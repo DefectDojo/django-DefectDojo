@@ -100,8 +100,7 @@ class DojoGroupViewSet(prefetch.PrefetchListMixin,
     filter_fields = ('id', 'name')
     swagger_schema = prefetch.get_prefetch_schema(["dojo_groups_list", "dojo_groups_read"],
         serializers.DojoGroupSerializer).to_schema()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupPermission)
 
     def get_queryset(self):
         return get_authorized_groups(Permissions.Group_View).distinct()
@@ -134,8 +133,7 @@ class DojoGroupMemberViewSet(prefetch.PrefetchListMixin,
     filter_fields = ('id', 'group_id', 'user_id')
     swagger_schema = prefetch.get_prefetch_schema(["dojo_group_members_list", "dojo_group_members_read"],
         serializers.DojoGroupMemberSerializer).to_schema()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupMemberPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupMemberPermission)
 
     def get_queryset(self):
         return get_authorized_group_members(Permissions.Group_View).distinct()
@@ -175,8 +173,7 @@ class EndPointViewSet(mixins.ListModelMixin,
     queryset = Endpoint.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiEndpointFilter
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasEndpointPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasEndpointPermission)
 
     def get_queryset(self):
         return get_authorized_endpoints(Permissions.Endpoint_View).distinct()
@@ -222,8 +219,7 @@ class EndpointStatusViewSet(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('mitigated', 'false_positive', 'out_of_scope',
                      'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasEndpointStatusPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasEndpointStatusPermission)
 
     def get_queryset(self):
         return get_authorized_endpoint_status(Permissions.Endpoint_View).distinct()
@@ -241,8 +237,7 @@ class EngagementViewSet(mixins.ListModelMixin,
     queryset = Engagement.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiEngagementFilter
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasEngagementPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasEngagementPermission)
 
     @property
     def risk_application_model_class(self):
@@ -429,8 +424,7 @@ class AppAnalysisViewSet(mixins.ListModelMixin,
     queryset = App_Analysis.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiAppAnalysisFilter
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasAppAnalysisPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasAppAnalysisPermission)
 
     def get_queryset(self):
         return get_authorized_app_analysis(Permissions.Product_View)
@@ -480,8 +474,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
     queryset = Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiFindingFilter
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasFindingPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasFindingPermission)
 
     _related_field_parameters = [openapi.Parameter(
                 name="related_fields",
@@ -1150,8 +1143,7 @@ class DojoMetaViewSet(prefetch.PrefetchListMixin,
     queryset = DojoMeta.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'product', 'endpoint', 'finding', 'name', 'value')
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasDojoMetaPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasDojoMetaPermission)
     swagger_schema = prefetch.get_prefetch_schema(["metadata_list", "metadata_read"],
         serializers.MetaSerializer).to_schema()
 
@@ -1202,8 +1194,7 @@ class ProductViewSet(prefetch.PrefetchListMixin,
     filterset_class = ApiProductFilter
     swagger_schema = prefetch.get_prefetch_schema(["products_list", "products_read"], serializers.ProductSerializer). \
         to_schema()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasProductPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasProductPermission)
 
     def get_queryset(self):
         return get_authorized_products(Permissions.Product_View).distinct()
@@ -1271,8 +1262,7 @@ class ProductMemberViewSet(prefetch.PrefetchListMixin,
     filter_fields = ('id', 'product_id', 'user_id')
     swagger_schema = prefetch.get_prefetch_schema(["product_members_list", "product_members_read"],
         serializers.ProductMemberSerializer).to_schema()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasProductMemberPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasProductMemberPermission)
 
     def get_queryset(self):
         return get_authorized_product_members(Permissions.Product_View).distinct()
@@ -1318,8 +1308,7 @@ class ProductGroupViewSet(prefetch.PrefetchListMixin,
     filter_fields = ('id', 'product_id', 'group_id')
     swagger_schema = prefetch.get_prefetch_schema(["product_groups_list", "product_groups_read"],
         serializers.ProductGroupSerializer).to_schema()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasProductGroupPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasProductGroupPermission)
 
     def get_queryset(self):
         return get_authorized_product_groups(Permissions.Product_Group_View).distinct()
@@ -1365,8 +1354,7 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
     filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
     swagger_schema = prefetch.get_prefetch_schema(["product_types_list", "product_types_read"],
         serializers.ProductTypeSerializer).to_schema()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasProductTypePermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasProductTypePermission)
 
     def get_queryset(self):
         return get_authorized_product_types(Permissions.Product_Type_View).distinct()
@@ -1374,15 +1362,14 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
     # Overwrite perfom_create of CreateModelMixin to add current user as owner
     def perform_create(self, serializer):
         serializer.save()
-        if settings.FEATURE_AUTHORIZATION_V2:
-            product_type_data = serializer.data
-            product_type_data.pop('authorization_groups')
-            product_type_data.pop('members')
-            member = Product_Type_Member()
-            member.user = self.request.user
-            member.product_type = Product_Type(**product_type_data)
-            member.role = Role.objects.get(is_owner=True)
-            member.save()
+        product_type_data = serializer.data
+        product_type_data.pop('authorization_groups')
+        product_type_data.pop('members')
+        member = Product_Type_Member()
+        member.user = self.request.user
+        member.product_type = Product_Type(**product_type_data)
+        member.role = Role.objects.get(is_owner=True)
+        member.save()
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -1440,8 +1427,7 @@ class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
     filter_fields = ('id', 'product_type_id', 'user_id')
     swagger_schema = prefetch.get_prefetch_schema(["product_type_members_list", "product_type_members_read"],
         serializers.ProductTypeMemberSerializer).to_schema()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasProductTypeMemberPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasProductTypeMemberPermission)
 
     def get_queryset(self):
         return get_authorized_product_type_members(Permissions.Product_Type_View).distinct()
@@ -1496,8 +1482,7 @@ class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
     filter_fields = ('id', 'product_type_id', 'group_id')
     swagger_schema = prefetch.get_prefetch_schema(["product_type_groups_list", "product_type_groups_read"],
         serializers.ProductTypeGroupSerializer).to_schema()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasProductTypeGroupPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasProductTypeGroupPermission)
 
     def get_queryset(self):
         return get_authorized_product_type_groups(Permissions.Product_Type_Group_View).distinct()
@@ -1527,8 +1512,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
     queryset = Stub_Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'title', 'date', 'severity', 'description')
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasFindingPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasFindingPermission)
 
     def get_queryset(self):
         return get_authorized_stub_findings(Permissions.Finding_View).distinct()
@@ -1565,8 +1549,7 @@ class TestsViewSet(mixins.ListModelMixin,
     queryset = Test.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiTestFilter
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasTestPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasTestPermission)
 
     @property
     def risk_application_model_class(self):
@@ -1763,8 +1746,7 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
                     'test_import_finding_action__finding', 'test_import_finding_action__created')
     swagger_schema = prefetch.get_prefetch_schema(["test_imports_list", "test_imports_read"], serializers.TestImportSerializer). \
         to_schema()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasTestImportPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasTestImportPermission)
 
     def get_queryset(self):
         return get_authorized_test_imports(Permissions.Test_View).prefetch_related(
@@ -1959,10 +1941,7 @@ class ImportScanView(mixins.CreateModelMixin,
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
-    else:
-        permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
         _, _, _, engagement_id, engagement_name, product_name = serializers.get_import_meta_data_from_dict(serializer.validated_data)
@@ -2022,8 +2001,7 @@ class LanguageViewSet(prefetch.PrefetchListMixin,
     filter_fields = ('id', 'language', 'product')
     swagger_schema = prefetch.get_prefetch_schema(["languages_list", "languages_read"],
         serializers.LanguageSerializer).to_schema()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasLanguagePermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasLanguagePermission)
 
     def get_queryset(self):
         return get_authorized_languages(Permissions.Language_View).distinct()
@@ -2035,8 +2013,7 @@ class ImportLanguagesView(mixins.CreateModelMixin,
     serializer_class = serializers.ImportLanguagesSerializer
     parser_classes = [MultiPartParser]
     queryset = Product.objects.none()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasLanguagePermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasLanguagePermission)
 
     def get_queryset(self):
         return get_authorized_products(Permissions.Language_Add)
@@ -2068,10 +2045,7 @@ class ReImportScanView(mixins.CreateModelMixin,
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasReimportPermission)
-    else:
-        permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, permissions.UserHasReimportPermission)
 
     def get_queryset(self):
         return get_authorized_tests(Permissions.Import_Scan_Result)
@@ -2467,8 +2441,7 @@ class EngagementPresetsViewset(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'title', 'product')
 
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasEngagementPresetPermission)
+    permission_classes = (IsAuthenticated, permissions.UserHasEngagementPresetPermission)
 
     def get_queryset(self):
         return get_authorized_engagement_presets(Permissions.Product_View)
@@ -2484,5 +2457,4 @@ class NetworkLocationsViewset(mixins.ListModelMixin,
     queryset = Network_Locations.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'location')
-    if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
