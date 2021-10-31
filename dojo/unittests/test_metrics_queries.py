@@ -11,8 +11,6 @@ from django.urls import reverse
 from dojo.metrics import views
 from dojo.models import User
 
-from django.conf import settings
-
 
 class MockMessages:
     def add(*args, **kwargs):
@@ -48,13 +46,8 @@ class FindingQueriesTest(TestCase):
         mock_datetime = datetime(2020, 12, 9, tzinfo=timezone.utc)
         mock_timezone.return_value = mock_datetime
 
-        if settings.FEATURE_AUTHORIZATION_V2:
-            # One more query to read usercontactinfo for global_role
-            num_queries = 35
-        else:
-            num_queries = 29
         # Queries over Finding and Risk_Acceptance
-        with self.assertNumQueries(num_queries):
+        with self.assertNumQueries(35):
             product_types = []
             finding_queries = views.finding_querys(
                 product_types,
@@ -172,12 +165,8 @@ class EndpointQueriesTest(TestCase):
         )
 
     def test_endpoint_queries(self):
-        if settings.FEATURE_AUTHORIZATION_V2:
-            num_queries = 71
-        else:
-            num_queries = 65
         # Queries over Finding and Endpoint_Status
-        with self.assertNumQueries(num_queries):
+        with self.assertNumQueries(71):
             product_types = []
             endpoint_queries = views.endpoint_querys(
                 product_types,
@@ -202,48 +191,28 @@ class EndpointQueriesTest(TestCase):
 
             # Assert that we get expected querysets back. This is to be used to
             # support refactoring, in attempt of lowering the query count.
-            if settings.FEATURE_AUTHORIZATION_V2:
-                self.assertSequenceEqual(
-                    endpoint_queries['all'].values(),
-                    [
-                        {
-                            'id': 1,
-                            'date': datetime(2020, 7, 1, 0, 0, tzinfo=timezone.utc),
-                            'last_modified': datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=timezone.utc),
-                            'mitigated': False,
-                            'mitigated_time': None,
-                            'mitigated_by_id': None,
-                            'false_positive': False,
-                            'out_of_scope': False,
-                            'risk_accepted': False,
-                            'endpoint_id': 2,
-                            'finding_id': 2,
-                            'endpoint__product__prod_type__member': True,
-                            'endpoint__product__member': True,
-                            'endpoint__product__prod_type__authorized_group': False,
-                            'endpoint__product__authorized_group': False
-                        }
-                    ],
-                )
-            else:
-                self.assertSequenceEqual(
-                    endpoint_queries['all'].values(),
-                    [
-                        {
-                            'id': 1,
-                            'date': datetime(2020, 7, 1, 0, 0, tzinfo=timezone.utc),
-                            'last_modified': datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=timezone.utc),
-                            'mitigated': False,
-                            'mitigated_time': None,
-                            'mitigated_by_id': None,
-                            'false_positive': False,
-                            'out_of_scope': False,
-                            'risk_accepted': False,
-                            'endpoint_id': 2,
-                            'finding_id': 2
-                        }
-                    ],
-                )
+            self.assertSequenceEqual(
+                endpoint_queries['all'].values(),
+                [
+                    {
+                        'id': 1,
+                        'date': datetime(2020, 7, 1, 0, 0, tzinfo=timezone.utc),
+                        'last_modified': datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=timezone.utc),
+                        'mitigated': False,
+                        'mitigated_time': None,
+                        'mitigated_by_id': None,
+                        'false_positive': False,
+                        'out_of_scope': False,
+                        'risk_accepted': False,
+                        'endpoint_id': 2,
+                        'finding_id': 2,
+                        'endpoint__product__prod_type__member': True,
+                        'endpoint__product__member': True,
+                        'endpoint__product__prod_type__authorized_group': False,
+                        'endpoint__product__authorized_group': False
+                    }
+                ],
+            )
             self.assertSequenceEqual(
                 endpoint_queries['closed'].values(),
                 [],
