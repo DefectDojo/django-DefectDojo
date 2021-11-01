@@ -163,9 +163,6 @@ env = environ.Env(
     DD_MAX_ALERTS_PER_USER=(int, 999),
     DD_TAG_PREFETCHING=(bool, True),
     DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
-    # when enabeld safety parser will download latest vuln db during runtime
-    # otherwise data is loaded from dojo/tools/safety/insecure_full.json
-    DD_SAFETY_PARSER_ONLINE_DB=(bool, True),
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
     DD_PARSER_EXCLUDE=(str, 'AWS Scout2 Scan'),
@@ -1138,7 +1135,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
     'GitLab Dependency Scanning Report': DEDUPE_ALGO_HASH_CODE,
-    'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
     'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1292,9 +1288,6 @@ QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 # Create a unique finding for all findings in qualys WAS parser
 # If using this, lines for Qualys WAS deduplication functions must be un-commented
 QUALYS_WAS_UNIQUE_ID = False
-
-# Deside if parser should download latest db or use offline version
-SAFETY_PARSER_ONLINE_DB = env("DD_SAFETY_PARSER_ONLINE_DB")
 
 # exclusion list for parsers
 PARSER_EXCLUDE = env("DD_PARSER_EXCLUDE")

@@ -900,10 +900,6 @@ report as follows
 -   Removing both fields will allow retrieval of all findings in the
     Risk Recon instance.
 
-### Safety Scan
-
-Safety scan (\--json) output file can be imported in JSON format.
-
 ### SARIF
 
 OASIS Static Analysis Results Interchange Format (SARIF). SARIF is
