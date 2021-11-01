@@ -16,7 +16,6 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
 
-from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
@@ -45,6 +44,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
 from dojo.tool_config.factory import create_API
+import dojo.finding.helper as finding_helper
 
 logger = logging.getLogger(__name__)
 
@@ -1182,11 +1182,11 @@ def ad_hoc_finding(request, pid):
     push_all_jira_issues = jira_helper.is_push_all_issues(test)
     jform = None
     gform = None
-    form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
+    form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None, product=prod)
     use_jira = jira_helper.get_jira_project(test) is not None
 
     if request.method == 'POST':
-        form = AdHocFindingForm(request.POST, req_resp=None)
+        form = AdHocFindingForm(request.POST, req_resp=None, product=prod)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -1215,48 +1215,9 @@ def ad_hoc_finding(request, pid):
                 new_finding.severity)
             new_finding.tags = form.cleaned_data['tags']
             new_finding.save()
-            new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            for endpoint in form.cleaned_data['endpoints']:
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=endpoint)
-                endpoint.endpoint_status.add(eps)
-                new_finding.endpoint_status.add(eps)
 
-            for endpoint in new_finding.unsaved_endpoints:
-                ep, created = endpoint_get_or_create(
-                    protocol=endpoint.protocol,
-                    userinfo=endpoint.userinfo,
-                    host=endpoint.host,
-                    port=endpoint.port,
-                    path=endpoint.path,
-                    query=endpoint.query,
-                    fragment=endpoint.fragment,
-                    product=test.engagement.product)
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=ep)
-                ep.endpoint_status.add(eps)
-
-                new_finding.endpoints.add(ep)
-                new_finding.endpoint_status.add(eps)
-            for endpoint in form.cleaned_data['endpoints']:
-                ep, created = endpoint_get_or_create(
-                    protocol=endpoint.protocol,
-                    userinfo=endpoint.userinfo,
-                    host=endpoint.host,
-                    port=endpoint.port,
-                    path=endpoint.path,
-                    query=endpoint.query,
-                    fragment=endpoint.fragment,
-                    product=test.engagement.product)
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=ep)
-                ep.endpoint_status.add(eps)
-
-                new_finding.endpoints.add(ep)
-                new_finding.endpoint_status.add(eps)
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
 
             new_finding.save()
             # Push to jira?
@@ -1319,10 +1280,6 @@ def ad_hoc_finding(request, pid):
             else:
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
         else:
-            if 'endpoints' in form.cleaned_data:
-                form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
-            else:
-                form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
             add_error_message_to_response('The form has errors, please correct them below.')
             add_field_errors_to_response(jform)

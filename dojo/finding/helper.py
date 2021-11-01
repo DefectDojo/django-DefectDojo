@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
 from dojo.utils import get_current_user, mass_model_updater, to_str_typed
-from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test
+from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test, Endpoint, Endpoint_Status
+from dojo.endpoint.utils import save_endpoints_to_add
 
 
 logger = logging.getLogger(__name__)
@@ -536,3 +537,19 @@ def removeLoop(finding_id, counter):
         super(Finding, f).save()
         super(Finding, real_original).save()
         removeLoop(f.id, counter - 1)
+
+
+def add_endpoints(new_finding, form):
+    added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, new_finding.test.engagement.product)
+    endpoint_ids = []
+    for endpoint in added_endpoints:
+        endpoint_ids.append(endpoint.id)
+
+    new_finding.endpoints.set(form.cleaned_data['endpoints'] | Endpoint.objects.filter(id__in=endpoint_ids))
+
+    for endpoint in new_finding.endpoints.all():
+        eps, created = Endpoint_Status.objects.get_or_create(
+            finding=new_finding,
+            endpoint=endpoint)
+        endpoint.endpoint_status.add(eps)
+        new_finding.endpoint_status.add(eps)
