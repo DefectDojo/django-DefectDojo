@@ -22,7 +22,7 @@ def migrate_sonarqube(apps, schema_editor):
 
 
 def migrate_cobalt_io(apps, schema_editor):
-    cobalt_products = Cobaltio_Product.objects.all(cobaltio_tool_config__isnull=False)
+    cobalt_products = Cobaltio_Product.objects.filter(cobaltio_tool_config__isnull=False)
     for cobalt_product in cobalt_products:
         api_scan_configuration = Product_API_Scan_Configuration()
         api_scan_configuration.product = cobalt_product.product
