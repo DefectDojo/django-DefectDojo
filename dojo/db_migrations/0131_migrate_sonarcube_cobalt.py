@@ -6,7 +6,7 @@ from dojo.models import Sonarqube_Product, Cobaltio_Product, Product_API_Scan_Co
 
 
 def migrate_sonarqube(apps, schema_editor):
-    sq_products = Sonarqube_Product.objects.all()
+    sq_products = Sonarqube_Product.objects.filter(sonarqube_tool_config__isnull=False)
     for sq_product in sq_products:
         api_scan_configuration = Product_API_Scan_Configuration()
         api_scan_configuration.product = sq_product.product
@@ -22,7 +22,7 @@ def migrate_sonarqube(apps, schema_editor):
 
 
 def migrate_cobalt_io(apps, schema_editor):
-    cobalt_products = Cobaltio_Product.objects.all()
+    cobalt_products = Cobaltio_Product.objects.filter(cobaltio_tool_config__isnull=False)
     for cobalt_product in cobalt_products:
         api_scan_configuration = Product_API_Scan_Configuration()
         api_scan_configuration.product = cobalt_product.product
