@@ -5,9 +5,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.utils.html import escape
 from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
@@ -262,19 +261,9 @@ def add_endpoint(request, pid):
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
                                  extra_tags='alert-success')
-            if '_popup' in request.GET:
-                resp = '<script type="text/javascript">opener.emptyEndpoints(window);</script>'
-                for endpoint in endpoints:
-                    resp += '<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "%s", "%s");</script>' \
-                            % (escape(endpoint._get_pk_val()), escape(endpoint))
-                resp += '<script type="text/javascript">window.close();</script>'
-                return HttpResponse(resp)
-            else:
-                return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
+            return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
 
-    product_tab = None
-    if '_popup' not in request.GET:
-        product_tab = Product_Tab(product.id, "Add Endpoint", tab="endpoints")
+    product_tab = Product_Tab(product.id, "Add Endpoint", tab="endpoints")
 
     return render(request, template, {
         'product_tab': product_tab,
