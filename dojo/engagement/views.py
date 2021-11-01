@@ -53,6 +53,7 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 import dojo.notifications.helper as notifications_helper
+from dojo.endpoint.utils import save_endpoints_to_add
 
 
 logger = logging.getLogger(__name__)
@@ -608,10 +609,13 @@ def import_scan_results(request, eid=None, pid=None):
             push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
             error = False
 
+            # Save newly added endpoints
+            added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, engagement.product)
+
             try:
                 importer = Importer()
                 test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
-                            minimum_severity=minimum_severity, endpoints_to_add=form.cleaned_data['endpoints'], scan_date=scan_date,
+                            minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
                             close_old_findings=close_old_findings, group_by=group_by, api_scan_configuration=api_scan_configuration)
 

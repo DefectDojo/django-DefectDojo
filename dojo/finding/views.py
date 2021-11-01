@@ -674,7 +674,7 @@ def edit_finding(request, fid):
         )
     else:
         req_resp = None
-    form = FindingForm(instance=finding, template=False, req_resp=req_resp,
+    form = FindingForm(instance=finding, req_resp=req_resp,
                        can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
     form_error = False
     jform = None
@@ -685,7 +685,7 @@ def edit_finding(request, fid):
     github_enabled = finding.has_github_issue()
 
     if request.method == 'POST':
-        form = FindingForm(request.POST, instance=finding, template=False, req_resp=None,
+        form = FindingForm(request.POST, instance=finding, req_resp=None,
                            can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
 
         if finding.active:
@@ -732,13 +732,15 @@ def edit_finding(request, fid):
                 if new_finding.risk_accepted:
                     ra_helper.risk_unaccept(new_finding, perform_save=False)
 
-            new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            for endpoint in form.cleaned_data['endpoints']:
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=endpoint)
-                endpoint.endpoint_status.add(eps)
-                new_finding.endpoint_status.add(eps)
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
+
+            # Remove unrelated endpoints
+            endpoint_status_list = Endpoint_Status.objects.filter(finding=new_finding)
+            for endpoint_status in endpoint_status_list:
+                if endpoint_status.endpoint not in new_finding.endpoints.all():
+                    endpoint_status.delete()
+
             new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
 
@@ -844,11 +846,6 @@ def edit_finding(request, fid):
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
                 gform = GITHUBFindingForm(enabled=github_enabled, prefix='githubform')
-
-    if form_error and 'endpoints' in form.cleaned_data:
-        form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
-    else:
-        form.fields['endpoints'].queryset = finding.endpoints.all()
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
 
@@ -1236,7 +1233,7 @@ def promote_to_finding(request, fid):
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
     if request.method == 'POST':
-        form = PromoteFindingForm(request.POST)
+        form = PromoteFindingForm(request.POST, product=test.engagement.product)
         if use_jira:
             jform = JIRAFindingForm(request.POST, instance=finding, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding))
 
@@ -1259,7 +1256,9 @@ def promote_to_finding(request, fid):
             new_finding.out_of_scope = False
 
             new_finding.save()
-            new_finding.endpoints.set(form.cleaned_data['endpoints'])
+
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
 
             # Push to jira?
             push_to_jira = False
@@ -1316,11 +1315,6 @@ def promote_to_finding(request, fid):
 
             return HttpResponseRedirect(reverse('view_test', args=(test.id, )))
         else:
-            if 'endpoints' in form.cleaned_data:
-                form.fields['endpoints'].queryset = form.cleaned_data[
-                    'endpoints']
-            else:
-                form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
             add_error_message_to_response('The form has errors, please correct them below.')
             add_field_errors_to_response(jform)
@@ -1336,7 +1330,7 @@ def promote_to_finding(request, fid):
                 'description': finding.description,
                 'test': finding.test,
                 'reporter': finding.reporter
-            })
+            }, product=test.engagement.product)
 
         if use_jira:
             jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test))
