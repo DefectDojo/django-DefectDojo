@@ -1343,21 +1343,17 @@ class Endpoint(models.Model):
         return self.findings().count()
 
     def active_findings(self):
-        return self.findings().filter(active=True,
+        findings = self.findings().filter(active=True,
                                       verified=True,
                                       out_of_scope=False,
                                       mitigated__isnull=True,
                                       false_p=False,
                                       duplicate=False).order_by('numerical_severity')
+        findings = findings.filter(endpoint_status__mitigated=False)
+        return findings
 
     def active_findings_count(self):
         return self.active_findings().count()
-
-    def closed_findings(self):
-        return self.findings().filter(mitigated__isnull=False)
-
-    def closed_findings_count(self):
-        return self.closed_findings().count()
 
     def host_endpoints(self):
         return Endpoint.objects.filter(host=self.host,
@@ -1381,21 +1377,17 @@ class Endpoint(models.Model):
         return self.host_finding().count()
 
     def host_active_findings(self):
-        return self.host_findings().filter(active=True,
+        findings = self.host_findings().filter(active=True,
                                            verified=True,
                                            out_of_scope=False,
                                            mitigated__isnull=True,
                                            false_p=False,
                                            duplicate=False).order_by('numerical_severity')
+        findings = findings.filter(endpoint_status__mitigated=False)
+        return findings
 
     def host_active_findings_count(self):
         return self.host_active_findings().count()
-
-    def host_closed_findings(self):
-        return self.host_findings().filter(mitigated__isnull=False)
-
-    def host_closed_findings_count(self):
-        return self.host_closed_findings().count()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()

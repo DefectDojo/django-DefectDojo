@@ -1236,10 +1236,6 @@ span.pull-right.clickable i.glyphicon-chevron-up, span.pull-right.clickable i.gl
     color: #546474;
 }
 
-table.finding-endpoints {
-    font-size: 13px;
-}
-
 .finding-description {
     max-height: 500px;
     overflow-y: scroll;
