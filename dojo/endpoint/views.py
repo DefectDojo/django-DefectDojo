@@ -36,6 +36,7 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
     if vulnerable:
         endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
                                      finding__duplicate=False, finding__out_of_scope=False, mitigated=False)
+        endpoints = endpoints.filter(endpoint_status__mitigated=False)
     else:
         endpoints = Endpoint.objects.all()
 
@@ -56,7 +57,7 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
         view_name = "All"
 
     if host_view:
-        view_name += " Endpoint Hosts"
+        view_name += " Hosts"
     else:
         view_name += " Endpoints"
 
@@ -122,13 +123,11 @@ def process_endpoint_view(request, eid, host_view=False):
         endpoint_metadata = None
         all_findings = endpoint.host_findings()
         active_findings = endpoint.host_active_findings()
-        closed_findings = endpoint.host_closed_findings()
     else:
         endpoints = None
         endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
         all_findings = endpoint.findings()
         active_findings = endpoint.active_findings()
-        closed_findings = endpoint.closed_findings()
 
     if all_findings:
         start_date = timezone.make_aware(datetime.combine(all_findings.last().date, datetime.min.time()))
@@ -140,6 +139,9 @@ def process_endpoint_view(request, eid, host_view=False):
     months_between = (r.years * 12) + r.months
     # include current month
     months_between += 1
+
+    # closed_findings is needed as a parameter for get_periods_counts, but they are not relevant in the endpoint view
+    closed_findings = Finding.objects.none()
 
     monthly_counts = get_period_counts(active_findings, all_findings, closed_findings, None, months_between, start_date,
                                        relative_delta='months')
@@ -323,7 +325,7 @@ def add_meta_data(request, eid):
                                  'Metadata added successfully.',
                                  extra_tags='alert-success')
             if 'add_another' in request.POST:
-                return HttpResponseRedirect(reverse('add_meta_data', args=(eid,)))
+                return HttpResponseRedirect(reverse('add_endpoint_meta_data', args=(eid,)))
             else:
                 return HttpResponseRedirect(reverse('view_endpoint', args=(eid,)))
     else:

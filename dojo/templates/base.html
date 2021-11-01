@@ -283,13 +283,13 @@
                                             <a href="{% url 'endpoint' %}">All Endpoints</a>
                                         </li>
                                         <li>
-                                            <a href="{% url 'endpoint_host' %}">All Endpoint Hosts</a>
+                                            <a href="{% url 'endpoint_host' %}">All Hosts</a>
                                         </li>
                                         <li>
                                             <a href="{% url 'vulnerable_endpoints' %}">Vulnerable Endpoints</a>
                                         </li>
                                         <li>
-                                            <a href="{% url 'vulnerable_endpoint_hosts' %}">Vulnerable Endpoint Hosts</a>
+                                            <a href="{% url 'vulnerable_endpoint_hosts' %}">Vulnerable Hosts</a>
                                         </li>
                                         {% if request.user.is_staff %}
                                             <li>
