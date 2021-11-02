@@ -20,6 +20,7 @@ from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from django.utils.functional import cached_property
 from django.utils import timezone
+from django.utils.html import escape
 from pytz import all_timezones
 from polymorphic.models import PolymorphicModel
 from multiselectfield import MultiSelectField
@@ -2446,7 +2447,7 @@ class Finding(models.Model):
         if self.sast_source_file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
-            return self.sast_source_file_path
+            return escape(self.sast_source_file_path)
         link = self.test.engagement.source_code_management_uri + '/' + self.sast_source_file_path
         if self.sast_source_line:
             link = link + '#L' + str(self.sast_source_line)
@@ -2457,7 +2458,7 @@ class Finding(models.Model):
         if self.file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
-            return self.file_path
+            return escape(self.file_path)
         link = self.test.engagement.source_code_management_uri + '/' + self.file_path
         if self.line:
             link = link + '#L' + str(self.line)
