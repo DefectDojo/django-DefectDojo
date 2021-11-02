@@ -634,6 +634,7 @@ def re_import_scan_results(request, tid):
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
             api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
+            service = form.cleaned_data.get('service', None)
 
             endpoints_to_add = None  # not available on reimport UI
 
@@ -663,7 +664,7 @@ def re_import_scan_results(request, tid):
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings, group_by=group_by,
-                                                api_scan_configuration=api_scan_configuration)
+                                                api_scan_configuration=api_scan_configuration, service=service)
             except Exception as e:
                 logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))

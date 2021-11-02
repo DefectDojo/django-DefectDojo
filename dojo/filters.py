@@ -232,6 +232,7 @@ def get_finding_filter_fields(metrics=False, similar=False):
                 'file_path',
                 'unique_id_from_tool',
                 'vuln_id_from_tool',
+                'service',
     ])
 
     if similar:
