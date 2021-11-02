@@ -28,7 +28,12 @@ class AnchoreGrypeParser(object):
             purl = PackageURL.from_string(item["artifact"]["purl"])
             description = ""
             description += f"\n**CVE:** {cve}"
-            description += f'\n**Matcher:** {item["matchDetails"]["matcher"]}'
+            if type(item["matchDetails"]) is dict:
+                description += f'\n**Matcher:** {item["matchDetails"]["matcher"]}'
+            else:
+                description += '\n**Matchers:**'
+                for matchers in item["matchDetails"]:
+                    description += f'\n * {matchers["matcher"]}'
             description += f"\n**PURL:** {purl}"
             description += "\n**Paths:**\n"
             for match_path in item["artifact"]["locations"]:

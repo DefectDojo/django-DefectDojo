@@ -24,4 +24,5 @@ exec uwsgi \
   --worker-reload-mercy 1 \
   --py-autoreload 1 \
   --buffer-size="${DD_UWSGI_BUFFER_SIZE:-8192}" \
-  --lazy-apps
+  --lazy-apps \
+  --touch-reload="/app/dojo/setting/settings.py"

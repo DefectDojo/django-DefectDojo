@@ -1,5 +1,4 @@
 from selenium import webdriver
-import chromedriver_autoinstaller
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -50,8 +49,6 @@ class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
 
-        chromedriver_autoinstaller.install()
-
         # Path for automatic downloads, mapped to the media path
         cls.export_path = 'media'
 
@@ -88,7 +85,7 @@ class BaseTestCase(unittest.TestCase):
 
             # change path of chromedriver according to which directory you have chromedriver.
             print('starting chromedriver with options: ', vars(dd_driver_options), desired)
-            dd_driver = webdriver.Chrome('chromedriver', chrome_options=dd_driver_options, desired_capabilities=desired)
+            dd_driver = webdriver.Chrome(os.environ['CHROMEDRIVER'], chrome_options=dd_driver_options, desired_capabilities=desired)
             # best practice is only use explicit waits
             dd_driver.implicitly_wait(1)
 
@@ -116,6 +113,16 @@ class BaseTestCase(unittest.TestCase):
 
     def test_login(self):
         return self.login_page()
+
+    def logout(self):
+        driver = self.driver
+        driver.get(self.base_url + "logout")
+
+        self.assertTrue(self.is_text_present_on_page("Login"))
+        return driver
+
+    def test_logout(self):
+        return self.logout()
 
     @on_exception_html_source_logger
     def delete_product_if_exists(self, name="QA Test"):
@@ -167,14 +174,14 @@ class BaseTestCase(unittest.TestCase):
         return driver
 
     def goto_active_engagements_overview(self, driver):
-        # return self.goto_engagements_internal(driver, 'engagement')
-        # engagement overview doesn't seem to have the datatables yet modifying the DOM
-        # https://github.com/DefectDojo/django-DefectDojo/issues/2173
-        driver.get(self.base_url + 'engagement')
-        # self.goto_engagements_internal(driver, 'engagement')
+        driver.get(self.base_url + 'engagement/active')
         return driver
 
     def goto_all_engagements_overview(self, driver):
+        driver.get(self.base_url + 'engagement/all')
+        return driver
+
+    def goto_all_engagements_by_product_overview(self, driver):
         return self.goto_engagements_internal(driver, 'engagements_all')
 
     def goto_engagements_internal(self, driver, rel_url):

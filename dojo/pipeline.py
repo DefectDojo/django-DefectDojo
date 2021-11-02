@@ -98,8 +98,13 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
         # For each project: create a new product or update product's authorized_users
         for project in projects:
             if project.path_with_namespace not in user_product_names:
-                # Create new product
-                product, created = Product.objects.get_or_create(name=project.path_with_namespace, prod_type=product_type)
+                try:
+                    # Check if there is a product with the name of the GitLab project
+                    product = Product.objects.get(name=project.path_with_namespace)
+                except Product.DoesNotExist:
+                    # If not, create a product with that name and the GitLab product type
+                    product = Product(name=project.path_with_namespace, prod_type=product_type)
+                    product.save()
                 if not settings.FEATURE_AUTHORIZATION_V2:
                     product.authorized_users.add(user)
                     product.save()

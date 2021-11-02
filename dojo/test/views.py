@@ -21,13 +21,12 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 
 from dojo.filters import TemplateFindingFilter, FindingFilter, TestImportFilter
-from dojo.forms import NoteForm, TestForm, FindingForm, \
+from dojo.forms import NoteForm, TestForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
 from dojo.models import Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Sonarqube_Product, \
-    Cobaltio_Product
+    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Test_Import, Product_API_Scan_Configuration
 
 from dojo.tools.factory import get_choices_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
@@ -353,12 +352,12 @@ def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
     jform = None
-    form = AddFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
+    form = AddFindingForm(initial={'date': timezone.now().date()}, req_resp=None, product=test.engagement.product)
     push_all_jira_issues = jira_helper.is_push_all_issues(test)
     use_jira = jira_helper.get_jira_project(test) is not None
 
     if request.method == 'POST':
-        form = AddFindingForm(request.POST, req_resp=None)
+        form = AddFindingForm(request.POST, req_resp=None, product=test.engagement.product)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -387,19 +386,11 @@ def add_findings(request, tid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            create_template = new_finding.is_template
-            # always false now since this will be deprecated soon in favor of new Finding_Template model
-            new_finding.is_template = False
             new_finding.tags = form.cleaned_data['tags']
             new_finding.save(dedupe_option=False, push_to_jira=False)
-            for ep in form.cleaned_data['endpoints']:
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=ep)
-                ep.endpoint_status.add(eps)
 
-                new_finding.endpoints.add(ep)
-                new_finding.endpoint_status.add(eps)
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
 
             # Push to jira?
             push_to_jira = False
@@ -451,37 +442,11 @@ def add_findings(request, tid):
                 burp_rr.clean()
                 burp_rr.save()
 
-            if create_template:
-                templates = Finding_Template.objects.filter(title=new_finding.title)
-                if len(templates) > 0:
-                    messages.add_message(request,
-                                         messages.ERROR,
-                                         'A finding template was not created.  A template with this title already '
-                                         'exists.',
-                                         extra_tags='alert-danger')
-                else:
-                    template = Finding_Template(title=new_finding.title,
-                                                cwe=new_finding.cwe,
-                                                severity=new_finding.severity,
-                                                description=new_finding.description,
-                                                mitigation=new_finding.mitigation,
-                                                impact=new_finding.impact,
-                                                references=new_finding.references,
-                                                numerical_severity=new_finding.numerical_severity)
-                    template.save()
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'A finding template was also created.',
-                                         extra_tags='alert-success')
             if '_Finished' in request.POST:
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             else:
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
         else:
-            if 'endpoints' in form.cleaned_data:
-                form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
-            else:
-                form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
             add_error_message_to_response('The form has errors, please correct them below.')
             add_field_errors_to_response(jform)
@@ -514,7 +479,7 @@ def add_temp_finding(request, tid, fid):
 
     if request.method == 'POST':
 
-        form = FindingForm(request.POST, template=True, req_resp=None)
+        form = AddFindingForm(request.POST, req_resp=None, product=test.engagement.product)
         if jira_helper.get_jira_project(test):
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
             logger.debug('jform valid: %s', jform.is_valid())
@@ -545,19 +510,11 @@ def add_temp_finding(request, tid, fid):
             new_finding.date = datetime.today()
             finding_helper.update_finding_status(new_finding, request.user)
 
-            create_template = new_finding.is_template
-            # is template always False now in favor of new model Finding_Template
-            # no further action needed here since this is already adding from template.
-            new_finding.is_template = False
             new_finding.save(dedupe_option=False, false_history=False)
-            for ep in form.cleaned_data['endpoints']:
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=ep)
-                ep.endpoint_status.add(eps)
 
-                new_finding.endpoints.add(ep)
-                new_finding.endpoint_status.add(eps)
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
+
             new_finding.save(false_history=True)
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', instance=new_finding, push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
@@ -572,29 +529,6 @@ def add_temp_finding(request, tid, fid):
                                  'Finding from template added successfully.',
                                  extra_tags='alert-success')
 
-            if create_template:
-                templates = Finding_Template.objects.filter(title=new_finding.title)
-                if len(templates) > 0:
-                    messages.add_message(request,
-                                         messages.ERROR,
-                                         'A finding template was not created.  A template with this title already '
-                                         'exists.',
-                                         extra_tags='alert-danger')
-                else:
-                    template = Finding_Template(title=new_finding.title,
-                                                cwe=new_finding.cwe,
-                                                severity=new_finding.severity,
-                                                description=new_finding.description,
-                                                mitigation=new_finding.mitigation,
-                                                impact=new_finding.impact,
-                                                references=new_finding.references,
-                                                numerical_severity=new_finding.numerical_severity)
-                    template.save()
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'A finding template was also created.',
-                                         extra_tags='alert-success')
-
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
         else:
             messages.add_message(request,
@@ -603,7 +537,7 @@ def add_temp_finding(request, tid, fid):
                                  extra_tags='alert-danger')
 
     else:
-        form = FindingForm(template=True, req_resp=None, initial={'active': False,
+        form = AddFindingForm(req_resp=None, product=test.engagement.product, initial={'active': False,
                                     'date': timezone.now().date(),
                                     'verified': False,
                                     'false_p': False,
@@ -699,8 +633,8 @@ def re_import_scan_results(request, tid):
             branch_tag = form.cleaned_data.get('branch_tag', None)
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
-            sonarqube_config = form.cleaned_data.get('sonarqube_config', None)
-            cobaltio_config = form.cleaned_data.get('cobaltio_config', None)
+            api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
+            service = form.cleaned_data.get('service', None)
 
             endpoints_to_add = None  # not available on reimport UI
 
@@ -730,8 +664,7 @@ def re_import_scan_results(request, tid):
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings, group_by=group_by,
-                                                sonarqube_config=sonarqube_config,
-                                                cobaltio_config=cobaltio_config)
+                                                api_scan_configuration=api_scan_configuration, service=service)
             except Exception as e:
                 logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
@@ -749,8 +682,8 @@ def re_import_scan_results(request, tid):
     product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
     product_tab.setEngagement(engagement)
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product_tab.product)
-    form.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product_tab.product)
+    form.initial['api_scan_configuration'] = test.api_scan_configuration
+    form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,

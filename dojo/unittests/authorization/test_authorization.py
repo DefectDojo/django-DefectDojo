@@ -4,7 +4,7 @@ from django.test import TestCase, override_settings
 from unittest.mock import patch
 from dojo.models import Dojo_User, Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, \
-    Languages, App_Analysis
+    Languages, App_Analysis, Stub_Finding
 import dojo.authorization.authorization
 from dojo.authorization.authorization import role_has_permission, get_roles_for_permission, \
     user_has_permission_or_403, user_has_permission, \
@@ -45,6 +45,9 @@ class TestAuthorization(TestCase):
 
         cls.finding = Finding()
         cls.finding.test = cls.test
+
+        cls.stub_finding = Stub_Finding()
+        cls.stub_finding.test = cls.test
 
         cls.endpoint = Endpoint()
         cls.endpoint.product = cls.product
@@ -314,6 +317,28 @@ class TestAuthorization(TestCase):
         mock_foo.filter.return_value = [self.product_member_owner]
 
         result = user_has_permission(self.user, self.finding, Permissions.Finding_Delete)
+
+        self.assertTrue(result)
+        mock_foo.filter.assert_called_with(user=self.user)
+
+    @patch('dojo.models.Product_Member.objects')
+    def test_user_has_permission_stub_finding_no_permissions(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.product_member_reader]
+
+        result = user_has_permission(self.user, self.stub_finding, Permissions.Finding_Edit)
+
+        self.assertFalse(result)
+        mock_foo.filter.assert_called_with(user=self.user)
+
+    @patch('dojo.models.Product_Member.objects')
+    def test_user_has_permission_stub_finding_success(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.product_member_owner]
+
+        result = user_has_permission(self.user, self.stub_finding, Permissions.Finding_Delete)
 
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(user=self.user)

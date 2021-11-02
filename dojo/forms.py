@@ -20,19 +20,21 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 import tagulous
 
-from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter
+from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
+    validate_endpoints_to_add
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
-    Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, Cobaltio_Product, \
+    Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member
+    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, \
+    Product_API_Scan_Configuration
 
-from dojo.tools.factory import requires_file, get_choices_sorted
+from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 from tagulous.forms import TagField
@@ -57,26 +59,10 @@ FINDING_STATUS = (('verified', 'Verified'),
                   ('out_of_scope', 'Out of Scope'))
 
 
-class SelectWithPop(forms.Select):
-    def render(self, name, *args, **kwargs):
-        html = super(SelectWithPop, self).render(name, *args, **kwargs)
-        popup_plus = '<div class="input-group dojo-input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="glyphicon glyphicon-plus"></span></a></span></div>'
-
-        return mark_safe(popup_plus)
-
-
 class MultipleSelectWithPop(forms.SelectMultiple):
     def render(self, name, *args, **kwargs):
         html = super(MultipleSelectWithPop, self).render(name, *args, **kwargs)
         popup_plus = '<div class="input-group dojo-input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="glyphicon glyphicon-plus"></span></a></span></div>'
-
-        return mark_safe(popup_plus)
-
-
-class MultipleSelectWithPopPlusMinus(forms.SelectMultiple):
-    def render(self, name, *args, **kwargs):
-        html = super(MultipleSelectWithPopPlusMinus, self).render(name, *args, **kwargs)
-        popup_plus = '<div class="input-group dojo-input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="icon-plusminus"></span></a></span></div>'
 
         return mark_safe(popup_plus)
 
@@ -430,15 +416,17 @@ class ImportScanForm(forms.Form):
     scan_type = forms.ChoiceField(required=True, choices=get_choices_sorted)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints')
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                         "Each must be valid.",
+                               widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     version = forms.CharField(max_length=100, required=False, help_text="Version that was scanned.")
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
-    sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
-    cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
-
+    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
+    service = forms.CharField(max_length=200, required=False, help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
@@ -462,12 +450,26 @@ class ImportScanForm(forms.Form):
             choices.insert(0, ('', '---------'))
             self.fields['group_by'].choices = choices
 
+        self.endpoints_to_add_list = []
+
     def clean(self):
         cleaned_data = super().clean()
         scan_type = cleaned_data.get("scan_type")
         file = cleaned_data.get("file")
         if requires_file(scan_type) and not file:
             raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        tool_type = requires_tool_type(scan_type)
+        if tool_type:
+            api_scan_configuration = cleaned_data.get('api_scan_configuration')
+            if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+                raise forms.ValidationError(f'API scan configuration must be of tool type {tool_type}')
+
+        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
+        if errors:
+            raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_add_list = endpoints_to_add_list
+
         return cleaned_data
 
     # date can only be today or in the past, not the future
@@ -494,8 +496,7 @@ class ReImportScanForm(forms.Form):
                                          choices=SEVERITY_CHOICES[0:4])
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints')
     tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
@@ -508,8 +509,8 @@ class ReImportScanForm(forms.Form):
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
-    sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
-    cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
+    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
+    service = forms.CharField(max_length=200, required=False, help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
 
     if settings.FEATURE_FINDING_GROUPS:
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
@@ -532,6 +533,12 @@ class ReImportScanForm(forms.Form):
         file = cleaned_data.get("file")
         if requires_file(self.scan_type) and not file:
             raise forms.ValidationError("Uploading a report file is required for re-uploading findings.")
+        tool_type = requires_tool_type(self.scan_type)
+        if tool_type:
+            api_scan_configuration = cleaned_data.get('api_scan_configuration')
+            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+                raise forms.ValidationError(f'API scan configuration must be of tool type {tool_type}')
+
         return cleaned_data
 
     # date can only be today or in the past, not the future
@@ -832,8 +839,7 @@ class TestForm(forms.ModelForm):
                 self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
             else:
                 self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
-            self.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product)
-            self.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product)
+            self.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=product)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
@@ -841,7 +847,7 @@ class TestForm(forms.ModelForm):
         model = Test
         fields = ['title', 'test_type', 'target_start', 'target_end', 'description',
                   'environment', 'percent_complete', 'tags', 'lead', 'version', 'branch_tag', 'build_id', 'commit_hash',
-                  'sonarqube_config', 'cobaltio_config']
+                  'api_scan_configuration']
 
 
 class DeleteTestForm(forms.ModelForm):
@@ -870,24 +876,36 @@ class AddFindingForm(forms.ModelForm):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects.none(), required=False, label='Systems / Endpoints')
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                         "Each must be valid.",
+                               widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
-    is_template = forms.BooleanField(label="Create Template?", required=False,
-                                     help_text="A new finding template will be created from this finding.")
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
-                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'severity_justification', 'endpoints', 'endpoints_to_add', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
                    'risk_accepted', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
+
+        product = None
+        if 'product' in kwargs:
+            product = kwargs.pop('product')
+
         super(AddFindingForm, self).__init__(*args, **kwargs)
+
+        if product:
+            self.fields['endpoints'].queryset = Endpoint.objects.filter(product=product)
+
         if req_resp:
             self.fields['request'].initial = req_resp[0]
             self.fields['response'].initial = req_resp[1]
+
+        self.endpoints_to_add_list = []
 
     def clean(self):
         cleaned_data = super(AddFindingForm, self).clean()
@@ -901,11 +919,16 @@ class AddFindingForm(forms.ModelForm):
             raise forms.ValidationError('Active findings cannot '
                                         'be risk accepted.')
 
+        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
+        if errors:
+            raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_add_list = endpoints_to_add_list
+
         return cleaned_data
 
     class Meta:
         model = Finding
-        order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
@@ -927,24 +950,36 @@ class AdHocFindingForm(forms.ModelForm):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
+    endpoints = forms.ModelMultipleChoiceField(queryset=Endpoint.objects.none(), required=False, label='Systems / Endpoints')
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                         "Each must be valid.",
+                               widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
-    is_template = forms.BooleanField(label="Create Template?", required=False,
-                                     help_text="A new finding template will be created from this finding.")
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
-    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
-                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'severity_justification', 'endpoints', 'endpoints_to_add', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
                    'risk_accepted', 'under_defect_review', 'sla_start_date')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
+
+        product = None
+        if 'product' in kwargs:
+            product = kwargs.pop('product')
+
         super(AdHocFindingForm, self).__init__(*args, **kwargs)
+
+        if product:
+            self.fields['endpoints'].queryset = Endpoint.objects.filter(product=product)
+
         if req_resp:
             self.fields['request'].initial = req_resp[0]
             self.fields['response'].initial = req_resp[1]
+
+        self.endpoints_to_add_list = []
 
     def clean(self):
         cleaned_data = super(AdHocFindingForm, self).clean()
@@ -954,11 +989,18 @@ class AdHocFindingForm(forms.ModelForm):
         if cleaned_data['false_p'] and cleaned_data['verified']:
             raise forms.ValidationError('False positive findings cannot '
                                         'be verified.')
+
+        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
+        if errors:
+            raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_add_list = endpoints_to_add_list
+
         return cleaned_data
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
@@ -977,14 +1019,45 @@ class PromoteFindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea, required=False)
     impact = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects.none(), required=False, label='Systems / Endpoints')
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                         "Each must be valid.",
+                               widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
+
+    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
+                   'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
+                   'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+                   'out_of_scope', 'risk_accept', 'under_defect_review')
+
+    def __init__(self, *args, **kwargs):
+        product = None
+        if 'product' in kwargs:
+            product = kwargs.pop('product')
+
+        super(PromoteFindingForm, self).__init__(*args, **kwargs)
+
+        if product:
+            self.fields['endpoints'].queryset = Endpoint.objects.filter(product=product)
+
+        self.endpoints_to_add_list = []
+
+    def clean(self):
+        cleaned_data = super(PromoteFindingForm, self).clean()
+
+        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
+        if errors:
+            raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_add_list = endpoints_to_add_list
+
+        return cleaned_data
 
     class Meta:
         model = Finding
-        order = ('title', 'severity', 'endpoints', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template', 'endpoint_status'
+        exclude = ('reporter', 'url', 'numerical_severity', 'active', 'false_p', 'verified', 'endpoint_status',
                    'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
 
 
@@ -1051,12 +1124,12 @@ class FindingForm(forms.ModelForm):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
+    endpoints = forms.ModelMultipleChoiceField(queryset=Endpoint.objects.none(), required=False, label='Systems / Endpoints')
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                         "Each must be valid.",
+                               widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
-
-    is_template = forms.BooleanField(label="Create Template?", required=False,
-                                     help_text="A new finding template will be created from this finding.")
 
     mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
     mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
@@ -1065,13 +1138,11 @@ class FindingForm(forms.ModelForm):
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
-                   'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
-                   'is_template', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+                   'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
+                   'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
-        template = kwargs.pop('template')
-
         req_resp = None
         if 'req_resp' in kwargs:
             req_resp = kwargs.pop('req_resp')
@@ -1080,6 +1151,8 @@ class FindingForm(forms.ModelForm):
             else False
 
         super(FindingForm, self).__init__(*args, **kwargs)
+
+        self.fields['endpoints'].queryset = Endpoint.objects.filter(product=self.instance.test.engagement.product)
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
         # if checked, always show to allow unaccept also with full risk acceptance enabled
@@ -1118,6 +1191,8 @@ class FindingForm(forms.ModelForm):
             self.fields['group'].queryset = self.instance.test.finding_group_set.all()
             self.fields['group'].initial = self.instance.finding_group
 
+        self.endpoints_to_add_list = []
+
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
 
@@ -1131,6 +1206,12 @@ class FindingForm(forms.ModelForm):
         if cleaned_data['active'] and 'risk_accepted' in cleaned_data and cleaned_data['risk_accepted']:
             raise forms.ValidationError('Active findings cannot '
                                         'be risk accepted.')
+
+        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
+        if errors:
+            raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -1147,7 +1228,7 @@ class FindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
 
 
@@ -1289,7 +1370,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 class EditEndpointForm(forms.ModelForm):
     class Meta:
         model = Endpoint
-        exclude = ['product']
+        exclude = ['product', 'endpoint_status']
 
     def __init__(self, *args, **kwargs):
         self.product = None
@@ -1384,34 +1465,12 @@ class AddEndpointForm(forms.Form):
             raise forms.ValidationError('Please enter a valid URL or IP address.',
                                         code='invalid')
 
-        endpoints = endpoint.split()
-
-        errors = []
-        for endpoint in endpoints:
-            try:
-                if '://' in endpoint:  # is it full uri?
-                    endpoint_ins = Endpoint.from_uri(endpoint)  # from_uri validate URI format + split to components
-                else:
-                    # from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
-                    # format doesn't follow RFC 3986 but users use it
-                    endpoint_ins = Endpoint.from_uri('//' + endpoint)
-                endpoint_ins.clean()
-                self.endpoints_to_process.append([
-                    endpoint_ins.protocol,
-                    endpoint_ins.userinfo,
-                    endpoint_ins.host,
-                    endpoint_ins.port,
-                    endpoint_ins.path,
-                    endpoint_ins.query,
-                    endpoint_ins.fragment
-                ])
-            except ValidationError as ves:
-                for ve in ves:
-                    errors.append(
-                        ValidationError("Invalid endpoint {}: {}".format(endpoint, ve))
-                    )
+        endpoints_to_add_list, errors = validate_endpoints_to_add(endpoint)
         if errors:
             raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_process = endpoints_to_add_list
+
         return cleaned_data
 
 
@@ -1774,6 +1833,12 @@ class Delete_Product_Type_GroupForm(Edit_Product_Type_Group_Form):
 
 
 class DojoUserForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(DojoUserForm, self).__init__(*args, **kwargs)
+        if not get_current_user().is_superuser and not settings.USER_PROFILE_EDITABLE:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     class Meta:
         model = Dojo_User
         exclude = ['password', 'last_login', 'is_superuser', 'groups',
@@ -1878,6 +1943,9 @@ class UserContactInfoForm(forms.ModelForm):
         current_user = get_current_user()
         if not current_user.is_superuser:
             del self.fields['force_password_reset']
+            if not settings.USER_PROFILE_EDITABLE:
+                for field in self.fields:
+                    self.fields[field].disabled = True
 
 
 class GlobalRoleForm(forms.ModelForm):
@@ -2114,38 +2182,28 @@ class DeleteBenchmarkForm(forms.ModelForm):
 #         exclude = ['product']
 
 
-class Sonarqube_ProductForm(forms.ModelForm):
+class Product_API_Scan_ConfigurationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(Sonarqube_ProductForm, self).__init__(*args, **kwargs)
-        Tool_Type.objects.get_or_create(name='SonarQube')
+        super(Product_API_Scan_ConfigurationForm, self).__init__(*args, **kwargs)
 
-    sonarqube_tool_config = forms.ModelChoiceField(
-        label='SonarQube Configuration',
-        queryset=Tool_Configuration.objects.filter(tool_type__name="SonarQube").order_by('name'),
-        required=True
+    tool_configuration = forms.ModelChoiceField(
+        label='Tool Configuration',
+        queryset=Tool_Configuration.objects.all().order_by('name'),
+        required=True,
     )
 
     class Meta:
-        model = Sonarqube_Product
+        model = Product_API_Scan_Configuration
         exclude = ['product']
 
 
-class Cobaltio_ProductForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(Cobaltio_ProductForm, self).__init__(*args, **kwargs)
-        Tool_Type.objects.get_or_create(name='Cobalt.io')
-
-    cobaltio_tool_config = forms.ModelChoiceField(
-        label='Cobalt.io Configuration',
-        queryset=Tool_Configuration.objects.filter(tool_type__name="Cobalt.io").order_by('name'),
-        required=True
-    )
+class DeleteProduct_API_Scan_ConfigurationForm(forms.ModelForm):
+    id = forms.IntegerField(required=True, widget=forms.widgets.HiddenInput())
 
     class Meta:
-        model = Cobaltio_Product
-        exclude = ['product', 'cobaltio_asset_name']
+        model = Product_API_Scan_Configuration
+        fields = ['id']
 
 
 class DeleteJIRAInstanceForm(forms.ModelForm):
@@ -2227,24 +2285,6 @@ class ToolConfigForm(forms.ModelForm):
                 code='invalid')
 
         return form_data
-
-
-class DeleteSonarqubeConfigurationForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Sonarqube_Product
-        fields = ['id']
-
-
-class DeleteCobaltioConfigurationForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Cobaltio_Product
-        fields = ['id']
 
 
 class DeleteObjectsSettingsForm(forms.ModelForm):
@@ -2742,7 +2782,7 @@ class GoogleSheetFieldsForm(forms.Form):
         self.credentials_required = kwargs.pop('credentials_required')
         options = ((0, 'Hide'), (100, 'Small'), (200, 'Medium'), (400, 'Large'))
         protect = ['reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'is_template']
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue']
         self.all_fields = kwargs.pop('all_fields')
         super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
         if not self.credentials_required:
