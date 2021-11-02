@@ -2,9 +2,12 @@ from django.test import TestCase
 from dojo.tools.semgrep.parser import SemgrepParser
 from dojo.models import Test
 
+FINDING_MITIGATION_TEXT = "javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");"
+FINDING_VULN_ID_TEXT = "java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle"
+FINDING_DESCRIPTION_TEXT = "\t\t\tjavax.crypto.Cipher c = javax.crypto.Cipher.getInstance(\"DES/CBC/PKCS5Padding\");"
 
 class TestSemgrepParser(TestCase):
-
+    
     def test_parse_empty(self):
         testfile = open("dojo/unittests/scans/semgrep/empty.json")
         parser = SemgrepParser()
@@ -23,8 +26,8 @@ class TestSemgrepParser(TestCase):
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02194.java", finding.file_path)
         self.assertEqual(64, finding.line)
         self.assertEqual(696, finding.cwe)
-        self.assertEqual("javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");", finding.mitigation)
-        self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
+        self.assertEqual(FINDING_MITIGATION_TEXT, finding.mitigation)
+        self.assertEqual(FINDING_VULN_ID_TEXT, finding.vuln_id_from_tool)
 
     def test_parse_many_finding(self):
         testfile = open("dojo/unittests/scans/semgrep/many_findings.json")
@@ -37,15 +40,17 @@ class TestSemgrepParser(TestCase):
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02194.java", finding.file_path)
         self.assertEqual(64, finding.line)
         self.assertEqual(696, finding.cwe)
-        self.assertEqual("javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");", finding.mitigation)
-        self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
+        self.assertEqual(FINDING_MITIGATION_TEXT, finding.mitigation)
+        self.assertEqual(FINDING_VULN_ID_TEXT, finding.vuln_id_from_tool)
+        self.assertContains(FINDING_DESCRIPTION_TEXT, finding.description)
         finding = findings[2]
         self.assertEqual("Info", finding.severity)
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01150.java", finding.file_path)
         self.assertEqual(66, finding.line)
         self.assertEqual(696, finding.cwe)
-        self.assertEqual("javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");", finding.mitigation)
-        self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
+        self.assertEqual(FINDING_MITIGATION_TEXT, finding.mitigation)
+        self.assertEqual(FINDING_VULN_ID_TEXT, finding.vuln_id_from_tool)
+        self.assertContains(FINDING_DESCRIPTION_TEXT, finding.description)
 
     def test_parse_repeated_finding(self):
         testfile = open("dojo/unittests/scans/semgrep/repeated_findings.json")
@@ -57,10 +62,11 @@ class TestSemgrepParser(TestCase):
         self.assertEqual("Low", finding.severity)
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01150.java", finding.file_path)
         self.assertEqual(66, finding.line)
-        self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
+        self.assertEqual(FINDING_VULN_ID_TEXT, finding.vuln_id_from_tool)
         self.assertEqual(696, finding.cwe)
-        self.assertEqual("javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");", finding.mitigation)
+        self.assertEqual(FINDING_MITIGATION_TEXT, finding.mitigation)
         self.assertEqual(2, finding.nb_occurences)
+        self.assertContains(FINDING_DESCRIPTION_TEXT, finding.description)
 
     def test_parse_many_vulns(self):
         testfile = open("dojo/unittests/scans/semgrep/many_vulns.json")
@@ -74,6 +80,7 @@ class TestSemgrepParser(TestCase):
         self.assertEqual(186, finding.line)
         self.assertIsNone(finding.mitigation)
         self.assertEqual("python.lang.correctness.tempfile.flush.tempfile-without-flush", finding.vuln_id_from_tool)
+        self.assertContains("                   'xsl-style-sheet': temp.name}", finding.description)
         finding = findings[2]
         self.assertEqual("Low", finding.severity)
         self.assertEqual("utils.py", finding.file_path)
