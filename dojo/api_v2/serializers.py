@@ -23,6 +23,7 @@ from dojo.utils import is_scan_file_too_large
 from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
+from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 import datetime
 import six
@@ -299,16 +300,31 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     last_login = serializers.DateTimeField(read_only=True)
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'}, required=False,
+                                     validators=[validate_password])
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser', 'password')
 
     def create(self, validated_data):
+        if 'password' in validated_data:
+            password = validated_data.pop('password')
+        else:
+            password = None
         user = User.objects.create(**validated_data)
-        user.set_unusable_password()
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
         user.save()
         return user
+
+    def validate(self, data):
+        if self.context['request'].method in ['PATCH', 'PUT'] and 'password' in data:
+            raise ValidationError('Update of password though API is not allowed')
+        else:
+            return super().validate(data)
 
 
 class UserContactInfoSerializer(serializers.ModelSerializer):
@@ -1218,6 +1234,8 @@ class ImportScanSerializer(serializers.Serializer):
     commit_hash = serializers.CharField(required=False)
     api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Product_API_Scan_Configuration.objects.all())
+    service = serializers.CharField(required=False)
+
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     # extra fields populated in response
@@ -1241,6 +1259,7 @@ class ImportScanSerializer(serializers.Serializer):
         branch_tag = data.get('branch_tag', None)
         commit_hash = data.get('commit_hash', None)
         api_scan_configuration = data.get('api_scan_configuration', None)
+        service = data.get('service', None)
 
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
@@ -1274,6 +1293,7 @@ class ImportScanSerializer(serializers.Serializer):
                                                                              close_old_findings=close_old_findings,
                                                                              group_by=group_by,
                                                                              api_scan_configuration=api_scan_configuration,
+                                                                             service=service,
                                                                              title=test_title)
 
             if test:
@@ -1341,6 +1361,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     commit_hash = serializers.CharField(required=False)
     api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Product_API_Scan_Configuration.objects.all())
+    service = serializers.CharField(required=False)
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
@@ -1365,6 +1386,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         branch_tag = data.get('branch_tag', None)
         commit_hash = data.get('commit_hash', None)
         api_scan_configuration = data.get('api_scan_configuration', None)
+        service = data.get('service', None)
 
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
@@ -1386,7 +1408,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                             version=version, branch_tag=branch_tag, build_id=build_id,
                                             commit_hash=commit_hash, push_to_jira=push_to_jira,
                                             close_old_findings=close_old_findings,
-                                            group_by=group_by, api_scan_configuration=api_scan_configuration)
+                                            group_by=group_by, api_scan_configuration=api_scan_configuration,
+                                            service=service)
 
             if test:
                 data['test'] = test

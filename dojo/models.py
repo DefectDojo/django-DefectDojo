@@ -1343,21 +1343,17 @@ class Endpoint(models.Model):
         return self.findings().count()
 
     def active_findings(self):
-        return self.findings().filter(active=True,
+        findings = self.findings().filter(active=True,
                                       verified=True,
                                       out_of_scope=False,
                                       mitigated__isnull=True,
                                       false_p=False,
                                       duplicate=False).order_by('numerical_severity')
+        findings = findings.filter(endpoint_status__mitigated=False)
+        return findings
 
     def active_findings_count(self):
         return self.active_findings().count()
-
-    def closed_findings(self):
-        return self.findings().filter(mitigated__isnull=False)
-
-    def closed_findings_count(self):
-        return self.closed_findings().count()
 
     def host_endpoints(self):
         return Endpoint.objects.filter(host=self.host,
@@ -1381,21 +1377,17 @@ class Endpoint(models.Model):
         return self.host_finding().count()
 
     def host_active_findings(self):
-        return self.host_findings().filter(active=True,
+        findings = self.host_findings().filter(active=True,
                                            verified=True,
                                            out_of_scope=False,
                                            mitigated__isnull=True,
                                            false_p=False,
                                            duplicate=False).order_by('numerical_severity')
+        findings = findings.filter(endpoint_status__mitigated=False)
+        return findings
 
     def host_active_findings_count(self):
         return self.host_active_findings().count()
-
-    def host_closed_findings(self):
-        return self.host_findings().filter(mitigated__isnull=False)
-
-    def host_closed_findings_count(self):
-        return self.host_closed_findings().count()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -1923,6 +1915,13 @@ class Finding(models.Model):
                                          verbose_name="Publish date",
                                          help_text="Date when this vulnerability was made publicly available.")
 
+    # The service is used to generate the hash_code, so that it gets part of the deduplication of findings.
+    service = models.CharField(null=True,
+                               blank=True,
+                               max_length=200,
+                               verbose_name="Service",
+                               help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
+
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
@@ -2092,6 +2091,11 @@ class Finding(models.Model):
 
     # Compute the hash_code from the fields to hash
     def hash_fields(self, fields_to_hash):
+        if hasattr(settings, 'HASH_CODE_FIELDS_ALWAYS'):
+            for field in settings.HASH_CODE_FIELDS_ALWAYS:
+                if getattr(self, field):
+                    fields_to_hash += str(getattr(self, field))
+
         logger.debug('fields_to_hash      : %s', fields_to_hash)
         logger.debug('fields_to_hash lower: %s', fields_to_hash.lower())
         return hashlib.sha256(fields_to_hash.casefold().encode('utf-8').strip()).hexdigest()
@@ -2318,8 +2322,6 @@ class Finding(models.Model):
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
         from dojo.finding import helper as finding_helper
-
-        system_settings = System_Settings.objects.get()
 
         if not user:
             from dojo.utils import get_current_user

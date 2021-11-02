@@ -218,6 +218,7 @@ def get_finding_filter_fields(metrics=False, similar=False):
                 'test__test_type',
                 'test__engagement__version',
                 'test__version',
+                'endpoints',
                 'status',
                 'active',
                 'verified',
@@ -231,6 +232,7 @@ def get_finding_filter_fields(metrics=False, similar=False):
                 'file_path',
                 'unique_id_from_tool',
                 'vuln_id_from_tool',
+                'service',
     ])
 
     if similar:
@@ -1146,6 +1148,10 @@ class FindingFilter(FindingFilterWithTags):
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.none(),
         label="Engagement")
+
+    endpoints = ModelMultipleChoiceFilter(
+        queryset=Endpoint.objects.none(),
+        label="Endpoint")
 
     test = ModelMultipleChoiceFilter(
         queryset=Test.objects.none(),

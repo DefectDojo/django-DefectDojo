@@ -181,17 +181,17 @@ class SchemaChecker():
 
         if obj is None:
             self._check_or_fail(is_nullable, f"{self._get_prefix()} is not nullable yet the value returned was null")
-        elif schema_type is TYPE_BOOLEAN:
+        elif schema_type == TYPE_BOOLEAN:
             _check_helper(isinstance(obj, bool))
-        elif schema_type is TYPE_INTEGER:
+        elif schema_type == TYPE_INTEGER:
             _check_helper(isinstance(obj, int))
-        elif schema_type is TYPE_NUMBER:
+        elif schema_type == TYPE_NUMBER:
             _check_helper(obj.isdecimal())
-        elif schema_type is TYPE_ARRAY:
+        elif schema_type == TYPE_ARRAY:
             _check_helper(isinstance(obj, list))
-        elif schema_type is TYPE_OBJECT:
+        elif schema_type == TYPE_OBJECT:
             _check_helper(isinstance(obj, OrderedDict) or isinstance(obj, dict))
-        elif schema_type is TYPE_STRING:
+        elif schema_type == TYPE_STRING:
             _check_helper(isinstance(obj, str))
         else:
             # Default case

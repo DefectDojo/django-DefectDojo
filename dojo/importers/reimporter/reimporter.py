@@ -22,7 +22,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 class DojoDefaultReImporter(object):
 
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now()):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None):
 
         items = parsed_findings
         original_items = list(test.finding_set.all())
@@ -62,6 +62,8 @@ class DojoDefaultReImporter(object):
 
             if not hasattr(item, 'test'):
                 item.test = test
+
+            item.service = service
 
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
@@ -281,7 +283,8 @@ class DojoDefaultReImporter(object):
 
     def reimport_scan(self, scan, scan_type, test, active=True, verified=True, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None):
+                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None,
+                    service=None):
 
         logger.debug(f'REIMPORT_SCAN: parameters: {locals()}')
 
@@ -319,7 +322,7 @@ class DojoDefaultReImporter(object):
         new_findings, reactivated_findings, findings_to_mitigate, untouched_findings = \
             self.process_parsed_findings(test, parsed_findings, scan_type, user, active, verified,
                                          minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
-                                         push_to_jira=push_to_jira, group_by=group_by, now=now)
+                                         push_to_jira=push_to_jira, group_by=group_by, now=now, service=service)
 
         closed_findings = []
         if close_old_findings:

@@ -78,6 +78,8 @@ There is a breaking change in the API for importing and re-importings scans with
 have been unified](https://github.com/DefectDojo/django-DefectDojo/pull/5289) and are set now with the attribute `api_scan_configuration`. 
 The existing configurations for SonarQube API and Cobalt.io API have been migrated.
 
+At the request of pyup.io, we had to remove the parser for Safety scans.
+
 
 ## Upgrading to DefectDojo Version 2.3.x.
 

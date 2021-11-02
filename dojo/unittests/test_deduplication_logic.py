@@ -111,7 +111,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 #                       1: dojo.Endpoint.None dojo.Finding.None 1 2020-07-01 00:00:00+00:00 2020-07-01 17:45:39.791907+00:00 False None None False False False ftp://localhost/ High Impact Test Finding
 #       engagement 6: April monthly engagement (dedupe_inside: True)
 #       engagement 3: weekly engagement (dedupe_inside: True)
-#               test 33: Generic Findings Import (algo=legacy, dynamic=False)
+#               test 33: Xanitizer Scan Findings Import (algo=legacy, dynamic=False)
 #               findings:
 #                       22  : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: False: dup_id: None: hash_code: 9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa: eps: 0: notes: []: uid: None
 #                       23  : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: True : dup_id: 22  : hash_code: 9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa: eps: 0: notes: []: uid: None

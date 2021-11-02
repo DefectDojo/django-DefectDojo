@@ -163,9 +163,6 @@ env = environ.Env(
     DD_MAX_ALERTS_PER_USER=(int, 999),
     DD_TAG_PREFETCHING=(bool, True),
     DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
-    # when enabeld safety parser will download latest vuln db during runtime
-    # otherwise data is loaded from dojo/tools/safety/insecure_full.json
-    DD_SAFETY_PARSER_ONLINE_DB=(bool, True),
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
     DD_PARSER_EXCLUDE=(str, 'AWS Scout2 Scan'),
@@ -202,6 +199,8 @@ env = environ.Env(
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
     # when enabled SonarQube API parser will download the security hotspots
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
+    # when enabled standard users can't change their profile information, default False
+    DD_USER_PROFILE_EDITABLE=(bool, True),
 )
 
 
@@ -1067,13 +1066,19 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Scout Suite Scan': True,
     'AWS Security Hub Scan': True,
     'Meterian Scan': True,
-    'SARIF': True
+    'SARIF': True,
+    'Hadolint Dockerfile check': True,
+    'Semgrep JSON Report': True,
+    'Generic Findings Import': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
 HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
+
+# Adding fields to the hash_code calculation regardless of the previous settings
+HASH_CODE_FIELDS_ALWAYS = ['service']
 
 # ------------------------------------
 # Deduplication configuration
@@ -1135,7 +1140,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
     'GitLab Dependency Scanning Report': DEDUPE_ALGO_HASH_CODE,
-    'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
     'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1148,6 +1152,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'SARIF': DEDUPE_ALGO_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
+    'Semgrep JSON Report': DEDUPE_ALGO_HASH_CODE,
+    'Generic Findings Import': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1287,9 +1294,6 @@ QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 # If using this, lines for Qualys WAS deduplication functions must be un-commented
 QUALYS_WAS_UNIQUE_ID = False
 
-# Deside if parser should download latest db or use offline version
-SAFETY_PARSER_ONLINE_DB = env("DD_SAFETY_PARSER_ONLINE_DB")
-
 # exclusion list for parsers
 PARSER_EXCLUDE = env("DD_PARSER_EXCLUDE")
 
@@ -1329,3 +1333,6 @@ DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')
 
 # Deside if SonarQube API parser should download the security hotspots
 SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
+
+# when enabled standard users can't change their profile information, default False
+USER_PROFILE_EDITABLE = env("DD_USER_PROFILE_EDITABLE")

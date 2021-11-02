@@ -2,7 +2,7 @@
 asteval==0.9.25
 bleach==4.1.0
 celery==5.1.2
-coverage==6.0.2
+coverage==6.1.1
 defusedxml==0.7.1
 django_celery_results==2.2.0
 django-auditlog==1.0a1
@@ -50,8 +50,8 @@ Python-jose==3.3.0
 gitpython==3.1.24
 debugpy==1.5.1
 python-gitlab==2.10.1
-google-api-python-client==2.27.0
-google-auth==2.3.1
+google-api-python-client==2.28.0
+google-auth==2.3.2
 google-auth-oauthlib==0.4.6
 drf_yasg==1.20.0
 cpe==1.2.1
