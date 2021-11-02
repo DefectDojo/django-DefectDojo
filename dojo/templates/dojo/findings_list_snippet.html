@@ -211,6 +211,7 @@
                             {% if show_product_column and product_tab is None %}
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
                             {% endif %}
+                            <th>Service</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -465,6 +466,11 @@
                                         title="{{ finding.test.engagement }}" alt="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                                 </td>
                                 {% endif %}
+                                <td>
+                                    {% if finding.service %}
+                                    {{ finding.service }}
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -520,6 +526,7 @@
                 {% if show_product_column and product_tab is None %}
                     { "data": "product" },
                 {% endif %}
+                { "data": "service" },
               ];
 
             // Filter the list of items to display based on what is shown.

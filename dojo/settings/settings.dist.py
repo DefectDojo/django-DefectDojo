@@ -1075,6 +1075,9 @@ HASHCODE_ALLOWS_NULL_CWE = {
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
 HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
 
+# Adding fields to the hash_code calculation regardless of the previous settings
+HASH_CODE_FIELDS_ALWAYS = ['service']
+
 # ------------------------------------
 # Deduplication configuration
 # ------------------------------------
