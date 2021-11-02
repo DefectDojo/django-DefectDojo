@@ -6,8 +6,9 @@ FINDING_MITIGATION_TEXT = "javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\"
 FINDING_VULN_ID_TEXT = "java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle"
 FINDING_DESCRIPTION_TEXT = "\t\t\tjavax.crypto.Cipher c = javax.crypto.Cipher.getInstance(\"DES/CBC/PKCS5Padding\");"
 
+
 class TestSemgrepParser(TestCase):
-    
+
     def test_parse_empty(self):
         testfile = open("dojo/unittests/scans/semgrep/empty.json")
         parser = SemgrepParser()
