@@ -16,18 +16,17 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
 
-from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
-                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, Cobaltio_ProductForm, ProductNotificationsForm, \
+                       EngagementPresetsForm, DeleteEngagementPresetsForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, AppAnalysisForm, JIRAEngagementForm, Add_Product_MemberForm, \
                        Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm, \
-                       DeleteAppAnalysisForm, DeleteSonarqubeConfigurationForm, DeleteCobaltioConfigurationForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
+                       DeleteAppAnalysisForm, Product_API_Scan_ConfigurationForm, DeleteProduct_API_Scan_ConfigurationForm
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member, \
-                        Product_Group, Cobaltio_Product
+                        Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
+                        Product_Group, Product_API_Scan_Configuration
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
                        get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs
 
@@ -44,8 +43,8 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
-from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
-from dojo.tools.cobalt_api.api_client import CobaltAPI
+from dojo.tool_config.factory import create_API
+import dojo.finding.helper as finding_helper
 
 logger = logging.getLogger(__name__)
 
@@ -1183,11 +1182,11 @@ def ad_hoc_finding(request, pid):
     push_all_jira_issues = jira_helper.is_push_all_issues(test)
     jform = None
     gform = None
-    form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
+    form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None, product=prod)
     use_jira = jira_helper.get_jira_project(test) is not None
 
     if request.method == 'POST':
-        form = AdHocFindingForm(request.POST, req_resp=None)
+        form = AdHocFindingForm(request.POST, req_resp=None, product=prod)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -1214,53 +1213,11 @@ def ad_hoc_finding(request, pid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            create_template = new_finding.is_template
-            # always false now since this will be deprecated soon in favor of new Finding_Template model
-            new_finding.is_template = False
             new_finding.tags = form.cleaned_data['tags']
             new_finding.save()
-            new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            for endpoint in form.cleaned_data['endpoints']:
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=endpoint)
-                endpoint.endpoint_status.add(eps)
-                new_finding.endpoint_status.add(eps)
 
-            for endpoint in new_finding.unsaved_endpoints:
-                ep, created = endpoint_get_or_create(
-                    protocol=endpoint.protocol,
-                    userinfo=endpoint.userinfo,
-                    host=endpoint.host,
-                    port=endpoint.port,
-                    path=endpoint.path,
-                    query=endpoint.query,
-                    fragment=endpoint.fragment,
-                    product=test.engagement.product)
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=ep)
-                ep.endpoint_status.add(eps)
-
-                new_finding.endpoints.add(ep)
-                new_finding.endpoint_status.add(eps)
-            for endpoint in form.cleaned_data['endpoints']:
-                ep, created = endpoint_get_or_create(
-                    protocol=endpoint.protocol,
-                    userinfo=endpoint.userinfo,
-                    host=endpoint.host,
-                    port=endpoint.port,
-                    path=endpoint.path,
-                    query=endpoint.query,
-                    fragment=endpoint.fragment,
-                    product=test.engagement.product)
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=ep)
-                ep.endpoint_status.add(eps)
-
-                new_finding.endpoints.add(ep)
-                new_finding.endpoint_status.add(eps)
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
 
             new_finding.save()
             # Push to jira?
@@ -1318,37 +1275,11 @@ def ad_hoc_finding(request, pid):
                                  'Finding added successfully.',
                                  extra_tags='alert-success')
 
-            if create_template:
-                templates = Finding_Template.objects.filter(title=new_finding.title)
-                if len(templates) > 0:
-                    messages.add_message(request,
-                                         messages.ERROR,
-                                         'A finding template was not created.  A template with this title already '
-                                         'exists.',
-                                         extra_tags='alert-danger')
-                else:
-                    template = Finding_Template(title=new_finding.title,
-                                                cwe=new_finding.cwe,
-                                                severity=new_finding.severity,
-                                                description=new_finding.description,
-                                                mitigation=new_finding.mitigation,
-                                                impact=new_finding.impact,
-                                                references=new_finding.references,
-                                                numerical_severity=new_finding.numerical_severity)
-                    template.save()
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'A finding template was also created.',
-                                         extra_tags='alert-success')
             if '_Finished' in request.POST:
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             else:
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
         else:
-            if 'endpoints' in form.cleaned_data:
-                form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
-            else:
-                form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
             add_error_message_to_response('The form has errors, please correct them below.')
             add_field_errors_to_response(jform)
@@ -1588,266 +1519,135 @@ def delete_product_member(request, memberid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def add_sonarqube(request, pid):
+@user_is_authorized(Product, Permissions.Product_API_Scan_Configuration_Add, 'pid', 'staff')
+def add_api_scan_configuration(request, pid):
 
-    prod = Product.objects.get(id=pid)
+    product = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
-        form = Sonarqube_ProductForm(request.POST)
+        form = Product_API_Scan_ConfigurationForm(request.POST)
         if form.is_valid():
-            sonarqube_product = form.save(commit=False)
-            sonarqube_product.product = prod
+            product_api_scan_configuration = form.save(commit=False)
+            product_api_scan_configuration.product = product
             try:
-                sq = SonarQubeAPI(sonarqube_product.sonarqube_tool_config)
-                project = sq.get_project(sonarqube_product.sonarqube_project_key)  # if connection is not successful, this call raise exception
+                api = create_API(product_api_scan_configuration.tool_configuration)
+                if api and hasattr(api, 'test_product_connection'):
+                    result = api.test_product_connection(product_api_scan_configuration)
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         f'API connection successful with message: {result}.',
+                                         extra_tags='alert-success')
+                product_api_scan_configuration.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'SonarQube connection successful. You have access to project "{}"'.format(
-                                         project['name']),
-                                     extra_tags='alert-success')
-                sonarqube_product.save()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'SonarQube Configuration added successfully.',
+                                     'API Scan Configuration added successfully.',
                                      extra_tags='alert-success')
                 if 'add_another' in request.POST:
-                    return HttpResponseRedirect(reverse('add_sonarqube', args=(pid,)))
+                    return HttpResponseRedirect(reverse('add_api_scan_configuration', args=(pid,)))
                 else:
-                    return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+                    return HttpResponseRedirect(reverse('view_api_scan_configurations', args=(pid,)))
             except Exception as e:
+                logger.exception(e)
                 messages.add_message(request,
                                      messages.ERROR,
                                      str(e),
                                      extra_tags='alert-danger')
     else:
-        form = Sonarqube_ProductForm()
+        form = Product_API_Scan_ConfigurationForm()
 
-    product_tab = Product_Tab(pid, title="Add SonarQube Configuration", tab="settings")
+    product_tab = Product_Tab(pid, title="Add API Scan Configuration", tab="settings")
 
     return render(request,
-                  'dojo/add_product_sonarqube_configuration.html',
+                  'dojo/add_product_api_scan_configuration.html',
                   {'form': form,
                    'product_tab': product_tab,
-                   'product': prod,
+                   'product': product,
                    })
 
 
 @user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
-def view_sonarqube(request, pid):
+def view_api_scan_configurations(request, pid):
 
-    sonarqube_queryset = Sonarqube_Product.objects.filter(product=pid)
+    product_api_scan_configurations = Product_API_Scan_Configuration.objects.filter(product=pid)
 
-    product_tab = Product_Tab(pid, title="Sonarqube Configurations", tab="settings")
+    product_tab = Product_Tab(pid, title="API Scan Configurations", tab="settings")
     return render(request,
-                  'dojo/view_product_sonarqube_configuration.html',
+                  'dojo/view_product_api_scan_configurations.html',
                   {
-                      'sonarqube_queryset': sonarqube_queryset,
+                      'product_api_scan_configurations': product_api_scan_configurations,
                       'product_tab': product_tab,
                       'pid': pid
                   })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def edit_sonarqube(request, pid, sqcid):
+@user_is_authorized(Product, Permissions.Product_API_Scan_Configuration_Edit, 'pascid', 'staff')
+def edit_api_scan_configuration(request, pid, pascid):
 
-    sqc = Sonarqube_Product.objects.get(pk=sqcid)
+    product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 
-    if sqc.product.pk != int(pid):  # user is trying to edit SQ Config from another product (trying to by-pass auth)
+    if product_api_scan_configuration.product.pk != int(pid):  # user is trying to edit Tool Configuration from another product (trying to by-pass auth)
         raise Http404()
 
     if request.method == 'POST':
-        sqcform = Sonarqube_ProductForm(request.POST, instance=sqc)
-        if sqcform.is_valid():
-            try:
-                sqcform_copy = sqcform.save(commit=False)
-                sq = SonarQubeAPI(sqcform_copy.sonarqube_tool_config)
-                project = sq.get_project(
-                    sqcform_copy.sonarqube_project_key)  # if connection is not successful, this call raise exception
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'SonarQube connection successful. You have access to project "{}"'.format(
-                                         project['name']),
-                                     extra_tags='alert-success')
-                sqcform.save()
-
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'SonarQube Configuration Successfully Updated.',
-                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
-            except Exception as e:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     str(e),
-                                     extra_tags='alert-danger')
-    else:
-        sqcform = Sonarqube_ProductForm(instance=sqc)
-
-    product_tab = Product_Tab(pid, title="Edit SonarQube Configuration", tab="settings")
-    return render(request,
-                  'dojo/edit_product_sonarqube_configuration.html',
-                  {
-                      'sqcform': sqcform,
-                      'product_tab': product_tab
-                  })
-
-
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def delete_sonarqube(request, pid, sqcid):
-
-    sqc = Sonarqube_Product.objects.get(pk=sqcid)
-
-    if sqc.product.pk != int(pid):  # user is trying to delete SQ Config from another product (trying to by-pass auth)
-        raise Http404()
-
-    if request.method == 'POST':
-        sqcform = Sonarqube_ProductForm(request.POST)
-        sqc.delete()
-        messages.add_message(request,
-                             messages.SUCCESS,
-                             'SonarQube Configuration Deleted.',
-                             extra_tags='alert-success')
-        return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
-    else:
-        sqcform = DeleteSonarqubeConfigurationForm(instance=sqc)
-
-    product_tab = Product_Tab(pid, title="Delete SonarQube Configuration", tab="settings")
-    return render(request,
-                  'dojo/delete_product_sonarqube_configuration.html',
-                  {
-                      'form': sqcform,
-                      'product_tab': product_tab
-                  })
-
-
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def add_cobaltio(request, pid):
-
-    prod = Product.objects.get(id=pid)
-    if request.method == 'POST':
-        form = Cobaltio_ProductForm(request.POST)
+        form = Product_API_Scan_ConfigurationForm(request.POST, instance=product_api_scan_configuration)
         if form.is_valid():
-            cobaltio_product = form.save(commit=False)
-            cobaltio_product.product = prod
             try:
-                cobalt = CobaltAPI(cobaltio_product.cobaltio_tool_config)
-                asset = cobalt.get_asset(cobaltio_product.cobaltio_asset_id)
+                form_copy = form.save(commit=False)
+                api = create_API(form_copy.tool_configuration)
+                if api and hasattr(api, 'test_product_connection'):
+                    result = api.test_product_connection(form_copy)
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         f'API connection successful with message: {result}.',
+                                         extra_tags='alert-success')
+                form.save()
+
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Cobalt.io connection successful. You have access to asset "{}"'.format(
-                                         asset['resource']['title']),
+                                     'API Scan Configuration successfully updated.',
                                      extra_tags='alert-success')
-                cobaltio_product.cobaltio_asset_name = asset['resource']['title']
-                cobaltio_product.save()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Cobalt.io Configuration added successfully.',
-                                     extra_tags='alert-success')
-                if 'add_another' in request.POST:
-                    return HttpResponseRedirect(reverse('add_cobaltio', args=(pid,)))
-                else:
-                    return HttpResponseRedirect(reverse('view_cobaltio', args=(pid,)))
+                return HttpResponseRedirect(reverse('view_api_scan_configurations', args=(pid,)))
             except Exception as e:
+                logger.info(e)
                 messages.add_message(request,
                                      messages.ERROR,
                                      str(e),
                                      extra_tags='alert-danger')
     else:
-        form = Cobaltio_ProductForm()
+        form = Product_API_Scan_ConfigurationForm(instance=product_api_scan_configuration)
 
-    product_tab = Product_Tab(pid, title="Add Cobalt.io Configuration", tab="settings")
-
+    product_tab = Product_Tab(pid, title="Edit API Scan Configuration", tab="settings")
     return render(request,
-                  'dojo/add_product_cobaltio_configuration.html',
-                  {'form': form,
-                   'product_tab': product_tab,
-                   'product': prod,
-                   })
-
-
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
-def view_cobaltio(request, pid):
-
-    cobaltio_queryset = Cobaltio_Product.objects.filter(product=pid)
-
-    product_tab = Product_Tab(pid, title="Cobalt.io Configurations", tab="settings")
-    return render(request,
-                  'dojo/view_product_cobaltio_configuration.html',
-                  {
-                      'cobaltio_queryset': cobaltio_queryset,
-                      'product_tab': product_tab,
-                      'pid': pid
-                  })
-
-
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def edit_cobaltio(request, pid, cobaltio_cid):
-
-    cobaltio = Cobaltio_Product.objects.get(pk=cobaltio_cid)
-
-    if cobaltio.product.pk != int(pid):  # user is trying to edit Cobalt.io Config from another product (trying to by-pass auth)
-        raise Http404()
-
-    if request.method == 'POST':
-        form = Cobaltio_ProductForm(request.POST, instance=cobaltio)
-        if form.is_valid():
-            cobaltio_product = form.save(commit=False)
-            try:
-                cobalt = CobaltAPI(cobaltio_product.cobaltio_tool_config)
-                asset = cobalt.get_asset(cobaltio_product.cobaltio_asset_id)
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Cobalt.io connection successful. You have access to asset "{}"'.format(
-                                         asset['resource']['title']),
-                                     extra_tags='alert-success')
-                cobaltio_product.cobaltio_asset_name = asset['resource']['title']
-                cobaltio_product.save()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Cobalt.io Configuration updated successfully.',
-                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_cobaltio', args=(pid,)))
-            except Exception as e:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     str(e),
-                                     extra_tags='alert-danger')
-    else:
-        form = Cobaltio_ProductForm(instance=cobaltio)
-
-    product_tab = Product_Tab(pid, title="Edit Cobalt.io Configuration", tab="settings")
-    return render(request,
-                  'dojo/edit_product_cobaltio_configuration.html',
+                  'dojo/edit_product_api_scan_configuration.html',
                   {
                       'form': form,
                       'product_tab': product_tab
                   })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def delete_cobaltio(request, pid, cobaltio_cid):
+@user_is_authorized(Product, Permissions.Product_API_Scan_Configuration_Delete, 'pascid', 'staff')
+def delete_api_scan_configuration(request, pid, pascid):
 
-    cobaltio = Cobaltio_Product.objects.get(pk=cobaltio_cid)
+    product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 
-    if cobaltio.product.pk != int(pid):  # user is trying to delete Cobalt.io Config from another product (trying to by-pass auth)
+    if product_api_scan_configuration.product.pk != int(pid):  # user is trying to delete Tool Configuration from another product (trying to by-pass auth)
         raise Http404()
 
     if request.method == 'POST':
-        cobaltioform = Cobaltio_ProductForm(request.POST)
-        cobaltio.delete()
+        form = Product_API_Scan_ConfigurationForm(request.POST)
+        product_api_scan_configuration.delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             'Cobalt.io Configuration Deleted.',
+                             'API Scan Configuration deleted.',
                              extra_tags='alert-success')
-        return HttpResponseRedirect(reverse('view_cobaltio', args=(pid,)))
+        return HttpResponseRedirect(reverse('view_api_scan_configurations', args=(pid,)))
     else:
-        cobaltioform = DeleteCobaltioConfigurationForm(instance=cobaltio)
+        form = DeleteProduct_API_Scan_ConfigurationForm(instance=product_api_scan_configuration)
 
-    product_tab = Product_Tab(pid, title="Delete Cobalt.io Configuration", tab="settings")
+    product_tab = Product_Tab(pid, title="Delete Tool Configuration", tab="settings")
     return render(request,
-                  'dojo/delete_product_cobaltio_configuration.html',
+                  'dojo/delete_product_api_scan_configuration.html',
                   {
-                      'form': cobaltioform,
+                      'form': form,
                       'product_tab': product_tab
                   })
 

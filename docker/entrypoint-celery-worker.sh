@@ -42,6 +42,9 @@ if [ "${DD_CELERY_WORKER_POOL_TYPE}" = "prefork" ]; then
     --prefetch-multiplier=${DD_CELERY_WORKER_PREFETCH_MULTIPLIER}"
 fi
 
+# do the check with Django stack
+python3 manage.py check
+
 exec celery --app=dojo \
     worker \
   --loglevel="${DD_CELERY_LOG_LEVEL}" \

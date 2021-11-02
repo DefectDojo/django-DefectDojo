@@ -1,4 +1,5 @@
 import logging
+from dojo.models import Product_API_Scan_Configuration
 
 from dojo.tools.cobalt_api.api_client import CobaltAPI
 
@@ -12,30 +13,30 @@ class CobaltApiImporter(object):
 
     def get_findings(self, test):
         client, config = self.prepare_client(test)
-        findings = client.get_findings(config.cobaltio_asset_id)
+        findings = client.get_findings(config.service_key_1)
         return findings
 
     def prepare_client(self, test):
         product = test.engagement.product
-        if test.cobaltio_config:
-            config = test.cobaltio_config
+        if test.api_scan_configuration:
+            config = test.api_scan_configuration
             # Double check of config
             if config.product != product:
-                raise Exception('Product Cobalt.io Configuration and "Product" mismatch')
+                raise Exception('API Scan Configuration for Cobalt.io and Product do not match.')
         else:
-            configs = product.cobaltio_product_set.filter(product=product)
+            configs = Product_API_Scan_Configuration.objects.filter(product=product)
             if configs.count() == 1:
                 config = configs.first()
             elif configs.count() > 1:
                 raise Exception(
-                    'There is more than one Cobalt.io Configuration for this Product but none of them has been choosen.\n'
+                    'More than one Product API Scan Configuration has been configured, but none of them has been chosen.\n'
                     'Please specify at Test which one should be used.'
                 )
             else:
                 raise Exception(
-                    'There are no Cobalt.io Configurations for this Product.\n'
-                    'Please add at least one Cobalt.io Configuration to this Product.'
+                    'There are no API Scan Configurations for this Product.\n'
+                    'Please add at least one API Scan Configuration for Cobalt.io to this Product.'
                 )
 
-        tool_config = config.cobaltio_tool_config
+        tool_config = config.tool_configuration
         return CobaltAPI(tool_config), config

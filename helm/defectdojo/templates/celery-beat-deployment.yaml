@@ -65,6 +65,12 @@ spec:
         {{- else if eq .Values.database "mysql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
         {{- end }}
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
+        {{- end }}
       {{- end }}
       - command:
         - /entrypoint-celery-beat.sh

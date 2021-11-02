@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load navigation_tags %}
 {% load humanize %}
 {% load display_tags %}
 {% load authorization_tags %}
@@ -18,23 +19,20 @@
             <div class="clearfix">
                 <h4 class="pull-left finding-title">
                     {% if host_view %}
-                      {{ endpoint.host }} -
-                      {{ endpoint.host_mitigated_endpoints_count }} / {{ endpoint.host_endpoints_count }} Mitigated Endpoints
+                      Host: {{ endpoint.host }} -
+                      {{ endpoint.host_mitigated_endpoints_count }} / {{ endpoint.host_endpoints_count }} mitigated endpoints
                     {% else %}
-                      {{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %} -
+                      Endpoint: {{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %} -
                       {% if endpoint.mitigated %}
                         Mitigated
                       {% else %}
                         {% if endpoint.active_findings_count > 0 %}
                           Vulnerable
                         {% else %}
-                          No Open, Active Findings
+                          No active verified findings
                         {% endif %}
                       {% endif %}
                     {% endif %}
-                    <span class="text-muted endpoint_product">
-                        <a href="{% url 'view_product' endpoint.product.id %}">{{ endpoint.product }}</a>
-                    </span>
                 </h4>
 
 
@@ -169,9 +167,9 @@
         </div>
     </div>
 
-    <div class="panel panel-default endpoints table-responsive">
+    <div class="panel panel-default table-responsive">
         {% if host_view %}
-            <div class="panel-heading">Endpoints</div>
+            <div class="panel-heading"><h4>Endpoints</h4></div>
             {% if endpoints %}
                 {% colgroup endpoints into 3 cols as grouped_items %}
                 <table class="table-striped table table table-condensed table-hover finding-endpoints">
@@ -181,11 +179,11 @@
                                 <td>{% if item %}
                                       <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
                                       {% if item.vulnerable %}
-                                        &#10005;
+                                        <span style="color:OrangeRed" class="fa fa-thumbs-down"></span>
                                       {% else %}
-                                        &#10003;
+                                        <span class="fa fa-thumbs-up"></span>
                                       {% endif %}
-                                      {{ item|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                      &nbsp;{{ item|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
                                     {% endif %}
                                 </td>
                             {% endfor %}
@@ -198,14 +196,14 @@
                 </div>
             {% endif %}
         {% else %}
-            <div class="panel-heading">Host</div>
-            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
+            <div class="panel-heading"><h4>Host</h4></div>
+            <div id="vuln_endpoints" class="panel-body table-responsive">
                 <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.host }}" href="{% url 'view_endpoint_host' endpoint.id %}">{{ endpoint.host }}</a>
             </div>
         {% endif %}
     </div>
 
-    {% if not host_view and endpoint.tags %}
+    {% if not host_view and endpoint.tags.all %}
         <div class="panel panel-default tags">
             <div class="panel-heading">
                 <h4>Tags</h4>
@@ -253,47 +251,58 @@
 
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h4>Active Findings</h4>
+            <h4>Active Verified Findings</h4>
         </div>
-        {% if findings %}
-            <table id="findings" class="tablesorter-bootstrap table table-striped table-bordered">
+    </div>
+    {% if findings %}
+    <div class="clearfix">
+        {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
+    </div>
+    <div class="table-responsive panel panel-default">
+        <table id="findings" class="tablesorter-bootstrap table table-striped">
                 <thead>
                 <tr>
                     <th>Title</th>
-                    <th>Date</th>
-                    <th>Severity</th>
-                    <th>Age</th>
+                    <th class="text-center">Severity</th>
+                    <th class="text-center">Date</th>
+                    <th class="text-center">Age</th>
+                    <th>Found by</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for finding in findings %}
                     <tr>
-                        <td>
+                        <td> 
                             <a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                         </td>
-                        <td>
+                        <td class="text-center">
+                            <span class="label severity severity-{{ finding.severity }}">
+                            {{ finding.severity }}
+                            </span>
+                        </td>
+                        <td class="text-center">
                             {{ finding.date }}
                         </td>
-                        <td>
-                            {{ finding.severity }}
+                        <td class="text-center">
+                            {{ finding.age }}
                         </td>
                         <td>
-                            {{ finding.age }}
+                            {% for scanner in finding.found_by.all %}
+                            {{ scanner }}
+                            {% endfor %}
                         </td>
                     </tr>
                 {% endfor %}
 
                 </tbody>
             </table>
-            <div class="clearfix">
-                {% include "dojo/paging_snippet.html" with page=findings %}
-            </div>
-        {% else %}
-            <p class="text-center">No findings found.</p>
-        {% endif %}
-
+        </div>
+    <div class="clearfix">
+        {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
     </div>
-
+    {% else %}
+        <p class="text-center">No findings found.</p>
+    {% endif %}
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
