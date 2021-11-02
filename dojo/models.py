@@ -20,6 +20,7 @@ from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from django.utils.functional import cached_property
 from django.utils import timezone
+from django.utils.html import escape
 from pytz import all_timezones
 from polymorphic.models import PolymorphicModel
 from multiselectfield import MultiSelectField
@@ -925,6 +926,31 @@ class Tool_Configuration(models.Model):
         return self.name
 
 
+class Product_API_Scan_Configuration(models.Model):
+    product = models.ForeignKey(Product, null=False, blank=False, on_delete=models.CASCADE)
+    tool_configuration = models.ForeignKey(Tool_Configuration, null=False, blank=False, on_delete=models.CASCADE)
+    service_key_1 = models.CharField(max_length=200, null=True, blank=True)
+    service_key_2 = models.CharField(max_length=200, null=True, blank=True)
+    service_key_3 = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        name = self.tool_configuration.name
+        if self.service_key_1 or self.service_key_2 or self.service_key_3:
+            name += f' ({self.details})'
+        return name
+
+    @property
+    def details(self):
+        details = ''
+        if self.service_key_1:
+            details += f'{self.service_key_1}'
+        if self.service_key_2:
+            details += f' | {self.service_key_2}'
+        if self.service_key_3:
+            details += f' | {self.service_key_3}'
+        return details
+
+
 # declare form here as we can't import forms.py due to circular imports not even locally
 class ToolConfigForm_Admin(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=False)
@@ -1318,21 +1344,17 @@ class Endpoint(models.Model):
         return self.findings().count()
 
     def active_findings(self):
-        return self.findings().filter(active=True,
+        findings = self.findings().filter(active=True,
                                       verified=True,
                                       out_of_scope=False,
                                       mitigated__isnull=True,
                                       false_p=False,
                                       duplicate=False).order_by('numerical_severity')
+        findings = findings.filter(endpoint_status__mitigated=False)
+        return findings
 
     def active_findings_count(self):
         return self.active_findings().count()
-
-    def closed_findings(self):
-        return self.findings().filter(mitigated__isnull=False)
-
-    def closed_findings_count(self):
-        return self.closed_findings().count()
 
     def host_endpoints(self):
         return Endpoint.objects.filter(host=self.host,
@@ -1356,21 +1378,17 @@ class Endpoint(models.Model):
         return self.host_finding().count()
 
     def host_active_findings(self):
-        return self.host_findings().filter(active=True,
+        findings = self.host_findings().filter(active=True,
                                            verified=True,
                                            out_of_scope=False,
                                            mitigated__isnull=True,
                                            false_p=False,
                                            duplicate=False).order_by('numerical_severity')
+        findings = findings.filter(endpoint_status__mitigated=False)
+        return findings
 
     def host_active_findings_count(self):
         return self.host_active_findings().count()
-
-    def host_closed_findings(self):
-        return self.host_findings().filter(mitigated__isnull=False)
-
-    def host_closed_findings_count(self):
-        return self.host_closed_findings().count()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -1439,6 +1457,7 @@ class Sonarqube_Issue_Transition(models.Model):
         ordering = ('-created', )
 
 
+# This class is not used anymore, but can't be deleted because it's referenced in dojo/db_migrations/0131_migrate_sonarcube_cobalt.py
 class Sonarqube_Product(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     sonarqube_project_key = models.CharField(
@@ -1453,6 +1472,7 @@ class Sonarqube_Product(models.Model):
         return '{} | {}'.format(self.sonarqube_tool_config.name if hasattr(self, 'sonarqube_tool_config') else '', self.sonarqube_project_key)
 
 
+# This class is not used anymore, but can't be deleted because it's referenced in dojo/db_migrations/0131_migrate_sonarcube_cobalt.py
 class Cobaltio_Product(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     cobaltio_asset_id = models.CharField(
@@ -1502,8 +1522,7 @@ class Test(models.Model):
                                    null=True, blank=True, help_text="Commit hash tested, a reimport may update this field.", verbose_name="Commit Hash")
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
-    sonarqube_config = models.ForeignKey(Sonarqube_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="SonarQube Config")
-    cobaltio_config = models.ForeignKey(Cobaltio_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="Cobalt.io Config")
+    api_scan_configuration = models.ForeignKey(Product_API_Scan_Configuration, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="API Scan Configuration")
 
     class Meta:
         indexes = [
@@ -1686,10 +1705,6 @@ class Finding(models.Model):
                              on_delete=models.CASCADE,
                              verbose_name="Test",
                              help_text="The test that is associated with this flaw.")
-    # TODO: Will be deprecated soon
-    is_template = models.BooleanField(default=False,
-                                      verbose_name="Is Template",
-                                      help_text="Denotes if this finding is a template and can be reused.")
     active = models.BooleanField(default=True,
                                  verbose_name="Active",
                                  help_text="Denotes if this flaw is active or not.")
@@ -1800,22 +1815,6 @@ class Finding(models.Model):
                                    editable=False,
                                    verbose_name="Files",
                                    help_text="Files(s) related to the flaw.")
-    line_number = models.CharField(null=True,
-                                   blank=True,
-                                   max_length=200,
-                                   verbose_name="Line Number",
-                                   help_text="Deprecated will be removed, use line",
-                                   editable=False)  # Deprecated will be removed, use line
-    sourcefilepath = models.TextField(null=True,
-                                      blank=True,
-                                      editable=False,
-                                      verbose_name="Source File Path",
-                                      help_text="Filepath of the source code file in which the flaw is located.")  # Not used? to remove
-    sourcefile = models.TextField(null=True,
-                                  blank=True,
-                                  editable=False,
-                                  verbose_name="Source File",
-                                  help_text="Name of the source code file in which the flaw is located.")
     param = models.TextField(null=True,
                              blank=True,
                              editable=False,
@@ -1916,6 +1915,13 @@ class Finding(models.Model):
                                          blank=True,
                                          verbose_name="Publish date",
                                          help_text="Date when this vulnerability was made publicly available.")
+
+    # The service is used to generate the hash_code, so that it gets part of the deduplication of findings.
+    service = models.CharField(null=True,
+                               blank=True,
+                               max_length=200,
+                               verbose_name="Service",
+                               help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
 
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.")
 
@@ -2086,6 +2092,11 @@ class Finding(models.Model):
 
     # Compute the hash_code from the fields to hash
     def hash_fields(self, fields_to_hash):
+        if hasattr(settings, 'HASH_CODE_FIELDS_ALWAYS'):
+            for field in settings.HASH_CODE_FIELDS_ALWAYS:
+                if getattr(self, field):
+                    fields_to_hash += str(getattr(self, field))
+
         logger.debug('fields_to_hash      : %s', fields_to_hash)
         logger.debug('fields_to_hash lower: %s', fields_to_hash.lower())
         return hashlib.sha256(fields_to_hash.casefold().encode('utf-8').strip()).hexdigest()
@@ -2313,8 +2324,6 @@ class Finding(models.Model):
 
         from dojo.finding import helper as finding_helper
 
-        system_settings = System_Settings.objects.get()
-
         if not user:
             from dojo.utils import get_current_user
             user = get_current_user()
@@ -2438,7 +2447,7 @@ class Finding(models.Model):
         if self.sast_source_file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
-            return self.sast_source_file_path
+            return escape(self.sast_source_file_path)
         link = self.test.engagement.source_code_management_uri + '/' + self.sast_source_file_path
         if self.sast_source_line:
             link = link + '#L' + str(self.sast_source_line)
@@ -2449,7 +2458,7 @@ class Finding(models.Model):
         if self.file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
-            return self.file_path
+            return escape(self.file_path)
         link = self.test.engagement.source_code_management_uri + '/' + self.file_path
         if self.line:
             link = link + '#L' + str(self.line)
@@ -3729,4 +3738,3 @@ admin.site.register(Notifications)
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)
 admin.site.register(Sonarqube_Issue_Transition)
-admin.site.register(Sonarqube_Product)

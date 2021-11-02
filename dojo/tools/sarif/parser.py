@@ -185,6 +185,10 @@ def get_snippet(result):
                 if 'snippet' in location['physicalLocation']['region']:
                     if 'text' in location['physicalLocation']['region']['snippet']:
                         snippet = location['physicalLocation']['region']['snippet']['text']
+            if snippet is None and 'contextRegion' in location['physicalLocation']:
+                if 'snippet' in location['physicalLocation']['contextRegion']:
+                    if 'text' in location['physicalLocation']['contextRegion']['snippet']:
+                        snippet = location['physicalLocation']['contextRegion']['snippet']['text']
     return snippet
 
 

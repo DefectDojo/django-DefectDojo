@@ -462,3 +462,27 @@ class TestSarifParser(TestCase):
             self.assertEqual("OtherScanner", test.type)
             findings = test.findings
             self.assertEqual(0, len(findings))
+
+    def test_codeql_snippet_report(self):
+        testfile = open(path.join(path.dirname(__file__), "../scans/sarif/codeQL-output.sarif"))
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(72, len(findings))
+        item = findings[7]
+        self.assertEqual("good/mod_user.py", item.file_path)
+        self.assertEqual(33, item.line)
+        self.assertEqual("Critical", item.severity)
+        description = """**Result message:** Keyword argument 'request' is not a supported parameter name of [function create](1).
+**Snippet:**
+```
+        response = make_response(redirect('/'))
+        response = libsession.create(request=request, response=response, username=username)
+        return response
+
+```
+**Rule name:** py/call/wrong-named-argument
+**Rule short description:** Wrong name for an argument in a call
+**Rule full description:** Using a named argument whose name does not correspond to a parameter of the called function or method, will result in a TypeError at runtime."""
+        self.assertEqual(description, item.description)
+        for finding in findings:
+            self.common_checks(finding)

@@ -122,24 +122,13 @@
                                           </li>
                                           <li role="separator" class="divider"></li>
                                           <li role="presentation">
-                                              <a class="" href="{% url 'add_sonarqube' prod.id %}">
-                                                  <i class="fa fa-list-alt"></i> Add SonarQube Configuration
+                                              <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
+                                                  <i class="fa fa-list-alt"></i> Add Scan API Configuration
                                               </a>
                                           </li>
                                           <li role="presentation">
-                                              <a title="Edit SonarQube configuration" href="{% url 'view_sonarqube' prod.id %}">
-                                                <i class="fa fa-history"></i> View SonarQube Configurations
-                                              </a>
-                                          </li>
-                                          <li role="separator" class="divider"></li>
-                                          <li role="presentation">
-                                              <a class="" href="{% url 'add_cobaltio' prod.id %}">
-                                                  <i class="fa fa-list-alt"></i> Add Cobalt.io Configuration
-                                              </a>
-                                          </li>
-                                          <li role="presentation">
-                                              <a href="{% url 'view_cobaltio' prod.id %}">
-                                                <i class="fa fa-history"></i> View Cobalt.io Configurations
+                                              <a title="View API Scan configurations" href="{% url 'view_api_scan_configurations' prod.id %}">
+                                                <i class="fa fa-history"></i> View Scan API Configurations
                                               </a>
                                           </li>
                                           <li role="separator" class="divider"></li>

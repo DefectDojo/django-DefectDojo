@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from dojo.tools.factory import PARSERS
-from dojo.models import Test_Type
+from dojo.models import Test_Type, Tool_Type
 
 
 class Command(BaseCommand):
@@ -10,3 +10,6 @@ class Command(BaseCommand):
         # called by the initializer to fill the table with test_types
         for scan_type in PARSERS:
             Test_Type.objects.get_or_create(name=scan_type)
+            parser = PARSERS[scan_type]
+            if hasattr(parser, 'requires_tool_type'):
+                Tool_Type.objects.get_or_create(name=parser.requires_tool_type(scan_type))

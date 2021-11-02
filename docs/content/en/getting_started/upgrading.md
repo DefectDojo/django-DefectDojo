@@ -72,6 +72,26 @@ update the source code first)
 Replace the first step above with this one: `docker-compose build`
 
 
+## Upgrading to DefectDojo Version 2.4.x. (Security Release)
+
+This releases fixes a High severity vulnerability for which the details will be disclosed on November 16th in [GHSA-fwg9-752c-qh8w](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-fwg9-752c-qh8w)
+
+There is a breaking change in the API for importing and re-importings scans with SonarQube API and Cobalt.io API. The [scan configurations
+have been unified](https://github.com/DefectDojo/django-DefectDojo/pull/5289) and are set now with the attribute `api_scan_configuration`. 
+The existing configurations for SonarQube API and Cobalt.io API have been migrated.
+
+At the request of pyup.io, we had to remove the parser for Safety scans.
+
+
+## Upgrading to DefectDojo Version 2.3.x.
+
+There are no special instruction for upgrading to 2.3.0. 
+In 2.3.0 we [changed the default password hashing algorithm to Argon2 (from PBKDF2)](https://github.com/DefectDojo/django-DefectDojo/pull/5205).
+When logging in, exising hashes get replaced by an Argon2 hash. If you want to rehash password without users having to login,
+please see the [Django password management docs](https://docs.djangoproject.com/en/3.2/topics/auth/passwords/).
+The previous password hashing algorithm (PBKDF2) was not unsafe, but we wanted to follow the [OWASP guidelines](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
+
+
 ## Upgrading to DefectDojo Version 2.2.x.
 
 Upgrade to 2.0.0 contained migration of endpoints. Some parts of migration haven't been done properly. This deficiency

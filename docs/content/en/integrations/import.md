@@ -60,9 +60,18 @@ auditjs ossi --json > auditjs_report.json
 The JSON output from AWS Security Hub exported with the `aws securityhub get-findings` (<https://docs.aws.amazon.com/cli/latest/reference/securityhub/get-findings.html>)
 command.
 
-### AWS Scout2 Scanner
+### AWS Scout2 Scanner (deprecated)
 
 JS file in scout2-report/inc-awsconfig/aws\_config.js.
+
+{{% alert title="Warning" color="warning" %}}
+AWS Scout2 Scanner is deprecated and has been replaced with ScoutSuite (https://github.com/nccgroup/ScoutSuite) upstream.
+Please switch to the new parser for ScoutSuite. 
+{{% /alert %}}
+
+{{% alert title="Warning" color="warning" %}}
+This parser is disactivated by default in releases >= 2.3.1 and will be removed in release >= 3.x.x.
+{{% /alert %}}
 
 ### AWS Prowler Scanner
 
@@ -105,6 +114,111 @@ processed and made available in the \'Finding View\' page.
 
 Import HTML reports from Burp Enterprise Edition
 
+### Burp GraphQL
+
+Import the JSON data returned from the BurpSuite Enterprise GraphQL API. Append all the
+issues returned to a list and save it as the value for the key "Issues". There is no need
+to filter duplicates, the parser will automatically combine issues with the same name.
+
+Example:
+
+{{< highlight json >}}
+{
+    "Issues": [
+        {
+            "issue_type": {
+                "name": "Cross-site scripting (reflected)",
+                "description_html": "Issue Description",
+                "remediation_html": "Issue Remediation",
+                "vulnerability_classifications_html": "<li><a href=\"https://cwe.mitre.org/data/definitions/79.html\">CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')</a></li>",
+                "references_html": "<li><a href=\"https://portswigger.net/web-security/cross-site-scripting\">Cross-site scripting</a></li>"
+            },
+            "description_html": "Details",
+            "remediation_html": "Remediation Details",
+            "severity": "high",
+            "path": "/burp",
+            "origin": "https://portswigger.net",
+            "evidence": [
+                {
+                    "request_index": 0,
+                    "request_segments": [
+                        {
+                            "data_html": "GET"
+                        },
+                        {
+                            "highlight_html": "data"
+                        },
+                        {
+                            "data_html": " HTTP More data"
+                        }
+                    ]
+                },
+                {
+                    "response_index": 0,
+                    "response_segments": [
+                        {
+                            "data_html": "HTTP/2 200 OK "
+                        },
+                        {
+                            "highlight_html": "data"
+                        },
+                        {
+                            "data_html": "More data"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+{{< /highlight >}}
+
+Example GraphQL query to get issue details:
+
+{{< highlight graphql >}}
+    query Issue ($id: ID!, $serial_num: ID!) {
+        issue(scan_id: $id, serial_number: $serial_num) {
+            issue_type {
+                name
+                description_html
+                remediation_html
+                vulnerability_classifications_html
+                references_html
+            }
+            description_html
+            remediation_html
+            severity
+            path
+            origin
+            evidence {
+                ... on Request {
+                    request_index
+                    request_segments {
+                        ... on DataSegment {
+                            data_html
+                        }
+                        ... on HighlightSegment {
+                                highlight_html
+                        }
+                    }
+                }
+                ... on Response {
+                    response_index
+                    response_segments {
+                        ... on DataSegment {
+                            data_html
+                        }
+                        ... on HighlightSegment {
+                            highlight_html
+                        }
+                    }
+                }
+            }
+        }
+    }
+{{< /highlight >}}
+
+
 ### CargoAudit Scan
 
 Import JSON output of cargo-audit scan report <https://crates.io/crates/cargo-audit>
@@ -138,16 +252,23 @@ Import findings from the Cobalt.io API - no file required.
 Follow these steps to setup API importing:
 
 1.  Configure the Cobalt.io Authentication details by navigating to
-    Configuration-\>Tool Configuration, selecting the Tool Type to "Cobalt.io",
+    Configuration / Tool Configuration, selecting the Tool Type to "Cobalt.io",
     and Authentication Type "API Key". Paste your Cobalt.io API key in the
-    "API Key" input and the desired org token in the "Extras" input.
-2.  In the Product settings select "Add Cobalt.io Configuration". Provide the ID
-    of the asset from which to import findings. The ID can be found at the end
-    of the URL when viewing the asset in your browser. Also select the
-    appropriate "Cobalt.io" configuration.
-3.  After this is you can import the findings as a scan by selecting "Cobalt.io
-    API Import" as the scan type. If you have more than one asset configured you
-    must also select which "Cobalt.io Config" to use.
+    "API Key" field and the desired org token in the "Extras" field.
+2.  In the Product settings select "Add API Scan Configuration" and select the
+    previously added Cobalt.io Tool Configuration. Provide the ID
+    of the asset from which to import findings in the field *Service key 1*.
+    The ID can be found at the end of the URL when viewing the asset in your browser.
+3.  After this is done, you can import the findings by selecting "Cobalt.io
+    API Import" as the scan type. If you have more than one asset configured, you
+    must also select which Cobalt.io API Scan Configuratio to use.
+
+### CodeQL
+CodeQL can be used to generate a SARIF report, that can be imported into Defect Dojo:
+
+`codeql database analyze db python-security-and-quality.qls --sarif-add-snippets --format=sarif-latest --output=security-extended.sarif`
+
+The same can be achieved by running the CodeQL GitHub action with the `add-snippet` property set to true.
 
 ### Coverity API
 
@@ -226,7 +347,12 @@ Import report in JSON generated with -j option
 
 ### Dependency Check
 
-OWASP Dependency Check output can be imported in Xml format.
+OWASP Dependency Check output can be imported in Xml format. This parser ingests the vulnerable dependencies and inherits the suppressions. 
+
+* Suppressed vulnerabilities are tagged with the tag: `suppressed`. 
+* Suppressed vulnerabilities are marked as inactive, but not as mitigated.
+* If the suppression is missing any `<notes>` tag, it tags them as `no_suppression_document`. 
+* Related vulnerable dependencies are tagged with `related` tag.
 
 ### Dependency Track
 
@@ -491,6 +617,17 @@ Hadolint Dockerfile scan in json format.
 
 Import findings from Harbor registry container scan:
 <https://github.com/goharbor/harbor>
+
+### Horusec
+
+Import findings from Horusec scan.
+
+```shell
+./horusec_linux_x64 start -O=report.json -o json -i="tests/" 
+```
+
+References:
+ * [GitHub repository](https://github.com/ZupIT/horusec)
 
 ### HuskyCI Report
 
@@ -763,10 +900,6 @@ report as follows
 -   Removing both fields will allow retrieval of all findings in the
     Risk Recon instance.
 
-### Safety Scan
-
-Safety scan (\--json) output file can be imported in JSON format.
-
 ### SARIF
 
 OASIS Static Analysis Results Interchange Format (SARIF). SARIF is
@@ -823,35 +956,35 @@ Version: \>= 1.1.0
 
 ### SonarQube API Import
 
-SonarQube API will be accessed to gather the report. No report file
+SonarQube API will be accessed to gather the report. No report file is
 required.
 
-Follow the below steps to setup API Import:
+Follow these steps to setup the SonarQube API import:
 
-1.  Configure the Sonarqube Authentication details by navigating to
-    Configuration-\>Tool Configuration. Note the url should be in the
-    formation of `<http(s)://>\<sonarqube\_hostname\>/api`. Select the tool
-    type to SonarQube. By default the tool will import vulnerabilities only,
+1.  Configure the Sonarqube authentication details by navigating to
+    Configuration / Tool Configuration. Note the url must be in the
+    format of `https://<sonarqube_host>/api`. Select the tool
+    type to be SonarQube. By default the tool will import vulnerabilities issues
+    and security hotspots only,
     but additional filters can be setup using the Extras field separated by
     commas (e.g. BUG,VULNERABILITY,CODE_SMELL)
-2.  In the Product settings fill the details for the SonarQube Project
-    Key (Key name can be found by navigating to a specific project and
+2.  In the Product settings add an API Scan Configuration. *Service key 1* must
+    be the SonarQube project key, which can be found by navigating to a specific project and
     selecting the value from the url
-    `<http(s)://>\<sonarqube\_host\>/dashboard?id=\<key\_name\>`.
-    In case you will not provide SonarQube Project Key, DefectDojo will
-    try to use Product as Project name in SonarQube. If you would like to
-    collect findings from multiple projects you can specify multiple Keys as
-    separated SonarQube Configuration in the Product settings.
-3.  Once all of the above settings are made, the API Import should be
-    able to auto-import all vulnerability information from the SonarQube
-    instance. During setting import, you can select which SonarQube
-    Configuration (which Project key) should be used. If you will not choose
-    any, DefectDojo will try to do the best guess :) (if you defined only one
-    Product SonarQube Configuration or only one SonarQube Tool Configuration).
+    `https://<sonarqube_host>/dashboard?id=key`.
+    When you do not provide a SonarQube project key, DefectDojo will
+    use the name of the Product as the project key in SonarQube. If you would like to
+    import findings from multiple projects, you can specify multiple keys as
+    separated API Scan Configuration in the Product settings.
+3.  Once all of the settings are made, the SonarQube API Import will be
+    able to import all vulnerability information from the SonarQube
+    instance. In the import or re-import dialog you can select which API Scan
+    Configuration shall be used. If you do not choose
+    any, DefectDojo will use the API Scan Configuration of the Product if there is
+    only one defined or the SonarQube Tool Configuration if there is only one.
 
-
-**NOTE**: If `https` is in use for the SonarQube than certificate should be
-trusted by DD instance.
+**Note:**: If `https` is used for the SonarQube, the certificate must be
+trusted by the DefectDojo instance.
 
 
 ### SpotBugs
