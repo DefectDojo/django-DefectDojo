@@ -4,7 +4,6 @@ from dojo.models import Test
 
 FINDING_MITIGATION_TEXT = "javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");"
 FINDING_VULN_ID_TEXT = "java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle"
-FINDING_DESCRIPTION_TEXT = "\t\t\tjavax.crypto.Cipher c = javax.crypto.Cipher.getInstance(\"DES/CBC/PKCS5Padding\");"
 
 
 class TestSemgrepParser(TestCase):
@@ -43,7 +42,6 @@ class TestSemgrepParser(TestCase):
         self.assertEqual(696, finding.cwe)
         self.assertEqual(FINDING_MITIGATION_TEXT, finding.mitigation)
         self.assertEqual(FINDING_VULN_ID_TEXT, finding.vuln_id_from_tool)
-        self.assertContains(FINDING_DESCRIPTION_TEXT, finding.description)
         finding = findings[2]
         self.assertEqual("Info", finding.severity)
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01150.java", finding.file_path)
@@ -51,7 +49,6 @@ class TestSemgrepParser(TestCase):
         self.assertEqual(696, finding.cwe)
         self.assertEqual(FINDING_MITIGATION_TEXT, finding.mitigation)
         self.assertEqual(FINDING_VULN_ID_TEXT, finding.vuln_id_from_tool)
-        self.assertContains(FINDING_DESCRIPTION_TEXT, finding.description)
 
     def test_parse_repeated_finding(self):
         testfile = open("dojo/unittests/scans/semgrep/repeated_findings.json")
@@ -67,7 +64,6 @@ class TestSemgrepParser(TestCase):
         self.assertEqual(696, finding.cwe)
         self.assertEqual(FINDING_MITIGATION_TEXT, finding.mitigation)
         self.assertEqual(2, finding.nb_occurences)
-        self.assertContains(FINDING_DESCRIPTION_TEXT, finding.description)
 
     def test_parse_many_vulns(self):
         testfile = open("dojo/unittests/scans/semgrep/many_vulns.json")
