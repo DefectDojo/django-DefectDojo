@@ -114,6 +114,16 @@ class BaseTestCase(unittest.TestCase):
     def test_login(self):
         return self.login_page()
 
+    def logout(self):
+        driver = self.driver
+        driver.get(self.base_url + "logout")
+
+        self.assertTrue(self.is_text_present_on_page("Login"))
+        return driver
+
+    def test_logout(self):
+        return self.logout()
+
     @on_exception_html_source_logger
     def delete_product_if_exists(self, name="QA Test"):
         driver = self.driver
