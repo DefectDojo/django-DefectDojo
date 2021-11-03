@@ -2,39 +2,51 @@
 
 from django.db import migrations
 
-from dojo.models import Sonarqube_Product, Cobaltio_Product, Product_API_Scan_Configuration, Test
-
 
 def migrate_sonarqube(apps, schema_editor):
-    sq_products = Sonarqube_Product.objects.filter(sonarqube_tool_config__isnull=False)
+
+    Sonarqube_Product_model = apps.get_model('dojo', 'Sonarqube_Product')
+    Product_API_Scan_Configuration_model = apps.get_model('dojo', 'Product_API_Scan_Configuration')
+    Test_model = apps.get_model('dojo', 'Test')
+
+    sq_products = Sonarqube_Product_model.objects.filter(sonarqube_tool_config__isnull=False)
     for sq_product in sq_products:
-        api_scan_configuration = Product_API_Scan_Configuration()
+        api_scan_configuration = Product_API_Scan_Configuration_model()
         api_scan_configuration.product = sq_product.product
         api_scan_configuration.tool_configuration = sq_product.sonarqube_tool_config
         api_scan_configuration.service_key_1 = sq_product.sonarqube_project_key
         api_scan_configuration.save()
-        tests = Test.objects.filter(sonarqube_config=sq_product)
+
+        tests = Test_model.objects.filter(sonarqube_config=sq_product)
         for test in tests:
             test.api_scan_configuration = api_scan_configuration
             test.sonarqube_config = None
             test.save()
+
         sq_product.delete()
 
 
 def migrate_cobalt_io(apps, schema_editor):
-    cobalt_products = Cobaltio_Product.objects.filter(cobaltio_tool_config__isnull=False)
+
+    Cobaltio_Product_model = apps.get_model('dojo', 'Cobaltio_Product')
+    Product_API_Scan_Configuration_model = apps.get_model('dojo', 'Product_API_Scan_Configuration')
+    Test_model = apps.get_model('dojo', 'Test')
+
+    cobalt_products = Cobaltio_Product_model.objects.filter(cobaltio_tool_config__isnull=False)
     for cobalt_product in cobalt_products:
-        api_scan_configuration = Product_API_Scan_Configuration()
+        api_scan_configuration = Product_API_Scan_Configuration_model()
         api_scan_configuration.product = cobalt_product.product
         api_scan_configuration.tool_configuration = cobalt_product.cobaltio_tool_config
         api_scan_configuration.service_key_1 = cobalt_product.cobaltio_asset_id
         api_scan_configuration.service_key_2 = cobalt_product.cobaltio_asset_name
         api_scan_configuration.save()
-        tests = Test.objects.filter(cobaltio_config=cobalt_product)
+
+        tests = Test_model.objects.filter(cobaltio_config=cobalt_product)
         for test in tests:
             test.api_scan_configuration = api_scan_configuration
             test.cobaltio_config = None
             test.save()
+
         cobalt_product.delete()
 
 
