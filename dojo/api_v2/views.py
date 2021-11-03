@@ -19,6 +19,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
     User, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
@@ -1937,6 +1938,24 @@ class UserProfileView(GenericAPIView):
 # Authorization: authenticated users, DjangoModelPermissions
 class ImportScanView(mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
+    """
+    Imports a scan report into an engagement or product.
+
+    By ID:
+    - Create a Product (or use an existing product)
+    - Create an Engagement inside the product
+    - Provide the id of the engagement in the `engagement` parameter
+
+    In this scenario a new Test will be created inside the engagement.
+
+    By Names:
+    - Create a Product (or use an existing product)
+    - Create an Engagement inside the product
+    - Provide `product_name`
+    - Provide `engagement_name`
+
+    In this scenario Defect Dojo will look up the engagment by the provided details.
+    """
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
@@ -1946,7 +1965,9 @@ class ImportScanView(mixins.CreateModelMixin,
         permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
     def perform_create(self, serializer):
-        engagement = serializer.validated_data['engagement']
+        _, _, _, engagement_id, engagement_name, product_name = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        product = get_target_product_if_exists(product_name)
+        engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
         jira_project = jira_helper.get_jira_project(engagement)
 
         push_to_jira = serializer.validated_data.get('push_to_jira')
@@ -2024,6 +2045,26 @@ class ImportLanguagesView(mixins.CreateModelMixin,
 # Authorization: authenticated users, DjangoModelPermissions
 class ReImportScanView(mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
+    """
+    Reimports a scan report into an existing test.
+
+    By ID:
+    - Create a Product (or use an existing product)
+    - Create an Engagement inside the product
+    - Import a scan report and find the id of the Test
+    - Provide this in the `test` parameter
+
+    By Names:
+    - Create a Product (or use an existing product)
+    - Create an Engagement inside the product
+    - Import a report which will create a Test
+    - Provide `product_name`
+    - Provide `engagement_name`
+    - Optional: Provide `test_title`
+
+    In this scenario Defect Dojo will look up the test by the provided details.
+    If no `test_title` is provided, the latest test inside the engagement will be chosen based on scan_type.
+    """
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
@@ -2036,7 +2077,10 @@ class ReImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        test = serializer.validated_data['test']
+        test_id, test_title, scan_type, _, engagement_name, product_name = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        product = get_target_product_if_exists(product_name)
+        engagement = get_target_engagement_if_exists(None, engagement_name, product)
+        test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
         jira_project = jira_helper.get_jira_project(test)
 
         push_to_jira = serializer.validated_data.get('push_to_jira')
