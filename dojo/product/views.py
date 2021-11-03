@@ -1579,7 +1579,7 @@ def view_api_scan_configurations(request, pid):
                   })
 
 
-@user_is_authorized(Product, Permissions.Product_API_Scan_Configuration_Edit, 'pascid', 'staff')
+@user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Edit, 'pascid', 'staff')
 def edit_api_scan_configuration(request, pid, pascid):
 
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
@@ -1624,7 +1624,7 @@ def edit_api_scan_configuration(request, pid, pascid):
                   })
 
 
-@user_is_authorized(Product, Permissions.Product_API_Scan_Configuration_Delete, 'pascid', 'staff')
+@user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Delete, 'pascid', 'staff')
 def delete_api_scan_configuration(request, pid, pascid):
 
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
