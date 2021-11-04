@@ -18,7 +18,7 @@ improve with the more you use the platform.
 
 Try out the demo sever at [demo.defectdojo.org](https://demo.defectdojo.org)
 
-Log in with `admin / defectdojo@demo#appsec`. Please note that the demo is pubicly accessable and regularly reset. Do not put sensitive data in the demo.
+Log in with `admin / 1Defectdojo@demo#appsec`. Please note that the demo is pubicly accessable and regularly reset. Do not put sensitive data in the demo.
 
 ## Quick Start
 
