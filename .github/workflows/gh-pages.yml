@@ -8,16 +8,11 @@ on:
       - dev
 
 # Taken from https://github.com/marketplace/actions/hugo-setup#%EF%B8%8F-workflow-for-autoprefixer-and-postcss-cli
+# Both builds have to be one worflow as otherwise one publish will overwrite the other
 jobs:
   deploy:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-          submodules: recursive  # Fetch the Docsy theme
-          fetch-depth: 0         # Fetch all history for .GitInfo and .Lastmod
-
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
         with:
@@ -37,12 +32,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - run: cd docs && npm ci && hugo --minify
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          submodules: recursive  # Fetch the Docsy theme
+          fetch-depth: 0         # Fetch all history for .GitInfo and .Lastmod
+          ref: 'dev'
+
+      - run: cd docs && npm ci && hugo --minify --config config.dev.toml
+      - run: ls -l ./docs/public/*
 
       # for dev we move everything into a subfolder, so the master version stays in the root
-      # remove .git folder to avoid conflicts
-      - run: mkdir dev && mv * dev/ && rm -rf ./docs/public/dev/.git
-        if: ${{ github.ref == 'dev' }}
+      - run: mkdir /tmp/dev && mv docs/public/* /tmp/dev/
+
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          submodules: recursive  # Fetch the Docsy theme
+          fetch-depth: 0         # Fetch all history for .GitInfo and .Lastmod
+          ref: 'master'
+
+      - run: cd docs && npm ci && hugo --minify --config config.master.toml
+      - run: mv /tmp/dev docs/public/
+      - run: ls -l ./docs/public/*
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
