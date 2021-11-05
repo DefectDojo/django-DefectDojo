@@ -39,8 +39,7 @@ Navigate to <http://localhost:8080>.
 
 ## Documentation
 
-- [Official docs](https://defectdojo.github.io/django-DefectDojo/)(latest release) 
-- [Official docs dev branch](https://defectdojo.github.io/django-DefectDojo/dev/)(dev branch, i.e. upcoming release) 
+- [Official docs](https://defectdojo.github.io/django-DefectDojo/) ([latest](https://defectdojo.github.io/django-DefectDojo/) | [dev](https://defectdojo.github.io/django-DefectDojo/dev))
 - [Getting started](https://defectdojo.github.io/django-DefectDojo/usage/)
 - [REST APIs](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/)
 - [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND_WRAPPERS.md)
@@ -73,25 +72,22 @@ For information please email info@10security.com or visit our [site](https://10s
 
 ## About Us
 
-DefectDojo is maintained by:
+Defect Dojo is maintained by:
+* Greg Anderson ([@devGregA](https://github.com/devgrega) | [linkedin](https://www.linkedin.com/in/g-anderson/))
+* Aaron Weaver ([@aaronweaver](https://github.com/aaronweaver)| [linkedin](https://www.linkedin.com/in/aweaver/) | [@weavera](https://twitter.com/weavera))
+* Matt Tesauro ([@mtesauro](https://github.com/mtesauro) | [linkedin](https://www.linkedin.com/in/matttesauro/) | [@matt_tesauro](https://twitter.com/matt_tesauro))
 
-* [Greg Anderson](https://www.linkedin.com/in/g-anderson/)
-* [Aaron Weaver](https://www.linkedin.com/in/aweaver/) ([@weavera](https://twitter.com/weavera))
-* [Matt Tesauro](https://www.linkedin.com/in/matttesauro/) ([@matt_tesauro](https://twitter.com/matt_tesauro))
+Core Moderators can help you with pull requests or feedback on dev ideas:
+* Valentijn Scholten ([@valentijnscholten](https://github.com/valentijnscholten) | [sponsor](https://github.com/sponsors/valentijnscholten) | [linkedin](https://www.linkedin.com/in/valentijn-scholten/))
+* Fred Blaise ([@madchap](https://github.com/madchap) | [linkedin](https://www.linkedin.com/in/fredblaise/))
+* Cody Maffucci ([@Maffooch](https://github.com/maffooch) | [linkedin](https://www.linkedin.com/in/cody-maffucci))
 
-
-## Project Moderators
-
-Project Moderators can help you with pull requests or feedback on dev ideas.
-
-* [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
-* [Valentijn Scholten](https://github.com/valentijnscholten) ([sponsor](https://github.com/sponsors/valentijnscholten) | [linkedin](https://www.linkedin.com/in/valentijn-scholten/))
-* Jannik Jürgens
-* [Fred Blaise](https://www.linkedin.com/in/fredblaise/)
-* [Cody Maffucci](https://www.linkedin.com/in/cody-maffucci)
-* Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
-* [Damien Carol](https://www.linkedin.com/in/damien-carol/)
-* [Stefan Fleckenstein](https://www.linkedin.com/in/stefan-fleckenstein-6a456a30/)
+Moderators can help you with pull requests or feedback on dev ideas:
+* Damien Carol ([@damnielcarol](https://github.com/damiencarol) | [linkedin](https://www.linkedin.com/in/damien-carol/))
+* Stefan Fleckenstein ([@StefanFl](https://github.com/stefanfl) | ([linkedin](https://www.linkedin.com/in/stefan-fleckenstein-6a456a30/))
+* Jannik Jürgens ([@alles-klar](https://github.com/alles-klar))
+* Pascal Trovatelli ([@ptrovatelli](https://github.com/ptrovatelli) | [Sopra Steria](https://www.soprasteria.com/))
+* Alex Dracea ([linkedin](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/))
 
 
 ## Hall of Fame
