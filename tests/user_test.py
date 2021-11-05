@@ -141,14 +141,21 @@ class UserTest(BaseTestCase):
         actions.move_to_element(configuration_menu).perform()
         wait.until(EC.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
 
+        originally_selected = { 
+            'product_added': driver.find_element_by_xpath("//input[@name='product_added' and @value='mail']").is_selected(),
+            'scan_added': driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").is_selected()
+        }
+
         driver.find_element_by_xpath("//input[@name='product_added' and @value='mail']").click()
         driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").click()
 
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
         self.assertTrue(self.is_success_message_present(text='Settings saved'))
-        self.assertTrue(driver.find_element_by_xpath("//input[@name='product_added' and @value='mail']").is_selected())
-        self.assertTrue(driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").is_selected())
+        self.assertNotEqual(originally_selected['product_added'],
+            driver.find_element_by_xpath("//input[@name='product_added' and @value='mail']").is_selected())
+        self.assertNotEqual(originally_selected['scan_added'],
+            driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").is_selected())
 
     def test_standard_user_login(self):
         self.login_standard_page()
