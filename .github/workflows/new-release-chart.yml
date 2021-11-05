@@ -8,7 +8,7 @@ on:
     inputs:
       release_number:
         description: 'Release number'
-        required: true  
+        required: true
 
 jobs:
   release-chart:
