@@ -28,6 +28,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          persist-credentials: false
 
       # - name: Read Docker Image Identifiers
       #   id: read-docker-image-identifiers
