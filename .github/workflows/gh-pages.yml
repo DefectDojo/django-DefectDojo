@@ -40,7 +40,8 @@ jobs:
       - run: cd docs && npm ci && hugo --minify
 
       # for dev we move everything into a subfolder, so the master version stays in the root
-      - run: mkdir dev && mv * dev/
+      # remove .git folder to avoid conflicts
+      - run: mkdir dev && mv * dev/ && rm -rf ./docs/public/dev/.git
         if: ${{ github.ref == 'dev' }}
 
       - name: Deploy
