@@ -39,19 +39,14 @@ Navigate to <http://localhost:8080>.
 
 ## Documentation
 
-### [Official docs](https://defectdojo.github.io/django-DefectDojo/)
-
-### [Getting Started](readme-docs/GETTING-STARTED.md)
-
-### [REST APIs](readme-docs/REST-APIs.md)
-
-### [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND_WRAPPERS.md)
-
-### [Contributing](readme-docs/CONTRIBUTING.md)
-
-### [Roadmap](readme-docs/ROADMAP.md)
-
-### [Wishlist](readme-docs/WISHLIST.md)
+- [Official docs](https://defectdojo.github.io/django-DefectDojo/)(latest release) 
+- [Official docs dev branch](https://defectdojo.github.io/django-DefectDojo/dev/)(dev branch, i.e. upcoming release) 
+- [Getting started](https://defectdojo.github.io/django-DefectDojo/usage/)
+- [REST APIs](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/)
+- [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND_WRAPPERS.md)
+- [Contributing](readme-docs/CONTRIBUTING.md)
+- [Roadmap](readme-docs/ROADMAP.md)
+- [Wishlist](readme-docs/WISHLIST.md)
 
 ## Supported Installation Options
 
