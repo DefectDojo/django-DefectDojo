@@ -47,8 +47,6 @@ Navigate to <http://localhost:8080>.
 
 ### [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND_WRAPPERS.md)
 
-### [Release and Branch Model](readme-docs/RELEASE-AND-BRANCH-MODEL.md)
-
 ### [Contributing](readme-docs/CONTRIBUTING.md)
 
 ### [Roadmap](readme-docs/ROADMAP.md)
