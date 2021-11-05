@@ -107,6 +107,10 @@ Moderators can help you with pull requests or feedback on dev ideas:
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png" github-user="mtesauro" alt="WeHackPurle" height="120" />](https://wehackpurple.com/)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png" github-user="StefanFl" alt="MiabornWolff" height="120" />]((https://www.maibornwolff.de/en))
 
+## Security
+
+Please report Security issues via our [disclosure policy](readme-docs/SECURITY.md).
+
 ## License
 
 DefectDojo is licensed under the [BSD Simplified license](LICENSE.md)
