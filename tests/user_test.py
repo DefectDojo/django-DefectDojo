@@ -141,7 +141,7 @@ class UserTest(BaseTestCase):
         actions.move_to_element(configuration_menu).perform()
         wait.until(EC.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
 
-        originally_selected = { 
+        originally_selected = {
             'product_added': driver.find_element_by_xpath("//input[@name='product_added' and @value='mail']").is_selected(),
             'scan_added': driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").is_selected()
         }
