@@ -44,8 +44,6 @@ Navigate to <http://localhost:8080>.
 - [Getting started](https://defectdojo.github.io/django-DefectDojo/usage/)
 - [REST APIs](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/)
 - [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND_WRAPPERS.md)
-- [Contributing](readme-docs/CONTRIBUTING.md)
-- [Roadmap](readme-docs/ROADMAP.md)
 - [Wishlist](readme-docs/WISHLIST.md)
 
 ## Supported Installation Options
@@ -63,6 +61,9 @@ Navigate to <http://localhost:8080>.
 
 [Join the slack community](https://owasp-slack.herokuapp.com/) and discussion! Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 Follow DefectDojo on [Twitter](https://twitter.com/defectdojo), [Linkedin](https://www.linkedin.com/company/defectdojo), and [YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) for project updates!
+
+## Contributing
+See our [Contributing guidelines](readme-docs/CONTRIBUTING.md)
 
 ## Commercial Support and Training
 Commercial support and training is availaible through [10Security](https://10security.com).
