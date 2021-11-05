@@ -37,7 +37,9 @@ docker-compose logs initializer | grep "Admin password:"
 Navigate to <http://localhost:8080>.
 
 
-## [Documentation](https://defectdojo.github.io/django-DefectDojo/)
+## Documentation
+
+### [Official docs](https://defectdojo.github.io/django-DefectDojo/)
 
 ### [Getting Started](readme-docs/GETTING-STARTED.md)
 
