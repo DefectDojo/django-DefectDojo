@@ -215,21 +215,6 @@ else
         fail $test
     fi
 
-    test="Read only user profile test"
-    echo "Preparing configuration: USER_PROFILE_EDITABLE=True"
-    echo "USER_PROFILE_EDITABLE=Frue" > /app/dojo/settings/local_settings.py
-    reload
-
-    echo "Running $test"
-    if python3 tests/user_standard_test.py ; then
-        success $test
-    else
-        fail $test
-    fi
-    echo "USER_PROFILE_EDITABLE=True" > /app/dojo/settings/local_settings.py
-    reload
-
-
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
