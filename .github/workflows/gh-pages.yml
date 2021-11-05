@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - master
       - dev
 
 # Taken from https://github.com/marketplace/actions/hugo-setup#%EF%B8%8F-workflow-for-autoprefixer-and-postcss-cli
@@ -13,6 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          persist-credentials: false
           submodules: recursive  # Fetch the Docsy theme
           fetch-depth: 0         # Fetch all history for .GitInfo and .Lastmod
 
@@ -36,6 +38,11 @@ jobs:
             ${{ runner.os }}-node-
 
       - run: cd docs && npm ci && hugo --minify
+
+      # for dev we move everything into a subfolder, so the master version stays in the root
+      # remove .git folder to avoid conflicts
+      - run: mkdir dev && mv * dev/ && rm -rf ./docs/public/dev/.git
+        if: ${{ github.ref == 'dev' }}
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
