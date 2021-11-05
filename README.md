@@ -42,8 +42,7 @@ Navigate to <http://localhost:8080>.
 - [Official docs](https://defectdojo.github.io/django-DefectDojo/) ([latest](https://defectdojo.github.io/django-DefectDojo/) | [dev](https://defectdojo.github.io/django-DefectDojo/dev))
 - [Getting started](https://defectdojo.github.io/django-DefectDojo/usage/)
 - [REST APIs](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/)
-- [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND_WRAPPERS.md)
-- [Wishlist](readme-docs/WISHLIST.md)
+- [Client APIs and Wrappers](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/#clients--api-wrappers)
 
 ## Supported Installation Options
 

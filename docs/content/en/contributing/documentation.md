@@ -22,14 +22,14 @@ Static files for the webside are build with github actions and are publish in th
     npm install
     {{< /highlight >}}
 
-3. Clone the DefectDojo git repository with the option `--recurse-submodules`. If you have already cloned the repository, make sure that you have checked out out the Docsy theme or use `git submodule` to check it out: 
+3. Clone the DefectDojo git repository with the option `--recurse-submodules`. If you have already cloned the repository, make sure that you have checked out out the Docsy theme or use `git submodule` to check it out:
 
     {{< highlight bash >}}
-    cd docs/themes/docsy 
+    cd docs/themes/docsy
     git submodule update --init --recursive
     {{< /highlight >}}
 
-4. Switch to the docs folder and start the hugo server with hot reloading `hugo server -D`
+4. Switch to the docs folder and start the hugo server with hot reloading `hugo server -D --config config.dev.toml`
 5. Visit [http://localhost:1313/django-DefectDojo](http://localhost:1313/django-DefectDojo).
 
 See also the [Docsy installation procedures](https://www.docsy.dev/docs/getting-started/) for reference.
