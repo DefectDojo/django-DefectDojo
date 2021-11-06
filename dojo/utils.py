@@ -1936,6 +1936,34 @@ def get_object_or_none(klass, *args, **kwargs):
         return None
 
 
+def get_last_object_or_none(klass, *args, **kwargs):
+    """
+    Use last() to return an object, or return None
+    does not exist.
+    klass may be a Model, Manager, or QuerySet object. All other passed
+    arguments and keyword arguments are used in the get() query.
+    Like with QuerySet.get(), MultipleObjectsReturned is raised if more than
+    one object is found.
+    """
+    queryset = klass
+
+    if hasattr(klass, '_default_manager'):
+        queryset = klass._default_manager.all()
+
+    if not hasattr(queryset, 'get'):
+        klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
+        raise ValueError(
+            "First argument to get_last_object_or_None() must be a Model, Manager, "
+            "or QuerySet, not '%s'." % klass__name
+        )
+    try:
+        results = queryset.filter(*args, **kwargs).order_by('id')
+        logger.debug('last_object_or_none: %s', results.query)
+        return results.last()
+    except queryset.model.DoesNotExist:
+        return None
+
+
 def add_success_message_to_response(message):
     if get_current_request():
         messages.add_message(get_current_request(),
