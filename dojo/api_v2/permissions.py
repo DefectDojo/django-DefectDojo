@@ -1,9 +1,10 @@
 import re
-
 from rest_framework.exceptions import ParseError
+from dojo.api_v2.serializers import get_import_meta_data_from_dict
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions
+from rest_framework import permissions, serializers
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 
@@ -11,7 +12,7 @@ from dojo.authorization.roles_permissions import Permissions
 def check_post_permission(request, post_model, post_pk, post_permission):
     if request.method == 'POST':
         if request.data.get(post_pk) is None:
-            raise ParseError('Attribute \'{}\' is required'.format(post_pk))
+            raise ParseError('Unable to check for permissions: Attribute \'{}\' is required'.format(post_pk))
         object = get_object_or_404(post_model, pk=request.data.get(post_pk))
         return user_has_permission(request.user, object, post_permission)
     else:
@@ -166,7 +167,25 @@ class UserHasFindingPermission(permissions.BasePermission):
 
 class UserHasImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(request, Engagement, 'engagement', Permissions.Import_Scan_Result)
+        # permission check takes place before validation, so we don't have access to serializer.validated_data()
+        # and we have to validate ourselves unfortunately
+
+        _, _, _, engagement_id, engagement_name, product_name = get_import_meta_data_from_dict(request.data)
+        product = get_target_product_if_exists(product_name)
+        engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
+
+        if engagement:
+            # existing engagement, nothing special to check
+            return user_has_permission(request.user, engagement, Permissions.Import_Scan_Result)
+        elif engagement_id:
+            # engagement_id doesn't exist
+            raise serializers.ValidationError("Engagement '%s' doesn''t exist" % engagement_id)
+        elif product and product_name and engagement_name:
+            raise serializers.ValidationError("Engagement '%s' doesn't exist in Product %s" % (engagement_name, product_name))
+        elif not product and product_name:
+            raise serializers.ValidationError("Product '%s' doesn't exist" % product_name)
+        else:
+            raise serializers.ValidationError("Need engagement_id or product_name + engagement_name to perform import")
 
 
 class UserHasProductPermission(permissions.BasePermission):
@@ -222,7 +241,31 @@ class UserHasProductTypeGroupPermission(permissions.BasePermission):
 
 class UserHasReimportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(request, Test, 'test', Permissions.Import_Scan_Result)
+        # permission check takes place before validation, so we don't have access to serializer.validated_data()
+        # and we have to validate ourselves unfortunately
+
+        test_id, test_title, scan_type, _, engagement_name, product_name = get_import_meta_data_from_dict(request.data)
+
+        product = get_target_product_if_exists(product_name)
+        engagement = get_target_engagement_if_exists(None, engagement_name, product)
+        test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
+
+        if test:
+            # existing engagement, nothing special to check
+            return user_has_permission(request.user, test, Permissions.Import_Scan_Result)
+        elif test_id:
+            # engagement_id doesn't exist
+            raise serializers.ValidationError("Test '%s' doesn't exist" % test_id)
+        elif engagement and engagement_name and test_title:
+            raise serializers.ValidationError("Test '%s' with scan_type '%s'  doesn't exist in Engagement %s" % (scan_type, test_title, engagement_name))
+        elif engagement and engagement_name and scan_type:
+            raise serializers.ValidationError("Test with scan_type '%s' doesn't exist in Engagement %s" % (scan_type, engagement_name))
+        elif product and product_name and engagement_name:
+            raise serializers.ValidationError("Engagement '%s' doesn''t exist in Product %s" % (engagement_name, product_name))
+        elif not product and product_name:
+            raise serializers.ValidationError("Product '%s' doesn't exist" % product_name)
+        else:
+            raise serializers.ValidationError("Need test_id or product_name + engagement_name + test_title to perform reimport")
 
 
 class UserHasTestPermission(permissions.BasePermission):

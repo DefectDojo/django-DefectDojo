@@ -165,6 +165,7 @@ env = environ.Env(
     DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
+    # AWS Scout2 Scan Parser is deprecated (see https://github.com/DefectDojo/django-DefectDojo/pull/5268)
     DD_PARSER_EXCLUDE=(str, 'AWS Scout2 Scan'),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
@@ -199,7 +200,7 @@ env = environ.Env(
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
     # when enabled SonarQube API parser will download the security hotspots
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
-    # when enabled standard users can't change their profile information, default False
+    # when enabled standard users can't change their profile information, default True
     DD_USER_PROFILE_EDITABLE=(bool, True),
 )
 
