@@ -1,5 +1,6 @@
 docs:
-- any: ['docs/**/*','readme-docs/**/*']
+- any: ['docs/**/*']
+- any: ['readme-docs/**/*']
 
 docker:
 - any: ['docker/**/*','docker**','Docker*']
