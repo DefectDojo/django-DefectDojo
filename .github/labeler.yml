@@ -1,8 +1,8 @@
 docs:
-- any: ['docs/**/*', 'readme-docs/**/*']
+- any: ['docs/**/*','readme-docs/**/*']
 
 docker:
-- any: ['docker/**/*', 'docker**', 'Docker*']
+- any: ['docker/**/*','docker**','Docker*']
 
 "New Migration":
 - any: ['dojo/db_migrations/*']
