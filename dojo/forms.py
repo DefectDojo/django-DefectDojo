@@ -9,6 +9,7 @@ from django.db.models import Count, Q
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.models import Permission
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
@@ -3160,3 +3161,85 @@ class AddEngagementForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(AddEngagementForm, self).__init__(*args, **kwargs)
         self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add)
+
+
+class ConfigurationPermissionsForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
+
+        self.permission_fields = [
+            Permission_Helper(name='group', app='auth', view=True, add=True),
+            Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True),
+            Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
+        ]
+
+        for permission_field in self.permission_fields:
+            for component_name in permission_field.component_names():
+                self.fields[component_name] = forms.BooleanField(required=False)
+                if not get_current_user().has_perm('auth.change_user'):
+                    self.fields[component_name].disabled = True
+
+        permissions_list = Permission.objects.all()
+        self.permissions = {}
+
+        for permission in permissions_list:
+            self.permissions[permission.codename] = permission
+
+    def save(self):
+        for permission_field in self.permission_fields:
+            for component_name in permission_field.component_names():
+                self.set_permission(component_name)
+
+    def set_permission(self, codename):
+        if self.cleaned_data[codename]:
+            self.user.user_permissions.add(self.permissions[codename])
+        else:
+            self.user.user_permissions.remove(self.permissions[codename])
+
+
+class Permission_Helper:
+    def __init__(self, *args, **kwargs):
+        self.name = kwargs.pop('name')
+        self.app = kwargs.pop('app')
+        self.view = kwargs.pop('view', False)
+        self.add = kwargs.pop('add', False)
+        self.change = kwargs.pop('change', False)
+        self.delete = kwargs.pop('delete', False)
+
+    def view_component_name(self):
+        if self.view:
+            return f'view_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def add_component_name(self):
+        if self.add:
+            return f'add_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def change_component_name(self):
+        if self.change:
+            return f'change_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def delete_component_name(self):
+        if self.delete:
+            return f'delete_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def component_names(self):
+        component_names = []
+        if self.view_component_name():
+            component_names.append(self.view_component_name())
+        if self.add_component_name():
+            component_names.append(self.add_component_name())
+        if self.change_component_name():
+            component_names.append(self.change_component_name())
+        if self.delete_component_name():
+            component_names.append(self.delete_component_name())
+        return component_names
