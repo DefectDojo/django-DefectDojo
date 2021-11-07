@@ -383,9 +383,9 @@
         {% if 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled and not user.is_superuser %}
         <div class="panel panel-default-secondary" id="edit_permissions">
             <div class="panel-heading">
-                <h3 class="panel-title"><span class="fa fa-unlock-alt" aria-hidden="true"></span>&nbsp;&nbsp;Permissions</h3>
+                <h3 class="panel-title"><span class="fa fa-unlock-alt" aria-hidden="true"></span>&nbsp;&nbsp;Configuration Permissions</h3>
             </div>
-            <form id="edit_permissions_form" class="form-horizontal" method="post" action="{% url 'edit_permissions' user.id %}">{% csrf_token %}
+            <form id="edit_permissions_form" class="form-horizontal" method="post" action="{% url 'edit_user_permissions' user.id %}">{% csrf_token %}
             <div class="table-responsive">
                 <table class="table table-striped">
                     <tr>
@@ -399,23 +399,23 @@
                     <tr>
                         <td><strong>{{ field.name|title }}</strong></td>
                         <td class="centered">
-                            {% if field.view_component_name %}
-                            <input id="id_{{ field.view_component_name }}" {% if not perms.auth.change_user %}disabled{% endif %} name="{{ field.view_component_name }}" type="checkbox" {% if user|user_has_view_permission:field %}checked{% endif %} />
+                            {% if field.view_codename %}
+                            <input id="id_{{ field.view_codename }}" {% if not perms.auth.change_permission %}disabled{% endif %} name="{{ field.view_codename }}" type="checkbox" {% if user|user_has_view_permission:field %}checked{% endif %} />
                             {% endif %}
                         </td>
                         <td class="centered">
-                            {% if field.add_component_name %}
-                            <input id="id_{{ field.add_component_name }}" {% if not perms.auth.change_user %}disabled{% endif %} name="{{ field.add_component_name }}" type="checkbox" {% if user|user_has_add_permission:field %}checked{% endif %} />
+                            {% if field.add_codename %}
+                            <input id="id_{{ field.add_codename }}" {% if not perms.auth.change_permission %}disabled{% endif %} name="{{ field.add_codename }}" type="checkbox" {% if user|user_has_add_permission:field %}checked{% endif %} />
                             {% endif %}
                         </td>
                         <td class="centered">
-                            {% if field.change_component_name %}
-                            <input id="id_{{ field.change_component_name }}" {% if not perms.auth.change_user %}disabled{% endif %} name="{{ field.change_component_name }}" type="checkbox" {% if user|user_has_change_permission:field %}checked{% endif %} />
+                            {% if field.change_codename %}
+                            <input id="id_{{ field.change_codename }}" {% if not perms.auth.change_permission %}disabled{% endif %} name="{{ field.change_codename }}" type="checkbox" {% if user|user_has_change_permission:field %}checked{% endif %} />
                             {% endif %}
                         </td>
                         <td class="centered">
-                            {% if field.delete_component_name %}
-                            <input id="id_{{ field.delete_component_name }}" {% if not perms.auth.change_user %}disabled{% endif %} name="{{ field.delete_component_name }}" type="checkbox" {% if user|user_has_delete_permission:field %}checked{% endif %} />
+                            {% if field.delete_codename %}
+                            <input id="id_{{ field.delete_codename }}" {% if not perms.auth.change_permission %}disabled{% endif %} name="{{ field.delete_codename }}" type="checkbox" {% if user|user_has_delete_permission:field %}checked{% endif %} />
                             {% endif %}
                         </td>
                     </tr>

@@ -3198,20 +3198,22 @@ class AddEngagementForm(forms.Form):
 class ConfigurationPermissionsForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user')
+        self.user = kwargs.pop('user', None)
+        self.group = kwargs.pop('group', None)
         super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
 
         self.permission_fields = [
             Permission_Helper(name='group', app='auth', view=True, add=True),
+            Permission_Helper(name='permission', app='auth', change=True),
             Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True),
             Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
         ]
 
         for permission_field in self.permission_fields:
-            for component_name in permission_field.component_names():
-                self.fields[component_name] = forms.BooleanField(required=False)
-                if not get_current_user().has_perm('auth.change_user'):
-                    self.fields[component_name].disabled = True
+            for codename in permission_field.codenames():
+                self.fields[codename] = forms.BooleanField(required=False)
+                if not get_current_user().has_perm('auth.change_permission'):
+                    self.fields[codename].disabled = True
 
         permissions_list = Permission.objects.all()
         self.permissions = {}
@@ -3221,14 +3223,24 @@ class ConfigurationPermissionsForm(forms.Form):
 
     def save(self):
         for permission_field in self.permission_fields:
-            for component_name in permission_field.component_names():
-                self.set_permission(component_name)
+            for codename in permission_field.codenames():
+                self.set_permission(codename)
 
     def set_permission(self, codename):
         if self.cleaned_data[codename]:
-            self.user.user_permissions.add(self.permissions[codename])
+            if self.user:
+                self.user.user_permissions.add(self.permissions[codename])
+            elif self.group:
+                self.group.auth_group.permissions.add(self.permissions[codename])
+            else:
+                raise Exception('Neither user or group are set')
         else:
-            self.user.user_permissions.remove(self.permissions[codename])
+            if self.user:
+                self.user.user_permissions.remove(self.permissions[codename])
+            elif self.group:
+                self.group.auth_group.permissions.remove(self.permissions[codename])
+            else:
+                raise Exception('Neither user or group are set')
 
 
 class Permission_Helper:
@@ -3240,38 +3252,38 @@ class Permission_Helper:
         self.change = kwargs.pop('change', False)
         self.delete = kwargs.pop('delete', False)
 
-    def view_component_name(self):
+    def view_codename(self):
         if self.view:
             return f'view_{self.name.replace(" ", "_")}'
         else:
             return None
 
-    def add_component_name(self):
+    def add_codename(self):
         if self.add:
             return f'add_{self.name.replace(" ", "_")}'
         else:
             return None
 
-    def change_component_name(self):
+    def change_codename(self):
         if self.change:
             return f'change_{self.name.replace(" ", "_")}'
         else:
             return None
 
-    def delete_component_name(self):
+    def delete_codename(self):
         if self.delete:
             return f'delete_{self.name.replace(" ", "_")}'
         else:
             return None
 
-    def component_names(self):
-        component_names = []
-        if self.view_component_name():
-            component_names.append(self.view_component_name())
-        if self.add_component_name():
-            component_names.append(self.add_component_name())
-        if self.change_component_name():
-            component_names.append(self.change_component_name())
-        if self.delete_component_name():
-            component_names.append(self.delete_component_name())
-        return component_names
+    def codenames(self):
+        codenames = []
+        if self.view_codename():
+            codenames.append(self.view_codename())
+        if self.add_codename():
+            codenames.append(self.add_codename())
+        if self.change_codename():
+            codenames.append(self.change_codename())
+        if self.delete_codename():
+            codenames.append(self.delete_codename())
+        return codenames

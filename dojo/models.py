@@ -10,6 +10,7 @@ from django.conf import settings
 from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.urls import reverse
 from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
@@ -181,6 +182,7 @@ class Dojo_Group(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
+    auth_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
