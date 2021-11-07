@@ -322,7 +322,7 @@
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% if request.user.is_staff %}
+                            {% if "auth.view_user"|has_configuration_permission or "auth.view_group"|has_configuration_permission %}
                                 <li>
                                     <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users">
                                         <i class="fa fa-user fa-fw"></i>
@@ -333,7 +333,9 @@
                                         {% if "auth.view_user"|has_configuration_permission %}
                                         <li><a href="{% url 'users' %}"> Users </a></li>
                                         {% endif %}
+                                        {% if "auth.view_group"|has_configuration_permission %}
                                         <li><a href="{% url 'groups' %}"> Groups </a></li>
+                                        {% endif %}
                                     </ul>
                                 </li>
                             {% endif %}

@@ -1,6 +1,7 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import Group
 from django.db.models.deletion import RestrictedError
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -13,11 +14,13 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.filters import GroupFilter
 from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, \
     Add_Product_Type_Group_GroupForm, Add_Group_MemberForm, Edit_Group_MemberForm, \
-    Delete_Group_MemberForm, GlobalRoleForm
+    Delete_Group_MemberForm, GlobalRoleForm, ConfigurationPermissionsForm
 from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, Role
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.group.queries import get_authorized_groups, get_product_groups_for_group, \
     get_product_type_groups_for_group, get_group_members_for_group
+from dojo.authorization.authorization_decorators import user_is_authorized_for_configuration
+from dojo.group.util import get_auth_group_name
 
 logger = logging.getLogger(__name__)
 
@@ -42,12 +45,24 @@ def view_group(request, gid):
     product_types = get_product_type_groups_for_group(group)
     group_members = get_group_members_for_group(group)
 
+    # Create authorization group if it doesn't exist and add product members
+    if not group.auth_group:
+        auth_group = Group(name=get_auth_group_name(group, 0))
+        auth_group.save()
+        group.auth_group = auth_group
+        members = group.users.all()
+        for member in members:
+            auth_group.user_set.add(member)
+        group.save()
+    configuration_permission_form = ConfigurationPermissionsForm(group=group)
+
     add_breadcrumb(title="View Group", top_level=False, request=request)
     return render(request, 'dojo/view_group.html', {
         'group': group,
         'products': products,
         'product_types': product_types,
-        'group_members': group_members
+        'group_members': group_members,
+        'configuration_permission_form': configuration_permission_form,
     })
 
 
@@ -111,6 +126,9 @@ def delete_group(request, gid):
             if form.is_valid():
                 try:
                     group.delete()
+                    # Authorization group doesn't get deleted automatically
+                    if group.auth_group:
+                        group.auth_group.delete()
                     messages.add_message(request,
                                         messages.SUCCESS,
                                         'Group and relationships successfully removed.',
@@ -149,6 +167,9 @@ def add_group(request):
                                     extra_tags='alert-warning')
             else:
                 group = form.save(commit=False)
+                auth_group = Group(name=get_auth_group_name(group, 0))
+                auth_group.save()
+                group.auth_group = auth_group
                 group.save()
                 global_role = global_role_form.save(commit=False)
                 global_role.group = group
@@ -158,6 +179,9 @@ def add_group(request):
                 member.group = group
                 member.role = Role.objects.get(is_owner=True)
                 member.save()
+                # Add user to authentication group as well
+                auth_group.user_set.add(request.user)
+
                 messages.add_message(request,
                                     messages.SUCCESS,
                                     'Group was added successfully.',
@@ -198,6 +222,8 @@ def add_group_member(request, gid):
                             group_member.user = user
                             group_member.role = groupform.cleaned_data['role']
                             group_member.save()
+                            # Add user to authentication group as well
+                            group.auth_group.user_set.add(user)
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'Group members added successfully.',
@@ -275,6 +301,8 @@ def delete_group_member(request, mid):
 
         user = member.user
         member.delete()
+        # Remove user from the authentication group as well
+        member.group.auth_group.user_set.remove(user)
         messages.add_message(request,
                              messages.SUCCESS,
                              'Group member deleted successfully.',
@@ -352,3 +380,17 @@ def add_product_type_group(request, gid):
         'group': group,
         'form': group_form,
     })
+
+
+@user_is_authorized_for_configuration('auth.change_permission', 'superuser')
+def edit_permissions(request, gid):
+    group = get_object_or_404(Dojo_Group, id=gid)
+    if request.method == 'POST':
+        form = ConfigurationPermissionsForm(request.POST, group=group)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Permissions updated.',
+                                 extra_tags='alert-success')
+    return HttpResponseRedirect(reverse('view_group', args=(gid,)))

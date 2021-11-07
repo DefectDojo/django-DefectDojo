@@ -514,7 +514,7 @@ def add_group_member(request, uid):
     })
 
 
-@user_is_authorized_for_configuration('auth.change_user', 'superuser')
+@user_is_authorized_for_configuration('auth.change_permission', 'superuser')
 def edit_permissions(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     if request.method == 'POST':
