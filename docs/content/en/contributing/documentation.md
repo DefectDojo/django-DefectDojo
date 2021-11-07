@@ -30,6 +30,6 @@ Static files for the webside are build with github actions and are publish in th
     {{< /highlight >}}
 
 4. Switch to the docs folder and start the hugo server with hot reloading `hugo server -D --config config.dev.toml`
-5. Visit [http://localhost:1313/django-DefectDojo](http://localhost:1313/django-DefectDojo).
+5. Visit [http://localhost:1313/django-DefectDojo/dev](http://localhost:1313/django-DefectDojo/dev).
 
 See also the [Docsy installation procedures](https://www.docsy.dev/docs/getting-started/) for reference.
