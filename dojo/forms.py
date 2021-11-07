@@ -25,7 +25,7 @@ from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
-    JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
+    JIRA_Issue, JIRA_Project, JIRA_Instance, JIRA_Instance_OAUTH, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, \
@@ -2130,6 +2130,35 @@ class JIRAForm(forms.ModelForm):
             self.add_error('password', message)
 
         return form_data
+
+class JIRAFormOAUTH(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    issue_key = forms.CharField(required=True, help_text='A valid issue ID is required to gather the necessary information.')
+
+    def __init__(self, *args, **kwargs):
+        super(JIRAFormOAUTH, self).__init__(*args, **kwargs)
+        if self.instance:
+            self.fields['password'].required = False
+
+    class Meta:
+        model = JIRA_Instance_OAUTH
+        exclude = ['product', 'epic_name_id']
+
+    def clean(self):
+        import dojo.jira_link.helper as jira_helper
+        form_data = self.cleaned_data
+
+        try:
+            jira = jira_helper.get_jira_connection_oauth(form_data['url'], form_data['access_token'], form_data['access_token_secret'], form_data['consumer_key'], form_data['key_cert'])
+            logger.debug('valid JIRA config!')
+        except Exception as e:
+            # form only used by admins, so we can show full error message using str(e) which can help debug any problems
+            message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e)
+            self.add_error('username', message)
+            self.add_error('password', message)
+
+        return form_data
+
 
 
 class ExpressJIRAForm(forms.ModelForm):

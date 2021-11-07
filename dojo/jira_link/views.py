@@ -15,8 +15,8 @@ from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
 # Local application/library imports
-from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
-from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes
+from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, JIRAFormOAUTH, ExpressJIRAForm
+from dojo.models import User, JIRA_Instance, JIRA_Instance_OAUTH, JIRA_Issue, Notes
 from dojo.utils import add_breadcrumb, add_error_message_to_response, get_system_setting
 from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
@@ -342,6 +342,43 @@ def new_jira(request):
     return render(request, 'dojo/new_jira.html',
                   {'jform': jform})
 
+
+
+@user_passes_test(lambda u: u.is_staff)
+def new_jira_oauth(request):
+    if request.method == 'POST':
+        jform = JIRAFormOAUTH(request.POST, instance=JIRA_Instance_OAUTH())
+        if jform.is_valid():
+            jira_server = jform.cleaned_data.get('url').rstrip('/')
+            jira_access_token = jform.cleaned_data.get('access_token')
+            jira_access_token_secret = jform.cleaned_data.get('access_token_secret')
+            jira_consumer_key = jform.cleaned_data.get('consumer_key')
+            jira_key_cert = jform.cleaned_data.get('key_cert')
+
+            logger.debug('calling get_jira_connection_oauth')
+            jira = jira_helper.get_jira_connection_oauth(jira_server, jira_access_token, jira_access_token_secret, jira_consumer_key, jira_key_cert)
+
+            new_j = jform.save(commit=False)
+            new_j.url = jira_server
+            new_j.save()
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'JIRA Configuration Successfully Created.',
+                                    extra_tags='alert-success')
+            create_notification(event='other',
+                                title='New addition of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
+                                description='JIRA "%s" was added by %s' %
+                                            (jform.cleaned_data.get('configuration_name'), request.user),
+                                url=request.build_absolute_uri(reverse('jira')),
+                                )
+            return HttpResponseRedirect(reverse('jira', ))
+        else:
+            logger.error('jform.errors: %s', jform.errors)
+    else:
+        jform = JIRAFormOAUTH()
+        add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)
+    return render(request, 'dojo/express_new_jira.html',
+                  {'jform': jform})
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_jira(request, jid):
