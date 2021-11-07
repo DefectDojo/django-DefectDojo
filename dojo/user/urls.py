@@ -29,5 +29,7 @@ urlpatterns = [
     url(r'^user/(?P<uid>\d+)/add_product_member$', views.add_product_member,
         name='add_product_member_user'),
     url(r'^user/(?P<uid>\d+)/add_group_member$', views.add_group_member,
-        name='add_group_member_user')
+        name='add_group_member_user'),
+    url(r'^user/(?P<uid>\d+)/edit_permissions$', views.edit_permissions,
+        name='edit_permissions')
 ]

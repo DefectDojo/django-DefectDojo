@@ -330,7 +330,9 @@
                                         <span class="glyphicon arrow"></span>
                                     </a>
                                     <ul class="nav nav-second-level">
+                                        {% if "auth.view_user"|has_configuration_permission %}
                                         <li><a href="{% url 'users' %}"> Users </a></li>
+                                        {% endif %}
                                         <li><a href="{% url 'groups' %}"> Groups </a></li>
                                     </ul>
                                 </li>
@@ -370,7 +372,11 @@
                                         <li><a href="{% url 'github' %}">GitHub </a></li>
                                         {% endif %}
                                         <li><a href="{% url 'tool_config' %}">Tool Configuration </a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_tool_type"|has_configuration_permission %}
                                         <li><a href="{% url 'tool_type' %}">Tool Type </a></li>
+                                        {% endif %}
+                                        {% if request.user.is_superuser %}
                                         <li><a href="{% url 'rules' %}">Rules Framework </a></li>
                                         {% endif %}
                                         <li><a href="{% url 'regulations' %}">Regulations </a></li>

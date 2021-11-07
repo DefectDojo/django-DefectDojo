@@ -202,6 +202,8 @@ env = environ.Env(
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
     # when enabled standard users can't change their profile information, default True
     DD_USER_PROFILE_EDITABLE=(bool, True),
+    # Feature toggle for new authorization for configurations
+    DD_FEATURE_CONFIGURATION_AUTHORIZATION=(bool, False),
 )
 
 
@@ -1337,3 +1339,6 @@ SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
 
 # when enabled standard users can't change their profile information, default False
 USER_PROFILE_EDITABLE = env("DD_USER_PROFILE_EDITABLE")
+
+# Feature toggle for new authorization for configurations
+FEATURE_CONFIGURATION_AUTHORIZATION = env("DD_FEATURE_CONFIGURATION_AUTHORIZATION")
