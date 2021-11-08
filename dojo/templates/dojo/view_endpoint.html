@@ -48,14 +48,12 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                               {% if not host_view %}
-                                {% if endpoint|has_object_permission:"Endpoint_Edit" or user|is_authorized_for_change:endpoint %}
+                                {% if endpoint|has_object_permission:"Endpoint_Edit" %}
                                     <li role="presentation">
                                         <a href="{% url 'edit_endpoint' endpoint.id %}">
                                             <i class="fa fa-pencil-square-o"></i> Edit Endpoint
                                         </a>
                                     </li>
-                                {% endif %}
-                                {% if endpoint|has_object_permission:"Endpoint_Edit" or user|is_authorized_for_staff:endpoint %}
                                     <li role="presentation">
                                         <a href="{% url 'add_endpoint_meta_data' endpoint.id %}">
                                             <i class="fa fa-list-alt"></i> Add Metadata
@@ -73,7 +71,7 @@
                                             <i class="fa fa-file-text-o"></i> Report
                                         </a>
                                     </li>
-                                {% if endpoint|has_object_permission:"Endpoint_Delete" or user|is_authorized_for_delete:endpoint %}
+                                {% if endpoint|has_object_permission:"Endpoint_Delete" %}
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation" class="text-danger">
                                         <a class="text-danger" href="{% url 'delete_endpoint' endpoint.id %}">

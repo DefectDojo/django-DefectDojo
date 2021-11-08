@@ -10,13 +10,6 @@ class TestAuthorizationTags(TestCase):
     def setUp(self):
         self.product_type = Product_Type()
 
-    @override_settings(FEATURE_AUTHORIZATION_V2=False)
-    def test_has_object_permission_legacy(self):
-
-        result = has_object_permission(self.product_type, Permissions.Product_Type_View)
-
-        self.assertFalse(result)
-
     @patch('dojo.templatetags.authorization_tags.user_has_permission')
     @override_settings(FEATURE_AUTHORIZATION_V2=True)
     def test_has_object_permission_no_permission(self, mock_has_permission):
