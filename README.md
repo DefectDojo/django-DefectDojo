@@ -40,7 +40,6 @@ Navigate to <http://localhost:8080>.
 ## Documentation
 
 - [Official docs](https://defectdojo.github.io/django-DefectDojo/) ([latest](https://defectdojo.github.io/django-DefectDojo/) | [dev](https://defectdojo.github.io/django-DefectDojo/dev))
-- [Getting started](https://defectdojo.github.io/django-DefectDojo/usage/)
 - [REST APIs](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/)
 - [Client APIs and Wrappers](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/#clients--api-wrappers)
 
