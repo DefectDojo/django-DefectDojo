@@ -1457,39 +1457,6 @@ class Sonarqube_Issue_Transition(models.Model):
         ordering = ('-created', )
 
 
-# This class is not used anymore, but can't be deleted because it's referenced in dojo/db_migrations/0131_migrate_sonarcube_cobalt.py
-class Sonarqube_Product(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    sonarqube_project_key = models.CharField(
-        max_length=200, null=True, blank=True, verbose_name="SonarQube Project Key"
-    )
-    sonarqube_tool_config = models.ForeignKey(
-        Tool_Configuration, verbose_name="SonarQube Configuration",
-        null=False, blank=False, on_delete=models.CASCADE
-    )
-
-    def __str__(self):
-        return '{} | {}'.format(self.sonarqube_tool_config.name if hasattr(self, 'sonarqube_tool_config') else '', self.sonarqube_project_key)
-
-
-# This class is not used anymore, but can't be deleted because it's referenced in dojo/db_migrations/0131_migrate_sonarcube_cobalt.py
-class Cobaltio_Product(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    cobaltio_asset_id = models.CharField(
-        max_length=200, null=True, blank=True, verbose_name="Cobalt.io Asset Id"
-    )
-    cobaltio_asset_name = models.CharField(
-        max_length=200, null=True, blank=True, verbose_name="Cobalt.io Asset Name"
-    )
-    cobaltio_tool_config = models.ForeignKey(
-        Tool_Configuration, verbose_name="Cobalt.io Configuration",
-        null=False, blank=False, on_delete=models.CASCADE
-    )
-
-    def __str__(self):
-        return "{} ({})".format(self.cobaltio_asset_name, self.cobaltio_asset_id)
-
-
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
     lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
