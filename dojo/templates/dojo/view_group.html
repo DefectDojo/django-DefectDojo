@@ -40,8 +40,6 @@
                 {{ group.description|markdown_render }}
             </div>
         </div>
-        {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
-
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
@@ -262,8 +260,6 @@
             </div>
             {% endif %}
         </div>
-
-        {% endif %}
     </div>
     <div class="col-md-4">
         <div class="panel panel-default-secondary">
