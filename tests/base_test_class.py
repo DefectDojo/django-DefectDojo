@@ -206,7 +206,7 @@ class BaseTestCase(unittest.TestCase):
             WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
 
     def is_element_by_css_selector_present(self, selector, text=None):
-        elems = self.driver.find_elements_by_css_selector(selector)
+        elems = self.driver.find_elements(by=By.CSS_SELECTOR, value=selector)
         if len(elems) == 0:
             # print('no elements!')
             return False
@@ -235,6 +235,9 @@ class BaseTestCase(unittest.TestCase):
 
     def is_error_message_present(self, text=None):
         return self.is_element_by_css_selector_present('.alert-danger', text=text)
+
+    def is_help_message_present(self, text=None):
+        return self.is_element_by_css_selector_present('.help-block', text=text)
 
     def is_text_present_on_page(self, text):
         # DEBUG: couldn't find:  Product type added successfully. path:  //*[contains(text(),'Product type added successfully.')]
