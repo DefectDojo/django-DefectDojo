@@ -72,6 +72,7 @@ class TestSemgrepParser(TestCase):
         self.assertEqual("High", finding.severity)
         self.assertEqual("tasks.py", finding.file_path)
         self.assertEqual(186, finding.line)
+        self.assertContains("                   'xsl-style-sheet': temp.name}", finding.description)
         self.assertIsNone(finding.mitigation)
         self.assertEqual("python.lang.correctness.tempfile.flush.tempfile-without-flush", finding.vuln_id_from_tool)
         finding = findings[2]
@@ -81,7 +82,6 @@ class TestSemgrepParser(TestCase):
         self.assertEqual("python.lang.maintainability.useless-ifelse.useless-if-conditional", finding.vuln_id_from_tool)
         finding = findings[4]
         self.assertEqual("Low", finding.severity)
-        self.assertContains(" 'xsl-style-sheet': temp.name}", finding.description)
         self.assertEqual("tools/sslyze/parser_xml.py", finding.file_path)
         self.assertEqual(124, finding.line)
         self.assertEqual(327, finding.cwe)
