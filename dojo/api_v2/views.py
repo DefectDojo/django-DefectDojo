@@ -58,6 +58,8 @@ from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpo
 from dojo.group.queries import get_authorized_groups, get_authorized_group_members
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from dojo.authorization.roles_permissions import Permissions
+from dojo.group.utils import group_post_create, group_post_delete, group_member_post_create, \
+    group_member_post_delete
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +107,14 @@ class DojoGroupViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_groups(Permissions.Group_View).distinct()
 
+    def perform_create(self, serializer):
+        group = serializer.save()
+        group_post_create(group)
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        group_post_delete(instance)
+
 
 # Authorization: object-based
 @extend_schema_view(
@@ -142,6 +152,14 @@ class DojoGroupMemberViewSet(prefetch.PrefetchListMixin,
         # Object authorization won't work if not all data is provided
         response = {'message': 'Patch function is not offered in this path.'}
         return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def perform_create(self, serializer):
+        group_member = serializer.save()
+        group_member_post_create(group_member)
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        group_member_post_delete(instance)
 
 
 # Authorization: superuser

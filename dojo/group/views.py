@@ -15,12 +15,13 @@ from dojo.filters import GroupFilter
 from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, \
     Add_Product_Type_Group_GroupForm, Add_Group_MemberForm, Edit_Group_MemberForm, \
     Delete_Group_MemberForm, GlobalRoleForm, ConfigurationPermissionsForm
-from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, Role
+from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.group.queries import get_authorized_groups, get_product_groups_for_group, \
     get_product_type_groups_for_group, get_group_members_for_group
 from dojo.authorization.authorization_decorators import user_is_authorized_for_configuration
-from dojo.group.util import get_auth_group_name
+from dojo.group.utils import get_auth_group_name, group_post_create, group_post_delete, \
+    group_member_post_create, group_member_post_delete
 
 logger = logging.getLogger(__name__)
 
@@ -126,9 +127,7 @@ def delete_group(request, gid):
             if form.is_valid():
                 try:
                     group.delete()
-                    # Authorization group doesn't get deleted automatically
-                    if group.auth_group:
-                        group.auth_group.delete()
+                    group_post_delete(group)
                     messages.add_message(request,
                                         messages.SUCCESS,
                                         'Group and relationships successfully removed.',
@@ -167,20 +166,10 @@ def add_group(request):
                                     extra_tags='alert-warning')
             else:
                 group = form.save(commit=False)
-                auth_group = Group(name=get_auth_group_name(group, 0))
-                auth_group.save()
-                group.auth_group = auth_group
-                group.save()
                 global_role = global_role_form.save(commit=False)
                 global_role.group = group
                 global_role.save()
-                member = Dojo_Group_Member()
-                member.user = request.user
-                member.group = group
-                member.role = Role.objects.get(is_owner=True)
-                member.save()
-                # Add user to authentication group as well
-                auth_group.user_set.add(request.user)
+                group_post_create(group)
 
                 messages.add_message(request,
                                     messages.SUCCESS,
@@ -222,9 +211,8 @@ def add_group_member(request, gid):
                             group_member.user = user
                             group_member.role = groupform.cleaned_data['role']
                             group_member.save()
-                            # Add user to authentication group as well
-                            group.auth_group.user_set.add(user)
-                messages.add_message(request,
+                            group_member_post_create(group_member)
+                            messages.add_message(request,
                                      messages.SUCCESS,
                                      'Group members added successfully.',
                                      extra_tags='alert-success')
@@ -301,8 +289,7 @@ def delete_group_member(request, mid):
 
         user = member.user
         member.delete()
-        # Remove user from the authentication group as well
-        member.group.auth_group.user_set.remove(user)
+        group_member_post_delete(member)
         messages.add_message(request,
                              messages.SUCCESS,
                              'Group member deleted successfully.',
