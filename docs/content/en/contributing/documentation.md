@@ -11,7 +11,7 @@ Static files for the webside are build with github actions and are publish in th
 
 ## How to run a local preview
 
-1. [Install Hugo](https://gohugo.io/getting-started/installing/). Make sure you have installed the extended version with Sass/SCSS support.
+1. [Install Hugo](https://gohugo.io/getting-started/installing/). Make sure you have installed the extended version with Sass/SCSS support. Please note there are various Linux packages available on [Hugo GitHub](https://github.com/gohugoio/hugo/releases)
 
 2. Install JavaScript packages
 
