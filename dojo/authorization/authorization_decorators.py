@@ -42,7 +42,7 @@ def user_is_authorized(model, permission, arg, legacy_permission=None, lookup="p
     return _wrapped
 
 
-def user_is_authorized_for_configuration(permission, legacy):
+def user_is_configuration_authorized(permission, legacy):
     """
     Decorator for views that checks whether a user has a particular permission enabled.
     """

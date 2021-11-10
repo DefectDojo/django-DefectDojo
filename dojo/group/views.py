@@ -19,14 +19,14 @@ from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Grou
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.group.queries import get_authorized_groups, get_product_groups_for_group, \
     get_product_type_groups_for_group, get_group_members_for_group
-from dojo.authorization.authorization_decorators import user_is_authorized_for_configuration
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.group.utils import get_auth_group_name, group_post_create, group_post_delete, \
     group_member_post_create, group_member_post_delete
 
 logger = logging.getLogger(__name__)
 
 
-@user_is_authorized_for_configuration('auth.view_group', 'staff')
+@user_is_configuration_authorized('auth.view_group', 'staff')
 def group(request):
     groups = get_authorized_groups(Permissions.Group_View)
     groups = GroupFilter(request.GET, queryset=groups)
@@ -41,7 +41,7 @@ def group(request):
 
 # Users need to be authorized to view groups in general and only the groups they are a member of
 # because with the group they can see user information that might be considered as confidential
-@user_is_authorized_for_configuration('auth.view_group', 'staff')
+@user_is_configuration_authorized('auth.view_group', 'staff')
 @user_is_authorized(Dojo_Group, Permissions.Group_View, 'gid')
 def view_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
@@ -153,7 +153,7 @@ def delete_group(request, gid):
     })
 
 
-@user_is_authorized_for_configuration('auth.add_group', 'staff')
+@user_is_configuration_authorized('auth.add_group', 'staff')
 def add_group(request):
     form = DojoGroupForm
     global_role_form = GlobalRoleForm()
@@ -372,7 +372,7 @@ def add_product_type_group(request, gid):
     })
 
 
-@user_is_authorized_for_configuration('auth.change_permission', 'superuser')
+@user_is_configuration_authorized('auth.change_permission', 'superuser')
 def edit_permissions(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     if request.method == 'POST':
