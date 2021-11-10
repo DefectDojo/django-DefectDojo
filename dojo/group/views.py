@@ -39,6 +39,9 @@ def group(request):
     })
 
 
+# Users need to be authorized to view groups in general and only the groups they are a member of
+# because with the group they can see user information that might be considered as confidential
+@user_is_authorized_for_configuration('auth.view_group', 'staff')
 @user_is_authorized(Dojo_Group, Permissions.Group_View, 'gid')
 def view_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
@@ -165,7 +168,7 @@ def add_group(request):
                                     'Only superusers are allowed to set global role.',
                                     extra_tags='alert-warning')
             else:
-                group = form.save(commit=False)
+                group = form.save()
                 global_role = global_role_form.save(commit=False)
                 global_role.group = group
                 global_role.save()

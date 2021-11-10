@@ -1884,7 +1884,7 @@ class UsersViewSet(mixins.CreateModelMixin,
     queryset = User.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'username', 'first_name', 'last_name', 'email')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
