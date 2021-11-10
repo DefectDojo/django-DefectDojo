@@ -3217,7 +3217,6 @@ class ConfigurationPermissionsForm(forms.Form):
 
         permissions_list = Permission.objects.all()
         self.permissions = {}
-
         for permission in permissions_list:
             self.permissions[permission.codename] = permission
 
@@ -3228,6 +3227,7 @@ class ConfigurationPermissionsForm(forms.Form):
 
     def set_permission(self, codename):
         if self.cleaned_data[codename]:
+            # Checkbox is set
             if self.user:
                 self.user.user_permissions.add(self.permissions[codename])
             elif self.group:
@@ -3235,6 +3235,7 @@ class ConfigurationPermissionsForm(forms.Form):
             else:
                 raise Exception('Neither user or group are set')
         else:
+            # Checkbox is unset
             if self.user:
                 self.user.user_permissions.remove(self.permissions[codename])
             elif self.group:
@@ -3278,12 +3279,12 @@ class Permission_Helper:
 
     def codenames(self):
         codenames = []
-        if self.view_codename():
+        if self.view:
             codenames.append(self.view_codename())
-        if self.add_codename():
+        if self.add:
             codenames.append(self.add_codename())
-        if self.change_codename():
+        if self.change:
             codenames.append(self.change_codename())
-        if self.delete_codename():
+        if self.delete:
             codenames.append(self.delete_codename())
         return codenames

@@ -2,6 +2,7 @@ from django import template
 from crum import get_current_user
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission, user_has_configuration_permission as configuration_permission
+from dojo.request_cache import cache_for_request
 
 register = template.Library()
 
@@ -16,8 +17,13 @@ def has_configuration_permission(permission):
     return configuration_permission(get_current_user(), permission)
 
 
+@cache_for_request
+def get_user_permissions(user):
+    return user.user_permissions.all()
+
+
 def user_has_permission_without_group(user, codename):
-    permissions = user.user_permissions.all()
+    permissions = get_user_permissions(user)
     for permission in permissions:
         if permission.codename == codename:
             return True
@@ -25,48 +31,22 @@ def user_has_permission_without_group(user, codename):
 
 
 @register.filter
-def user_has_view_permission(user, permission):
-    return user_has_permission_without_group(user, permission.view_codename())
+def user_has_configuration_permission(user, codename):
+    return user_has_permission_without_group(user, codename)
 
 
-@register.filter
-def user_has_add_permission(user, permission):
-    return user_has_permission_without_group(user, permission.add_codename())
-
-
-@register.filter
-def user_has_change_permission(user, permission):
-    return user_has_permission_without_group(user, permission.change_codename())
-
-
-@register.filter
-def user_has_delete_permission(user, permission):
-    return user_has_permission_without_group(user, permission.delete_codename())
+@cache_for_request
+def get_group_permissions(group):
+    return group.permissions.all()
 
 
 def group_has_permission(group, codename):
-    permissions = group.permissions.all()
-    for permission in permissions:
+    for permission in get_group_permissions(group):
         if permission.codename == codename:
             return True
     return False
 
 
 @register.filter
-def group_has_view_permission(group, permission):
-    return group_has_permission(group, permission.view_codename())
-
-
-@register.filter
-def group_has_add_permission(group, permission):
-    return group_has_permission(group, permission.add_codename())
-
-
-@register.filter
-def group_has_change_permission(group, permission):
-    return group_has_permission(group, permission.change_codename())
-
-
-@register.filter
-def group_has_delete_permission(group, permission):
-    return group_has_permission(group, permission.delete_codename())
+def group_has_configuration_permission(group, codename):
+    return group_has_permission(group, codename)
