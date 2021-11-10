@@ -1,5 +1,6 @@
 import re
 from rest_framework.exceptions import ParseError
+from django.conf import settings
 from dojo.api_v2.serializers import get_import_meta_data_from_dict
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
@@ -325,3 +326,23 @@ class UserHasEngagementPresetPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(request, obj.product, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Edit, Permissions.Product_Edit)
+
+
+class UserHasConfigurationPermissionStaff(permissions.DjangoModelPermissions):
+
+    # Override map to also provide 'view' permissions
+    perms_map = {
+        'GET': ['%(app_label)s.view_%(model_name)s'],
+        'OPTIONS': [],
+        'HEAD': [],
+        'POST': ['%(app_label)s.add_%(model_name)s'],
+        'PUT': ['%(app_label)s.change_%(model_name)s'],
+        'PATCH': ['%(app_label)s.change_%(model_name)s'],
+        'DELETE': ['%(app_label)s.delete_%(model_name)s'],
+    }
+
+    def has_permission(self, request, view):
+        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+            return super().has_permission(request, view)
+        else:
+            return request.user.is_staff
