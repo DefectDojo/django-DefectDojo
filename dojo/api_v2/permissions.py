@@ -54,6 +54,8 @@ class UserHasDojoGroupPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if request.method == 'GET':
+            # Users need to be authorized to view groups in general and only the groups they are a member of
+            # because with the group they can see user information that might be considered as confidential
             return user_has_configuration_permission(request.user, 'auth.view_group') and user_has_permission(request.user, obj, Permissions.Group_View)
         else:
             return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Edit, Permissions.Group_Delete)
