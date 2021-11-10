@@ -130,7 +130,7 @@
                             &nbsp;
                             <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                                 <i class="fa fa-question-circle"></i></a>
-                            {% if has_object_permission:"Product_Type_Manage_Members" %}
+                            {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                             <div class="dropdown pull-right">
                                 <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductTypeMember"
                                         data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Type Member">
