@@ -7,7 +7,7 @@ from dojo.user.helper import user_is_authorized as legacy_check
 
 
 def user_is_authorized(model, permission, arg, legacy_permission=None, lookup="pk", func=None):
-    """Decorator for functions that ensures the user has permission on an object.
+    """Decorator for functions that ensures the user has an object permission.
     """
 
     if func is None:
@@ -42,7 +42,7 @@ def user_is_authorized(model, permission, arg, legacy_permission=None, lookup="p
 
 
 def user_has_global_permission(permission, func=None):
-    """Decorator for functions that ensures the user has a permission
+    """Decorator for functions that ensures the user has a (global) permission
     """
 
     if func is None:
