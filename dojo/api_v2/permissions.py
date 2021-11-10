@@ -8,7 +8,7 @@ from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
-from dojo.authorization.authorization import user_has_global_permission, user_has_permission
+from dojo.authorization.authorization import user_has_global_permission, user_has_permission, user_has_configuration_permission
 from dojo.authorization.roles_permissions import Permissions
 
 
@@ -45,13 +45,18 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
 
 class UserHasDojoGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method == 'POST':
-            return request.user.is_staff
+        if request.method == 'GET':
+            return user_has_configuration_permission(request.user, 'auth.view_group')
+        elif request.method == 'POST':
+            return user_has_configuration_permission(request.user, 'auth.create_group')
         else:
             return True
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Edit, Permissions.Group_Delete)
+        if request.method == 'GET':
+            return user_has_configuration_permission(request.user, 'auth.view_group') and user_has_permission(request.user, obj, Permissions.Group_View)
+        else:
+            return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Edit, Permissions.Group_Delete)
 
 
 class UserHasDojoGroupMemberPermission(permissions.BasePermission):
