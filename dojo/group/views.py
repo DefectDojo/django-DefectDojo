@@ -26,7 +26,7 @@ from dojo.group.utils import get_auth_group_name, group_post_create, group_post_
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized_for_configuration('auth.view_group', 'staff')
 def group(request):
     groups = get_authorized_groups(Permissions.Group_View)
     groups = GroupFilter(request.GET, queryset=groups)
@@ -150,7 +150,7 @@ def delete_group(request, gid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized_for_configuration('auth.add_group', 'staff')
 def add_group(request):
     form = DojoGroupForm
     global_role_form = GlobalRoleForm()

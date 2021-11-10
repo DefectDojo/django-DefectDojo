@@ -8,6 +8,10 @@ from dojo.models import Product_Type, Product_Type_Member, Product, Product_Memb
 
 
 def user_has_configuration_permission(user, permission, legacy=None):
+
+    if not user:
+        return False
+
     if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
         return user.has_perm(permission)
     else:
