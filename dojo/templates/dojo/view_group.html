@@ -318,22 +318,42 @@
                         <td><strong>{{ field.name|title }}</strong></td>
                         <td class="centered">
                             {% if field.view_codename %}
-                            <input id="id_{{ field.view_codename }}" {% if not perms.auth.change_permission %}disabled{% endif %} name="{{ field.view_codename }}" type="checkbox" {% if group.auth_group|group_has_configuration_permission:field.view_codename %}checked{% endif %} />
+                            <input id="id_{{ field.view_codename }}"
+                                {% if not perms.auth.change_permission %}disabled{% endif %}
+                                name="{{ field.view_codename }}"
+                                aria-label="{{ field.view_codename }}"
+                                type="checkbox"
+                                {% if group.auth_group|group_has_configuration_permission:field.view_codename %}checked{% endif %} />
                             {% endif %}
                         </td>
                         <td class="centered">
                             {% if field.add_codename %}
-                            <input id="id_{{ field.add_codename }}" {% if not perms.auth.change_permission %}disabled{% endif %} name="{{ field.add_codename }}" type="checkbox" {% if group.auth_group|group_has_configuration_permission:field.add_codename %}checked{% endif %} />
+                            <input id="id_{{ field.add_codename }}"
+                                {% if not perms.auth.change_permission %}disabled{% endif %}
+                                name="{{ field.add_codename }}"
+                                aria-label="{{ field.add_codename }}"
+                                type="checkbox"
+                                {% if group.auth_group|group_has_configuration_permission:field.add_codename %}checked{% endif %} />
                             {% endif %}
                         </td>
                         <td class="centered">
                             {% if field.change_codename %}
-                            <input id="id_{{ field.change_codename }}" {% if not perms.auth.change_permission %}disabled{% endif %} name="{{ field.change_codename }}" type="checkbox" {% if group.auth_group|group_has_configuration_permission:field.change_codename %}checked{% endif %} />
+                            <input id="id_{{ field.change_codename }}"
+                                {% if not perms.auth.change_permission %}disabled{% endif %}
+                                name="{{ field.change_codename }}"
+                                aria-label="{{ field.change_codename }}"
+                                type="checkbox"
+                                {% if group.auth_group|group_has_configuration_permission:field.change_codename %}checked{% endif %} />
                             {% endif %}
                         </td>
                         <td class="centered">
                             {% if field.delete_codename %}
-                            <input id="id_{{ field.delete_codename }}" {% if not perms.auth.change_permission %}disabled{% endif %} name="{{ field.delete_codename }}" type="checkbox" {% if group.auth_group|group_has_configuration_permission:field.delete_codename %}checked{% endif %} />
+                            <input id="id_{{ field.delete_codename }}"
+                                {% if not perms.auth.change_permission %}disabled{% endif %}
+                                name="{{ field.delete_codename }}"
+                                aria-label="{{ field.delete_codename }}"
+                                type="checkbox"
+                                {% if group.auth_group|group_has_configuration_permission:field.delete_codename %}checked{% endif %} />
                             {% endif %}
                         </td>
                     </tr>

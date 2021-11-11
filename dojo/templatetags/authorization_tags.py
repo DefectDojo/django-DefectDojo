@@ -19,8 +19,8 @@ def has_global_permission(permission):
 
 
 @register.filter
-def has_configuration_permission(permission):
-    return configuration_permission(get_current_user(), permission)
+def has_configuration_permission(permission, legacy):
+    return configuration_permission(get_current_user(), permission, legacy)
 
 
 @cache_for_request
