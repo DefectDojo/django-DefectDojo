@@ -42,9 +42,11 @@ def group_post_delete(group):
 
 def group_member_post_create(group_member):
     # Add user to authentication group as well
-    group_member.group.auth_group.user_set.add(group_member.user)
+    if group_member.group.auth_group:
+        group_member.group.auth_group.user_set.add(group_member.user)
 
 
 def group_member_post_delete(group_member):
     # Remove user from the authentication group as well
-    group_member.group.auth_group.user_set.remove(group_member.user)
+    if group_member.group.auth_group:
+        group_member.group.auth_group.user_set.remove(group_member.user)
