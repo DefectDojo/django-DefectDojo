@@ -12,5 +12,5 @@ def has_object_permission(obj, permission):
 
 
 @register.filter
-def has_permission(permission):
+def has_global_permission(permission):
     return user_has_global_permission(get_current_user(), Permissions[permission])
