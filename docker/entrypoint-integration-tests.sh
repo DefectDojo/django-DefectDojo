@@ -39,10 +39,6 @@ function success() {
     echo "Success: $1 test passed\n"
 }
 
-function reload() {
-  touch /app/dojo/settings/settings.py
-}
-
 echo "IT FILENAME: $DD_INTEGRATION_TEST_FILENAME"
 if [[ ! -z "$DD_INTEGRATION_TEST_FILENAME" ]]; then
     test=$DD_INTEGRATION_TEST_FILENAME
