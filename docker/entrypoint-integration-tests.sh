@@ -39,10 +39,6 @@ function success() {
     echo "Success: $1 test passed\n"
 }
 
-function reload() {
-  touch /app/dojo/settings/settings.py
-}
-
 echo "IT FILENAME: $DD_INTEGRATION_TEST_FILENAME"
 if [[ ! -z "$DD_INTEGRATION_TEST_FILENAME" ]]; then
     test=$DD_INTEGRATION_TEST_FILENAME
@@ -214,21 +210,6 @@ else
     else
         fail $test
     fi
-
-    test="Read only user profile test"
-    echo "Preparing configuration: USER_PROFILE_EDITABLE=True"
-    echo "USER_PROFILE_EDITABLE=Frue" > /app/dojo/settings/local_settings.py
-    reload
-
-    echo "Running $test"
-    if python3 tests/user_standard_test.py ; then
-        success $test
-    else
-        fail $test
-    fi
-    echo "USER_PROFILE_EDITABLE=True" > /app/dojo/settings/local_settings.py
-    reload
-
 
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
