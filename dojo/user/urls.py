@@ -35,7 +35,7 @@ urlpatterns = [
 ]
 if settings.FORGOT_PASSWORD_BUTTON:
     urlpatterns.extend([
-        url(r'^password_reset/$', auth_views.PasswordResetView.as_view(
+        url(r'^password_reset/$', views.DojoPasswordResetView.as_view(
             template_name='dojo/password_reset.html',
         ), name="password_reset"),
         url(r'^password_reset/done/$', auth_views.PasswordResetDoneView.as_view(

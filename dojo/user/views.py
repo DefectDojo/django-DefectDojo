@@ -12,8 +12,8 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.utils import NestedObjects
-from django.contrib.auth.views import LoginView
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.views import LoginView, PasswordResetView
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.utils.http import urlencode
 from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
@@ -540,3 +540,24 @@ def add_group_member(request, uid):
         'user': user,
         'form': memberform
     })
+
+
+class DojoPasswordResetForm(PasswordResetForm):
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+        from dojo.utils import get_system_setting
+        import hyperlink
+        from_email = get_system_setting('email_from')
+        url = hyperlink.parse(settings.SITE_URL)
+        context['site_name'] = url.host
+        context['protocol'] = url.scheme
+        context['domain'] = settings.SITE_URL[len(url.scheme + '://'):]
+        try:
+            super().send_mail(subject_template_name, email_template_name,
+                              context, from_email, to_email, html_email_template_name)
+        except ConnectionError as ce:
+            logger.error(f"It is not possible to send reset password email: {ce}")
+
+
+class DojoPasswordResetView(PasswordResetView):
+    form_class = DojoPasswordResetForm
