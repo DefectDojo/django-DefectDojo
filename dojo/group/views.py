@@ -20,8 +20,7 @@ from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.group.queries import get_authorized_groups, get_product_groups_for_group, \
     get_product_type_groups_for_group, get_group_members_for_group
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
-from dojo.group.utils import get_auth_group_name, group_post_create, group_post_delete, \
-    group_member_post_create, group_member_post_delete
+from dojo.group.utils import get_auth_group_name
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +129,6 @@ def delete_group(request, gid):
             if form.is_valid():
                 try:
                     group.delete()
-                    group_post_delete(group)
                     messages.add_message(request,
                                         messages.SUCCESS,
                                         'Group and relationships successfully removed.',
@@ -172,7 +170,6 @@ def add_group(request):
                 global_role = global_role_form.save(commit=False)
                 global_role.group = group
                 global_role.save()
-                group_post_create(group)
 
                 messages.add_message(request,
                                     messages.SUCCESS,
@@ -214,7 +211,6 @@ def add_group_member(request, gid):
                             group_member.user = user
                             group_member.role = groupform.cleaned_data['role']
                             group_member.save()
-                            group_member_post_create(group_member)
                             messages.add_message(request,
                                      messages.SUCCESS,
                                      'Group members added successfully.',
@@ -292,7 +288,6 @@ def delete_group_member(request, mid):
 
         user = member.user
         member.delete()
-        group_member_post_delete(member)
         messages.add_message(request,
                              messages.SUCCESS,
                              'Group member deleted successfully.',
