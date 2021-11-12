@@ -78,7 +78,7 @@ class SemgrepParser(object):
         message = item["extra"]["message"]
         description += '**Result message:** {}\n'.format(message)
 
-        snippet = item["extra"]["lines"]
+        snippet = item["extra"].get("lines")
         if snippet is not None:
             description += '**Snippet:**\n```{}```\n'.format(snippet)
 
