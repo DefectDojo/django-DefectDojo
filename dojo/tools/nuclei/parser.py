@@ -24,12 +24,12 @@ class NucleiParser(object):
         else:
             dupes = {}
             for item in data:
-                template_id = item.get('templateID')
+                template_id = item.get('template-id')
                 info = item.get('info')
                 name = info.get('name')
                 severity = info.get('severity').title()
                 type = item.get('type')
-                matched = item.get('matched')
+                matched = item.get('matched-at')
                 if '://' in matched:
                     endpoint = Endpoint.from_uri(matched)
                 else:
