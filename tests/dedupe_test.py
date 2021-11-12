@@ -472,6 +472,81 @@ class DedupeTest(BaseTestCase):
     def test_check_cross_status(self):
         self.check_nb_duplicates(1)
 
+# --------------------------------------------------------------------------------------------------------
+# Deduplication with and without service attribute in finding
+# --------------------------------------------------------------------------------------------------------
+    def test_import_no_service(self):
+        logger.debug("Importing findings...")
+
+        driver = self.driver
+
+        # We reuse the engagement and test for Checkmarx, because we need a parser with hash_code deduplication
+        self.goto_active_engagements_overview(driver)
+        driver.find_element_by_partial_link_text("Dedupe on hash_code only").click()
+        driver.find_element_by_partial_link_text("Path Test 1").click()
+        driver.find_element_by_id("dropdownMenu1").click()
+        driver.find_element_by_link_text("Re-Upload Scan").click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+
+        self.assertTrue(self.is_success_message_present(text='Checkmarx Scan processed a total of 2 findings created 2 findings.'))
+
+        # Import the same findings a second time - they should all be duplicates
+        self.goto_active_engagements_overview(driver)
+        driver.find_element_by_partial_link_text("Dedupe on hash_code only").click()
+        driver.find_element_by_partial_link_text("Path Test 2").click()
+        driver.find_element_by_id("dropdownMenu1").click()
+        driver.find_element_by_link_text("Re-Upload Scan").click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+
+        self.assertTrue(self.is_success_message_present(text='Checkmarx Scan processed a total of 2 findings created 2 findings.'))
+
+    def test_check_no_service(self):
+        # Since we imported the same report twice, we should have 2 duplicates
+        self.check_nb_duplicates(2)
+
+    def test_import_service(self):
+        logger.debug("Importing findings...")
+
+        driver = self.driver
+
+        # We reuse the engagement and test for Checkmarx, because we need a parser with hash_code deduplication
+        self.goto_active_engagements_overview(driver)
+        driver.find_element_by_partial_link_text("Dedupe on hash_code only").click()
+        driver.find_element_by_partial_link_text("Path Test 1").click()
+        driver.find_element_by_id("dropdownMenu1").click()
+        driver.find_element_by_link_text("Re-Upload Scan").click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element_by_id('id_service').send_keys("service_1")
+        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+
+        self.assertTrue(self.is_success_message_present(text='Checkmarx Scan processed a total of 2 findings created 2 findings.'))
+
+        # Import the same findings a second time with a different service - they should all be new findings
+        self.goto_active_engagements_overview(driver)
+        driver.find_element_by_partial_link_text("Dedupe on hash_code only").click()
+        driver.find_element_by_partial_link_text("Path Test 2").click()
+        driver.find_element_by_id("dropdownMenu1").click()
+        driver.find_element_by_link_text("Re-Upload Scan").click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element_by_id('id_service').send_keys("service_2")
+        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+
+        self.assertTrue(self.is_success_message_present(text='Checkmarx Scan processed a total of 2 findings created 2 findings.'))
+
+    def test_check_service(self):
+        # Since we imported the same report twice but with different service names, we should have no duplicates
+        self.check_nb_duplicates(0)
+
 
 def add_dedupe_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase('test_login'))
@@ -517,6 +592,13 @@ def add_dedupe_tests_to_suite(suite, jira=False, github=False, block_execution=F
     suite.addTest(DedupeTest('test_add_cross_test_suite'))
     suite.addTest(DedupeTest('test_import_cross_test'))
     suite.addTest(DedupeTest('test_check_cross_status'))
+    # Test deduplication with and without service in findings
+    suite.addTest(DedupeTest('test_delete_findings'))
+    suite.addTest(DedupeTest('test_import_no_service'))
+    suite.addTest(DedupeTest('test_check_no_service'))
+    suite.addTest(DedupeTest('test_delete_findings'))
+    suite.addTest(DedupeTest('test_import_service'))
+    suite.addTest(DedupeTest('test_check_service'))
     # Clean up
     suite.addTest(ProductTest('test_delete_product'))
     return suite

@@ -3,7 +3,7 @@ from unittest import mock
 
 from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
 from django.test import TestCase
-from dojo.models import Test, Engagement, Product, Sonarqube_Product
+from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuration
 
 
 def dummy_product(self, *args, **kwargs):
@@ -114,7 +114,7 @@ class TestSonarqubeImporterMultipleSQToolConfig(TestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'It has configured more than one SonarQube tool.'):
+        with self.assertRaisesRegex(Exception, 'More than one Tool Configuration for SonarQube exists.'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -187,7 +187,7 @@ class TestSonarqubeImporterMultipleSQConfigs(TestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'It has configured more than one Product SonarQube Configuration but non of them has been choosen.'):
+        with self.assertRaisesRegex(Exception, 'More than one Product API Scan Configuration has been configured, but none of them has been chosen.'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -207,7 +207,7 @@ class TestSonarqubeImporterSelectedSQConfigsNoKey(TestCase):
         engagement = Engagement(product=product)
         self.test = Test(
             engagement=engagement,
-            sonarqube_config=Sonarqube_Product.objects.all().first()
+            api_scan_configuration=Product_API_Scan_Configuration.objects.all().first()
         )
 
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
@@ -237,13 +237,13 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
         engagement = Engagement(product=product)
         self.test = Test(
             engagement=engagement,
-            sonarqube_config=Sonarqube_Product.objects.all().last()
+            api_scan_configuration=Product_API_Scan_Configuration.objects.all().last()
         )
         other_product = Product(name='other product')
         other_engagement = Engagement(product=other_product)
         self.other_test = Test(
             engagement=other_engagement,
-            sonarqube_config=Sonarqube_Product.objects.all().last()
+            api_scan_configuration=Product_API_Scan_Configuration.objects.all().last()
         )
 
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_project', dummy_product)
@@ -257,7 +257,7 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
         self.assertEqual(2, len(findings))
 
     def test_product_mismatch(self):
-        with self.assertRaisesRegex(Exception, 'Product SonarQube Configuration and "Product" mismatch'):
+        with self.assertRaisesRegex(Exception, 'Product API Scan Configuration and Product do not match.'):
             SonarQubeApiImporter.prepare_client(self.other_test)
 
 
@@ -278,7 +278,7 @@ class TestSonarqubeImporterExternalRule(TestCase):
         engagement = Engagement(product=product)
         self.test = Test(
             engagement=engagement,
-            sonarqube_config=Sonarqube_Product.objects.all().last()
+            api_scan_configuration=Product_API_Scan_Configuration.objects.all().last()
         )
 
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_project', dummy_product)

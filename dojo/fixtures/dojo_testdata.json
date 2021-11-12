@@ -169,7 +169,7 @@
       "slack_username": null,
       "cell_number": "",
       "title": null,
-      "twitter_username": null,
+      "twitter_username": "#admin",
       "user": 1,
       "block_execution": false,
       "github_username": null
@@ -303,7 +303,7 @@
     "pk": 120,
     "model": "dojo.test_type",
     "fields": {
-        "name": "Generic Findings Import"
+        "name": "Xanitizer Scan"
     }
   },
   {
@@ -590,7 +590,7 @@
 "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
-      "name": "April monthly engagement",
+      "name": "April monthly engagement2",
       "check_list": true,
       "target_start": "2018-04-12",
       "api_test": true,
@@ -620,7 +620,7 @@
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
-      "name": "April monthly engagement",
+      "name": "April monthly engagement3",
       "check_list": true,
       "target_start": "2018-04-12",
       "api_test": true,
@@ -713,6 +713,8 @@
       "lead": null,
       "estimated_time": "00:00:00",
       "test_type": 1,
+      "scan_type": "ZAP Scan",
+      "title": "My ZAP Scan",
       "engagement": 4,
       "environment": 1,
       "target_start": "2017-12-01T00:00:00Z",
@@ -1776,11 +1778,11 @@
   },
   {
     "pk": 1,
-    "model": "dojo.sonarqube_product",
+    "model": "dojo.product_api_scan_configuration",
     "fields": {
       "product": 2,
-      "sonarqube_project_key": "dojo_sonar_key",
-      "sonarqube_tool_config": 3
+      "service_key_1": "dojo_sonar_key",
+      "tool_configuration": 3
     }
   },
   {

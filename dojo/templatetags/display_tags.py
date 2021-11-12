@@ -8,7 +8,6 @@ from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url, get_file_images
-from dojo.user.helper import user_is_authorized
 from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
@@ -312,8 +311,7 @@ def action_log_entry(value, autoescape=None):
     text = ''
     for k in history.keys():
         text += k.capitalize() + ' changed from "' + \
-                history[k][0] + '" to "' + history[k][1] + '"'
-
+                history[k][0] + '" to "' + history[k][1] + '"\n'
     return text
 
 
@@ -728,30 +726,6 @@ def finding_display_status(finding):
         display_status = display_status.replace('Duplicate', link)
 
     return display_status
-
-
-@register.filter
-def is_authorized_for_change(user, obj):
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        return user_is_authorized(user, 'change', obj)
-    else:
-        return False
-
-
-@register.filter
-def is_authorized_for_delete(user, obj):
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        return user_is_authorized(user, 'delete', obj)
-    else:
-        return False
-
-
-@register.filter
-def is_authorized_for_staff(user, obj):
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        return user_is_authorized(user, 'staff', obj)
-    else:
-        return False
 
 
 @register.filter

@@ -6,7 +6,7 @@ weight: 5
 ---
 
 {{% alert title="Deprecation notice" color="warning" %}}
-Legacy authorization will be removed with version 2.5.0 / end of November 2021.
+Legacy authorization will be removed with version 2.5.0 / beginning of December 2021.
 If you have set `FEATURE_AUTHORIZATION_V2` to `False` in your local configuration,
 remove this local setting and start using the new authorization as described
 in [Permissions]({{< ref "/usage/permissions" >}}).
@@ -70,6 +70,17 @@ first. (Of course, if you're doing this, then you know you have to
 update the source code first)
 
 Replace the first step above with this one: `docker-compose build`
+
+
+## Upgrading to DefectDojo Version 2.4.x. (Security Release)
+
+This releases fixes a High severity vulnerability for which the details will be disclosed on November 16th in [GHSA-fwg9-752c-qh8w](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-fwg9-752c-qh8w)
+
+There is a breaking change in the API for importing and re-importings scans with SonarQube API and Cobalt.io API. The [scan configurations
+have been unified](https://github.com/DefectDojo/django-DefectDojo/pull/5289) and are set now with the attribute `api_scan_configuration`. 
+The existing configurations for SonarQube API and Cobalt.io API have been migrated.
+
+At the request of pyup.io, we had to remove the parser for Safety scans.
 
 
 ## Upgrading to DefectDojo Version 2.3.x.

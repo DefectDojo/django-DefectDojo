@@ -18,8 +18,8 @@ from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
 import pytz
 from django.db.models import Q
-from dojo.models import Dojo_User, Finding_Group, Product_Type, Finding, Product, Test_Import, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Note_Type, Sonarqube_Product, Cobaltio_Product, \
+from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
+    Endpoint, Development_Environment, Finding_Template, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
     ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group
 from dojo.utils import get_system_setting
@@ -218,6 +218,7 @@ def get_finding_filter_fields(metrics=False, similar=False):
                 'test__test_type',
                 'test__engagement__version',
                 'test__version',
+                'endpoints',
                 'status',
                 'active',
                 'verified',
@@ -231,6 +232,7 @@ def get_finding_filter_fields(metrics=False, similar=False):
                 'file_path',
                 'unique_id_from_tool',
                 'vuln_id_from_tool',
+                'service',
     ])
 
     if similar:
@@ -606,12 +608,14 @@ class EngagementDirectFilter(DojoFilter):
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
+            ('target_start', 'target_start'),
             ('name', 'name'),
             ('product__name', 'product__name'),
             ('product__prod_type__name', 'product__prod_type__name'),
             ('lead__first_name', 'lead__first_name'),
         ),
         field_labels={
+            'target_start': 'Start date',
             'name': 'Engagement',
             'product__name': 'Product Name',
             'product__prod_type__name': 'Product Type',
@@ -1144,6 +1148,10 @@ class FindingFilter(FindingFilterWithTags):
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.none(),
         label="Engagement")
+
+    endpoints = ModelMultipleChoiceFilter(
+        queryset=Endpoint.objects.none(),
+        label="Endpoint")
 
     test = ModelMultipleChoiceFilter(
         queryset=Test.objects.none(),
@@ -1748,8 +1756,7 @@ class EngagementTestFilter(DojoFilter):
             ('target_start', 'target_start'),
             ('target_end', 'target_end'),
             ('lead', 'lead'),
-            ('sonarqube_config', 'sonarqube_config'),
-            ('cobaltio_config', 'cobaltio_config'),
+            ('api_scan_configuration', 'api_scan_configuration'),
         ),
         field_labels={
             'name': 'Test Name',
@@ -1761,14 +1768,13 @@ class EngagementTestFilter(DojoFilter):
         model = Test
         fields = ['id', 'title', 'test_type', 'target_start',
                      'target_end', 'percent_complete',
-                     'version', 'sonarqube_config', 'cobaltio_config']
+                     'version', 'api_scan_configuration']
 
     def __init__(self, *args, **kwargs):
         self.engagement = kwargs.pop('engagement')
         super(DojoFilter, self).__init__(*args, **kwargs)
         self.form.fields['test_type'].queryset = Test_Type.objects.filter(test__engagement=self.engagement).distinct().order_by('name')
-        self.form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=self.engagement.product).distinct()
-        self.form.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=self.engagement.product).distinct()
+        self.form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=self.engagement.product).distinct()
 
 
 class ApiTestFilter(DojoFilter):
@@ -1805,8 +1811,7 @@ class ApiTestFilter(DojoFilter):
             ('branch_tag', 'branch_tag'),
             ('build_id', 'build_id'),
             ('commit_hash', 'commit_hash'),
-            ('sonarqube_config', 'sonarqube_config'),
-            ('cobaltio_config', 'cobaltio_config'),
+            ('api_scan_configuration', 'api_scan_configuration'),
             ('engagement', 'engagement'),
             ('created', 'created'),
             ('updated', 'updated'),
@@ -1822,7 +1827,7 @@ class ApiTestFilter(DojoFilter):
                      'target_end', 'notes', 'percent_complete',
                      'actual_time', 'engagement', 'version',
                      'branch_tag', 'build_id', 'commit_hash',
-                     'sonarqube_config', 'cobaltio_config']
+                     'api_scan_configuration']
 
 
 class ApiAppAnalysisFilter(DojoFilter):

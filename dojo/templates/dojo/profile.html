@@ -14,12 +14,10 @@
                     <legend>Additional Contact Information</legend>
                     {% include "dojo/form_fields.html" with form=contact_form %}
                 </fieldset>
-                {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                 <fieldset>
                     <legend>Global Role</legend>
                     {% include "dojo/form_fields.html" with form=global_role_form %}
                 </fieldset>
-                {% endif %}
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
                         <input class="btn btn-primary" type="submit" value="Submit"/>
@@ -40,7 +38,6 @@
                 <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">API Key</a>
                 </div>
             </div>
-            {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="clearfix">
@@ -94,7 +91,6 @@
                 </div>
                 {% endif %}
             </div>
-            {% endif %}
         </div>
     </div>
 {% endblock %}

@@ -18,7 +18,7 @@ improve with the more you use the platform.
 
 Try out the demo sever at [demo.defectdojo.org](https://demo.defectdojo.org)
 
-Log in with `admin / defectdojo@demo#appsec`. Please note that the demo is pubicly accessable and regularly reset. Do not put sensitive data in the demo.
+Log in with `admin / 1Defectdojo@demo#appsec`. Please note that the demo is pubicly accessable and regularly reset. Do not put sensitive data in the demo.
 
 ## Quick Start
 
@@ -37,13 +37,15 @@ docker-compose logs initializer | grep "Admin password:"
 Navigate to <http://localhost:8080>.
 
 
-## [Documentation](https://defectdojo.github.io/django-DefectDojo/)
+## Documentation
+
+### [Official docs](https://defectdojo.github.io/django-DefectDojo/)
 
 ### [Getting Started](readme-docs/GETTING-STARTED.md)
 
 ### [REST APIs](readme-docs/REST-APIs.md)
 
-### [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND-WRAPPERS)
+### [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND_WRAPPERS.md)
 
 ### [Release and Branch Model](readme-docs/RELEASE-AND-BRANCH-MODEL.md)
 

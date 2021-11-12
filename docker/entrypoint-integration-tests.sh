@@ -38,6 +38,7 @@ function fail() {
 function success() {
     echo "Success: $1 test passed\n"
 }
+
 echo "IT FILENAME: $DD_INTEGRATION_TEST_FILENAME"
 if [[ ! -z "$DD_INTEGRATION_TEST_FILENAME" ]]; then
     test=$DD_INTEGRATION_TEST_FILENAME
@@ -47,6 +48,7 @@ if [[ ! -z "$DD_INTEGRATION_TEST_FILENAME" ]]; then
     else
         fail $test
     fi
+
 else
     test="Finding integration tests"
     echo "Running: $test"
@@ -209,12 +211,16 @@ else
         fail $test
     fi
 
+# The below tests are commented out because they are still an unstable work in progress
+## Once Ready they can be uncommented.
+
     echo "Check Various Pages integration test"
     if python3 tests/check_various_pages.py ; then
         echo "Success: Check Various Pages tests passed"
     else
         echo "Error: Check Various Pages test failed"; exit 1
     fi
+
 
     # The below tests are commented out because they are still an unstable work in progress
     ## Once Ready they can be uncommented.

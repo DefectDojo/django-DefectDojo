@@ -114,6 +114,16 @@ class BaseTestCase(unittest.TestCase):
     def test_login(self):
         return self.login_page()
 
+    def logout(self):
+        driver = self.driver
+        driver.get(self.base_url + "logout")
+
+        self.assertTrue(self.is_text_present_on_page("Login"))
+        return driver
+
+    def test_logout(self):
+        return self.logout()
+
     @on_exception_html_source_logger
     def delete_product_if_exists(self, name="QA Test"):
         driver = self.driver
@@ -164,14 +174,14 @@ class BaseTestCase(unittest.TestCase):
         return driver
 
     def goto_active_engagements_overview(self, driver):
-        # return self.goto_engagements_internal(driver, 'engagement')
-        # engagement overview doesn't seem to have the datatables yet modifying the DOM
-        # https://github.com/DefectDojo/django-DefectDojo/issues/2173
-        driver.get(self.base_url + 'engagement')
-        # self.goto_engagements_internal(driver, 'engagement')
+        driver.get(self.base_url + 'engagement/active')
         return driver
 
     def goto_all_engagements_overview(self, driver):
+        driver.get(self.base_url + 'engagement/all')
+        return driver
+
+    def goto_all_engagements_by_product_overview(self, driver):
         return self.goto_engagements_internal(driver, 'engagements_all')
 
     def goto_engagements_internal(self, driver, rel_url):
@@ -196,7 +206,7 @@ class BaseTestCase(unittest.TestCase):
             WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
 
     def is_element_by_css_selector_present(self, selector, text=None):
-        elems = self.driver.find_elements_by_css_selector(selector)
+        elems = self.driver.find_elements(by=By.CSS_SELECTOR, value=selector)
         if len(elems) == 0:
             # print('no elements!')
             return False
@@ -225,6 +235,9 @@ class BaseTestCase(unittest.TestCase):
 
     def is_error_message_present(self, text=None):
         return self.is_element_by_css_selector_present('.alert-danger', text=text)
+
+    def is_help_message_present(self, text=None):
+        return self.is_element_by_css_selector_present('.help-block', text=text)
 
     def is_text_present_on_page(self, text):
         # DEBUG: couldn't find:  Product type added successfully. path:  //*[contains(text(),'Product type added successfully.')]

@@ -91,12 +91,18 @@ spec:
         {{- else if eq .Values.database "mysql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
         {{- end }}
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
+        {{- end }}
       {{- end }}
       {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
       - name: metrics
         image: {{ .Values.monitoring.prometheus.image }}
         imagePullPolicy: {{ .Values.monitoring.prometheus.imagePullPolicy }}
-        command: [ '/usr/bin/exporter', '-nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
+        command: [ '/usr/bin/nginx-prometheus-exporter', '-nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
         livenessProbe:
           httpGet:
             path: /metrics
