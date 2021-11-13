@@ -1,3 +1,10 @@
+---
+title: "Wishlist"
+description: "Be careful what you wish for"
+draft: false
+weight: 2
+---
+
 To manage expectations, we call this the wishlist. These are items we want to do, are discussing or pondering our minds:
 - New modern UI / SPA
 - New dashboarding / statistics
