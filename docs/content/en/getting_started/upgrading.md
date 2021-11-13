@@ -71,6 +71,20 @@ update the source code first)
 
 Replace the first step above with this one: `docker-compose build`
 
+## Upgrading to DefectDojo Version 2.5.x.
+
+This release introduces the "Forgot password" functionality (`DD_FORGOT_PASSWORD`: default `True`). The function
+allows sending an e-mail with the reset password link. Missing configuration or misconfiguration of SMTP
+(`DD_EMAIL_URL`) could raise an error (HTTP-500). Check and test (for example by resetting your own password) if you
+configured SMTP correctly. If you want to avoid HTTP-500 and you don't want to set up SMTP, you can just simply switch
+off the "Forgot password" functionality (`DD_FORGOT_PASSWORD=False`).
+
+Release renamed system setting `mail_notifications_from` to `email_from`. This value will not be used only for sending
+notifications but also for sending the reset password emails. It is highly recommended to check the content of this
+value if you are satisfied. If you installed DefectDojo earlier, you can expect `"from@example.com"` there. A fresh
+installation will use `"no-reply@example.com"`
+
+
 
 ## Upgrading to DefectDojo Version 2.4.x. (Security Release)
 
