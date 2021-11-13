@@ -22,12 +22,14 @@ from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, ChangePasswordForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
     Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm
 from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member
-from dojo.utils import get_page_items, add_breadcrumb
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.group.queries import get_authorized_group_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.authorization.roles_permissions import Permissions
 from dojo.decorators import dojo_ratelimit
+
+import hyperlink
 
 logger = logging.getLogger(__name__)
 
@@ -545,18 +547,16 @@ def add_group_member(request, uid):
 class DojoPasswordResetForm(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
-        from dojo.utils import get_system_setting
-        import hyperlink
+
         from_email = get_system_setting('email_from')
+
         url = hyperlink.parse(settings.SITE_URL)
         context['site_name'] = url.host
         context['protocol'] = url.scheme
         context['domain'] = settings.SITE_URL[len(url.scheme + '://'):]
-        try:
-            super().send_mail(subject_template_name, email_template_name,
-                              context, from_email, to_email, html_email_template_name)
-        except ConnectionError as ce:
-            logger.error(f"It is not possible to send reset password email: {ce}")
+
+        super().send_mail(subject_template_name, email_template_name,
+                          context, from_email, to_email, html_email_template_name)
 
 
 class DojoPasswordResetView(PasswordResetView):

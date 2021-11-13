@@ -79,7 +79,7 @@ env = environ.Env(
     DD_SECRET_KEY=(str, ''),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
-    DD_FORGOT_PASSWORD_BUTTON=(bool, True),  # do we show button for "Forgot password"
+    DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
     DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
     DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
@@ -428,7 +428,7 @@ SOCIAL_AUTH_PIPELINE = (
 )
 
 CLASSIC_AUTH_ENABLED = True
-FORGOT_PASSWORD_BUTTON = env('DD_FORGOT_PASSWORD_BUTTON')
+FORGOT_PASSWORD = env('DD_FORGOT_PASSWORD')
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
 SHOW_LOGIN_FORM = env('DD_SOCIAL_AUTH_SHOW_LOGIN_FORM')
 SOCIAL_LOGIN_AUTO_REDIRECT = env('DD_SOCIAL_LOGIN_AUTO_REDIRECT')

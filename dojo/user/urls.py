@@ -33,7 +33,7 @@ urlpatterns = [
     url(r'^user/(?P<uid>\d+)/add_group_member$', views.add_group_member,
         name='add_group_member_user'),
 ]
-if settings.FORGOT_PASSWORD_BUTTON:
+if settings.FORGOT_PASSWORD:
     urlpatterns.extend([
         url(r'^password_reset/$', views.DojoPasswordResetView.as_view(
             template_name='dojo/password_reset.html',
