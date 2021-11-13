@@ -77,7 +77,7 @@ Replace the first step above with this one: `docker-compose build`
 This releases fixes a High severity vulnerability for which the details will be disclosed on November 16th in [GHSA-fwg9-752c-qh8w](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-fwg9-752c-qh8w)
 
 There is a breaking change in the API for importing and re-importings scans with SonarQube API and Cobalt.io API. The [scan configurations
-have been unified](https://github.com/DefectDojo/django-DefectDojo/pull/5289) and are set now with the attribute `api_scan_configuration`. 
+have been unified](https://github.com/DefectDojo/django-DefectDojo/pull/5289) and are set now with the attribute `api_scan_configuration`.
 The existing configurations for SonarQube API and Cobalt.io API have been migrated.
 
 At the request of pyup.io, we had to remove the parser for Safety scans.
@@ -85,7 +85,7 @@ At the request of pyup.io, we had to remove the parser for Safety scans.
 
 ## Upgrading to DefectDojo Version 2.3.x.
 
-There are no special instruction for upgrading to 2.3.0. 
+There are no special instruction for upgrading to 2.3.0.
 In 2.3.0 we [changed the default password hashing algorithm to Argon2 (from PBKDF2)](https://github.com/DefectDojo/django-DefectDojo/pull/5205).
 When logging in, exising hashes get replaced by an Argon2 hash. If you want to rehash password without users having to login,
 please see the [Django password management docs](https://docs.djangoproject.com/en/3.2/topics/auth/passwords/).
@@ -126,11 +126,11 @@ We decided to name this version 2.0.0 because we did some big cleanups in this r
 - Refactor EndPoint handling/formatting ([#4473](https://github.com/DefectDojo/django-DefectDojo/pull/4473))
 - Upgrade to Django 3.x ([#3632](https://github.com/DefectDojo/django-DefectDojo/pull/3632))
 - PDF Reports removed ([#4418](https://github.com/DefectDojo/django-DefectDojo/pull/4418))
-- Hashcode calculation logic has changed. To update existing findings run: 
-  
+- Hashcode calculation logic has changed. To update existing findings run:
+
   `./manage.py dedupe --hash_code_only`.
 
-If you're using docker: 
+If you're using docker:
 
 `docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`.
 
@@ -231,7 +231,7 @@ This can take a while depeneding on your instance size. It might possible that n
 
 -   See release notes:
     <https://github.com/DefectDojo/django-DefectDojo/releases>
--   Defect Dojo now provides a `settings.py` file
+-   DefectDojo now provides a `settings.py` file
     out-of-the-box. Custom settings need to go into
     `local\_settings.py`. See
     <https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.py>
