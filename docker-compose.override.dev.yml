@@ -12,6 +12,8 @@ services:
   celeryworker:
     volumes:
       - '.:/app:z'
+    environment:
+      DD_EMAIL_URL: "smtp://mailhog:1025"
   celerybeat:
     volumes:
       - '.:/app:z'
