@@ -138,7 +138,7 @@
       "url_prefix": "",
       "enable_slack_notifications": false,
       "enable_mail_notifications": false,
-      "email_from": "from@example.com",
+      "email_from": "no-reply@example.com",
       "false_positive_history": false,
       "msteams_url": "",
       "slack_token": "",
