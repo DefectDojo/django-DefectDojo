@@ -9,7 +9,7 @@ assignees: ''
 
 **DefectDojo security reporting program**
 
-If you believe you have found a **security issue** in DefectDojo, please review the [disclosure policy](https://github.com/DefectDojo/django-DefectDojo/blob/master/SECURITY.md) and submit your finding via our security reporting program. 
+If you believe you have found a **security issue** in DefectDojo, please review the [disclosure policy](../../readme-docs/SECURITY.md) and submit your finding via our security reporting program. 
 
 Please, do not submit **security issues** via GitHub directly.
 

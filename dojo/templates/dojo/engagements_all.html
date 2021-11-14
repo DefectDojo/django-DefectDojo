@@ -88,7 +88,7 @@
                                         </a>
                                     </td>
                                     <td>
-                                        {% if p|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:p %}
+                                        {% if p|has_object_permission:"Engagement_Add" %}
                                         <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
                                                 <i class="fa fa-plus"></i> Add
                                         </a>
