@@ -1,3 +1,4 @@
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 import unittest
 import sys
@@ -25,55 +26,55 @@ class EngagementTest(BaseTestCase):
     def test_add_new_engagement(self):
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-        driver.find_element_by_partial_link_text("Add New Engagement").click()
-        driver.find_element_by_id("id_name").send_keys("test engagement")
-        driver.find_element_by_id("id_name").send_keys("\tthis is engagement test.")
-        driver.find_element_by_id("id_test_strategy").clear()
-        driver.find_element_by_id('id_test_strategy').send_keys("http://localhost:5000")
-        Select(driver.find_element_by_id("id_status")).select_by_visible_text("In Progress")
-        driver.find_element_by_css_selector("input[value='Done']").click()
+        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Add New Engagement").click()
+        driver.find_element(By.ID, "id_name").send_keys("test engagement")
+        driver.find_element(By.ID, "id_name").send_keys("\tthis is engagement test.")
+        driver.find_element(By.ID, "id_test_strategy").clear()
+        driver.find_element(By.ID, 'id_test_strategy').send_keys("http://localhost:5000")
+        Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
+        driver.find_element(By.CSS_SELECTOR, "input[value='Done']").click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
 
     def test_edit_created_new_engagement(self):
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-        driver.find_element_by_link_text("View Engagements").click()
-        driver.find_element_by_link_text("test engagement").click()
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Edit Engagement").click()
-        driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("edited test engagement")
-        Select(driver.find_element_by_id("id_status")).select_by_visible_text("In Progress")
-        driver.find_element_by_css_selector("input[value='Done']").click()
+        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+        driver.find_element(By.LINK_TEXT, "View Engagements").click()
+        driver.find_element(By.LINK_TEXT, "test engagement").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Edit Engagement").click()
+        driver.find_element(By.ID, "id_name").clear()
+        driver.find_element(By.ID, "id_name").send_keys("edited test engagement")
+        Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
+        driver.find_element(By.CSS_SELECTOR, "input[value='Done']").click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement updated successfully.'))
 
     def test_close_new_engagement(self):
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-        driver.find_element_by_link_text("View Engagements").click()
-        driver.find_element_by_link_text("edited test engagement").click()
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Close Engagement").click()
+        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+        driver.find_element(By.LINK_TEXT, "View Engagements").click()
+        driver.find_element(By.LINK_TEXT, "edited test engagement").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Close Engagement").click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement closed successfully.'))
 
     def test_delete_new_closed_engagement(self):
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-        driver.find_element_by_link_text('View Engagements').click()
+        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+        driver.find_element(By.LINK_TEXT, 'View Engagements').click()
 
         self.wait_for_datatable_if_content("no_active_engagements", "open_wrapper")
 
-        driver.find_element_by_link_text("edited test engagement").click()
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text('Delete Engagement').click()
-        driver.find_element_by_name('delete_name').click()
+        driver.find_element(By.LINK_TEXT, "edited test engagement").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, 'Delete Engagement').click()
+        driver.find_element(By.NAME, 'delete_name').click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement and relationships removed.'))
 
@@ -81,14 +82,14 @@ class EngagementTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
-        driver.find_element_by_id('products_wrapper')
-        driver.find_element_by_link_text('QA Test').click()
-        driver.find_element_by_xpath("//a[@class='dropdown-toggle active']//span[@class='hidden-xs']").click()
-        driver.find_element_by_link_text('Add New CI/CD Engagement').click()
-        driver.find_element_by_id("id_name").send_keys("test new ci/cd engagement")
-        driver.find_element_by_id("id_name").send_keys("\ttest new ci/cd engagement")
-        driver.find_element_by_id('id_deduplication_on_engagement').get_attribute('checked')
-        driver.find_element_by_css_selector("input[value='Done']").click()
+        driver.find_element(By.ID, 'products_wrapper')
+        driver.find_element(By.LINK_TEXT, 'QA Test').click()
+        driver.find_element(By.XPATH, "//a[@class='dropdown-toggle active']//span[@class='hidden-xs']").click()
+        driver.find_element(By.LINK_TEXT, 'Add New CI/CD Engagement').click()
+        driver.find_element(By.ID, "id_name").send_keys("test new ci/cd engagement")
+        driver.find_element(By.ID, "id_name").send_keys("\ttest new ci/cd engagement")
+        driver.find_element(By.ID, 'id_deduplication_on_engagement').get_attribute('checked')
+        driver.find_element(By.CSS_SELECTOR, "input[value='Done']").click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
 
