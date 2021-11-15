@@ -216,7 +216,7 @@ The deduplication part of this command will run the deduplication for each findi
 run the deduplication in the foreground process, use:
 
 {{< highlight bash >}}
-docker-compose exec uwsgi ./manage.py dedupe --dedupe-sync
+docker-compose exec uwsgi ./manage.py dedupe --dedupe_sync
 {{< / highlight >}}
 
 Please note the deduplication process is resource intensive and can take a long time to complete
