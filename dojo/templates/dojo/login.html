@@ -73,7 +73,7 @@
                 {% if SAML2_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
-                            <a id="oauth-login-saml" rel="nofollow" data-method="post" href="/saml2/login" style="color: rgb(255,255,255)">Login with SAML</a>
+                            <a id="oauth-login-saml" rel="nofollow" data-method="post" href="/saml2/login" style="color: rgb(255,255,255)">{{ SAML2_LOGIN_BUTTON_TEXT }}</a>
                         </button>
                     </div>
                 {% endif %}
