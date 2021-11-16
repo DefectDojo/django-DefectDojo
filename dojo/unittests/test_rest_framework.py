@@ -482,6 +482,18 @@ class BaseClass():
             self.client = APIClient()
             self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
+        def setUp_global_reader(self):
+            testuser = User.objects.get(id=5)
+            token = Token.objects.get(user=testuser)
+            self.client = APIClient()
+            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        def setUp_global_owner(self):
+            testuser = User.objects.get(id=6)
+            token = Token.objects.get(user=testuser)
+            self.client = APIClient()
+            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
         @skipIfNotSubclass(ListModelMixin)
         def test_list_not_authorized(self):
             if not self.object_permission:
@@ -1475,6 +1487,18 @@ class ProductTypeTest(BaseClass.RESTEndpointTest):
 
         response = self.client.post(self.url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_create_not_authorized_reader(self):
+        self.setUp_global_reader()
+
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_create_authorized_owner(self):
+        self.setUp_global_owner()
+
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(201, response.status_code, response.content[:1000])
 
 
 class DojoGroupsTest(BaseClass.RESTEndpointTest):

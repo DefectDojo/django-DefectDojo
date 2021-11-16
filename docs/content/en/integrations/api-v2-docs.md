@@ -6,6 +6,8 @@ weight: 2
 ---
 
 
+
+
 DefectDojo\'s API is created using [Django Rest
 Framework](http://www.django-rest-framework.org/). The documentation of
 each endpoint is available within each DefectDojo installation at
@@ -171,3 +173,17 @@ Example for importing a scan result:
        -   Browse for the file to upload
 
 -   Click send
+
+Clients / API Wrappers
+----------------------
+
+| Wrapper                      | Status                   | Notes |
+| -----------------------------| ------------------------| ------------------------|
+| [Specific python wrapper](https://github.com/DefectDojo/defectdojo_api)      | working (2021-01-21)    | API Wrapper including scripts for continous CI/CD uploading. Is lagging behind a bit on latest API features as we plan to revamp the API wrapper |
+| [Openapi python wrapper](https://github.com/alles-klar/defectdojo-api-v2-client)       | | proof of concept only where we found out the the OpenAPI spec is not perfect yet |
+| [Java library](https://github.com/secureCodeBox/defectdojo-client-java)                 | working (2021-08-30)    | Created by the kind people of [SecureCodeBox](https://github.com/secureCodeBox/secureCodeBox) |
+| [Image using the Java library](https://github.com/SDA-SE/defectdojo-client) | working (2021-08-30)    | |
+| [.Net/C# library](https://www.nuget.org/packages/DefectDojo.Api/)              | working (2021-06-08)    | |
+| [dd-import](https://github.com/MaibornWolff/dd-import)                    | working (2021-08-24)    | dd-import is not directly an API wrapper. It offers some convenience functions to make it easier to import findings and language data from CI/CD pipelines. |
+
+Some of the api wrappers contain quite a bit of logic to ease scanning and importing in CI/CD environments. We are in the process of simplifying this by making the DefectDojo API smarter (so api wrappers / script can be dumber).
