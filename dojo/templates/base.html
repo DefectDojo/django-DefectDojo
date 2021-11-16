@@ -208,7 +208,7 @@
                                         <li><a href="{% url 'new_product' %}"> Add Product</a></li>
                                     {% endif %}
                                     <li><a href="{% url 'product_type' %}">All Product Types</a></li>
-                                    {% if request.user.is_staff %}
+                                    {% if "Product_Type_Add"|has_global_permission %}
                                         <li><a id="pop-out-add-product-type" href="{% url 'add_product_type' %}"> Add Product Type</a></li>
                                     {% endif %}
                                 </ul>
