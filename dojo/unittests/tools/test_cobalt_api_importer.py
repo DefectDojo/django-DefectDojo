@@ -91,7 +91,7 @@ class TestCobaltApiImporter(TestCase):
         cobalt_api_importer = CobaltApiImporter()
         cobalt_api, api_scan_configuration = cobalt_api_importer.prepare_client(self.test)
 
-        mock_foo.filter.assert_called_with(product=self.product)
+        mock_foo.filter.assert_called_with(product=self.product, tool_configuration__tool_type__name='Cobalt.io')
         self.assertEqual(api_scan_configuration, self.api_scan_configuration)
         self.assertEqual(cobalt_api.api_token, 'API_KEY')
         self.assertEqual(cobalt_api.org_token, 'EXTRAS')
