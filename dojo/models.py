@@ -3700,7 +3700,9 @@ admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
 admin.site.register(CWE)
 admin.site.register(Regulation)
-admin.site.register(Notifications)
+admin.site.register(Global_Role)
+admin.site.register(Role)
+admin.site.register(Dojo_Group)
 
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)

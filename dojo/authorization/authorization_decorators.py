@@ -1,6 +1,6 @@
 import functools
 from django.shortcuts import get_object_or_404
-from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
 
 
 def user_is_authorized(model, permission, arg, lookup="pk", func=None):
@@ -26,6 +26,21 @@ def user_is_authorized(model, permission, arg, lookup="pk", func=None):
 
         user_has_permission_or_403(request.user, obj, permission)
 
+        return func(request, *args, **kwargs)
+
+    return _wrapped
+
+
+def user_has_global_permission(permission, func=None):
+    """Decorator for functions that ensures the user has a (global) permission
+    """
+
+    if func is None:
+        return functools.partial(user_has_global_permission, permission)
+
+    @functools.wraps(func)
+    def _wrapped(request, *args, **kwargs):
+        user_has_global_permission_or_403(request.user, permission)
         return func(request, *args, **kwargs)
 
     return _wrapped

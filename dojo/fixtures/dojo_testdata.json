@@ -72,6 +72,42 @@
     }
   },
   {
+    "pk": 5,
+    "model": "auth.user",
+    "fields": {
+      "username": "user4",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": null,
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
+      "email": "",
+      "date_joined": "2018-04-13T07:59:51.527Z"
+    }
+  },
+  {
+    "pk": 6,
+    "model": "auth.user",
+    "fields": {
+      "username": "user5",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": null,
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
+      "email": "",
+      "date_joined": "2018-04-13T07:59:51.527Z"
+    }
+  },
+  {
     "pk": "2dqr18yqu9mzb87abk0okid75w2clakl",
     "model": "sessions.session",
     "fields": {
@@ -2194,6 +2230,30 @@
     }
   },
   {
+    "pk": "184770c4c3256aba904297610fbb4da3fa15ba34",
+    "model": "authtoken.token",
+    "fields": {
+      "user": 4,
+      "created": "2018-04-16T06:54:35.933Z"
+    }
+  },
+  {
+    "pk": "184770c4c3256aba904297610fbb4da3fa15ba35",
+    "model": "authtoken.token",
+    "fields": {
+      "user": 5,
+      "created": "2018-04-16T06:54:35.933Z"
+    }
+  },
+  {
+    "pk": "184770c4c3256aba904297610fbb4da3fa15ba36",
+    "model": "authtoken.token",
+    "fields": {
+      "user": 6,
+      "created": "2018-04-16T06:54:35.933Z"
+    }
+  },
+  {
     "pk": "1",
     "model": "dojo.dojo_group",
     "fields": {
@@ -2242,6 +2302,22 @@
     "fields": {
       "user": 1,
       "role": 4
+    }
+  },
+  {
+    "pk": 2,
+    "model": "dojo.global_role",
+    "fields": {
+      "user": 6,
+      "role": 4
+    }
+  },
+  {
+    "pk": 3,
+    "model": "dojo.global_role",
+    "fields": {
+      "user": 5,
+      "role": 5
     }
   },
   {

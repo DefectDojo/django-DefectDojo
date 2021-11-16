@@ -3,7 +3,6 @@ import logging
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -19,7 +18,7 @@ from django.db.models.query import QuerySet
 from django.conf import settings
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.authorization_decorators import user_has_global_permission, user_is_authorized
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_members_for_product_type, \
     get_authorized_groups_for_product_type
 from dojo.product.queries import get_authorized_products
@@ -70,7 +69,7 @@ def prefetch_for_product_type(prod_types):
     return prefetch_prod_types
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_has_global_permission(Permissions.Product_Type_Add)
 def add_product_type(request):
     form = Product_TypeForm()
     if request.method == 'POST':
