@@ -80,7 +80,7 @@ def login_view(request):
         settings.GITLAB_OAUTH2_ENABLED,
         settings.AUTH0_OAUTH2_ENABLED,
         settings.SAML2_ENABLED
-    ]) == 1:
+    ]) == 1 and not ('force_login_form' in request.GET):
         if settings.GOOGLE_OAUTH_ENABLED:
             social_auth = 'google-oauth2'
         elif settings.OKTA_OAUTH_ENABLED:
