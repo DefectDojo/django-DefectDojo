@@ -51,7 +51,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 @sensitive_variables('service_account_info', 'credentials')
-@user_is_authorized(Test, Permissions.Test_View, 'tid', 'view')
+@user_is_authorized(Test, Permissions.Test_View, 'tid')
 def view_test(request, tid):
     test_prefetched = get_authorized_tests(Permissions.Test_View)
     test_prefetched = test_prefetched.annotate(total_reimport_count=Count('test_import__id', distinct=True))
@@ -236,7 +236,7 @@ def prefetch_for_findings(findings):
 #     return prefetch_for_test_imports
 
 
-@user_is_authorized(Test, Permissions.Test_Edit, 'tid', 'change')
+@user_is_authorized(Test, Permissions.Test_Edit, 'tid')
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     form = TestForm(instance=test)
@@ -263,7 +263,7 @@ def edit_test(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_Delete, 'tid', 'delete')
+@user_is_authorized(Test, Permissions.Test_Delete, 'tid')
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     eng = test.engagement
@@ -327,7 +327,7 @@ def test_calendar(request):
         'users': Dojo_User.objects.all()})
 
 
-@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Test_View, 'tid')
 def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
@@ -347,7 +347,7 @@ def test_ics(request, tid):
     return response
 
 
-@user_is_authorized(Test, Permissions.Finding_Add, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid')
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
@@ -469,7 +469,7 @@ def add_findings(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Finding_Add, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid')
 def add_temp_finding(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)
@@ -575,7 +575,7 @@ def add_temp_finding(request, tid, fid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Test_View, 'tid')
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
     templates = Finding_Template.objects.all()
@@ -594,7 +594,7 @@ def search(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid')
 def re_import_scan_results(request, tid):
     additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
