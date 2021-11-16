@@ -111,6 +111,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
     DD_SAML2_ENABLED=(bool, False),
+    DD_SAML2_LOGIN_BUTTON_TEXT=(str, 'Login with SAML'),
     # Optional: display the idp SAML Logout URL in DefectDojo
     DD_SAML2_LOGOUT_URL=(str, ''),
     # Metadata is required for SAML, choose either remote url or local file path
@@ -759,6 +760,7 @@ def saml2_attrib_map_format(dict):
 
 
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
+SAML2_LOGIN_BUTTON_TEXT = env('DD_SAML2_LOGIN_BUTTON_TEXT')
 SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
 if SAML2_ENABLED:
     import saml2

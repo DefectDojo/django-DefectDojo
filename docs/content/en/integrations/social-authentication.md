@@ -242,6 +242,8 @@ homepage](https://github.com/IdentityPython/djangosaml2).
 
     {{< highlight python >}}
     DD_SAML2_ENABLED=(bool, **True**),
+    # SAML Login Button Text
+    DD_SAML2_LOGIN_BUTTON_TEXT=(str, 'Login with SAML'),
     # If the metadata can be accessed from a url, try the
     DD_SAML2_METADATA_AUTO_CONF_URL=(str, '<https://your_IdP.com/metadata.xml>'),
     # Otherwise, downlaod a copy of the metadata into an xml file, and
@@ -263,8 +265,7 @@ NOTE: *DD_SAML2_ATTRIBUTES_MAP* in k8s can be referenced as extraConfig (e.g. `D
 4.  Checkout the SAML section in dojo/`dojo/settings/settings.dist.py` and verfiy if it fits your requirement. If you need help, take a look at the [plugin
 documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
 
-5.  Restart DefectDojo, and you should now see a **Login with SAML**
-    button on the login page.
+5.  Restart DefectDojo, and you should now see a **Login with SAML** button (default setting of DD_SAML2_LOGIN_BUTTON_TEXT) on the login page.
 
 NOTE: In the case when IDP is configured to use self signed (private) certificate,
 than CA needs to be specified by define environments variable
