@@ -5,6 +5,7 @@ from django.conf import settings
 def globalize_oauth_vars(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
     return {'SHOW_LOGIN_FORM': settings.SHOW_LOGIN_FORM,
+            'FORGOT_PASSWORD': settings.FORGOT_PASSWORD,
             'CLASSIC_AUTH_ENABLED': settings.CLASSIC_AUTH_ENABLED,
             'AUTH0_ENABLED': settings.AUTH0_OAUTH2_ENABLED,
             'GOOGLE_ENABLED': settings.GOOGLE_OAUTH_ENABLED,

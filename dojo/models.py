@@ -225,6 +225,8 @@ class System_Settings(models.Model):
                                               "number of duplicates, the "
                                               "oldest will be deleted. Duplicate will not be deleted when left empty. A value of 0 will remove all duplicates.")
 
+    email_from = models.CharField(max_length=200, default='no-reply@example.com', blank=True)
+
     enable_jira = models.BooleanField(default=False,
                                       verbose_name='Enable JIRA integration',
                                       blank=False)
@@ -278,9 +280,6 @@ class System_Settings(models.Model):
                                     help_text='The full URL of the '
                                               'incoming webhook')
     enable_mail_notifications = models.BooleanField(default=False, blank=False)
-    mail_notifications_from = models.CharField(max_length=200,
-                                               default='from@example.com',
-                                               blank=True)
     mail_notifications_to = models.CharField(max_length=200, default='',
                                              blank=True)
     false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive. Not needed when using deduplication, advised to not combine these two.")
