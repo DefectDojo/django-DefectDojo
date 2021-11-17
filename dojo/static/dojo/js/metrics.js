@@ -1600,7 +1600,7 @@ function open_close_weekly(opened, closed, accepted, ticks) {
             options);
 }
 
-function severity_weekly(critical, high, medium, low, ticks) {
+function severity_weekly(critical, high, medium, low, info, ticks) {
     var options = {
         xaxes: [{
             ticks: ticks,

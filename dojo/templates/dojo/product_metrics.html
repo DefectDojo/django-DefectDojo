@@ -861,7 +861,7 @@
                 low.push([{{ forloop.counter0 }}, {{ values.Low }}]);
                 info.push([{{ forloop.counter0 }}, {{ values.Info }}]);
             {% endfor %}
-            severity_weekly(critical, high, medium, low, ticks);
+            severity_weekly(critical, high, medium, low, info, ticks);
             
             critical = [];
             high = [];
