@@ -28,9 +28,13 @@ class CloudsploitParser(object):
         dupes = dict()
         for item in data:
             title = item['title']
+            if type(item['region']) is str:
+                region = item['region']
+            elif type(item['region']) is list:
+                region = ','.join(item['region'])
             description = "**Finding** : " + item['message'] + "\n" + \
                 "**Resource** : " + item['resource'] + "\n" + \
-                "**Region** : " + item['region']
+                "**Region** : " + region
             severity = self.convert_severity(item['status'])
             finding = Finding(
                 title=title,
@@ -44,9 +48,8 @@ class CloudsploitParser(object):
             )
 
             # internal de-duplication
-            dupe_key = hashlib.sha256(
-                str(description + title).encode('utf-8')).hexdigest()
-            print(dupe_key)
+            dupe_key = hashlib.sha256(str(description + title).encode('utf-8')).hexdigest()
+
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if finding.description:

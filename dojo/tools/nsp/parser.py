@@ -15,13 +15,11 @@ class NspParser(object):
         return "Node Security Platform (NSP) output file can be imported in JSON format."
 
     def get_findings(self, json_output, test):
-
         tree = self.parse_json(json_output)
-
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return self.get_items(tree, test)
         else:
-            self.items = []
+            return []
 
     def parse_json(self, json_output):
         try:

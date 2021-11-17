@@ -56,7 +56,6 @@ class TwistlockCSVParser(object):
 
     def parse(self, filename, test):
         if filename is None:
-            self.items = ()
             return
         content = filename.read()
         dupes = dict()
@@ -95,18 +94,12 @@ class TwistlockJsonParser(object):
     def get_items(self, tree, test):
         items = {}
         if 'results' in tree:
-            try:
-                vulnerabilityTree = tree['results'][0]['vulnerabilities']
-
-                for node in vulnerabilityTree:
-
-                    item = get_item(node, test)
-                    unique_key = node['id'] + str(node['packageName'] + str(
-                        node['packageVersion']) + str(node['severity']))
-                    items[unique_key] = item
-            except KeyError as ke:
-                logger.warn("Could not find key {}".format(ke))
-
+            vulnerabilityTree = tree['results'][0].get('vulnerabilities', [])
+            for node in vulnerabilityTree:
+                item = get_item(node, test)
+                unique_key = node['id'] + str(node['packageName'] + str(
+                    node['packageVersion']) + str(node['severity']))
+                items[unique_key] = item
         return list(items.values())
 
 

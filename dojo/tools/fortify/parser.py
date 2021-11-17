@@ -117,7 +117,6 @@ class FortifyParser(object):
                     title=title,
                     severity=issue["Friority"],
                     file_path=issue['FilePath'],
-                    line_number=int(issue['LineStart']),
                     line=int(issue['LineStart']),
                     static_finding=True,
                     test=test,

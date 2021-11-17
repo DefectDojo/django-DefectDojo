@@ -1,0 +1,20 @@
+docs:
+- any: ['docs/**/*', 'readme-docs/**/*']
+
+docker:
+- any: ['docker/**/*', 'docker**', 'Docker*']
+
+"New Migration":
+- any: ['dojo/db_migrations/*']
+
+unittests:
+- any: ['dojo/unittests/**/*']
+
+integration_tests:
+- any: ['tests/**/*']
+
+settings_changes:
+- any: ['dojo/settings/settings.dist.py']
+
+apiv2:
+- any: ['dojo/api_v2/**/*']

@@ -162,6 +162,8 @@ class DependencyCheckParser(object):
         dependency_filename, dependency_filepath = self.get_filename_and_path_from_dependency(dependency, related_dependency, namespace)
         # logger.debug('dependency_filename: %s', dependency_filename)
 
+        tags = []
+
         if dependency_filename is None:
             return None
 
@@ -172,6 +174,8 @@ class DependencyCheckParser(object):
         else:
             cwe_field = self.get_field_value(vulnerability, 'cwe', namespace)
         description = self.get_field_value(vulnerability, 'description', namespace)
+        # I need the notes field since this is how the suppression is documented.
+        notes = self.get_field_value(vulnerability, 'notes', namespace)
 
         cve = name[:28]
         if cve and not cve.startswith('CVE'):
@@ -195,6 +199,10 @@ class DependencyCheckParser(object):
         stripped_name = re.sub(r'^CWE-\d+\:', '', stripped_name).strip()
         # startswith CWE-XXX
         stripped_name = re.sub(r'^CWE-\d+', '', stripped_name).strip()
+
+        if component_name is None:
+            logger.warning("component_name was None for File: {}, using dependency file name instead.".format(dependency_filename))
+            component_name = dependency_filename
 
         title = '%s:%s | %s(in %s)' % (component_name.split(':')[-1], component_version,
             (stripped_name + ' ' if stripped_name else '') + (description if len(stripped_name) < 25 else ''),
@@ -238,7 +246,23 @@ class DependencyCheckParser(object):
                                      'source: {1}\n' \
                                      'url: {2}\n\n'.format(name, source, url)
 
-        mitigation = 'Update ' + component_name + ':' + component_version + ' to at least the version recommended in the description'
+        if related_dependency is not None:
+            tags.append("related")
+
+        if vulnerability.tag == "{}suppressedVulnerability".format(namespace):
+            if notes == "":
+                notes = "Document on why we are suppressing this vulnerability is missing!"
+                tags.append("no_suppression_document")
+            mitigation = '**This vulnerability is mitigated and/or suppressed:** {}\n'.format(notes)
+            mitigation = mitigation + 'Update {}:{} to at least the version recommended in the description'.format(component_name, component_version)
+
+            active = False
+            tags.append("suppressed")
+
+        else:
+            mitigation = 'Update {}:{} to at least the version recommended in the description'.format(component_name, component_version)
+            description += '\nFilepath: ' + str(dependency_filepath)
+            active = True
 
         return Finding(
             title=title,
@@ -249,6 +273,8 @@ class DependencyCheckParser(object):
             description=description,
             severity=severity,
             mitigation=mitigation,
+            tags=tags,
+            active=active,
             static_finding=True,
             references=reference_detail,
             component_name=component_name,
@@ -264,7 +290,6 @@ class DependencyCheckParser(object):
         return "OWASP Dependency Check output can be imported in Xml format."
 
     def get_findings(self, filename, test):
-
         if filename is None:
             return list()
 
@@ -283,60 +308,27 @@ class DependencyCheckParser(object):
         dependencies = scan.find(namespace + 'dependencies')
 
         if dependencies:
-            for dependency in dependencies.findall(namespace +
-                                                   'dependency'):
-                vulnerabilities = dependency.find(namespace +
-                                                  'vulnerabilities')
+            for dependency in dependencies.findall(namespace + 'dependency'):
+                logger.debug('parsing dependency: %s', self.get_field_value(dependency, 'fileName', namespace))
+                vulnerabilities = dependency.find(namespace + 'vulnerabilities')
                 if vulnerabilities is not None:
-                    for vulnerability in vulnerabilities.findall(
-                            namespace + 'vulnerability'):
+                    for vulnerability in vulnerabilities.findall(namespace + 'vulnerability'):
+                        if vulnerability:
+                            finding = self.get_finding_from_vulnerability(dependency, None, vulnerability, test, namespace)
+                            self.add_finding(finding, dupes)
 
-                        finding = self.get_finding_from_vulnerability(dependency, None,
-                            vulnerability, test, namespace)
+                    for suppressedVulnerability in vulnerabilities.findall(namespace + 'suppressedVulnerability'):
+                        if suppressedVulnerability:
+                            finding = self.get_finding_from_vulnerability(dependency, None, suppressedVulnerability, test, namespace)
+                            self.add_finding(finding, dupes)
 
-                        self.add_finding(finding, dupes)
-
-                        # TODO relateddependencies are ignored in this parser, but should be imported because you might miss vulnerable dependencies otherwise
-                        # <relatedDependencies>
-                        #     <relatedDependency>
-                        #         <fileName>client-offer-service-ear-1.0-SNAPSHOT-deployment-prod.zip: h2-console.war</fileName>
-                        #         <filePath>/var/lib/jenkins/workspace/vice-middleware-security_develop/offer-service-ear/target/client-offer-service-ear-1.0-SNAPSHOT-deployment-prod.zip/jboss/standalone/deployments/h2-console.war</filePath>
-                        #         <sha256>a520752f350909c191db45a598a88fcca2fa5db17a340dee6b3d0e36f4122e11</sha256>
-                        #         <sha1>080c5a481cd7abf27bfd4b48edf73b1cb214085e</sha1>
-                        #         <md5>add18b9f953221ff565cf7a34aac0ed9</md5>
-                        #     </relatedDependency>
-                        #     <relatedDependency>
-                        #         <fileName>client-offer-service-ear-1.0-SNAPSHOT-deployment-uat.zip: h2-console.war</fileName>
-                        #         <filePath>/var/lib/jenkins/workspace/vice-middleware-security_develop/offer-service-ear/target/client-offer-service-ear-1.0-SNAPSHOT-deployment-uat.zip/jboss/standalone/deployments/h2-console.war</filePath>
-                        #         <sha256>a520752f350909c191db45a598a88fcca2fa5db17a340dee6b3d0e36f4122e11</sha256>
-                        #         <sha1>080c5a481cd7abf27bfd4b48edf73b1cb214085e</sha1>
-                        #         <md5>add18b9f953221ff565cf7a34aac0ed9</md5>
-                        #     </relatedDependency>
-                        # </relatedDependencies>
-
-                        # related dependencies can have different identifiers
-                        # <relatedDependency>
-                        #     <fileName>client-platform.ear: platform-rest-internal.war: jackson-datatype-jsr310-2.9.8.jar</fileName>
-                        #     <filePath>/var/lib/jenkins/workspace/nl-platform_-_metrics_develop/platform-client/target/client-platform.ear/platform-rest-internal.war/WEB-INF/lib/jackson-datatype-jsr310-2.9.8.jar</filePath>
-                        #     <sha256>fdca896161766ca4a2c3e06f02f6a5ede22a5b3a55606541cd2838eace08ca23</sha256>
-                        #     <sha1>28ad1bced632ba338e51c825a652f6e11a8e6eac</sha1>
-                        #     <md5>01d34ef6e91de1aea29aadebced1aaa5</md5>
-                        #     <identifiers>
-                        #         <package>
-                        #             <id>pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.9.8</id>
-                        #             <url>https://ossindex.sonatype.org/component/pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.9.8</url>
-                        #         </package>
-                        #     </identifiers>
-                        # </relatedDependency>
-
-                        relatedDependencies = dependency.find(namespace + 'relatedDependencies')
-                        if relatedDependencies:
-                            for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
-                                finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
-                                self.add_finding(finding, dupes)
+                    relatedDependencies = dependency.find(namespace + 'relatedDependencies')
+                    if relatedDependencies:
+                        for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
+                            finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
+                            self.add_finding(finding, dupes)
 
         return list(dupes.values())
-
 
 # future idea include vulnerablesoftware in description?
 # <vulnerableSoftware>

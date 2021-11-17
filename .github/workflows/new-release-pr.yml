@@ -19,11 +19,6 @@ jobs:
   create_pr:
     runs-on: ubuntu-latest
     steps:
-#       - name: Login to DockerHub
-#         uses: docker/login-action@v1
-#         with:
-#           username: ${{ secrets.DOCKERHUB_USERNAME }}
-#           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout from_branch branch
         uses: actions/checkout@v2
         with:
@@ -52,13 +47,17 @@ jobs:
           sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number }}'/" dojo/__init__.py
           sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
           sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number }}\"/" components/package.json
+          # remove the -dev suffix to make it the new final version in master
+          CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml)
+          sed -ri "s/version: \S+/version: ${CURRENT_CHART_VERSION%-*}/" helm/defectdojo/Chart.yaml
+
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@v4.11.0
+        uses: stefanzweifel/git-auto-commit-action@v4.12.0
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"
@@ -70,11 +69,11 @@ jobs:
       - name: Create Pull Request
         env:
           REPO_ORG: ${{ steps.set-repo-org.outputs.repoorg }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.pulls.create({
+            github.rest.pulls.create({
               owner: '${{ env.REPO_ORG }}',
               repo: 'django-DefectDojo',
               title: 'Release: Merge release into master from: ${{ env.NEW_BRANCH }}',

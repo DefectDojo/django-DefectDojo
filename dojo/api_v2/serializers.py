@@ -4,25 +4,26 @@ from drf_yasg.utils import swagger_serializer_method
 from rest_framework.fields import DictField, MultipleChoiceField
 
 from dojo.endpoint.utils import endpoint_filter
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Instance, Endpoint, JIRA_Project, \
     Notes, DojoMeta, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
-    System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, \
+    Regulation, System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
-    Network_Locations
+    Network_Locations, UserContactInfo, Product_API_Scan_Configuration
 
-from dojo.forms import ImportScanForm
-from dojo.tools.factory import requires_file
+from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from dojo.utils import is_scan_file_too_large
 from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
+from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 import datetime
 import six
@@ -39,6 +40,31 @@ from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+
+def get_import_meta_data_from_dict(data):
+    test_id = data.get('test', None)
+    if test_id:
+        if isinstance(test_id, Test):
+            test_id = test_id.id
+        elif isinstance(test_id, str) and not test_id.isdigit():
+            raise serializers.ValidationError('test must be an integer')
+
+    scan_type = data.get('scan_type', None)
+
+    test_title = data.get('test_title', None)
+
+    engagement_id = data.get('engagement', None)
+    if engagement_id:
+        if isinstance(engagement_id, Engagement):
+            engagement_id = engagement_id.id
+        elif isinstance(engagement_id, str) and not engagement_id.isdigit():
+            raise serializers.ValidationError('engagement must be an integer')
+    engagement_name = data.get('engagement_name', None)
+
+    product_name = data.get('product_name', None)
+
+    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name
 
 
 @extend_schema_field(serializers.ListField(child=serializers.CharField()))  # also takes basic python types
@@ -274,16 +300,38 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     last_login = serializers.DateTimeField(read_only=True)
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'}, required=False,
+                                     validators=[validate_password])
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser', 'password')
 
     def create(self, validated_data):
+        if 'password' in validated_data:
+            password = validated_data.pop('password')
+        else:
+            password = None
         user = User.objects.create(**validated_data)
-        user.set_unusable_password()
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
         user.save()
         return user
+
+    def validate(self, data):
+        if self.context['request'].method in ['PATCH', 'PUT'] and 'password' in data:
+            raise ValidationError('Update of password though API is not allowed')
+        else:
+            return super().validate(data)
+
+
+class UserContactInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserContactInfo
+        fields = '__all__'
 
 
 class UserStubSerializer(serializers.ModelSerializer):
@@ -751,9 +799,9 @@ class SonarqubeIssueTransitionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SonarqubeProductSerializer(serializers.ModelSerializer):
+class ProductAPIScanConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Sonarqube_Product
+        model = Product_API_Scan_Configuration
         fields = '__all__'
 
 
@@ -1159,14 +1207,19 @@ class ImportScanSerializer(serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
+        choices=get_choices_sorted())
     # TODO why do we allow only existing endpoints?
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                          required=False,
                                                          default=None)
     file = serializers.FileField(required=False)
+
+    product_name = serializers.CharField(required=False)
+    engagement_name = serializers.CharField(required=False)
     engagement = serializers.PrimaryKeyRelatedField(
-        queryset=Engagement.objects.all())
+        queryset=Engagement.objects.all(), required=False)
+    test_title = serializers.CharField(required=False)
+
     lead = serializers.PrimaryKeyRelatedField(
         allow_null=True,
         default=None,
@@ -1179,12 +1232,18 @@ class ImportScanSerializer(serializers.Serializer):
     build_id = serializers.CharField(required=False)
     branch_tag = serializers.CharField(required=False)
     commit_hash = serializers.CharField(required=False)
-    sonarqube_config = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
-                                                          queryset=Sonarqube_Product.objects.all())
-
-    test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
+    api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
+                                                          queryset=Product_API_Scan_Configuration.objects.all())
+    service = serializers.CharField(required=False)
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+
+    # extra fields populated in response
+    # need to use the _id suffix as without the serializer framework gets confused
+    test = serializers.IntegerField(read_only=True)  # left for backwards compatibility
+    test_id = serializers.IntegerField(read_only=True)
+    engagement_id = serializers.IntegerField(read_only=True)
+    product_id = serializers.IntegerField(read_only=True)
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1192,7 +1251,6 @@ class ImportScanSerializer(serializers.Serializer):
         active = data['active']
         verified = data['verified']
         minimum_severity = data['minimum_severity']
-        scan_type = data['scan_type']
         endpoint_to_add = data['endpoint_to_add']
         scan_date = data['scan_date']
         # Will save in the provided environment or in the `Development` one if absent
@@ -1200,7 +1258,8 @@ class ImportScanSerializer(serializers.Serializer):
         build_id = data.get('build_id', None)
         branch_tag = data.get('branch_tag', None)
         commit_hash = data.get('commit_hash', None)
-        sonarqube_config = data.get('sonarqube_config', None)
+        api_scan_configuration = data.get('api_scan_configuration', None)
+        service = data.get('service', None)
 
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
@@ -1209,13 +1268,17 @@ class ImportScanSerializer(serializers.Serializer):
             logger.debug('import scan tags: %s', data['tags'])
             tags = data['tags']
 
-        engagement = data['engagement']
         lead = data['lead']
 
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
         group_by = data.get('group_by', None)
+
+        _, test_title, scan_type, engagement_id, engagement_name, product_name = get_import_meta_data_from_dict(data)
+        # we passed validation, so the engagement is present
+        product = get_target_product_if_exists(product_name)
+        engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
         importer = Importer()
         try:
@@ -1229,18 +1292,22 @@ class ImportScanSerializer(serializers.Serializer):
                                                                              push_to_jira=push_to_jira,
                                                                              close_old_findings=close_old_findings,
                                                                              group_by=group_by,
-                                                                             sonarqube_config=sonarqube_config)
+                                                                             api_scan_configuration=api_scan_configuration,
+                                                                             service=service,
+                                                                             title=test_title)
+
+            if test:
+                data['test'] = test.id
+                data['test_id'] = test.id
+                data['engagement_id'] = test.engagement.id
+                data['product_id'] = test.engagement.product.id
+
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
             raise Exception(se)
         except ValueError as ve:
             raise Exception(ve)
-
-        # return the id of the created test, can't find a better way because this is not a ModelSerializer....
-        self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
-
-        return test
 
     def validate(self, data):
         scan_type = data.get("scan_type")
@@ -1250,6 +1317,11 @@ class ImportScanSerializer(serializers.Serializer):
         if file and is_scan_file_too_large(file):
             raise serializers.ValidationError(
                 'Report file is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
+        tool_type = requires_tool_type(scan_type)
+        if tool_type:
+            api_scan_configuration = data.get('api_scan_configuration')
+            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+                raise serializers.ValidationError(f'API scan configuration must be of tool type {tool_type}')
         return data
 
     def validate_scan_data(self, value):
@@ -1267,13 +1339,17 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
+        choices=get_choices_sorted())
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                           default=None,
                                                           required=False)
     file = serializers.FileField(required=False)
-    test = serializers.PrimaryKeyRelatedField(
+    test = serializers.PrimaryKeyRelatedField(required=False,
         queryset=Test.objects.all())
+    test_title = serializers.CharField(required=False)
+    engagement_name = serializers.CharField(required=False)
+    product_name = serializers.CharField(required=False)
+
     push_to_jira = serializers.BooleanField(default=False)
     # Close the old findings if the parameter is not provided. This is to
     # mentain the old API behavior after reintroducing the close_old_findings parameter
@@ -1283,15 +1359,21 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     build_id = serializers.CharField(required=False)
     branch_tag = serializers.CharField(required=False)
     commit_hash = serializers.CharField(required=False)
-    sonarqube_config = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
-                                                          queryset=Sonarqube_Product.objects.all())
+    api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
+                                                          queryset=Product_API_Scan_Configuration.objects.all())
+    service = serializers.CharField(required=False)
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+
+    # extra fields populated in response
+    # need to use the _id suffix as without the serializer framework gets confused
+    test_id = serializers.IntegerField(read_only=True)
+    engagement_id = serializers.IntegerField(read_only=True)  # need to use the _id suffix as without the serializer framework gets confused
+    product_id = serializers.IntegerField(read_only=True)
 
     def save(self, push_to_jira=False):
         logger.debug('push_to_jira: %s', push_to_jira)
         data = self.validated_data
-        test = data['test']
         scan_type = data['scan_type']
         endpoint_to_add = data['endpoint_to_add']
         minimum_severity = data['minimum_severity']
@@ -1303,12 +1385,19 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         build_id = data.get('build_id', None)
         branch_tag = data.get('branch_tag', None)
         commit_hash = data.get('commit_hash', None)
-        sonarqube_config = data.get('sonarqube_config', None)
+        api_scan_configuration = data.get('api_scan_configuration', None)
+        service = data.get('service', None)
 
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
         group_by = data.get('group_by', None)
+
+        test_id, test_title, scan_type, _, engagement_name, product_name = get_import_meta_data_from_dict(data)
+        # we passed validation, so the test is present
+        product = get_target_product_if_exists(product_name)
+        engagement = get_target_engagement_if_exists(None, engagement_name, product)
+        test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
         reimporter = ReImporter()
         try:
@@ -1319,15 +1408,21 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                             version=version, branch_tag=branch_tag, build_id=build_id,
                                             commit_hash=commit_hash, push_to_jira=push_to_jira,
                                             close_old_findings=close_old_findings,
-                                            group_by=group_by, sonarqube_config=sonarqube_config)
+                                            group_by=group_by, api_scan_configuration=api_scan_configuration,
+                                            service=service)
+
+            if test:
+                data['test'] = test
+                data['test_id'] = test.id
+                data['engagement_id'] = test.engagement.id
+                data['product_id'] = test.engagement.product.id
+
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
             raise Exception(se)
         except ValueError as ve:
             raise Exception(ve)
-
-        return test
 
     def validate(self, data):
         scan_type = data.get("scan_type")
@@ -1337,6 +1432,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         if file and is_scan_file_too_large(file):
             raise serializers.ValidationError(
                 'Report file is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
+        tool_type = requires_tool_type(scan_type)
+        if tool_type:
+            api_scan_configuration = data.get('api_scan_configuration')
+            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+                raise serializers.ValidationError(f'API scan configuration must be of tool type {tool_type}')
         return data
 
     def validate_scan_data(self, value):
@@ -1560,3 +1660,12 @@ class NetworkLocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Network_Locations
         fields = '__all__'
+
+
+class UserProfileSerializer(serializers.Serializer):
+    user = UserSerializer(many=False)
+    user_contact_info = UserContactInfoSerializer(many=False)
+    global_role = GlobalRoleSerializer(many=False)
+    dojo_group_member = DojoGroupMemberSerializer(many=True)
+    product_type_member = ProductTypeMemberSerializer(many=True)
+    product_member = ProductMemberSerializer(many=True)

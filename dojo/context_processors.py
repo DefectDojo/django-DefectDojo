@@ -12,6 +12,7 @@ def globalize_oauth_vars(request):
             'GITLAB_ENABLED': settings.GITLAB_OAUTH2_ENABLED,
             'AZUREAD_TENANT_OAUTH2_ENABLED': settings.AZUREAD_TENANT_OAUTH2_ENABLED,
             'SAML2_ENABLED': settings.SAML2_ENABLED,
+            'SAML2_LOGIN_BUTTON_TEXT': settings.SAML2_LOGIN_BUTTON_TEXT,
             'SAML2_LOGOUT_URL': settings.SAML2_LOGOUT_URL}
 
 

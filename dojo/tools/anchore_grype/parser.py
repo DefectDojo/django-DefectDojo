@@ -11,10 +11,10 @@ class AnchoreGrypeParser(object):
     """
 
     def get_scan_types(self):
-        return ["anchore_grype"]
+        return ["Anchore Grype"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "anchore_grype"
+        return "Anchore Grype"
 
     def get_description_for_scan_types(self, scan_type):
         return "A vulnerability scanner for container images and filesystems. JSON report generated with '-o json' format"
@@ -28,7 +28,12 @@ class AnchoreGrypeParser(object):
             purl = PackageURL.from_string(item["artifact"]["purl"])
             description = ""
             description += f"\n**CVE:** {cve}"
-            description += f'\n**Matcher:** {item["matchDetails"]["matcher"]}'
+            if type(item["matchDetails"]) is dict:
+                description += f'\n**Matcher:** {item["matchDetails"]["matcher"]}'
+            else:
+                description += '\n**Matchers:**'
+                for matchers in item["matchDetails"]:
+                    description += f'\n * {matchers["matcher"]}'
             description += f"\n**PURL:** {purl}"
             description += "\n**Paths:**\n"
             for match_path in item["artifact"]["locations"]:

@@ -253,3 +253,50 @@ def clean_hosts_run(apps, change):
         logger.info(message)
 
     return html_log
+
+
+def validate_endpoints_to_add(endpoints_to_add):
+    errors = []
+    endpoint_list = []
+    endpoints = endpoints_to_add.split()
+    for endpoint in endpoints:
+        try:
+            if '://' in endpoint:  # is it full uri?
+                endpoint_ins = Endpoint.from_uri(endpoint)  # from_uri validate URI format + split to components
+            else:
+                # from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
+                # format doesn't follow RFC 3986 but users use it
+                endpoint_ins = Endpoint.from_uri('//' + endpoint)
+            endpoint_ins.clean()
+            endpoint_list.append([
+                endpoint_ins.protocol,
+                endpoint_ins.userinfo,
+                endpoint_ins.host,
+                endpoint_ins.port,
+                endpoint_ins.path,
+                endpoint_ins.query,
+                endpoint_ins.fragment
+            ])
+        except ValidationError as ves:
+            for ve in ves:
+                errors.append(
+                    ValidationError("Invalid endpoint {}: {}".format(endpoint, ve))
+                )
+    return endpoint_list, errors
+
+
+def save_endpoints_to_add(endpoint_list, product):
+    processed_endpoints = []
+    for e in endpoint_list:
+        endpoint, created = endpoint_get_or_create(
+            protocol=e[0],
+            userinfo=e[1],
+            host=e[2],
+            port=e[3],
+            path=e[4],
+            query=e[5],
+            fragment=e[6],
+            product=product
+        )
+        processed_endpoints.append(endpoint)
+    return processed_endpoints

@@ -20,6 +20,7 @@ jobs:
         # more info https://github.community/t/github-actions-are-severely-limited-on-prs/18179/16
         # we checkout merge_commit here as this contains all new code from dev also. we don't need to compare against base_commit
         with:
+          persist-credentials: false
           fetch-depth: 0
           ref: refs/pull/${{ github.event.pull_request.number }}/merge
           # repository: ${{github.event.pull_request.head.repo.full_name}}

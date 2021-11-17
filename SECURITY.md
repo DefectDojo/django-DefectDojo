@@ -1,13 +1,14 @@
 # Security
 
-No technology is perfect, and OWASP DefectDojo believes that working with skilled security researchers across the globe is crucial in identifying weaknesses in any technology. If you believe you've found a security issue in our product, we encourage you to notify us. We welcome working with you to resolve the issue promptly.
+No technology is perfect, and we believe that working with skilled security researchers across the globe is crucial in identifying weaknesses in any technology. If you believe you've found a security issue in DefectDojo, we encourage you to notify us. We welcome working with you to resolve the issue promptly.
 
 ## Disclosure Policy and Process
 
-* Let us know by submitting the finding through HackerOne's [disclosure submission program](https://hackerone.com/defectdojo/reports/new) as soon as possible upon discovery of a potential security issue.
-* Once we've assessed your HackerOne report, a maintainer will create a GitHub "security advisory", which basically will allow the reporter and the DefectDojo team to work on the issue in a confidential manner, to avoid any premature disclosure. We will invite you as a collaborator to it and any needed trusted persons.
+* Let us know by submitting the finding through our HackerOne [disclosure submission program](https://hackerone.com/defectdojo/reports/new) as soon as possible, upon discovery of a potential security issue.
+* Once we've assessed your HackerOne report, a member of our team will create a GitHub "security advisory", which will allow the reporter and the DefectDojo team to work on the issue in a confidential manner. We will invite you as a collaborator to the advisory and any needed trusted persons.
 * That "security advisory" will also allow us to have a temporary private fork, to work on the fix in confidentiality.
-* Once a fix is ready, we will coordonate a release.
+* Once a fix is ready, we will include the fix in our next release and mark that release as a security release.
+* Details on the issue will be embargoed for 30 days to give users an oppurtunity to upgrade, after which we will coordinate disclosure with the researcher(s).
 * If you've contributed the fix, you will be credited for it.
 
 > Make a good faith effort to avoid privacy violations, destruction of data, and interruption or degradation of our service. Only interact with accounts you own or with explicit permission of the account holder.

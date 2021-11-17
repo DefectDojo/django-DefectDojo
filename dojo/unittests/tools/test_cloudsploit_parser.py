@@ -24,4 +24,4 @@ class TestCloudsploitParser(TestCase):
         parser = CloudsploitParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        self.assertEqual(5, len(findings))
+        self.assertEqual(6, len(findings))

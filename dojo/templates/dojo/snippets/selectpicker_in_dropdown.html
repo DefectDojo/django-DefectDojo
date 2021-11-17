@@ -1,0 +1,39 @@
+{% load static %}
+<script type="application/javascript">
+    $('.selectpicker').selectpicker({
+        container: 'body'
+    });
+    
+    $('.dropdown-menu').on('click', function(event) {
+        var target = $(event.target);
+        var bs_select_parent = target.parents('.bootstrap-select')
+        if (bs_select_parent.length) {
+            var hasClass = bs_select_parent.hasClass('open');
+            if (hasClass) {
+                bs_select_parent.removeClass('open');
+            } else {
+                bs_select_parent.addClass('open');
+            }  
+        } 
+        event.stopPropagation()
+    });
+
+    $('body').on('click', function(event) {
+        var target = $(event.target);
+        var selected = target[0].id.indexOf('bs-select')
+        var bs_select_parent = target.parents('.bootstrap-select')
+        if (selected == -1 && bs_select_parent.length) {
+
+            var hasClass = bs_select_parent.hasClass('open');
+            if (hasClass) {
+                bs_select_parent.removeClass('open');
+            } else {
+                bs_select_parent.addClass('open');
+            }
+        } 
+        var hasClass = bs_select_parent.hasClass('open');
+        if (selected == -1 && hasClass) {
+            bs_select_parent.removeClass('open');
+        }
+    });	    
+</script>

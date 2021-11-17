@@ -2,9 +2,11 @@ from crum import get_current_user
 from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Product, Product_Member, Product_Type_Member, App_Analysis, \
-    DojoMeta, Product_Group, Product_Type_Group, Languages, Engagement_Presets
-from dojo.authorization.authorization import get_roles_for_permission, user_has_permission, \
-    role_has_permission, get_groups
+    DojoMeta, Product_Group, Product_Type_Group, Languages, Engagement_Presets, \
+    Product_API_Scan_Configuration
+from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission, user_has_permission, \
+    role_has_permission
+
 from dojo.group.queries import get_authorized_groups
 from dojo.authorization.roles_permissions import Permissions
 
@@ -24,12 +26,8 @@ def get_authorized_products(permission, user=None):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Product.objects.all().order_by('name')
 
-        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+        if user_has_global_permission(user, permission):
             return Product.objects.all().order_by('name')
-
-        for group in get_groups(user):
-            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
-                return Product.objects.all().order_by('name')
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -97,7 +95,7 @@ def get_authorized_product_members(permission):
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Product_Member.objects.all().select_related('role')
 
-    if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+    if user_has_global_permission(user, permission):
         return Product_Member.objects.all().select_related('role')
 
     products = get_authorized_products(permission)
@@ -152,12 +150,8 @@ def get_authorized_app_analysis(permission):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return App_Analysis.objects.all().order_by('name')
 
-        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+        if user_has_global_permission(user, permission):
             return App_Analysis.objects.all().order_by('name')
-
-        for group in get_groups(user):
-            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
-                return App_Analysis.objects.all().order_by('name')
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -207,12 +201,8 @@ def get_authorized_dojo_meta(permission):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return DojoMeta.objects.all().order_by('name')
 
-        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+        if user_has_global_permission(user, permission):
             return DojoMeta.objects.all().order_by('name')
-
-        for group in get_groups(user):
-            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
-                return DojoMeta.objects.all().order_by('name')
 
         roles = get_roles_for_permission(permission)
         product_authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -318,12 +308,8 @@ def get_authorized_languages(permission):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Languages.objects.all().order_by('language')
 
-        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+        if user_has_global_permission(user, permission):
             return Languages.objects.all().order_by('language')
-
-        for group in get_groups(user):
-            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
-                return Languages.objects.all().order_by('language')
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -373,12 +359,8 @@ def get_authorized_engagement_presets(permission):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Engagement_Presets.objects.all().order_by('title')
 
-        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+        if user_has_global_permission(user, permission):
             return Engagement_Presets.objects.all().order_by('title')
-
-        for group in get_groups(user):
-            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
-                return Engagement_Presets.objects.all().order_by('title')
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -413,3 +395,54 @@ def get_authorized_engagement_presets(permission):
                 Q(product__authorized_users__in=[user]) |
                 Q(product__prod_type__authorized_users__in=[user])).order_by('title')
     return engagement_presets
+
+
+def get_authorized_product_api_scan_configurations(permission):
+    user = get_current_user()
+
+    if user is None:
+        return Product_API_Scan_Configuration.objects.none()
+
+    if user.is_superuser:
+        return Product_API_Scan_Configuration.objects.all()
+
+    if settings.FEATURE_AUTHORIZATION_V2:
+        if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+            return Product_API_Scan_Configuration.objects.all()
+
+        if user_has_global_permission(user, permission):
+            return Product_API_Scan_Configuration.objects.all()
+
+        roles = get_roles_for_permission(permission)
+        authorized_product_type_roles = Product_Type_Member.objects.filter(
+            product_type=OuterRef('product__prod_type_id'),
+            user=user,
+            role__in=roles)
+        authorized_product_roles = Product_Member.objects.filter(
+            product=OuterRef('product_id'),
+            user=user,
+            role__in=roles)
+        authorized_product_type_groups = Product_Type_Group.objects.filter(
+            product_type=OuterRef('product__prod_type_id'),
+            group__users=user,
+            role__in=roles)
+        authorized_product_groups = Product_Group.objects.filter(
+            product=OuterRef('product_id'),
+            group__users=user,
+            role__in=roles)
+        product_api_scan_configurations = Product_API_Scan_Configuration.objects.annotate(
+            product__prod_type__member=Exists(authorized_product_type_roles),
+            product__member=Exists(authorized_product_roles),
+            product__prod_type__authorized_group=Exists(authorized_product_type_groups),
+            product__authorized_group=Exists(authorized_product_groups))
+        product_api_scan_configurations = product_api_scan_configurations.filter(
+            Q(product__prod_type__member=True) | Q(product__member=True) |
+            Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
+    else:
+        if user.is_staff:
+            product_api_scan_configurations = Product_API_Scan_Configuration.objects.all()
+        else:
+            product_api_scan_configurations = Product_API_Scan_Configuration.objects.filter(
+                Q(product__authorized_users__in=[user]) |
+                Q(product__prod_type__authorized_users__in=[user]))
+    return product_api_scan_configurations

@@ -40,12 +40,13 @@
                 {{ group.description|markdown_render }}
             </div>
         </div>
-        {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
-
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">Members</h4>
+                    &nbsp;
+                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/#groups" target="_blank">
+                        <i class="fa fa-question-circle"></i></a>
                     {% if group|has_object_permission:"Group_Manage_Members" %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
@@ -60,8 +61,6 @@
                                 </a>
                             </li>
                         </ul>
-                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/#groups" target="_blank">
-                            <i class="fa fa-question-circle text-low"></i></a>
                     </div>
                     {% endif %}
                 </div>
@@ -118,6 +117,9 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">Product Type Groups</h4>
+                    &nbsp;
+                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                        <i class="fa fa-question-circle"></i></a>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddProductTypeGroup"
@@ -132,8 +134,6 @@
                                 </a>
                             </li>
                         </ul>
-                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                            <i class="fa fa-question-circle text-low"></i></a>
                     </div>
                     {% endif %}
                 </div>
@@ -191,6 +191,9 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">Product Groups</h4>
+                    &nbsp;
+                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                        <i class="fa fa-question-circle"></i></a>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button"  id="dropdownMenuAddProductGroup"
@@ -205,9 +208,6 @@
                                 </a>
                             </li>
                         </ul>
-                        &nbsp;
-                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                            <i class="fa fa-question-circle text-low"></i></a>
                     </div>
                     {% endif %}
                 </div>
@@ -260,8 +260,6 @@
             </div>
             {% endif %}
         </div>
-
-        {% endif %}
     </div>
     <div class="col-md-4">
         <div class="panel panel-default-secondary">

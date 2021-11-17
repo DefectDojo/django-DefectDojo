@@ -491,13 +491,15 @@ def get_labels(obj):
 
 
 def jira_summary(obj):
+    summary = ''
+
     if type(obj) == Finding:
-        return obj.title
+        summary = obj.title
 
     if type(obj) == Finding_Group:
-        return obj.name
+        summary = obj.name
 
-    return None
+    return summary.replace('\r', '').replace('\n', '')
 
 
 def jira_description(obj):
@@ -802,7 +804,7 @@ def update_jira_issue(obj, *args, **kwargs):
                 # folder. Has this feature ever worked?
                 try:
                     jira_attachment(
-                        find, jira, new_issue,
+                        find, jira, issue,
                         settings.MEDIA_ROOT + '/' + pic)
                 except FileNotFoundError as e:
                     logger.info(e)

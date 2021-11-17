@@ -16,18 +16,17 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
 
-from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
-                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
+                       EngagementPresetsForm, DeleteEngagementPresetsForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, AppAnalysisForm, JIRAEngagementForm, Add_Product_MemberForm, \
                        Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm, \
-                       DeleteAppAnalysisForm, DeleteSonarqubeConfigurationForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
+                       DeleteAppAnalysisForm, Product_API_Scan_ConfigurationForm, DeleteProduct_API_Scan_ConfigurationForm
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member, \
-                        Product_Group
+                        Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
+                        Product_Group, Product_API_Scan_Configuration
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
                        get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs
 
@@ -44,7 +43,8 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
-from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
+from dojo.tool_config.factory import create_API
+import dojo.finding.helper as finding_helper
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +132,7 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     return start + timedelta(weeks=iso_week - 1, days=iso_day - 1)
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def view_product(request, pid):
     prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager') \
                                       .prefetch_related('authorized_users') \
@@ -211,7 +211,7 @@ def view_product(request, pid):
         'personal_notifications_form': personal_notifications_form})
 
 
-@user_is_authorized(Product, Permissions.Component_View, 'pid', 'view')
+@user_is_authorized(Product, Permissions.Component_View, 'pid')
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
@@ -470,7 +470,7 @@ def endpoint_querys(request, prod):
     return filters
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def view_product_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
@@ -627,7 +627,7 @@ def view_product_metrics(request, pid):
                    'user': request.user})
 
 
-@user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
+@user_is_authorized(Product, Permissions.Engagement_View, 'pid')
 def view_engagements(request, pid):
     prod = get_object_or_404(Product, id=pid)
 
@@ -799,7 +799,7 @@ def new_product(request, ptid=None):
                    'gform': gform})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def edit_product(request, pid):
     product = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
@@ -880,7 +880,7 @@ def edit_product(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_Delete, 'pid', 'delete')
+@user_is_authorized(Product, Permissions.Product_Delete, 'pid')
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     form = DeleteProductForm(instance=product)
@@ -926,7 +926,7 @@ def delete_product(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Engagement_Add, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Engagement_Add, 'pid')
 def new_eng_for_app(request, pid, cicd=False):
     jira_project = None
     jira_project_form = None
@@ -934,8 +934,6 @@ def new_eng_for_app(request, pid, cicd=False):
 
     product = Product.objects.get(id=pid)
     jira_error = False
-    if not user_is_authorized(request.user, 'staff', product):
-        raise PermissionDenied
 
     if request.method == 'POST':
         form = EngForm(request.POST, cicd=cicd, product=product, user=request.user)
@@ -1023,7 +1021,7 @@ def new_eng_for_app(request, pid, cicd=False):
                    })
 
 
-@user_is_authorized(Product, Permissions.Technology_Add, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Technology_Add, 'pid')
 def new_tech_for_prod(request, pid):
     if request.method == 'POST':
         form = AppAnalysisForm(request.POST)
@@ -1045,7 +1043,7 @@ def new_tech_for_prod(request, pid):
                    'pid': pid})
 
 
-@user_is_authorized(App_Analysis, Permissions.Technology_Edit, 'tid', 'staff')
+@user_is_authorized(App_Analysis, Permissions.Technology_Edit, 'tid')
 def edit_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
     form = AppAnalysisForm(instance=technology)
@@ -1069,7 +1067,7 @@ def edit_technology(request, tid):
                    'technology': technology})
 
 
-@user_is_authorized(App_Analysis, Permissions.Technology_Delete, 'tid', 'staff')
+@user_is_authorized(App_Analysis, Permissions.Technology_Delete, 'tid')
 def delete_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
     form = DeleteAppAnalysisForm(instance=technology)
@@ -1091,13 +1089,13 @@ def delete_technology(request, tid):
     })
 
 
-@user_is_authorized(Product, Permissions.Engagement_Add, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Engagement_Add, 'pid')
 def new_eng_for_app_cicd(request, pid):
     # we have to use pid=pid here as new_eng_for_app expects kwargs, because that is how django calls the function based on urls.py named groups
     return new_eng_for_app(request, pid=pid, cicd=True)
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def add_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1125,7 +1123,7 @@ def add_meta_data(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1156,9 +1154,10 @@ def edit_meta_data(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Finding_Add, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Finding_Add, 'pid')
 def ad_hoc_finding(request, pid):
     prod = Product.objects.get(id=pid)
+    test_type, _ = Test_Type.objects.get_or_create(name="Pen Test")
     test = None
     try:
         eng = Engagement.objects.get(product=prod, name="Ad Hoc Engagement")
@@ -1167,25 +1166,25 @@ def ad_hoc_finding(request, pid):
         if len(tests) != 0:
             test = tests[0]
         else:
-            test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
+            test = Test(engagement=eng, test_type=test_type,
                         target_start=timezone.now(), target_end=timezone.now())
             test.save()
     except:
         eng = Engagement(name="Ad Hoc Engagement", target_start=timezone.now(),
                          target_end=timezone.now(), active=False, product=prod)
         eng.save()
-        test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
+        test = Test(engagement=eng, test_type=test_type,
                     target_start=timezone.now(), target_end=timezone.now())
         test.save()
     form_error = False
     push_all_jira_issues = jira_helper.is_push_all_issues(test)
     jform = None
     gform = None
-    form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
+    form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None, product=prod)
     use_jira = jira_helper.get_jira_project(test) is not None
 
     if request.method == 'POST':
-        form = AdHocFindingForm(request.POST, req_resp=None)
+        form = AdHocFindingForm(request.POST, req_resp=None, product=prod)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -1212,53 +1211,11 @@ def ad_hoc_finding(request, pid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            create_template = new_finding.is_template
-            # always false now since this will be deprecated soon in favor of new Finding_Template model
-            new_finding.is_template = False
             new_finding.tags = form.cleaned_data['tags']
             new_finding.save()
-            new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            for endpoint in form.cleaned_data['endpoints']:
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=endpoint)
-                endpoint.endpoint_status.add(eps)
-                new_finding.endpoint_status.add(eps)
 
-            for endpoint in new_finding.unsaved_endpoints:
-                ep, created = endpoint_get_or_create(
-                    protocol=endpoint.protocol,
-                    userinfo=endpoint.userinfo,
-                    host=endpoint.host,
-                    port=endpoint.port,
-                    path=endpoint.path,
-                    query=endpoint.query,
-                    fragment=endpoint.fragment,
-                    product=test.engagement.product)
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=ep)
-                ep.endpoint_status.add(eps)
-
-                new_finding.endpoints.add(ep)
-                new_finding.endpoint_status.add(eps)
-            for endpoint in form.cleaned_data['endpoints']:
-                ep, created = endpoint_get_or_create(
-                    protocol=endpoint.protocol,
-                    userinfo=endpoint.userinfo,
-                    host=endpoint.host,
-                    port=endpoint.port,
-                    path=endpoint.path,
-                    query=endpoint.query,
-                    fragment=endpoint.fragment,
-                    product=test.engagement.product)
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=ep)
-                ep.endpoint_status.add(eps)
-
-                new_finding.endpoints.add(ep)
-                new_finding.endpoint_status.add(eps)
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
 
             new_finding.save()
             # Push to jira?
@@ -1316,37 +1273,11 @@ def ad_hoc_finding(request, pid):
                                  'Finding added successfully.',
                                  extra_tags='alert-success')
 
-            if create_template:
-                templates = Finding_Template.objects.filter(title=new_finding.title)
-                if len(templates) > 0:
-                    messages.add_message(request,
-                                         messages.ERROR,
-                                         'A finding template was not created.  A template with this title already '
-                                         'exists.',
-                                         extra_tags='alert-danger')
-                else:
-                    template = Finding_Template(title=new_finding.title,
-                                                cwe=new_finding.cwe,
-                                                severity=new_finding.severity,
-                                                description=new_finding.description,
-                                                mitigation=new_finding.mitigation,
-                                                impact=new_finding.impact,
-                                                references=new_finding.references,
-                                                numerical_severity=new_finding.numerical_severity)
-                    template.save()
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'A finding template was also created.',
-                                         extra_tags='alert-success')
             if '_Finished' in request.POST:
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             else:
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
         else:
-            if 'endpoints' in form.cleaned_data:
-                form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
-            else:
-                form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
             add_error_message_to_response('The form has errors, please correct them below.')
             add_field_errors_to_response(jform)
@@ -1377,7 +1308,7 @@ def ad_hoc_finding(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     presets = Engagement_Presets.objects.filter(product=prod).all()
@@ -1390,7 +1321,7 @@ def engagement_presets(request, pid):
                    'prod': prod})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def edit_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
@@ -1416,7 +1347,7 @@ def edit_engagement_presets(request, pid, eid):
                    'prod': prod})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def add_engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -1439,7 +1370,7 @@ def add_engagement_presets(request, pid):
     return render(request, 'dojo/new_params.html', {'tform': tform, 'pid': pid, 'product_tab': product_tab})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def delete_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
@@ -1469,7 +1400,7 @@ def delete_engagement_presets(request, pid, eid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def edit_notifications(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -1586,134 +1517,135 @@ def delete_product_member(request, memberid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def add_sonarqube(request, pid):
+@user_is_authorized(Product, Permissions.Product_API_Scan_Configuration_Add, 'pid')
+def add_api_scan_configuration(request, pid):
 
-    prod = Product.objects.get(id=pid)
+    product = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
-        form = Sonarqube_ProductForm(request.POST)
+        form = Product_API_Scan_ConfigurationForm(request.POST)
         if form.is_valid():
-            sonarqube_product = form.save(commit=False)
-            sonarqube_product.product = prod
+            product_api_scan_configuration = form.save(commit=False)
+            product_api_scan_configuration.product = product
             try:
-                sq = SonarQubeAPI(sonarqube_product.sonarqube_tool_config)
-                project = sq.get_project(sonarqube_product.sonarqube_project_key)  # if connection is not successful, this call raise exception
+                api = create_API(product_api_scan_configuration.tool_configuration)
+                if api and hasattr(api, 'test_product_connection'):
+                    result = api.test_product_connection(product_api_scan_configuration)
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         f'API connection successful with message: {result}.',
+                                         extra_tags='alert-success')
+                product_api_scan_configuration.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'SonarQube connection successful. You have access to project "{}"'.format(
-                                         project['name']),
-                                     extra_tags='alert-success')
-                sonarqube_product.save()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'SonarQube Configuration added successfully.',
+                                     'API Scan Configuration added successfully.',
                                      extra_tags='alert-success')
                 if 'add_another' in request.POST:
-                    return HttpResponseRedirect(reverse('add_sonarqube', args=(pid,)))
+                    return HttpResponseRedirect(reverse('add_api_scan_configuration', args=(pid,)))
                 else:
-                    return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+                    return HttpResponseRedirect(reverse('view_api_scan_configurations', args=(pid,)))
             except Exception as e:
+                logger.exception(e)
                 messages.add_message(request,
                                      messages.ERROR,
                                      str(e),
                                      extra_tags='alert-danger')
     else:
-        form = Sonarqube_ProductForm()
+        form = Product_API_Scan_ConfigurationForm()
 
-    product_tab = Product_Tab(pid, title="Add SonarQube Configuration", tab="settings")
+    product_tab = Product_Tab(pid, title="Add API Scan Configuration", tab="settings")
 
     return render(request,
-                  'dojo/add_product_sonarqube_configuration.html',
+                  'dojo/add_product_api_scan_configuration.html',
                   {'form': form,
                    'product_tab': product_tab,
-                   'product': prod,
+                   'product': product,
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
-def view_sonarqube(request, pid):
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
+def view_api_scan_configurations(request, pid):
 
-    sonarqube_queryset = Sonarqube_Product.objects.filter(product=pid)
+    product_api_scan_configurations = Product_API_Scan_Configuration.objects.filter(product=pid)
 
-    product_tab = Product_Tab(pid, title="Sonarqube Configurations", tab="settings")
+    product_tab = Product_Tab(pid, title="API Scan Configurations", tab="settings")
     return render(request,
-                  'dojo/view_product_sonarqube_configuration.html',
+                  'dojo/view_product_api_scan_configurations.html',
                   {
-                      'sonarqube_queryset': sonarqube_queryset,
+                      'product_api_scan_configurations': product_api_scan_configurations,
                       'product_tab': product_tab,
                       'pid': pid
                   })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def edit_sonarqube(request, pid, sqcid):
+@user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Edit, 'pascid', 'staff')
+def edit_api_scan_configuration(request, pid, pascid):
 
-    sqc = Sonarqube_Product.objects.get(pk=sqcid)
+    product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 
-    if sqc.product.pk != int(pid):  # user is trying to edit SQ Config from another product (trying to by-pass auth)
+    if product_api_scan_configuration.product.pk != int(pid):  # user is trying to edit Tool Configuration from another product (trying to by-pass auth)
         raise Http404()
 
     if request.method == 'POST':
-        sqcform = Sonarqube_ProductForm(request.POST, instance=sqc)
-        if sqcform.is_valid():
+        form = Product_API_Scan_ConfigurationForm(request.POST, instance=product_api_scan_configuration)
+        if form.is_valid():
             try:
-                sqcform_copy = sqcform.save(commit=False)
-                sq = SonarQubeAPI(sqcform_copy.sonarqube_tool_config)
-                project = sq.get_project(
-                    sqcform_copy.sonarqube_project_key)  # if connection is not successful, this call raise exception
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'SonarQube connection successful. You have access to project "{}"'.format(
-                                         project['name']),
-                                     extra_tags='alert-success')
-                sqcform.save()
+                form_copy = form.save(commit=False)
+                api = create_API(form_copy.tool_configuration)
+                if api and hasattr(api, 'test_product_connection'):
+                    result = api.test_product_connection(form_copy)
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         f'API connection successful with message: {result}.',
+                                         extra_tags='alert-success')
+                form.save()
 
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'SonarQube Configuration Successfully Updated.',
+                                     'API Scan Configuration successfully updated.',
                                      extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+                return HttpResponseRedirect(reverse('view_api_scan_configurations', args=(pid,)))
             except Exception as e:
+                logger.info(e)
                 messages.add_message(request,
                                      messages.ERROR,
                                      str(e),
                                      extra_tags='alert-danger')
     else:
-        sqcform = Sonarqube_ProductForm(instance=sqc)
+        form = Product_API_Scan_ConfigurationForm(instance=product_api_scan_configuration)
 
-    product_tab = Product_Tab(pid, title="Edit SonarQube Configuration", tab="settings")
+    product_tab = Product_Tab(pid, title="Edit API Scan Configuration", tab="settings")
     return render(request,
-                  'dojo/edit_product_sonarqube_configuration.html',
+                  'dojo/edit_product_api_scan_configuration.html',
                   {
-                      'sqcform': sqcform,
+                      'form': form,
                       'product_tab': product_tab
                   })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def delete_sonarqube(request, pid, sqcid):
+@user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Delete, 'pascid', 'staff')
+def delete_api_scan_configuration(request, pid, pascid):
 
-    sqc = Sonarqube_Product.objects.get(pk=sqcid)
+    product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 
-    if sqc.product.pk != int(pid):  # user is trying to delete SQ Config from another product (trying to by-pass auth)
+    if product_api_scan_configuration.product.pk != int(pid):  # user is trying to delete Tool Configuration from another product (trying to by-pass auth)
         raise Http404()
 
     if request.method == 'POST':
-        sqcform = Sonarqube_ProductForm(request.POST)
-        sqc.delete()
+        form = Product_API_Scan_ConfigurationForm(request.POST)
+        product_api_scan_configuration.delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             'SonarQube Configuration Deleted.',
+                             'API Scan Configuration deleted.',
                              extra_tags='alert-success')
-        return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+        return HttpResponseRedirect(reverse('view_api_scan_configurations', args=(pid,)))
     else:
-        sqcform = DeleteSonarqubeConfigurationForm(instance=sqc)
+        form = DeleteProduct_API_Scan_ConfigurationForm(instance=product_api_scan_configuration)
 
-    product_tab = Product_Tab(pid, title="Delete SonarQube Configuration", tab="settings")
+    product_tab = Product_Tab(pid, title="Delete Tool Configuration", tab="settings")
     return render(request,
-                  'dojo/delete_product_sonarqube_configuration.html',
+                  'dojo/delete_product_api_scan_configuration.html',
                   {
-                      'form': sqcform,
+                      'form': form,
                       'product_tab': product_tab
                   })
 

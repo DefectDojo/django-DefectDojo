@@ -1,22 +1,19 @@
+import base64
 import datetime
+import logging
 
-from dojo.endpoint.utils import endpoint_get_or_create
-from dojo.importers import utils as importer_utils
-from dojo.models import Notes, Finding, \
-    BurpRawRequestResponse, \
-    Endpoint_Status, \
-    Test_Import
-
-from dojo.utils import get_current_user
-
-from django.core.exceptions import MultipleObjectsReturned
-from django.conf import settings
-from django.utils import timezone
-import dojo.notifications.helper as notifications_helper
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
-import base64
-import logging
+import dojo.notifications.helper as notifications_helper
+from django.conf import settings
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.utils import timezone
+from dojo.endpoint.utils import endpoint_get_or_create
+from dojo.importers import utils as importer_utils
+from dojo.models import (BurpRawRequestResponse, Endpoint_Status, Finding,
+                         Notes, Test_Import)
+from dojo.tools.factory import get_parser
+from dojo.utils import get_current_user
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -25,7 +22,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 class DojoDefaultReImporter(object):
 
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now()):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None):
 
         items = parsed_findings
         original_items = list(test.finding_set.all())
@@ -39,21 +36,22 @@ class DojoDefaultReImporter(object):
         unchanged_items = []
 
         logger.debug('starting reimport of %i items.', len(items) if items else 0)
-        from dojo.importers.reimporter.utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
+        from dojo.importers.reimporter.utils import (
+            get_deduplication_algorithm_from_conf,
+            match_new_finding_to_existing_finding, update_endpoint_status)
         deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
 
         i = 0
         logger.debug('STEP 1: looping over findings from the reimported report and trying to match them to existing findings')
         deduplicationLogger.debug('Algorithm used for matching new findings to existing findings: %s', deduplication_algorithm)
         for item in items:
-            sev = item.severity
-            if sev == 'Information' or sev == 'Informational':
-                sev = 'Info'
+            # FIXME hack to remove when all parsers have unit tests for this attribute
+            if item.severity.lower().startswith('info') and item.severity != 'Info':
+                item.severity = 'Info'
 
-            item.severity = sev
-            item.numerical_severity = Finding.get_numerical_severity(sev)
+            item.numerical_severity = Finding.get_numerical_severity(item.severity)
 
-            if (Finding.SEVERITIES[sev] >
+            if minimum_severity and (Finding.SEVERITIES[item.severity] >
                     Finding.SEVERITIES[minimum_severity]):
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
@@ -64,6 +62,8 @@ class DojoDefaultReImporter(object):
 
             if not hasattr(item, 'test'):
                 item.test = test
+
+            item.service = service
 
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
@@ -283,7 +283,8 @@ class DojoDefaultReImporter(object):
 
     def reimport_scan(self, scan, scan_type, test, active=True, verified=True, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, sonarqube_config=None):
+                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None,
+                    service=None):
 
         logger.debug(f'REIMPORT_SCAN: parameters: {locals()}')
 
@@ -295,22 +296,33 @@ class DojoDefaultReImporter(object):
         if settings.USE_TZ:
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
 
-        if sonarqube_config:  # it there is not sonarqube_config, just use original
-            if sonarqube_config.product != test.engagement.product:
-                raise ValidationError('"sonarqube_config" has to be from same product as "test"')
-
-            if test.sonarqube_config != sonarqube_config:  # update of sonarqube_config
-                test.sonarqube_config = sonarqube_config
+        if api_scan_configuration:
+            if api_scan_configuration.product != test.engagement.product:
+                raise ValidationError('API Scan Configuration has to be from same product as the Test')
+            if test.api_scan_configuration != api_scan_configuration:
+                test.api_scan_configuration = api_scan_configuration
                 test.save()
 
-        logger.debug('REIMPORT_SCAN: Parse findings')
-        parsed_findings = importer_utils.parse_findings(scan, test, active, verified, scan_type)
+        # check if the parser that handle the scan_type manage tests
+        parser = get_parser(scan_type)
+        if hasattr(parser, 'get_tests'):
+            logger.debug('REIMPORT_SCAN parser v2: Create parse findings')
+            tests = parser.get_tests(scan_type, scan)
+            # for now we only consider the first test in the list and artificially aggregate all findings of all tests
+            # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
+            # when there is more than 1 test
+            parsed_findings = []
+            for test_raw in tests:
+                parsed_findings.extend(test_raw.findings)
+        else:
+            logger.debug('REIMPORT_SCAN: Parse findings')
+            parsed_findings = parser.get_findings(scan, test)
 
         logger.debug('REIMPORT_SCAN: Processing findings')
         new_findings, reactivated_findings, findings_to_mitigate, untouched_findings = \
             self.process_parsed_findings(test, parsed_findings, scan_type, user, active, verified,
                                          minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
-                                         push_to_jira=push_to_jira, group_by=group_by, now=now)
+                                         push_to_jira=push_to_jira, group_by=group_by, now=now, service=service)
 
         closed_findings = []
         if close_old_findings:

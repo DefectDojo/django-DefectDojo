@@ -5,6 +5,8 @@ from celery.schedules import crontab
 from dojo import __version__
 import environ
 
+# See https://defectdojo.github.io/django-DefectDojo/getting_started/configuration/ for options
+# how to tune the configuration to your needs.
 
 root = environ.Path(__file__) - 3  # Three folders back
 
@@ -28,7 +30,6 @@ env = environ.Env(
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
     DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
-    DD_SECURE_BROWSER_XSS_FILTER=(bool, True),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
@@ -110,6 +111,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
     DD_SAML2_ENABLED=(bool, False),
+    DD_SAML2_LOGIN_BUTTON_TEXT=(str, 'Login with SAML'),
     # Optional: display the idp SAML Logout URL in DefectDojo
     DD_SAML2_LOGOUT_URL=(str, ''),
     # Metadata is required for SAML, choose either remote url or local file path
@@ -147,6 +149,8 @@ env = environ.Env(
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
+    # Use business day's to calculate SLA's and age instead of calendar days
+    DD_SLA_BUSINESS_DAYS=(bool, False),
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
@@ -160,12 +164,14 @@ env = environ.Env(
     DD_MAX_ALERTS_PER_USER=(int, 999),
     DD_TAG_PREFETCHING=(bool, True),
     DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
+    # regular expression to exclude one or more parsers
+    # could be usefull to limit parser allowed
+    # AWS Scout2 Scan Parser is deprecated (see https://github.com/DefectDojo/django-DefectDojo/pull/5268)
+    DD_PARSER_EXCLUDE=(str, 'AWS Scout2 Scan'),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
-    # APIv1 is depreacted and will be removed at 2021-06-30
-    DD_LEGACY_API_V1_ENABLE=(bool, False),
     # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
@@ -193,6 +199,10 @@ env = environ.Env(
     DD_RATE_LIMITER_BLOCK=(bool, False),
     # Forces the user to change password on next login.
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
+    # when enabled SonarQube API parser will download the security hotspots
+    DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
+    # when enabled standard users can't change their profile information, default True
+    DD_USER_PROFILE_EDITABLE=(bool, True),
 )
 
 
@@ -385,6 +395,23 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+# Make Argon2 the default password hasher by listing it first
+# Unfortunately Django doesn't provide the default built-in
+# PASSWORD_HASHERS list here as a variable which we could modify,
+# so we have to list all the hashers present in Django :-(
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.UnsaltedSHA1PasswordHasher',
+    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
+    'django.contrib.auth.hashers.CryptPasswordHasher',
+]
+
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',
     'dojo.pipeline.social_uid',
@@ -459,6 +486,8 @@ SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env('DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY')
 SLA_NOTIFY_WITH_JIRA_ONLY = env('DD_SLA_NOTIFY_WITH_JIRA_ONLY')  # Based on the 2 above, but only with a JIRA link
 SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify between dayofbreach minus this number until dayofbreach
 SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
+SLA_BUSINESS_DAYS = env('DD_SLA_BUSINESS_DAYS')  # Use business days to calculate SLA's and age of a finding instead of calendar days
+
 
 SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
 SIMILAR_FINDINGS_MAX_RESULTS = env('DD_SIMILAR_FINDINGS_MAX_RESULTS')
@@ -476,8 +505,6 @@ LOGIN_EXEMPT_URLS = (
     r'complete/',
     r'empty_questionnaire/([\d]+)/answer'
 )
-
-LEGACY_API_V1_ENABLE = env('DD_LEGACY_API_V1_ENABLE')
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -516,10 +543,6 @@ RATE_LIMITER_ACCOUNT_LOCKOUT = env('DD_RATE_LIMITER_ACCOUNT_LOCKOUT')  # Forces 
 # If True, the SecurityMiddleware redirects all non-HTTPS requests to HTTPS
 # (except for those URLs matching a regular expression listed in SECURE_REDIRECT_EXEMPT).
 SECURE_SSL_REDIRECT = env('DD_SECURE_SSL_REDIRECT')
-
-# If True, the SecurityMiddleware sets the X-XSS-Protection: 1;
-# mode=block header on all responses that do not already have it.
-SECURE_BROWSER_XSS_FILTER = env('DD_SECURE_BROWSER_XSS_FILTER')
 
 # If True, the SecurityMiddleware sets the X-Content-Type-Options: nosniff;
 SECURE_CONTENT_TYPE_NOSNIFF = env('DD_SECURE_CONTENT_TYPE_NOSNIFF')
@@ -737,6 +760,7 @@ def saml2_attrib_map_format(dict):
 
 
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
+SAML2_LOGIN_BUTTON_TEXT = env('DD_SAML2_LOGIN_BUTTON_TEXT')
 SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
 if SAML2_ENABLED:
     import saml2
@@ -975,10 +999,13 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Aqua Scan': ['severity', 'cve', 'component_name', 'component_version'],
+    'Bandit Scan': ['file_path', 'line', 'vuln_id_from_tool'],
     'CargoAudit Scan': ['cve', 'severity', 'component_name', 'component_version', 'vuln_id_from_tool'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['cve', 'component_name'],
+    'Cloudsploit Scan': ['title', 'description'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
+    'SonarQube API Import': ['title', 'file_path', 'line'],
     'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
@@ -1008,10 +1035,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
     'JFrog Xray Unified Scan': ['cve', 'file_path', 'component_name', 'component_version'],
-    'Scout Suite Scan': ['title', 'severity', 'description'],
+    'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
-    'Github Vulnerability Scan': ['unique_id_from_tool']
+    'Github Vulnerability Scan': ['unique_id_from_tool'],
+    'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1023,6 +1051,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'AWS Prowler Scan': True,
     'Checkmarx Scan': False,
     'Checkmarx OSA': True,
+    'Cloudsploit Scan': True,
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
     'Mobsfscan Scan': False,
@@ -1039,13 +1068,20 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'SpotBugs Scan': False,
     'Scout Suite Scan': True,
     'AWS Security Hub Scan': True,
-    'Meterian Scan': True
+    'Meterian Scan': True,
+    'SARIF': True,
+    'Hadolint Dockerfile check': True,
+    'Semgrep JSON Report': True,
+    'Generic Findings Import': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
 HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
+
+# Adding fields to the hash_code calculation regardless of the previous settings
+HASH_CODE_FIELDS_ALWAYS = ['service']
 
 # ------------------------------------
 # Deduplication configuration
@@ -1071,15 +1107,18 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'AuditJS Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'AWS Prowler Scan': DEDUPE_ALGO_HASH_CODE,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Bandit Scan': DEDUPE_ALGO_HASH_CODE,
     'CargoAudit Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Coverity API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Cobalt.io API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
     'Mobsfscan Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
+    'SonarQube API Import': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Dockle Scan': DEDUPE_ALGO_HASH_CODE,
     'Nessus Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1104,7 +1143,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
     'GitLab Dependency Scanning Report': DEDUPE_ALGO_HASH_CODE,
-    'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
     'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1112,7 +1150,14 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Scout Suite Scan': DEDUPE_ALGO_HASH_CODE,
     'AWS Security Hub Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
-    'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL
+    'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
+    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
+    'SARIF': DEDUPE_ALGO_HASH_CODE,
+    'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
+    'Semgrep JSON Report': DEDUPE_ALGO_HASH_CODE,
+    'Generic Findings Import': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1252,6 +1297,9 @@ QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 # If using this, lines for Qualys WAS deduplication functions must be un-commented
 QUALYS_WAS_UNIQUE_ID = False
 
+# exclusion list for parsers
+PARSER_EXCLUDE = env("DD_PARSER_EXCLUDE")
+
 SERIALIZATION_MODULES = {
     'xml': 'tagulous.serializers.xml_serializer',
     'json': 'tagulous.serializers.json',
@@ -1285,3 +1333,9 @@ JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
 
 DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')
+
+# Deside if SonarQube API parser should download the security hotspots
+SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
+
+# when enabled standard users can't change their profile information, default False
+USER_PROFILE_EDITABLE = env("DD_USER_PROFILE_EDITABLE")
