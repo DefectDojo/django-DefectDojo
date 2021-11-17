@@ -341,11 +341,11 @@ def add_product_type_group(request, gid):
                         product_type_group.group = group
                         product_type_group.role = group_form.cleaned_data['role']
                         product_type_group.save()
-            messages.add_message(request,
-                                    messages.SUCCESS,
-                                    'Product type groups added successfully.',
-                                    extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_group', args=(gid, )))
+                messages.add_message(request,
+                                        messages.SUCCESS,
+                                        'Product type groups added successfully.',
+                                        extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_group', args=(gid, )))
 
     add_breadcrumb(title="Add Product Type Group", top_level=False, request=request)
     return render(request, 'dojo/new_product_type_group_group.html', {
