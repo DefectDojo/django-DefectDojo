@@ -2752,6 +2752,18 @@ Note that SYN scanners are less intrusive than TCP (full connect) scanners again
 <synopsis>It is possible to determine which TCP ports are open.</synopsis>
 <plugin_output>Port 443/tcp was found to be open</plugin_output>
 </ReportItem>
+<ReportItem port="264" svc_name="fw1-topology-download" protocol="tcp" severity="0" pluginID="11219" pluginName="Nessus SYN scanner" pluginFamily="Port scanners">
+<description>dummy</description>
+<fname>dummy</fname>
+<plugin_modification_date>2011/04/05</plugin_modification_date>
+<plugin_name>dummy</plugin_name>
+<plugin_type>dummy</plugin_type>
+<risk_factor>None</risk_factor>
+<script_version>$Revision: 1.14 $</script_version>
+<solution>dummy</solution>
+<synopsis>dummy</synopsis>
+<plugin_output>dummy</plugin_output>
+</ReportItem>
 </ReportHost>
 </Report>
 </NessusClientData_v2>
