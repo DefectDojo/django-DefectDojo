@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0012_alter_user_first_name_max_length'),
-        ('dojo', '0134_sonarque_cobaltio_removal'),
+        ('dojo', '0135_email_from'),
     ]
 
     operations = [
