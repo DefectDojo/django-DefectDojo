@@ -102,11 +102,11 @@ class BaseTestCase(unittest.TestCase):
     def login_page(self):
         driver = self.driver
         driver.get(self.base_url + "login")
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
+        driver.find_element(By.ID, "id_username").clear()
+        driver.find_element(By.ID, "id_username").send_keys(os.environ['DD_ADMIN_USER'])
+        driver.find_element(By.ID, "id_password").clear()
+        driver.find_element(By.ID, "id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
+        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
 
         self.assertFalse(self.is_element_by_css_selector_present('.alert-danger', 'Please enter a correct username and password'))
         return driver
@@ -143,7 +143,7 @@ class BaseTestCase(unittest.TestCase):
         # Click on `Delete Template` button
         templates = driver.find_elements(By.LINK_TEXT, name)
         if len(templates) > 0:
-            driver.find_element_by_id("id_delete").click()
+            driver.find_element(By.ID, "id_delete").click()
             # Click 'Yes' on Alert popup
             driver.switch_to.alert.accept()
 
@@ -197,7 +197,7 @@ class BaseTestCase(unittest.TestCase):
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         no_content = None
         try:
-            no_content = self.driver.find_element_by_id(no_content_id)
+            no_content = self.driver.find_element(By.ID, no_content_id)
         except:
             pass
 
@@ -206,7 +206,7 @@ class BaseTestCase(unittest.TestCase):
             WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
 
     def is_element_by_css_selector_present(self, selector, text=None):
-        elems = self.driver.find_elements(by=By.CSS_SELECTOR, value=selector)
+        elems = self.driver.find_elements(By.CSS_SELECTOR, selector)
         if len(elems) == 0:
             # print('no elements!')
             return False
@@ -225,7 +225,7 @@ class BaseTestCase(unittest.TestCase):
 
     def is_element_by_id_present(self, id):
         try:
-            self.driver.find_element_by_id(id)
+            self.driver.find_element(By.ID, id)
             return True
         except NoSuchElementException:
             return False
@@ -243,15 +243,15 @@ class BaseTestCase(unittest.TestCase):
         # DEBUG: couldn't find:  Product type added successfully. path:  //*[contains(text(),'Product type added successfully.')]
         # can't get this xpath to work
         # path = "//*[contains(text(), '" + text + "')]"
-        # elems = self.driver.find_elements_by_xpath(path)
+        # elems = self.driver.find_elements(By.XPATH, path)
         # if len(elems) == 0:
         #     print("DEBUG: couldn't find: ", text, "path: ", path)
 
-        body = self.driver.find_element_by_tag_name("body")
+        body = self.driver.find_element(By.TAG_NAME, "body")
         return re.search(text, body.text)
 
     def element_exists_by_id(self, id):
-        elems = self.driver.find_elements_by_id(id)
+        elems = self.driver.find_elements(By.ID, id)
         return len(elems) > 0
 
     def change_system_setting(self, id, enable=True):
@@ -259,15 +259,15 @@ class BaseTestCase(unittest.TestCase):
         driver = self.driver
         driver.get(self.base_url + 'system_settings')
 
-        is_enabled = driver.find_element_by_id(id).is_selected()
+        is_enabled = driver.find_element(By.ID, id).is_selected()
         if (enable and not is_enabled) or (not enable and is_enabled):
-            # driver.find_element_by_xpath('//*[@id=' + id + ']').click()
-            driver.find_element_by_id(id).click()
+            # driver.find_element(By.XPATH, '//*[@id=' + id + ']').click()
+            driver.find_element(By.ID, id).click()
             # save settings
-            driver.find_element_by_css_selector("input.btn.btn-primary").click()
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # check if it's enabled after reload
 
-        is_enabled = driver.find_element_by_id(id).is_selected()
+        is_enabled = driver.find_element(By.ID, id).is_selected()
 
         if enable:
             self.assertTrue(is_enabled)
@@ -301,12 +301,12 @@ class BaseTestCase(unittest.TestCase):
         print('setting block execution to: ', str(block_execution))
         driver = self.driver
         driver.get(self.base_url + 'profile')
-        if driver.find_element_by_id('id_block_execution').is_selected() != block_execution:
-            driver.find_element_by_xpath('//*[@id="id_block_execution"]').click()
+        if driver.find_element(By.ID, 'id_block_execution').is_selected() != block_execution:
+            driver.find_element(By.XPATH, '//*[@id="id_block_execution"]').click()
             # save settings
-            driver.find_element_by_css_selector("input.btn.btn-primary").click()
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # check if it's enabled after reload
-            self.assertTrue(driver.find_element_by_id('id_block_execution').is_selected() == block_execution)
+            self.assertTrue(driver.find_element(By.ID, 'id_block_execution').is_selected() == block_execution)
         return driver
 
     def enable_block_execution(self):
