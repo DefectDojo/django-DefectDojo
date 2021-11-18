@@ -27,7 +27,7 @@ jira==3.0.1
 PyGithub==1.55
 lxml==4.6.4
 Markdown==3.3.6
-mysqlclient==2.0.3
+mysqlclient==2.1.0
 openpyxl==3.0.9
 xlrd==1.2.0
 Pillow==8.4.0  # required by django-imagekit
