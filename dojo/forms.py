@@ -35,7 +35,6 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Product_API_Scan_Configuration
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
-from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 from tagulous.forms import TagField
 import logging
@@ -754,11 +753,7 @@ class EngForm(forms.ModelForm):
 
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
-                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
-            else:
-                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
+            self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
@@ -834,11 +829,7 @@ class TestForm(forms.ModelForm):
 
         if obj:
             product = get_product(obj)
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
-                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
-            else:
-                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
+            self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
             self.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=product)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)

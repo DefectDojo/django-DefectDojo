@@ -1,6 +1,7 @@
 {
   "name": "defectdojo",
   "version": "2.5.0-dev",
+  "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
     "JUMFlot": "jumjum123/JUMFlot#*",

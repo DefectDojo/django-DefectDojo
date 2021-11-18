@@ -67,11 +67,7 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
         p = request.GET.getlist('product', [])
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                if not user_is_authorized(request.user, 'view', product):
-                    raise PermissionDenied
-            else:
-                user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            user_has_permission_or_403(request.user, product, Permissions.Product_View)
             product_tab = Product_Tab(product.id, view_name, tab="endpoints")
 
     return render(
@@ -167,17 +163,17 @@ def process_endpoint_view(request, eid, host_view=False):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid')
 def view_endpoint(request, eid):
     return process_endpoint_view(request, eid, host_view=False)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid')
 def view_endpoint_host(request, eid):
     return process_endpoint_view(request, eid, host_view=True)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'change')
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid')
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
@@ -205,7 +201,7 @@ def edit_endpoint(request, eid):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_Delete, 'eid', 'delete')
+@user_is_authorized(Endpoint, Permissions.Endpoint_Delete, 'eid')
 def delete_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, pk=eid)
     product = endpoint.product
@@ -243,7 +239,7 @@ def delete_endpoint(request, eid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Endpoint_Add, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Endpoint_Add, 'pid')
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
     template = 'dojo/add_endpoint.html'
@@ -279,11 +275,7 @@ def add_product_endpoint(request):
     if request.method == 'POST':
         form = AddEndpointForm(request.POST)
         if form.is_valid():
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                if not user_is_authorized(request.user, 'change', form.product):
-                    raise PermissionDenied
-            else:
-                user_has_permission_or_403(request.user, form.product, Permissions.Endpoint_Add)
+            user_has_permission_or_403(request.user, form.product, Permissions.Endpoint_Add)
             endpoints = form.save()
             tags = request.POST.get('tags')
             for e in endpoints:
@@ -330,7 +322,7 @@ def add_meta_data(request, eid):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, 'eid', 'change')
+@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, 'eid')
 def edit_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
 
@@ -440,7 +432,7 @@ def endpoint_bulk_update_all(request, pid=None):
     return HttpResponseRedirect(reverse('endpoint', args=()))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def endpoint_status_bulk_update(request, fid):
     if request.method == "POST":
         post = request.POST
