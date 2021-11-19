@@ -11,7 +11,7 @@ django-environ==0.8.1
 django-filter==21.1
 django-imagekit==4.1.0
 django-multiselectfield==0.1.12
-django-polymorphic==3.0.0
+django-polymorphic==3.1.0
 django-crispy-forms==1.13.0
 django_extensions==3.1.5
 django-slack==5.17.6
@@ -26,8 +26,8 @@ humanize==3.12.0
 jira==3.0.1
 PyGithub==1.55
 lxml==4.6.4
-Markdown==3.3.5
-mysqlclient==2.0.3
+Markdown==3.3.6
+mysqlclient==2.1.0
 openpyxl==3.0.9
 xlrd==1.2.0
 Pillow==8.4.0  # required by django-imagekit
