@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from django.test.utils import override_settings
 from dojo.models import Finding_Group, User, Finding, JIRA_Instance
 from dojo.jira_link import helper as jira_helper
@@ -237,7 +238,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
         return test_id
 
-    def test_import_no_push_to_jira_reimport_push_to_jira_is_false_but_push_all_issues(self):
+    @patch('dojo.jira_link.views.jira_helper.update_jira_issue_for_finding')
+    def test_import_no_push_to_jira_reimport_push_to_jira_is_false_but_push_all_issues(self, jira_mock):
         self.set_jira_push_all_issues(self.get_engagement(1))
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
@@ -245,10 +247,15 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_group_issue_count_in_test(test_id, 0)
         updated_map = self.get_jira_issue_updated_map(test_id)
 
+        # re-import and see status change.
+        # behaviour has changed during upgrade of jira python library from 3.0.1 to 3.1.1:
+        # We use a mock as the updated timestamp in jira won't get updated for identical data
+        # our reimport doesn't update finding fields, tags, etc so fields sent to JIRA are identical to what's in JIRA already
         reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename, push_to_jira=False)
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
-        self.assert_jira_updated_map_changed(test_id, updated_map)
+        # self.assert_jira_updated_map_changed(test_id, updated_map)
+        self.assertEqual(jira_mock.call_count, 2)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -272,7 +279,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
         return test_id
 
-    def test_import_push_to_jira_reimport_with_push_to_jira(self):
+    @patch('dojo.jira_link.views.jira_helper.update_jira_issue_for_finding')
+    def test_import_push_to_jira_reimport_with_push_to_jira(self, jira_mock):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
@@ -280,12 +288,16 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # Get one of the findings from the test
         finding_id = Finding.objects.filter(test__id=test_id).first().id
         pre_jira_status = self.get_jira_issue_updated(finding_id)
-        # re-import and see status change
+        # re-import and see status change.
+        # behaviour has changed during upgrade of jira python library from 3.0.1 to 3.1.1:
+        # We use a mock as the updated timestamp in jira won't get updated for identical data
+        # our reimport doesn't update finding fields, tags, etc so fields sent to JIRA are identical to what's in JIRA already
         reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename, push_to_jira=True)
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
-        post_jira_status = self.get_jira_issue_updated(finding_id)
-        self.assert_jira_updated_change(pre_jira_status, post_jira_status)
+        # post_jira_status = self.get_jira_issue_updated(finding_id)
+        # self.assert_jira_updated_change(pre_jira_status, post_jira_status)
+        self.assertEqual(jira_mock.call_count, 2)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
