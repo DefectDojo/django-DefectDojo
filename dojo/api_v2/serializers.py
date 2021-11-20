@@ -577,14 +577,7 @@ class ProductTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product_Type
-
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['members']
-            extra_kwargs = {
-                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
-            }
-        else:
-            exclude = ['authorized_users']
+        exclude = ['authorized_users']
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1181,13 +1174,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['tid', 'updated', 'members']
-            extra_kwargs = {
-                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
-            }
-        else:
-            exclude = ['tid', 'updated', 'authorized_users']
+        exclude = ['tid', 'updated', 'authorized_users']
 
     def get_findings_count(self, obj) -> int:
         return obj.findings_count
