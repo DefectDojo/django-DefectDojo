@@ -147,25 +147,10 @@ class MonthYearWidget(Widget):
 class Product_TypeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False)
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_users = forms.ModelMultipleChoiceField(
-            queryset=None,
-            required=False, label="Authorized Users")
-
-    def __init__(self, *args, **kwargs):
-        non_staff = Dojo_User.objects.exclude(is_staff=True) \
-            .exclude(is_active=False).order_by('first_name', 'last_name')
-        super(Product_TypeForm, self).__init__(*args, **kwargs)
-
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            self.fields['authorized_users'].queryset = non_staff
 
     class Meta:
         model = Product_Type
-        if settings.FEATURE_AUTHORIZATION_V2:
-            fields = ['name', 'description', 'critical_product', 'key_product']
-        else:
-            fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
+        fields = ['name', 'description', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
@@ -254,33 +239,19 @@ class ProductForm(forms.ModelForm):
                                        queryset=Product_Type.objects.none(),
                                        required=True)
 
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_users = forms.ModelMultipleChoiceField(
-            queryset=None,
-            required=False, label="Authorized Users")
-
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     team_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
 
     def __init__(self, *args, **kwargs):
-        non_staff = Dojo_User.objects.exclude(is_staff=True) \
-            .exclude(is_active=False).order_by('first_name', 'last_name')
         super(ProductForm, self).__init__(*args, **kwargs)
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            self.fields['authorized_users'].queryset = non_staff
         self.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
 
     class Meta:
         model = Product
-        if settings.FEATURE_AUTHORIZATION_V2:
-            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
-                    'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                    'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
-        else:
-            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
-                    'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                    'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
+        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
+                'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
+                'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
 
 class DeleteProductForm(forms.ModelForm):
@@ -1573,7 +1544,7 @@ class ReviewFindingForm(forms.Form):
 
         super(ReviewFindingForm, self).__init__(*args, **kwargs)
 
-        if finding is not None and settings.FEATURE_AUTHORIZATION_V2:
+        if finding is not None:
             self.fields['reviewers'].queryset = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
 
     class Meta:
@@ -1876,43 +1847,23 @@ class AddDojoUserForm(forms.ModelForm):
         required=False, validators=[validate_password],
         help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
                    and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?). Leave blank to set an unusable password for this user.')  # noqa W605
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_products = forms.ModelMultipleChoiceField(
-            queryset=Product.objects.all(), required=False,
-            help_text='Select the products this user should have access to.')
-        authorized_product_types = forms.ModelMultipleChoiceField(
-            queryset=Product_Type.objects.all(), required=False,
-            help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User
         fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active',
                   'is_staff', 'is_superuser']
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions']
-        else:
-            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
-                       'authorized_products', 'authorized_product_types']
+        exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
+                    'authorized_products', 'authorized_product_types']
 
 
 class EditDojoUserForm(forms.ModelForm):
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_products = forms.ModelMultipleChoiceField(
-            queryset=Product.objects.all(), required=False,
-            help_text='Select the products this user should have access to.')
-        authorized_product_types = forms.ModelMultipleChoiceField(
-            queryset=Product_Type.objects.all(), required=False,
-            help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User
         fields = ['username', 'first_name', 'last_name', 'email', 'is_active',
                   'is_staff', 'is_superuser']
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions']
-        else:
-            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
-                       'authorized_products', 'authorized_product_types']
+        exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
+                    'authorized_products', 'authorized_product_types']
 
 
 class DeleteUserForm(forms.ModelForm):

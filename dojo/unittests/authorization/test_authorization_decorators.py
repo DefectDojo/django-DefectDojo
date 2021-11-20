@@ -27,7 +27,6 @@ class TestAuthorizationDecorators(TestCase):
 
     @patch('dojo.authorization.authorization_decorators.get_object_or_404')
     @patch('dojo.authorization.authorization_decorators.user_has_permission_or_403', side_effect=PermissionDenied())
-    @override_settings(FEATURE_AUTHORIZATION_V2=True)
     def test_authorization_permission_denied(self, mock_user_has_permission, mock_shortcuts_get):
         mock_shortcuts_get.return_value = self.product_type
 
@@ -40,7 +39,6 @@ class TestAuthorizationDecorators(TestCase):
         mock_user_has_permission.assert_called_with(self.user, self.product_type, Permissions.Product_Type_View)
 
     @patch('dojo.authorization.authorization_decorators.get_object_or_404')
-    @override_settings(FEATURE_AUTHORIZATION_V2=True)
     def test_authorization_superuser(self, mock_shortcuts_get):
         mock_shortcuts_get.return_value = self.product_type
 
@@ -51,7 +49,6 @@ class TestAuthorizationDecorators(TestCase):
         mock_shortcuts_get.assert_called_once()
 
     @patch('dojo.authorization.authorization_decorators.get_object_or_404')
-    @override_settings(FEATURE_AUTHORIZATION_V2=True)
     @override_settings(AUTHORIZATION_STAFF_OVERRIDE=True)
     def test_authorization_staff_override(self, mock_shortcuts_get):
         mock_shortcuts_get.return_value = self.product_type
@@ -64,7 +61,6 @@ class TestAuthorizationDecorators(TestCase):
 
     @patch('dojo.authorization.authorization_decorators.get_object_or_404')
     @patch('dojo.authorization.authorization_decorators.user_has_permission_or_403')
-    @override_settings(FEATURE_AUTHORIZATION_V2=True)
     def test_authorization_user_has_permission(self, mock_user_has_permission, mock_shortcuts_get):
         mock_shortcuts_get.return_value = self.product_type
 
