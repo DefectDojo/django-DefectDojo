@@ -77,23 +77,6 @@ class TestDashboard(DojoTestCase):
         System_Settings.objects.update(enable_deduplication=False)  # The default deduplication does not work.
         Engagement.objects.all().delete()
 
-    def test_tesdata_admin(self):
-        user = User.objects.get(username="admin")
-        authorized_products_ids = Product.objects\
-            .filter(Q(authorized_users=user) | Q(prod_type__authorized_users=user))\
-            .values_list('id', flat=True)
-        self.assertNotIn(2, authorized_products_ids)
-        self.assertTrue(user.is_staff)
-
-    def test_tesdata_user1(self):
-        user = User.objects.get(username="user1")
-        authorized_products_ids = Product.objects\
-            .filter(Q(authorized_users=user) | Q(prod_type__authorized_users=user))\
-            .values_list('id', flat=True)
-        self.assertIn(2, authorized_products_ids)
-        self.assertNotIn(3, authorized_products_ids)
-        self.assertFalse(user.is_staff)
-
     def _setup_test_counters_findings(self, product_id: int):
         when = self.week_ago
         create(when, product_id, [

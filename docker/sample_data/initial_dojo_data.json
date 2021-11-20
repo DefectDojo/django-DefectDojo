@@ -3335,7 +3335,6 @@
       "prod_type": 1,
       "name": "Bodgeit",
       "created": null,
-      "authorized_users": [],
       "tid": 0,
       "description": "The BodgeIt Store is a vulnerable web application which is currently aimed at people who are new to pen testing.",
       "tags": [
@@ -3352,7 +3351,6 @@
       "prod_type": 1,
       "name": "Gruyere",
       "created": null,
-      "authorized_users": [],
       "tid": 0,
       "description": "Vulnerable Application written by Google"
     },

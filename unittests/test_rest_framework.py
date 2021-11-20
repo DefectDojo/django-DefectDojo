@@ -1081,7 +1081,6 @@ class ProductTest(BaseClass.RESTEndpointTest):
             "product_manager": 2,
             "technical_contact": 3,
             "team_manager": 2,
-            "authorized_users": [2, 3],
             "prod_type": 1,
             "name": "Test Product",
             "description": "test product",
