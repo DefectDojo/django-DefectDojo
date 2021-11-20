@@ -506,7 +506,7 @@ class ReImportScanForm(forms.Form):
         tool_type = requires_tool_type(self.scan_type)
         if tool_type:
             api_scan_configuration = cleaned_data.get('api_scan_configuration')
-            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+            if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
                 raise forms.ValidationError(f'API scan configuration must be of tool type {tool_type}')
 
         return cleaned_data
