@@ -2142,7 +2142,10 @@ class JIRAFormOAUTH(forms.ModelForm):
 
     class Meta:
         model = JIRA_Instance_OAUTH
-        exclude = ['product', 'epic_name_id']
+        exclude = ['product', 'epic_name_id', 'open_status_key',
+                    'close_status_key', 'info_mapping_severity',
+                    'low_mapping_severity', 'medium_mapping_severity',
+                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
 
     def clean(self):
         import dojo.jira_link.helper as jira_helper
@@ -2154,8 +2157,8 @@ class JIRAFormOAUTH(forms.ModelForm):
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
             message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e)
-            self.add_error('username', message)
-            self.add_error('password', message)
+            self.add_error('access_token', message)
+            self.add_error('access_token_secret', message)
 
         return form_data
 
