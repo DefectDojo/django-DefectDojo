@@ -48,14 +48,19 @@ def user_has_global_permission(permission, func=None):
     return _wrapped
 
 
-def user_is_configuration_authorized(permission, legacy):
+def user_is_configuration_authorized(permission, legacy, func=None):
     """
     Decorator for views that checks whether a user has a particular permission enabled.
     """
-    def check_permission(user):
-        if user_has_configuration_permission(user, permission, legacy):
-            return True
-        else:
-            raise PermissionDenied
 
-    return user_passes_test(check_permission)
+    if func is None:
+        return functools.partial(user_is_configuration_authorized, permission, legacy)
+
+    @functools.wraps(func)
+    def _wrapped(request, *args, **kwargs):
+
+        if not user_has_configuration_permission(request.user, permission, legacy):
+            raise PermissionDenied
+        return func(request, *args, **kwargs)
+
+    return _wrapped

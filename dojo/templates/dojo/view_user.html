@@ -405,7 +405,7 @@
                                 name="{{ field.view_codename }}" 
                                 aria-label="{{ field.view_codename }}" 
                                 type="checkbox" 
-                                {% if user|user_has_configuration_permission:field.view_codename %}checked{% endif %} />
+                                {% if user|user_has_configuration_permission_without_group:field.view_codename %}checked{% endif %} />
                             {% endif %}
                         </td>
                         <td class="centered">
@@ -415,7 +415,7 @@
                                 name="{{ field.add_codename }}"
                                 aria-label="{{ field.add_codename }}"
                                 type="checkbox"
-                                {% if user|user_has_configuration_permission:field.add_codename %}checked{% endif %} />
+                                {% if user|user_has_configuration_permission_without_group:field.add_codename %}checked{% endif %} />
                             {% endif %}
                         </td>
                         <td class="centered">
@@ -425,7 +425,7 @@
                                 name="{{ field.change_codename }}"
                                 aria-label="{{ field.change_codename }}"
                                 type="checkbox"
-                                {% if user|user_has_configuration_permission:field.change_codename %}checked{% endif %} />
+                                {% if user|user_has_configuration_permission_without_group:field.change_codename %}checked{% endif %} />
                             {% endif %}
                         </td>
                         <td class="centered">
@@ -435,7 +435,7 @@
                                 name="{{ field.delete_codename }}"
                                 aria-label="{{ field.delete_codename }}"
                                 type="checkbox"
-                                {% if user|user_has_configuration_permission:field.delete_codename %}checked{% endif %} />
+                                {% if user|user_has_configuration_permission_without_group:field.delete_codename %}checked{% endif %} />
                             {% endif %}
                         </td>
                     </tr>

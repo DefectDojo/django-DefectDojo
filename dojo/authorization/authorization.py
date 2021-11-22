@@ -109,6 +109,10 @@ def user_has_permission(user, obj, permission):
 
 
 def user_has_global_permission(user, permission):
+
+    if not user:
+        return False
+
     if user.is_superuser:
         return True
 
