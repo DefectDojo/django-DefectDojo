@@ -50,7 +50,7 @@ def view_group(request, gid):
 
     # Create authorization group if it doesn't exist and add product members
     if not group.auth_group:
-        auth_group = Group(name=get_auth_group_name(group, 0))
+        auth_group = Group(name=get_auth_group_name(group))
         auth_group.save()
         group.auth_group = auth_group
         members = group.users.all()

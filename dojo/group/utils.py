@@ -5,7 +5,7 @@ from django.dispatch import receiver
 from dojo.models import Dojo_Group, Dojo_Group_Member, Role
 
 
-def get_auth_group_name(group, attempt):
+def get_auth_group_name(group, attempt=0):
     if attempt > 999:
         raise Exception(f'Cannot find name for authorization group for Dojo_Group {group.name}, aborted after 999 attempts.')
     if attempt == 0:
@@ -26,7 +26,7 @@ def group_post_save_handler(sender, **kwargs):
     group = kwargs.pop('instance')
     if created:
         # Create authentication group
-        auth_group = Group(name=get_auth_group_name(group, 0))
+        auth_group = Group(name=get_auth_group_name(group))
         auth_group.save()
         group.auth_group = auth_group
         group.save()
