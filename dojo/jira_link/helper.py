@@ -1100,6 +1100,20 @@ def add_epic(engagement):
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
     if jira_project.enable_engagement_epic_mapping:
+        # If existing Epic configured in Tracker field, then use the same to get Epic details
+        if engagement.tracker:
+            jira = get_jira_connection(jira_instance)
+            epic = engagement.tracker.rsplit('/', 1)[1]
+            existing_issue = jira.issue(epic)
+            logger.debug('add_epic: %s', epic)
+            j_issue = JIRA_Issue(
+                jira_id=existing_issue.id,
+                jira_key=existing_issue.key,
+                engagement=engagement,
+                jira_project=jira_project)
+            j_issue.save()
+            return True
+
         issue_dict = {
             'project': {
                 'key': jira_project.project_key
