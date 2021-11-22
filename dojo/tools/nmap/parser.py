@@ -79,6 +79,23 @@ class NmapParser(object):
 
                 description += "\n\n"
 
+                # find Description element and add it to the description
+                tag = ''
+                desc_element = root.find('Description')
+                for i in desc_element:
+                    if 'AccountId' in i.tag:
+                        description += "**AccountID:** %s\n" % i.text
+                        tag = i.text
+                    if 'Status' in i.tag:
+                        description += "**Status:** %s\n" % i.text
+                    if 'Description' in i.tag:
+                        description += "**Description:** %s\n" % i.text
+                    if 'Group' in i.tag:
+                        description += "**Group:** %s\n" % i.text
+                    if 'InstanceId' in i.tag:
+                        description += "**InstanceId:** %s\n" % i.text
+                description += '\n\n'
+
                 # manage some script like https://github.com/vulnersCom/nmap-vulners
                 for script_element in port_element.findall('script[@id="vulners"]'):
                     self.manage_vulner_script(test, dupes, script_element, endpoint, report_date)
@@ -96,6 +113,7 @@ class NmapParser(object):
                                 severity=severity,
                                 mitigation="N/A",
                                 impact="No impact provided",
+                                tags=tag,
                                    )
                     find.unsaved_endpoints = list()
                     dupes[dupe_key] = find
