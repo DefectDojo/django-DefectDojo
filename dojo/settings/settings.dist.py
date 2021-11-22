@@ -1162,6 +1162,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
     'Semgrep JSON Report': DEDUPE_ALGO_HASH_CODE,
     'Generic Findings Import': DEDUPE_ALGO_HASH_CODE,
+    'Trufflehog3 Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
