@@ -1102,17 +1102,27 @@ def add_epic(engagement):
     if jira_project.enable_engagement_epic_mapping:
         # If existing Epic configured in Tracker field, then use the same to get Epic details
         if engagement.tracker:
-            jira = get_jira_connection(jira_instance)
-            epic = engagement.tracker.rsplit('/', 1)[1]
-            existing_issue = jira.issue(epic)
-            logger.debug('add_epic: %s', epic)
-            j_issue = JIRA_Issue(
-                jira_id=existing_issue.id,
-                jira_key=existing_issue.key,
-                engagement=engagement,
-                jira_project=jira_project)
-            j_issue.save()
-            return True
+            try:
+                jira = get_jira_connection(jira_instance)
+                epic = engagement.tracker.rsplit('/', 1)[1]
+                existing_issue = jira.issue(epic)
+                logger.debug('add_epic: %s', epic)
+                j_issue = JIRA_Issue(
+                    jira_id=existing_issue.id,
+                    jira_key=existing_issue.key,
+                    engagement=engagement,
+                    jira_project=jira_project)
+                j_issue.save()
+                return True
+            except JIRAError as e:
+                logger.exception(e)
+                error = str(e)
+                message = ""
+                if "customfield" in error:
+                    message = "The 'Tracker' in your DefectDojo Engagement Configuration does not appear to be correct"
+                log_jira_generic_alert('Jira Engagement/Epic Mapping Error',
+                                    message + error)
+                return False
 
         issue_dict = {
             'project': {
