@@ -1102,9 +1102,9 @@ def add_epic(engagement):
     if jira_project.enable_engagement_epic_mapping:
         # If existing Epic configured in Tracker field, then use the same to get Epic details
         if engagement.tracker:
+            epic = engagement.tracker.split(jira_project.jira_instance.url + '/browse/')[1]
             try:
                 jira = get_jira_connection(jira_instance)
-                epic = engagement.tracker.rsplit('/', 1)[1]
                 existing_issue = jira.issue(epic)
                 logger.debug('add_epic: %s', epic)
                 j_issue = JIRA_Issue(
