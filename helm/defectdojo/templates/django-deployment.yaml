@@ -169,8 +169,8 @@ spec:
               name: {{ .Values.postgresql.existingSecret }}
               key: {{ .Values.postgresql.secretKey }}
               {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.existingSecret }}
-              key: {{ .Values.mysql.secretKey }}
+              name: {{ .Values.mysql.auth.existingSecret }}
+              key: {{ .Values.mysql.auth.secretKey }}
               {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:

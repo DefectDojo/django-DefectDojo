@@ -398,5 +398,6 @@ helm uninstall defectdojo
 To remove persistent objects not removed by uninstall (this will remove any database):
 ```
 kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-rabbitmq-specific defectdojo-postgresql-specific defectdojo-mysql-specific
-kubectl delete pvc data-defectdojo-rabbitmq-0 data-defectdojo-postgresql-0
+kubectl delete serviceAccount defectdojo
+kubectl delete pvc data-defectdojo-rabbitmq-0 data-defectdojo-postgresql-0 data-defectdojo-mysql-0
 ```
