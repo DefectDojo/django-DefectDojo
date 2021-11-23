@@ -27,6 +27,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 import datetime
 import six
+import re
 from django.utils.translation import ugettext_lazy as _
 import json
 import dojo.jira_link.helper as jira_helper
@@ -104,21 +105,16 @@ class TagListSerializerField(serializers.ListField):
         if not isinstance(data, list):
             self.fail('not_a_list', input_type=type(data).__name__)
 
-        # data_safe = []
+        data_safe = []
         for s in data:
             if not isinstance(s, six.string_types):
                 self.fail('not_a_str')
 
             self.child.run_validation(s)
 
-            # if ' ' in s or ',' in s:
-            #     s = '"%s"' % s
+            data_safe += re.split('[, ]', s)
 
-            # data_safe.append(s)
-
-        # internal_value = ','.join(data_safe)
-
-        internal_value = tagulous.utils.render_tags(data)
+        internal_value = tagulous.utils.render_tags(data_safe)
 
         return internal_value
         # return data
