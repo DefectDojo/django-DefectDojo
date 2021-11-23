@@ -592,6 +592,7 @@
   <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
   <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
   <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
+  <script src="{% static "dojo/js/metrics.js" %}"></script>
   <script type="text/javascript">
     $(function() {
       if (document.referrer.indexOf('simple_search') > 0) {
@@ -608,37 +609,19 @@
       }
 
       {% if languages and langSummary.files__count > 0 %}
-      severity_pie();
-      function severity_pie() {
-          var data = [
+        var data = [
           {% for lang in languages %}
             {% if lang.code %}
-            {
+              {
                 label: "&nbsp;{{lang}} - {{lang.code|intcomma}} LoC",
-                color: "{{lang.language.color }}",
+                color: "{{ lang.language.color }}",
                 data: {{lang.code}}
-            },
+              },
             {% endif %}
           {% endfor %}
-          ];
-
-          var plotObj = $.plot($("#donut-lang"), data, {
-              series: {
-                  pie: {
-                      innerRadius: 0.5,
-                      show: true,
-                      radius: 1,
-                  }
-              },
-              legend: {
-                  show: true
-              },
-              grid: {
-                  hoverable: true,
-              },
-          });
-        }
-        {% endif %}
+        ];
+        languages_pie(data);
+      {% endif %}
     });
 
     $(function() {
