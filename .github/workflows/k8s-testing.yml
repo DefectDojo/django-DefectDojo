@@ -110,7 +110,7 @@ jobs:
       matrix:
         databases: [pgsql, mysql]
         brokers: [redis, rabbit]
-        k8s: ['v1.16.0','v1.20.0']
+        k8s: ['v1.20.0','v1.22.0']
 
     steps:
 #      - name: Login to DockerHub
@@ -165,11 +165,16 @@ jobs:
         run: |-
              helm install \
                defectdojo \
-               ./helm/defectdojo \
-               --set django.ingress.enabled=true \
-               --set imagePullPolicy=Never \
-               ${{ steps.set.outputs[matrix.databases] }} \
-               ${{ steps.set.outputs[matrix.brokers] }} \
+                ./helm/defectdojo \
+                --set django.ingress.enabled=true \
+                --set redis.enabled=false \
+                --set rabbitmq.enabled=true \
+                --set celery.broker=rabbitmq \
+                --set createRabbitMqSecret=true \
+                --set database=mysql \
+                --set postgresql.enabled=false \
+                --set mysql.enabled=true \
+                --set createMysqlSecret=true \
                --set createSecret=true \
               #  --set imagePullSecrets=defectdojoregistrykey
 
