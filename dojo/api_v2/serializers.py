@@ -4,7 +4,7 @@ from drf_yasg.utils import swagger_serializer_method
 from rest_framework.fields import DictField, MultipleChoiceField
 
 from dojo.endpoint.utils import endpoint_filter
-from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
+from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -63,8 +63,12 @@ def get_import_meta_data_from_dict(data):
     engagement_name = data.get('engagement_name', None)
 
     product_name = data.get('product_name', None)
+    product_type_name = data.get('product_type_name', None)
 
-    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name
+    auto_create_context = data.get('auto_create_context', None)
+    auto_import_initial = data.get('auto_import_initial', None)
+
+    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, auto_import_initial
 
 
 @extend_schema_field(serializers.ListField(child=serializers.CharField()))  # also takes basic python types
@@ -1201,11 +1205,13 @@ class ImportScanSerializer(serializers.Serializer):
                                                          default=None)
     file = serializers.FileField(required=False)
 
+    product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), required=False)
     test_title = serializers.CharField(required=False)
+    auto_create_context = serializers.BooleanField(required=False)
 
     lead = serializers.PrimaryKeyRelatedField(
         allow_null=True,
@@ -1262,10 +1268,8 @@ class ImportScanSerializer(serializers.Serializer):
 
         group_by = data.get('group_by', None)
 
-        _, test_title, scan_type, engagement_id, engagement_name, product_name = get_import_meta_data_from_dict(data)
-        # we passed validation, so the engagement is present
-        product = get_target_product_if_exists(product_name)
-        engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
+        _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, auto_import_initial = get_import_meta_data_from_dict(data)
+        engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context)
 
         importer = Importer()
         try:
@@ -1331,11 +1335,14 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                                           default=None,
                                                           required=False)
     file = serializers.FileField(required=False)
+    product_type_name = serializers.CharField(required=False)
+    product_name = serializers.CharField(required=False)
+    engagement_name = serializers.CharField(required=False)
     test = serializers.PrimaryKeyRelatedField(required=False,
         queryset=Test.objects.all())
     test_title = serializers.CharField(required=False)
-    engagement_name = serializers.CharField(required=False)
-    product_name = serializers.CharField(required=False)
+    auto_create_context = serializers.BooleanField(required=False)
+    auto_import_initial = serializers.BooleanField(required=False)
 
     push_to_jira = serializers.BooleanField(default=False)
     # Close the old findings if the parameter is not provided. This is to
@@ -1380,7 +1387,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         group_by = data.get('group_by', None)
 
-        test_id, test_title, scan_type, _, engagement_name, product_name = get_import_meta_data_from_dict(data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, auto_import_initial = get_import_meta_data_from_dict(data)
         # we passed validation, so the test is present
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)

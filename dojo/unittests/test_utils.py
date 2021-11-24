@@ -1,4 +1,4 @@
-from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, IMPORT_UPDATED_FINDING, Engagement, Product, Test, Test_Import, Test_Import_Finding_Action
+from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, IMPORT_UPDATED_FINDING, Engagement, Product, Product_Type, Test, Test_Import, Test_Import_Finding_Action
 from contextlib import contextmanager
 from django.test import TestCase
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view
@@ -19,6 +19,7 @@ TEST_IMPORT_FINDING_ACTION_UPDATED = TEST_IMPORT_FINDING_ACTION_ALL.filter(actio
 TESTS = Test.objects.all()
 ENGAGEMENTS = Engagement.objects.all()
 PRODUCTS = Product.objects.all()
+PRODUCT_TYPES = Product_Type.objects.all()
 
 
 class TestUtils(TestCase):
@@ -76,14 +77,16 @@ def assertTestImportModelsCreated(test_case, imports=0, reimports=0, affected_fi
 
 
 @contextmanager
-def assertImportModelsCreated(test_case, tests=0, engagements=0, products=0):
+def assertImportModelsCreated(test_case, tests=0, engagements=0, products=0, product_types=0):
 
     with assertNumOfModelsCreated(test_case, TESTS, num=tests) as test_count, \
             assertNumOfModelsCreated(test_case, ENGAGEMENTS, num=engagements) as engagement_count, \
-            assertNumOfModelsCreated(test_case, PRODUCTS, num=products) as product_count:
+            assertNumOfModelsCreated(test_case, PRODUCTS, num=products) as product_count, \
+            assertNumOfModelsCreated(test_case, PRODUCT_TYPES, num=product_types) as product_type_count:
 
         yield (
                 test_count,
                 engagement_count,
                 product_count,
+                product_type_count,
               )

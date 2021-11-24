@@ -400,7 +400,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
-                                product_name=None, product=None, expected_http_status_code=201, test_title=None):
+                                product_name=None, product=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -423,6 +423,12 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if product_name:
             payload['product_name'] = product_name
+
+        if product_type_name:
+            payload['product_type_name'] = product_type_name
+
+        if auto_create_context:
+            payload['auto_create_context'] = auto_create_context
 
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira

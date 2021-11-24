@@ -1,7 +1,7 @@
 import re
-from rest_framework.exceptions import ParseError
+from rest_framework.exceptions import ParseError, PermissionDenied
 from dojo.api_v2.serializers import get_import_meta_data_from_dict
-from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_product_type_if_exists, get_target_test_if_exists
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
@@ -170,8 +170,9 @@ class UserHasImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, engagement_id, engagement_name, product_name = get_import_meta_data_from_dict(request.data)
-        product = get_target_product_if_exists(product_name)
+        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, auto_import_initial = get_import_meta_data_from_dict(request.data)
+        product_type = get_target_product_type_if_exists(product_type_name)
+        product = get_target_product_if_exists(product_name, product_type_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
         if engagement:
@@ -181,9 +182,37 @@ class UserHasImportPermission(permissions.BasePermission):
             # engagement_id doesn't exist
             raise serializers.ValidationError("Engagement '%s' doesn''t exist" % engagement_id)
         elif product and product_name and engagement_name:
-            raise serializers.ValidationError("Engagement '%s' doesn't exist in Product %s" % (engagement_name, product_name))
+            if not auto_create_context:
+                raise serializers.ValidationError("Engagement '%s' doesn't exist in Product %s" % (engagement_name, product_name))
+
+            if not user_has_permission(request.user, product, Permissions.Engagement_Add):
+                raise PermissionDenied('No permission to create engagements in product %s', product_name)
+
+            if not user_has_permission(request.user, product, Permissions.Import_Scan_Result):
+                raise PermissionDenied('No permission to import scans into product %s', product_name)
+
+            # all good
+            return True
         elif not product and product_name:
-            raise serializers.ValidationError("Product '%s' doesn't exist" % product_name)
+            if not auto_create_context:
+                if product_type_name:
+                    raise serializers.ValidationError("Product '%s' doesn't exist in product type '%s'" % (product_name, product_type_name))
+                else:
+                    raise serializers.ValidationError("Product '%s' doesn't exist" % product_name)
+
+            if not product_type_name:
+                raise serializers.ValidationError("Product '%s' doesn't exist and no product_type_name provided to create the new product in" % product_name)
+            if not product_type:
+                if not user_has_global_permission(request.user, Permissions.Product_Type_Add):
+                    raise PermissionDenied('No permission to create product_type %s', product_type_name)
+                # new product type can be created with current user as owner, so all objects in it can be created as well
+                return True
+
+            if not user_has_permission(request.user, product_type, Permissions.Product_Type_Add_Product):
+                raise PermissionDenied('No permission to create products in product_type %s', product_type)
+
+            # product can be created, so objects in it can be created as well
+            return True
         else:
             raise serializers.ValidationError("Need engagement_id or product_name + engagement_name to perform import")
 
@@ -244,7 +273,7 @@ class UserHasReimportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        test_id, test_title, scan_type, _, engagement_name, product_name = get_import_meta_data_from_dict(request.data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, auto_import_initial = get_import_meta_data_from_dict(request.data)
 
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)

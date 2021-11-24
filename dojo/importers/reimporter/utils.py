@@ -1,5 +1,7 @@
+from datetime import timedelta
+from crum import get_current_user
 from django.conf import settings
-from dojo.models import Engagement, Finding, Q, Product, Test
+from dojo.models import Engagement, Finding, Q, Product, Product_Type, Test
 from django.utils import timezone
 import logging
 from dojo.utils import get_last_object_or_none, get_object_or_none
@@ -82,11 +84,25 @@ def mitigate_endpoint_status(endpoint_status, user):
     endpoint_status.save()
 
 
-def get_target_product_if_exists(product_name=None):
-    if product_name:
-        return get_object_or_none(Product, name=product_name)
+def get_target_product_type_if_exists(product_type_name=None):
+    if product_type_name:
+        return get_object_or_none(Product_Type, name=product_type_name)
     else:
         return None
+
+
+def get_target_product_if_exists(product_name=None, product_type_name=None):
+    if product_name:
+        product = get_object_or_none(Product, name=product_name)
+        if product:
+            # product type name must match if provided
+            if product_type_name:
+                if product.product_type.name == product_type_name:
+                    return product
+            else:
+                return product
+
+    return None
 
 
 def get_target_engagement_if_exists(engagement_id=None, engagement_name=None, product=None):
@@ -99,6 +115,7 @@ def get_target_engagement_if_exists(engagement_id=None, engagement_name=None, pr
         # if there's no product, then for sure there's no engagement either
         return None
 
+    # engagement name is not unique unfortunately
     engagement = get_last_object_or_none(Engagement, product=product, name=engagement_name)
     return engagement
 
@@ -116,3 +133,39 @@ def get_target_test_if_exists(test_id=None, test_title=None, scan_type=None, eng
         return get_last_object_or_none(Test, engagement=engagement, title=test_title, scan_type=scan_type)
 
     return get_last_object_or_none(Test, engagement=engagement, scan_type=scan_type)
+
+
+def get_or_create_product(product_name=None, product_type_name=None, auto_create_context=None):
+    product = get_target_product_if_exists(product_name, product_type_name)
+    if product:
+        return product
+
+    if not auto_create_context:
+        raise ValueError('auto_create_context not True, unable to create non-existing product')
+
+    product_type, created = Product_Type.objects.get_or_create(name=product_type_name)
+    # TODO set owner if created
+
+    product = Product.objects.create(name=product_name, prod_type=product_type)
+    # TODO set owner
+
+    return product
+
+
+def get_or_create_engagement(engagement_id=None, engagement_name=None, product_name=None, product_type_name=None, auto_create_context=None):
+    product = get_target_product_if_exists(product_name, product_type_name)
+    engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
+    if engagement:
+        return engagement
+
+    product = get_or_create_product(product_name, product_type_name, auto_create_context)
+
+    if not product:
+        raise ValueError('no product, unable to create engagement')
+    if not auto_create_context:
+        raise ValueError('auto_create_context not True, unable to create non-existing engagement')
+
+    engagement = Engagement.objects.create(name=engagement_name, product=product, lead=get_current_user(), target_start=timezone.now(), target_end=timezone.now() + timedelta(days=365))
+    # TODO set version, ...
+
+    return engagement
