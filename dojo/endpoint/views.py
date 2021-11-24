@@ -1,4 +1,6 @@
 import logging
+import csv
+import io
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -11,13 +13,13 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Q, QuerySet, Count
 
-from dojo.endpoint.utils import clean_hosts_run
+from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
-    DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
+    DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm, ImportEndpointMetaForm
 from dojo.models import Product, Endpoint, Finding, DojoMeta, Endpoint_Status
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, Product_Tab, calculate_grade, redirect, \
-    add_error_message_to_response
+    add_error_message_to_response, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
@@ -477,4 +479,53 @@ def migrate_endpoints_view(request):
             'product_tab': None,
             "name": view_name,
             "html_log": html_log
-        })
+        })    
+
+
+@user_is_authorized(Product, Permissions.Import_Scan_Result, 'pid')
+def import_endpoint_meta(request, pid):
+    product = get_object_or_404(Product, id=pid)
+    form = ImportEndpointMetaForm()
+    if request.method == 'POST':
+        form = ImportEndpointMetaForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES.get('file', None)
+            if file and is_scan_file_too_large(file):
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                    extra_tags='alert-danger')
+
+            content = file.read()
+            if type(content) is bytes:
+                content = content.decode('utf-8')
+            reader = csv.DictReader(io.StringIO(content))
+
+            # Make sure 'private_dns' field is present
+            if 'private_dns' not in reader.fieldnames:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    'The column "private_dns" must be present to map host to Endpoint.',
+                    extra_tags='alert-danger')
+                return HttpResponseRedirect(reverse('import_endpoint_meta', args=(pid, )))
+
+            keys = [key for key in reader.fieldnames if key != 'private_dns']
+            create_endpoints = form.cleaned_data['create_endpoints']
+            create_tags = form.cleaned_data['create_tags']
+            create_dojo_meta = form.cleaned_data['create_dojo_meta']
+
+            try:
+                endpoint_meta_import(reader, product, keys, create_endpoints, create_tags, create_dojo_meta)
+            except Exception as e:
+                logger.exception(e)
+                add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
+            return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
+
+    add_breadcrumb(title="Endpoint Meta Importer", top_level=False, request=request)
+    product_tab = Product_Tab(product.id, title="Endpoint Meta Importer", tab="endpoints")
+    return render(request, 'dojo/endpoint_meta_importer.html', {
+        'product_tab': product_tab,
+        'form': form,
+    })

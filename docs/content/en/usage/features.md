@@ -508,3 +508,35 @@ enabled benchmarks for that AVSV level.
 
 Additional benchmarks can be added/updated in the Django admin site. In
 a future release this will be brought out to the UI.
+
+## Endpoint Meta Importer
+
+For heavy infrastructure scanning organizations, endpoints need to be as 
+flexible as possible to get the most of DefectDojo. This felexibility comes
+in the form of Tags and custom fields. Tags allow users to filter, sort, and
+report objects in ways the base object is not totally proficient in doing.
+
+Endpoint Meta Importer provides a means to apply tags and custom fields to 
+endpoints in mass via a CSV file. Tags and customs fields are stored in the
+format of column:row, so in following exmaple:
+
+```
+private_dns                  | team                | public_facing
+------------------------------------------------------------------
+sheets.google.com            | data analytics      | yes
+docs.google.com              | language processing | yes
+feedback.internal.google.com | human resources     | no
+```
+
+The three endpoints hosts will be used to find existing endpoints with matching hosts,
+or create new endpoints, and then apply tags as follows:
+
+```
+sheets.google.com (endpoint) -> [ team:data analytics, public_facing:yes ] (tags)
+docs.google.com (endpoint) -> [ team:language processing, public_facing:yes ] (tags)
+feedback.internal.google.com (endpoint) -> [ team:human resources, public_facing:no ] (tags)
+```
+
+Endpoint Meta Importer can be found in the Endpoint tab when viewing a Product
+
+**Note:** The field "private_dns" is required as it is used to query/create endpoints.
