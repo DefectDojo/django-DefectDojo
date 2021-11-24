@@ -41,7 +41,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         DojoVCRAPITestCase.__init__(self, *args, **kwargs)
 
     def assert_cassette_played(self):
-        if False:  # set to True when committing. set to False when recording new test cassettes
+        if True:  # set to True when committing. set to False when recording new test cassettes
             self.assertTrue(self.cassette.all_played)
 
     def _get_vcr(self, **kwargs):
@@ -496,6 +496,71 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         finding_id = findings['results'][0]['id']
 
         response = self.post_finding_notes_api(finding_id, 'testing note. creating it and pushing it to JIRA')
+        self.patch_finding_api(finding_id, {"push_to_jira": True})
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+        return test_id
+
+    def test_import_with_push_to_jira_add_tags(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        findings = self.get_test_findings_api(test_id)
+
+        finding = Finding.objects.get(id=findings['results'][0]['id'])
+
+        tags = ['tag1', 'tag2']
+        response = self.post_finding_tags_api(finding.id, tags)
+        self.patch_finding_api(finding.id, {"push_to_jira": True})
+
+        # Connect to jira to get the new issue
+        jira_instance = jira_helper.get_jira_instance(finding)
+        jira = jira_helper.get_jira_connection(jira_instance)
+        issue = jira.issue(finding.jira_issue.jira_id)
+
+        # Assert that the tags match
+        self.assertEqual(issue.fields.labels, tags)
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+        return test_id
+
+    def test_import_with_push_to_jira_update_tags(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        findings = self.get_test_findings_api(test_id)
+
+        finding = Finding.objects.get(id=findings['results'][0]['id'])
+
+        tags = ['tag1', 'tag2']
+        response = self.post_finding_tags_api(finding.id, tags)
+        self.patch_finding_api(finding.id, {"push_to_jira": True})
+
+        # Connect to jira to get the new issue
+        jira_instance = jira_helper.get_jira_instance(finding)
+        jira = jira_helper.get_jira_connection(jira_instance)
+        issue = jira.issue(finding.jira_issue.jira_id)
+
+        # Assert that the tags match
+        self.assertEqual(issue.fields.labels, tags)
+
+        tags_new = tags + ['tag3', 'tag4']
+        response = self.post_finding_tags_api(finding.id, tags_new)
+        self.patch_finding_api(finding.id, {"push_to_jira": True})
+
+        # Connect to jira to get the new issue
+        jira_instance = jira_helper.get_jira_instance(finding)
+        jira = jira_helper.get_jira_connection(jira_instance)
+        issue = jira.issue(finding.jira_issue.jira_id)
+
+        # Assert that the tags match
+        self.assertEqual(issue.fields.labels, tags_new)
 
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()

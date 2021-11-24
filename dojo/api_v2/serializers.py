@@ -577,14 +577,7 @@ class ProductTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product_Type
-
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['members']
-            extra_kwargs = {
-                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
-            }
-        else:
-            exclude = ['authorized_users']
+        exclude = ['authorized_users']
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1181,13 +1174,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['tid', 'updated', 'members']
-            extra_kwargs = {
-                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
-            }
-        else:
-            exclude = ['tid', 'updated', 'authorized_users']
+        exclude = ['tid', 'updated', 'authorized_users']
 
     def get_findings_count(self, obj) -> int:
         return obj.findings_count
@@ -1320,7 +1307,7 @@ class ImportScanSerializer(serializers.Serializer):
         tool_type = requires_tool_type(scan_type)
         if tool_type:
             api_scan_configuration = data.get('api_scan_configuration')
-            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+            if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
                 raise serializers.ValidationError(f'API scan configuration must be of tool type {tool_type}')
         return data
 
@@ -1435,7 +1422,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         tool_type = requires_tool_type(scan_type)
         if tool_type:
             api_scan_configuration = data.get('api_scan_configuration')
-            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+            if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
                 raise serializers.ValidationError(f'API scan configuration must be of tool type {tool_type}')
         return data
 

@@ -1,6 +1,7 @@
+from django.core.exceptions import ValidationError
 from django.db.models.deletion import RestrictedError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_409_CONFLICT, HTTP_500_INTERNAL_SERVER_ERROR
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_500_INTERNAL_SERVER_ERROR
 from rest_framework.views import exception_handler
 import logging
 
@@ -16,6 +17,11 @@ def custom_exception_handler(exc, context):
         # An object cannot be deleted because it has dependent objects.
         response = Response()
         response.status_code = HTTP_409_CONFLICT
+        response.data = {}
+        response.data['message'] = str(exc)
+    elif isinstance(exc, ValidationError):
+        response = Response()
+        response.status_code = HTTP_400_BAD_REQUEST
         response.data = {}
         response.data['message'] = str(exc)
     else:

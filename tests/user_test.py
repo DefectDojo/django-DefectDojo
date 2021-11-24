@@ -177,6 +177,17 @@ class UserTest(BaseTestCase):
         self.driver.get(self.base_url + "profile")
         self.assertTrue(self.driver.find_element(By.ID, 'id_first_name').is_enabled())
 
+    def test_forgot_password(self):
+        driver = self.driver
+        driver.get(self.base_url + "login")
+        # Click on link on login screen
+        driver.find_element_by_id("reset-password").click()
+        # Submit "Forgot password" form
+        driver.find_element_by_id("id_email").send_keys("propersam@example.com")
+        driver.find_element_by_id("reset-password").click()
+
+        self.assertTrue(self.is_text_present_on_page(text='We’ve emailed you instructions for setting your password'))
+
 
 def suite():
     suite = unittest.TestSuite()
@@ -190,6 +201,7 @@ def suite():
     suite.addTest(UserTest('test_user_profile_form_disabled'))
     suite.addTest(UserTest('test_user_profile_form_enabled'))
     suite.addTest(BaseTestCase('test_logout'))
+    suite.addTest(UserTest('test_forgot_password'))
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(UserTest('test_user_edit_permissions'))
     suite.addTest(UserTest('test_user_delete'))
