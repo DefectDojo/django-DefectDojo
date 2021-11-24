@@ -58,8 +58,6 @@ class NessusWASCSVParser(object):
                     port = 443
                 elif protocol == 'ssh':
                     port = 22
-                else:
-                    port = 8888
 
             # get severity from 'Risk' column and manage columns with no 'Risk' value
             severity = self._convert_severity(row.get('Risk'))
