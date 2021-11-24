@@ -479,7 +479,7 @@ def migrate_endpoints_view(request):
             'product_tab': None,
             "name": view_name,
             "html_log": html_log
-        })    
+        })
 
 
 @user_is_authorized(Product, Permissions.Import_Scan_Result, 'pid')
