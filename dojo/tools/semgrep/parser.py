@@ -24,7 +24,7 @@ class SemgrepParser(object):
                 test=test,
                 title=item["check_id"],
                 severity=self.convert_severity(item["extra"]["severity"]),
-                description=item["extra"]["message"],
+                description=self.get_description(item),
                 file_path=item['path'],
                 line=item["start"]["line"],
                 static_finding=True,
@@ -71,3 +71,15 @@ class SemgrepParser(object):
             return "Info"
         else:
             raise ValueError(f"Unknown value for severity: {val}")
+
+    def get_description(self, item):
+        description = ''
+
+        message = item["extra"]["message"]
+        description += '**Result message:** {}\n'.format(message)
+
+        snippet = item["extra"].get("lines")
+        if snippet is not None:
+            description += '**Snippet:**\n```{}```\n'.format(snippet)
+
+        return description

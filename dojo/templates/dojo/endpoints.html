@@ -46,12 +46,12 @@
                         <form action="{% url 'endpoints_bulk_all' %}" method="post" id="bulk_change_form">
                     {% endif %}
                         {% csrf_token %}
-                        {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
+                        {% if user.is_staff or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
 						<button class="btn btn-sm btn-primary" type="submit" id="remedy_endpoint" title="Mitigate Endpoints">
                 Bulk Mitigate
             </button>
                         {% endif %}
-                        {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Endpoint_Delete" %}
+                        {% if user.is_staff or product_tab and product_tab.product|has_object_permission:"Endpoint_Delete" %}
 						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Endpoint">
 								<a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
 								<i class="fa fa-trash"></i>
@@ -90,7 +90,7 @@
 
                         {% for e in endpoints %}
                             <tr>
-                                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
+                                {% if user.is_staff or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
                                 <td class="hidden-sm centered">
                                     <form action="#">
                                         <input type="checkbox" title= "Select_{{ e.id }}" name="select_{{ e.id }}"
