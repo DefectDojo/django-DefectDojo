@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import patch
 
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -178,15 +179,18 @@ class FlexibleImportTestAPI(DojoAPITestCase):
         # engagement name is not unique by itself and not unique inside a product
         self.engagement_last = self.create_engagement(ENGAGEMENT_NAME_DEFAULT, product=self.product)
 
-    def test_import_by_engagement_id(self):
+    @patch('dojo.jira_link.helper.get_jira_project')
+    def test_import_by_engagement_id(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=self.engagement.id, test_title=DEFAULT_TEST_TITLE)
             test_id = import0['test']
             self.assertEqual(get_object_or_none(Test, id=test_id).title, DEFAULT_TEST_TITLE)
             self.assertEqual(import0['engagement_id'], self.engagement.id)
             self.assertEqual(import0['product_id'], self.engagement.product.id)
+        mock.assert_called_with(self.engagement)
 
-    def test_import_by_product_name_exists_engagement_name_exists(self):
+    @patch('dojo.jira_link.helper.get_jira_project')
+    def test_import_by_product_name_exists_engagement_name_exists(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
@@ -194,31 +198,58 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.assertEqual(Test.objects.get(id=test_id).engagement, self.engagement_last)
             self.assertEqual(import0['engagement_id'], self.engagement_last.id)
             self.assertEqual(import0['product_id'], self.engagement_last.product.id)
+        mock.assert_called_with(self.engagement_last)
 
     def test_import_by_product_name_exists_engagement_name_not_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    def test_import_by_product_name_exists_engagement_name_not_exists_auto_create(self):
+    @patch('dojo.jira_link.helper.get_jira_project')
+    def test_import_by_product_name_exists_engagement_name_not_exists_auto_create(self, mock):
+        mock.return_value = None
         with assertImportModelsCreated(self, tests=1, engagements=1, products=0, product_types=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True)
+            test_id = import0['test']
+            self.assertEqual(get_object_or_none(Test, id=test_id).title, None)
+            self.assertEqual(get_object_or_none(Engagement, id=import0['engagement_id']).name, ENGAGEMENT_NAME_NEW)
+            self.assertEqual(import0['product_id'], self.engagement.product.id)
+        # the new engagement should inherit the jira settings from the product
+        # the jira settings are retrieved before an engagement is auto created
+        mock.assert_called_with(self.product)
 
     def test_import_by_product_name_not_exists_engagement_name(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    def test_import_by_product_name_not_exists_engagement_name_auto_create(self):
+    @patch('dojo.jira_link.helper.get_jira_project')
+    def test_import_by_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, product_type_name=PRODUCT_TYPE_NAME_DEFAULT, auto_create_context=True)
+            test_id = import0['test']
+            self.assertEqual(get_object_or_none(Test, id=test_id).title, None)
+            self.assertEqual(get_object_or_none(Engagement, id=import0['engagement_id']).name, ENGAGEMENT_NAME_NEW)
+            self.assertEqual(get_object_or_none(Product, id=import0['product_id']).name, PRODUCT_NAME_NEW)
+            self.assertEqual(get_object_or_none(Product, id=import0['product_id']).prod_type.name, PRODUCT_TYPE_NAME_DEFAULT)
 
-    def test_import_by_product_type_name_not_exists_product_name_not_exists_engagement_name_auto_create(self):
+        mock.assert_not_called()
+
+    @patch('dojo.jira_link.helper.get_jira_project')
+    def test_import_by_product_type_name_not_exists_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=1):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, product_type_name=PRODUCT_TYPE_NAME_NEW, auto_create_context=True)
+            test_id = import0['test']
+            self.assertEqual(get_object_or_none(Test, id=test_id).title, None)
+            self.assertEqual(get_object_or_none(Engagement, id=import0['engagement_id']).name, ENGAGEMENT_NAME_NEW)
+            self.assertEqual(get_object_or_none(Product, id=import0['product_id']).name, PRODUCT_NAME_NEW)
+            self.assertEqual(get_object_or_none(Product, id=import0['product_id']).prod_type.name, PRODUCT_TYPE_NAME_NEW)
+            self.assertEqual(get_object_or_none(Product_Type, id=import0['product_type_id']).name, PRODUCT_TYPE_NAME_NEW)
+
+        mock.assert_not_called()
 
     def test_import_with_invalid_parameters(self):
         with self.subTest('no parameters'):

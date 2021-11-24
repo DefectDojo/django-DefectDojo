@@ -1236,6 +1236,7 @@ class ImportScanSerializer(serializers.Serializer):
     test_id = serializers.IntegerField(read_only=True)
     engagement_id = serializers.IntegerField(read_only=True)
     product_id = serializers.IntegerField(read_only=True)
+    product_type_id = serializers.IntegerField(read_only=True)
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1291,6 +1292,7 @@ class ImportScanSerializer(serializers.Serializer):
                 data['test_id'] = test.id
                 data['engagement_id'] = test.engagement.id
                 data['product_id'] = test.engagement.product.id
+                data['product_type_id'] = test.engagement.product.prod_type.id
 
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
