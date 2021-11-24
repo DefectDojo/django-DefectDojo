@@ -2093,10 +2093,7 @@ class ProductTypeFilter(DojoFilter):
 
     class Meta:
         model = Product_Type
-        if settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['authorized_users']
-        else:
-            exclude = ['members', 'authorization_groups']
+        exclude = ['authorized_users']
         include = ('name',)
 
 
