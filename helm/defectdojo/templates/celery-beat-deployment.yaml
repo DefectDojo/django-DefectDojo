@@ -38,6 +38,8 @@ spec:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
       volumes:
+      - name: run
+        emptyDir: {}
       {{- range .Values.celery.extraVolumes }}
       - name: userconfig-{{ .name }}
         {{ .type }}:
@@ -82,6 +84,8 @@ spec:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
         {{- end }}
         volumeMounts:
+        - name: run
+          mountPath: /run/defectdojo
         {{- range .Values.celery.extraVolumes }}
         - name: userconfig-{{ .name }}
           readOnly: true

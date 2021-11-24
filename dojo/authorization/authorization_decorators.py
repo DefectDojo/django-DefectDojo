@@ -1,17 +1,14 @@
 import functools
-from django.conf import settings
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.user.helper import user_is_authorized as legacy_check
+from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
 
 
-def user_is_authorized(model, permission, arg, legacy_permission=None, lookup="pk", func=None):
+def user_is_authorized(model, permission, arg, lookup="pk", func=None):
     """Decorator for functions that ensures the user has permission on an object.
     """
 
     if func is None:
-        return functools.partial(user_is_authorized, model, permission, arg, legacy_permission, lookup)
+        return functools.partial(user_is_authorized, model, permission, arg, lookup)
 
     @functools.wraps(func)
     def _wrapped(request, *args, **kwargs):
@@ -27,15 +24,23 @@ def user_is_authorized(model, permission, arg, legacy_permission=None, lookup="p
         # object must exist
         obj = get_object_or_404(model.objects.filter(**{lookup: lookup_value}))
 
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, permission)
-        else:
-            if legacy_permission:
-                if not legacy_check(request.user, legacy_permission, obj):
-                    raise PermissionDenied()
-            elif not request.user.is_staff:
-                raise PermissionDenied()
+        user_has_permission_or_403(request.user, obj, permission)
 
+        return func(request, *args, **kwargs)
+
+    return _wrapped
+
+
+def user_has_global_permission(permission, func=None):
+    """Decorator for functions that ensures the user has a (global) permission
+    """
+
+    if func is None:
+        return functools.partial(user_has_global_permission, permission)
+
+    @functools.wraps(func)
+    def _wrapped(request, *args, **kwargs):
+        user_has_global_permission_or_403(request.user, permission)
         return func(request, *args, **kwargs)
 
     return _wrapped

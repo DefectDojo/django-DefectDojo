@@ -24,7 +24,6 @@ from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGC
     CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
     get_words_for_field
-from dojo.user.helper import check_auth_users_list
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
@@ -179,13 +178,13 @@ def report_cover_page(request):
                    'report_info': report_info})
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid', 'view')
+@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid')
 def product_type_report(request, ptid):
     product_type = get_object_or_404(Product_Type, id=ptid)
     return generate_report(request, product_type)
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def product_report(request, pid):
     product = get_object_or_404(Product, id=pid)
     return generate_report(request, product)
@@ -196,31 +195,31 @@ def product_findings_report(request):
     return generate_report(request, findings)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def engagement_report(request, eid):
     engagement = get_object_or_404(Engagement, id=eid)
     return generate_report(request, engagement)
 
 
-@user_is_authorized(Test, Permissions.Test_View, 'tid', 'view')
+@user_is_authorized(Test, Permissions.Test_View, 'tid')
 def test_report(request, tid):
     test = get_object_or_404(Test, id=tid)
     return generate_report(request, test)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid')
 def endpoint_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     return generate_report(request, endpoint, False)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid')
 def endpoint_host_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     return generate_report(request, endpoint, True)
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def product_endpoint_report(request, pid):
     user = Dojo_User.objects.get(id=request.user.id)
     product = get_object_or_404(Product.objects.all().prefetch_related('engagement_set__test_set__test_type', 'engagement_set__test_set__environment'), id=pid)
@@ -365,35 +364,15 @@ def generate_report(request, obj, host_view=False):
         user.get_full_name(), (timezone.now().strftime("%m/%d/%Y %I:%M%p %Z")))
 
     if type(obj).__name__ == "Product_Type":
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Product_Type_View)
-        else:
-            if not (request.user.is_staff or check_auth_users_list(request.user, obj)):
-                raise PermissionDenied
+        user_has_permission_or_403(request.user, obj, Permissions.Product_Type_View)
     elif type(obj).__name__ == "Product":
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Product_View)
-        else:
-            if not (request.user.is_staff or check_auth_users_list(request.user, obj)):
-                raise PermissionDenied
+        user_has_permission_or_403(request.user, obj, Permissions.Product_View)
     elif type(obj).__name__ == "Engagement":
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
-        else:
-            if not (request.user.is_staff or check_auth_users_list(request.user, obj)):
-                raise PermissionDenied
+        user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
     elif type(obj).__name__ == "Test":
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Test_View)
-        else:
-            if not (request.user.is_staff or check_auth_users_list(request.user, obj)):
-                raise PermissionDenied
+        user_has_permission_or_403(request.user, obj, Permissions.Test_View)
     elif type(obj).__name__ == "Endpoint":
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Endpoint_View)
-        else:
-            if not (request.user.is_staff or check_auth_users_list(request.user, obj)):
-                raise PermissionDenied
+        user_has_permission_or_403(request.user, obj, Permissions.Endpoint_View)
     elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet":
         # authorization taken care of by only selecting findings from product user is authed to see
         pass
