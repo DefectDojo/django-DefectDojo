@@ -1466,7 +1466,7 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
         if file and is_scan_file_too_large(file):
             raise serializers.ValidationError(
                 'Report file is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
-        
+
         return data
 
     def save(self):
@@ -1485,11 +1485,6 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
         create_endpoints = data['create_endpoints']
         create_tags = data['create_tags']
         create_dojo_meta = data['create_dojo_meta']
-
-        print(create_endpoints)
-        print(create_tags)
-        print(create_dojo_meta)   
-
 
         _, _, _, _, _, product_id, product_name = get_import_meta_data_from_dict(data)
         print(product_id, product_name)
