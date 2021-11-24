@@ -1,5 +1,6 @@
 docs:
-- docs/*
+- docs/**/*
+- readme-docs/**/*
 
 docker:
 - docker/**/*
