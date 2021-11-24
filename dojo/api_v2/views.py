@@ -1935,8 +1935,12 @@ class ImportScanView(mixins.CreateModelMixin,
     - Create an Engagement inside the product
     - Provide `product_name`
     - Provide `engagement_name`
+    - Optionally provide `product_type_name`
 
     In this scenario Defect Dojo will look up the engagment by the provided details.
+
+    When using names you can let the importer automatically create Engagements, Products and Product_Types
+    by using `auto_create_context=True`.
     """
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
