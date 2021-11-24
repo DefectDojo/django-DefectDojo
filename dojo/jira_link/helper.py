@@ -478,16 +478,24 @@ def get_labels(obj):
     labels = []
     system_settings = System_Settings.objects.get()
     system_labels = system_settings.jira_labels
-    if system_labels is None:
-        return
-    else:
+    if system_labels:
         system_labels = system_labels.split()
-    if len(system_labels) > 0:
         for system_label in system_labels:
             labels.append(system_label)
-    # Update the label with the product name (underscore)
-    labels.append(prod_name(obj).replace(" ", "_"))
+        # Update the label with the product name (underscore)
+        labels.append(prod_name(obj).replace(" ", "_"))
     return labels
+
+
+def get_tags(obj):
+    # Update Label with system setttings label
+    tags = []
+    if isinstance(obj, Finding) or isinstance(obj, Engagement):
+        obj_tags = obj.tags.all()
+        if obj_tags:
+            for tag in obj_tags:
+                tags.append(str(tag.name))
+    return tags
 
 
 def jira_summary(obj):
@@ -649,9 +657,11 @@ def add_jira_issue(obj, *args, **kwargs):
                                 }
 
         labels = get_labels(obj)
-        if labels:
+        tags = get_tags(obj)
+        jira_labels = labels + tags
+        if jira_labels:
             if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
-                fields['labels'] = labels
+                fields['labels'] = jira_labels
 
         if System_Settings.objects.get().enable_finding_sla:
 
@@ -776,9 +786,11 @@ def update_jira_issue(obj, *args, **kwargs):
             meta = get_jira_meta(jira, jira_project)
 
         labels = get_labels(obj)
-        if labels:
+        tags = get_tags(obj)
+        jira_labels = labels + tags
+        if jira_labels:
             if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
-                fields['labels'] = labels
+                fields['labels'] = jira_labels
 
         if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
             fields['environment'] = jira_environment(obj)

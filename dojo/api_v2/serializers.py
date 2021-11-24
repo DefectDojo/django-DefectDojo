@@ -1307,7 +1307,7 @@ class ImportScanSerializer(serializers.Serializer):
         tool_type = requires_tool_type(scan_type)
         if tool_type:
             api_scan_configuration = data.get('api_scan_configuration')
-            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+            if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
                 raise serializers.ValidationError(f'API scan configuration must be of tool type {tool_type}')
         return data
 
@@ -1422,7 +1422,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         tool_type = requires_tool_type(scan_type)
         if tool_type:
             api_scan_configuration = data.get('api_scan_configuration')
-            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+            if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
                 raise serializers.ValidationError(f'API scan configuration must be of tool type {tool_type}')
         return data
 
