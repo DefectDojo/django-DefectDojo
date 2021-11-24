@@ -137,7 +137,7 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.4.2
         with:
-          minikube version: 'v1.22.0'
+          minikube version: 'v1.24.0'
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress'
@@ -178,18 +178,13 @@ jobs:
         run: |-
              helm install \
                defectdojo \
-                ./helm/defectdojo \
-                --set django.ingress.enabled=true \
-                --set redis.enabled=false \
-                --set rabbitmq.enabled=true \
-                --set celery.broker=rabbitmq \
-                --set createRabbitMqSecret=true \
-                --set database=mysql \
-                --set postgresql.enabled=false \
-                --set mysql.enabled=true \
-                --set createMysqlSecret=true \
+               ./helm/defectdojo \
+               --set django.ingress.enabled=true \
+               --set imagePullPolicy=Never \
+               ${{ steps.set.outputs[matrix.databases] }} \
+               ${{ steps.set.outputs[matrix.brokers] }} \
                --set createSecret=true \
-              #  --set imagePullSecrets=defectdojoregistrykey
+               # --set imagePullSecrets=defectdojoregistrykey
 
       - name: Check deployment status
         run: |-
