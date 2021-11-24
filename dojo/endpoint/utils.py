@@ -311,10 +311,9 @@ def endpoint_meta_import(reader, product, keys, create_endpoints, create_tags, c
         if not host:
             continue
 
-        endpoints = Endpoint.objects.filter(host=host)
+        endpoints = Endpoint.objects.filter(host=host, product=product)
         if not endpoints.count() and create_endpoints:
             endpoints = [Endpoint.objects.create(host=host, product=product)]
-
         for key in keys:
             meta.append((key, row.get(key)))
 

@@ -1944,8 +1944,8 @@ class ImportScanView(mixins.CreateModelMixin,
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        _, _, _, engagement_id, engagement_name, product_name = serializers.get_import_meta_data_from_dict(serializer.validated_data)
-        product = get_target_product_if_exists(product_name)
+        _, _, _, engagement_id, engagement_name, product_id, product_name = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        product = get_target_product_if_exists(product_id, product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
         jira_project = jira_helper.get_jira_project(engagement)
 
@@ -1958,6 +1958,32 @@ class ImportScanView(mixins.CreateModelMixin,
 
     def get_queryset(self):
         return get_authorized_tests(Permissions.Import_Scan_Result)
+
+
+# Authorization: authenticated users, DjangoModelPermissions
+class EndpointMetaImporterView(mixins.CreateModelMixin,
+                     viewsets.GenericViewSet):
+    """
+    Imports an arbitrary meta file into a product to propogate meta on endpoints.
+
+    By Names:
+    - Provide `product_name`
+
+    In this scenario Defect Dojo will look up the product by the provided details.
+    """
+    serializer_class = serializers.EndpointMetaImporterSerializer
+    parser_classes = [MultiPartParser]
+    queryset = Product.objects.all()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasMetaImportPermission)
+    else:
+        permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def get_queryset(self):
+        return get_authorized_products(Permissions.Import_Scan_Result)
 
 
 # Authorization: staff users
@@ -2051,8 +2077,8 @@ class ReImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        test_id, test_title, scan_type, _, engagement_name, product_name = serializers.get_import_meta_data_from_dict(serializer.validated_data)
-        product = get_target_product_if_exists(product_name)
+        test_id, test_title, scan_type, _, engagement_name, product_id, product_name = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        product = get_target_product_if_exists(product_id, product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
         jira_project = jira_helper.get_jira_project(test)

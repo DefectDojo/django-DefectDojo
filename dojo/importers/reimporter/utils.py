@@ -82,7 +82,12 @@ def mitigate_endpoint_status(endpoint_status, user):
     endpoint_status.save()
 
 
-def get_target_product_if_exists(product_name=None):
+def get_target_product_if_exists(product_id=None, product_name=None):
+    if product_id:
+        product = get_object_or_none(Product, pk=product_id)
+        logger.debug('Using existing product by id: %s', product_id)
+        return product
+
     if product_name:
         return get_object_or_none(Product, name=product_name)
     else:

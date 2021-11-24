@@ -170,8 +170,8 @@ class UserHasImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, engagement_id, engagement_name, product_name = get_import_meta_data_from_dict(request.data)
-        product = get_target_product_if_exists(product_name)
+        _, _, _, engagement_id, engagement_name, product_id, product_name = get_import_meta_data_from_dict(request.data)
+        product = get_target_product_if_exists(product_id, product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
         if engagement:
@@ -186,6 +186,24 @@ class UserHasImportPermission(permissions.BasePermission):
             raise serializers.ValidationError("Product '%s' doesn't exist" % product_name)
         else:
             raise serializers.ValidationError("Need engagement_id or product_name + engagement_name to perform import")
+
+
+class UserHasMetaImportPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        # permission check takes place before validation, so we don't have access to serializer.validated_data()
+        # and we have to validate ourselves unfortunately
+
+        _, _, _, _, _, product_id, product_name = get_import_meta_data_from_dict(request.data)
+        product = get_target_product_if_exists(product_id, product_name)
+
+        if product:
+            # existing product, nothing special to check
+            return user_has_permission(request.user, product, Permissions.Import_Scan_Result)
+        elif product_id:
+            # product_id doesn't exist
+            raise serializers.ValidationError("product '%s' doesn''t exist" % product_id)
+        else:
+            raise serializers.ValidationError("Need product_id or product_name to perform import")
 
 
 class UserHasProductPermission(permissions.BasePermission):
@@ -244,9 +262,9 @@ class UserHasReimportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        test_id, test_title, scan_type, _, engagement_name, product_name = get_import_meta_data_from_dict(request.data)
+        test_id, test_title, scan_type, _, engagement_name, product_id, product_name = get_import_meta_data_from_dict(request.data)
 
-        product = get_target_product_if_exists(product_name)
+        product = get_target_product_if_exists(product_id, product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 

@@ -27,11 +27,14 @@ from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 import datetime
 import six
+import csv
+import io
 from django.utils.translation import ugettext_lazy as _
 import json
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
+from dojo.endpoint.utils import endpoint_meta_import
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
 from dojo.authorization.authorization import user_has_permission
@@ -62,9 +65,15 @@ def get_import_meta_data_from_dict(data):
             raise serializers.ValidationError('engagement must be an integer')
     engagement_name = data.get('engagement_name', None)
 
+    product_id = data.get('product', None)
+    if product_id:
+        if isinstance(product_id, Product):
+            product_id = product_id.id
+        elif isinstance(product_id, str) and not product_id.isdigit():
+            raise serializers.ValidationError('product must be an integer')
     product_name = data.get('product_name', None)
 
-    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name
+    return test_id, test_title, scan_type, engagement_id, engagement_name, product_id, product_name
 
 
 @extend_schema_field(serializers.ListField(child=serializers.CharField()))  # also takes basic python types
@@ -1262,9 +1271,9 @@ class ImportScanSerializer(serializers.Serializer):
 
         group_by = data.get('group_by', None)
 
-        _, test_title, scan_type, engagement_id, engagement_name, product_name = get_import_meta_data_from_dict(data)
+        _, test_title, scan_type, engagement_id, engagement_name, product_id, product_name = get_import_meta_data_from_dict(data)
         # we passed validation, so the engagement is present
-        product = get_target_product_if_exists(product_name)
+        product = get_target_product_if_exists(product_id, product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
         importer = Importer()
@@ -1380,9 +1389,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         group_by = data.get('group_by', None)
 
-        test_id, test_title, scan_type, _, engagement_name, product_name = get_import_meta_data_from_dict(data)
+        test_id, test_title, scan_type, _, engagement_name, product_id, product_name = get_import_meta_data_from_dict(data)
         # we passed validation, so the test is present
-        product = get_target_product_if_exists(product_name)
+        product = get_target_product_if_exists(product_id, product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
@@ -1431,6 +1440,67 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             raise serializers.ValidationError(
                 'The date cannot be in the future!')
         return value
+
+
+class EndpointMetaImporterSerializer(serializers.Serializer):
+    file = serializers.FileField(
+        required=True)
+    create_endpoints = serializers.BooleanField(
+        default=True,
+        required=False)
+    create_tags = serializers.BooleanField(
+        default=True,
+        required=False)
+    create_dojo_meta = serializers.BooleanField(
+        default=False,
+        required=False)
+    product_name = serializers.CharField(required=False)
+    product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), required=False)
+    # extra fields populated in response
+    # need to use the _id suffix as without the serializer framework gets confused
+    product_id = serializers.IntegerField(read_only=True)
+
+    def validate(self, data):
+        file = data.get("file")
+        if file and is_scan_file_too_large(file):
+            raise serializers.ValidationError(
+                'Report file is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
+        
+        return data
+
+    def save(self):
+        data = self.validated_data
+        file = data.get('file', None)
+        content = file.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        reader = csv.DictReader(io.StringIO(content))
+
+        # Make sure 'private_dns' field is present
+        if 'private_dns' not in reader.fieldnames:
+            raise serializers.ValidationError('The column "private_dns" must be present to map host to Endpoint.',)
+
+        keys = [key for key in reader.fieldnames if key != 'private_dns']
+        create_endpoints = data['create_endpoints']
+        create_tags = data['create_tags']
+        create_dojo_meta = data['create_dojo_meta']
+
+        print(create_endpoints)
+        print(create_tags)
+        print(create_dojo_meta)   
+
+
+        _, _, _, _, _, product_id, product_name = get_import_meta_data_from_dict(data)
+        print(product_id, product_name)
+        product = get_target_product_if_exists(product_id, product_name)
+        print(product)
+        try:
+            endpoint_meta_import(reader, product, keys, create_endpoints, create_tags, create_dojo_meta)
+        except SyntaxError as se:
+            raise Exception(se)
+        except ValueError as ve:
+            raise Exception(ve)
 
 
 class LanguageTypeSerializer(serializers.ModelSerializer):

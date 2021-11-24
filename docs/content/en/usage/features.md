@@ -516,9 +516,11 @@ flexible as possible to get the most of DefectDojo. This felexibility comes
 in the form of Tags and custom fields. Tags allow users to filter, sort, and
 report objects in ways the base object is not totally proficient in doing.
 
-Endpoint Meta Importer provides a means to apply tags and custom fields to 
+Endpoint Meta Importer provides a means to apply arbitrary tags and custom fields to 
 endpoints in mass via a CSV file. Tags and customs fields are stored in the
-format of column:row, so in following exmaple:
+format of column:row.
+
+Here is a very simple example with only two columns:
 
 ```
 private_dns                  | team                | public_facing
@@ -529,7 +531,7 @@ feedback.internal.google.com | human resources     | no
 ```
 
 The three endpoints hosts will be used to find existing endpoints with matching hosts,
-or create new endpoints, and then apply tags as follows:
+or create new endpoints, and then apply meta as follows:
 
 ```
 sheets.google.com (endpoint) -> [ team:data analytics, public_facing:yes ] (tags)
