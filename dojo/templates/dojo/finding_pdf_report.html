@@ -231,16 +231,12 @@
     <script src="{{ host }}{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
     <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
+    <script src="{{ host }}{% static "dojo/js/metrics.js" %}"></script>
     <script type="text/javascript">
         $(function () {
-            finding_age();
-            open_findings();
-        });
-
-        function finding_age() {
             var data = {};
-            var data_1 = []
-            var ticks = []
+            var data_1 = [];
+            var ticks = [];
             {% for f in findings %}
                 if (data[{{ f.age }}]) {
                     data[{{ f.age }}] += 1
@@ -257,59 +253,14 @@
                 }
                 i++;
             });
+            finding_age(data_1, ticks);
 
-
-            var dataset = [
-                {data: data_1, color: "#337ab7", fillColor: "#337ab7"}
-            ];
-
-            var options = {
-                series: {
-                    bars: {
-                        show: true,
-                        fill: true,
-                        fillColor: "#337ab7"
-                    }
-                },
-                bars: {
-                    align: "center",
-                    barWidth: 0.5
-                },
-                xaxis: {
-                    axisLabel: "Days Open",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 10,
-                    ticks: ticks,
-                },
-                yaxis: {
-                    axisLabel: "Number of Findings",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 3,
-                },
-                legend: {
-                    show: false,
-                },
-                grid: {
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-                }
-            };
-
-
-            $.plot("#finding_age", dataset, options);
-        }
-        ;
-        function open_findings() {
             var critical = 0;
             var high = 0;
             var medium = 0;
             var low = 0;
             var info = 0;
-            var ticks = [
+            ticks = [
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
@@ -342,98 +293,8 @@
             var d5 = [
                 [4, info],
             ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#open_findings", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
+            open_findings(d1, d2, d3, d4, d5, ticks);
+        });
 
         window.onload = function () {
             var toc = "";
