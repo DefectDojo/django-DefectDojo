@@ -346,7 +346,7 @@ def get_jira_connection_oauth(jira_server, access_token, access_token_secret, co
             'access_token': access_token,
             'access_token_secret': access_token_secret,
             'consumer_key': consumer_key,
-            'key_cert': key_cert
+            'key_cert': cert
             }
         jira = JIRA(server=jira_server, oauth=oauth_dict)
         logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
