@@ -6,7 +6,7 @@
 # docker-compose.yml file is not intended for production use without first
 # customizing it to your particular situation.
 ---
-version: '3.7'
+version: '3.5'
 services:
   nginx:
     build:
@@ -21,11 +21,11 @@ services:
       - defectdojo_media:/usr/share/nginx/html/media
     ports:
       - target: 8080
-        published: ${DD_PORT:-8080}
+        published: ${DD_PORT:-9080}
         protocol: tcp
         mode: host
       - target: 8443
-        published: ${DD_TLS_PORT:-8443}
+        published: ${DD_TLS_PORT:-9443}
         protocol: tcp
         mode: host
   uwsgi:
