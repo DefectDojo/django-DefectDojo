@@ -341,7 +341,7 @@ def has_jira_configured(obj):
 
 def get_jira_connection_oauth(jira_server, access_token, access_token_secret, consumer_key, key_cert):
     try:
-
+        cert = JIRA_Instance_OAUTH.objects.get(consumer_key=consumer_key).key_cert
         oauth_dict = {
             'access_token': access_token,
             'access_token_secret': access_token_secret,

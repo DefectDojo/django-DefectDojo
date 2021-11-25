@@ -371,12 +371,13 @@ def new_jira_oauth(request):
                                             (jform.cleaned_data.get('configuration_name'), request.user),
                                 url=request.build_absolute_uri(reverse('jira')),
                                 )
-            return HttpResponseRedirect(reverse('jira', ))
+            return HttpResponseRedirect(reverse('oauth', ))
         else:
             logger.error('jform.errors: %s', jform.errors)
     else:
         jform = JIRAFormOAUTH()
-        add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)
+        cert = JIRA_Instance_OAUTH.objects.get(configuration_name=)
+        add_breadcrumb(title="New Jira Configuration (OAUTH)", top_level=False, request=request)
     return render(request, 'dojo/express_new_jira.html',
                   {'jform': jform})
 

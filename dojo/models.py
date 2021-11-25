@@ -2854,7 +2854,8 @@ class JIRA_Instance_OAUTH(models.Model):
     access_token = models.CharField(max_length=2000)
     access_token_secret = models.CharField(max_length=2000)
     consumer_key = models.CharField(max_length=2000)
-    key_cert = models.CharField(max_length=2000)
+    key_cert = models.FileField(upload_to='certs')
+
 
     if hasattr(settings, 'JIRA_ISSUE_TYPE_CHOICES_CONFIG'):
         default_issue_type_choices = settings.JIRA_ISSUE_TYPE_CHOICES_CONFIG
