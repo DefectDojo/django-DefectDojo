@@ -166,6 +166,5 @@ def get_or_create_engagement(engagement_id=None, engagement_name=None, product_n
         raise ValueError('auto_create_context not True, unable to create non-existing engagement')
 
     engagement = Engagement.objects.create(engagement_type="CI/CD", name=engagement_name, product=product, lead=get_current_user(), target_start=timezone.now().date(), target_end=(timezone.now() + timedelta(days=365)).date())
-    # TODO set version, ...
 
     return engagement
