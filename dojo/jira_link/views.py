@@ -371,7 +371,7 @@ def new_jira_oauth(request):
                                             (jform.cleaned_data.get('configuration_name'), request.user),
                                 url=request.build_absolute_uri(reverse('jira')),
                                 )
-            return HttpResponseRedirect(reverse('oauth', ))
+            return HttpResponseRedirect(reverse('jira', ))
         else:
             logger.error('jform.errors: %s', jform.errors)
     else:
