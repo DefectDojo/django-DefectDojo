@@ -20,6 +20,8 @@ from dojo.utils import truncate_with_dots, prod_name, get_file_images
 from django.urls import reverse
 from dojo.forms import JIRAProjectForm, JIRAEngagementForm
 
+from pprint import pprint
+
 logger = logging.getLogger(__name__)
 
 RESOLVED_STATUS = [
@@ -342,12 +344,14 @@ def has_jira_configured(obj):
 def get_jira_connection_oauth(jira_server, access_token, access_token_secret, consumer_key, key_cert):
     try:
         cert = JIRA_Instance_OAUTH.objects.get(consumer_key=consumer_key).key_cert
+
         oauth_dict = {
             'access_token': access_token,
             'access_token_secret': access_token_secret,
             'consumer_key': consumer_key,
             'key_cert': cert
             }
+        pprint.pprint(oauth_dict)
         jira = JIRA(server=jira_server, oauth=oauth_dict)
         logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
         return jira
