@@ -25,6 +25,8 @@ class TestSemgrepParser(TestCase):
         self.assertEqual(696, finding.cwe)
         self.assertEqual("javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");", finding.mitigation)
         self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
+        self.assertIn("javax.crypto.Cipher c = javax.crypto.Cipher.getInstance(\"DES/CBC/PKCS5Padding\");", finding.description)
+        self.assertIn("Using CBC with PKCS5Padding is susceptible to padding orcale attacks", finding.description)
 
     def test_parse_many_finding(self):
         testfile = open("dojo/unittests/scans/semgrep/many_findings.json")

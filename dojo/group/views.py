@@ -334,7 +334,7 @@ def add_product_type_group(request, gid):
         if group_form.is_valid():
             if 'product_types' in group_form.cleaned_data and len(group_form.cleaned_data['product_types']) > 0:
                 for product_type in group_form.cleaned_data['product_types']:
-                    existing_groups = Product_Type_Group.objects.filter(product_type=product_type)
+                    existing_groups = Product_Type_Group.objects.filter(product_type=product_type, group=group)
                     if existing_groups.count() == 0:
                         product_type_group = Product_Type_Group()
                         product_type_group.product_type = product_type

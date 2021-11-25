@@ -1,7 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
 from dojo.request_cache import cache_for_request
-from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
+from dojo.authorization.roles_permissions import Permissions, Roles, get_global_roles_with_permissions, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group, Dojo_Group, Dojo_Group_Member, \
     Languages, App_Analysis, Stub_Finding, Product_API_Scan_Configuration
@@ -17,11 +17,8 @@ def user_has_permission(user, obj, permission):
 
     if isinstance(obj, Product_Type) or isinstance(obj, Product):
         # Global roles are only relevant for product types, products and their dependent objects
-        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+        if user_has_global_permission(user, permission):
             return True
-        for group in get_groups(user):
-            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
-                return True
 
     if isinstance(obj, Product_Type):
         # Check if the user has a role for the product type with the requested permissions
@@ -95,8 +92,30 @@ def user_has_permission(user, obj, permission):
             format(type(obj).__name__, permission))
 
 
+def user_has_global_permission(user, permission):
+    if user.is_superuser:
+        return True
+
+    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+        return True
+
+    if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_global_permission(user.global_role.role.id, permission):
+        return True
+
+    for group in get_groups(user):
+        if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_global_permission(group.global_role.role.id, permission):
+            return True
+
+    return False
+
+
 def user_has_permission_or_403(user, obj, permission):
     if not user_has_permission(user, obj, permission):
+        raise PermissionDenied
+
+
+def user_has_global_permission_or_403(user, permission):
+    if not user_has_global_permission(user, permission):
         raise PermissionDenied
 
 
@@ -119,7 +138,21 @@ def role_has_permission(role, permission):
         raise RoleDoesNotExistError('Role {} does not exist'.format(role))
     roles = get_roles_with_permissions()
     permissions = roles.get(role)
+    if not permissions:
+        return False
     return permission in permissions
+
+
+def role_has_global_permission(role, permission):
+    if role is None:
+        return False
+    if not Roles.has_value(role):
+        raise RoleDoesNotExistError('Role {} does not exist'.format(role))
+    roles = get_global_roles_with_permissions()
+    permissions = roles.get(role)
+    if permissions and permission in permissions:
+        return True
+    return role_has_permission(role, permission)
 
 
 class NoAuthorizationImplementedError(Exception):

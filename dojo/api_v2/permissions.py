@@ -5,7 +5,7 @@ from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
-from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.authorization import user_has_global_permission, user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 
 
@@ -215,7 +215,7 @@ class UserHasProductGroupPermission(permissions.BasePermission):
 class UserHasProductTypePermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST':
-            return request.user.is_staff
+            return user_has_global_permission(request.user, Permissions.Product_Type_Add)
         else:
             return True
 
