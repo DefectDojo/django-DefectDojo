@@ -377,7 +377,7 @@ def new_jira_oauth(request):
     else:
         jform = JIRAFormOAUTH()
         add_breadcrumb(title="New Jira Configuration (OAUTH)", top_level=False, request=request)
-    return render(request, 'dojo/express_new_jira.html',
+    return render(request, 'dojo/oauth_new_jira.html',
                   {'jform': jform})
 
 @user_passes_test(lambda u: u.is_staff)
