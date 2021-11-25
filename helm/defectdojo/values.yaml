@@ -267,8 +267,9 @@ mysql:
     database: defectdojo
     existingSecret: defectdojo-mysql-specific
     secretKey: mysql-password
-  service:
-    port: 3306
+  master:
+    service:
+      port: 3306
   # To use an external mySQL instance, set enabled to false and uncomment
   # the line below / add external address:
   # mysqlServer: "127.0.0.1"
