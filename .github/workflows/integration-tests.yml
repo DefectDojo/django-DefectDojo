@@ -59,8 +59,8 @@ jobs:
             ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
           file: Dockerfile.${{ env.docker-image }}
           outputs: type=docker,dest=${{ env.docker-image }}_img
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.docker-image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
           
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
