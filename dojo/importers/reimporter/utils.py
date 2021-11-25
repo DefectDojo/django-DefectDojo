@@ -1,7 +1,7 @@
 from datetime import timedelta
 from crum import get_current_user
 from django.conf import settings
-from dojo.models import Engagement, Finding, Q, Product, Product_Type, Test
+from dojo.models import Engagement, Finding, Q, Product, Product_Member, Product_Type, Product_Type_Member, Role, Test
 from django.utils import timezone
 import logging
 from dojo.utils import get_last_object_or_none, get_object_or_none
@@ -144,10 +144,19 @@ def get_or_create_product(product_name=None, product_type_name=None, auto_create
         raise ValueError('auto_create_context not True, unable to create non-existing product')
 
     product_type, created = Product_Type.objects.get_or_create(name=product_type_name)
-    # TODO set owner if created
+    if created:
+        member = Product_Type_Member()
+        member.user = get_current_user()
+        member.product_type = product_type
+        member.role = Role.objects.get(is_owner=True)
+        member.save()
 
     product = Product.objects.create(name=product_name, prod_type=product_type)
-    # TODO set owner
+    member = Product_Member()
+    member.user = get_current_user()
+    member.product = product
+    member.role = Role.objects.get(is_owner=True)
+    member.save()
 
     return product
 
