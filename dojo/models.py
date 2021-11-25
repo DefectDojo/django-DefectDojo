@@ -1089,7 +1089,7 @@ class Engagement(models.Model):
         return False
 
     def __str__(self):
-        return "Engagement: %s (%s)" % (self.name if self.name else '',
+        return "Engagement %i: %s (%s)" % (self.id if id else 0, self.name if self.name else '',
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
 
