@@ -72,9 +72,8 @@ jobs:
           tags: |
             ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
           file: Dockerfile.${{ env.docker-image }}
-          outputs: type=docker,dest=${{ env.docker-image }}_img
-          cache-from: type=gha,scope=${{ matrix.docker-image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
+          cache-from: type=gha,scope=${{ matrix.test-case }}-${{ matrix.docker-image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.test-case }}-${{ matrix.docker-image }}
 
       - name: Build
         id: docker_build_nginx
@@ -87,9 +86,8 @@ jobs:
           tags: |
             ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
           file: Dockerfile.${{ env.docker-image }}
-          outputs: type=docker,dest=${{ env.docker-image }}_img
-          cache-from: type=gha,scope=${{ matrix.docker-image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
+          cache-from: type=gha,scope=${{ matrix.test-case }}-${{ matrix.docker-image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.test-case }}-${{ matrix.docker-image }}
 
       - name: Build
         id: docker_build_integration-tests
@@ -102,9 +100,8 @@ jobs:
           tags: |
             ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
           file: Dockerfile.${{ env.docker-image }}
-          outputs: type=docker,dest=${{ env.docker-image }}_img
-          cache-from: type=gha,scope=${{ matrix.docker-image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
+          cache-from: type=gha,scope=${{ matrix.test-case }}-${{ matrix.docker-image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.test-case }}-${{ matrix.docker-image }}
 
       # phased startup so we can use the exit code from integrationtest container
 
