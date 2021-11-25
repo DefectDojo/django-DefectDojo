@@ -470,11 +470,6 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True, expected_http_status_code=400)
 
 
-# TODO optimize getting of targets
+# TODO auth check reimport autocreate
 # TODO update docs and docstrings
-# TODO Reimport create initial empty test? notification? call import? update title?
-
-# TODO solves:
-# allow setting title during api import
-# allow import by product_id/name + engagement_name
-# return engagment and product after import
+# TODO optimize getting of targets?
