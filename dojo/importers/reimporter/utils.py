@@ -121,6 +121,11 @@ def get_target_engagement_if_exists(engagement_id=None, engagement_name=None, pr
 
 
 def get_target_test_if_exists(test_id=None, test_title=None, scan_type=None, engagement=None):
+    """
+    Retrieves the target test to reimport. This can be as simple as looking up the test via the `test_id` parameter.
+    If there is no `test_id` provided, we lookup the latest test inside the provided engagement that satisfies
+    the provided scan_type and test_title.
+    """
     if test_id:
         test = get_object_or_none(Test, pk=test_id)
         logger.debug('Using existing Test by id: %s', test_id)
@@ -169,10 +174,11 @@ def get_or_create_engagement(engagement_id=None, engagement_name=None, product_n
 
     product = get_or_create_product(product_name, product_type_name, auto_create_context)
 
-    if not product:
-        raise ValueError('no product, unable to create engagement')
     if not auto_create_context:
         raise ValueError('auto_create_context not True, unable to create non-existing engagement')
+
+    if not product:
+        raise ValueError('no product, unable to create engagement')
 
     engagement = Engagement.objects.create(engagement_type="CI/CD", name=engagement_name, product=product, lead=get_current_user(), target_start=timezone.now().date(), target_end=(timezone.now() + timedelta(days=365)).date())
 

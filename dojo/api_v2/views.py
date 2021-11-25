@@ -2062,7 +2062,10 @@ class ReImportScanView(mixins.CreateModelMixin,
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
-        jira_project = jira_helper.get_jira_project(test)
+
+        # when using auto_create_context, the engagement or product may not have been created yet
+        jira_driver = test if test else engagement if engagement else product if product else None
+        jira_project = jira_helper.get_jira_project(jira_driver) if jira_driver else None
 
         push_to_jira = serializer.validated_data.get('push_to_jira')
         if get_system_setting('enable_jira') and jira_project:

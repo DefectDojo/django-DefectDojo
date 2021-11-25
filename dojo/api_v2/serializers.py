@@ -1,6 +1,7 @@
 from typing import List
 from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
+from rest_framework.exceptions import NotFound
 from rest_framework.fields import DictField, MultipleChoiceField
 
 from dojo.endpoint.utils import endpoint_filter
@@ -1256,11 +1257,7 @@ class ImportScanSerializer(serializers.Serializer):
 
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
-        tags = None
-        if 'tags' in data:
-            logger.debug('import scan tags: %s', data['tags'])
-            tags = data['tags']
-
+        tags = data.get('tags', None)
         lead = data['lead']
 
         scan = data.get('file', None)
@@ -1356,6 +1353,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Product_API_Scan_Configuration.objects.all())
     service = serializers.CharField(required=False)
+    environment = serializers.CharField(required=False)
+    lead = serializers.PrimaryKeyRelatedField(
+        allow_null=True,
+        default=None,
+        queryset=User.objects.all())
+    tags = TagListSerializerField(required=False)
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
@@ -1364,6 +1367,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     test_id = serializers.IntegerField(read_only=True)
     engagement_id = serializers.IntegerField(read_only=True)  # need to use the _id suffix as without the serializer framework gets confused
     product_id = serializers.IntegerField(read_only=True)
+    product_type_id = serializers.IntegerField(read_only=True)
 
     def save(self, push_to_jira=False):
         logger.debug('push_to_jira: %s', push_to_jira)
@@ -1381,6 +1385,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         commit_hash = data.get('commit_hash', None)
         api_scan_configuration = data.get('api_scan_configuration', None)
         service = data.get('service', None)
+        lead = data.get('lead', None)
+        tags = data.get('tags', None)
+        environment_name = data.get('environment', 'Development')
+        environment = Development_Environment.objects.get(name=environment_name)
 
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
@@ -1393,23 +1401,48 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
-        reimporter = ReImporter()
         try:
-            test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
-                reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
-                                            tags=None, minimum_severity=minimum_severity,
-                                            endpoints_to_add=endpoints_to_add, scan_date=scan_date,
-                                            version=version, branch_tag=branch_tag, build_id=build_id,
-                                            commit_hash=commit_hash, push_to_jira=push_to_jira,
-                                            close_old_findings=close_old_findings,
-                                            group_by=group_by, api_scan_configuration=api_scan_configuration,
-                                            service=service)
+            if test:
+                # reimport into provided / latest test
+                reimporter = ReImporter()
+                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
+                    reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
+                                                tags=None, minimum_severity=minimum_severity,
+                                                endpoints_to_add=endpoints_to_add, scan_date=scan_date,
+                                                version=version, branch_tag=branch_tag, build_id=build_id,
+                                                commit_hash=commit_hash, push_to_jira=push_to_jira,
+                                                close_old_findings=close_old_findings,
+                                                group_by=group_by, api_scan_configuration=api_scan_configuration,
+                                                service=service)
+
+            elif auto_create_context:
+                # perform Import to create test
+                logger.debug('reimport for non-existing test, using import to create new test')
+                engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context)
+                importer = Importer()
+                test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment,
+                                                                                active=active, verified=verified, tags=tags,
+                                                                                minimum_severity=minimum_severity,
+                                                                                endpoints_to_add=endpoints_to_add,
+                                                                                scan_date=scan_date, version=version,
+                                                                                branch_tag=branch_tag, build_id=build_id,
+                                                                                commit_hash=commit_hash,
+                                                                                push_to_jira=push_to_jira,
+                                                                                close_old_findings=close_old_findings,
+                                                                                group_by=group_by,
+                                                                                api_scan_configuration=api_scan_configuration,
+                                                                                service=service,
+                                                                                title=test_title)
+            else:
+                # should be captured by validation / permission check already
+                raise NotFound('test not found')
 
             if test:
                 data['test'] = test
                 data['test_id'] = test.id
                 data['engagement_id'] = test.engagement.id
                 data['product_id'] = test.engagement.product.id
+                data['product_type_id'] = test.engagement.product.prod_type.id
 
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
