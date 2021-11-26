@@ -63,7 +63,7 @@ class SslscanParser(object):
                             dynamic_finding=True,)
                         finding.unsaved_endpoints = list()
                         dupes[dupe_key] = finding
-                        
+
                         if host:
                             if '://' in host:
                                 endpoint = Endpoint.from_uri(host)
