@@ -470,6 +470,5 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True, expected_http_status_code=400)
 
 
-# TODO auth check reimport autocreate
 # TODO update docs and docstrings
 # TODO optimize getting of targets?
