@@ -1,3 +1,4 @@
+{{- if .Values.initializer.run  }}
 {{- $fullName := include "defectdojo.fullname" . -}}
 apiVersion: batch/v1
 kind: Job
@@ -86,3 +87,4 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
   backoffLimit: 1
+{{- end }}
