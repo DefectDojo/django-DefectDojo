@@ -11,7 +11,7 @@ from dojo.tools.factory import get_parser
 from dojo.tools.sarif.parser import SarifParser
 from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from dojo.unittests.dojo_test_case import DojoAPITestCase
-from dojo.unittests.test_utils import assertImportModelsCreat, endpoints=0ed
+from dojo.unittests.test_utils import assertImportModelsCreated
 import logging
 
 from dojo.utils import get_object_or_none

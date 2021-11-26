@@ -1,5 +1,5 @@
 from django.urls import reverse
-from dojo.models import User, Test, Finding
+from dojo.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from django.test.client import Client
@@ -38,7 +38,7 @@ class EndpointMetaImportMixin(object):
         self.assertEqual(meta_count_before + 6, self.db_dojo_meta_count())
 
     def test_endpoint_meta_import_endpoint_missing_private_dns(self):
-         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             import0 = self.endpoint_meta_import_scan_with_params(
                 self.meta_import_no_private_dns, create_endpoints=True, create_tags=True, create_dojo_meta=True, expected_http_status_code=400)
 

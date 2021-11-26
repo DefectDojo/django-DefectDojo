@@ -521,7 +521,6 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         return self.endpoint_meta_import_scan(payload, expected_http_status_code)
 
-
     def get_finding_api(self, finding_id):
         response = self.client.get(reverse('finding-list') + '%s/' % finding_id, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
