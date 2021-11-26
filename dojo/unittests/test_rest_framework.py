@@ -353,7 +353,7 @@ class BaseClass():
                 tag_list = []
                 for tag_string in self.payload.get('tags', None):
                     tag_list += tagulous.utils.parse_tags(tag_string, max_count=0, space_delimiter=True)
-                
+
                 self.assertEqual(len(tag_list), len(response.data.get('tags', None)))
                 for tag in tag_list:
                     # logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
