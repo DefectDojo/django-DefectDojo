@@ -37,6 +37,7 @@ from drf_spectacular.settings import spectacular_settings
 import logging
 import pathlib
 import json
+import tagulous
 from dojo.authorization.roles_permissions import Permissions
 
 
@@ -302,7 +303,7 @@ class BaseClass():
             # print(open_api3_json_schema)
             # validator = ResponseValidator(spec)
 
-            check_for_tags = False
+            tag_list = []
             if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
                 logger.debug('creating model with endpoints: %s', self.payload)
@@ -312,7 +313,8 @@ class BaseClass():
                 # print('response:', response.content[:1000])
                 check_for_id = response.data['id']
                 # print('id: ', check_for_id)
-                check_for_tags = self.payload.get('tags', None)
+                for tag_string in self.payload.get('tags', None):
+                    tag_list += tagulous.utils.parse_tags(tag_string, max_count=0, space_delimiter=True)
 
             response = self.client.get(self.url, format='json')
             # print('response')
@@ -321,13 +323,13 @@ class BaseClass():
             # print('response.data')
             # print(response.data)
             # tags must be present in last entry, the one we created
-            if check_for_tags:
+            if tag_list:
                 tags_found = False
                 for result in response.data['results']:
                     if result['id'] == check_for_id:
                         # logger.debug('result.tags: %s', result.get('tags', ''))
-                        self.assertEqual(len(check_for_tags), len(result.get('tags', None)))
-                        for tag in check_for_tags:
+                        self.assertEqual(len(tag_list), len(result.get('tags', None)))
+                        for tag in tag_list:
                             # logger.debug('looking for tag %s in tag list %s', tag, result['tags'])
                             self.assertTrue(tag in result['tags'])
                         tags_found = True
@@ -348,8 +350,12 @@ class BaseClass():
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
 
             if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
-                self.assertEqual(len(self.payload.get('tags')), len(response.data.get('tags', None)))
-                for tag in self.payload.get('tags'):
+                tag_list = []
+                for tag_string in self.payload.get('tags', None):
+                    tag_list += tagulous.utils.parse_tags(tag_string, max_count=0, space_delimiter=True)
+                
+                self.assertEqual(len(tag_list), len(response.data.get('tags', None)))
+                for tag in tag_list:
                     # logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
                     self.assertTrue(tag in response.data['tags'])
 
@@ -673,7 +679,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
             'query': 'test=true',
             'fragment': 'test-1',
             'product': 1,
-            "tags": ["mytag", "yourtag"]
+            "tags": ['tag1', 'tag2, tag3', '"tag4, tag5"']
         }
         self.update_fields = {'protocol': 'ftp', 'tags': ['one_new_tag']}
         self.object_permission = True
@@ -704,7 +710,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
             "reason": "",
             "test_strategy": "",
             "product": "1",
-            "tags": ["mytag"]
+            "tags": ["tag1"]
         }
         self.update_fields = {'version': 'latest'}
         self.object_permission = True
@@ -818,7 +824,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "dynamic_finding": False,
             "endpoints": [1, 2],
             "files": [],
-            "tags": ['tag1', 'tag_2'],
+            "tags": ["tag1, tag2"],
         }
         self.update_fields = {'duplicate': False, 'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
         self.object_permission = True
@@ -1085,7 +1091,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
             "prod_type": 1,
             "name": "Test Product",
             "description": "test product",
-            "tags": ["mytag, yourtag"]
+            "tags": ["tag1, tag2"]
         }
         self.update_fields = {'prod_type': 2}
         self.object_permission = True

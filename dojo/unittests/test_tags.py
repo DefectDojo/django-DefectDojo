@@ -155,61 +155,69 @@ class TagTests(DojoAPITestCase):
         return self.test_finding_put_remove_tags_non_existent()
 
     def test_finding_create_tags_with_commas(self):
-        tags = ['one,two']
+        tags = ['tag1,tag2']
         finding_id = self.create_finding_with_tags(tags)
         response = self.get_finding_tags_api(finding_id)
 
-        # the old django-tagging library was splitting this tag into 2 tags
-        # with djangotagulous the tag does no longer get split up and we cannot modify tagulous
-        # to keep doing the old behaviour. so this is a small incompatibility, but only for
-        # tags with commas, so should be minor trouble
-        #
-        # self.assertEqual(2, len(response.get('tags')))
-        self.assertEqual(1, len(response.get('tags')))
+        # Tagulous tag string parser tokenizes tag string values by both commas and spaces.
+        # If a tag string contains both spaces and commas, commas take higher priority.
+        # If a tag name contains a space or comma, it should be escaped by "" for clarity.
+        # Therefore, ['tag1,tag2'] would render two tags, 'tag1' and 'tag2', using commas as the delimiter.
+
+        self.assertEqual(2, len(response.get('tags')))
         # print("response['tags']:" + str(response['tags']))
-        self.assertTrue('one' in str(response['tags']))
-        self.assertTrue('two' in str(response['tags']))
+        self.assertTrue('tag1' in str(response['tags']))
+        self.assertTrue('tag2' in str(response['tags']))
 
     def test_finding_create_tags_with_commas_quoted(self):
-        tags = ['"one,two"']
+        tags = ['"tag1,tag2"']
         finding_id = self.create_finding_with_tags(tags)
         response = self.get_finding_tags_api(finding_id)
 
-        # no splitting due to quotes
+        # Tagulous tag string parser tokenizes tag string values by both commas and spaces.
+        # If a tag string contains both spaces and commas, commas take higher priority.
+        # If a tag name contains a space or comma, it should be escaped by "" for clarity.
+        # Therefore, ['"tag1,tag2"'] renders one tag, 'tag1,tag2', because it is escaped by "".
+
         self.assertEqual(len(tags), len(response.get('tags', None)))
         for tag in tags:
             logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
             # with django-tagging the quotes were stripped, with tagulous they remain
-            # self.assertTrue(tag.strip('\"') in response['tags'])
-            self.assertTrue(tag in response['tags'])
+            self.assertTrue(tag.strip('\"') in response['tags'])
+            # self.assertTrue(tag in response['tags'])
 
     def test_finding_create_tags_with_spaces(self):
-        tags = ['one two']
+        tags = ['tag1 tag2']
         finding_id = self.create_finding_with_tags(tags)
         response = self.get_finding_tags_api(finding_id)
 
-        # the old django-tagging library was splitting this tag into 2 tags
-        # with djangotagulous the tag does no longer get split up and we cannot modify tagulous
-        # to keep doing the old behaviour. so this is a small incompatibility, but only for
-        # tags with commas, so should be minor trouble
+        # Tagulous tag string parser tokenizes tag string values by both commas and spaces.
+        # If a tag string contains both spaces and commas, commas take higher priority.
+        # If a tag name contains a space or comma, it should be escaped by "" for clarity.
+        # Therefore, ['tag1 tag2'] renders two tags, 'tag1' and 'tag2', using spaces as the delimiter.
+
         # self.assertEqual(2, len(response.get('tags')))
-        self.assertEqual(1, len(response.get('tags')))
-        self.assertTrue('one' in str(response['tags']))
-        self.assertTrue('two' in str(response['tags']))
+        self.assertEqual(2, len(response.get('tags')))
+        self.assertTrue('tag1' in str(response['tags']))
+        self.assertTrue('tag2' in str(response['tags']))
         # finding.tags: [<Tag: one>, <Tag: two>]
 
     def test_finding_create_tags_with_spaces_quoted(self):
-        tags = ['"one two"']
+        tags = ['"tag1 tag2"']
         finding_id = self.create_finding_with_tags(tags)
         response = self.get_finding_tags_api(finding_id)
 
-        # no splitting due to quotes
+        # Tagulous tag string parser tokenizes tag string values by both commas and spaces.
+        # If a tag string contains both spaces and commas, commas take higher priority.
+        # If a tag name contains a space or comma, it should be escaped by "" for clarity.
+        # Therefore, ['"tag1 tag2"'] renders one tag, 'tag1 tag2', because it is escaped by "".
+
         self.assertEqual(len(tags), len(response.get('tags', None)))
         for tag in tags:
             logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
             # with django-tagging the quotes were stripped, with tagulous they remain
-            # self.assertTrue(tag.strip('\"') in response['tags'])
-            self.assertTrue(tag in response['tags'])
+            self.assertTrue(tag.strip('\"') in response['tags'])
+            # self.assertTrue(tag in response['tags'])
 
         # finding.tags: <QuerySet [<Tag: one two>]>
 

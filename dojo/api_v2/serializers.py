@@ -27,7 +27,6 @@ from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 import datetime
 import six
-import re
 from django.utils.translation import ugettext_lazy as _
 import json
 import dojo.jira_link.helper as jira_helper
@@ -112,7 +111,7 @@ class TagListSerializerField(serializers.ListField):
 
             self.child.run_validation(s)
 
-            data_safe += re.split('[, ]', s)
+            data_safe += tagulous.utils.parse_tags(s, max_count=0, space_delimiter=True)
 
         internal_value = tagulous.utils.render_tags(data_safe)
 
