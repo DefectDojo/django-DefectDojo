@@ -208,11 +208,11 @@ class FlexibleImportTestAPI(DojoAPITestCase):
 
     def test_endpoint_meta_import_by_product_name_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
-            import0 = self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product_name=PRODUCT_NAME_DEFAULT, expected_http_status_code=201)
+            import0 = self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product=None, product_name=PRODUCT_NAME_DEFAULT, expected_http_status_code=201)
 
     def test_endpoint_meta_import_by_product_name_not_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
-            import0 = self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product_name=PRODUCT_NAME_NEW, expected_http_status_code=400)
+            import0 = self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product=None, product_name=PRODUCT_NAME_NEW, expected_http_status_code=400)
 
     def test_import_with_invalid_parameters(self):
         with self.subTest('no parameters'):

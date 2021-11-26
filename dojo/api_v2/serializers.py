@@ -1487,9 +1487,7 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
         create_dojo_meta = data['create_dojo_meta']
 
         _, _, _, _, _, product_id, product_name = get_import_meta_data_from_dict(data)
-        print(product_id, product_name)
         product = get_target_product_if_exists(product_id, product_name)
-        print(product)
         try:
             endpoint_meta_import(reader, product, keys, create_endpoints, create_tags, create_dojo_meta)
         except SyntaxError as se:
