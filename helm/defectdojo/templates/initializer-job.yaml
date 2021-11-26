@@ -18,6 +18,10 @@ spec:
         defectdojo.org/component: initializer
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+      {{- with .Values.initializer.annotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
