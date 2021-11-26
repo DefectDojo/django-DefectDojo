@@ -59,7 +59,7 @@ class UserTest(BaseTestCase):
         # Query the site to determine if the user has been created
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='User added successfully, you may edit if necessary.') or
+        self.assertTrue(self.is_success_message_present(text='User added successfully.') or
             self.is_help_message_present(text='A user with that username already exists.'))
 
     def login_standard_page(self):
