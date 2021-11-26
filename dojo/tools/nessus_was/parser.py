@@ -49,7 +49,7 @@ class NessusWASCSVParser(object):
             cvssv3 = row.get('CVSSv3', None)
             protocol = row.get('Protocol').lower() if 'Protocol' in row else None
             port = row.get('Port', None)
-            host = row.get('Host', 'localhost')
+            host = row.get('Host', row.get('IP Address', 'localhost'))
 
             # get severity from 'Risk' column and manage columns with no 'Risk' value
             severity = self._convert_severity(row.get('Risk'))
