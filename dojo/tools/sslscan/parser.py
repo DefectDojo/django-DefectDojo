@@ -63,10 +63,13 @@ class SslscanParser(object):
                             dynamic_finding=True,)
                         finding.unsaved_endpoints = list()
                         dupes[dupe_key] = finding
-
-                        if host is not None:
-                            finding.unsaved_endpoints.append(Endpoint(
-                                host=host,
-                                port=port,
-                                protocol='https' if port == 443 else None))
+                        
+                        if host:
+                            if '://' in host:
+                                endpoint = Endpoint.from_uri(host)
+                            else:
+                                endpoint = Endpoint(
+                                    host=host,
+                                    port=port)
+                            finding.unsaved_endpoints.append(endpoint)
         return dupes.values()

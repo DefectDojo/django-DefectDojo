@@ -51,14 +51,6 @@ class NessusWASCSVParser(object):
             port = row.get('Port', None)
             host = row.get('Host', 'localhost')
 
-            if not port:
-                if protocol == 'http':
-                    port = 80
-                elif protocol == 'https':
-                    port = 443
-                elif protocol == 'ssh':
-                    port = 22
-
             # get severity from 'Risk' column and manage columns with no 'Risk' value
             severity = self._convert_severity(row.get('Risk'))
             if 'CVE' in row:
