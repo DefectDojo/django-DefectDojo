@@ -302,9 +302,9 @@ def add_user(request):
                         pt.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'User added successfully, you may edit if necessary.',
+                                 'User added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('edit_user', args=(user.id,)))
+            return HttpResponseRedirect(reverse('view_user', args=(user.id,)))
         else:
             messages.add_message(request,
                                  messages.ERROR,
