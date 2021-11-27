@@ -26,7 +26,7 @@ import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
     Dojo_User, Test, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule
+    Language_Type, Languages, Rule, Dojo_Group_Member
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
 import logging
@@ -1641,14 +1641,24 @@ def get_site_url():
 
 
 @receiver(post_save, sender=Dojo_User)
-def set_default_notifications(sender, instance, created, **kwargs):
-    # for new user we create a Notifications object so the default 'alert' notifications work
-    # this needs to be a signal to make it also work for users created via ldap, oauth and other authentication backends
+def user_post_save(sender, instance, created, **kwargs):
+    # For new users we create a Notifications object so the default 'alert' notifications work and
+    # assign them to a default group if specified in the system settings.
+    # This needs to be a signal to make it also work for users created via ldap, oauth and other
+    # authentication backends
     if created:
         logger.info('creating default set of notifications for: ' + str(instance))
-        notifications = Notifications()
-        notifications.user = instance
+        notifications = Notifications(user=instance)
         notifications.save()
+
+        system_settings = System_Settings.objects.get()
+        if system_settings.default_group and system_settings.default_group_role:
+            logger.info('setting default group for: ' + str(instance))
+            dojo_group_member = Dojo_Group_Member(
+                group=system_settings.default_group,
+                user=instance,
+                role=system_settings.default_group_role)
+            dojo_group_member.save()
 
 
 @receiver(post_save, sender=Engagement)

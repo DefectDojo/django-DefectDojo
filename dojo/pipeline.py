@@ -2,8 +2,7 @@ import gitlab
 import re
 
 from django.conf import settings
-from dojo.models import Dojo_Group_Member, Product, Product_Member, \
-    Product_Type, System_Settings, Role
+from dojo.models import Product, Product_Member, Product_Type, System_Settings, Role
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
 from dojo.authorization.roles_permissions import Permissions, Roles
@@ -60,14 +59,6 @@ def social_uid(backend, details, response, *args, **kwargs):
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
     if kwargs.get('is_new'):
         system_settings = System_Settings.objects.get()
-
-        if system_settings.default_group is not None and system_settings.default_group_role is not None:
-            dojo_group_member = Dojo_Group_Member(
-                group=system_settings.default_group,
-                user=user,
-                role=system_settings.default_group_role)
-            dojo_group_member.save()
-
         if system_settings.staff_user_email_pattern is not None and \
            re.fullmatch(system_settings.staff_user_email_pattern, user.email) is not None:
             user.is_staff = True
