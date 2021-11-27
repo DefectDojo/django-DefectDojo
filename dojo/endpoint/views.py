@@ -502,16 +502,16 @@ def import_endpoint_meta(request, pid):
                 content = content.decode('utf-8')
             reader = csv.DictReader(io.StringIO(content))
 
-            # Make sure 'private_dns' field is present
-            if 'private_dns' not in reader.fieldnames:
+            # Make sure 'hostname' field is present
+            if 'hostname' not in reader.fieldnames:
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    'The column "private_dns" must be present to map host to Endpoint.',
+                    'The column "hostname" must be present to map host to Endpoint.',
                     extra_tags='alert-danger')
                 return HttpResponseRedirect(reverse('import_endpoint_meta', args=(pid, )))
 
-            keys = [key for key in reader.fieldnames if key != 'private_dns']
+            keys = [key for key in reader.fieldnames if key != 'hostname']
             create_endpoints = form.cleaned_data['create_endpoints']
             create_tags = form.cleaned_data['create_tags']
             create_dojo_meta = form.cleaned_data['create_dojo_meta']

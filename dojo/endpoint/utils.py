@@ -306,7 +306,7 @@ def endpoint_meta_import(reader, product, keys, create_endpoints, create_tags, c
     for row in reader:
         meta = []
         endpoint = None
-        host = row.get('private_dns', None)
+        host = row.get('hostname', None)
 
         if not host:
             continue

@@ -18,7 +18,7 @@ class EndpointMetaImportMixin(object):
     def __init__(self, *args, **kwargs):
         self.scans_path = 'dojo/unittests/scans/'
         self.meta_import_full = self.scans_path + 'endpoint_meta_import/full_endpoint_meta_import.csv'
-        self.meta_import_no_private_dns = self.scans_path + 'endpoint_meta_import/no_private_dns_endpoint_meta_import.csv'
+        self.meta_import_no_hostname = self.scans_path + 'endpoint_meta_import/no_hostname_endpoint_meta_import.csv'
         self.meta_import_updated_added = self.scans_path + 'endpoint_meta_import/updated_added_endpoint_meta_import.csv'
         self.meta_import_updated_removed = self.scans_path + 'endpoint_meta_import/updated_removed_endpoint_meta_import.csv'
         self.meta_import_updated_changed = self.scans_path + 'endpoint_meta_import/updated_changed_endpoint_meta_import.csv'
@@ -37,10 +37,10 @@ class EndpointMetaImportMixin(object):
         self.assertEqual(endpoint_tag_count_before + 6, self.db_endpoint_tag_count())
         self.assertEqual(meta_count_before + 6, self.db_dojo_meta_count())
 
-    def test_endpoint_meta_import_endpoint_missing_private_dns(self):
+    def test_endpoint_meta_import_endpoint_missing_hostname(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             import0 = self.endpoint_meta_import_scan_with_params(
-                self.meta_import_no_private_dns, create_endpoints=True, create_tags=True, create_dojo_meta=True, expected_http_status_code=400)
+                self.meta_import_no_hostname, create_endpoints=True, create_tags=True, create_dojo_meta=True, expected_http_status_code=400)
 
     def test_endpoint_meta_import_tag_remove_column(self):
         # Import full scan first

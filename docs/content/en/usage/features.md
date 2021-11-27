@@ -523,7 +523,7 @@ format of column:row.
 Here is a very simple example with only two columns:
 
 ```
-private_dns                  | team                | public_facing
+hostname                  | team                | public_facing
 ------------------------------------------------------------------
 sheets.google.com            | data analytics      | yes
 docs.google.com              | language processing | yes
@@ -541,4 +541,4 @@ feedback.internal.google.com (endpoint) -> [ team:human resources, public_facing
 
 Endpoint Meta Importer can be found in the Endpoint tab when viewing a Product
 
-**Note:** The field "private_dns" is required as it is used to query/create endpoints.
+**Note:** The field "hostname" is required as it is used to query/create endpoints.

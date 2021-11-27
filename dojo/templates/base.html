@@ -478,7 +478,7 @@
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'add_endpoint' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
                       {% endif %}
-                      {% if product_tab.product|has_object_permission:"Import_Scan_Result" %}
+                      {% if product_tab.product|has_object_permission:"Import_Scan_Result" and 'ENDPOINT_META_IMPORTER'|setting_enabled %}
                       <li><a href="{% url 'import_endpoint_meta' product_tab.product.id %}"><i class="fa fa-upload"></i> Import Endpoint Meta</a></li>
                       {% endif %}
                     </ul>

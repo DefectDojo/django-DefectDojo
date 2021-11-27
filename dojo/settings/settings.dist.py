@@ -202,6 +202,8 @@ env = environ.Env(
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
     # when enabled standard users can't change their profile information, default True
     DD_USER_PROFILE_EDITABLE=(bool, True),
+    # Feature flag for Endpoint Meta Importer
+    DD_ENDPOINT_META_IMPORTER=(bool, True),
 )
 
 
@@ -1341,3 +1343,6 @@ SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
 
 # when enabled standard users can't change their profile information, default False
 USER_PROFILE_EDITABLE = env("DD_USER_PROFILE_EDITABLE")
+
+# Feature flag for Endpoint Meta Importer
+ENDPOINT_META_IMPORTER = env("DD_ENDPOINT_META_IMPORTER")

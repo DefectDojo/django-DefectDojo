@@ -1477,11 +1477,11 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
             content = content.decode('utf-8')
         reader = csv.DictReader(io.StringIO(content))
 
-        # Make sure 'private_dns' field is present
-        if 'private_dns' not in reader.fieldnames:
-            raise serializers.ValidationError('The column "private_dns" must be present to map host to Endpoint.',)
+        # Make sure 'hostname' field is present
+        if 'hostname' not in reader.fieldnames:
+            raise serializers.ValidationError('The column "hostname" must be present to map host to Endpoint.',)
 
-        keys = [key for key in reader.fieldnames if key != 'private_dns']
+        keys = [key for key in reader.fieldnames if key != 'hostname']
         create_endpoints = data['create_endpoints']
         create_tags = data['create_tags']
         create_dojo_meta = data['create_dojo_meta']
