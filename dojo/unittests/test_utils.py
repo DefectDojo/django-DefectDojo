@@ -1,7 +1,11 @@
-from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, IMPORT_UPDATED_FINDING, Engagement, Product, Test, Test_Import, Test_Import_Finding_Action
+from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, IMPORT_UPDATED_FINDING, \
+    Engagement, Product, Test, Test_Import, Test_Import_Finding_Action, \
+    Dojo_User, Dojo_Group, Dojo_Group_Member, Role, System_Settings, Notifications
 from contextlib import contextmanager
 from django.test import TestCase
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view
+from unittest.mock import patch, Mock
+from dojo.utils import dojo_crypto_encrypt, prepare_for_view, user_post_save
+from dojo.authorization.roles_permissions import Roles
 import logging
 
 
@@ -27,6 +31,36 @@ class TestUtils(TestCase):
         encrypt = dojo_crypto_encrypt(test_input)
         test_output = prepare_for_view(encrypt)
         self.assertEqual(test_input, test_output)
+
+    @patch('dojo.models.System_Settings.objects')
+    @patch('dojo.utils.Dojo_Group_Member')
+    @patch('dojo.utils.Notifications')
+    def test_user_post_save(self, mock_notifications, mock_member, mock_settings):
+        user = Dojo_User()
+        user.id = 1
+
+        group = Dojo_Group()
+        group.id = 1
+
+        role = Role.objects.get(id=Roles.Reader)
+
+        system_settings_group = System_Settings()
+        system_settings_group.default_group = group
+        system_settings_group.default_group_role = role
+
+        mock_settings.get.return_value = system_settings_group
+        save_mock_member = Mock(return_value=Dojo_Group_Member())
+        mock_member.return_value = save_mock_member
+        save_mock_notifications = Mock(return_value=Notifications())
+        mock_notifications.return_value = save_mock_notifications
+
+        user_post_save(None, user, True)
+
+        mock_member.assert_called_with(group=group, user=user, role=role)
+        save_mock_member.save.assert_called_once()
+
+        mock_notifications.assert_called_with(user=user)
+        save_mock_notifications.save.assert_called_once()
 
 
 class assertNumOfModelsCreated():
