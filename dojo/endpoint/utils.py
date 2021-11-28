@@ -1,8 +1,10 @@
 import logging
 import re
+import csv
+import io
 
 from django.urls import reverse
-
+from django.contrib import messages
 from django.core.exceptions import MultipleObjectsReturned
 from hyperlink._url import SCHEME_PORT_MAP
 
@@ -302,7 +304,27 @@ def save_endpoints_to_add(endpoint_list, product):
     return processed_endpoints
 
 
-def endpoint_meta_import(reader, product, keys, create_endpoints, create_tags, create_meta):
+def endpoint_meta_import(file, product, create_endpoints, create_tags, create_meta, origin='UI', request=None):
+    content = file.read()
+    if type(content) is bytes:
+        content = content.decode('utf-8')
+    reader = csv.DictReader(io.StringIO(content))
+
+    if 'hostname' not in reader.fieldnames:
+        if origin == 'UI':
+            from django.http import HttpResponseRedirect
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'The column "hostname" must be present to map host to Endpoint.',
+                extra_tags='alert-danger')
+            return HttpResponseRedirect(reverse('import_endpoint_meta', args=(product.id, )))
+        elif origin == 'API':
+            from rest_framework.serializers import ValidationError
+            raise ValidationError('The column "hostname" must be present to map host to Endpoint.',)
+
+    keys = [key for key in reader.fieldnames if key != 'hostname']
+
     for row in reader:
         meta = []
         endpoint = None

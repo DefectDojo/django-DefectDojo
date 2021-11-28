@@ -1472,16 +1472,7 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
     def save(self):
         data = self.validated_data
         file = data.get('file', None)
-        content = file.read()
-        if type(content) is bytes:
-            content = content.decode('utf-8')
-        reader = csv.DictReader(io.StringIO(content))
 
-        # Make sure 'hostname' field is present
-        if 'hostname' not in reader.fieldnames:
-            raise serializers.ValidationError('The column "hostname" must be present to map host to Endpoint.',)
-
-        keys = [key for key in reader.fieldnames if key != 'hostname']
         create_endpoints = data['create_endpoints']
         create_tags = data['create_tags']
         create_dojo_meta = data['create_dojo_meta']
@@ -1489,7 +1480,7 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
         _, _, _, _, _, product_id, product_name = get_import_meta_data_from_dict(data)
         product = get_target_product_if_exists(product_id, product_name)
         try:
-            endpoint_meta_import(reader, product, keys, create_endpoints, create_tags, create_dojo_meta)
+            endpoint_meta_import(file, product, create_endpoints, create_tags, create_dojo_meta, origin='API')
         except SyntaxError as se:
             raise Exception(se)
         except ValueError as ve:

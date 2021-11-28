@@ -1,9 +1,8 @@
 import logging
-import csv
-import io
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -482,7 +481,7 @@ def migrate_endpoints_view(request):
         })
 
 
-@user_is_authorized(Product, Permissions.Import_Scan_Result, 'pid')
+@user_is_authorized(Product, Permissions.Endpoint_Edit, 'pid')
 def import_endpoint_meta(request, pid):
     product = get_object_or_404(Product, id=pid)
     form = ImportEndpointMetaForm()
@@ -490,6 +489,7 @@ def import_endpoint_meta(request, pid):
         form = ImportEndpointMetaForm(request.POST, request.FILES)
         if form.is_valid():
             file = request.FILES.get('file', None)
+            # Make sure size is not too large
             if file and is_scan_file_too_large(file):
                 messages.add_message(
                     request,
@@ -497,27 +497,12 @@ def import_endpoint_meta(request, pid):
                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
                     extra_tags='alert-danger')
 
-            content = file.read()
-            if type(content) is bytes:
-                content = content.decode('utf-8')
-            reader = csv.DictReader(io.StringIO(content))
-
-            # Make sure 'hostname' field is present
-            if 'hostname' not in reader.fieldnames:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    'The column "hostname" must be present to map host to Endpoint.',
-                    extra_tags='alert-danger')
-                return HttpResponseRedirect(reverse('import_endpoint_meta', args=(pid, )))
-
-            keys = [key for key in reader.fieldnames if key != 'hostname']
             create_endpoints = form.cleaned_data['create_endpoints']
             create_tags = form.cleaned_data['create_tags']
             create_dojo_meta = form.cleaned_data['create_dojo_meta']
 
             try:
-                endpoint_meta_import(reader, product, keys, create_endpoints, create_tags, create_dojo_meta)
+                endpoint_meta_import(file, product, create_endpoints, create_tags, create_dojo_meta, origin='UI', request=request)
             except Exception as e:
                 logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))

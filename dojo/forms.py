@@ -525,20 +525,20 @@ class ImportEndpointMetaForm(forms.Form):
         label="Choose meta file",
         required=True)  # Could not get required=True to actually accept the file as present
     create_endpoints = forms.BooleanField(
-        label="Create Nonexsitng Endpoint",
+        label="Create nonexsitng Endpoint",
         initial=True,
         required=False,
-        help_text="Create hosts in meta that do no already exist",)
+        help_text="Create endpoints that do not already exist",)
     create_tags = forms.BooleanField(
         label="Add Tags",
         initial=True,
         required=False,
         help_text="Add meta from file as tags in the format key:value",)
     create_dojo_meta = forms.BooleanField(
-        label="Add DojoMeta",
+        label="Add Meta",
         initial=False,
         required=False,
-        help_text="Add meta from file as DojoMeta. DojoMeta is primarily used for displaying custom fields.",)
+        help_text="Add data from file as Metadata. Metadata is used for displaying custom fields",)
 
     def __init__(self, *args, **kwargs):
         super(ImportEndpointMetaForm, self).__init__(*args, **kwargs)

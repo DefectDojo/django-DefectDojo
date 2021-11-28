@@ -512,7 +512,7 @@ a future release this will be brought out to the UI.
 ## Endpoint Meta Importer
 
 For heavy infrastructure scanning organizations, endpoints need to be as 
-flexible as possible to get the most of DefectDojo. This felexibility comes
+flexible as possible to get the most of DefectDojo. This flexibility comes
 in the form of Tags and custom fields. Tags allow users to filter, sort, and
 report objects in ways the base object is not totally proficient in doing.
 
@@ -523,7 +523,7 @@ format of column:row.
 Here is a very simple example with only two columns:
 
 ```
-hostname                  | team                | public_facing
+hostname                     | team                | public_facing
 ------------------------------------------------------------------
 sheets.google.com            | data analytics      | yes
 docs.google.com              | language processing | yes
