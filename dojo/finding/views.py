@@ -1746,16 +1746,12 @@ def finding_bulk_update_all(request, pid=None):
         if request.POST.get('delete_bulk_findings'):
             if form.is_valid() and finding_to_update:
 
-                if not settings.FEATURE_AUTHORIZATION_V2:
-                    if not request.user.is_staff and not settings.AUTHORIZED_USERS_ALLOW_DELETE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                if pid is None:
+                    if not request.user.is_staff:
                         raise PermissionDenied
                 else:
-                    if pid is None:
-                        if not request.user.is_staff:
-                            raise PermissionDenied
-                    else:
-                        product = get_object_or_404(Product, id=pid)
-                        user_has_permission_or_403(request.user, product, Permissions.Finding_Delete)
+                    product = get_object_or_404(Product, id=pid)
+                    user_has_permission_or_403(request.user, product, Permissions.Finding_Delete)
 
                 finds = get_authorized_findings(Permissions.Finding_Delete, finds).distinct()
 
@@ -1779,16 +1775,12 @@ def finding_bulk_update_all(request, pid=None):
         else:
             if form.is_valid() and finding_to_update:
 
-                if not settings.FEATURE_AUTHORIZATION_V2:
-                    if not request.user.is_staff and not settings.AUTHORIZED_USERS_ALLOW_CHANGE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                if pid is None:
+                    if not request.user.is_staff:
                         raise PermissionDenied
                 else:
-                    if pid is None:
-                        if not request.user.is_staff:
-                            raise PermissionDenied
-                    else:
-                        product = get_object_or_404(Product, id=pid)
-                        user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
+                    product = get_object_or_404(Product, id=pid)
+                    user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
                 # make sure users are not editing stuff they are not authorized for
                 finds = get_authorized_findings(Permissions.Finding_Edit, finds).distinct()

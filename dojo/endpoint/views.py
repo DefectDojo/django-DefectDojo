@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
@@ -268,9 +267,6 @@ def add_endpoint(request, pid):
 
 
 def add_product_endpoint(request):
-    if not settings.FEATURE_AUTHORIZATION_V2 and not request.user.is_staff:
-        raise PermissionDenied
-
     form = AddEndpointForm()
     if request.method == 'POST':
         form = AddEndpointForm(request.POST)
@@ -364,16 +360,12 @@ def endpoint_bulk_update_all(request, pid=None):
 
         if request.POST.get('delete_bulk_endpoints') and endpoints_to_update:
 
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                if not (request.user.is_staff or settings.AUTHORIZED_USERS_ALLOW_DELETE or settings.AUTHORIZED_USERS_ALLOW_STAFF):
+            if pid is None:
+                if not request.user.is_staff:
                     raise PermissionDenied
             else:
-                if pid is None:
-                    if not request.user.is_staff:
-                        raise PermissionDenied
-                else:
-                    product = get_object_or_404(Product, id=pid)
-                    user_has_permission_or_403(request.user, product, Permissions.Endpoint_Delete)
+                product = get_object_or_404(Product, id=pid)
+                user_has_permission_or_403(request.user, product, Permissions.Endpoint_Delete)
 
             finds = get_authorized_endpoints(Permissions.Endpoint_Delete, finds, request.user)
 
@@ -396,16 +388,12 @@ def endpoint_bulk_update_all(request, pid=None):
         else:
             if endpoints_to_update:
 
-                if not settings.FEATURE_AUTHORIZATION_V2:
-                    if not request.user.is_staff or settings.AUTHORIZED_USERS_ALLOW_CHANGE or settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                if pid is None:
+                    if not request.user.is_staff:
                         raise PermissionDenied
                 else:
-                    if pid is None:
-                        if not request.user.is_staff:
-                            raise PermissionDenied
-                    else:
-                        product = get_object_or_404(Product, id=pid)
-                        user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
+                    product = get_object_or_404(Product, id=pid)
+                    user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
                 finds = get_authorized_endpoints(Permissions.Endpoint_Edit, finds, request.user)
 
