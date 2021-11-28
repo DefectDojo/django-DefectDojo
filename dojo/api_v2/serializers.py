@@ -27,8 +27,6 @@ from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 import datetime
 import six
-import csv
-import io
 from django.utils.translation import ugettext_lazy as _
 import json
 import dojo.jira_link.helper as jira_helper
