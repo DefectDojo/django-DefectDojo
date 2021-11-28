@@ -151,13 +151,13 @@ jobs:
 
       - name: Start Dojo
         # implicity starts uwsgi and rabbitmq
-        run: docker-compose up -d mysql nginx celerybeat celeryworker mailhog
+        run: docker-compose up --no-build -d mysql nginx celerybeat celeryworker mailhog
 
       - name: Initialize
-        run: docker-compose up --exit-code-from initializer initializer
+        run: docker-compose up --no-build --exit-code-from initializer initializer
 
       - name: Integration tests
-        run: docker-compose up --exit-code-from integration-tests integration-tests
+        run: docker-compose up --no-build --exit-code-from integration-tests integration-tests
         env:
           DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
 
