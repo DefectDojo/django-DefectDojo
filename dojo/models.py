@@ -392,13 +392,13 @@ class System_Settings(models.Model):
         Dojo_Group,
         null=True,
         blank=True,
-        help_text="New users created by OAuth2 will be assigned to this group.",
+        help_text="New users will be assigned to this group.",
         on_delete=models.RESTRICT)
     default_group_role = models.ForeignKey(
         Role,
         null=True,
         blank=True,
-        help_text="New users created by OAuth2 will be assigned to their default group with this role.",
+        help_text="New users will be assigned to their default group with this role.",
         on_delete=models.RESTRICT)
     staff_user_email_pattern = models.CharField(
         max_length=200,
