@@ -17,30 +17,25 @@ def get_authorized_product_types(permission):
     if user.is_superuser:
         return Product_Type.objects.all().order_by('name')
 
-    if settings.FEATURE_AUTHORIZATION_V2:
-        if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-            return Product_Type.objects.all().order_by('name')
+    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+        return Product_Type.objects.all().order_by('name')
 
-        if user_has_global_permission(user, permission):
-            return Product_Type.objects.all().order_by('name')
+    if user_has_global_permission(user, permission):
+        return Product_Type.objects.all().order_by('name')
 
-        roles = get_roles_for_permission(permission)
-        authorized_roles = Product_Type_Member.objects.filter(product_type=OuterRef('pk'),
-            user=user,
-            role__in=roles)
-        authorized_groups = Product_Type_Group.objects.filter(
-            product_type=OuterRef('pk'),
-            group__users=user,
-            role__in=roles)
-        product_types = Product_Type.objects.annotate(
-            member=Exists(authorized_roles),
-            authorized_group=Exists(authorized_groups)).order_by('name')
-        product_types = product_types.filter(Q(member=True) | Q(authorized_group=True))
-    else:
-        if user.is_staff:
-            product_types = Product_Type.objects.all().order_by('name')
-        else:
-            product_types = Product_Type.objects.filter(authorized_users__in=[user]).order_by('name')
+    roles = get_roles_for_permission(permission)
+    authorized_roles = Product_Type_Member.objects.filter(product_type=OuterRef('pk'),
+        user=user,
+        role__in=roles)
+    authorized_groups = Product_Type_Group.objects.filter(
+        product_type=OuterRef('pk'),
+        group__users=user,
+        role__in=roles)
+    product_types = Product_Type.objects.annotate(
+        member=Exists(authorized_roles),
+        authorized_group=Exists(authorized_groups)).order_by('name')
+    product_types = product_types.filter(Q(member=True) | Q(authorized_group=True))
+
     return product_types
 
 
