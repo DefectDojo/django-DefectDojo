@@ -7,7 +7,7 @@ from datetime import datetime, date, timedelta
 from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
@@ -38,7 +38,6 @@ from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
-from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
@@ -730,12 +729,9 @@ def new_product(request, ptid=None):
             gform = None
 
         if form.is_valid():
-            if settings.FEATURE_AUTHORIZATION_V2:
-                product_type = form.instance.prod_type
-                user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
-            else:
-                if not request.user.is_staff:
-                    raise PermissionDenied
+            product_type = form.instance.prod_type
+            user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
+
             product = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
