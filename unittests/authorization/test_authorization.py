@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.test import TestCase, override_settings
+from .dojo_test_case import DojoTestCase, override_settings
 from unittest.mock import patch
 from dojo.models import Dojo_User, Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, \
@@ -12,7 +12,7 @@ from dojo.authorization.authorization import role_has_permission, get_roles_for_
 from dojo.authorization.roles_permissions import Permissions, Roles
 
 
-class TestAuthorization(TestCase):
+class TestAuthorization(DojoTestCase):
 
     @classmethod
     def setUpTestData(cls):

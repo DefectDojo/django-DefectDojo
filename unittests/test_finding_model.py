@@ -1,8 +1,8 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Finding, Test, Engagement
 
 
-class TestFindingModel(TestCase):
+class TestFindingModel(DojoTestCase):
 
     def test_get_sast_source_file_path_with_link_no_file_path(self):
         finding = Finding()

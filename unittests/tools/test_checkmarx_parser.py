@@ -1,4 +1,4 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from unittest.mock import patch
 
 from dojo.models import Test, Engagement, Product
@@ -6,7 +6,7 @@ from dojo.tools.checkmarx.parser import CheckmarxParser
 import datetime
 
 
-class TestCheckmarxParser(TestCase):
+class TestCheckmarxParser(DojoTestCase):
     # comment out to get full diff with big reports
     # maxDiff = None
 

@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.immuniweb.parser import ImmuniwebParser
 from dojo.models import Test
 
 
-class TestImmuniwebParser(TestCase):
+class TestImmuniwebParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/immuniweb/ImmuniWeb-0-vuln.xml")

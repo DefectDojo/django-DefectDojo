@@ -5,11 +5,12 @@ Tests for metrics database queries
 from datetime import datetime, timezone
 from unittest.mock import patch
 
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory
 from django.urls import reverse
 
 from dojo.metrics import views
 from dojo.models import User
+from .dojo_test_case import DojoTestCase
 
 
 class MockMessages:
@@ -17,7 +18,7 @@ class MockMessages:
         pass
 
 
-class FindingQueriesTest(TestCase):
+class FindingQueriesTest(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -140,7 +141,7 @@ class FindingQueriesTest(TestCase):
             self.assertIsInstance(finding_queries['end_date'], datetime)
 
 
-class EndpointQueriesTest(TestCase):
+class EndpointQueriesTest(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):

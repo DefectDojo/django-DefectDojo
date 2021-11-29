@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.gosec.parser import GosecParser
 from dojo.models import Test
 
 
-class TestGosecParser(TestCase):
+class TestGosecParser(DojoTestCase):
 
     def test_parse_file_with_one_finding(self):
         testfile = open("unittests/scans/gosec/many_vulns.json")

@@ -1,4 +1,4 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Finding, User, Product, Endpoint, Endpoint_Status, Test, Engagement
 from dojo.models import System_Settings
 from crum import impersonate
@@ -125,7 +125,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 # product 3: Security Podcast
 
 
-class TestDuplicationLogic(TestCase):
+class TestDuplicationLogic(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     def run(self, result=None):

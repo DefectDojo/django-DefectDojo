@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.cargo_audit.parser import CargoAuditParser
 from dojo.models import Test
 
 
-class TestCargoAuditParser(TestCase):
+class TestCargoAuditParser(DojoTestCase):
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/cargo_audit/no_findings.json")

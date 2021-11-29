@@ -10,7 +10,7 @@ from dojo.models import Finding
 from dojo.models import Finding_Template
 from dojo.models import System_Settings
 from dojo.finding import views
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from django.test.client import RequestFactory
 from django.contrib.auth.models import User
 from django.contrib.messages.storage.fallback import FallbackStorage
@@ -110,7 +110,7 @@ class FindingTemplateTestUtil:
 
 
 @skip("outdated so doesn't work with current fixture")
-class TestApplyFindingTemplate(TestCase):
+class TestApplyFindingTemplate(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     apply_template_url = 'finding/2/2/apply_template_to_finding'
@@ -225,7 +225,7 @@ class TestApplyFindingTemplate(TestCase):
 
 
 @skip("outdated so doesn't work with current fixture")
-class TestFindTemplateToApply(TestCase):
+class TestFindTemplateToApply(DojoTestCase):
     fixtures = ['dojo_testdata.json']
     choose_template_url = 'finding/2/find_template_to_apply'
 
@@ -264,7 +264,7 @@ class TestFindTemplateToApply(TestCase):
 
 
 @skip("outdated so doesn't work with current fixture")
-class TestChooseFindingTemplateOptions(TestCase):
+class TestChooseFindingTemplateOptions(DojoTestCase):
     fixtures = ['dojo_testdata.json']
     finding_template_options_url = 'finding/2/2/choose_finding_template_options'
 

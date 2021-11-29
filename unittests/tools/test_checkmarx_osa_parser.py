@@ -1,11 +1,11 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 
 from dojo.models import Test, Engagement, Product
 from dojo.tools.checkmarx_osa.parser import CheckmarxOsaParser
 from datetime import datetime
 
 
-class TestCheckmarxOsaParser(TestCase):
+class TestCheckmarxOsaParser(DojoTestCase):
     # comment out to get full diff with big reports
     # maxDiff = None
 

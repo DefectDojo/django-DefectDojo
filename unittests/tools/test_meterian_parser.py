@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.meterian.parser import MeterianParser
 
 
-class TestMeterianParser(TestCase):
+class TestMeterianParser(DojoTestCase):
 
     def test_meterianParser_invalid_security_report_raise_ValueError_exception(self):
         with self.assertRaises(ValueError):

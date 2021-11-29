@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.terrascan.parser import TerrascanParser
 from dojo.models import Test
 
 
-class TestTerrascanParser(TestCase):
+class TestTerrascanParser(DojoTestCase):
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/terrascan/no_findings.json")

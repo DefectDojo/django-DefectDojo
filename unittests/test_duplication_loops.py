@@ -1,5 +1,5 @@
 from crum import impersonate
-from django.test import TestCase, override_settings
+from .dojo_test_case import DojoTestCase, override_settings
 from dojo.utils import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Engagement, Finding, Product, User
@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class TestDuplicationLoops(TestCase):
+class TestDuplicationLoops(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     def run(self, result=None):

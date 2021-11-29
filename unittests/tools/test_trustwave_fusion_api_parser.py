@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.trustwave_fusion_api.parser import TrustwaveFusionAPIParser
 from dojo.models import Test
 
 
-class TestTrustwaveFusionAPIParser(TestCase):
+class TestTrustwaveFusionAPIParser(DojoTestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(
             self.unit_test_folder + "/scans/trustwave_fusion_api/trustwave_fusion_api_zero_vul.json"

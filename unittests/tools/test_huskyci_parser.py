@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.huskyci.parser import HuskyCIParser
 from dojo.models import Test
 
 
-class TestHuskyCIParser(TestCase):
+class TestHuskyCIParser(DojoTestCase):
 
     def test_parse_file_no_finding(self):
         testfile = open("unittests/scans/huskyci/huskyci_report_no_finding.json")

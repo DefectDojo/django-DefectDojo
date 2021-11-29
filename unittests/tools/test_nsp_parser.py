@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.nsp.parser import NspParser
 from dojo.models import Test
 
 
-class TestNspParser(TestCase):
+class TestNspParser(DojoTestCase):
     def test_parse_none(self):
         parser = NspParser()
         with open("unittests/scans/nsp/none.json") as test_file:

@@ -1,10 +1,10 @@
 from os import path
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.bundler_audit.parser import BundlerAuditParser
 from dojo.models import Test
 
 
-class TestBundlerAuditParser(TestCase):
+class TestBundlerAuditParser(DojoTestCase):
     def test_get_findings(self):
         with open(path.join(path.dirname(__file__), "../scans/bundler_audit/bundler-audit_v0.6.1.txt")) as testfile:
             parser = BundlerAuditParser()

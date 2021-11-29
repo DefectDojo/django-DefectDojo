@@ -1,4 +1,4 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 
 from dojo.models import Test
 from dojo.tools.dependency_check.parser import DependencyCheckParser
@@ -13,7 +13,7 @@ class TestFile(object):
         self.content = content
 
 
-class TestDependencyCheckParser(TestCase):
+class TestDependencyCheckParser(DojoTestCase):
 
     def test_parse_file_with_no_vulnerabilities_has_no_findings(self):
         content = """<?xml version="1.0"?>

@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.spotbugs.parser import SpotbugsParser
 from dojo.models import Test
 
 
-class TestSpotbugsParser(TestCase):
+class TestSpotbugsParser(DojoTestCase):
 
     def test_no_findings(self):
         parser = SpotbugsParser()

@@ -1,10 +1,10 @@
 from os import path
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.npm_audit.parser import NpmAuditParser, censor_path_hashes
 from dojo.models import Test
 
 
-class TestNpmAuditParser(TestCase):
+class TestNpmAuditParser(DojoTestCase):
     def test_npm_audit_parser_with_no_vuln_has_no_findings(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/no_vuln.json"))
         parser = NpmAuditParser()

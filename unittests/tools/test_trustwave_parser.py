@@ -1,6 +1,6 @@
 import os.path
 
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.trustwave.parser import TrustwaveParser
 from dojo.models import Test, Engagement, Product
 
@@ -9,7 +9,7 @@ def sample_path(file_name):
     return os.path.join(self.unit_test_folder + "/scans/trustwave", file_name)
 
 
-class TestTrivyParser(TestCase):
+class TestTrivyParser(DojoTestCase):
 
     def test_no_vuln(self):
         test = Test()

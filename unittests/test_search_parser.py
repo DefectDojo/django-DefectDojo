@@ -1,8 +1,8 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.search.views import parse_search_query
 
 
-class TestSearch(TestCase):
+class TestSearch(DojoTestCase):
     def test_parse_query(self):
 
         operators, keywords = parse_search_query("some keywords")

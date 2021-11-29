@@ -1,10 +1,10 @@
 from os import path
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.sslyze.parser import SslyzeParser
 from dojo.models import Test
 
 
-class TestSslyzeJSONParser(TestCase):
+class TestSslyzeJSONParser(DojoTestCase):
     def test_parse_file_with_one_target_has_one_vuln(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_one_vuln.json"))
         parser = SslyzeParser()
@@ -48,7 +48,7 @@ class TestSslyzeJSONParser(TestCase):
         self.assertEqual(2, len(findings))
 
 
-class TestSSLyzeXMLParser(TestCase):
+class TestSSLyzeXMLParser(DojoTestCase):
     def test_parse_file_with_one_target_has_three_vuln(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/report_one_target_three_vuln.xml"))
         parser = SslyzeParser()

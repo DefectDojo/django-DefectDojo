@@ -1,9 +1,9 @@
 from dojo.urls import v2_api
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.unittests.test_rest_framework import get_open_api3_json_schema, BASE_API_URL
 
 
-class ApiEndpointMethods(TestCase):
+class ApiEndpointMethods(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):

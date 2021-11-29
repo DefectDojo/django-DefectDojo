@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.snyk.parser import SnykParser
 
 
-class TestSnykParser(TestCase):
+class TestSnykParser(DojoTestCase):
 
     def test_snykParser_single_has_no_finding(self):
         testfile = open("unittests/scans/snyk/single_project_no_vulns.json")

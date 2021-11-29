@@ -5,7 +5,7 @@ from unittest.mock import patch
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from django.urls import reverse
 from django.utils import timezone
 
@@ -61,7 +61,7 @@ def verify(when: datetime, product_id: int, title: str):
         Finding.objects.filter(test__engagement__product_id=product_id, title=title).update(verified=True)
 
 
-class TestDashboard(TestCase):
+class TestDashboard(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     @classmethod

@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.ossindex_devaudit.parser import OssIndexDevauditParser
 from dojo.models import Test
 
 
-class TestOssIndexDevauditParser(TestCase):
+class TestOssIndexDevauditParser(DojoTestCase):
 
     def test_ossindex_devaudit_parser_with_no_vulns_has_no_findings(self):
         testfile = open(

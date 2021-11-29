@@ -1,6 +1,6 @@
 import datetime
 
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from django.test.utils import override_settings
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -19,7 +19,7 @@ from dojo.utils import get_object_or_none
 
 logger = logging.getLogger(__name__)
 
-NPM_AUDIT_NO_VULN_FILENAME = self.unit_test_folder + '/scans/npm_audit_sample/no_vuln.json'
+NPM_AUDIT_NO_VULN_FILENAME = 'scans/npm_audit_sample/no_vuln.json'
 NPM_AUDIT_SCAN_TYPE = 'NPM Audit Scan'
 
 ENGAGEMENT_NAME_DEFAULT = 'Engagement 1'
@@ -34,7 +34,7 @@ DEFAULT_TEST_TITLE = 'super important scan'
 ALTERNATE_TEST_TITLE = 'meh import scan'
 
 
-class TestDojoDefaultImporter(TestCase):
+class TestDojoDefaultImporter(DojoTestCase):
     def test_parse_findings(self):
         scan_type = "Acunetix Scan"
         scan = open("unittests/scans/acunetix/one_finding.xml")

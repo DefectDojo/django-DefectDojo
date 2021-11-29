@@ -1,10 +1,10 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from unittest.mock import patch
 from dojo.models import Dojo_User, System_Settings
 from dojo.pipeline import modify_permissions
 
 
-class TestPipeline(TestCase):
+class TestPipeline(DojoTestCase):
 
     @classmethod
     def setUpTestData(cls):

@@ -1,4 +1,4 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 import datetime
 from dojo.utils import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class TestDuplicationReopen(TestCase):
+class TestDuplicationReopen(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):

@@ -1,8 +1,8 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Product, User, Notifications
 
 
-class TestNotifications(TestCase):
+class TestNotifications(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     def test_merge_notifications_list(self):

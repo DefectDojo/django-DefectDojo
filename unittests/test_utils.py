@@ -2,7 +2,7 @@ from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_RE
     Engagement, Product, Test, Test_Import, Test_Import_Finding_Action, \
     Dojo_User, Dojo_Group, Dojo_Group_Member, Role, System_Settings, Notifications
 from contextlib import contextmanager
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from unittest.mock import patch, Mock
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view, user_post_save
 from dojo.authorization.roles_permissions import Roles
@@ -25,7 +25,7 @@ ENGAGEMENTS = Engagement.objects.all()
 PRODUCTS = Product.objects.all()
 
 
-class TestUtils(TestCase):
+class TestUtils(DojoTestCase):
     def test_encryption(self):
         test_input = "Hello World!"
         encrypt = dojo_crypto_encrypt(test_input)

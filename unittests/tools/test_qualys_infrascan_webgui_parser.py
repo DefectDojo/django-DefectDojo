@@ -1,14 +1,14 @@
 from datetime import datetime
 
 import pytz
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 
 from dojo.models import Test
 from dojo.tools.qualys_infrascan_webgui.parser import \
     QualysInfrascanWebguiParser
 
 
-class TestQualysInfrascanWebguiParser(TestCase):
+class TestQualysInfrascanWebguiParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(

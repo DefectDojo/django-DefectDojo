@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.gitlab_api_fuzzing.parser import GitlabAPIFuzzingParser
 from dojo.models import Test
 
 
-class TestGitlabAPIFuzzingParser(TestCase):
+class TestGitlabAPIFuzzingParser(DojoTestCase):
     def test_gitlab_api_fuzzing_parser_with_no_vuln_has_no_findings(self):
         with open(
             self.unit_test_folder + "/scans/gitlab_api_fuzzing/gitlab_api_fuzzing_0_vuln.json"

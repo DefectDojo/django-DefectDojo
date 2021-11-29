@@ -1,11 +1,11 @@
 import datetime
 
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.nmap.parser import NmapParser
 
 
-class TestNmapParser(TestCase):
+class TestNmapParser(DojoTestCase):
 
     def test_parse_file_with_no_open_ports_has_no_findings(self):
         testfile = open("unittests/scans/nmap/nmap_0port.xml")

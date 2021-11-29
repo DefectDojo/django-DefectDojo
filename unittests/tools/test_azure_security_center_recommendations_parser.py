@@ -1,10 +1,10 @@
 from datetime import date
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.azure_security_center_recommendations.parser import AzureSecurityCenterRecommendationsParser
 from dojo.models import Test
 
 
-class TestAzureSecurityCenterRecommendationsParser(TestCase):
+class TestAzureSecurityCenterRecommendationsParser(DojoTestCase):
 
     def test_parse_file_with_no_findings(self):
         testfile = open("unittests/scans/azure_security_center_recommendations/zero_vulns.csv")

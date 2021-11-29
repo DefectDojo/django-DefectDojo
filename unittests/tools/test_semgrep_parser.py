@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.semgrep.parser import SemgrepParser
 from dojo.models import Test
 
 
-class TestSemgrepParser(TestCase):
+class TestSemgrepParser(DojoTestCase):
 
     def test_parse_empty(self):
         testfile = open("unittests/scans/semgrep/empty.json")

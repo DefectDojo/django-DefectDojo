@@ -1,12 +1,12 @@
 import datetime
 
 from dateutil.tz import tzlocal
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.bandit.parser import BanditParser
 
 
-class TestBanditParser(TestCase):
+class TestBanditParser(DojoTestCase):
     def test_bandit_parser_has_no_finding(self):
         testfile = open("unittests/scans/bandit/no_vuln.json")
         parser = BanditParser()

@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.outpost24.parser import Outpost24Parser
 from dojo.models import Test
 
 
-class TestOutpost24Parser(TestCase):
+class TestOutpost24Parser(DojoTestCase):
     def assert_file_has_n_items(self, filename, item_count):
         with open(filename) as file:
             parser = Outpost24Parser()

@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.dockle.parser import DockleParser
 from dojo.models import Test
 
 
-class TestDockleParser(TestCase):
+class TestDockleParser(DojoTestCase):
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/dockle/no_findings.json")

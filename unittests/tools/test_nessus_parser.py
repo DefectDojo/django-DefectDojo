@@ -1,10 +1,10 @@
 from os import path
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.nessus.parser import NessusXMLParser, NessusCSVParser, NessusParser
 from dojo.models import Finding, Test, Engagement, Product
 
 
-class TestNessusParser(TestCase):
+class TestNessusParser(DojoTestCase):
     def create_test(self):
         test = Test()
         test.engagement = Engagement()

@@ -1,6 +1,6 @@
 import os.path
 import datetime
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.trufflehog3.parser import TruffleHog3Parser
 from dojo.models import Test
 
@@ -9,7 +9,7 @@ def sample_path(file_name):
     return os.path.join(self.unit_test_folder + "/scans/trufflehog3", file_name)
 
 
-class TestTruffleHog3Parser(TestCase):
+class TestTruffleHog3Parser(DojoTestCase):
 
     def test_zero_vulns(self):
         test_file = open(sample_path("zero_vulns.json"))

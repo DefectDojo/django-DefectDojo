@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.ccvs.parser import CCVSParser
 from dojo.models import Test
 
 
-class TestCCVSParser(TestCase):
+class TestCCVSParser(DojoTestCase):
     def test_ccvs_parser_has_no_finding(self):
         testfile = open("unittests/scans/ccvs/no_vuln.json")
         parser = CCVSParser()

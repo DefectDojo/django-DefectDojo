@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.openvas_csv.parser import OpenVASCsvParser
 from dojo.models import Test, Engagement, Product
 
 
-class TestOpenVASUploadCsvParser(TestCase):
+class TestOpenVASUploadCsvParser(DojoTestCase):
 
     def test_openvas_csv_one_vuln(self):
         with open("unittests/scans/openvas/one_vuln.csv") as f:

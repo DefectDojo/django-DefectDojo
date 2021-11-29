@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.acunetix360.parser import Acunetix360Parser
 
 
-class TestAcunetix360Parser(TestCase):
+class TestAcunetix360Parser(DojoTestCase):
 
     def test_parse_file_with_one_finding(self):
         testfile = open("unittests/scans/acunetix360/acunetix360_one_finding.json")

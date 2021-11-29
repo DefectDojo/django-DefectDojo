@@ -1,11 +1,11 @@
 import datetime
 from dateutil.tz import tzlocal
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.detect_secrets.parser import DetectSecretsParser
 from dojo.models import Test
 
 
-class TestDetectSecretsParser(TestCase):
+class TestDetectSecretsParser(DojoTestCase):
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/detect_secrets/no_findings.json")

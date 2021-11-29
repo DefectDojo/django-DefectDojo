@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.anchore_engine.parser import AnchoreEngineParser
 from dojo.models import Test
 
 
-class TestAnchoreEngineParser(TestCase):
+class TestAnchoreEngineParser(DojoTestCase):
     def test_anchore_engine_parser_has_no_finding(self):
         testfile = open("unittests/scans/anchore/no_vuln.json")
         parser = AnchoreEngineParser()

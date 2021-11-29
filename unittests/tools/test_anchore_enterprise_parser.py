@@ -1,11 +1,11 @@
 from os import path
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.anchore_enterprise.parser import AnchoreEnterpriseParser
 from dojo.tools.anchore_enterprise.parser import extract_cve, search_filepath
 from dojo.models import Test
 
 
-class TestAnchoreEnterpriseParser(TestCase):
+class TestAnchoreEnterpriseParser(DojoTestCase):
     def test_anchore_policy_check_parser_has_no_findings(self):
         with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/no_checks.json")) as testfile:
             parser = AnchoreEnterpriseParser()

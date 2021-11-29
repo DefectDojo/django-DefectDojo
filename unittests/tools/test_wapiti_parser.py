@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.wapiti.parser import WapitiParser
 from dojo.models import Test
 
 
-class TestWapitiParser(TestCase):
+class TestWapitiParser(DojoTestCase):
 
     def test_parse_file_3_0_4(self):
         """Generated with version 3.0.4 on OWASP Juicy Shop"""

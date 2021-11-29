@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.intsights.parser import IntSightsParser
 
 
-class TestIntSightsParser(TestCase):
+class TestIntSightsParser(DojoTestCase):
     def test_intsights_parser_with_no_vuln_has_no_findings_json(self):
         with self.assertRaises(ValueError):
             testfile = open("unittests/scans/intsights/intsights_zero_vul.json")

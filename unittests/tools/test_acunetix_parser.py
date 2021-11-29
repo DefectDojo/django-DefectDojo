@@ -1,11 +1,11 @@
 import datetime
 
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.acunetix.parser import AcunetixParser
 
 
-class TestAcunetixParser(TestCase):
+class TestAcunetixParser(DojoTestCase):
 
     def test_parse_file_with_one_finding(self):
         testfile = open("unittests/scans/acunetix/one_finding.xml")

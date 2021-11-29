@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.crashtest_security.parser import CrashtestSecurityParser
 from dojo.models import Test
 
 
-class TestCrashtestSecurityParser(TestCase):
+class TestCrashtestSecurityParser(DojoTestCase):
     def test_crashtest_security_json_parser_empty_file_has_no_findings(self):
         testfile = open("unittests/scans/crashtest_security/empty.json")
         parser = CrashtestSecurityParser()

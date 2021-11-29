@@ -2,7 +2,7 @@ import io
 import csv
 
 from defusedxml import ElementTree
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 
 from dojo.models import Test
 from dojo.tools.vcg.parser import VCGCsvParser
@@ -19,7 +19,7 @@ class TestFile(object):
         self.content = content
 
 
-class TestVCGXmlParser(TestCase):
+class TestVCGXmlParser(DojoTestCase):
     def setUp(self):
         self.parser = VCGXmlParser()
 
@@ -141,7 +141,7 @@ class TestVCGXmlParser(TestCase):
         self.assertEqual("Comment Indicates Potentially Unfinished Code", finding.title)
 
 
-class TestVCGCsvParser(TestCase):
+class TestVCGCsvParser(DojoTestCase):
     def setUp(self):
         self.parser = VCGCsvParser()
 
@@ -200,7 +200,7 @@ class TestVCGCsvParser(TestCase):
         self.assertEqual("Comment Indicates Potentially Unfinished Code", finding.title)
 
 
-class TestVCGImport(TestCase):
+class TestVCGImport(DojoTestCase):
 
     def test_can_parse_xml(self):
         content = """<?xml version="1.0" encoding="utf-8"?>

@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.mozilla_observatory.parser import MozillaObservatoryParser
 
 
-class TestMozillaObservatoryParser(TestCase):
+class TestMozillaObservatoryParser(DojoTestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/mozilla_observatory/mozilla_no_vuln.json")
         parser = MozillaObservatoryParser()

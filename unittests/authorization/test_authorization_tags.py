@@ -1,11 +1,11 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from unittest.mock import patch
 from dojo.models import Product_Type
 from dojo.authorization.roles_permissions import Permissions
 from dojo.templatetags.authorization_tags import has_object_permission
 
 
-class TestAuthorizationTags(TestCase):
+class TestAuthorizationTags(DojoTestCase):
 
     def setUp(self):
         self.product_type = Product_Type()

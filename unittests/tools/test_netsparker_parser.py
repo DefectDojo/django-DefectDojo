@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.netsparker.parser import NetsparkerParser
 
 
-class TestNetsparkerParser(TestCase):
+class TestNetsparkerParser(DojoTestCase):
 
     def test_parse_file_with_one_finding(self):
         testfile = open("unittests/scans/netsparker/netsparker_one_finding.json")

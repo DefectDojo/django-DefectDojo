@@ -2,7 +2,7 @@ import json
 from unittest import mock
 
 from dojo.tools.sonarqube_api.parser import SonarQubeAPIParser
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Tool_Type, Tool_Configuration, Product_Type, Product, Engagement, Test
 
 
@@ -34,7 +34,7 @@ def empty_list(self, *args, **kwargs):
     return list()
 
 
-class TestSonarqubeApiParser(TestCase):
+class TestSonarqubeApiParser(DojoTestCase):
     def setUp(self):
         product_type, _ = Product_Type.objects.get_or_create(name="Fake unit tests")
         product, _ = Product.objects.get_or_create(name="product", prod_type=product_type)

@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.php_security_audit_v2.parser import PhpSecurityAuditV2Parser
 from dojo.models import Test
 
 
-class TestPhpSecurityAuditV2ParserParser(TestCase):
+class TestPhpSecurityAuditV2ParserParser(DojoTestCase):
 
     def test_php_symfony_security_check_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/php_security_audit_v2/php_security_audit_v2.0.0_unformatted.json")

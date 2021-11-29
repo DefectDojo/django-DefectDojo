@@ -411,7 +411,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                 "active": active,
                 "verified": verified,
                 "scan_type": scan_type,
-                "file": open(filename),
+                "file": open(self.unit_test_folder + '/' + filename),
                 "version": "1.0.1",
                 "close_old_findings": close_old_findings,
         }
@@ -454,7 +454,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                 "active": active,
                 "verified": verified,
                 "scan_type": scan_type,
-                "file": open(filename),
+                "file": open(self.unit_test_folder + '/' + filename),
                 "version": "1.0.1",
                 "close_old_findings": close_old_findings,
         }

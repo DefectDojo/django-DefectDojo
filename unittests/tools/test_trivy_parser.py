@@ -1,6 +1,6 @@
 import os.path
 
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.trivy.parser import TrivyParser
 from dojo.models import Test
 
@@ -9,7 +9,7 @@ def sample_path(file_name):
     return os.path.join(self.unit_test_folder + "/scans/trivy", file_name)
 
 
-class TestTrivyParser(TestCase):
+class TestTrivyParser(DojoTestCase):
 
     def test_legacy_no_vuln(self):
         test_file = open(sample_path("legacy_no_vuln.json"))

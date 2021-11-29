@@ -1,6 +1,6 @@
 from dojo.tools.factory import get_parser
 from dojo.models import Test, Test_Type
-from unittests.dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase
 
 
 class TestFactory(DojoTestCase):

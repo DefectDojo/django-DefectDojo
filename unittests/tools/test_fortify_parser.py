@@ -1,10 +1,10 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.fortify.parser import FortifyParser
 from dojo.models import Test
 from datetime import datetime
 
 
-class TestFortifyParser(TestCase):
+class TestFortifyParser(DojoTestCase):
     def test_fortify_many_findings(self):
         testfile = self.unit_test_folder + "/scans/fortify/fortify_many_findings.xml"
         parser = FortifyParser()

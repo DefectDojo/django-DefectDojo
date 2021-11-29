@@ -1,14 +1,14 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.test import TestCase, RequestFactory, override_settings
+from .dojo_test_case import DojoTestCase, RequestFactory, override_settings
 from unittest.mock import patch, Mock
 from dojo.models import Product_Type
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 
 
-class TestAuthorizationDecorators(TestCase):
+class TestAuthorizationDecorators(DojoTestCase):
 
     def setUp(self):
         self.request = RequestFactory().get('/dummy')

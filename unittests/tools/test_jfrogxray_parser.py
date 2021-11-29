@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.jfrogxray.parser import JFrogXrayParser, decode_cwe_number
 
 
-class TestJfrogJFrogXrayParser(TestCase):
+class TestJfrogJFrogXrayParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln(self):
         testfile = open("unittests/scans/jfrogxray/one_vuln.json")

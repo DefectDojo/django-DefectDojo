@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.retirejs.parser import RetireJsParser
 
 
-class TestRetireJsParser(TestCase):
+class TestRetireJsParser(DojoTestCase):
     def test_parse(self):
         testfile = open("unittests/scans/retirejs/latest.json")
         parser = RetireJsParser()

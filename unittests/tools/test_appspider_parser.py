@@ -1,10 +1,10 @@
 from os import path
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.appspider.parser import AppSpiderParser
 from dojo.models import Product, Engagement, Test, Finding
 
 
-class TestAppSpiderParser(TestCase):
+class TestAppSpiderParser(DojoTestCase):
     def test_appspider_parser_has_one_finding(self):
         test = Test()
         test.engagement = Engagement()

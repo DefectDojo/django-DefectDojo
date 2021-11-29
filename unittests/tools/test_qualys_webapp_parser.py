@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.qualys_webapp.parser import QualysWebAppParser
 from dojo.models import Test
 
 
-class TestQualysWebAppParser(TestCase):
+class TestQualysWebAppParser(DojoTestCase):
 
     def test_qualys_webapp_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/qualys_webapp/qualys_webapp_no_vuln.xml")

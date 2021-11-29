@@ -1,8 +1,8 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.clair.parser import ClairParser
 
 
-class TestClairParser(TestCase):
+class TestClairParser(DojoTestCase):
 
     def test_no_findings(self):
         my_file_handle = open("unittests/scans/clair/empty.json")

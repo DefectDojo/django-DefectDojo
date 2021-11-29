@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.ort.parser import OrtParser
 from dojo.models import Test
 
 
-class TestOrtParser(TestCase):
+class TestOrtParser(DojoTestCase):
     def test_parse_without_file_has_no_finding(self):
         parser = OrtParser()
         findings = parser.get_findings(None, Test())

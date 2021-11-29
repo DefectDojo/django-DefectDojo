@@ -1,10 +1,10 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.blackduck_component_risk.parser import BlackduckComponentRiskParser
 from dojo.models import Test
 from pathlib import Path
 
 
-class TestBlackduckComponentRiskParser(TestCase):
+class TestBlackduckComponentRiskParser(DojoTestCase):
     def test_blackduck_enhanced_zip_upload(self):
         testfile = Path(
             self.unit_test_folder + "/scans/blackduck_component_risk/"

@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Tool_Configuration, Tool_Type
 from dojo.tools.sonarqube_api.updater import SonarQubeApiUpdater
 
 
-class TestSonarQubeApiUpdater(TestCase):
+class TestSonarQubeApiUpdater(DojoTestCase):
 
     def setUp(self):
         tool_type = Tool_Type.objects.create(name='SonarQube')

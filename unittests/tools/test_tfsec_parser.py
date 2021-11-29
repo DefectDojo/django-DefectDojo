@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.tfsec.parser import TFSecParser
 from dojo.models import Test
 
 
-class TestTFSecParser(TestCase):
+class TestTFSecParser(DojoTestCase):
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/tfsec/no_findings.json")

@@ -1,11 +1,11 @@
 from os import path
 
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.burp_graphql.parser import BurpGraphQLParser
 
 
-class TestBurpGraphQLParser(TestCase):
+class TestBurpGraphQLParser(DojoTestCase):
 
     def test_burp_one_finding(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_graphql/one_finding.json")) as test_file:

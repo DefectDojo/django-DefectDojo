@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.kiuwan.parser import KiuwanParser
 from dojo.models import Test
 
 
-class TestKiuwanParser(TestCase):
+class TestKiuwanParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
 

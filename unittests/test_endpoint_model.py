@@ -1,11 +1,11 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.models import Endpoint
 from django.core.exceptions import ValidationError
 
 
-class TestEndpointModel(TestCase):
+class TestEndpointModel(DojoTestCase):
 
     def test_empty(self):
         endpoint = Endpoint()

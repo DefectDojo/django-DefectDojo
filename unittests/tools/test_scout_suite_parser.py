@@ -1,11 +1,11 @@
 import datetime
 
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.scout_suite.parser import ScoutSuiteParser
 
 
-class TestScoutSuiteParser(TestCase):
+class TestScoutSuiteParser(DojoTestCase):
     def test_scout_suite_parser_with_no_vuln_has_no_findings(self):
         test_file = open("unittests/scans/scout_suite/no_vuln.js")
         parser = ScoutSuiteParser()

@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test, Engagement, Product
 from dojo.tools.mobsf.parser import MobSFParser
 
 
-class TestMobSFParser(TestCase):
+class TestMobSFParser(DojoTestCase):
 
     def test_parse_file(self):
         test = Test()

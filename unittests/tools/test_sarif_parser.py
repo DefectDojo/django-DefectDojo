@@ -1,12 +1,12 @@
 from os import path
 import datetime
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 
 from dojo.models import Test, Finding
 from dojo.tools.sarif.parser import SarifParser
 
 
-class TestSarifParser(TestCase):
+class TestSarifParser(DojoTestCase):
     def common_checks(self, finding):
         self.assertLessEqual(len(finding.title), 250)
         self.assertIn(finding.severity, Finding.SEVERITIES)

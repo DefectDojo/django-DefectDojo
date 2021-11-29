@@ -1,10 +1,10 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.blackduck.parser import BlackduckParser
 from dojo.models import Test
 from pathlib import Path
 
 
-class TestBlackduckHubParser(TestCase):
+class TestBlackduckHubParser(DojoTestCase):
     def test_blackduck_csv_parser_has_no_finding(self):
         testfile = Path(self.unit_test_folder + "/scans/blackduck/no_vuln.csv")
         parser = BlackduckParser()

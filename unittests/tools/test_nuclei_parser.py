@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.nuclei.parser import NucleiParser
 from dojo.models import Test
 
 
-class TestNucleiParser(TestCase):
+class TestNucleiParser(DojoTestCase):
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/nuclei/no_findings.json")

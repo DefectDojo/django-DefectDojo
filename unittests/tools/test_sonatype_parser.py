@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.sonatype.parser import SonatypeParser
 
 
-class TestSonatypeParser(TestCase):
+class TestSonatypeParser(DojoTestCase):
     def test_parse_file_with_one_vuln(self):
         testfile = open("unittests/scans/sonatype/one_vuln.json")
         parser = SonatypeParser()

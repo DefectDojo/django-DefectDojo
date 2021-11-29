@@ -1,10 +1,10 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.dsop.parser import DsopParser
 
 from dojo.models import Test
 
 
-class TestDsopParser(TestCase):
+class TestDsopParser(DojoTestCase):
     def test_zero_findings(self):
         testfile = open("unittests/scans/dsop/zero_vuln.xlsx", "rb")
         parser = DsopParser()

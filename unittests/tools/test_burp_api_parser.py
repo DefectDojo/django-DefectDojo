@@ -1,10 +1,10 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.burp_api.parser import BurpApiParser
 from dojo.tools.burp_api.parser import convert_severity, convert_confidence
 
 
-class TestParser(TestCase):
+class TestParser(DojoTestCase):
 
     def test_example_report(self):
         testfile = self.unit_test_folder + "/scans/burp_api/example.json"

@@ -2,7 +2,7 @@ import json
 from unittest import mock
 
 from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuration
 
 
@@ -58,7 +58,7 @@ def empty_list(self, *args, **kwargs):
     return list()
 
 
-class TestSonarqubeImporterNoSQToolConfig(TestCase):
+class TestSonarqubeImporterNoSQToolConfig(DojoTestCase):
     # Testing case no 1. https://github.com/DefectDojo/django-DefectDojo/pull/4676
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -75,7 +75,7 @@ class TestSonarqubeImporterNoSQToolConfig(TestCase):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
-class TestSonarqubeImporterOneSQToolConfig(TestCase):
+class TestSonarqubeImporterOneSQToolConfig(DojoTestCase):
     # Testing case no 2. https://github.com/DefectDojo/django-DefectDojo/pull/4676
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -99,7 +99,7 @@ class TestSonarqubeImporterOneSQToolConfig(TestCase):
         self.assertEqual(2, len(findings))
 
 
-class TestSonarqubeImporterMultipleSQToolConfig(TestCase):
+class TestSonarqubeImporterMultipleSQToolConfig(DojoTestCase):
     # Testing case no 3. https://github.com/DefectDojo/django-DefectDojo/pull/4676
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -118,7 +118,7 @@ class TestSonarqubeImporterMultipleSQToolConfig(TestCase):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
-class TestSonarqubeImporterOneSQConfigNoKey(TestCase):
+class TestSonarqubeImporterOneSQConfigNoKey(DojoTestCase):
     # Testing case no 4. https://github.com/DefectDojo/django-DefectDojo/pull/4676 without Project key
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -144,7 +144,7 @@ class TestSonarqubeImporterOneSQConfigNoKey(TestCase):
         self.assertEqual(2, len(findings))
 
 
-class TestSonarqubeImporterOneSQConfigWithKey(TestCase):
+class TestSonarqubeImporterOneSQConfigWithKey(DojoTestCase):
     # Testing case no 5. https://github.com/DefectDojo/django-DefectDojo/pull/4676 without Project key
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -170,7 +170,7 @@ class TestSonarqubeImporterOneSQConfigWithKey(TestCase):
         self.assertEqual(2, len(findings))
 
 
-class TestSonarqubeImporterMultipleSQConfigs(TestCase):
+class TestSonarqubeImporterMultipleSQConfigs(DojoTestCase):
     # Testing case no 6. https://github.com/DefectDojo/django-DefectDojo/pull/4676 without Project key
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -191,7 +191,7 @@ class TestSonarqubeImporterMultipleSQConfigs(TestCase):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
-class TestSonarqubeImporterSelectedSQConfigsNoKey(TestCase):
+class TestSonarqubeImporterSelectedSQConfigsNoKey(DojoTestCase):
     # Testing case no 7. https://github.com/DefectDojo/django-DefectDojo/pull/4676 without Project key
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -221,7 +221,7 @@ class TestSonarqubeImporterSelectedSQConfigsNoKey(TestCase):
         self.assertEqual(2, len(findings))
 
 
-class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
+class TestSonarqubeImporterSelectedSQConfigsWithKey(DojoTestCase):
     # Testing case no 8. https://github.com/DefectDojo/django-DefectDojo/pull/4676 without Project key
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -261,7 +261,7 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
             SonarQubeApiImporter.prepare_client(self.other_test)
 
 
-class TestSonarqubeImporterExternalRule(TestCase):
+class TestSonarqubeImporterExternalRule(DojoTestCase):
     # Test that finding governed by a rule without htmlDesc can be imported.
     # Custom (user defined) rules may have no htmlDesc field.
     fixtures = [
@@ -300,7 +300,7 @@ class TestSonarqubeImporterExternalRule(TestCase):
         self.assertEqual('internal.dummy.project:src/main/javascript/TranslateDirective.ts', finding.file_path)
 
 
-class TestSonarqubeImporterTwoIssuesNoHotspots(TestCase):
+class TestSonarqubeImporterTwoIssuesNoHotspots(DojoTestCase):
     # Testing case no 9. https://github.com/DefectDojo/django-DefectDojo/pull/4107
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -324,7 +324,7 @@ class TestSonarqubeImporterTwoIssuesNoHotspots(TestCase):
         self.assertEqual(2, len(findings))
 
 
-class TestSonarqubeImporterNoIssuesOneHotspot(TestCase):
+class TestSonarqubeImporterNoIssuesOneHotspot(DojoTestCase):
     # Testing case no 9. https://github.com/DefectDojo/django-DefectDojo/pull/4107
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -348,7 +348,7 @@ class TestSonarqubeImporterNoIssuesOneHotspot(TestCase):
         self.assertEqual(1, len(findings))
 
 
-class TestSonarqubeImporterNoIssuesTwoHotspots(TestCase):
+class TestSonarqubeImporterNoIssuesTwoHotspots(DojoTestCase):
     # Testing case no 11. https://github.com/DefectDojo/django-DefectDojo/pull/4107
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -372,7 +372,7 @@ class TestSonarqubeImporterNoIssuesTwoHotspots(TestCase):
         self.assertEqual(2, len(findings))
 
 
-class TestSonarqubeImporterTwoIssuesTwoHotspots(TestCase):
+class TestSonarqubeImporterTwoIssuesTwoHotspots(DojoTestCase):
     # Testing case no 12. https://github.com/DefectDojo/django-DefectDojo/pull/4107
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -396,7 +396,7 @@ class TestSonarqubeImporterTwoIssuesTwoHotspots(TestCase):
         self.assertEqual(4, len(findings))
 
 
-class TestSonarqubeImporterValidateHotspotData(TestCase):
+class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
     # Testing case no 13. https://github.com/DefectDojo/django-DefectDojo/pull/4107
     fixtures = [
         'unit_sonarqube_toolType.json',

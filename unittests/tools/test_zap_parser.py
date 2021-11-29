@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Test, Finding
 from dojo.tools.zap.parser import ZapParser
 
 
-class TestZapParser(TestCase):
+class TestZapParser(DojoTestCase):
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/zap/empty_2.9.0.xml")
         parser = ZapParser()

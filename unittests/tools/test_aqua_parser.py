@@ -1,10 +1,10 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.aqua.parser import AquaParser
 from dojo.models import Test
 from collections import Counter
 
 
-class TestAquaParser(TestCase):
+class TestAquaParser(DojoTestCase):
     def test_aqua_parser_has_no_finding(self):
         testfile = open("unittests/scans/aqua/no_vuln.json")
         parser = AquaParser()

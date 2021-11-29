@@ -1,12 +1,12 @@
 from datetime import datetime
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.gitlab_secret_detection_report.parser import (
     GitlabSecretDetectionReportParser,
 )
 from dojo.models import Test
 
 
-class TestGitlabSecretDetectionReportParser(TestCase):
+class TestGitlabSecretDetectionReportParser(DojoTestCase):
     def test_gitlab_secret_detection_report_parser_with_no_vuln_has_no_findings(self):
         testfile = open(
             self.unit_test_folder + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_0_vuln.json"

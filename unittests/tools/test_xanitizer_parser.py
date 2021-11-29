@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.xanitizer.parser import XanitizerParser
 from dojo.models import Test
 
 
-class TestXanitizerParser(TestCase):
+class TestXanitizerParser(DojoTestCase):
 
     def test_parse_file_with_no_findings(self):
         testfile = open("unittests/scans/xanitizer/no-findings.xml")

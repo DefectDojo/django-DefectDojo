@@ -1,10 +1,10 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 
 from dojo.models import Test, Engagement, Product
 from dojo.tools.sonarqube.parser import SonarQubeParser
 
 
-class TestSonarQubeParser(TestCase):
+class TestSonarQubeParser(DojoTestCase):
     # comment out to get full diff with big reports
     # maxDiff = None
 

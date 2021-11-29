@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.choctaw_hog.parser import ChoctawhogParser
 from dojo.models import Test
 
 
-class TestChoctawhogParser(TestCase):
+class TestChoctawhogParser(DojoTestCase):
     def test_parse_file_with_no_vuln_has_no_finding(self):
         testfile = open("unittests/scans/choctaw_hog/no_vuln.json")
         parser = ChoctawhogParser()

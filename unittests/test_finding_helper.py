@@ -1,4 +1,4 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import Finding, Test
 from django.contrib.auth.models import User
 from unittest import mock
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 frozen_datetime = timezone.now()
 
 
-class TestUpdateFindingStatusSignal(TestCase):
+class TestUpdateFindingStatusSignal(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):

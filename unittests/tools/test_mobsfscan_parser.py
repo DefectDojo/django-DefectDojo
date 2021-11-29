@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.mobsfscan.parser import MobsfscanParser
 from dojo.models import Test
 
 
-class TestMobsfscanParser(TestCase):
+class TestMobsfscanParser(DojoTestCase):
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/mobsfscan/no_findings.json")

@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.solar_appscreener.parser import SolarAppscreenerParser
 from dojo.models import Test
 
 
-class TestSolarAppscreenerParser(TestCase):
+class TestSolarAppscreenerParser(DojoTestCase):
 
     def test_solar_appscreener_parser_with_no_vuln_has_no_findings(self):
         testfile = open(

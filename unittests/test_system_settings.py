@@ -1,8 +1,8 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.models import System_Settings
 
 
-class TestSystemSettings(TestCase):
+class TestSystemSettings(DojoTestCase):
 
     def test_system_settings_update(self):
         try:

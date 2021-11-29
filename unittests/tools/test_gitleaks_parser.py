@@ -1,9 +1,9 @@
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from dojo.tools.gitleaks.parser import GitleaksParser
 from dojo.models import Test
 
 
-class TestGitleaksParser(TestCase):
+class TestGitleaksParser(DojoTestCase):
 
     def test_parse_file_with_no_findings(self):
         testfile = open("unittests/scans/gitleaks/no_findings.json")

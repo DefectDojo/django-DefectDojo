@@ -1,5 +1,5 @@
 from dojo.tasks import cleanup_alerts
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 from django.conf import settings
 from dojo.models import User, Alerts
 from datetime import datetime, timezone
@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class TestCleanupAlerts(TestCase):
+class TestCleanupAlerts(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):

@@ -1,8 +1,8 @@
 from django.core.management import call_command
-from django.test import TestCase
+from .dojo_test_case import DojoTestCase
 
 
-class TestSampleData(TestCase):
+class TestSampleData(DojoTestCase):
     def test_loaddata(self):
         try:
             call_command('loaddata', 'dojo/fixtures/defect_dojo_sample_data', verbosity=0)
