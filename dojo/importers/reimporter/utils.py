@@ -1,4 +1,3 @@
-from re import L
 from django.conf import settings
 from dojo.models import Engagement, Finding, Q, Product, Test
 from django.utils import timezone
