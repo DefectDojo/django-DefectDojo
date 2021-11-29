@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 
 from dojo.models import Finding, Test
 from dojo.tools.anchore_grype.parser import AnchoreGrypeParser

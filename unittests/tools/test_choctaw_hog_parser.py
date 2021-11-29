@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.choctaw_hog.parser import ChoctawhogParser
 from dojo.models import Test
 

@@ -1,6 +1,6 @@
 import os.path
 
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.awssecurityhub.parser import AwsSecurityHubParser
 from dojo.models import Test
 

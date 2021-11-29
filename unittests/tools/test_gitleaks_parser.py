@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.gitleaks.parser import GitleaksParser
 from dojo.models import Test
 

@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.php_security_audit_v2.parser import PhpSecurityAuditV2Parser
 from dojo.models import Test
 

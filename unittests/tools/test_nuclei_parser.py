@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.nuclei.parser import NucleiParser
 from dojo.models import Test
 

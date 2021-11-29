@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.yarn_audit.parser import YarnAuditParser
 from dojo.models import Engagement, Product, Test
 

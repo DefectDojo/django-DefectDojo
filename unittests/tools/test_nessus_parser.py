@@ -1,5 +1,5 @@
 from os import path
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.nessus.parser import NessusXMLParser, NessusCSVParser, NessusParser
 from dojo.models import Finding, Test, Engagement, Product
 

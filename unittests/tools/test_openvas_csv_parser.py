@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.openvas_csv.parser import OpenVASCsvParser
 from dojo.models import Test, Engagement, Product
 

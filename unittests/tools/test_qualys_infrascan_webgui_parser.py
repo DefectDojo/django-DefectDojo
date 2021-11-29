@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pytz
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 
 from dojo.models import Test
 from dojo.tools.qualys_infrascan_webgui.parser import \

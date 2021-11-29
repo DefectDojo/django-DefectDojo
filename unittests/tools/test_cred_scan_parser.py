@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.cred_scan.parser import CredScanParser
 from dojo.models import Test
 import datetime

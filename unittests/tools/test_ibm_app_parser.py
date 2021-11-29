@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.ibm_app.parser import IbmAppParser
 

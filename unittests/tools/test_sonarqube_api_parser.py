@@ -2,7 +2,7 @@ import json
 from unittest import mock
 
 from dojo.tools.sonarqube_api.parser import SonarQubeAPIParser
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.models import Tool_Type, Tool_Configuration, Product_Type, Product, Engagement, Test
 
 

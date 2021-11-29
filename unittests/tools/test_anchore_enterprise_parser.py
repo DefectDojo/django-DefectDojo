@@ -1,5 +1,5 @@
 from os import path
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.anchore_enterprise.parser import AnchoreEnterpriseParser
 from dojo.tools.anchore_enterprise.parser import extract_cve, search_filepath
 from dojo.models import Test

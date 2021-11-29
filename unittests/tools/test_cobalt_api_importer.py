@@ -1,5 +1,5 @@
 import json
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from unittest.mock import patch
 
 from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuration, Tool_Type, Tool_Configuration

@@ -1,5 +1,5 @@
 import datetime
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.aws_prowler.parser import AWSProwlerParser
 from dojo.models import Test
 

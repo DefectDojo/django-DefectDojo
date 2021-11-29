@@ -1,6 +1,6 @@
 import datetime
 
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.nmap.parser import NmapParser
 

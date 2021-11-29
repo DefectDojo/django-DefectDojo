@@ -1,6 +1,6 @@
 import os.path
 import datetime
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.trufflehog3.parser import TruffleHog3Parser
 from dojo.models import Test
 

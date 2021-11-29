@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.gitlab_dep_scan.parser import GitlabDepScanParser
 from dojo.models import Test
 

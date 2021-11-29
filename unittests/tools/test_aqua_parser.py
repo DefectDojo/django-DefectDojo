@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.aqua.parser import AquaParser
 from dojo.models import Test
 from collections import Counter

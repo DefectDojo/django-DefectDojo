@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.cobalt.parser import CobaltParser
 from dojo.models import Test
 

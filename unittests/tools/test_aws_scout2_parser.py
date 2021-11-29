@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.aws_scout2.parser import AWSScout2Parser
 from django.utils import timezone
 from dojo.models import Test, Engagement, Product, Product_Type, Test_Type

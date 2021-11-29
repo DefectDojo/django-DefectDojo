@@ -1,6 +1,6 @@
 import json
 
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from unittest.mock import patch
 
 from dojo.tools.cobalt_api.parser import CobaltApiParser

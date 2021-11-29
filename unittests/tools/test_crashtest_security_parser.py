@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.crashtest_security.parser import CrashtestSecurityParser
 from dojo.models import Test
 

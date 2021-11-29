@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.dependency_track.parser import DependencyTrackParser
 from dojo.models import Test
 

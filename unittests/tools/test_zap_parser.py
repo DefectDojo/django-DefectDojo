@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.models import Test, Finding
 from dojo.tools.zap.parser import ZapParser
 

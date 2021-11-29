@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.ccvs.parser import CCVSParser
 from dojo.models import Test
 

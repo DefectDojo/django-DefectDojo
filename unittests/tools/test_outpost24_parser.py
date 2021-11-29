@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.outpost24.parser import Outpost24Parser
 from dojo.models import Test
 

@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.blackduck_component_risk.parser import BlackduckComponentRiskParser
 from dojo.models import Test
 from pathlib import Path

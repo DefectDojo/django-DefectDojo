@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.mobsfscan.parser import MobsfscanParser
 from dojo.models import Test
 

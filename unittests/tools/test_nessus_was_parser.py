@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.nessus_was.parser import NessusWASXMLParser, NessusWASCSVParser
 from dojo.models import Finding, Test, Engagement, Product
 

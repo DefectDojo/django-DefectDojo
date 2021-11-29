@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.trustwave_fusion_api.parser import TrustwaveFusionAPIParser
 from dojo.models import Test
 

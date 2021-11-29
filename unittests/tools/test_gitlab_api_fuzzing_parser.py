@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.gitlab_api_fuzzing.parser import GitlabAPIFuzzingParser
 from dojo.models import Test
 

@@ -1,6 +1,6 @@
 import os.path
 
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.trivy.parser import TrivyParser
 from dojo.models import Test
 

@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.nikto.parser import NiktoParser
 from dojo.models import Test, Engagement, Product
 

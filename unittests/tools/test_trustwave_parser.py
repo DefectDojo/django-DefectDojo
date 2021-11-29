@@ -1,6 +1,6 @@
 import os.path
 
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.trustwave.parser import TrustwaveParser
 from dojo.models import Test, Engagement, Product
 

@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.xanitizer.parser import XanitizerParser
 from dojo.models import Test
 

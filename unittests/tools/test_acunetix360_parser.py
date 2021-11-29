@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.acunetix360.parser import Acunetix360Parser
 

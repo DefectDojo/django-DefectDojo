@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.drheader.parser import DrHeaderParser
 from dojo.models import Test
 

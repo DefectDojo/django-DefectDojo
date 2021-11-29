@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.anchore_engine.parser import AnchoreEngineParser
 from dojo.models import Test
 

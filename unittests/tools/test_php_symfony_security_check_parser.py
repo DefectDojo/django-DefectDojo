@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.php_symfony_security_check.parser import PhpSymfonySecurityCheckParser
 from dojo.models import Test
 
