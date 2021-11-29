@@ -46,7 +46,7 @@ if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_deb
                             "python": "python",
                             "subProcess": True
                         })
-        debugpy.listen(("0.0.0.0", debugpy_port))
+        debugpy.listen(("0.0.0.0", 9000))
         if os.environ.get("DD_DEBUG_WAIT_FOR_CLIENT") == "True":
             logger.info("Waiting for the debugging client to connect on port {}".format(debugpy_port))
             debugpy.wait_for_client()

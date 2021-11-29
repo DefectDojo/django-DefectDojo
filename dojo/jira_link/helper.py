@@ -343,33 +343,36 @@ def has_jira_configured(obj):
 
 def get_jira_connection_oauth(jira_server, access_token, access_token_secret, consumer_key, key_cert):
     try:
-        cert = JIRA_Instance_OAUTH.objects.get(consumer_key=consumer_key).key_cert
+        with open("/tmp/cert") as f:
+                key_cert_data = f.read()
 
         oauth_dict = {
             'access_token': access_token,
             'access_token_secret': access_token_secret,
             'consumer_key': consumer_key,
-            'key_cert': cert
+            'key_cert': key_cert_data
             }
-        pprint.pprint(oauth_dict)
+
+        logger.error('find_me')
         jira = JIRA(server=jira_server, oauth=oauth_dict)
         logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
         return jira
     except JIRAError as e:
+        logger.error('find_me1')
         logger.exception(e)
         error_message = e.text if hasattr(e, 'text') else e.message if hasattr(e, 'message') else e.args[0]
         if e.status_code in [401, 403]:
             log_jira_generic_alert('JIRA Authentication Error', error_message)
         else:
             log_jira_generic_alert('Unknown JIRA Connection Error', error_message)
-        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(oauth_dict))
         raise e
 
     except requests.exceptions.RequestException as re:
         logger.exception(re)
         error_message = re.text if hasattr(re, 'text') else re.message if hasattr(re, 'message') else re.args[0]
         log_jira_generic_alert('Unknown JIRA Connection Error', re)
-        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(oauth_dict))
         raise re
 
 def get_jira_connection_raw(jira_server, jira_username, jira_password):

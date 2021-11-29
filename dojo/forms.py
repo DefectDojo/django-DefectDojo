@@ -2132,29 +2132,31 @@ class JIRAForm(forms.ModelForm):
         return form_data
 
 class JIRAFormOAUTH(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
-    issue_key = forms.CharField(required=True, help_text='A valid issue ID is required to gather the necessary information.')
 
+    issue_key = forms.CharField(required=True, help_text='A valid issue ID is required to gather the necessary information.')
+    cert = forms.FileField()
     def __init__(self, *args, **kwargs):
         super(JIRAFormOAUTH, self).__init__(*args, **kwargs)
-        if self.instance:
-            self.fields['password'].required = False
+
 
     class Meta:
         model = JIRA_Instance_OAUTH
-        exclude = ['product', 'epic_name_id', 'open_status_key',
-                    'close_status_key', 'info_mapping_severity',
-                    'low_mapping_severity', 'medium_mapping_severity',
-                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
+        exclude = ['']
 
     def clean(self):
         import dojo.jira_link.helper as jira_helper
         form_data = self.cleaned_data
 
         try:
-            jira = jira_helper.get_jira_connection_oauth(form_data['url'], form_data['access_token'], form_data['access_token_secret'], form_data['consumer_key'], form_data['key_cert'])
+            logger.error("try to upload cert" + form_data['cert'])
+            with open('/tmp/certs/cert', 'wb+') as destination:
+                for chunk in form_data['cert'].chunks():
+                    destination.write(chunk)
+            logger.error('uploaded cert')
+            jira = jira_helper.get_jira_connection_oauth(form_data['url'], form_data['access_token'], form_data['access_token_secret'], form_data['consumer_key'], form_data['cert'])
             logger.debug('valid JIRA config!')
         except Exception as e:
+            logger.debug('invalid JIRA config! forms 2159' + form_data['cert'] + form_data['url'])
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
             message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e)
             self.add_error('access_token', message)

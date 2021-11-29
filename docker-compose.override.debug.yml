@@ -1,8 +1,9 @@
 ---
-    version: '3.7'
+    version: '3.5'
     services:
       uwsgi:
         entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
+        image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
         volumes:
           - '.:/app:z'
         environment:
@@ -29,10 +30,10 @@
       nginx:
         volumes:
           - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
+      image: "defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}"
       mysql:
         ports:
           - target: 3306
             published: 3306
             protocol: tcp
             mode: host
-

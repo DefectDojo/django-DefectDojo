@@ -347,17 +347,24 @@ def new_jira(request):
 @user_passes_test(lambda u: u.is_staff)
 def new_jira_oauth(request):
     if request.method == 'POST':
-        jform = JIRAFormOAUTH(request.POST, instance=JIRA_Instance_OAUTH())
+        jform = JIRAFormOAUTH(request.POST, request.FILES,  instance=JIRA_Instance_OAUTH())
+        logger.debug(jform)
         if jform.is_valid():
+            logger.debug("form is valid")
             jira_server = jform.cleaned_data.get('url').rstrip('/')
             jira_access_token = jform.cleaned_data.get('access_token')
             jira_access_token_secret = jform.cleaned_data.get('access_token_secret')
             jira_consumer_key = jform.cleaned_data.get('consumer_key')
-            jira_key_cert = jform.cleaned_data.get('key_cert')
+            with open('/tmp/cert', 'wb+') as destination:
+                for chunk in request.FILES['cert'].chunks():
+                    destination.write(chunk)
+                    logger.error('uploaded cert')
 
             logger.debug('calling get_jira_connection_oauth')
+            with open('/tmp/cert') as f:
+                jira_key_cert = f.read()
             jira = jira_helper.get_jira_connection_oauth(jira_server, jira_access_token, jira_access_token_secret, jira_consumer_key, jira_key_cert)
-
+            logger.error()
             new_j = jform.save(commit=False)
             new_j.url = jira_server
             new_j.save()
@@ -373,7 +380,11 @@ def new_jira_oauth(request):
                                 )
             return HttpResponseRedirect(reverse('jira', ))
         else:
+            logger.debug("form invalid")
             logger.error('jform.errors: %s', jform.errors)
+
+
+
     else:
         jform = JIRAFormOAUTH()
         add_breadcrumb(title="New Jira Configuration (OAUTH)", top_level=False, request=request)

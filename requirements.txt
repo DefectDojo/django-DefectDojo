@@ -74,4 +74,4 @@ djangosaml2==1.3.4
 drf-spectacular==0.20.2
 django-ratelimit==3.0.1
 argon2-cffi==21.1.0
-pprint
+pprintpp==0.4.0
