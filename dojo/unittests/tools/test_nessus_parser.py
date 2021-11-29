@@ -19,9 +19,14 @@ class TestNessusParser(TestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
         self.assertEqual(6, len(findings))
-        finding = findings[0]
+        finding = findings[5]
         self.assertEqual("Info", finding.severity)
         self.assertIsNone(finding.cwe)
+        print(finding.unsaved_endpoints)
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual("https", endpoint.protocol)
+        endpoint = finding.unsaved_endpoints[1]
+        self.assertEqual("tcp", endpoint.protocol)
 
     def test_parse_some_findings_csv(self):
         """Test one report provided by a user"""
@@ -133,3 +138,7 @@ class TestNessusParser(TestCase):
         self.assertEqual("Nessus SYN scanner", finding.title)
         self.assertEqual("Info", finding.severity)
         self.assertIsNone(finding.cve)
+        endpoint = finding.unsaved_endpoints[26]
+        self.assertEqual("http", endpoint.protocol)
+        endpoint = finding.unsaved_endpoints[37]
+        self.assertEqual("tcp", endpoint.protocol)
