@@ -4,7 +4,8 @@ from drf_yasg.utils import swagger_serializer_method
 from rest_framework.fields import DictField, MultipleChoiceField
 
 from dojo.endpoint.utils import endpoint_filter
-from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, \
+    get_target_product_if_exists, get_target_test_if_exists, get_target_product_by_id_if_exsits
 from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -63,15 +64,19 @@ def get_import_meta_data_from_dict(data):
             raise serializers.ValidationError('engagement must be an integer')
     engagement_name = data.get('engagement_name', None)
 
+    product_name = data.get('product_name', None)
+
+    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name
+
+
+def get_product_id_from_dict(data):
     product_id = data.get('product', None)
     if product_id:
         if isinstance(product_id, Product):
             product_id = product_id.id
         elif isinstance(product_id, str) and not product_id.isdigit():
             raise serializers.ValidationError('product must be an integer')
-    product_name = data.get('product_name', None)
-
-    return test_id, test_title, scan_type, engagement_id, engagement_name, product_id, product_name
+    return product_id
 
 
 @extend_schema_field(serializers.ListField(child=serializers.CharField()))  # also takes basic python types
@@ -1269,9 +1274,9 @@ class ImportScanSerializer(serializers.Serializer):
 
         group_by = data.get('group_by', None)
 
-        _, test_title, scan_type, engagement_id, engagement_name, product_id, product_name = get_import_meta_data_from_dict(data)
+        _, test_title, scan_type, engagement_id, engagement_name, product_name = get_import_meta_data_from_dict(data)
         # we passed validation, so the engagement is present
-        product = get_target_product_if_exists(product_id, product_name)
+        product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
         importer = Importer()
@@ -1387,9 +1392,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         group_by = data.get('group_by', None)
 
-        test_id, test_title, scan_type, _, engagement_name, product_id, product_name = get_import_meta_data_from_dict(data)
+        test_id, test_title, scan_type, _, engagement_name, product_name = get_import_meta_data_from_dict(data)
         # we passed validation, so the test is present
-        product = get_target_product_if_exists(product_id, product_name)
+        product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
@@ -1475,8 +1480,11 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
         create_tags = data['create_tags']
         create_dojo_meta = data['create_dojo_meta']
 
-        _, _, _, _, _, product_id, product_name = get_import_meta_data_from_dict(data)
-        product = get_target_product_if_exists(product_id, product_name)
+        _, _, _, _, _, product_name = get_import_meta_data_from_dict(data)
+        product = get_target_product_if_exists(product_name)
+        if not product:
+            product_id = get_product_id_from_dict(data)
+            product = get_target_product_by_id_if_exsits(product_id)
         try:
             endpoint_meta_import(file, product, create_endpoints, create_tags, create_dojo_meta, origin='API')
         except SyntaxError as se:

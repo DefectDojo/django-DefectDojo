@@ -1,7 +1,8 @@
 import re
 from rest_framework.exceptions import ParseError
-from dojo.api_v2.serializers import get_import_meta_data_from_dict
-from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
+from dojo.api_v2.serializers import get_import_meta_data_from_dict, get_product_id_from_dict
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, \
+    get_target_product_if_exists, get_target_test_if_exists, get_target_product_by_id_if_exsits
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
@@ -170,8 +171,8 @@ class UserHasImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, engagement_id, engagement_name, product_id, product_name = get_import_meta_data_from_dict(request.data)
-        product = get_target_product_if_exists(product_id, product_name)
+        _, _, _, engagement_id, engagement_name, product_name = get_import_meta_data_from_dict(request.data)
+        product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
         if engagement:
@@ -193,8 +194,11 @@ class UserHasMetaImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, _, _, product_id, product_name = get_import_meta_data_from_dict(request.data)
-        product = get_target_product_if_exists(product_id, product_name)
+        _, _, _, _, _, product_name = get_import_meta_data_from_dict(data)
+        product = get_target_product_if_exists(product_name)
+        if not product:
+            product_id = get_product_id_from_dict(data)
+            product = get_target_product_by_id_if_exsits(product_id)
 
         if product:
             # existing product, nothing special to check
@@ -262,9 +266,9 @@ class UserHasReimportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        test_id, test_title, scan_type, _, engagement_name, product_id, product_name = get_import_meta_data_from_dict(request.data)
+        test_id, test_title, scan_type, _, engagement_name, product_name = get_import_meta_data_from_dict(request.data)
 
-        product = get_target_product_if_exists(product_id, product_name)
+        product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
