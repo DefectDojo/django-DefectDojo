@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0135_email_from'),
+        ('dojo', '0136_default_group_help_text'),
     ]
 
     operations = [
