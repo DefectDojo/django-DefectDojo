@@ -367,7 +367,6 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
     def __init__(self, *args, **kwargs):
         TestCase.__init__(self, *args, **kwargs)
         self.unit_test_folder = os.path.dirname(os.path.realpath(__file__))
-        print(self.unit_test_folder)
 
 
 class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):

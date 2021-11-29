@@ -1,6 +1,6 @@
 from dojo.urls import v2_api
 from .dojo_test_case import DojoTestCase
-from dojo.unittests.test_rest_framework import get_open_api3_json_schema, BASE_API_URL
+from .test_rest_framework import get_open_api3_json_schema, BASE_API_URL
 
 
 class ApiEndpointMethods(DojoTestCase):

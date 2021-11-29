@@ -1,4 +1,4 @@
-from dojo.unittests.test_jira_config_engagement import JIRAConfigEngagementBase
+from .test_jira_config_engagement import JIRAConfigEngagementBase
 from vcr import VCR
 from .dojo_test_case import DojoVCRTestCase
 # from unittest import skip
