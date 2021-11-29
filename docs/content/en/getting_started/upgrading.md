@@ -58,7 +58,10 @@ Replace the first step above with this one: `docker-compose build`
 
 ## Upgrading to DefectDojo Version 2.5.x.
 
-Legacy authorization has been completely removed with version 2.5.0
+Legacy authorization has been completely removed with version 2.5.0. This includes removal of the migration of users
+to the new authorization as described in https://defectdojo.github.io/django-DefectDojo/getting_started/upgrading/#authorization.
+If you are still using the legacy authorization, you should run the migration with ``./manage.py migrate_authorization_v2``
+before upgrading to version 2.5.0
 
 This release introduces the "Forgot password" functionality (`DD_FORGOT_PASSWORD`: default `True`). The function
 allows sending an e-mail with the reset password link. Missing configuration or misconfiguration of SMTP
