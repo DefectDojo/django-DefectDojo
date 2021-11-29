@@ -58,6 +58,8 @@ Replace the first step above with this one: `docker-compose build`
 
 ## Upgrading to DefectDojo Version 2.5.x.
 
+Legacy authorization has been completely removed with version 2.5.0
+
 This release introduces the "Forgot password" functionality (`DD_FORGOT_PASSWORD`: default `True`). The function
 allows sending an e-mail with the reset password link. Missing configuration or misconfiguration of SMTP
 (`DD_EMAIL_URL`) could raise an error (HTTP-500). Check and test (for example by resetting your own password) if you
