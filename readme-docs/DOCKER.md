@@ -307,19 +307,19 @@ docker-compose exec uwsgi bash
 Rerun all the tests:
 
 ```
-python manage.py test .unittests --keepdb
+python manage.py test unittests --keepdb
 ```
 
 Run all the tests from a python file. Example:
 
 ```
-python manage.py test .unittests.tools.test_dependency_check_parser --keepdb
+python manage.py test unittests.tools.test_dependency_check_parser --keepdb
 ```
 
 Run a single test. Example:
 
 ```
-python manage.py test .unittests.tools.test_dependency_check_parser.TestDependencyCheckParser.test_parse_file_with_no_vulnerabilities_has_no_findings --keepdb
+python manage.py test unittests.tools.test_dependency_check_parser.TestDependencyCheckParser.test_parse_file_with_no_vulnerabilities_has_no_findings --keepdb
 ```
 
 ## Running the integration-tests

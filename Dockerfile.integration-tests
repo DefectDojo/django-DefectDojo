@@ -5,7 +5,7 @@ FROM python:3.8.12-slim-buster@sha256:7e732593f25983fa7d4b2d54444be4a785f2397c1c
 WORKDIR /app
 RUN \
   apt-get -y update && \
-  apt-get -y install \
+  apt-get -y install --no-install-recommends \
     git \
     wget \
     curl \
@@ -21,7 +21,7 @@ RUN \
   curl -sS -o - https://dl.google.com/linux/linux_signing_key.pub | apt-key add && \
   echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
   apt-get -y update && \
-  apt-get -y install \
+  apt-get -y install --no-install-recommends \
     google-chrome-stable \
   && \
   apt-get clean && \
