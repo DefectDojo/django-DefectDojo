@@ -43,8 +43,8 @@ logger = logging.getLogger(__name__)
 
 # test methods to be used both by API Test and UI Test
 class ImportReimportMixin(object):
-    def __init__(self, unit_test_folder, *args, **kwargs):
-        self.scans_path = unit_test_folder + '/scans/'
+    def __init__(self, *args, **kwargs):
+        self.scans_path = '/scans/'
         self.zap_sample0_filename = self.scans_path + 'zap/0_zap_sample.xml'
         self.zap_sample1_filename = self.scans_path + 'zap/1_zap_sample_0_and_new_absent.xml'
         self.zap_sample2_filename = self.scans_path + 'zap/2_zap_sample_0_and_new_endpoint.xml'
@@ -1037,11 +1037,9 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
 
     def __init__(self, *args, **kwargs):
         # super(ImportReimportMixin, self).__init__(*args, **kwargs)
-        super().__init__(*args, **kwargs)
+        ImportReimportMixin.__init__(self, *args, **kwargs)
         # DojoAPITestCase.__init__(*args, **kwargs)
-        # I can't make sense of the python Mixin / Multiple Inheritance / super() things so just pass the unit_test_folder
-        # value in this one instance
-        ImportReimportMixin.__init__(self, self.unit_test_folder, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def setUp(self):
         testuser = User.objects.get(username='admin')
@@ -1058,10 +1056,10 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
     def __init__(self, *args, **kwargs):
         # TODO remove __init__ if it does nothing...
+        ImportReimportMixin.__init__(self, *args, **kwargs)
         # super(ImportReimportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)
         super().__init__(*args, **kwargs)
-        ImportReimportMixin.__init__(self, self.unit_test_folder, *args, **kwargs)
 
     def setUp(self):
         # still using the API to verify results
