@@ -3,7 +3,7 @@ from dojo.models import User, Test, Finding
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from django.test.client import Client
-from .dojo_test_case import DojoAPITestCase
+from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
 from .test_utils import assertTestImportModelsCreated
 from django.test import override_settings
 # from unittest import skip
@@ -1105,7 +1105,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
                 "active": active,
                 "verified": verified,
                 "scan_type": scan_type,
-                "file": open(self.unit_test_folder + filename),
+                "file": open(get_unit_tests_path() + filename),
                 "environment": 1,
                 "version": "1.0.1",
                 "close_old_findings": close_old_findings,
@@ -1129,7 +1129,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
                 "active": active,
                 "verified": verified,
                 "scan_type": scan_type,
-                "file": (self.unit_test_folder + filename),
+                "file": (get_unit_tests_path() + filename),
                 "version": "1.0.1",
                 "close_old_findings": close_old_findings,
         }

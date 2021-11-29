@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from dojo.models import Test
 
@@ -22,7 +22,7 @@ class TestGitlabSastParser(DojoTestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
-            self.unit_test_folder + "/scans/gitlab_sast/gl-sast-report-many-vuln.json"
+            get_unit_tests_path() + "/scans/gitlab_sast/gl-sast-report-many-vuln.json"
         )
         parser = GitlabSastParser()
         findings = parser.get_findings(testfile, Test())
@@ -39,7 +39,7 @@ class TestGitlabSastParser(DojoTestCase):
 
     def test_parse_file_with_various_confidences(self):
         testfile = open(
-            self.unit_test_folder + "/scans/gitlab_sast/gl-sast-report-confidence.json"
+            get_unit_tests_path() + "/scans/gitlab_sast/gl-sast-report-confidence.json"
         )
         parser = GitlabSastParser()
         findings = parser.get_findings(testfile, Test())

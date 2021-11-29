@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.trustwave_fusion_api.parser import TrustwaveFusionAPIParser
 from dojo.models import Test
 
@@ -6,7 +6,7 @@ from dojo.models import Test
 class TestTrustwaveFusionAPIParser(DojoTestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(
-            self.unit_test_folder + "/scans/trustwave_fusion_api/trustwave_fusion_api_zero_vul.json"
+            get_unit_tests_path() + "/scans/trustwave_fusion_api/trustwave_fusion_api_zero_vul.json"
         )
         parser = TrustwaveFusionAPIParser()
         findings = parser.get_findings(testfile, Test())
@@ -39,7 +39,7 @@ class TestTrustwaveFusionAPIParser(DojoTestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
-            self.unit_test_folder + "/scans/trustwave_fusion_api/trustwave_fusion_api_many_vul.json"
+            get_unit_tests_path() + "/scans/trustwave_fusion_api/trustwave_fusion_api_many_vul.json"
         )
         parser = TrustwaveFusionAPIParser()
         findings = parser.get_findings(testfile, Test())

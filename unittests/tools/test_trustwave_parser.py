@@ -1,12 +1,12 @@
 import os.path
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.trustwave.parser import TrustwaveParser
 from dojo.models import Test, Engagement, Product
 
 
 def sample_path(file_name):
-    return os.path.join(self.unit_test_folder + "/scans/trustwave", file_name)
+    return os.path.join(get_unit_tests_path() + "/scans/trustwave", file_name)
 
 
 class TestTrivyParser(DojoTestCase):

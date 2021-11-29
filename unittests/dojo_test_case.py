@@ -20,6 +20,10 @@ from django.utils.http import urlencode
 logger = logging.getLogger(__name__)
 
 
+def get_unit_tests_path():
+    return os.path.dirname(os.path.realpath(__file__))
+
+
 class DojoTestUtilsMixin(object):
 
     def get_test_admin(self, *args, **kwargs):
@@ -366,14 +370,12 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
 
     def __init__(self, *args, **kwargs):
         TestCase.__init__(self, *args, **kwargs)
-        self.unit_test_folder = os.path.dirname(os.path.realpath(__file__))
 
 
 class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def __init__(self, *args, **kwargs):
         APITestCase.__init__(self, *args, **kwargs)
-        self.unit_test_folder = os.path.dirname(os.path.realpath(__file__))
 
     def login_as_admin(self):
         testuser = self.get_test_admin()
@@ -410,7 +412,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                 "active": active,
                 "verified": verified,
                 "scan_type": scan_type,
-                "file": open(self.unit_test_folder + '/' + filename),
+                "file": open(get_unit_tests_path() + '/' + filename),
                 "version": "1.0.1",
                 "close_old_findings": close_old_findings,
         }
@@ -453,7 +455,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                 "active": active,
                 "verified": verified,
                 "scan_type": scan_type,
-                "file": open(self.unit_test_folder + '/' + filename),
+                "file": open(get_unit_tests_path() + '/' + filename),
                 "version": "1.0.1",
                 "close_old_findings": close_old_findings,
         }

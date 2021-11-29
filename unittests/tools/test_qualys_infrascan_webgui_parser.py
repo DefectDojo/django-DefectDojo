@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pytz
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 from dojo.models import Test
 from dojo.tools.qualys_infrascan_webgui.parser import \
@@ -12,7 +12,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(
-            self.unit_test_folder + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_0.xml"
+            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_0.xml"
         )
         parser = QualysInfrascanWebguiParser()
         findings = parser.get_findings(testfile, Test())
@@ -22,7 +22,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
     # + also verify data with one test
     def test_parse_file_with_one_vuln_has_one_findings(self):
         testfile = open(
-            self.unit_test_folder + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_1.xml"
+            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_1.xml"
         )
         parser = QualysInfrascanWebguiParser()
         findings = parser.get_findings(testfile, Test())
@@ -39,7 +39,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
     # Sample with Multiple Test
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
-            self.unit_test_folder + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_multiple.xml"
+            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_multiple.xml"
         )
         parser = QualysInfrascanWebguiParser()
         findings = parser.get_findings(testfile, Test())
@@ -62,7 +62,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
     # Sample with Multiple Test
     def test_parse_file_with_finding_no_dns(self):
         testfile = open(
-            self.unit_test_folder + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_3.xml"
+            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_3.xml"
         )
         parser = QualysInfrascanWebguiParser()
         findings = parser.get_findings(testfile, Test())

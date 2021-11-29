@@ -3,7 +3,7 @@ from dojo.models import Finding_Group, User, Finding, JIRA_Instance
 from dojo.jira_link import helper as jira_helper
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
-from .dojo_test_case import DojoVCRAPITestCase
+from .dojo_test_case import DojoVCRAPITestCase, get_unit_tests_path
 from crum import impersonate
 # from unittest import skip
 import logging
@@ -49,7 +49,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         my_vcr.record_mode = 'once'
         my_vcr.path_transformer = VCR.ensure_suffix('.yaml')
         my_vcr.filter_headers = ['Authorization', 'X-Atlassian-Token']
-        my_vcr.cassette_library_dir = self.unit_test_folder + '/vcr/jira/'
+        my_vcr.cassette_library_dir = get_unit_tests_path() + '/vcr/jira/'
         # filters headers doesn't seem to work for cookies, so use callbacks to filter cookies from being recorded
         my_vcr.before_record_request = self.before_record_request
         my_vcr.before_record_response = self.before_record_response

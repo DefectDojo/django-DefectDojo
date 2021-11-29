@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.gitlab_api_fuzzing.parser import GitlabAPIFuzzingParser
 from dojo.models import Test
 
@@ -6,7 +6,7 @@ from dojo.models import Test
 class TestGitlabAPIFuzzingParser(DojoTestCase):
     def test_gitlab_api_fuzzing_parser_with_no_vuln_has_no_findings(self):
         with open(
-            self.unit_test_folder + "/scans/gitlab_api_fuzzing/gitlab_api_fuzzing_0_vuln.json"
+            get_unit_tests_path() + "/scans/gitlab_api_fuzzing/gitlab_api_fuzzing_0_vuln.json"
         ) as testfile:
             parser = GitlabAPIFuzzingParser()
             findings = parser.get_findings(testfile, Test())
@@ -15,7 +15,7 @@ class TestGitlabAPIFuzzingParser(DojoTestCase):
 
     def test_gitlab_api_fuzzing_parser_with_one_criticle_vuln_has_one_findings(self):
         with open(
-            self.unit_test_folder + "/scans/gitlab_api_fuzzing/gitlab_api_fuzzing_1_vuln.json"
+            get_unit_tests_path() + "/scans/gitlab_api_fuzzing/gitlab_api_fuzzing_1_vuln.json"
         ) as testfile:
             parser = GitlabAPIFuzzingParser()
             findings = parser.get_findings(testfile, Test())
@@ -33,7 +33,7 @@ class TestGitlabAPIFuzzingParser(DojoTestCase):
 
     def test_gitlab_api_fuzzing_parser_with_invalid_json(self):
         with open(
-            self.unit_test_folder + "/scans/gitlab_api_fuzzing/gitlab_api_fuzzing_invalid.json"
+            get_unit_tests_path() + "/scans/gitlab_api_fuzzing/gitlab_api_fuzzing_invalid.json"
         ) as testfile:
             # Something is wrong with JSON file
             with self.assertRaises((KeyError, ValueError)):

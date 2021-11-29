@@ -1,6 +1,6 @@
 from os import path
 import datetime
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 from dojo.models import Test, Finding
 from dojo.tools.sarif.parser import SarifParser
@@ -298,7 +298,7 @@ class TestSarifParser(DojoTestCase):
 ```      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\",```"""
             self.assertEqual(description, finding.description)
             self.assertEqual(
-                self.unit_test_folder + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json",
+                get_unit_tests_path() + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json",
                 finding.file_path,
             )
             self.assertEqual(13, finding.line)
@@ -311,7 +311,7 @@ class TestSarifParser(DojoTestCase):
 ```      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\",```"""
             self.assertEqual(description, finding.description)
             self.assertEqual(
-                self.unit_test_folder + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json",
+                get_unit_tests_path() + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json",
                 finding.file_path,
             )
             self.assertEqual(44, finding.line)
@@ -323,7 +323,7 @@ class TestSarifParser(DojoTestCase):
 **Snippet:**
 ```        self.assertEqual(\"AWS\\nAKIAIOSFODNN7EXAMPLE\", first_finding.description)```"""
             self.assertEqual(description, finding.description)
-            self.assertEqual(self.unit_test_folder + "/tools/test_gitlab_secret_detection_report_parser.py", finding.file_path)
+            self.assertEqual(get_unit_tests_path() + "/tools/test_gitlab_secret_detection_report_parser.py", finding.file_path)
             self.assertEqual(37, finding.line)
 
     def test_flawfinder(self):

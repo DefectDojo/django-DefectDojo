@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from unittest.mock import patch
 
 from dojo.models import Test, Engagement, Product
@@ -29,7 +29,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/no_finding.xml"
+            get_unit_tests_path() + "/scans/checkmarx/no_finding.xml"
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -41,7 +41,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_detailed_parse_file_with_no_vulnerabilities_has_no_findings(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/no_finding.xml"
+            get_unit_tests_path() + "/scans/checkmarx/no_finding.xml"
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -53,7 +53,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_name_aggregated_parse_file_with_single_vulnerability_has_single_finding(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/single_finding.xml"
+            get_unit_tests_path() + "/scans/checkmarx/single_finding.xml"
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -86,7 +86,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_detailed_parse_file_with_single_vulnerability_has_single_finding(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/single_finding.xml"
+            get_unit_tests_path() + "/scans/checkmarx/single_finding.xml"
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -226,7 +226,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_name_aggregated_parse_file_with_false_positive_is_false_positive(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/single_finding_false_positive.xml"
+            get_unit_tests_path() + "/scans/checkmarx/single_finding_false_positive.xml"
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -238,7 +238,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_detailed_parse_file_with_false_positive_is_false_positive(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/single_finding_false_positive.xml"
+            get_unit_tests_path() + "/scans/checkmarx/single_finding_false_positive.xml"
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -267,7 +267,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_name_aggregated_parse_file_with_two_aggregated_findings_one_is_false_p(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/two_aggregated_findings_one_is_false_positive.xml"
+            get_unit_tests_path() + "/scans/checkmarx/two_aggregated_findings_one_is_false_positive.xml"
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -291,7 +291,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_name_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/multiple_findings.xml"
+            get_unit_tests_path() + "/scans/checkmarx/multiple_findings.xml"
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -303,7 +303,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_detailed_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/multiple_findings.xml"
+            get_unit_tests_path() + "/scans/checkmarx/multiple_findings.xml"
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -318,7 +318,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_name_aggregated_parse_file_with_different_sourceFilename_same_sinkFilename_is_aggregated(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
+            get_unit_tests_path() + "/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -333,7 +333,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_detailed_parse_file_with_different_sourceFilename_same_sinkFilename_is_not_aggregated(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
+            get_unit_tests_path() + "/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -350,7 +350,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_name_aggregated_parse_file_with_same_sourceFilename_different_sinkFilename_is_not_aggregated(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
+            get_unit_tests_path() + "/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -362,7 +362,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_detailed_parse_file_with_same_sourceFilename_different_sinkFilename_is_not_aggregated(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
+            get_unit_tests_path() + "/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -377,7 +377,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_name_aggregated_parse_file_with_utf8_replacement_char(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/utf8_replacement_char.xml"
+            get_unit_tests_path() + "/scans/checkmarx/utf8_replacement_char.xml"
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -410,7 +410,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_detailed_parse_file_with_utf8_replacement_char(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/utf8_replacement_char.xml"
+            get_unit_tests_path() + "/scans/checkmarx/utf8_replacement_char.xml"
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -534,7 +534,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_name_aggregated_parse_file_with_utf8_various_non_ascii_char(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/utf8_various_non_ascii_char.xml"
+            get_unit_tests_path() + "/scans/checkmarx/utf8_various_non_ascii_char.xml"
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -567,7 +567,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_detailed_parse_file_with_utf8_various_non_ascii_char(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            self.unit_test_folder + "/scans/checkmarx/utf8_various_non_ascii_char.xml"
+            get_unit_tests_path() + "/scans/checkmarx/utf8_various_non_ascii_char.xml"
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')

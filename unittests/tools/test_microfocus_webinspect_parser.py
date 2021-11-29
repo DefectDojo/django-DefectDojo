@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectParser
 from dojo.models import Test, Engagement, Product
 
@@ -10,7 +10,7 @@ class TestMicrofocusWebinspectParser(DojoTestCase):
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open(
-            self.unit_test_folder + "/scans/microfocus_webinspect/Webinspect_no_vuln.xml"
+            get_unit_tests_path() + "/scans/microfocus_webinspect/Webinspect_no_vuln.xml"
         )
         parser = MicrofocusWebinspectParser()
         findings = parser.get_findings(testfile, test)
@@ -21,7 +21,7 @@ class TestMicrofocusWebinspectParser(DojoTestCase):
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open(
-            self.unit_test_folder + "/scans/microfocus_webinspect/Webinspect_one_vuln.xml"
+            get_unit_tests_path() + "/scans/microfocus_webinspect/Webinspect_one_vuln.xml"
         )
         parser = MicrofocusWebinspectParser()
         findings = parser.get_findings(testfile, test)
@@ -42,7 +42,7 @@ class TestMicrofocusWebinspectParser(DojoTestCase):
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open(
-            self.unit_test_folder + "/scans/microfocus_webinspect/Webinspect_many_vuln.xml"
+            get_unit_tests_path() + "/scans/microfocus_webinspect/Webinspect_many_vuln.xml"
         )
         parser = MicrofocusWebinspectParser()
         findings = parser.get_findings(testfile, test)

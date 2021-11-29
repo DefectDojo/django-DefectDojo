@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.xanitizer.parser import XanitizerParser
 from dojo.models import Test
 
@@ -25,7 +25,7 @@ class TestXanitizerParser(DojoTestCase):
 
     def test_parse_file_with_multiple_findings_no_details(self):
         testfile = open(
-            self.unit_test_folder + "/scans/xanitizer/multiple-findings-no-details.xml"
+            get_unit_tests_path() + "/scans/xanitizer/multiple-findings-no-details.xml"
         )
         parser = XanitizerParser()
         findings = parser.get_findings(testfile, Test())

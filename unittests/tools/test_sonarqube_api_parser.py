@@ -25,7 +25,7 @@ def dummy_rule(self, *args, **kwargs):
 
 
 def dummy_hotspot_rule(self, *args, **kwargs):
-    with open(self.unit_test_folder + '/scans/sonarqube_api/hotspots/rule.json') as json_file:
+    with open(get_unit_tests_path() + '/scans/sonarqube_api/hotspots/rule.json') as json_file:
         data = json.load(json_file)
         return data
 

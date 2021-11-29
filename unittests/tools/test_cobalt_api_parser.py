@@ -1,6 +1,6 @@
 import json
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from unittest.mock import patch
 
 from dojo.tools.cobalt_api.parser import CobaltApiParser
@@ -280,7 +280,7 @@ class TestCobaltApiParser(DojoTestCase):
 
     @patch('dojo.tools.cobalt_api.importer.CobaltApiImporter.get_findings')
     def test_cobalt_api_parser_with_api(self, mock):
-        with open(self.unit_test_folder + '/scans/cobalt_api/cobalt_api_many_vul.json') as api_findings_file:
+        with open(get_unit_tests_path() + '/scans/cobalt_api/cobalt_api_many_vul.json') as api_findings_file:
             api_findings = json.load(api_findings_file)
         mock.return_value = api_findings
 

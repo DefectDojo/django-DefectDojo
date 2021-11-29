@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.outpost24.parser import Outpost24Parser
 from dojo.models import Test
 
@@ -18,10 +18,10 @@ class TestOutpost24Parser(DojoTestCase):
                     self.assertGreater(endpoint_count, 0)
 
     def test_parser_no_items(self):
-        self.assert_file_has_n_items(self.unit_test_folder + "/scans/outpost24/none.xml", 0)
+        self.assert_file_has_n_items(get_unit_tests_path() + "/scans/outpost24/none.xml", 0)
 
     def test_parser_one_item(self):
-        self.assert_file_has_n_items(self.unit_test_folder + "/scans/outpost24/one.xml", 1)
+        self.assert_file_has_n_items(get_unit_tests_path() + "/scans/outpost24/one.xml", 1)
 
     def test_parser_sample_items(self):
-        self.assert_file_has_n_items(self.unit_test_folder + "/scans/outpost24/sample.xml", 24)
+        self.assert_file_has_n_items(get_unit_tests_path() + "/scans/outpost24/sample.xml", 24)

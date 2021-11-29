@@ -1,12 +1,12 @@
 import os.path
 import datetime
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.trufflehog3.parser import TruffleHog3Parser
 from dojo.models import Test
 
 
 def sample_path(file_name):
-    return os.path.join(self.unit_test_folder + "/scans/trufflehog3", file_name)
+    return os.path.join(get_unit_tests_path() + "/scans/trufflehog3", file_name)
 
 
 class TestTruffleHog3Parser(DojoTestCase):

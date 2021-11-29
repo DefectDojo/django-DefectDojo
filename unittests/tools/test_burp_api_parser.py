@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.models import Test
 from dojo.tools.burp_api.parser import BurpApiParser
 from dojo.tools.burp_api.parser import convert_severity, convert_confidence
@@ -7,7 +7,7 @@ from dojo.tools.burp_api.parser import convert_severity, convert_confidence
 class TestParser(DojoTestCase):
 
     def test_example_report(self):
-        testfile = self.unit_test_folder + "/scans/burp_api/example.json"
+        testfile = get_unit_tests_path() + "/scans/burp_api/example.json"
         with open(testfile) as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
@@ -25,7 +25,7 @@ class TestParser(DojoTestCase):
             self.assertIsNotNone(item.impact)
 
     def test_validate_more(self):
-        testfile = self.unit_test_folder + "/scans/burp_api/many_vulns.json"
+        testfile = get_unit_tests_path() + "/scans/burp_api/many_vulns.json"
         with open(testfile) as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())

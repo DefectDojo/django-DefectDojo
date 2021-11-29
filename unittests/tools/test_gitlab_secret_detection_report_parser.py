@@ -1,5 +1,5 @@
 from datetime import datetime
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.gitlab_secret_detection_report.parser import (
     GitlabSecretDetectionReportParser,
 )
@@ -9,7 +9,7 @@ from dojo.models import Test
 class TestGitlabSecretDetectionReportParser(DojoTestCase):
     def test_gitlab_secret_detection_report_parser_with_no_vuln_has_no_findings(self):
         testfile = open(
-            self.unit_test_folder + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_0_vuln.json"
+            get_unit_tests_path() + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_0_vuln.json"
         )
         parser = GitlabSecretDetectionReportParser()
         findings = parser.get_findings(testfile, Test())
@@ -20,7 +20,7 @@ class TestGitlabSecretDetectionReportParser(DojoTestCase):
         self,
     ):
         testfile = open(
-            self.unit_test_folder + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json"
+            get_unit_tests_path() + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json"
         )
         parser = GitlabSecretDetectionReportParser()
         findings = parser.get_findings(testfile, Test())
@@ -44,7 +44,7 @@ class TestGitlabSecretDetectionReportParser(DojoTestCase):
         self,
     ):
         testfile = open(
-            self.unit_test_folder + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json"
+            get_unit_tests_path() + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json"
         )
         parser = GitlabSecretDetectionReportParser()
         findings = parser.get_findings(testfile, Test())

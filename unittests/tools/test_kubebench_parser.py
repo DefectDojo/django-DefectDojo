@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.kubebench.parser import KubeBenchParser
 from dojo.models import Test
 
@@ -7,7 +7,7 @@ class TestKubeBenchParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(
-            self.unit_test_folder + "/scans/kubebench/kube-bench-report-zero-vuln.json"
+            get_unit_tests_path() + "/scans/kubebench/kube-bench-report-zero-vuln.json"
         )
         parser = KubeBenchParser()
         findings = parser.get_findings(testfile, Test())
@@ -15,7 +15,7 @@ class TestKubeBenchParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
         testfile = open(
-            self.unit_test_folder + "/scans/kubebench/kube-bench-report-one-vuln.json"
+            get_unit_tests_path() + "/scans/kubebench/kube-bench-report-one-vuln.json"
         )
         parser = KubeBenchParser()
         findings = parser.get_findings(testfile, Test())
@@ -23,7 +23,7 @@ class TestKubeBenchParser(DojoTestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
-            self.unit_test_folder + "/scans/kubebench/kube-bench-report-many-vuln.json"
+            get_unit_tests_path() + "/scans/kubebench/kube-bench-report-many-vuln.json"
         )
         parser = KubeBenchParser()
         findings = parser.get_findings(testfile, Test())
@@ -33,7 +33,7 @@ class TestKubeBenchParser(DojoTestCase):
 
         # The testfile has been derived from https://github.com/kubernetes-sigs/wg-policy-prototypes/blob/master/policy-report/kube-bench-adapter/samples/kube-bench-output.json
         testfile = open(
-            self.unit_test_folder + "/scans/kubebench/kube-bench-controls.json"
+            get_unit_tests_path() + "/scans/kubebench/kube-bench-controls.json"
         )
         parser = KubeBenchParser()
         findings = parser.get_findings(testfile, Test())

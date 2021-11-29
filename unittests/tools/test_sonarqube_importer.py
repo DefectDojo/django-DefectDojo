@@ -2,54 +2,54 @@ import json
 from unittest import mock
 
 from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuration
 
 
 def dummy_product(self, *args, **kwargs):
-    with open(self.unit_test_folder + '/scans/sonarqube_api/product.json') as json_file:
+    with open(get_unit_tests_path() + '/scans/sonarqube_api/product.json') as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_issues(self, *args, **kwargs):
-    with open(self.unit_test_folder + '/scans/sonarqube_api/issues.json') as json_file:
+    with open(get_unit_tests_path() + '/scans/sonarqube_api/issues.json') as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_rule(self, *args, **kwargs):
-    with open(self.unit_test_folder + '/scans/sonarqube_api/rule.json') as json_file:
+    with open(get_unit_tests_path() + '/scans/sonarqube_api/rule.json') as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_rule_wo_html_desc(self, *args, **kwargs):
-    with open(self.unit_test_folder + '/scans/sonarqube_api/rule_wo_html_desc.json') as json_file:
+    with open(get_unit_tests_path() + '/scans/sonarqube_api/rule_wo_html_desc.json') as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_no_hotspot(self, *args, **kwargs):
-    with open(self.unit_test_folder + '/scans/sonarqube_api/hotspots/no_vuln.json') as json_file:
+    with open(get_unit_tests_path() + '/scans/sonarqube_api/hotspots/no_vuln.json') as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_one_hotspot(self, *args, **kwargs):
-    with open(self.unit_test_folder + '/scans/sonarqube_api/hotspots/one_vuln.json') as json_file:
+    with open(get_unit_tests_path() + '/scans/sonarqube_api/hotspots/one_vuln.json') as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_many_hotspots(self, *args, **kwargs):
-    with open(self.unit_test_folder + '/scans/sonarqube_api/hotspots/many_vulns.json') as json_file:
+    with open(get_unit_tests_path() + '/scans/sonarqube_api/hotspots/many_vulns.json') as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_hotspot_rule(self, *args, **kwargs):
-    with open(self.unit_test_folder + '/scans/sonarqube_api/hotspots/rule.json') as json_file:
+    with open(get_unit_tests_path() + '/scans/sonarqube_api/hotspots/rule.json') as json_file:
         data = json.load(json_file)
         return data
 

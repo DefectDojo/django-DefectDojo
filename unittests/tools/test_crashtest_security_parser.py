@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.crashtest_security.parser import CrashtestSecurityParser
 from dojo.models import Test
 
@@ -20,7 +20,7 @@ class TestCrashtestSecurityParser(DojoTestCase):
 
     def test_crashtest_security_json_parser_extracted_data_file_has_many_findings(self):
         testfile = open(
-            self.unit_test_folder + "/scans/crashtest_security/data_extracted.json"
+            get_unit_tests_path() + "/scans/crashtest_security/data_extracted.json"
         )
         parser = CrashtestSecurityParser()
         findings = parser.get_findings(testfile, Test())

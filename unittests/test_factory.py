@@ -1,31 +1,31 @@
 from dojo.tools.factory import get_parser
 from dojo.models import Test, Test_Type
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestFactory(DojoTestCase):
     def test_get_parser(self):
         with self.subTest(scan_type="Acunetix Scan"):
             scan_type = "Acunetix Scan"
-            testfile = open(self.unit_test_folder + "/scans/acunetix/one_finding.xml")
+            testfile = open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml")
             parser = get_parser(scan_type)
             findings = parser.get_findings(testfile, Test())
             testfile.close()
         with self.subTest(scan_type="Anchore Engine Scan"):
             scan_type = "Anchore Engine Scan"
-            testfile = open(self.unit_test_folder + "/scans/anchore/one_vuln.json")
+            testfile = open(get_unit_tests_path() + "/scans/anchore/one_vuln.json")
             parser = get_parser(scan_type)
             findings = parser.get_findings(testfile, Test())
             testfile.close()
         with self.subTest(scan_type="Nessus Scan"):
             scan_type = "Nessus Scan"
-            testfile = open(self.unit_test_folder + "/scans/nessus/nessus_v_unknown.xml")
+            testfile = open(get_unit_tests_path() + "/scans/nessus/nessus_v_unknown.xml")
             parser = get_parser(scan_type)
             findings = parser.get_findings(testfile, Test())
             testfile.close()
         with self.subTest(scan_type="ZAP Scan"):
             scan_type = "ZAP Scan"
-            testfile = open(self.unit_test_folder + "/scans/zap/some_2.9.0.xml")
+            testfile = open(get_unit_tests_path() + "/scans/zap/some_2.9.0.xml")
             parser = get_parser(scan_type)
             findings = parser.get_findings(testfile, Test())
             testfile.close()
