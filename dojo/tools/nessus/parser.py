@@ -8,6 +8,7 @@ from xml.dom import NamespaceErr
 from cpe import CPE
 from cvss import CVSS3
 from defusedxml import ElementTree
+from hyperlink._url import SCHEME_PORT_MAP
 
 from dojo.models import Endpoint, Finding, Test
 
@@ -149,6 +150,8 @@ class NessusXMLParser(object):
                         protocol = re.sub(r'[^A-Za-z0-9\-\+]+', "", item.attrib["svc_name"])
                         if protocol == 'www':
                             protocol = 'http'
+                        if protocol not in SCHEME_PORT_MAP:
+                            protocol = re.sub(r'[^A-Za-z0-9\-\+]+', "", item.attrib["protocol"])
 
                     description = ""
                     plugin_output = None
