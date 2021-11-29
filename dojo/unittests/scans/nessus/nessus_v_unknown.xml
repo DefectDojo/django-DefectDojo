@@ -13889,6 +13889,19 @@ An SMB server is running on this port.
 A CIFS server is running on this port.
 </plugin_output>
 </ReportItem>
+<ReportItem port="264" svc_name="fw1-topology-download" protocol="tcp" severity="0" pluginID="11219" pluginName="Nessus SYN scanner" pluginFamily="Port scanners">
+<description>dummy</description>
+<fname>dummy</fname>
+<plugin_modification_date>2012/01/31</plugin_modification_date>
+<plugin_name>dummy</plugin_name>
+<plugin_publication_date>2002/06/05</plugin_publication_date>
+<plugin_type>dummy</plugin_type>
+<risk_factor>None</risk_factor>
+<script_version>$Revision: 1.37 $</script_version>
+<solution>dummy</solution>
+<synopsis>dummy</synopsis>
+<plugin_output>dummy</plugin_output>
+</ReportItem>
 </ReportHost>
 </Report>
 </NessusClientData_v2>
