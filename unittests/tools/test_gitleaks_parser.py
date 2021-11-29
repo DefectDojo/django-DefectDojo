@@ -60,25 +60,25 @@ class TestGitleaksParser(DojoTestCase):
         with self.subTest(i=0):
             finding = findings[0]
             self.assertEqual("Hard Coded AWS Access Key", finding.title)
-            self.assertEqual(self.unit_test_folder + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json", finding.file_path)
+            self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json", finding.file_path)
             self.assertEqual(13, finding.line)
             self.assertIn("key", finding.unsaved_tags)
             self.assertIn("AWS", finding.unsaved_tags)
         with self.subTest(i=1):
             finding = findings[1]
             self.assertEqual("Hard Coded Asymmetric Private Key", finding.title)
-            self.assertEqual(self.unit_test_folder + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json", finding.file_path)
+            self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json", finding.file_path)
             self.assertEqual(13, finding.line)
             self.assertIn("AsymmetricPrivateKey", finding.unsaved_tags)
         with self.subTest(i=2):
             finding = findings[2]
             self.assertEqual("Hard Coded AWS Access Key", finding.title)
-            self.assertEqual(self.unit_test_folder + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json", finding.file_path)
+            self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json", finding.file_path)
             self.assertEqual(44, finding.line)
             self.assertIn("AWS", finding.unsaved_tags)
         with self.subTest(i=3):
             finding = findings[3]
             self.assertEqual("Hard Coded AWS Access Key", finding.title)
-            self.assertEqual(self.unit_test_folder + "/tools/test_gitlab_secret_detection_report_parser.py", finding.file_path)
+            self.assertEqual("dojo/unittests/tools/test_gitlab_secret_detection_report_parser.py", finding.file_path)
             self.assertEqual(37, finding.line)
             self.assertIn("AWS", finding.unsaved_tags)

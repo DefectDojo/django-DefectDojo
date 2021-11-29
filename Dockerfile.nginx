@@ -7,7 +7,7 @@ FROM python:3.8.12-slim-buster@sha256:7e732593f25983fa7d4b2d54444be4a785f2397c1c
 WORKDIR /app
 RUN \
   apt-get -y update && \
-  apt-get -y install --no-install-recommends \
+  apt-get -y install \
     build-essential \
     dnsutils \
     default-mysql-client \
@@ -42,7 +42,7 @@ RUN \
   wget https://github.com/yarnpkg/yarn/releases/download/v1.22.10/yarn_1.22.10_all.deb && \
   dpkg -i yarn_1.22.10_all.deb && \
   echo "$(yarn --version)" && \
-  apt-get -y install nodejs && \
+  apt-get -y install --no-install-recommends nodejs && \
   echo "$(node --version)" && \
   apt-get clean && \
   rm yarn_1.22.10_all.deb && \
