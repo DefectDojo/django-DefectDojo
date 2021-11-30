@@ -1129,7 +1129,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
                 "active": active,
                 "verified": verified,
                 "scan_type": scan_type,
-                "file": (get_unit_tests_path() + filename),
+                "file": open(get_unit_tests_path() + filename),
                 "version": "1.0.1",
                 "close_old_findings": close_old_findings,
         }
