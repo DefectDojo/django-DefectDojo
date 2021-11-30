@@ -1,4 +1,4 @@
-from .dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase
 from unittest.mock import patch
 from dojo.models import Product_Type
 from dojo.authorization.roles_permissions import Permissions

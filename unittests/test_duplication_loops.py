@@ -1,5 +1,6 @@
 from crum import impersonate
-from .dojo_test_case import DojoTestCase, override_settings
+from django.test.utils import override_settings
+from .dojo_test_case import DojoTestCase
 from dojo.utils import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Engagement, Finding, Product, User
