@@ -247,6 +247,7 @@ django:
 
 initializer:
   run: true
+  annotations: {}
   keepSeconds: 60
   affinity: {}
   nodeSelector: {}
