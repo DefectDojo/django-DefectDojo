@@ -1,3 +1,4 @@
+{{- if .Values.initializer.run  }}
 {{- $fullName := include "defectdojo.fullname" . -}}
 apiVersion: batch/v1
 kind: Job
@@ -17,6 +18,10 @@ spec:
         defectdojo.org/component: initializer
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+      {{- with .Values.initializer.annotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
@@ -86,3 +91,4 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
   backoffLimit: 1
+{{- end }}
