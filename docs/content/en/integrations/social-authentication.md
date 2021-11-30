@@ -83,13 +83,13 @@ to be created. Closely follow the steps below to guarantee success.
    To authorize users you will need to set the following:
 
     {{< highlight python >}}
-    SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['example.com', 'example.org']
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['example.com', 'example.org']
     {{< /highlight >}}
 
     or
 
     {{< highlight python >}}
-    SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['<email@example.com>']
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['<email@example.com>']
     {{< /highlight >}}
 
 OKTA
