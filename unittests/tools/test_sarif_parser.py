@@ -20,7 +20,7 @@ class TestSarifParser(DojoTestCase):
     def test_example_report(self):
         testfile = open(
             path.join(
-                path.dirname(__file__), "../scans/sarif/DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif"
+                get_unit_tests_path() + "/scans/sarif/DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif"
             )
         )
         parser = SarifParser()
@@ -298,7 +298,7 @@ class TestSarifParser(DojoTestCase):
 ```      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\",```"""
             self.assertEqual(description, finding.description)
             self.assertEqual(
-                get_unit_tests_path() + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json",
+                "dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json",
                 finding.file_path,
             )
             self.assertEqual(13, finding.line)
@@ -311,7 +311,7 @@ class TestSarifParser(DojoTestCase):
 ```      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\",```"""
             self.assertEqual(description, finding.description)
             self.assertEqual(
-                get_unit_tests_path() + "/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json",
+                "dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json",
                 finding.file_path,
             )
             self.assertEqual(44, finding.line)
@@ -323,7 +323,7 @@ class TestSarifParser(DojoTestCase):
 **Snippet:**
 ```        self.assertEqual(\"AWS\\nAKIAIOSFODNN7EXAMPLE\", first_finding.description)```"""
             self.assertEqual(description, finding.description)
-            self.assertEqual(get_unit_tests_path() + "/tools/test_gitlab_secret_detection_report_parser.py", finding.file_path)
+            self.assertEqual("dojo/unittests/tools/test_gitlab_secret_detection_report_parser.py", finding.file_path)
             self.assertEqual(37, finding.line)
 
     def test_flawfinder(self):
