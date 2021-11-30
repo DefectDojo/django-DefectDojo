@@ -63,7 +63,7 @@ django-debug-toolbar==3.2.2
 django-debug-toolbar-request-history==0.1.4
 vcrpy==4.1.1
 vcrpy-unittest==0.1.7
-django-tagulous==1.3.0
+git+https://github.com/nschlemm/django-tagulous.git@bugfix/144-filter_or_exclude_not_enough_values_to_unpack#egg=django-tagulous
 PyJWT==2.3.0
 cvss==2.3
 django-fieldsignals==0.7.0
