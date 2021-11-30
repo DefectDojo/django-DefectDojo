@@ -5,7 +5,7 @@ FROM python:3.8.12-slim-buster@sha256:7e732593f25983fa7d4b2d54444be4a785f2397c1c
 WORKDIR /app
 RUN \
   apt-get -y update && \
-  apt-get -y install --no-install-recommends \
+  apt-get -y install \
     git \
     wget \
     curl \
