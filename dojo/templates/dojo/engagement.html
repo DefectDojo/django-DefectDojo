@@ -65,7 +65,11 @@
                                 <td style="white-space: normal">
                                     <a class="eng_link" href="{%url 'view_engagement' e.id %}">{% if e.name %}{{ e.name }}{% endif %}</a>
                                     <div>
-                                        {% include "dojo/snippets/tags.html" with tags=e.tags.alll %}
+                                        {% for tag in e.tags.all %}
+                                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">
+                                                {{ tag }}
+                                            </a>
+                                        {% endfor %}
                                     </div>
                                 </td>
                                 <td> {{ e.target_start }} - {{ e.target_end }}
@@ -81,7 +85,13 @@
                                         {{ e.product.name }}
                                     </a>
                                     {{ e.product|jira_project_tag }}
-                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.alll %}
+                                    {% if e.product.tags.all %}
+                                        <div>
+                                            {% for tag in e.product.tags.all %}
+                                                <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </td>
                                 <td class="prod_name">
                                     <a href="{% url 'product_type_metrics' e.product.prod_type.id %}">

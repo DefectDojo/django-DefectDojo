@@ -10,7 +10,7 @@ import googleapiclient.discovery
 from google.oauth2 import service_account
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.urls import reverse
 from django.db.models import Q, QuerySet, Count
 from django.http import HttpResponseRedirect, HttpResponse
@@ -51,7 +51,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 @sensitive_variables('service_account_info', 'credentials')
-@user_is_authorized(Test, Permissions.Test_View, 'tid')
+@user_is_authorized(Test, Permissions.Test_View, 'tid', 'view')
 def view_test(request, tid):
     test_prefetched = get_authorized_tests(Permissions.Test_View)
     test_prefetched = test_prefetched.annotate(total_reimport_count=Count('test_import__id', distinct=True))
@@ -76,7 +76,11 @@ def view_test(request, tid):
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
     system_settings = get_object_or_404(System_Settings, id=1)
     if request.method == 'POST':
-        user_has_permission_or_403(request.user, test, Permissions.Note_Add)
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, test, Permissions.Note_Add)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
         if note_type_activation:
             form = TypedNoteForm(request.POST, available_note_types=available_note_types)
         else:
@@ -232,7 +236,7 @@ def prefetch_for_findings(findings):
 #     return prefetch_for_test_imports
 
 
-@user_is_authorized(Test, Permissions.Test_Edit, 'tid')
+@user_is_authorized(Test, Permissions.Test_Edit, 'tid', 'change')
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     form = TestForm(instance=test)
@@ -259,7 +263,7 @@ def edit_test(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_Delete, 'tid')
+@user_is_authorized(Test, Permissions.Test_Delete, 'tid', 'delete')
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     eng = test.engagement
@@ -323,7 +327,7 @@ def test_calendar(request):
         'users': Dojo_User.objects.all()})
 
 
-@user_is_authorized(Test, Permissions.Test_View, 'tid')
+@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
 def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
@@ -343,7 +347,7 @@ def test_ics(request, tid):
     return response
 
 
-@user_is_authorized(Test, Permissions.Finding_Add, 'tid')
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid', 'staff')
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
@@ -465,7 +469,7 @@ def add_findings(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Finding_Add, 'tid')
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid', 'staff')
 def add_temp_finding(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)
@@ -571,7 +575,7 @@ def add_temp_finding(request, tid, fid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_View, 'tid')
+@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
     templates = Finding_Template.objects.all()
@@ -590,7 +594,7 @@ def search(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid')
+@user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid', 'staff')
 def re_import_scan_results(request, tid):
     additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
                          "mitigated.  The process attempts to identify the differences, however manual verification " \

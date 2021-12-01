@@ -1,9 +1,8 @@
 from django.conf import settings
-from dojo.models import Engagement, Finding, Q, Product, Test
+from dojo.models import Finding, Q
 from django.utils import timezone
-import logging
-from dojo.utils import get_last_object_or_none, get_object_or_none
 
+import logging
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -80,47 +79,3 @@ def mitigate_endpoint_status(endpoint_status, user):
     endpoint_status.mitigated = True
     endpoint_status.last_modified = timezone.now()
     endpoint_status.save()
-
-
-def get_target_product_if_exists(product_name=None):
-    if product_name:
-        return get_object_or_none(Product, name=product_name)
-    else:
-        return None
-
-
-def get_target_product_by_id_if_exsits(product_id=None):
-    product = None
-    if product_id:
-        product = get_object_or_none(Product, pk=product_id)
-        logger.debug('Using existing product by id: %s', product_id)
-    return product
-
-
-def get_target_engagement_if_exists(engagement_id=None, engagement_name=None, product=None):
-    if engagement_id:
-        engagement = get_object_or_none(Engagement, pk=engagement_id)
-        logger.debug('Using existing engagement by id: %s', engagement_id)
-        return engagement
-
-    if not product:
-        # if there's no product, then for sure there's no engagement either
-        return None
-
-    engagement = get_last_object_or_none(Engagement, product=product, name=engagement_name)
-    return engagement
-
-
-def get_target_test_if_exists(test_id=None, test_title=None, scan_type=None, engagement=None):
-    if test_id:
-        test = get_object_or_none(Test, pk=test_id)
-        logger.debug('Using existing Test by id: %s', test_id)
-        return test
-
-    if not engagement:
-        return None
-
-    if test_title:
-        return get_last_object_or_none(Test, engagement=engagement, title=test_title, scan_type=scan_type)
-
-    return get_last_object_or_none(Test, engagement=engagement, scan_type=scan_type)
