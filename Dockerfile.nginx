@@ -32,7 +32,7 @@ ENV \
   node="nodejs"
 RUN \
   apt-get -y update && \
-  apt-get -y install apt-transport-https ca-certificates curl wget && \
+  apt-get -y install --no-install-recommends apt-transport-https ca-certificates curl wget && \
   curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add --no-tty - && \
   echo 'deb https://deb.nodesource.com/node_14.x buster main' > /etc/apt/sources.list.d/nodesource.list && \
   echo 'deb-src https://deb.nodesource.com/node_14.x buster main' >> /etc/apt/sources.list.d/nodesource.list && \
@@ -42,7 +42,7 @@ RUN \
   wget https://github.com/yarnpkg/yarn/releases/download/v1.22.10/yarn_1.22.10_all.deb && \
   dpkg -i yarn_1.22.10_all.deb && \
   echo "$(yarn --version)" && \
-  apt-get -y install nodejs && \
+  apt-get -y install --no-install-recommends nodejs && \
   echo "$(node --version)" && \
   apt-get clean && \
   rm yarn_1.22.10_all.deb && \
