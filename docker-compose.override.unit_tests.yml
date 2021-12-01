@@ -7,6 +7,8 @@ services:
     volumes:
       - defectdojo_media_unittest:/usr/share/nginx/html/media
   uwsgi:
+    build:
+      target: django-unittests
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/app/docker/entrypoint-unit-tests-devDocker.sh']
     volumes:
       - '.:/app:z'
