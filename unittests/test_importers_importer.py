@@ -350,7 +350,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
     @patch('dojo.jira_link.helper.get_jira_project')
     def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_exists_auto_create(self, mock):
-        with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0):
+        with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0, endpoints=1):
             import0 = self.reimport_scan_with_params(None, ACUNETIX_AUDIT_ONE_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title=TEST_TITLE_DEFAULT, auto_create_context=True)
             test_id = import0['test']
@@ -365,7 +365,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
     @patch('dojo.jira_link.helper.get_jira_project')
     def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_not_exists_auto_create(self, mock):
-        with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0):
+        with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0, endpoints=1):
             import0 = self.reimport_scan_with_params(None, ACUNETIX_AUDIT_ONE_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title='bogus title', auto_create_context=True)
             test_id = import0['test']
