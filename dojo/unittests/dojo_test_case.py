@@ -1,6 +1,6 @@
 from django.utils import timezone
 from vcr_unittest import VCRTestCase
-from dojo.models import Product_Type, Test_Type, User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project, \
+from dojo.models import DojoMeta, Product_Type, Test_Type, User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project, \
                         Product
 from dojo.models import System_Settings, Engagement
 from django.urls import reverse
@@ -47,6 +47,12 @@ class DojoTestUtilsMixin(object):
     def patch_product_api(self, product_id, product_details):
         payload = copy.deepcopy(product_details)
         response = self.client.patch(reverse('product-list') + '%s/' % product_id, payload, format='json')
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        return response.data
+
+    def patch_endpoint_api(self, endpoint_id, endpoint_details):
+        payload = copy.deepcopy(endpoint_details)
+        response = self.client.patch(reverse('endpoint-list') + '%s/' % endpoint_id, payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
@@ -114,8 +120,14 @@ class DojoTestUtilsMixin(object):
             eps = eps.filter(mitigated=mitigated)
         return eps.count()
 
+    def db_endpoint_tag_count(self):
+        return Endpoint.tags.tag_model.objects.all().count()
+
     def db_notes_count(self):
         return Notes.objects.all().count()
+
+    def db_dojo_meta_count(self):
+        return DojoMeta.objects.all().count()
 
     def get_new_product_with_jira_project_data(self):
         return {
@@ -392,6 +404,13 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(expected_http_status_code, response.status_code, response.content[:1000])
         return json.loads(response.content)
 
+    def endpoint_meta_import_scan(self, payload, expected_http_status_code):
+        logger.debug('endpoint_meta_import_scan payload %s', payload)
+        response = self.client.post(reverse('endpointmetaimport-list'), payload)
+        print(response.content)
+        self.assertEqual(expected_http_status_code, response.status_code, response.content[:1000])
+        return json.loads(response.content)
+
     def get_test_api(self, test_id):
         response = self.client.get(reverse('test-list') + '%s/' % test_id, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
@@ -484,6 +503,24 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         return self.reimport_scan(payload, expected_http_status_code=expected_http_status_code)
 
+    def endpoint_meta_import_scan_with_params(self, filename, product=1, product_name=None,
+                                              create_endpoints=True, create_tags=True, create_dojo_meta=True,
+                                              expected_http_status_code=201):
+        payload = {
+            "create_endpoints": create_endpoints,
+            "create_tags": create_tags,
+            "create_dojo_meta": create_dojo_meta,
+            "file": open(filename),
+        }
+
+        if product:
+            payload['product'] = product
+
+        if product_name:
+            payload['product_name'] = product_name
+
+        return self.endpoint_meta_import_scan(payload, expected_http_status_code)
+
     def get_finding_api(self, finding_id):
         response = self.client.get(reverse('finding-list') + '%s/' % finding_id, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
@@ -542,6 +579,24 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         response = self.client.get(reverse('finding-list'), payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         # print('findings.content: ', response.content)
+        return json.loads(response.content)
+
+    def get_product_endpoints_api(self, product_id, host=None):
+        payload = {'product': product_id}
+        if host is not None:
+            payload['host'] = host
+
+        response = self.client.get(reverse('endpoint-list'), payload, format='json')
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        return json.loads(response.content)
+
+    def get_endpoints_meta_api(self, endpoint_id, name=None):
+        payload = {'endpoint': endpoint_id}
+        if name is not None:
+            payload['name'] = name
+
+        response = self.client.get(reverse('metadata-list'), payload, format='json')
+        self.assertEqual(200, response.status_code, response.content[:1000])
         return json.loads(response.content)
 
     def do_finding_tags_api(self, http_method, finding_id, tags=None):

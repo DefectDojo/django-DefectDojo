@@ -23,13 +23,7 @@
             <div class="clearfix">
                 <h3 class="pull-left finding-title">
                     {{ finding.title }}
-                    {% if finding.tags %}
-                        <sup>
-                            {% for tag in finding.tags.all %}
-                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                            {% endfor %}
-                        </sup>
-                    {% endif %}
+                    {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                     {% if finding.last_reviewed %}
                         <small>Last Reviewed {{ finding.last_reviewed | naturalday }}
                             by {{ finding.last_reviewed_by }}, </small>
