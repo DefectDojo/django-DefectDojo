@@ -419,13 +419,7 @@
                         <sup><div class="tag-label {{ grade }}">{{ grade }}</div></sup>
                       {% endif %}
                     {% endwith %}
-                    {% if product_tab.product.tags %}
-                      <sup>
-                          {% for tag in product_tab.product.tags.all.all %}
-                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                          {% endfor %}
-                      </sup>
-                    {% endif %}
+                    {% include "dojo/snippets/tags.html" with tags=product_tab.product.tags.all.all %}
                 </h3>
                 <ul class="nav nav-tabs horizontal-bar in">
                   <li role="presentation"{% if product_tab.tab == 'overview' %} class="active"{% endif %}><a href="{% url 'view_product' product_tab.product.id %}"><span class="fa fa-globe" aria-hidden="true"></span><span class="hidden-xs"> Overview</span></a></li>
@@ -483,6 +477,9 @@
                       {% if product_tab.product|has_object_permission:"Endpoint_Add" %}
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'add_endpoint' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
+                      {% endif %}
+                      {% if product_tab.product|has_object_permission:"Endpoint_Edit" and system_settings.enable_endpoint_metadata_import %}
+                      <li><a href="{% url 'import_endpoint_meta' product_tab.product.id %}"><i class="fa fa-upload"></i> Import Endpoint Meta</a></li>
                       {% endif %}
                     </ul>
                   </li>

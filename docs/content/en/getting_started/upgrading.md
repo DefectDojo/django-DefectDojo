@@ -84,7 +84,9 @@ notifications but also for sending the reset password emails. It is highly recom
 value if you are satisfied. If you installed DefectDojo earlier, you can expect `"from@example.com"` there. A fresh
 installation will use `"no-reply@example.com"`
 
+This release [updates](https://github.com/DefectDojo/django-DefectDojo/pull/5450) our helm dependencies. There is a breaking change if you are using the mysql database from the helm chart because we replaced the deprecated chart from the stable repo with a chart from bitnami. If you have persistance enabled, ensure to backup your data before upgrading. All data get lost when replacing the mysql chart during the upgrade. For data migration take a look at the mysql backup and restore process.
 
+Furthermore we updated our kubernetes version. Current tests run on 1.18.16 and 1.22.0.
 
 ## Upgrading to DefectDojo Version 2.4.x. (Security Release)
 
