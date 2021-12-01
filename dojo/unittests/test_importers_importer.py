@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 NPM_AUDIT_NO_VULN_FILENAME = 'dojo/unittests/scans/npm_audit_sample/no_vuln.json'
 NPM_AUDIT_SCAN_TYPE = 'NPM Audit Scan'
 
+ENDPOINT_META_IMPORTER_FILENAME = 'dojo/unittests/scans/endpoint_meta_import/no_endpoint_meta_import.csv'
+
 ENGAGEMENT_NAME_DEFAULT = 'Engagement 1'
 ENGAGEMENT_NAME_NEW = 'Engagement New 1'
 
@@ -178,7 +180,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
         self.engagement_last = self.create_engagement(ENGAGEMENT_NAME_DEFAULT, product=self.product)
 
     def test_import_by_engagement_id(self):
-        with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
+        with assertImportModelsCreated(self, tests=1, engagements=0, products=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=self.engagement.id, test_title=DEFAULT_TEST_TITLE)
             test_id = import0['test']
             self.assertEqual(get_object_or_none(Test, id=test_id).title, DEFAULT_TEST_TITLE)
@@ -186,7 +188,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.assertEqual(import0['product_id'], self.engagement.product.id)
 
     def test_import_by_product_name_exists_engagement_name_exists(self):
-        with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
+        with assertImportModelsCreated(self, tests=1, engagements=0, products=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
             test_id = import0['test']
@@ -195,14 +197,22 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.assertEqual(import0['product_id'], self.engagement_last.product.id)
 
     def test_import_by_product_name_exists_engagement_name_not_exists(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
     def test_import_by_product_name_not_exists_engagement_name(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
+
+    def test_endpoint_meta_import_by_product_name_exists(self):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
+            import0 = self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product=None, product_name=PRODUCT_NAME_DEFAULT, expected_http_status_code=201)
+
+    def test_endpoint_meta_import_by_product_name_not_exists(self):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
+            import0 = self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product=None, product_name=PRODUCT_NAME_NEW, expected_http_status_code=400)
 
     def test_import_with_invalid_parameters(self):
         with self.subTest('no parameters'):
@@ -267,7 +277,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
         self.test_last_by_scan_type = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE)
 
     def test_reimport_by_test_id(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             import0 = self.reimport_scan_with_params(self.test.id, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE)
             test_id = import0['test']
             self.assertEqual(get_object_or_none(Test, id=test_id).title, DEFAULT_TEST_TITLE)
@@ -276,7 +286,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.assertEqual(import0['product_id'], self.test.engagement.product.id)
 
     def test_reimport_by_product_name_exists_engagement_name_exists_no_title(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
             test_id = import0['test']
@@ -285,29 +295,29 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.assertEqual(import0['product_id'], self.test_last_by_scan_type.engagement.product.id)
 
     def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_exists(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title=DEFAULT_TEST_TITLE, expected_http_status_code=400)
 
     def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_not_exists(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title='bogus title', expected_http_status_code=400)
 
     def test_reimport_by_product_name_exists_engagement_name_exists_test_title_exists(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title=DEFAULT_TEST_TITLE)
             test_id = import0['test']
             self.assertEqual(test_id, self.test_last_by_title.id)
 
     def test_reimport_by_product_name_exists_engagement_name_not_exists(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
     def test_reimport_by_product_name_not_exists_engagement_name(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
