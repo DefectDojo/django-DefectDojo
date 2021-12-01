@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0136_default_group_help_text'),
+        ('dojo', '0137_system_settings_enable_endpoint_metadata_import'),
     ]
 
     operations = [
