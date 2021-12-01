@@ -11,7 +11,7 @@ docker:
 - dojo/db_migrations/*
 
 unittests:
-- dojo/unittests/**/*
+- unittests/**/*
 
 integration_tests:
 - tests/**/*
