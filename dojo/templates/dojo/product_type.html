@@ -20,7 +20,7 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                {% if request.user.is_staff %}
+                                {% if "Product_Type_Add"|has_global_permission %}
                                     <li role="presentation">
                                         <a href="{% url 'add_product_type' %}">
                                             <i class="fa fa-plus"></i> Add Product Type
@@ -67,13 +67,13 @@
                                                     <a class="" href="{% url 'view_product_type' pt.id %}">
                                                     <i class="fa fa-list-alt"></i> View</a>
                                                 </li>
-                                                {% if pt|has_object_permission:"Product_Type_Edit" or user|is_authorized_for_change:pt %}
+                                                {% if pt|has_object_permission:"Product_Type_Edit" %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'edit_product_type' pt.id %}">
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                 </li>
                                                 {% endif %}
-                                                {% if pt|has_object_permission:"Product_Type_Add_Product" or user|is_authorized_for_staff:pt %}
+                                                {% if pt|has_object_permission:"Product_Type_Add_Product" %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
                                                     <i class="fa fa-plus"></i> Add Product</a>
@@ -88,7 +88,7 @@
                                                     <a class="" href="{% url 'product_type_report' pt.id %}">
                                                     <i class="fa fa-file-text-o"></i> Product Type Report</a>
                                                 </li>
-                                                {% if pt|has_object_permission:"Product_Type_Delete"  or user|is_authorized_for_delete:pt %}
+                                                {% if pt|has_object_permission:"Product_Type_Delete" %}
                                                 <li role="separator" class="divider"></li>
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'delete_product_type' pt.id %}">

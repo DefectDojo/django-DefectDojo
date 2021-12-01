@@ -46,7 +46,7 @@ Parser are loaded dynamicaly with a factory pattern. To have your parser loaded 
 1. your parser **MUST** be in a sub-module of module `dojo.tools`
    - ex: `dojo.tools.my_tool.parser` module
 2. your parser **MUST** be a class in this sub-module.
-   - ex: `dojo.tools.my_tool.parser.MyToolParser` 
+   - ex: `dojo.tools.my_tool.parser.MyToolParser`
 3. The name of this class **MUST** be the Python module name without underscores and with `Parser` suffix.
    - ex: `dojo.tools.my_tool.parser.MyToolParser`
 4. This class **MUST** have an empty constructor or no constructor
@@ -113,7 +113,7 @@ Here is a list of advise that will make your parser future proof.
 ### Do not parse URLs by hand
 
 We use 2 modules to handle endpoints:
- - `hyperlink` 
+ - `hyperlink`
  - `dojo.models` with a specific class to handle processing around URLs to create endpoints `Endpoint`.
 
 All the existing parser use the same code to parse URL and create endpoints.
@@ -141,7 +141,7 @@ Very bad example:
 Parsers may have many fields, out of which many of them may be optional.
 It better to not set attribute if you don't have data instead of filling with values like `NA`, `No data` etc...
 
-Check class `dojo.models.Finding` 
+Check class `dojo.models.Finding`
 
 ### Data could be missing in the source report
 
@@ -259,17 +259,17 @@ MYSQL> flush privileges;
 This local command will launch the unit test for your new parser
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.tools.<your_unittest_py_file>.<main_class_name> -v2'
+$ docker-compose exec uwsgi bash -c 'python manage.py test unittests.tools.<your_unittest_py_file>.<main_class_name> -v2'
 {{< /highlight >}}
 
 Example for the blackduck hub parser:
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
+$ docker-compose exec uwsgi bash -c 'python manage.py test unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
 {{< /highlight >}}
 
 {{% alert title="Information" color="info" %}}
-If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests -v2'`
+If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
 {{% /alert %}}
 
 ### Endpoint validation

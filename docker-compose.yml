@@ -1,8 +1,8 @@
 # This docker-compose.yml file  is fully functional to evaluate DefectDojo
-# in your local environment. 
+# in your local environment.
 #
 # Although Docker Compose is one of the supported installation methods to
-# deploy a containerized DefectDojo in a production environment, the 
+# deploy a containerized DefectDojo in a production environment, the
 # docker-compose.yml file is not intended for production use without first
 # customizing it to your particular situation.
 ---
@@ -32,6 +32,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile.django
+      target: django
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
       - mysql
@@ -102,7 +103,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   mysql:
-    image: mysql:5.7.36@sha256:2db8bfd2656b51ded5d938abcded8d32ec6181a9eae8dfc7ddf87a656ef97e97
+    image: mysql:5.7.36@sha256:7a3a7b7a29e6fbff433c339fc52245435fa2c308586481f2f92ab1df239d6a29
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: "${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}"
@@ -113,7 +114,7 @@ services:
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
-    image: rabbitmq:3.9.8@sha256:0bdc06e489d369e2b1b27e5bb37977ae800a7550b515407d2cdb07f4b08ea59c
+    image: rabbitmq:3.9.10@sha256:0d862496f77a3bd377eb5de437411a4388885f0f0c2452291e97a85bc89df87a
     volumes:
        - defectdojo_rabbitmq:/var/lib/rabbitmq
 volumes:
