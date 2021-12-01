@@ -18,7 +18,7 @@ django-slack==5.17.6
 django-tagging==0.5.0
 django-watson==1.6.0
 django-prometheus==2.1.0
-Django==3.1.13
+Django==3.2.8
 djangorestframework==3.12.4
 gunicorn==20.1.0
 html2text==2020.1.16
@@ -63,7 +63,7 @@ django-debug-toolbar==3.2.2
 django-debug-toolbar-request-history==0.1.4
 vcrpy==4.1.1
 vcrpy-unittest==0.1.7
-django-tagulous==1.3.0
+git+https://github.com/nschlemm/django-tagulous.git@250b88c68507b39da7b5a88798e49805b94e81b8#egg=django-tagulous
 PyJWT==2.3.0
 cvss==2.3
 django-fieldsignals==0.7.0
