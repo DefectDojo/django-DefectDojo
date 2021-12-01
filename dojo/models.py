@@ -388,6 +388,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name='Enable checklists',
         help_text="With this setting turned off, checklists will be disabled in the user interface.")
+    enable_endpoint_metadata_import = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable Endpoint Metadata Import',
+        help_text="With this setting turned off, endpoint metadata import will be disabled in the user interface.")
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,

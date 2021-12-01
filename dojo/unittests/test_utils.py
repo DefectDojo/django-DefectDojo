@@ -1,7 +1,7 @@
 from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, IMPORT_UPDATED_FINDING, \
     Engagement, Product, Test, Test_Import, Test_Import_Finding_Action, \
     Dojo_User, Dojo_Group, Dojo_Group_Member, Role, System_Settings, Notifications, \
-    Product_Type
+    Product_Type, Endpoint
 from contextlib import contextmanager
 from django.test import TestCase
 from unittest.mock import patch, Mock
@@ -25,6 +25,7 @@ TESTS = Test.objects.all()
 ENGAGEMENTS = Engagement.objects.all()
 PRODUCTS = Product.objects.all()
 PRODUCT_TYPES = Product_Type.objects.all()
+ENDPOINTS = Endpoint.objects.all()
 
 
 class TestUtils(TestCase):
@@ -112,16 +113,18 @@ def assertTestImportModelsCreated(test_case, imports=0, reimports=0, affected_fi
 
 
 @contextmanager
-def assertImportModelsCreated(test_case, tests=0, engagements=0, products=0, product_types=0):
+def assertImportModelsCreated(test_case, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
 
     with assertNumOfModelsCreated(test_case, TESTS, num=tests) as test_count, \
             assertNumOfModelsCreated(test_case, ENGAGEMENTS, num=engagements) as engagement_count, \
             assertNumOfModelsCreated(test_case, PRODUCTS, num=products) as product_count, \
-            assertNumOfModelsCreated(test_case, PRODUCT_TYPES, num=product_types) as product_type_count:
+            assertNumOfModelsCreated(test_case, PRODUCT_TYPES, num=product_types) as product_type_count, \
+            assertNumOfModelsCreated(test_case, ENDPOINTS, num=endpoints) as endpoint_count:
 
         yield (
                 test_count,
                 engagement_count,
                 product_count,
                 product_type_count,
+                endpoint_count,
               )

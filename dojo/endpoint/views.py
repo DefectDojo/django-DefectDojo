@@ -1,8 +1,8 @@
 import logging
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.contrib import messages
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -12,13 +12,13 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Q, QuerySet, Count
 
-from dojo.endpoint.utils import clean_hosts_run
+from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
-    DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
+    DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm, ImportEndpointMetaForm
 from dojo.models import Product, Endpoint, Finding, DojoMeta, Endpoint_Status
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, Product_Tab, calculate_grade, redirect, \
-    add_error_message_to_response
+    add_error_message_to_response, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
@@ -268,9 +268,6 @@ def add_endpoint(request, pid):
 
 
 def add_product_endpoint(request):
-    if not settings.FEATURE_AUTHORIZATION_V2 and not request.user.is_staff:
-        raise PermissionDenied
-
     form = AddEndpointForm()
     if request.method == 'POST':
         form = AddEndpointForm(request.POST)
@@ -364,16 +361,12 @@ def endpoint_bulk_update_all(request, pid=None):
 
         if request.POST.get('delete_bulk_endpoints') and endpoints_to_update:
 
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                if not (request.user.is_staff or settings.AUTHORIZED_USERS_ALLOW_DELETE or settings.AUTHORIZED_USERS_ALLOW_STAFF):
+            if pid is None:
+                if not request.user.is_staff:
                     raise PermissionDenied
             else:
-                if pid is None:
-                    if not request.user.is_staff:
-                        raise PermissionDenied
-                else:
-                    product = get_object_or_404(Product, id=pid)
-                    user_has_permission_or_403(request.user, product, Permissions.Endpoint_Delete)
+                product = get_object_or_404(Product, id=pid)
+                user_has_permission_or_403(request.user, product, Permissions.Endpoint_Delete)
 
             finds = get_authorized_endpoints(Permissions.Endpoint_Delete, finds, request.user)
 
@@ -396,16 +389,12 @@ def endpoint_bulk_update_all(request, pid=None):
         else:
             if endpoints_to_update:
 
-                if not settings.FEATURE_AUTHORIZATION_V2:
-                    if not request.user.is_staff or settings.AUTHORIZED_USERS_ALLOW_CHANGE or settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                if pid is None:
+                    if not request.user.is_staff:
                         raise PermissionDenied
                 else:
-                    if pid is None:
-                        if not request.user.is_staff:
-                            raise PermissionDenied
-                    else:
-                        product = get_object_or_404(Product, id=pid)
-                        user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
+                    product = get_object_or_404(Product, id=pid)
+                    user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
                 finds = get_authorized_endpoints(Permissions.Endpoint_Edit, finds, request.user)
 
@@ -490,3 +479,38 @@ def migrate_endpoints_view(request):
             "name": view_name,
             "html_log": html_log
         })
+
+
+@user_is_authorized(Product, Permissions.Endpoint_Edit, 'pid')
+def import_endpoint_meta(request, pid):
+    product = get_object_or_404(Product, id=pid)
+    form = ImportEndpointMetaForm()
+    if request.method == 'POST':
+        form = ImportEndpointMetaForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES.get('file', None)
+            # Make sure size is not too large
+            if file and is_scan_file_too_large(file):
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                    extra_tags='alert-danger')
+
+            create_endpoints = form.cleaned_data['create_endpoints']
+            create_tags = form.cleaned_data['create_tags']
+            create_dojo_meta = form.cleaned_data['create_dojo_meta']
+
+            try:
+                endpoint_meta_import(file, product, create_endpoints, create_tags, create_dojo_meta, origin='UI', request=request)
+            except Exception as e:
+                logger.exception(e)
+                add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
+            return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
+
+    add_breadcrumb(title="Endpoint Meta Importer", top_level=False, request=request)
+    product_tab = Product_Tab(product.id, title="Endpoint Meta Importer", tab="endpoints")
+    return render(request, 'dojo/endpoint_meta_importer.html', {
+        'product_tab': product_tab,
+        'form': form,
+    })

@@ -1,7 +1,6 @@
 from rest_framework.test import APITestCase, APIClient
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
-from django.conf import settings
 
 
 class EndpointTest(APITestCase):
@@ -20,10 +19,7 @@ class EndpointTest(APITestCase):
             "host": "FOO.BAR"
         }, format='json')
         self.assertEqual(r.status_code, 400, r.content[:1000])
-        if settings.FEATURE_AUTHORIZATION_V2:
-            self.assertIn("Attribute \'product\' is required", r.content.decode("utf-8"))
-        else:
-            self.assertIn("Product is required", r.content.decode("utf-8"))
+        self.assertIn("Attribute \'product\' is required", r.content.decode("utf-8"))
 
         r = self.client.post(reverse('endpoint-list'), {
             "product": 1

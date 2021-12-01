@@ -36,7 +36,6 @@ jobs:
           version: v3.4.0
       - name: Configure Helm repos
         run: |
-          helm repo add stable https://charts.helm.sh/stable
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm dependency list ./helm/defectdojo
           helm dependency update ./helm/defectdojo
