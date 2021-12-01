@@ -1,7 +1,7 @@
 import datetime
 from unittest.mock import patch
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, get_unit_tests_path
 from django.test.utils import override_settings
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -43,7 +43,7 @@ TEST_TITLE_NEW = 'lol importing via reimport'
 class TestDojoDefaultImporter(DojoTestCase):
     def test_parse_findings(self):
         scan_type = "Acunetix Scan"
-        scan = open("unittests/scans/acunetix/one_finding.xml")
+        scan = open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml")
 
         user, created = User.objects.get_or_create(username="admin")
 
@@ -92,7 +92,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             self.assertIn(finding.numerical_severity, ["S0", "S1", "S2", "S3", "S4"])
 
     def test_import_scan(self):
-        scan = open("unittests/scans/sarif/spotbugs.sarif")
+        scan = open(get_unit_tests_path() + "/scans/sarif/spotbugs.sarif")
         scan_type = SarifParser().get_scan_types()[0]  # SARIF format implement the new method
 
         user, _ = User.objects.get_or_create(username="admin")
@@ -124,7 +124,7 @@ class TestDojoDefaultImporter(DojoTestCase):
 
     def test_import_scan_without_test_scan_type(self):
         # GitLabSastParser implements get_tests but report has no scanner name
-        scan = open("unittests/scans/gitlab_sast/gl-sast-report-1-vuln.json")
+        scan = open(get_unit_tests_path() + "/scans/gitlab_sast/gl-sast-report-1-vuln.json")
         scan_type = GitlabSastParser().get_scan_types()[0]
 
         user, _ = User.objects.get_or_create(username="admin")
