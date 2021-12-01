@@ -1,8 +1,8 @@
 # This docker-compose.yml file  is fully functional to evaluate DefectDojo
-# in your local environment. 
+# in your local environment.
 #
 # Although Docker Compose is one of the supported installation methods to
-# deploy a containerized DefectDojo in a production environment, the 
+# deploy a containerized DefectDojo in a production environment, the
 # docker-compose.yml file is not intended for production use without first
 # customizing it to your particular situation.
 ---
@@ -32,6 +32,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile.django
+      target: django
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
       - mysql
