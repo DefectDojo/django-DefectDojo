@@ -46,7 +46,10 @@ class NessusWASCSVParser(object):
             mitigation = str(row.get('Solution'))
             impact = row.get('Description')
             references = row.get('See Also')
-            cvssv3 = row.get('CVSSv3')
+            cvssv3 = row.get('CVSSv3', None)
+            protocol = row.get('Protocol').lower() if 'Protocol' in row else None
+            port = row.get('Port', None)
+            host = row.get('Host', row.get('IP Address', 'localhost'))
 
             # get severity from 'Risk' column and manage columns with no 'Risk' value
             severity = self._convert_severity(row.get('Risk'))
@@ -71,21 +74,24 @@ class NessusWASCSVParser(object):
                 find = Finding(title=title,
                                 test=test,
                                 cve=cve,
-                                cvssv3_score=cvssv3,
                                 description=description,
                                 severity=severity,
                                 mitigation=mitigation,
                                 impact=impact,
                                 references=references)
+                if cvssv3:
+                    find.cvssv3_score = cvssv3
 
                 find.unsaved_endpoints = list()
                 dupes[dupe_key] = find
             # manage endpoints
-            endpoint = Endpoint(
-                protocol=row.get('Protocol').lower() if 'Protocol' in row else None,
-                host=row.get('Host', row.get('IP Address', 'localhost')),
-                port=row.get('Port')
-            )
+            if '://' in host:
+                endpoint = Endpoint.from_uri(host)
+            else:
+                endpoint = Endpoint(
+                    protocol=protocol,
+                    host=host,
+                    port=port)
             find.unsaved_endpoints.append(endpoint)
 
         return list(dupes.values())

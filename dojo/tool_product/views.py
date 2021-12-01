@@ -14,7 +14,7 @@ from dojo.authorization.roles_permissions import Permissions
 logger = logging.getLogger(__name__)
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def new_tool_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -42,7 +42,7 @@ def new_tool_product(request, pid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def all_tool_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
@@ -54,7 +54,7 @@ def all_tool_product(request, pid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def view_tool_product(request, pid, ttid):
     tool = Tool_Product_Settings.objects.get(pk=ttid)
     notes = tool.notes.all()
@@ -91,7 +91,7 @@ def view_tool_product(request, pid, ttid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def edit_tool_product(request, pid, ttid):
     prod = get_object_or_404(Product, id=pid)
     tool_product = Tool_Product_Settings.objects.get(pk=ttid)
@@ -116,7 +116,7 @@ def edit_tool_product(request, pid, ttid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def delete_tool_product(request, pid, ttid):
     tool_product = Tool_Product_Settings.objects.get(pk=ttid)
     prod = get_object_or_404(Product, id=pid)

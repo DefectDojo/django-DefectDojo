@@ -11,7 +11,7 @@ Static files for the webside are build with github actions and are publish in th
 
 ## How to run a local preview
 
-1. [Install Hugo](https://gohugo.io/getting-started/installing/). Make sure you have installed the extended version with Sass/SCSS support.
+1. [Install Hugo](https://gohugo.io/getting-started/installing/). Make sure you have installed the extended version with Sass/SCSS support. Please note there are various Linux packages available on [Hugo GitHub](https://github.com/gohugoio/hugo/releases)
 
 2. Install JavaScript packages
 
@@ -22,14 +22,14 @@ Static files for the webside are build with github actions and are publish in th
     npm install
     {{< /highlight >}}
 
-3. Clone the DefectDojo git repository with the option `--recurse-submodules`. If you have already cloned the repository, make sure that you have checked out out the Docsy theme or use `git submodule` to check it out: 
+3. Clone the DefectDojo git repository with the option `--recurse-submodules`. If you have already cloned the repository, make sure that you have checked out out the Docsy theme or use `git submodule` to check it out:
 
     {{< highlight bash >}}
-    cd docs/themes/docsy 
+    cd docs/themes/docsy
     git submodule update --init --recursive
     {{< /highlight >}}
 
-4. Switch to the docs folder and start the hugo server with hot reloading `hugo server -D`
-5. Visit [http://localhost:1313/django-DefectDojo](http://localhost:1313/django-DefectDojo).
+4. Switch to the docs folder and start the hugo server with hot reloading `hugo server -D --config config.dev.toml`
+5. Visit [http://localhost:1313/django-DefectDojo/dev](http://localhost:1313/django-DefectDojo/dev).
 
 See also the [Docsy installation procedures](https://www.docsy.dev/docs/getting-started/) for reference.

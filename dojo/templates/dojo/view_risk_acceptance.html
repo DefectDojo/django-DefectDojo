@@ -184,7 +184,7 @@
                         <td>{{ finding.active }}</td>
 
                         <td>
-                            {% if engagement|has_object_permission:"Risk_Acceptance" or user|is_authorized_for_staff:risk_acceptance %}
+                            {% if engagement|has_object_permission:"Risk_Acceptance" %}
                                 <form method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
@@ -209,7 +209,7 @@
         {% endif %}
     </div>
 
-    {% if engagement|has_object_permission:"Risk_Acceptance" or user|is_authorized_for_staff:risk_acceptance %}
+    {% if engagement|has_object_permission:"Risk_Acceptance" %}
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3>Accept Additional Findings</h3>
@@ -250,7 +250,7 @@
                         {{ risk_acceptance.created }}
                     </td>
                     <td>
-                        {% if engagement|has_object_permission:"Risk_Acceptance" or user|is_authorized_for_staff:risk_acceptance %}
+                        {% if engagement|has_object_permission:"Risk_Acceptance" %}
                             <form id="replace_risk_file" enctype="multipart/form-data" method="post">
                                 {% csrf_token %}
                                 <label class="btn btn-sm btn-primary">
@@ -299,7 +299,7 @@
                             {{ note }}
                         </td>
                         <td>
-                            {% if engagement|has_object_permission:"Risk_Acceptance" or user|is_authorized_for_staff:risk_acceptance %}
+                            {% if engagement|has_object_permission:"Risk_Acceptance" %}
                                 <form method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="delete_note_id" value="{{ note.id }}"/>

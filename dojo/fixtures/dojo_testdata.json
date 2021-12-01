@@ -72,6 +72,42 @@
     }
   },
   {
+    "pk": 5,
+    "model": "auth.user",
+    "fields": {
+      "username": "user4",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": null,
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
+      "email": "",
+      "date_joined": "2018-04-13T07:59:51.527Z"
+    }
+  },
+  {
+    "pk": 6,
+    "model": "auth.user",
+    "fields": {
+      "username": "user5",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": null,
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
+      "email": "",
+      "date_joined": "2018-04-13T07:59:51.527Z"
+    }
+  },
+  {
     "pk": "2dqr18yqu9mzb87abk0okid75w2clakl",
     "model": "sessions.session",
     "fields": {
@@ -138,7 +174,7 @@
       "url_prefix": "",
       "enable_slack_notifications": false,
       "enable_mail_notifications": false,
-      "mail_notifications_from": "from@example.com",
+      "email_from": "no-reply@example.com",
       "false_positive_history": false,
       "msteams_url": "",
       "slack_token": "",
@@ -590,7 +626,7 @@
 "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
-      "name": "April monthly engagement",
+      "name": "April monthly engagement2",
       "check_list": true,
       "target_start": "2018-04-12",
       "api_test": true,
@@ -620,7 +656,7 @@
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
-      "name": "April monthly engagement",
+      "name": "April monthly engagement3",
       "check_list": true,
       "target_start": "2018-04-12",
       "api_test": true,
@@ -713,6 +749,8 @@
       "lead": null,
       "estimated_time": "00:00:00",
       "test_type": 1,
+      "scan_type": "ZAP Scan",
+      "title": "My ZAP Scan",
       "engagement": 4,
       "environment": 1,
       "target_start": "2017-12-01T00:00:00Z",
@@ -2192,6 +2230,30 @@
     }
   },
   {
+    "pk": "184770c4c3256aba904297610fbb4da3fa15ba34",
+    "model": "authtoken.token",
+    "fields": {
+      "user": 4,
+      "created": "2018-04-16T06:54:35.933Z"
+    }
+  },
+  {
+    "pk": "184770c4c3256aba904297610fbb4da3fa15ba35",
+    "model": "authtoken.token",
+    "fields": {
+      "user": 5,
+      "created": "2018-04-16T06:54:35.933Z"
+    }
+  },
+  {
+    "pk": "184770c4c3256aba904297610fbb4da3fa15ba36",
+    "model": "authtoken.token",
+    "fields": {
+      "user": 6,
+      "created": "2018-04-16T06:54:35.933Z"
+    }
+  },
+  {
     "pk": "1",
     "model": "dojo.dojo_group",
     "fields": {
@@ -2240,6 +2302,22 @@
     "fields": {
       "user": 1,
       "role": 4
+    }
+  },
+  {
+    "pk": 2,
+    "model": "dojo.global_role",
+    "fields": {
+      "user": 6,
+      "role": 4
+    }
+  },
+  {
+    "pk": 3,
+    "model": "dojo.global_role",
+    "fields": {
+      "user": 5,
+      "role": 5
     }
   },
   {

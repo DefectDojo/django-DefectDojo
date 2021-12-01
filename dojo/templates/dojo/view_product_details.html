@@ -24,14 +24,12 @@
                             <span class="caret"></span>
                         </button>
               <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
+                {% if prod|has_object_permission:"Product_Edit" %}
                   <li role="presentation">
                     <a class="" href="{% url 'edit_product' prod.id %}">
                                           <i class="fa fa-pencil-square-o"></i> Edit
                                       </a>
                   </li>
-                {% endif %}
-                {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_staff:prod %}
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a class="" href="{% url 'add_meta_data' prod.id %}">
@@ -74,7 +72,7 @@
                       <i class="fa fa-file-text-o"></i> Product Report
                   </a>
                 </li>
-                {% if prod|has_object_permission:"Benchmark_Edit" or user|is_authorized_for_staff:prod %}
+                {% if prod|has_object_permission:"Benchmark_Edit" %}
                   {% if system_settings.enable_benchmark and benchmark_type %}
                     <li role="separator" class="divider"></li>
                     {% for bt in benchmark_type %}
@@ -86,7 +84,7 @@
                     {% endfor %}
                   {% endif %}
                 {% endif %}
-                {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_staff:prod %}
+                {% if prod|has_object_permission:"Product_Edit" %}
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a href="{% url 'action_history' prod|content_type prod.id %}">
@@ -94,7 +92,7 @@
                     </a>
                   </li>
                 {% endif %}
-                {% if prod|has_object_permission:"Product_Delete" or user|is_authorized_for_delete:prod %}
+                {% if prod|has_object_permission:"Product_Delete" %}
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a class="text-danger" href="{% url 'delete_product' prod.id %}">
@@ -236,7 +234,6 @@
 </div>
 {% endif %}
 
-{% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -412,7 +409,6 @@
           {% endif %}
       </div>
 
-{% endif %}
 </div>
 <!-- Meta Data -->
 <div class="col-md-4">
@@ -538,33 +534,6 @@
             <td><strong>Technical Contact</strong></td>
             <td>{% if prod.technical_contact != "0" %}{{ prod.technical_contact | default:"Unknown" }}{% endif %}</td>
           </tr>
-          {% if not 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
-          <tr>
-            <td><strong>Authorized Users</strong></td>
-            <td>
-
-              {% if prod.authorized_users.all %}
-                {% if prod.authorized_users.all.count > 1 %}
-                  {% for au in prod.authorized_users.all %}
-                     {{au}}{%if not forloop.last%},{%endif%}
-                  {% endfor %}
-                {% else %}
-                  {{ prod.authorized_users.all.0 }}
-                {% endif %}
-              {% elif prod.prod_type.authorized_users.all %}
-                {% if prod.prod_type.authorized_users.all.count > 1 %}
-                  {% for au in prod.prod_type.authorized_users.all %}
-                     {{au}}{%if not forloop.last%},{%endif%}
-                  {% endfor %}
-                {% else %}
-                  {{ prod.prod_type.authorized_users.all.0 }}
-                {% endif %}
-              {% else %}
-                {{ prod.authorized_users.all|notspecified }}
-              {% endif %}
-            </td>
-          </tr>
-          {% endif %}
         </tbody>
       </table>
     </div>
@@ -623,6 +592,7 @@
   <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
   <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
   <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
+  <script src="{% static "dojo/js/metrics.js" %}"></script>
   <script type="text/javascript">
     $(function() {
       if (document.referrer.indexOf('simple_search') > 0) {
@@ -639,37 +609,19 @@
       }
 
       {% if languages and langSummary.files__count > 0 %}
-      severity_pie();
-      function severity_pie() {
-          var data = [
+        var data = [
           {% for lang in languages %}
             {% if lang.code %}
-            {
+              {
                 label: "&nbsp;{{lang}} - {{lang.code|intcomma}} LoC",
-                color: "{{lang.language.color }}",
+                color: "{{ lang.language.color }}",
                 data: {{lang.code}}
-            },
+              },
             {% endif %}
           {% endfor %}
-          ];
-
-          var plotObj = $.plot($("#donut-lang"), data, {
-              series: {
-                  pie: {
-                      innerRadius: 0.5,
-                      show: true,
-                      radius: 1,
-                  }
-              },
-              legend: {
-                  show: true
-              },
-              grid: {
-                  hoverable: true,
-              },
-          });
-        }
-        {% endif %}
+        ];
+        languages_pie(data);
+      {% endif %}
     });
 
     $(function() {
