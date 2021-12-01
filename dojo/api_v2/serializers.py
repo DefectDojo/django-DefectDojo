@@ -4,7 +4,8 @@ from drf_yasg.utils import swagger_serializer_method
 from rest_framework.fields import DictField, MultipleChoiceField
 
 from dojo.endpoint.utils import endpoint_filter
-from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, \
+    get_target_product_if_exists, get_target_test_if_exists, get_target_product_by_id_if_exsits
 from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -32,6 +33,7 @@ import json
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
+from dojo.endpoint.utils import endpoint_meta_import
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
 from dojo.authorization.authorization import user_has_permission
@@ -65,6 +67,16 @@ def get_import_meta_data_from_dict(data):
     product_name = data.get('product_name', None)
 
     return test_id, test_title, scan_type, engagement_id, engagement_name, product_name
+
+
+def get_product_id_from_dict(data):
+    product_id = data.get('product', None)
+    if product_id:
+        if isinstance(product_id, Product):
+            product_id = product_id.id
+        elif isinstance(product_id, str) and not product_id.isdigit():
+            raise serializers.ValidationError('product must be an integer')
+    return product_id
 
 
 @extend_schema_field(serializers.ListField(child=serializers.CharField()))  # also takes basic python types
@@ -1431,6 +1443,54 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             raise serializers.ValidationError(
                 'The date cannot be in the future!')
         return value
+
+
+class EndpointMetaImporterSerializer(serializers.Serializer):
+    file = serializers.FileField(
+        required=True)
+    create_endpoints = serializers.BooleanField(
+        default=True,
+        required=False)
+    create_tags = serializers.BooleanField(
+        default=True,
+        required=False)
+    create_dojo_meta = serializers.BooleanField(
+        default=False,
+        required=False)
+    product_name = serializers.CharField(required=False)
+    product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), required=False)
+    # extra fields populated in response
+    # need to use the _id suffix as without the serializer framework gets confused
+    product_id = serializers.IntegerField(read_only=True)
+
+    def validate(self, data):
+        file = data.get("file")
+        if file and is_scan_file_too_large(file):
+            raise serializers.ValidationError(
+                'Report file is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
+
+        return data
+
+    def save(self):
+        data = self.validated_data
+        file = data.get('file', None)
+
+        create_endpoints = data['create_endpoints']
+        create_tags = data['create_tags']
+        create_dojo_meta = data['create_dojo_meta']
+
+        _, _, _, _, _, product_name = get_import_meta_data_from_dict(data)
+        product = get_target_product_if_exists(product_name)
+        if not product:
+            product_id = get_product_id_from_dict(data)
+            product = get_target_product_by_id_if_exsits(product_id)
+        try:
+            endpoint_meta_import(file, product, create_endpoints, create_tags, create_dojo_meta, origin='API')
+        except SyntaxError as se:
+            raise Exception(se)
+        except ValueError as ve:
+            raise Exception(ve)
 
 
 class LanguageTypeSerializer(serializers.ModelSerializer):

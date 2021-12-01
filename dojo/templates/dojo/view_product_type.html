@@ -89,11 +89,7 @@
                                     <td><a href="{% url 'view_product' product.id %}">{{ product.name }}</a></td>
                                     <!-- Tags column -->
                                     <td class="text-center">
-                                        <sup>
-                                        {% for tag in product.tags.all %}
-                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                        </sup>
+                                        {% include "dojo/snippets/tags.html" with tags=product.tags.all %}
                                     </td>
                                     <!-- End of Tags Column -->
                                     <td class="text-center">{{ product.business_criticality|business_criticality_icon }}</td>

@@ -1960,6 +1960,32 @@ class ImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
 
+# Authorization: authenticated users, DjangoModelPermissions
+class EndpointMetaImporterView(mixins.CreateModelMixin,
+                     viewsets.GenericViewSet):
+    """
+    Imports a CSV file into a product to propogate arbitrary meta and tags on endpoints.
+
+    By Names:
+    - Provide `product_name` of existing product
+
+    By ID:
+    - Provide the id of the product in the `product` parameter
+
+    In this scenario Defect Dojo will look up the product by the provided details.
+    """
+    serializer_class = serializers.EndpointMetaImporterSerializer
+    parser_classes = [MultiPartParser]
+    queryset = Product.objects.all()
+    permission_classes = (IsAuthenticated, permissions.UserHasMetaImportPermission)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def get_queryset(self):
+        return get_authorized_products(Permissions.Endpoint_Edit)
+
+
 # Authorization: staff users
 class LanguageTypeViewSet(mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
