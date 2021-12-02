@@ -467,7 +467,7 @@ Ex:
 
 ```JSON
 {
-    "title": "My wonderfull report",
+    "title": "My wonderful report",
     "findings": [
         {
             "title": "Vuln with image",
