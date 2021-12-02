@@ -89,7 +89,7 @@ def get_target_product_if_exists(product_name=None):
         return None
 
 
-def get_target_product_by_id_if_exsits(product_id=None):
+def get_target_product_by_id_if_exists(product_id=None):
     product = None
     if product_id:
         product = get_object_or_none(Product, pk=product_id)
