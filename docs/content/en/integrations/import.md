@@ -461,6 +461,29 @@ Example of JSON format:
 }
 ```
 
+This parser support an attributes that accept files as Base64 strings. These files will be created as `UploadFile`
+
+Ex:
+
+```JSON
+{
+    "title": "My wonderfull report",
+    "findings": [
+        {
+            "title": "Vuln with image",
+            "description": "Some very long description",
+            "severity": "Medium",
+            "files": [
+                {
+                    "title": "Screenshot from 2017-04-10 16-54-19.png",
+                    "data": "iVBORw0KGgoAAAANSUhEUgAABWgAAAK0CAIAAAARSkPJAAAAA3N<...>TkSuQmCC"
+                }
+            ]
+        }
+    ]
+}
+```
+
 ### Gosec Scanner
 
 Import Gosec Scanner findings in JSON format.
