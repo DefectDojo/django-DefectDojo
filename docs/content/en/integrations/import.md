@@ -461,7 +461,7 @@ Example of JSON format:
 }
 ```
 
-This parser support an attributes that accept files as Base64 strings. These files will be created as `UploadFile`
+This parser support an attributes that accept files as Base64 strings. These files are attached to the respective findings.
 
 Example:
 
