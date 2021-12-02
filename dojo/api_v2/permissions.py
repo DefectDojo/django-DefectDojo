@@ -1,8 +1,8 @@
 import re
 from rest_framework.exceptions import ParseError, PermissionDenied
 from dojo.api_v2.serializers import get_import_meta_data_from_dict, get_product_id_from_dict
-from dojo.importers.reimporter.utils import get_target_engagement_if_exists, \
-    get_target_product_if_exists, get_target_test_if_exists, get_target_product_by_id_if_exsits, \
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_by_id_if_exsits, \
+    get_target_product_if_exists, get_target_test_if_exists,  \
     get_target_product_type_if_exists
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404

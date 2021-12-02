@@ -525,7 +525,7 @@ class ImportEndpointMetaForm(forms.Form):
         label="Choose meta file",
         required=True)  # Could not get required=True to actually accept the file as present
     create_endpoints = forms.BooleanField(
-        label="Create nonexsitng Endpoint",
+        label="Create nonexisting Endpoint",
         initial=True,
         required=False,
         help_text="Create endpoints that do not already exist",)

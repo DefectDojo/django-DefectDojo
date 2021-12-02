@@ -5,8 +5,8 @@ from rest_framework.exceptions import NotFound
 from rest_framework.fields import DictField, MultipleChoiceField
 
 from dojo.endpoint.utils import endpoint_filter
-from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, \
-    get_target_product_if_exists, get_target_test_if_exists, get_target_product_by_id_if_exsits
+from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_by_id_if_exsits, \
+    get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \

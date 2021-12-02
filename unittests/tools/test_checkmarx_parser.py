@@ -69,14 +69,9 @@ class TestCheckmarxParser(DojoTestCase):
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
             "**Finding Link:** [https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28](https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28)\n"
-            "\n"
-            "-----\n"
-            "<b>Source filename: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java\n"
-            "<b>Source line number: </b> 39\n"
+            "<b>Source file: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java (line 39)\n"
             "<b>Source object: </b> executeQuery\n"
-            "\n"
-            "<b>Sink filename: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java\n"
-            "<b>Sink line number: </b> 58\n"
+            "<b>Sink file: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java (line 58)\n"
             "<b>Sink object: </b> allUsersMap",
             item.description,
         )
@@ -103,7 +98,6 @@ class TestCheckmarxParser(DojoTestCase):
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
             "**Finding Link:** [https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28](https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28)\n"
-            "\n"
             "-----\n"
             "**Line Number:** 39\n"
             "**Column:** 59\n"
@@ -393,14 +387,9 @@ class TestCheckmarxParser(DojoTestCase):
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
             "**Finding Link:** [https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28](https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28)\n"
-            "\n"
-            "-----\n"
-            "<b>Source filename: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java�\n"
-            "<b>Source line number: </b> 39\n"
+            "<b>Source file: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java� (line 39)\n"
             "<b>Source object: </b> executeQuery�\n"
-            "\n"
-            "<b>Sink filename: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java�\n"
-            "<b>Sink line number: </b> 58\n"
+            "<b>Sink file: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java� (line 58)\n"
             "<b>Sink object: </b> allUsersMap�",
             item.description,
         )
@@ -427,7 +416,6 @@ class TestCheckmarxParser(DojoTestCase):
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
             "**Finding Link:** [https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28](https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28)\n"
-            "\n"
             "-----\n"
             "**Line Number:** 39\n"
             "**Column:** 59\n"
@@ -550,14 +538,9 @@ class TestCheckmarxParser(DojoTestCase):
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
             "**Finding Link:** [https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28](https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28)\n"
-            "\n"
-            "-----\n"
-            "<b>Source filename: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſUsers.java\n"
-            "<b>Source line number: </b> 39\n"
+            "<b>Source file: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſUsers.java (line 39)\n"
             "<b>Source object: </b> executeQuery¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ\n"
-            "\n"
-            "<b>Sink filename: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſUsers.java\n"
-            "<b>Sink line number: </b> 58\n"
+            "<b>Sink file: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſUsers.java (line 58)\n"
             "<b>Sink object: </b> allUsersMap¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ",
             item.description,
         )
@@ -584,7 +567,6 @@ class TestCheckmarxParser(DojoTestCase):
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
             "**Finding Link:** [https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28](https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28)\n"
-            "\n"
             "-----\n"
             "**Line Number:** 39\n"
             "**Column:** 59\n"
@@ -687,3 +669,13 @@ class TestCheckmarxParser(DojoTestCase):
         self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), item.date)
         self.assertEqual(bool, type(item.static_finding))
         self.assertEqual(True, item.static_finding)
+
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_with_multiple_findings_is_aggregated_with_query_id(self, mock):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/multiple_findings_same_query_id.xml"
+        )
+        parser = CheckmarxParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.teardown(my_file_handle)
+        self.assertEqual(6, len(findings))
