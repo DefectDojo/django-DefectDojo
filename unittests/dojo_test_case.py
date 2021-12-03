@@ -527,7 +527,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             "create_endpoints": create_endpoints,
             "create_tags": create_tags,
             "create_dojo_meta": create_dojo_meta,
-            "file": open(filename),
+            "file": open(get_unit_tests_path() + '/' + filename),
         }
 
         if product:
