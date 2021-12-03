@@ -673,7 +673,7 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_with_multiple_findings_is_aggregated_with_query_id(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/multiple_findings_same_query_id.xml"
+            get_unit_tests_path() + "/scans/checkmarx/multiple_findings_same_query_id.xml"
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)

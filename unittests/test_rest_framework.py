@@ -765,7 +765,7 @@ class FindingFilesTest(DojoAPITestCase):
                 "file": open(str(path) + '/scans/acunetix/one_finding.xml')
             }
             response = self.client.post('/api/v2/' + level + '/files/', payload)
-            self.assertEqual(200, response.status_code, response.data)
+            self.assertEqual(201, response.status_code, response.data)
             self.assertEqual(FileUpload.objects.count(), length + 1)
 
     def test_request_response_get(self):
