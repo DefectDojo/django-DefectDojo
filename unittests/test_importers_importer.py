@@ -1,6 +1,6 @@
 import datetime
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, get_unit_tests_path
 from django.test.utils import override_settings
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 NPM_AUDIT_NO_VULN_FILENAME = 'scans/npm_audit_sample/no_vuln.json'
 NPM_AUDIT_SCAN_TYPE = 'NPM Audit Scan'
 
-ENDPOINT_META_IMPORTER_FILENAME = 'dojo/unittests/scans/endpoint_meta_import/no_endpoint_meta_import.csv'
+ENDPOINT_META_IMPORTER_FILENAME = get_unit_tests_path() + '/endpoint_meta_import/no_endpoint_meta_import.csv'
 
 ENGAGEMENT_NAME_DEFAULT = 'Engagement 1'
 ENGAGEMENT_NAME_NEW = 'Engagement New 1'
