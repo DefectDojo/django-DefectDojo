@@ -309,7 +309,9 @@
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
     <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
-    <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
     <script type="text/javascript">
         $(function () {
             $(document).on('click', '.panel-heading button.clickable', function (e) {
