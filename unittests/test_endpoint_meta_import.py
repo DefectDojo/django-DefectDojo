@@ -3,10 +3,9 @@ from dojo.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from django.test.client import Client
-from .dojo_test_case import DojoAPITestCase
+from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
 from .test_utils import assertImportModelsCreated
 from django.test import override_settings
-# from unittest import skip
 import logging
 
 
@@ -16,12 +15,11 @@ logger = logging.getLogger(__name__)
 # test methods to be used both by API Test and UI Test
 class EndpointMetaImportMixin(object):
     def __init__(self, *args, **kwargs):
-        self.scans_path = 'dojo/unittests/scans/'
-        self.meta_import_full = self.scans_path + 'endpoint_meta_import/full_endpoint_meta_import.csv'
-        self.meta_import_no_hostname = self.scans_path + 'endpoint_meta_import/no_hostname_endpoint_meta_import.csv'
-        self.meta_import_updated_added = self.scans_path + 'endpoint_meta_import/updated_added_endpoint_meta_import.csv'
-        self.meta_import_updated_removed = self.scans_path + 'endpoint_meta_import/updated_removed_endpoint_meta_import.csv'
-        self.meta_import_updated_changed = self.scans_path + 'endpoint_meta_import/updated_changed_endpoint_meta_import.csv'
+        self.meta_import_full = get_unit_tests_path() + '/endpoint_meta_import/full_endpoint_meta_import.csv'
+        self.meta_import_no_hostname = get_unit_tests_path() + '/endpoint_meta_import/no_hostname_endpoint_meta_import.csv'
+        self.meta_import_updated_added = get_unit_tests_path() + '/endpoint_meta_import/updated_added_endpoint_meta_import.csv'
+        self.meta_import_updated_removed = get_unit_tests_path() + '/endpoint_meta_import/updated_removed_endpoint_meta_import.csv'
+        self.meta_import_updated_changed = get_unit_tests_path() + '/endpoint_meta_import/updated_changed_endpoint_meta_import.csv'
         self.updated_tag_host = 'feedback.internal.google.com'
 
     def test_endpoint_meta_import_endpoint_create_tag_create_meta_create(self):
