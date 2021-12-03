@@ -24,7 +24,7 @@ NPM_AUDIT_NO_VULN_FILENAME = 'scans/npm_audit_sample/no_vuln.json'
 NPM_AUDIT_SCAN_TYPE = 'NPM Audit Scan'
 
 ACUNETIX_AUDIT_ONE_VULN_FILENAME = 'scans/acunetix/one_finding.xml'
-ENDPOINT_META_IMPORTER_FILENAME = 'scans/endpoint_meta_import/no_endpoint_meta_import.csv'
+ENDPOINT_META_IMPORTER_FILENAME = 'endpoint_meta_import/no_endpoint_meta_import.csv'
 
 ENGAGEMENT_NAME_DEFAULT = 'Engagement 1'
 ENGAGEMENT_NAME_NEW = 'Engagement New 1'
