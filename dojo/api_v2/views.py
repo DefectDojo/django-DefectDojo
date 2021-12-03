@@ -367,14 +367,14 @@ class EngagementViewSet(mixins.ListModelMixin,
     )
     @swagger_auto_schema(
         method='get',
-        responses={status.HTTP_200_OK: serializers.FileSerializer}
+        responses={status.HTTP_200_OK: serializers.EngagementToFilesSerializer}
     )
     @swagger_auto_schema(
-        methods=['post', 'patch'],
+        method='post',
         request_body=serializers.AddNewFileOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.FileSerializer}
+        responses={status.HTTP_201_CREATED: serializers.FileSerializer}
     )
-    @action(detail=True, methods=["get", "post", "patch"])
+    @action(detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,))
     def files(self, request, pk=None):
         engagement = self.get_object()
         if request.method == 'POST':
@@ -383,33 +383,20 @@ class EngagementViewSet(mixins.ListModelMixin,
                 title = new_file.validated_data['title']
                 file = new_file.validated_data['file']
             else:
-                return Response(new_file.errors,
-                    status=status.HTTP_400_BAD_REQUEST)
+                return Response(new_file.errors, status=status.HTTP_400_BAD_REQUEST)
 
             file = FileUpload(title=title, file=file)
             file.save()
             engagement.files.add(file)
 
-            serialized_file = serializers.FileSerializer({
-                "title": title, "file": file,
-            })
-            result = serializers.EngagementToFilesSerializer({
-                "engagement_id": engagement, "files": [serialized_file.data]
-            })
-            return Response(serialized_file.data,
-                status=status.HTTP_200_OK)
+            serialized_file = serializers.FileSerializer(file)
+            return Response(serialized_file.data, status=status.HTTP_201_CREATED)
+
         files = engagement.files.all()
-
-        serialized_files = []
-        if files:
-            serialized_files = serializers.EngagementToFilesSerializer({
-                    "engagement_id": engagement, "files": files
-            })
-            return Response(serialized_files.data,
-                    status=status.HTTP_200_OK)
-
-        return Response(serialized_files,
-                status=status.HTTP_200_OK)
+        serialized_files = serializers.EngagementToFilesSerializer({
+            "engagement_id": engagement, "files": files
+        })
+        return Response(serialized_files.data, status=status.HTTP_200_OK)
 
 
 # These are technologies in the UI and the API!
@@ -677,18 +664,18 @@ class FindingViewSet(prefetch.PrefetchListMixin,
     @extend_schema(
         methods=['POST'],
         request=serializers.AddNewFileOptionSerializer,
-        responses={status.HTTP_201_CREATED: serializers.FindingToFilesSerializer}
+        responses={status.HTTP_201_CREATED: serializers.FileSerializer}
     )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer}
     )
     @swagger_auto_schema(
-        methods=['post', 'patch'],
+        method='post',
         request_body=serializers.AddNewFileOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer}
+        responses={status.HTTP_201_CREATED: serializers.FileSerializer}
     )
-    @action(detail=True, methods=["get", "post", "patch"])
+    @action(detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,))
     def files(self, request, pk=None):
         finding = self.get_object()
         if request.method == 'POST':
@@ -697,33 +684,20 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                 title = new_file.validated_data['title']
                 file = new_file.validated_data['file']
             else:
-                return Response(new_file.errors,
-                    status=status.HTTP_400_BAD_REQUEST)
+                return Response(new_file.errors, status=status.HTTP_400_BAD_REQUEST)
 
             file = FileUpload(title=title, file=file)
             file.save()
             finding.files.add(file)
 
-            serialized_file = serializers.FileSerializer({
-                "title": title, "file": file,
-            })
-            result = serializers.FindingToFilesSerializer({
-                "finding_id": finding, "files": [serialized_file.data]
-            })
-            return Response(serialized_file.data,
-                status=status.HTTP_200_OK)
+            serialized_file = serializers.FileSerializer(file)
+            return Response(serialized_file.data, status=status.HTTP_201_CREATED)
+
         files = finding.files.all()
-
-        serialized_files = []
-        if files:
-            serialized_files = serializers.FindingToFilesSerializer({
-                    "finding_id": finding, "files": files
-            })
-            return Response(serialized_files.data,
-                    status=status.HTTP_200_OK)
-
-        return Response(serialized_files,
-                status=status.HTTP_200_OK)
+        serialized_files = serializers.FindingToFilesSerializer({
+            "finding_id": finding, "files": files
+        })
+        return Response(serialized_files.data, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=serializers.FindingNoteSerializer,
@@ -1663,11 +1637,11 @@ class TestsViewSet(mixins.ListModelMixin,
         responses={status.HTTP_200_OK: serializers.TestToFilesSerializer}
     )
     @swagger_auto_schema(
-        methods=['post', 'patch'],
+        method='post',
         request_body=serializers.AddNewFileOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.FileSerializer}
+        responses={status.HTTP_201_CREATED: serializers.FileSerializer}
     )
-    @action(detail=True, methods=["get", "post", "patch"])
+    @action(detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,))
     def files(self, request, pk=None):
         test = self.get_object()
         if request.method == 'POST':
@@ -1676,33 +1650,20 @@ class TestsViewSet(mixins.ListModelMixin,
                 title = new_file.validated_data['title']
                 file = new_file.validated_data['file']
             else:
-                return Response(new_file.errors,
-                    status=status.HTTP_400_BAD_REQUEST)
+                return Response(new_file.errors, status=status.HTTP_400_BAD_REQUEST)
 
             file = FileUpload(title=title, file=file)
             file.save()
             test.files.add(file)
 
-            serialized_file = serializers.FileSerializer({
-                "title": title, "file": file,
-            })
-            result = serializers.TestToFilesSerializer({
-                "test_id": test, "files": [serialized_file.data]
-            })
-            return Response(serialized_file.data,
-                status=status.HTTP_200_OK)
+            serialized_file = serializers.FileSerializer(file)
+            return Response(serialized_file.data, status=status.HTTP_201_CREATED)
+
         files = test.files.all()
-
-        serialized_files = []
-        if files:
-            serialized_files = serializers.TestToFilesSerializer({
-                    "test_id": test, "files": files
-            })
-            return Response(serialized_files.data,
-                    status=status.HTTP_200_OK)
-
-        return Response(serialized_files,
-                status=status.HTTP_200_OK)
+        serialized_files = serializers.TestToFilesSerializer({
+            "test_id": test, "files": files
+        })
+        return Response(serialized_files.data, status=status.HTTP_200_OK)
 
 
 # Authorization: authenticated users
