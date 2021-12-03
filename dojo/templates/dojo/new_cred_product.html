@@ -1,8 +1,7 @@
 {% extends "base.html"%}
 {% block content %}
     {{ block.super }}
- {{ block.super }}
-    <h3> Add a Credential</h3>
+     <h3> Add a Credential</h3>
     <form class="form-horizontal" action="{% url 'new_cred_product' pid %}" method="post">{% csrf_token %}
      {% include "dojo/form_fields.html" with form=tform %}
         <div class="form-group">
