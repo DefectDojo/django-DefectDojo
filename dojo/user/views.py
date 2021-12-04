@@ -21,7 +21,7 @@ from rest_framework.authtoken.models import Token
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, ChangePasswordForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
     Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm
-from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member
+from dojo.models import Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.group.queries import get_authorized_group_members_for_user
@@ -313,8 +313,6 @@ def add_user(request):
 @user_passes_test(lambda u: u.is_staff)
 def view_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
-    authorized_products = Product.objects.filter(authorized_users__in=[user])
-    authorized_product_types = Product_Type.objects.filter(authorized_users__in=[user])
     product_members = get_authorized_product_members_for_user(user, Permissions.Product_View)
     product_type_members = get_authorized_product_type_members_for_user(user, Permissions.Product_Type_View)
     group_members = get_authorized_group_members_for_user(user)
@@ -322,8 +320,6 @@ def view_user(request, uid):
     add_breadcrumb(title="View User", top_level=False, request=request)
     return render(request, 'dojo/view_user.html', {
         'user': user,
-        'authorized_products': authorized_products,
-        'authorized_product_types': authorized_product_types,
         'product_members': product_members,
         'product_type_members': product_type_members,
         'group_members': group_members})
@@ -332,12 +328,7 @@ def view_user(request, uid):
 @user_passes_test(lambda u: u.is_superuser)
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
-    authed_products = Product.objects.filter(authorized_users__in=[user])
-    authed_product_types = Product_Type.objects.filter(authorized_users__in=[user])
-    form = EditDojoUserForm(instance=user, initial={
-        'authorized_products': authed_products,
-        'authorized_product_types': authed_product_types
-    })
+    form = EditDojoUserForm(instance=user)
     if not request.user.is_superuser:
         form.fields['is_staff'].widget.attrs['disabled'] = True
         form.fields['is_superuser'].widget.attrs['disabled'] = True

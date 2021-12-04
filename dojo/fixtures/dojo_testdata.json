@@ -368,10 +368,6 @@
       "product_manager": 1,
       "team_manager": 2,
       "tid": 0,
-      "authorized_users": [
-        2,
-        3
-      ],
       "description": "test product"
     }
   },
@@ -387,10 +383,6 @@
       "product_manager": 2,
       "team_manager": 3,
       "tid": 0,
-      "authorized_users": [
-        2,
-        3
-      ],
       "description": "test product"
     }
   },
@@ -406,9 +398,6 @@
       "product_manager": 1,
       "team_manager": 3,
       "tid": 0,
-      "authorized_users": [
-        3
-      ],
       "description": "test product"
     }
   },

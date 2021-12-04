@@ -56,7 +56,6 @@ def prefetch_for_product_type(prod_types):
         active_findings_query = Q(prod_type__engagement__test__finding__active=True)
         active_verified_findings_query = Q(prod_type__engagement__test__finding__active=True,
                                 prod_type__engagement__test__finding__verified=True)
-        prefetch_prod_types = prefetch_prod_types.prefetch_related('authorized_users')
         prefetch_prod_types = prefetch_prod_types.annotate(
             active_findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))
         prefetch_prod_types = prefetch_prod_types.annotate(
@@ -147,9 +146,8 @@ def delete_product_type(request, ptid):
 @user_is_authorized(Product_Type, Permissions.Product_Type_Edit, 'ptid')
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
-    authed_users = pt.authorized_users.all()
     members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_Manage_Members)
-    pt_form = Product_TypeForm(instance=pt, initial={'authorized_users': authed_users})
+    pt_form = Product_TypeForm(instance=pt)
     if request.method == "POST" and request.POST.get('edit_product_type'):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
