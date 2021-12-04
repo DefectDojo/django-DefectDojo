@@ -96,10 +96,20 @@ class DojoDefaultImporter(object):
                 item.active = active
             if item.verified:
                 item.verified = verified
-            # Only set date value of the test if they were NOT set by the parser
+            # Set the scan_date at import time to all findings imported
+            # Only allow this to happen if the scan_date is different than the default "today"
+            #   and different than what the scan report has.
             # scan_date is set to both target_start and target_end in the creat_test function
-            if item.date:
-                item.date = test.target_start
+            if item.date == now:
+                # Parser did not set the date, so it is the default value
+                if test.target_start != now:
+                    # Import scan_date was set, and the parser has not overwritten it
+                    item.date = test.target_start
+            else:
+                # The parser has set the date already
+                if test.target_start != now:
+                    # The date set by import scan_date should overwrite scan report date
+                    item.date = test.target_start
 
             item.created = now
             item.updated = now
