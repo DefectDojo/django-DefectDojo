@@ -43,19 +43,10 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        env:
-          docker-image: ${{ matrix.docker-image }}
         with:
-          path: /tmp/.buildx-cache-${{ env.docker-image }}
-          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}
-
+          buildkitd-flags: --debug
+          driver-opts: image=moby/buildkit:master # needed to get the fix for https://github.com/moby/buildkit/issues/2426
+          
       - name: Build
         id: docker_build
         uses: docker/build-push-action@v2
@@ -68,9 +59,9 @@ jobs:
             ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
           file: Dockerfile.${{ env.docker-image }}
           outputs: type=docker,dest=${{ env.docker-image }}_img
-          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
-          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
-
+          cache-from: type=gha,scope=${{ matrix.docker-image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
+          
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
         uses:  actions/upload-artifact@v2
