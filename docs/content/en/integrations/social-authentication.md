@@ -95,12 +95,11 @@ to be created. Closely follow the steps below to guarantee success.
 OKTA
 ----
 
-In a similar fashion to that of Google, using OKTA as a OAuth2 provider
-carries the same attributes and a similar procedure. Upon login with an Okta account,
-a new user will be created if one does not already exist. OAuth2 identities are matched 
-to DefectDojo users by email address, not username.   Follow along below.  These images are taken 
-from an Okta Developer Edition tenant, so options for Custom Authorization Servers are shown.  The 
-corresponding steps for Workforce tenants are mentioned in the text.
+Okta can bet set up in a similar fashion to that of Google, using Okta as an OAuth2 provider. Upon login to 
+DefectDojo with an Okta identity token, a new DefectDojos user will be created if one does not already exist. 
+Okta OAuth2 identities are matched to DefectDojo users by email address, not by username. Follow along below.  
+These images are taken from an Okta Developer Edition tenant so options for Custom Authorization Servers are shown.  
+The corresponding steps for Okta Workforce tenants are mentioned in the text below and the overall procedure is the same.
 
 1.  Navigate to the following address and either create a new account,
     or login with an existing one: [OKTA Account
