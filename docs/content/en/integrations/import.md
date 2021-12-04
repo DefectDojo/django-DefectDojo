@@ -77,6 +77,10 @@ This parser is disactivated by default in releases >= 2.3.1 and will be removed 
 
 Prowler file can be imported as a CSV (`-M csv`) or JSON (`-M json`) file.
 
+### Azure Security Center Recommendations Scan
+
+Azure Security Center recommendations can be exported from the user interface in CSV format.
+
 ### Bandit
 
 JSON report format
