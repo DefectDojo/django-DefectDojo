@@ -1,7 +1,7 @@
 import re
 from rest_framework.exceptions import ParseError, PermissionDenied
 from dojo.api_v2.serializers import get_import_meta_data_from_dict, get_product_id_from_dict
-from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_by_id_if_exsits, \
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists,  \
     get_target_product_type_if_exists
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
@@ -202,7 +202,7 @@ class UserHasMetaImportPermission(permissions.BasePermission):
         product = get_target_product_if_exists(product_name)
         if not product:
             product_id = get_product_id_from_dict(request.data)
-            product = get_target_product_by_id_if_exsits(product_id)
+            product = get_target_product_by_id_if_exists(product_id)
 
         if product:
             # existing product, nothing special to check

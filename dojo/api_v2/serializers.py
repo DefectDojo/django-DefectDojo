@@ -5,7 +5,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.fields import DictField, MultipleChoiceField
 
 from dojo.endpoint.utils import endpoint_filter
-from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_by_id_if_exsits, \
+from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
@@ -1524,7 +1524,7 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
         product = get_target_product_if_exists(product_name)
         if not product:
             product_id = get_product_id_from_dict(data)
-            product = get_target_product_by_id_if_exsits(product_id)
+            product = get_target_product_by_id_if_exists(product_id)
         try:
             endpoint_meta_import(file, product, create_endpoints, create_tags, create_dojo_meta, origin='API')
         except SyntaxError as se:
