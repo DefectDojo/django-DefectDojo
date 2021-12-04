@@ -96,11 +96,15 @@ OKTA
 ----
 
 In a similar fashion to that of Google, using OKTA as a OAuth2 provider
-carries the same attributes and a similar procedure. Follow along below.
+carries the same attributes and a similar procedure. Upon login with an Okta account,
+a new user will be created if one does not already exist. OAuth2 identities are matched 
+to DefectDojo users by email address, not username.   Follow along below.  These images are taken 
+from an Okta Developer Edition tenant, so options for Custom Authorization Servers are shown.  The 
+corresponding steps for Workforce tenants are mentioned in the text.
 
 1.  Navigate to the following address and either create a new account,
     or login with an existing one: [OKTA Account
-    Creation](https://www.okta.com/developer/signup/)
+    Creation](https://www.okta.com/developer/signup/). 
 2.  Once logged in, enter the **Applications** and click **Add
     Application**:
 
@@ -111,16 +115,16 @@ carries the same attributes and a similar procedure. Follow along below.
     ![image](../../images/okta_2.png)
 
 4.  Add the pictured URLs in the **Login Redirect URLs** section. This
-    part is very important. If there are any mistakes here, the
-    authentication client will not authorize the request, and deny
-    access. Check the **Implicit** box as well.
+    part is very important. Check the **Implicit** box as well.  The Login Redirect URL is 
+	where the browser will be redirected to POST the identity token.  You may use localhost 
+	for testing but will need to add a domain name for production deployment.
 
     ![image](../../images/okta_3.png)
 
 5.  Once all URLs are added, finish by clicking **Done**.
 
 6.  Return to the **Dashboard** to find the **Org-URL**. Note this value
-    as it will be important in the settings file.
+    as it will be important in the settings file.   This is your Okta_subdomain + okta.com
 
     ![image](../../images/okta_4.png)
 
@@ -140,12 +144,16 @@ carries the same attributes and a similar procedure. Follow along below.
     DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2/default'),
     {{< /highlight >}}
 
-If during the login process you get the following error: *The
-'redirect_uri' parameter must be an absolute URI that is whitelisted
-in the client app settings.* and the `redirect_uri` HTTP
-GET parameter starts with `http://` instead of
-`https://` you need to add
-`SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` in the settings.
+If you are using an Okta Workforce (not Developer) tenant then use only "/oauth2" for the API URL,  do not include the "default" 
+because your tenant has only one authorization server.
+
+For production deployments where you are using HTTPS to access DefectDojo, also add/set the following.  Note that this is not a "DD_*" 
+environment variable so it is further down in the the settings file.
+
+    {{< highlight python >}}
+    SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+    {{< /highlight >}}
+
 
 ## Azure Active Directory
 
