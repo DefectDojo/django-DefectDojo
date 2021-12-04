@@ -479,7 +479,9 @@
     {% endif %}
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
-    <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
     <script type="text/javascript">
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {

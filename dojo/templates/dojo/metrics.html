@@ -647,7 +647,9 @@
     {% include "dojo/filter_js_snippet.html" %}
     <script src="{% static "justgage/raphael.min.js" %}"></script>
     <script src="{% static "justgage/justgage.js" %}"></script>
-    <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
     <script>
         $('.gaugeloop').each(function () {
             j_obj = $(this);

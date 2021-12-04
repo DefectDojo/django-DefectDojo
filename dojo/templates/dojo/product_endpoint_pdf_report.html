@@ -311,7 +311,9 @@
         <script src="{{ host }}{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
         <script src="{{ host }}{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
-    <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
     <script type="text/javascript">
         $(function () {
             var critical = 0;
