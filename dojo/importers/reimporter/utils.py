@@ -84,13 +84,6 @@ def mitigate_endpoint_status(endpoint_status, user):
     endpoint_status.save()
 
 
-def get_target_product_type_if_exists(product_type_name=None):
-    if product_type_name:
-        return get_object_or_none(Product_Type, name=product_type_name)
-    else:
-        return None
-
-
 def get_target_product_if_exists(product_name=None, product_type_name=None):
     if product_name:
         product = get_object_or_none(Product, name=product_name)
@@ -103,6 +96,13 @@ def get_target_product_if_exists(product_name=None, product_type_name=None):
                 return product
 
     return None
+
+
+def get_target_product_type_if_exists(product_type_name=None):
+    if product_type_name:
+        return get_object_or_none(Product_Type, name=product_type_name)
+    else:
+        return None
 
 
 def get_target_product_by_id_if_exists(product_id=None):
