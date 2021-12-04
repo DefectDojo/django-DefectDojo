@@ -217,22 +217,6 @@
   },
   {
     "fields": {
-      "model": "findingimage",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 35
-  },
-  {
-    "fields": {
-      "model": "findingimageaccesstoken",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 36
-  },
-  {
-    "fields": {
       "model": "dojo_user",
       "app_label": "dojo"
     },
@@ -2121,60 +2105,6 @@
     },
     "model": "auth.permission",
     "pk": 105
-  },
-  {
-    "fields": {
-      "codename": "add_findingimage",
-      "name": "Can add finding image",
-      "content_type": 35
-    },
-    "model": "auth.permission",
-    "pk": 106
-  },
-  {
-    "fields": {
-      "codename": "change_findingimage",
-      "name": "Can change finding image",
-      "content_type": 35
-    },
-    "model": "auth.permission",
-    "pk": 107
-  },
-  {
-    "fields": {
-      "codename": "delete_findingimage",
-      "name": "Can delete finding image",
-      "content_type": 35
-    },
-    "model": "auth.permission",
-    "pk": 108
-  },
-  {
-    "fields": {
-      "codename": "add_findingimageaccesstoken",
-      "name": "Can add finding image access token",
-      "content_type": 36
-    },
-    "model": "auth.permission",
-    "pk": 109
-  },
-  {
-    "fields": {
-      "codename": "change_findingimageaccesstoken",
-      "name": "Can change finding image access token",
-      "content_type": 36
-    },
-    "model": "auth.permission",
-    "pk": 110
-  },
-  {
-    "fields": {
-      "codename": "delete_findingimageaccesstoken",
-      "name": "Can delete finding image access token",
-      "content_type": 36
-    },
-    "model": "auth.permission",
-    "pk": 111
   },
   {
     "fields": {
