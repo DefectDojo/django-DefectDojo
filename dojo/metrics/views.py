@@ -441,7 +441,7 @@ def metrics(request, mtype):
     else:
         prod_type = get_authorized_product_types(Permissions.Product_Type_View)
     # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch
-    prod_type = prod_type.prefetch_related('prod_type', 'prod_type__authorized_users', 'authorized_users')
+    prod_type = prod_type.prefetch_related('prod_type')
 
     filters = dict()
     if view == 'Finding':
@@ -526,7 +526,7 @@ def simple_metrics(request):
     # count the S0, S1, S2 and S3
     # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch
     product_types = get_authorized_product_types(Permissions.Product_Type_View)
-    product_types = product_types.prefetch_related('prod_type', 'prod_type__authorized_users', 'authorized_users')
+    product_types = product_types.prefetch_related('prod_type')
     for pt in product_types:
         total_critical = []
         total_high = []
@@ -544,7 +544,7 @@ def simple_metrics(request):
                                        out_of_scope=False,
                                        date__month=now.month,
                                        date__year=now.year,
-                                       ).distinct().prefetch_related('test__engagement__product__authorized_users', 'test__engagement__product__prod_type__authorized_users')
+                                       ).distinct()
 
         for f in total:
             if f.severity == "Critical":

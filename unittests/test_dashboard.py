@@ -4,12 +4,11 @@ from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
-from django.db.models import Q
 from .dojo_test_case import DojoTestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.models import Finding, Test, Engagement, Risk_Acceptance, System_Settings, Product
+from dojo.models import Finding, Test, Engagement, Risk_Acceptance, System_Settings
 
 User = get_user_model()
 
@@ -76,23 +75,6 @@ class TestDashboard(DojoTestCase):
     def setUpTestData(cls) -> None:
         System_Settings.objects.update(enable_deduplication=False)  # The default deduplication does not work.
         Engagement.objects.all().delete()
-
-    def test_tesdata_admin(self):
-        user = User.objects.get(username="admin")
-        authorized_products_ids = Product.objects\
-            .filter(Q(authorized_users=user) | Q(prod_type__authorized_users=user))\
-            .values_list('id', flat=True)
-        self.assertNotIn(2, authorized_products_ids)
-        self.assertTrue(user.is_staff)
-
-    def test_tesdata_user1(self):
-        user = User.objects.get(username="user1")
-        authorized_products_ids = Product.objects\
-            .filter(Q(authorized_users=user) | Q(prod_type__authorized_users=user))\
-            .values_list('id', flat=True)
-        self.assertIn(2, authorized_products_ids)
-        self.assertNotIn(3, authorized_products_ids)
-        self.assertFalse(user.is_staff)
 
     def _setup_test_counters_findings(self, product_id: int):
         when = self.week_ago
