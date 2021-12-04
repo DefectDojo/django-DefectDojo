@@ -291,7 +291,7 @@ def add_product_endpoint(request):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, 'eid', 'staff')
+@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, 'eid')
 def add_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
     if request.method == 'POST':

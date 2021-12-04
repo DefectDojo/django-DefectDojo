@@ -103,8 +103,6 @@ def prefetch_for_product(prods):
                                                                                     engagement__test__finding__active=True,
                                                                                     engagement__test__finding__verified=True)))
         prefetched_prods = prefetched_prods.prefetch_related('jira_project_set__jira_instance')
-        prefetched_prods = prefetched_prods.prefetch_related('authorized_users')
-        prefetched_prods = prefetched_prods.prefetch_related('prod_type__authorized_users')
         prefetched_prods = prefetched_prods.prefetch_related('members')
         prefetched_prods = prefetched_prods.prefetch_related('prod_type__members')
         active_endpoint_query = Endpoint.objects.filter(
@@ -134,7 +132,6 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 @user_is_authorized(Product, Permissions.Product_View, 'pid')
 def view_product(request, pid):
     prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager') \
-                                      .prefetch_related('authorized_users') \
                                       .prefetch_related('members') \
                                       .prefetch_related('prod_type__members')
     prod = get_object_or_404(prod_query, id=pid)
@@ -848,8 +845,7 @@ def edit_product(request, pid):
             if not error:
                 return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
-        form = ProductForm(instance=product,
-                        initial={'auth_users': product.authorized_users.all()})
+        form = ProductForm(instance=product)
 
         if jira_enabled:
             jira_project = jira_helper.get_jira_project(product)

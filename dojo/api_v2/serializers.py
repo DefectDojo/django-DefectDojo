@@ -589,7 +589,7 @@ class ProductTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product_Type
-        exclude = ['authorized_users']
+        fields = '__all__'
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1186,7 +1186,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ['tid', 'updated', 'authorized_users']
+        exclude = ['tid', 'updated']
 
     def get_findings_count(self, obj) -> int:
         return obj.findings_count
