@@ -96,7 +96,7 @@ OKTA
 ----
 
 Okta can bet set up in a similar fashion to that of Google, using Okta as an OAuth2 provider. Upon login to 
-DefectDojo with an Okta identity token, a new DefectDojos user will be created if one does not already exist. 
+DefectDojo with an Okta identity token, a new DefectDojo user will be created if one does not already exist. 
 Okta OAuth2 identities are matched to DefectDojo users by email address, not by username. Follow along below.  
 These images are taken from an Okta Developer Edition tenant so options for Custom Authorization Servers are shown.  
 The corresponding steps for Okta Workforce tenants are mentioned in the text below and the overall procedure is the same.
