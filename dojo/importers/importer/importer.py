@@ -96,6 +96,10 @@ class DojoDefaultImporter(object):
                 item.active = active
             if item.verified:
                 item.verified = verified
+            # Only set date value of the test if they were NOT set by the parser
+            # scan_date is set to both target_start and target_end in the creat_test function
+            if item.date:
+                item.date = test.target_start
 
             item.created = now
             item.updated = now
