@@ -1,25 +1,20 @@
-import datetime
-from dojo.importers import utils as importer_utils
-from dojo.models import Test, Finding, \
-    Test_Type, \
-    BurpRawRequestResponse, \
-    Endpoint_Status, \
-    Test_Import
-from dojo.endpoint.utils import endpoint_get_or_create
-
-from dojo.utils import get_current_user, max_safe
-
-from django.core.exceptions import MultipleObjectsReturned
-from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.utils import timezone
-import dojo.notifications.helper as notifications_helper
-import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 import base64
+import datetime
 import logging
 
+import dojo.finding.helper as finding_helper
+import dojo.jira_link.helper as jira_helper
+import dojo.notifications.helper as notifications_helper
+from django.conf import settings
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.core.files.base import ContentFile
+from django.utils import timezone
+from dojo.endpoint.utils import endpoint_get_or_create
+from dojo.importers import utils as importer_utils
+from dojo.models import (BurpRawRequestResponse, Endpoint_Status, FileUpload,
+                         Finding, Test, Test_Import, Test_Type)
 from dojo.tools.factory import get_parser
+from dojo.utils import get_current_user, max_safe
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -187,6 +182,17 @@ class DojoDefaultImporter(object):
 
             if item.unsaved_tags:
                 item.tags = item.unsaved_tags
+
+            if item.unsaved_files:
+                for unsaved_file in item.unsaved_files:
+                    data = base64.b64decode(unsaved_file.get('data'))
+                    title = unsaved_file.get('title', '<No title>')
+                    file_upload = FileUpload(
+                        title=title,
+                        file=ContentFile(data, name=title)
+                    )
+                    file_upload.save()
+                    item.files.add(file_upload)
 
             new_findings.append(item)
             # to avoid pushing a finding group multiple times, we push those outside of the loop

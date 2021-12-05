@@ -1939,6 +1939,7 @@ class Finding(models.Model):
         self.unsaved_request = None
         self.unsaved_response = None
         self.unsaved_tags = None
+        self.unsaved_files = None
 
     def get_absolute_url(self):
         from django.urls import reverse
