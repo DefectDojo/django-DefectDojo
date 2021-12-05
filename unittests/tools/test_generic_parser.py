@@ -581,7 +581,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         self.assertEqual("path", endpoint.path)
 
     def test_parse_json_with_image(self):
-        file = open("dojo/unittests/scans/generic/test_with_image.json")
+        file = open("unittests/scans/generic/test_with_image.json")
         parser = GenericParser()
         findings = parser.get_findings(file, Test())
         self.assertEqual(1, len(findings))
