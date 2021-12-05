@@ -7,6 +7,7 @@ import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.core.files.base import ContentFile
 from django.utils import timezone
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.importers import utils as importer_utils
@@ -222,6 +223,17 @@ class DojoDefaultReImporter(object):
 
                 if item.unsaved_tags:
                     finding.tags = item.unsaved_tags
+
+                if item.unsaved_files:
+                    for unsaved_file in item.unsaved_files:
+                        data = base64.b64decode(unsaved_file.get('data'))
+                        title = unsaved_file.get('title', '<No title>')
+                        file_upload = FileUpload(
+                            title=title,
+                            file=ContentFile(data, name=title)
+                        )
+                        file_upload.save()
+                        item.files.add(file_upload)
 
                 # existing findings may be from before we had component_name/version fields
                 finding.component_name = finding.component_name if finding.component_name else component_name

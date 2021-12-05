@@ -579,3 +579,16 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         endpoint.clean()
         self.assertEqual("foo.bar", endpoint.host)
         self.assertEqual("path", endpoint.path)
+
+    def test_parse_json_with_image(self):
+        file = open("unittests/scans/generic/test_with_image.json")
+        parser = GenericParser()
+        findings = parser.get_findings(file, Test())
+        self.assertEqual(1, len(findings))
+
+        finding = findings[0]
+        finding.clean()
+        self.assertEqual(1, len(finding.unsaved_files))
+        image = finding.unsaved_files[0]
+        self.assertEqual("Screenshot from 2017-04-10 16-54-19.png", image.get("title"))
+        self.assertIn("data", image)
