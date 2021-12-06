@@ -3,15 +3,13 @@ from dojo.importers import utils as importer_utils
 from dojo.models import Test, Finding, \
     Test_Type, \
     BurpRawRequestResponse, \
-    Endpoint_Status, \
     Test_Import
-from dojo.endpoint.utils import endpoint_get_or_create
-
+from dojo.decorators import dojo_async_task
 from dojo.utils import get_current_user, max_safe
-
-from django.core.exceptions import MultipleObjectsReturned
+from dojo.celery import app
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core import serializers
 from django.utils import timezone
 import dojo.notifications.helper as notifications_helper
 import dojo.finding.helper as finding_helper
@@ -62,8 +60,10 @@ class DojoDefaultImporter(object):
         test.save()
         return test
 
+    @dojo_async_task
+    @app.task(ignore_result=False)
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, **kwargs):
         logger.debug('endpoints_to_add: %s', endpoints_to_add)
         new_findings = []
         items = parsed_findings
@@ -121,69 +121,16 @@ class DojoDefaultImporter(object):
                 burp_rr.clean()
                 burp_rr.save()
 
-            for endpoint in item.unsaved_endpoints:
-                try:
-                    endpoint.clean()
-                except ValidationError as e:
-                    logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
-                                   "{}".format(e))
-
-                try:
-                    ep, created = endpoint_get_or_create(
-                        protocol=endpoint.protocol,
-                        userinfo=endpoint.userinfo,
-                        host=endpoint.host,
-                        port=endpoint.port,
-                        path=endpoint.path,
-                        query=endpoint.query,
-                        fragment=endpoint.fragment,
-                        product=test.engagement.product)
-                except (MultipleObjectsReturned):
-                    pass
-
-                try:
-                    eps, created = Endpoint_Status.objects.get_or_create(
-                        finding=item,
-                        endpoint=ep)
-                except (MultipleObjectsReturned):
-                    pass
-
-                ep.endpoint_status.add(eps)
-                item.endpoint_status.add(eps)
-                item.endpoints.add(ep)
+            if settings.ASYNC_FINDING_IMPORT:
+                importer_utils.chunk_endpoints_and_disperse(item, test, item.unsaved_endpoints)
+            else:
+                importer_utils.add_endpoints_to_unsaved_finding(item, test, item.unsaved_endpoints, sync=True)
 
             if endpoints_to_add:
-                for endpoint in endpoints_to_add:
-                    logger.debug('adding endpoint %s', endpoint)
-                    # TODO Not sure what happens here, we get an endpoint model and try to create it again?
-                    try:
-                        endpoint.clean()
-                    except ValidationError as e:
-                        logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
-                                       "{}".format(e))
-
-                    try:
-                        ep, created = endpoint_get_or_create(
-                            protocol=endpoint.protocol,
-                            userinfo=endpoint.userinfo,
-                            host=endpoint.host,
-                            port=endpoint.port,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=test.engagement.product)
-                    except (MultipleObjectsReturned):
-                        pass
-                    try:
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=item,
-                            endpoint=ep)
-                    except (MultipleObjectsReturned):
-                        pass
-
-                    ep.endpoint_status.add(eps)
-                    item.endpoints.add(ep)
-                    item.endpoint_status.add(eps)
+                if settings.ASYNC_FINDING_IMPORT:
+                    importer_utils.chunk_endpoints_and_disperse(item, test, endpoints_to_add)
+                else:
+                    importer_utils.add_endpoints_to_unsaved_finding(item, test, endpoints_to_add, sync=True)
 
             if item.unsaved_tags:
                 item.tags = item.unsaved_tags
@@ -198,7 +145,9 @@ class DojoDefaultImporter(object):
         if settings.FEATURE_FINDING_GROUPS and push_to_jira:
             for finding_group in set([finding.finding_group for finding in new_findings if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
-
+        sync = kwargs.get('sync', False)
+        if not sync:
+            return [serializers.serialize('json', [finding, ]) for finding in new_findings]
         return new_findings
 
     def close_old_findings(self, test, scan_date_time, user, push_to_jira=None):
@@ -350,10 +299,34 @@ class DojoDefaultImporter(object):
             parsed_findings = parser.get_findings(scan, test)
 
         logger.debug('IMPORT_SCAN: Processing findings')
-        new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
-                                                    verified, minimum_severity=minimum_severity,
-                                                    endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                    group_by=group_by, now=now, service=service)
+        new_findings = []
+        if settings.ASYNC_FINDING_IMPORT:
+            chunk_list = importer_utils.chunk_list(parsed_findings)
+            results_list = []
+            # First kick off all the workers
+            for findings_list in chunk_list:
+                result = self.process_parsed_findings(test, findings_list, scan_type, user, active,
+                                                            verified, minimum_severity=minimum_severity,
+                                                            endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
+                                                            group_by=group_by, now=now, service=service, sync=False)
+                # Since I dont want to wait until the task is done right now, save the id
+                # So I can check on the task later
+                results_list += [result]
+            # After all tasks have been started, time to pull the results
+            logger.info('IMPORT_SCAN: Collecting Findings')
+            for results in results_list:
+                serial_new_findings = results.get()
+                new_findings += [next(serializers.deserialize("json", finding)).object for finding in serial_new_findings]
+            logger.info('IMPORT_SCAN: All Findings Collected')
+            # Indicate that the test is not complete yet as endpoints will still be rolling in.
+            test.percent_complete = 50
+            test.save()
+            importer_utils.update_test_progess(testß)
+        else:
+            new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
+                                                            verified, minimum_severity=minimum_severity,
+                                                            endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
+                                                            group_by=group_by, now=now, service=service, sync=True)
 
         closed_findings = []
         if close_old_findings:
