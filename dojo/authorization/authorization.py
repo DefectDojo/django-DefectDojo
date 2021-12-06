@@ -99,6 +99,9 @@ def user_has_global_permission(user, permission):
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return True
 
+    if user.is_staff and permission == Permissions.Product_Type_Add:
+        return True
+
     if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_global_permission(user.global_role.role.id, permission):
         return True
 
