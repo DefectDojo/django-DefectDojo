@@ -15,6 +15,7 @@ from dojo.jira_link.views import get_custom_field
 import logging
 import pprint
 import copy
+import datetime
 from django.utils.http import urlencode
 
 logger = logging.getLogger(__name__)
@@ -424,9 +425,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
-                                product_name=None, product=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
+                                product_name=None, product=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None, scan_date=None):
         payload = {
-                "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
@@ -469,13 +469,17 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if test_title is not None:
             payload['test_title'] = test_title
 
+        if scan_date is not None:
+            payload['scan_date'] = scan_date
+        else:
+            payload['scan_date'] = str(datetime.date.today())
+
         return self.import_scan(payload, expected_http_status_code)
 
     def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None,
                                   tags=None, close_old_findings=True, group_by=None, engagement_name=None,
-                                  product_name=None, product=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
+                                  product_name=None, product=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None, scan_date=None):
         payload = {
-                "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
@@ -517,6 +521,11 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if test_title is not None:
             payload['test_title'] = test_title
+
+        if scan_date is not None:
+            payload['scan_date'] = scan_date
+        else:
+            payload['scan_date'] = str(datetime.date.today())
 
         return self.reimport_scan(payload, expected_http_status_code=expected_http_status_code)
 

@@ -100,15 +100,19 @@ class DojoDefaultImporter(object):
             # Only allow this to happen if the scan_date is different than the default "today"
             #   and different than what the scan report has.
             # scan_date is set to both target_start and target_end in the creat_test function
-            if item.date == now:
+            target_start_date = test.target_start.date()
+            now_date = now.date()
+            if item.date == now_date:
                 # Parser did not set the date, so it is the default value
-                if test.target_start != now:
+                if target_start_date != now_date:
                     # Import scan_date was set, and the parser has not overwritten it
+                    logger.debug('Parser did not set date, import override it ' + str(target_start_date) + ' : ' + str(now_date))
                     item.date = test.target_start
             else:
                 # The parser has set the date already
-                if test.target_start != now:
+                if target_start_date != now_date:
                     # The date set by import scan_date should overwrite scan report date
+                    logger.debug('Parser set date, import override it ' + str(target_start_date) + ' : ' + str(now_date))
                     item.date = test.target_start
 
             item.created = now
