@@ -50,6 +50,8 @@ class ImportReimportMixin(object):
         self.zap_sample2_filename = self.scans_path + 'zap/2_zap_sample_0_and_new_endpoint.xml'
         self.zap_sample3_filename = self.scans_path + 'zap/3_zap_sampl_0_and_different_severities.xml'
 
+        self.checkmarx_sample0_filename = self.scans_path + 'checkmarx/single_finding_false_positive.xml'
+
         self.anchore_file_name = self.scans_path + 'anchore/one_vuln_many_files.json'
         self.scan_type_anchore = 'Anchore Engine Scan'
 
@@ -148,6 +150,41 @@ class ImportReimportMixin(object):
         # finding 5 have 2 endpoints => 2 status
         self.assertEqual(endpoint_status_count_before_active + 7, self.db_endpoint_status_count(mitigated=False))
         self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
+
+        # no notes expected
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
+        return test_id
+
+    # import checkmarx scan. ZAP parser will never create a finding with active/verified false
+    # checkmarx will (for false positive for example)
+    # the goal of this test is to verify the final active/verified status depending on the parser status vs the options choosen during import
+    # see code @ dojo\importers\importer\importer.py process_parsed_findings
+    # - import
+    # - active/verifed final status when parser says active=false, verified=false but the API parameters are set to active=true, verified=true
+    def test_checkmarx_scan_base_false_positive(self):
+        logger.debug('importing checkmarx with false positive')
+        endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
+        endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
+        notes_count_before = self.db_notes_count()
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import0 = self.import_scan_with_params(self.checkmarx_sample0_filename, scan_type='Checkmarx Scan')
+
+        # checkmarx_sample0_filename.xml: single finding which is false positive
+
+        test_id = import0['test']
+        # final status of finding should be inactive/not verified
+        # finding happens to be mitigated for some reason
+        findings = self.get_test_findings_api(test_id, active=False, verified=False, is_mitigated=True)
+        self.log_finding_summary_json_api(findings)
+
+        # imported count must match count in xml report
+        self.assert_finding_count_json(1, findings)
+
+        # the checkmarx scan contains 0 endpoints
+        self.assertEqual(endpoint_count_before, self.db_endpoint_count())
 
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
