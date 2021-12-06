@@ -11,7 +11,7 @@ weight: 2
 DefectDojo\'s API is created using [Django Rest
 Framework](http://www.django-rest-framework.org/). The documentation of
 each endpoint is available within each DefectDojo installation at
-`/api/v2/doc/` and can be accessed by choosing the API v2
+[`/api/v2/doc/`](https://demo.defectdojo.org/api/v2/) and can be accessed by choosing the API v2
 Docs link on the user drop down menu in the header.
 
 ![image](../../images/api_v2_1.png)
@@ -20,21 +20,20 @@ The documentation is generated using [Django Rest Framework
 Yet Another Swagger Generator](https://github.com/axnsan12/drf-yasg/), and is
 interactive. On the top of API v2 docs is a link that generates an OpenAPI v2 spec.
 
+As a preparation to move to OpenAPIv3, we have added an compatible spec and documentation at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/?docExpansion=none)
+
 To interact with the documentation, a valid Authorization header value
 is needed. Visit the `/api/v2/key/` view to generate your
 API Key (`Token <api_key>`) and copy the header value provided.
 
 ![image](../../images/api_v2_2.png)
 
-Return to the `/api/v2/doc/` and click on
-`Authorize` to open the Authorization form. Paste your key in
-the form field provided and click on the `Authorize` button. Your
-authorization header value will be captured and used for all requests.
-
 Each section allows you to make calls to the API and view the Request
 URL, Response Body, Response Code and Response Headers.
 
 ![image](../../images/api_v2_3.png)
+
+If you're logged in to the Defect Dojo web UI, you do not need to provide the authorization token.
 
 Authentication
 --------------
