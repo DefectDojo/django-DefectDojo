@@ -404,7 +404,7 @@ class ImportScanForm(forms.Form):
         label="Choose report file",
         required=False)
 
-    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get mitigated when importing."
+    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing."
                                                         "This affects the whole engagement/product depending on your deduplication scope.",
                                             required=False, initial=False)
 
@@ -473,7 +473,7 @@ class ReImportScanForm(forms.Form):
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx, .txt, .sarif"}),
         label="Choose report file",
         required=False)
-    close_old_findings = forms.BooleanField(help_text="Select if old findings get mitigated when importing.",
+    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing.",
                                             required=False, initial=True)
     version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")

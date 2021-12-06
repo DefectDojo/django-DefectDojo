@@ -1896,8 +1896,12 @@ class ImportScanView(mixins.CreateModelMixin,
     - Create an Engagement inside the product
     - Provide `product_name`
     - Provide `engagement_name`
+    - Optionally provide `product_type_name`
 
     In this scenario Defect Dojo will look up the engagment by the provided details.
+
+    When using names you can let the importer automatically create Engagements, Products and Product_Types
+    by using `auto_create_context=True`.
     """
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
@@ -1905,10 +1909,13 @@ class ImportScanView(mixins.CreateModelMixin,
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        _, _, _, engagement_id, engagement_name, product_name = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
-        jira_project = jira_helper.get_jira_project(engagement)
+
+        # when using auto_create_context, the engagement or product may not have been created yet
+        jira_driver = engagement if engagement else product if product else None
+        jira_project = jira_helper.get_jira_project(jira_driver) if jira_driver else None
 
         push_to_jira = serializer.validated_data.get('push_to_jira')
         if get_system_setting('enable_jira') and jira_project:
@@ -2038,11 +2045,14 @@ class ReImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        test_id, test_title, scan_type, _, engagement_name, product_name = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
-        jira_project = jira_helper.get_jira_project(test)
+
+        # when using auto_create_context, the engagement or product may not have been created yet
+        jira_driver = test if test else engagement if engagement else product if product else None
+        jira_project = jira_helper.get_jira_project(jira_driver) if jira_driver else None
 
         push_to_jira = serializer.validated_data.get('push_to_jira')
         if get_system_setting('enable_jira') and jira_project:
