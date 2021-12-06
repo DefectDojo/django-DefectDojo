@@ -2035,6 +2035,9 @@ class ReImportScanView(mixins.CreateModelMixin,
 
     In this scenario Defect Dojo will look up the test by the provided details.
     If no `test_title` is provided, the latest test inside the engagement will be chosen based on scan_type.
+    
+    When using names you can let the importer automatically create Engagements, Products and Product_Types
+    by using `auto_create_context=True`.    
     """
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
