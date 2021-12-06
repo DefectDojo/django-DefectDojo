@@ -56,6 +56,11 @@ update the source code first)
 
 Replace the first step above with this one: `docker-compose build`
 
+godojo installations
+--------------------
+
+If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
+
 ## Upgrading to DefectDojo Version 2.5.x.
 
 Legacy authorization has been completely removed with version 2.5.0. This includes removal of the migration of users
