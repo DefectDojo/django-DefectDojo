@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 # test methods to be used both by API Test and UI Test
 class EndpointMetaImportMixin(object):
     def __init__(self, *args, **kwargs):
-        self.meta_import_full = get_unit_tests_path() + '/endpoint_meta_import/full_endpoint_meta_import.csv'
-        self.meta_import_no_hostname = get_unit_tests_path() + '/endpoint_meta_import/no_hostname_endpoint_meta_import.csv'
-        self.meta_import_updated_added = get_unit_tests_path() + '/endpoint_meta_import/updated_added_endpoint_meta_import.csv'
-        self.meta_import_updated_removed = get_unit_tests_path() + '/endpoint_meta_import/updated_removed_endpoint_meta_import.csv'
-        self.meta_import_updated_changed = get_unit_tests_path() + '/endpoint_meta_import/updated_changed_endpoint_meta_import.csv'
+        self.meta_import_full = 'endpoint_meta_import/full_endpoint_meta_import.csv'
+        self.meta_import_no_hostname = 'endpoint_meta_import/no_hostname_endpoint_meta_import.csv'
+        self.meta_import_updated_added = 'endpoint_meta_import/updated_added_endpoint_meta_import.csv'
+        self.meta_import_updated_removed = 'endpoint_meta_import/updated_removed_endpoint_meta_import.csv'
+        self.meta_import_updated_changed = 'endpoint_meta_import/updated_changed_endpoint_meta_import.csv'
         self.updated_tag_host = 'feedback.internal.google.com'
 
     def test_endpoint_meta_import_endpoint_create_tag_create_meta_create(self):
@@ -211,7 +211,7 @@ class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
             "create_endpoints": create_endpoints,
             "create_tags": create_tags,
             "create_dojo_meta": create_dojo_meta,
-            "file": open(filename),
+            "file": open(get_unit_tests_path() + '/' + filename),
         }
 
         return self.endpoint_meta_import_ui(product, payload)
