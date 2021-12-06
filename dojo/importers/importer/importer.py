@@ -341,7 +341,7 @@ class DojoDefaultImporter(object):
             # Indicate that the test is not complete yet as endpoints will still be rolling in.
             test.percent_complete = 50
             test.save()
-            importer_utils.update_test_progess(test)
+            importer_utils.update_test_progress(test)
         else:
             new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                             verified, minimum_severity=minimum_severity,

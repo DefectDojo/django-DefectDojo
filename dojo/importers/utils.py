@@ -157,6 +157,6 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
 # and after endpoint task, so this should only run after all the other ones are done
 @dojo_async_task
 @app.task()
-def update_test_progess(test):
+def update_test_progress(test):
     test.percent_complete = 100
     test.save()
