@@ -267,31 +267,6 @@ class ImportReimportMixin(object):
 
         return test_id
 
-    # import zap scan, testing:
-    # - import
-    # - scan_date propogates to findings
-    def test_zap_scan_base_scan_date(self):
-        logger.debug('importing original zap xml report')
-        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import0 = self.import_scan_with_params(self.zap_sample0_filename, active=False, verified=False)
-
-        # 0_zap_sample.xml: basic file with 4 out of 5 findings reported, zap4 absent
-        # 1 inactive
-        # 2 inactive
-        # 3 inactive
-        # 4 absent
-        # 5 inactive
-
-        test_id = import0['test']
-        findings = self.get_test_findings_api(test_id, active=False, verified=False)
-        self.log_finding_summary_json_api(findings)
-
-        # Get the date
-        date = findings['results'][0]['date']
-        self.assertEqual(date, '2020-06-04')
-
-        return test_id
-
     # Test re-import with unique_id_from_tool algorithm
     # import sonar scan with detailed parser, testing:
     # - import
