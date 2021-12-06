@@ -11,7 +11,7 @@ vulnerability management platform.
 DefectDojo allows you to manage your application security program, maintain
 product and application information, triage vulnerabilities and
 push findings to systems like JIRA and Slack. DefectDojo enriches and
-refines vulnerability data using a number of heuristic algrothims that
+refines vulnerability data using a number of heuristic algorithms that
 improve with the more you use the platform.
 
 ## Demo
