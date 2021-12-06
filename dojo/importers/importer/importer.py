@@ -81,7 +81,17 @@ class DojoDefaultImporter(object):
             item.last_reviewed = now
             item.last_reviewed_by = user if user else get_current_user
 
-            # Only set active/verified flags if they were NOT set by default value(True)
+            logger.debug('process_parsed_findings: active from report: %s, verified from report: %s', item.active, item.verified)
+            # active, verified parameters = parameters from the gui or api call.
+            # item.active, item.verified = values from the report / the parser
+            # if either value of active (from the parser or from the api/gui) is false, final status is inactive
+            #   else final status is active
+            # if either value of verified (from the parser or from the api/gui) is false, final status is not verified
+            #   else final status is verified
+            # Note that:
+            #   - the API (active/verified parameters) values default to True if not specified
+            #   - the parser values default to true if not set by the parser (as per the default value in models.py)
+            #   - there is no "not specified" in the GUI (not ticked means not active/not verified)
             if item.active:
                 item.active = active
             if item.verified:

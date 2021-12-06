@@ -114,12 +114,17 @@ class CheckmarxParser(object):
         false_p = result.get('FalsePositive')
         sev = result.get('Severity')
         aggregateKeys = "{}{}{}".format(cwe, sev, sinkFilename)
+        state = result.get('state')
+        active = self.isActive(state)
+        verified = self.isVerified(state)
 
         if not(aggregateKeys in dupes):
             find = Finding(title=title,
                            cwe=int(cwe),
                            test=self.test,
-                           # this may be overwritten later by another member of the aggregate, see "else" below
+                           # active, verified and false_p may be overwritten later by another member of the aggregate, see "else" below
+                           active=active,
+                           verified=verified,
                            false_p=(false_p == "True"),
                            # Concatenates the query information with this specific finding information
                            description=findingdetail + description,
@@ -146,6 +151,12 @@ class CheckmarxParser(object):
             # If at least one of the findings in the aggregate is exploitable, the defectdojo finding should not be "false positive"
             if(false_p == "False"):
                 dupes[aggregateKeys].false_p = False
+            # If at least one of the findings in the aggregate is active, the defectdojo finding should be active
+            if(active):
+                dupes[aggregateKeys].active = True
+            # If at least one of the findings in the aggregate is verified, the defectdojo finding should be verified
+            if(verified):
+                dupes[aggregateKeys].verified = True
 
     # Iterate over function calls / assignments to extract finding description and last pathnode
     def get_description_file_name_aggregated(self, query, result):
@@ -171,6 +182,7 @@ class CheckmarxParser(object):
         title = ''
         sev = result.get('Severity')
         title = query.get('name').replace('_', ' ')
+        state = result.get('state')
         # Loop over <Path> (there should be only one)
         paths = result.findall('Path')
         if(len(paths)) > 1:
@@ -203,6 +215,8 @@ class CheckmarxParser(object):
             find = Finding(title=title,
                        cwe=int(cwe),
                        test=self.test,
+                       active=self.isActive(state),
+                       verified=self.isVerified(state),
                        false_p=result.get('FalsePositive') == "True",
                        description=findingdetail,
                        severity=sev,
@@ -252,3 +266,15 @@ class CheckmarxParser(object):
         if query.get('categories') is not None:
             categories = query.get('categories')
         return name, cwe, categories, queryId
+
+    # Map checkmarx report state to active/inactive status
+    def isActive(self, state):
+        # To verify, Confirmed, Urgent, Proposed not exploitable
+        activeStates = ["0", "2", "3", "4"]
+        return state in activeStates
+
+    # Map checkmarx report state to verified/unverified status
+    def isVerified(self, state):
+        # Confirmed, urgent
+        verifiedStates = ["2", "3"]
+        return state in verifiedStates
