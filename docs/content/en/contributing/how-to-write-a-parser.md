@@ -311,4 +311,4 @@ If you want to take a look at previous parsers that are now part of DefectDojo, 
 
 ## Update the import page documentation
 
-Please update [`docs/content/en/integrations/import.md`] with the details of your new parser.
+Please update [`docs/content/en/integrations/parsers.md`] with the details of your new parser.

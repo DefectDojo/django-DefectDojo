@@ -1,5 +1,5 @@
 ---
-title: "Import scan reports"
+title: "Supported reports"
 description: "DefectDojo has the ability to import scan reports from a large number of security tools."
 draft: false
 weight: 1
@@ -66,7 +66,7 @@ JS file in scout2-report/inc-awsconfig/aws\_config.js.
 
 {{% alert title="Warning" color="warning" %}}
 AWS Scout2 Scanner is deprecated and has been replaced with ScoutSuite (https://github.com/nccgroup/ScoutSuite) upstream.
-Please switch to the new parser for ScoutSuite. 
+Please switch to the new parser for ScoutSuite.
 {{% /alert %}}
 
 {{% alert title="Warning" color="warning" %}}
@@ -351,11 +351,11 @@ Import report in JSON generated with -j option
 
 ### Dependency Check
 
-OWASP Dependency Check output can be imported in Xml format. This parser ingests the vulnerable dependencies and inherits the suppressions. 
+OWASP Dependency Check output can be imported in Xml format. This parser ingests the vulnerable dependencies and inherits the suppressions.
 
-* Suppressed vulnerabilities are tagged with the tag: `suppressed`. 
+* Suppressed vulnerabilities are tagged with the tag: `suppressed`.
 * Suppressed vulnerabilities are marked as inactive, but not as mitigated.
-* If the suppression is missing any `<notes>` tag, it tags them as `no_suppression_document`. 
+* If the suppression is missing any `<notes>` tag, it tags them as `no_suppression_document`.
 * Related vulnerable dependencies are tagged with `related` tag.
 
 ### Dependency Track
@@ -395,21 +395,21 @@ Import Findings from XML file format.
 Import Generic findings in CSV or JSON format.
 
 Attributes supported for CSV:
- - Title
- - Description
- - Date
- - Severity
- - Duplicate ('TRUE', 'FALSE')
- - Active ('TRUE', 'FALSE')
- - Mitigation
- - Impact
- - References
- - Verified ('TRUE', 'FALSE')
- - FalsePositive
- - CVE
- - CweId
- - CVSSV3
- - Url
+- Date: Date of the finding in mm/dd/yyyy format.
+- Title: Title of the finding
+- CweId: Cwe identifier, must be an integer value.
+- Url: Url associated with the finding.
+- Severity: Severity of the finding. Must be one of Info, Low, Medium, High, or Critical.
+- Description: Description of the finding. Can be multiple lines if enclosed in double quotes.
+- Mitigation: Possible Mitigations for the finding. Can be multiple lines if enclosed in double quotes.
+- Impact: Detailed impact of the finding. Can be multiple lines if enclosed in double quotes.
+- References: References associated with the finding. Can be multiple lines if enclosed in double quotes.
+- Active: Indicator if the finding is active. Must be empty, TRUE or FALSE
+- Verified: Indicator if the finding has been verified. Must be empty, TRUE, or FALSE
+- FalsePositive: Indicator if the finding is a false positive. Must be TRUE, or FALSE.
+- Duplicate:Indicator if the finding is a duplicate. Must be TRUE, or FALSE
+
+The CSV expects a header row with the names of the attributes.
 
 Example of JSON format:
 
@@ -650,7 +650,7 @@ Import findings from Harbor registry container scan:
 Import findings from Horusec scan.
 
 ```shell
-./horusec_linux_x64 start -O=report.json -o json -i="tests/" 
+./horusec_linux_x64 start -O=report.json -o json -i="tests/"
 ```
 
 References:
@@ -1117,69 +1117,3 @@ Import Yarn Audit scan report in JSON format. Use something like `yarn audit --j
 ### Zed Attack Proxy
 
 ZAP XML report format.
-
-## Import and reimport in DefectDojo
-
-The importers analyze each report and create new Findings for each item
-reported. DefectDojo collapses duplicate Findings by capturing the
-individual hosts vulnerable.
-
-![Import Form](../../images/imp_1.png)
-
-Additionally, DefectDojo allows for re-imports of previously uploaded
-reports. DefectDojo will attempt to capture the deltas between the
-original and new import and automatically add or mitigate findings as
-appropriate.
-
-![Re-Import Form](../../images/imp_2.png)
-
-## Bulk import via CSV
-
-Bulk import of findings can be done using a CSV file with the following
-column headers:
-
-Date
-:   Date of the finding in mm/dd/yyyy format.
-
-Title:
-:   Title of the finding
-
-CweId
-:   Cwe identifier, must be an integer value.
-
-Url:
-:   Url associated with the finding.
-
-Severity:
-:   Severity of the finding. Must be one of Info, Low, Medium, High, or
-    Critical.
-
-Description:
-:   Description of the finding. Can be multiple lines if enclosed in
-    double quotes.
-
-Mitigation:
-:   Possible Mitigations for the finding. Can be multiple lines if
-    enclosed in double quotes.
-
-Impact:
-:   Detailed impact of the finding. Can be multiple lines if enclosed in
-    double quotes.
-
-References:
-:   References associated with the finding. Can be multiple lines if
-    enclosed in double quotes.
-
-Active:
-:   Indicator if the finding is active. Must be empty, True or False
-
-Verified:
-:   Indicator if the finding has been verified. Must be empty, True, or
-    False
-
-FalsePositive:
-:   Indicator if the finding is a false positive. Must be True, or
-    False.
-
-Duplicate:
-:   Indicator if the finding is a duplicate. Must be True, or False.

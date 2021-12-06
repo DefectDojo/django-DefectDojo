@@ -1,5 +1,7 @@
+from datetime import timedelta
+from crum import get_current_user
 from django.conf import settings
-from dojo.models import Engagement, Finding, Q, Product, Test
+from dojo.models import Engagement, Finding, Q, Product, Product_Member, Product_Type, Product_Type_Member, Role, Test
 from django.utils import timezone
 import logging
 from dojo.utils import get_last_object_or_none, get_object_or_none
@@ -82,9 +84,23 @@ def mitigate_endpoint_status(endpoint_status, user):
     endpoint_status.save()
 
 
-def get_target_product_if_exists(product_name=None):
+def get_target_product_if_exists(product_name=None, product_type_name=None):
     if product_name:
-        return get_object_or_none(Product, name=product_name)
+        product = get_object_or_none(Product, name=product_name)
+        if product:
+            # product type name must match if provided
+            if product_type_name:
+                if product.product_type.name == product_type_name:
+                    return product
+            else:
+                return product
+
+    return None
+
+
+def get_target_product_type_if_exists(product_type_name=None):
+    if product_type_name:
+        return get_object_or_none(Product_Type, name=product_type_name)
     else:
         return None
 
@@ -107,11 +123,17 @@ def get_target_engagement_if_exists(engagement_id=None, engagement_name=None, pr
         # if there's no product, then for sure there's no engagement either
         return None
 
+    # engagement name is not unique unfortunately
     engagement = get_last_object_or_none(Engagement, product=product, name=engagement_name)
     return engagement
 
 
 def get_target_test_if_exists(test_id=None, test_title=None, scan_type=None, engagement=None):
+    """
+    Retrieves the target test to reimport. This can be as simple as looking up the test via the `test_id` parameter.
+    If there is no `test_id` provided, we lookup the latest test inside the provided engagement that satisfies
+    the provided scan_type and test_title.
+    """
     if test_id:
         test = get_object_or_none(Test, pk=test_id)
         logger.debug('Using existing Test by id: %s', test_id)
@@ -124,3 +146,48 @@ def get_target_test_if_exists(test_id=None, test_title=None, scan_type=None, eng
         return get_last_object_or_none(Test, engagement=engagement, title=test_title, scan_type=scan_type)
 
     return get_last_object_or_none(Test, engagement=engagement, scan_type=scan_type)
+
+
+def get_or_create_product(product_name=None, product_type_name=None, auto_create_context=None):
+    product = get_target_product_if_exists(product_name, product_type_name)
+    if product:
+        return product
+
+    if not auto_create_context:
+        raise ValueError('auto_create_context not True, unable to create non-existing product')
+
+    product_type, created = Product_Type.objects.get_or_create(name=product_type_name)
+    if created:
+        member = Product_Type_Member()
+        member.user = get_current_user()
+        member.product_type = product_type
+        member.role = Role.objects.get(is_owner=True)
+        member.save()
+
+    product = Product.objects.create(name=product_name, prod_type=product_type)
+    member = Product_Member()
+    member.user = get_current_user()
+    member.product = product
+    member.role = Role.objects.get(is_owner=True)
+    member.save()
+
+    return product
+
+
+def get_or_create_engagement(engagement_id=None, engagement_name=None, product_name=None, product_type_name=None, auto_create_context=None):
+    product = get_target_product_if_exists(product_name, product_type_name)
+    engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
+    if engagement:
+        return engagement
+
+    product = get_or_create_product(product_name, product_type_name, auto_create_context)
+
+    if not auto_create_context:
+        raise ValueError('auto_create_context not True, unable to create non-existing engagement')
+
+    if not product:
+        raise ValueError('no product, unable to create engagement')
+
+    engagement = Engagement.objects.create(engagement_type="CI/CD", name=engagement_name, product=product, lead=get_current_user(), target_start=timezone.now().date(), target_end=(timezone.now() + timedelta(days=365)).date())
+
+    return engagement
