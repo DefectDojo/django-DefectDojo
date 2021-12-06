@@ -12,7 +12,6 @@ from django.core.exceptions import ValidationError
 from django.core import serializers
 from django.core.files.base import ContentFile
 from django.utils import timezone
-from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.importers import utils as importer_utils
 from dojo.models import (BurpRawRequestResponse, Finding,
                          Notes, Test_Import)
@@ -44,7 +43,7 @@ class DojoDefaultReImporter(object):
         logger.debug('starting reimport of %i items.', len(items) if items else 0)
         from dojo.importers.reimporter.utils import (
             get_deduplication_algorithm_from_conf,
-            match_new_finding_to_existing_finding, 
+            match_new_finding_to_existing_finding,
             update_endpoint_status,
             reactivate_endpoint_status)
         deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)

@@ -1,33 +1,22 @@
 import base64
 import datetime
 from dojo.importers import utils as importer_utils
-from dojo.models import Test, Finding, \
-    Test_Type, \
-    BurpRawRequestResponse, \
-    Test_Import
 from dojo.decorators import dojo_async_task
 from dojo.utils import get_current_user, max_safe
 from dojo.celery import app
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core import serializers
-from django.utils import timezone
-import dojo.notifications.helper as notifications_helper
-import logging
-
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from django.conf import settings
-from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.core.files.base import ContentFile
 from django.utils import timezone
-from dojo.endpoint.utils import endpoint_get_or_create
-from dojo.importers import utils as importer_utils
-from dojo.models import (BurpRawRequestResponse, Endpoint_Status, FileUpload,
+from dojo.models import (BurpRawRequestResponse, FileUpload,
                          Finding, Test, Test_Import, Test_Type)
 from dojo.tools.factory import get_parser
-from dojo.utils import get_current_user, max_safe
+import logging
+
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

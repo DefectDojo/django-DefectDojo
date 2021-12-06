@@ -3,14 +3,13 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
 from dojo.decorators import dojo_async_task
 from dojo.celery import app
-from celery.result import AsyncResult
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.utils import max_safe
 from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, \
     IMPORT_REACTIVATED_FINDING, Test_Import, Test_Import_Finding_Action, \
     Endpoint_Status
 import logging
-import time
+
 
 logger = logging.getLogger(__name__)
 
