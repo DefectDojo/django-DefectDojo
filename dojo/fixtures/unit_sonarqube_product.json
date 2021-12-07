@@ -8,7 +8,8 @@
       "critical_product": true,
       "key_product": false,
       "updated": null,
-      "created": null
+      "created": null,
+      "authorized_users": []
     }
   },
   {
@@ -35,6 +36,7 @@
       "internet_accessible": false,
       "enable_simple_risk_acceptance": false,
       "enable_full_risk_acceptance": true,
+      "authorized_users": [],
       "regulations": [],
       "tags": []
     }

@@ -200,7 +200,7 @@ def engagements_all(request):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'change')
 def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
     is_ci_cd = engagement.engagement_type == "CI/CD"
@@ -278,7 +278,7 @@ def edit_engagement(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Delete, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Delete, 'eid', 'delete')
 def delete_engagement(request, eid):
     engagement = get_object_or_404(Engagement, pk=eid)
     product = engagement.product
@@ -319,7 +319,7 @@ def delete_engagement(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
 def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     tests = eng.test_set.all().order_by('test_type__name', '-updated')
@@ -355,7 +355,11 @@ def view_engagement(request, eid):
     form = DoneForm()
     files = eng.files.all()
     if request.method == 'POST':
-        user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
         eng.progress = 'check_list'
         eng.save()
 
@@ -439,7 +443,7 @@ def prefetch_for_view_tests(tests):
     return prefetched
 
 
-@user_is_authorized(Engagement, Permissions.Test_Add, 'eid')
+@user_is_authorized(Engagement, Permissions.Test_Add, 'eid', 'staff')
 def add_tests(request, eid):
     eng = Engagement.objects.get(id=eid)
     cred_form = CredMappingForm()
@@ -534,7 +538,11 @@ def import_scan_results(request, eid=None, pid=None):
     elif not user.is_staff:
         raise PermissionDenied
 
-    user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
+    if settings.FEATURE_AUTHORIZATION_V2:
+        user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
+    else:
+        if not user_is_authorized(user, 'staff', engagement_or_product):
+            raise PermissionDenied
 
     push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
 
@@ -673,7 +681,7 @@ def import_scan_results(request, eid=None, pid=None):
          })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     close_engagement(eng)
@@ -689,7 +697,7 @@ def close_eng(request, eid):
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
 def reopen_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     reopen_engagement(eng)
@@ -713,7 +721,7 @@ method to complete checklists from the engagement view
 """
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
 def complete_checklist(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     try:
@@ -765,7 +773,7 @@ def complete_checklist(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     finding = None
@@ -835,12 +843,12 @@ def add_risk_acceptance(request, eid, fid=None):
                   })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
 def view_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def edit_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
 
@@ -1004,7 +1012,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1014,7 +1022,7 @@ def expire_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1027,7 +1035,7 @@ def reinstate_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1042,7 +1050,7 @@ def delete_risk_acceptance(request, eid, raid):
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
 def download_risk_acceptance(request, eid, raid):
     import mimetypes
 
@@ -1068,7 +1076,7 @@ under media folder
 """
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
 def upload_threatmodel(request, eid):
     eng = Engagement.objects.get(id=eid)
     add_breadcrumb(
@@ -1101,14 +1109,14 @@ def upload_threatmodel(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'staff')
 def view_threatmodel(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
     response = FileResponse(open(eng.tmodel_path, 'rb'))
     return response
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'staff')
 def engagement_ics(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     start_date = datetime.combine(eng.target_start, datetime.min.time())

@@ -1,17 +1,17 @@
 dependencies:
   - name: mysql
-    version: 8.8.12
-    repository: "@bitnami"
+    version: 1.6.9
+    repository: "@stable"
     condition: mysql.enabled
   - name: postgresql
-    version: 10.13.4
+    version: 10.3.5
     repository: "@bitnami"
     condition: postgresql.enabled
   - name: rabbitmq
-    version: 8.24.2
+    version: 8.7.0
     repository: "@bitnami"
     condition: rabbitmq.enabled
   - name: redis
-    version: 15.5.4
+    version: 12.0.0
     repository: "@bitnami"
     condition: redis.enabled
