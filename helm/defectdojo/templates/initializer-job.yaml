@@ -1,4 +1,3 @@
-{{- if .Values.initializer.run  }}
 {{- $fullName := include "defectdojo.fullname" . -}}
 apiVersion: batch/v1
 kind: Job
@@ -18,10 +17,6 @@ spec:
         defectdojo.org/component: initializer
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-      annotations:
-      {{- with .Values.initializer.annotations }}
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
     spec:
       serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
@@ -41,7 +36,7 @@ spec:
         {{- if eq .Values.database "postgresql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
         {{- else if eq .Values.database "mysql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.master.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
         {{- end }}
         {{- if .Values.cloudsql.enable_iam_login }}
         - "-enable_iam_login"
@@ -72,8 +67,8 @@ spec:
               name: {{ .Values.postgresql.existingSecret }}
               key: {{ .Values.postgresql.secretKey }}
               {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.auth.existingSecret }}
-              key: {{ .Values.mysql.auth.secretKey }}
+              name: {{ .Values.mysql.existingSecret }}
+              key: {{ .Values.mysql.secretKey }}
               {{- end }}
         resources:
           {{- toYaml .Values.initializer.resources | nindent 10 }}
@@ -91,4 +86,3 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
   backoffLimit: 1
-{{- end }}

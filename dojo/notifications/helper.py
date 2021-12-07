@@ -260,9 +260,9 @@ def send_mail_notification(event, user=None, *args, **kwargs):
         email = EmailMessage(
             subject,
             create_notification_message(event, user, 'mail', *args, **kwargs),
-            get_system_setting('email_from'),
+            get_system_setting('mail_notifications_from'),
             [address],
-            headers={"From": "{}".format(get_system_setting('email_from'))}
+            headers={"From": "{}".format(get_system_setting('mail_notifications_from'))}
         )
         email.content_subtype = 'html'
         logger.debug('sending email alert')

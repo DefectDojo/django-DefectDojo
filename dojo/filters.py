@@ -944,6 +944,7 @@ class ApiProductFilter(DojoFilter):
     team_manager = NumberInFilter(field_name='team_manager', lookup_expr='in')
     prod_type = NumberInFilter(field_name='prod_type', lookup_expr='in')
     tid = NumberInFilter(field_name='tid', lookup_expr='in')
+    authorized_users = NumberInFilter(field_name='authorized_users', lookup_expr='in')
     prod_numeric_grade = NumberInFilter(field_name='prod_numeric_grade', lookup_expr='in')
     user_records = NumberInFilter(field_name='user_records', lookup_expr='in')
     regulations = NumberInFilter(field_name='regulations', lookup_expr='in')
@@ -2092,7 +2093,10 @@ class ProductTypeFilter(DojoFilter):
 
     class Meta:
         model = Product_Type
-        exclude = []
+        if settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['authorized_users']
+        else:
+            exclude = ['members', 'authorization_groups']
         include = ('name',)
 
 
