@@ -85,6 +85,22 @@ You can execute the following command to see the configuration:
 `docker-compose exec celerybeat bash -c "celery -A dojo inspect stats"`
 and see what is in effect.
 
+###### Asynchronous Imports
+
+Import and Re-Import can also be configured to handle uploads asynchronously to aid in 
+importing especially large files. It works by batching Findings and Endpoints by a 
+configurable amount. Each batch will be be processed in seperate celery tasks.
+
+The following variables have to be used.
+
+-   `DD_ASYNC_FINDING_IMPORT` defaults to False
+-   `DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE` deafults to 100
+
+When using asynchronous imports with dynamic scanners, Endpoints will continue to "trickle" in
+even after the import has returned a successful respsonse. This is becasue processing continues 
+to occur after the Findings have already been imported.
+
+To determine if an import has been fully completed, please see the progress bar in the appropriate test.
 
 ## Monitoring
 
