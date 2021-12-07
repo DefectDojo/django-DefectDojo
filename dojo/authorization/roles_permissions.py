@@ -33,6 +33,7 @@ class Permissions(IntEnum):
     Product_Type_Member_Add_Owner = 1005
     Product_Type_Edit = 1006
     Product_Type_Delete = 1007
+    Product_Type_Add = 1008
 
     Product_View = 1102
     Product_Member_Delete = 1103
@@ -446,5 +447,19 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_Add,
             Permissions.Product_API_Scan_Configuration_Edit,
             Permissions.Product_API_Scan_Configuration_Delete
+        }
+    }
+
+
+def get_global_roles_with_permissions():
+    """
+    Extra permissions for global roles, on top of the permissions granted to the "normal" roles above.
+    """
+    return {
+        Roles.Maintainer: {
+            Permissions.Product_Type_Add
+        },
+        Roles.Owner: {
+            Permissions.Product_Type_Add
         }
     }

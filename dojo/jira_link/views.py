@@ -25,7 +25,7 @@ import dojo.jira_link.helper as jira_helper
 logger = logging.getLogger(__name__)
 
 
-# for examples of incoming json, see the unit tests for the webhook: https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/unittests/test_jira_webhook.py
+# for examples of incoming json, see the unit tests for the webhook: https://github.com/DefectDojo/django-DefectDojo/blob/master/unittests/test_jira_webhook.py
 # or the officials docs (which are not always clear): https://developer.atlassian.com/server/jira/platform/webhooks/
 @csrf_exempt
 @require_POST
@@ -249,6 +249,7 @@ def express_new_jira(request):
                 issue_id = jform.cleaned_data.get('issue_key')
                 key_url = jira_server.strip('/') + '/rest/api/latest/issue/' + issue_id + '/transitions?expand=transitions.fields'
                 response = jira._session.get(key_url).json()
+                logger.debug('Retrieved JIRA issue succesfully')
                 open_key = close_key = None
                 for node in response['transitions']:
                     if node['to']['statusCategory']['name'] == 'To Do':
@@ -259,7 +260,7 @@ def express_new_jira(request):
                 logger.exception(e)  # already logged in jira_helper
                 messages.add_message(request,
                                     messages.ERROR,
-                                    'Unable to find Open/Close ID\'s. They will need to be found manually',
+                                    'Unable to find Open/Close ID\'s (invalid issue key specified?). They will need to be found manually',
                                     extra_tags='alert-danger')
                 return render(request, 'dojo/new_jira.html',
                                         {'jform': jform})
