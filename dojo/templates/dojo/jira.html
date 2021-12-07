@@ -76,7 +76,6 @@
                                         <i class="fa fa-trash"></i>
                                         Delete
                                     </a>
-                                    </a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -89,6 +88,52 @@
             {% else %}
                 <p class="text-center">No JIRA instances found.</p>
             {% endif %}
+
+            {% if jira_instances_auth %}
+
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=jira_instances_auth page_size=True %}
+                </div>
+                <div class="panel panel-default table-responsive">
+                    <table id="products"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>URL</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for jira_instance_auth in jira_instances_auth %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'edit_jira_oauth' jira_instance_auth.id %}"><b>{{ jira_instance_auth.configuration_name }}</b></a>
+                            </td>
+                            <td>
+                                <a href="{{ jira_instance_auth.url }}">{{ jira_instance_auth.url }}
+                                <i class="fa fa-external-link" aria-hidden="true"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{% url 'edit_jira_oauth' jira_instance_auth.id %}" class="btn btn-sm btn-success">
+                                    <i class="fa fa-pencil"></i>
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=jira_instances_auth page_size=True %}
+                </div>
+            {% else %}
+                <p class="text-center">No JIRA instances OAUTH found.</p>
+            {% endif %}
+
+
         </div>
     </div>
 {% endblock %}

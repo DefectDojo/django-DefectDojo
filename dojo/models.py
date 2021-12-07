@@ -2848,43 +2848,43 @@ class GITHUB_PKey(models.Model):
     def __str__(self):
         return self.product.name + " | " + self.git_project
 
-class JIRA_Instance_OAUTH(models.Model):
-    configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
-    url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For more information how to configure Jira, read the DefectDojo documentation.")
-    access_token = models.CharField(max_length=2000)
-    access_token_secret = models.CharField(max_length=2000)
-    consumer_key = models.CharField(max_length=2000)
-    
-
-    accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to an Accepted Finding")
-    false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to a False Positive Finding")
-    global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Globally send SLA notifications as comment?", help_text="This setting can be overidden at the Product level")
-
-    @property
-    def accepted_resolutions(self):
-        return [m.strip() for m in (self.accepted_mapping_resolution or '').split(',')]
-
-    @property
-    def false_positive_resolutions(self):
-        return [m.strip() for m in (self.false_positive_mapping_resolution or '').split(',')]
-
-    def __str__(self):
-        return self.configuration_name + " | " + self.url + " | " + self.username
-
-    def get_priority(self, status):
-        if status == 'Info':
-            return self.info_mapping_severity
-        elif status == 'Low':
-            return self.low_mapping_severity
-        elif status == 'Medium':
-            return self.medium_mapping_severity
-        elif status == 'High':
-            return self.high_mapping_severity
-        elif status == 'Critical':
-            return self.critical_mapping_severity
-        else:
-            return 'N/A'
-
+# class JIRA_Instance_OAUTH(models.Model):
+#     configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
+#     url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For more information how to configure Jira, read the DefectDojo documentation.")
+#     access_token = models.CharField(max_length=2000)
+#     access_token_secret = models.CharField(max_length=2000)
+#     consumer_key = models.CharField(max_length=2000)
+#     cert = models.FileField()
+#
+#     accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to an Accepted Finding")
+#     false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to a False Positive Finding")
+#     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Globally send SLA notifications as comment?", help_text="This setting can be overidden at the Product level")
+#
+#     @property
+#     def accepted_resolutions(self):
+#         return [m.strip() for m in (self.accepted_mapping_resolution or '').split(',')]
+#
+#     @property
+#     def false_positive_resolutions(self):
+#         return [m.strip() for m in (self.false_positive_mapping_resolution or '').split(',')]
+#
+#     def __str__(self):
+#         return self.configuration_name + " | " + self.url
+#
+#     def get_priority(self, status):
+#         if status == 'Info':
+#             return self.info_mapping_severity
+#         elif status == 'Low':
+#             return self.low_mapping_severity
+#         elif status == 'Medium':
+#             return self.medium_mapping_severity
+#         elif status == 'High':
+#             return self.high_mapping_severity
+#         elif status == 'Critical':
+#             return self.critical_mapping_severity
+#         else:
+#             return 'N/A'
+#
 
 # declare form here as we can't import forms.py due to circular imports not even locally
 
@@ -2925,7 +2925,9 @@ class JIRA_Instance(models.Model):
     accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to an Accepted Finding")
     false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to a False Positive Finding")
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Globally send SLA notifications as comment?", help_text="This setting can be overidden at the Product level")
-
+    consumer_key = models.CharField(null=True, max_length=2000)
+    cert = models.FileField(null=True)
+    use_oauth = models.IntegerField(default=False)
     @property
     def accepted_resolutions(self):
         return [m.strip() for m in (self.accepted_mapping_resolution or '').split(',')]

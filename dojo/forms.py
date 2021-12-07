@@ -25,7 +25,7 @@ from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
-    JIRA_Issue, JIRA_Project, JIRA_Instance, JIRA_Instance_OAUTH, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
+    JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, \
@@ -2114,7 +2114,7 @@ class JIRAForm(forms.ModelForm):
 
     class Meta:
         model = JIRA_Instance
-        exclude = ['']
+        exclude = ['use_oauth', 'cert', 'consumer_key']
 
     def clean(self):
         import dojo.jira_link.helper as jira_helper
@@ -2134,14 +2134,14 @@ class JIRAForm(forms.ModelForm):
 class JIRAFormOAUTH(forms.ModelForm):
 
     issue_key = forms.CharField(required=True, help_text='A valid issue ID is required to gather the necessary information.')
-    cert = forms.FileField()
-    def __init__(self, *args, **kwargs):
-        super(JIRAFormOAUTH, self).__init__(*args, **kwargs)
-
-
+    access_token = forms.CharField(required=True)
+    access_token_secret = forms.CharField(required=True)
     class Meta:
-        model = JIRA_Instance_OAUTH
-        exclude = ['']
+        model = JIRA_Instance
+        exclude = ['product', 'info_mapping_severity',
+                    'low_mapping_severity', 'medium_mapping_severity',
+                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text', 'use_oauth', 'username', 'password']
+
 
     def clean(self):
         import dojo.jira_link.helper as jira_helper
@@ -2174,7 +2174,7 @@ class ExpressJIRAForm(forms.ModelForm):
         exclude = ['product', 'epic_name_id', 'open_status_key',
                     'close_status_key', 'info_mapping_severity',
                     'low_mapping_severity', 'medium_mapping_severity',
-                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
+                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text', 'use_oauth', 'cert', 'consumer_key']
 
     def clean(self):
         import dojo.jira_link.helper as jira_helper
@@ -2237,6 +2237,7 @@ class DeleteProduct_API_Scan_ConfigurationForm(forms.ModelForm):
     class Meta:
         model = Product_API_Scan_Configuration
         fields = ['id']
+
 
 
 class DeleteJIRAInstanceForm(forms.ModelForm):

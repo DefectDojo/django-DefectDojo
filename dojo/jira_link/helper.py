@@ -343,17 +343,15 @@ def has_jira_configured(obj):
 
 def get_jira_connection_oauth(jira_server, access_token, access_token_secret, consumer_key, key_cert):
     try:
-        with open("/tmp/cert") as f:
-                key_cert_data = f.read()
 
+        logger.error('key_cert', key_cert)
         oauth_dict = {
             'access_token': access_token,
             'access_token_secret': access_token_secret,
             'consumer_key': consumer_key,
-            'key_cert': key_cert_data
+            'key_cert': key_cert
             }
-
-        logger.error('find_me')
+        logger.error(oauth_dict)
         jira = JIRA(server=jira_server, oauth=oauth_dict)
         logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
         return jira
@@ -375,37 +373,68 @@ def get_jira_connection_oauth(jira_server, access_token, access_token_secret, co
         add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(oauth_dict))
         raise re
 
-def get_jira_connection_raw(jira_server, jira_username, jira_password):
-    try:
-        jira = JIRA(server=jira_server,
-                basic_auth=(jira_username, jira_password),
+def get_jira_connection_raw(jira_instance):
+    if jira_instance.use_oauth :
+        try:
+            with open('/app/media/cert') as f:
+                jira_key_cert = f.read()
+            oauth_dict = {
+                'access_token': jira_instance.username,
+                'access_token_secret': jira_instance.password,
+                'consumer_key': jira_instance.consumer_key,
+                'key_cert': jira_key_cert
+                }
+            jira = JIRA(server=jira_instance.url, oauth=oauth_dict)
+            logger.debug('logged in to JIRA ''%s'' successfully', jira_instance.url)
+            return jira
+        except JIRAError as e:
+                logger.error('find_me1')
+                logger.exception(e)
+                error_message = e.text if hasattr(e, 'text') else e.message if hasattr(e, 'message') else e.args[0]
+                if e.status_code in [401, 403]:
+                    log_jira_generic_alert('JIRA Authentication Error', error_message)
+                else:
+                    log_jira_generic_alert('Unknown JIRA Connection Error', error_message)
+                add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(oauth_dict))
+                raise e
+
+        except requests.exceptions.RequestException as re:
+                logger.exception(re)
+                error_message = re.text if hasattr(re, 'text') else re.message if hasattr(re, 'message') else re.args[0]
+                log_jira_generic_alert('Unknown JIRA Connection Error', re)
+                add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(oauth_dict))
+                raise re
+    else:
+        try:
+            jira = JIRA(server=jira_instance.url,
+                basic_auth=(jira_instance.username, jira_instance.password),
                 options={"verify": settings.JIRA_SSL_VERIFY},
                 max_retries=0)
 
-        logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
+            logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
 
-        return jira
-    except JIRAError as e:
-        logger.exception(e)
+            return jira
+        except JIRAError as e:
+            logger.exception(e)
 
-        error_message = e.text if hasattr(e, 'text') else e.message if hasattr(e, 'message') else e.args[0]
+            error_message = e.text if hasattr(e, 'text') else e.message if hasattr(e, 'message') else e.args[0]
 
-        if e.status_code in [401, 403]:
-            log_jira_generic_alert('JIRA Authentication Error', error_message)
-        else:
-            log_jira_generic_alert('Unknown JIRA Connection Error', error_message)
+            if e.status_code in [401, 403]:
+                log_jira_generic_alert('JIRA Authentication Error', error_message)
+            else:
+                log_jira_generic_alert('Unknown JIRA Connection Error', error_message)
 
-        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
-        raise e
+            add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
+            raise e
 
-    except requests.exceptions.RequestException as re:
-        logger.exception(re)
-        error_message = re.text if hasattr(re, 'text') else re.message if hasattr(re, 'message') else re.args[0]
-        log_jira_generic_alert('Unknown JIRA Connection Error', re)
+        except requests.exceptions.RequestException as re:
+            logger.exception(re)
+            error_message = re.text if hasattr(re, 'text') else re.message if hasattr(re, 'message') else re.args[0]
+            log_jira_generic_alert('Unknown JIRA Connection Error', re)
 
-        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
+            add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
 
-        raise re
+            raise re
 
     # except RequestException as re:
     #     logger.exception(re)
@@ -420,7 +449,7 @@ def get_jira_connection(obj):
         jira_instance = get_jira_instance(obj)
 
     if jira_instance is not None:
-        return get_jira_connection_raw(jira_instance.url, jira_instance.username, jira_instance.password)
+        return get_jira_connection_raw(jira_instance)
 
 
 def jira_get_resolution_id(jira, issue, status):
