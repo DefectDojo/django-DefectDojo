@@ -1234,13 +1234,12 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
         if scan_date is not None:
             payload['scan_date'] = scan_date
-        else:
-            payload['scan_date'] = str(timezone.localtime(timezone.now()).date())
 
         return self.import_scan_ui(engagement, payload)
 
-    def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
+    def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
         payload = {
+                "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
@@ -1255,11 +1254,6 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
         if tags is not None:
             payload['tags'] = tags
-
-        if scan_date is not None:
-            payload['scan_date'] = scan_date
-        else:
-            payload['scan_date'] = str(timezone.localtime(timezone.now()).date())
 
         return self.reimport_scan_ui(test_id, payload)
 
