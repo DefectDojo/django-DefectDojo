@@ -1,25 +1,22 @@
+import base64
 import datetime
 from dojo.importers import utils as importer_utils
-from dojo.models import Test, Finding, \
-    Test_Type, \
-    BurpRawRequestResponse, \
-    Endpoint_Status, \
-    Test_Import
-from dojo.endpoint.utils import endpoint_get_or_create
-
+from dojo.decorators import dojo_async_task
 from dojo.utils import get_current_user, max_safe
-
-from django.core.exceptions import MultipleObjectsReturned
-from django.conf import settings
+from dojo.celery import app
 from django.core.exceptions import ValidationError
-from django.utils import timezone
-import dojo.notifications.helper as notifications_helper
+from django.core import serializers
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
-import base64
+import dojo.notifications.helper as notifications_helper
+from django.conf import settings
+from django.core.files.base import ContentFile
+from django.utils import timezone
+from dojo.models import (BurpRawRequestResponse, FileUpload,
+                         Finding, Test, Test_Import, Test_Type)
+from dojo.tools.factory import get_parser
 import logging
 
-from dojo.tools.factory import get_parser
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -29,7 +26,7 @@ class DojoDefaultImporter(object):
 
     def create_test(self, scan_type, test_type_name, engagement, lead, environment, tags=None,
                     scan_date=None, version=None, branch_tag=None, build_id=None, commit_hash=None, now=timezone.now(),
-                    api_scan_configuration=None):
+                    api_scan_configuration=None, title=None):
 
         test_type, created = Test_Type.objects.get_or_create(
             name=test_type_name)
@@ -38,6 +35,7 @@ class DojoDefaultImporter(object):
             logger.info('Created new Test_Type with name %s because a report is being imported', test_type.name)
 
         test = Test(
+            title=title,
             engagement=engagement,
             lead=lead,
             test_type=test_type,
@@ -61,8 +59,10 @@ class DojoDefaultImporter(object):
         test.save()
         return test
 
+    @dojo_async_task
+    @app.task(ignore_result=False)
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None, **kwargs):
         logger.debug('endpoints_to_add: %s', endpoints_to_add)
         new_findings = []
         items = parsed_findings
@@ -85,11 +85,28 @@ class DojoDefaultImporter(object):
             item.last_reviewed = now
             item.last_reviewed_by = user if user else get_current_user
 
-            # Only set active/verified flags if they were NOT set by default value(True)
+            logger.debug('process_parsed_findings: active from report: %s, verified from report: %s', item.active, item.verified)
+            # active, verified parameters = parameters from the gui or api call.
+            # item.active, item.verified = values from the report / the parser
+            # if either value of active (from the parser or from the api/gui) is false, final status is inactive
+            #   else final status is active
+            # if either value of verified (from the parser or from the api/gui) is false, final status is not verified
+            #   else final status is verified
+            # Note that:
+            #   - the API (active/verified parameters) values default to True if not specified
+            #   - the parser values default to true if not set by the parser (as per the default value in models.py)
+            #   - there is no "not specified" in the GUI (not ticked means not active/not verified)
             if item.active:
                 item.active = active
             if item.verified:
                 item.verified = verified
+            # Set the date if the parser does not set it
+            if not item.date:
+                item.date = scan_date
+
+            # Indicates the scan_date is not the default, overwrite everything
+            if (scan_date.date() if isinstance(scan_date, datetime.datetime) else scan_date) != now.date():
+                item.date = scan_date
 
             item.created = now
             item.updated = now
@@ -120,72 +137,30 @@ class DojoDefaultImporter(object):
                 burp_rr.clean()
                 burp_rr.save()
 
-            for endpoint in item.unsaved_endpoints:
-                try:
-                    endpoint.clean()
-                except ValidationError as e:
-                    logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
-                                   "{}".format(e))
-
-                try:
-                    ep, created = endpoint_get_or_create(
-                        protocol=endpoint.protocol,
-                        userinfo=endpoint.userinfo,
-                        host=endpoint.host,
-                        port=endpoint.port,
-                        path=endpoint.path,
-                        query=endpoint.query,
-                        fragment=endpoint.fragment,
-                        product=test.engagement.product)
-                except (MultipleObjectsReturned):
-                    pass
-
-                try:
-                    eps, created = Endpoint_Status.objects.get_or_create(
-                        finding=item,
-                        endpoint=ep)
-                except (MultipleObjectsReturned):
-                    pass
-
-                ep.endpoint_status.add(eps)
-                item.endpoint_status.add(eps)
-                item.endpoints.add(ep)
+            if settings.ASYNC_FINDING_IMPORT:
+                importer_utils.chunk_endpoints_and_disperse(item, test, item.unsaved_endpoints)
+            else:
+                importer_utils.add_endpoints_to_unsaved_finding(item, test, item.unsaved_endpoints, sync=True)
 
             if endpoints_to_add:
-                for endpoint in endpoints_to_add:
-                    logger.debug('adding endpoint %s', endpoint)
-                    # TODO Not sure what happens here, we get an endpoint model and try to create it again?
-                    try:
-                        endpoint.clean()
-                    except ValidationError as e:
-                        logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
-                                       "{}".format(e))
-
-                    try:
-                        ep, created = endpoint_get_or_create(
-                            protocol=endpoint.protocol,
-                            userinfo=endpoint.userinfo,
-                            host=endpoint.host,
-                            port=endpoint.port,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=test.engagement.product)
-                    except (MultipleObjectsReturned):
-                        pass
-                    try:
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=item,
-                            endpoint=ep)
-                    except (MultipleObjectsReturned):
-                        pass
-
-                    ep.endpoint_status.add(eps)
-                    item.endpoints.add(ep)
-                    item.endpoint_status.add(eps)
+                if settings.ASYNC_FINDING_IMPORT:
+                    importer_utils.chunk_endpoints_and_disperse(item, test, endpoints_to_add)
+                else:
+                    importer_utils.add_endpoints_to_unsaved_finding(item, test, endpoints_to_add, sync=True)
 
             if item.unsaved_tags:
                 item.tags = item.unsaved_tags
+
+            if item.unsaved_files:
+                for unsaved_file in item.unsaved_files:
+                    data = base64.b64decode(unsaved_file.get('data'))
+                    title = unsaved_file.get('title', '<No title>')
+                    file_upload = FileUpload(
+                        title=title,
+                        file=ContentFile(data, name=title)
+                    )
+                    file_upload.save()
+                    item.files.add(file_upload)
 
             new_findings.append(item)
             # to avoid pushing a finding group multiple times, we push those outside of the loop
@@ -197,7 +172,9 @@ class DojoDefaultImporter(object):
         if settings.FEATURE_FINDING_GROUPS and push_to_jira:
             for finding_group in set([finding.finding_group for finding in new_findings if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
-
+        sync = kwargs.get('sync', False)
+        if not sync:
+            return [serializers.serialize('json', [finding, ]) for finding in new_findings]
         return new_findings
 
     def close_old_findings(self, test, scan_date_time, user, push_to_jira=None):
@@ -279,13 +256,18 @@ class DojoDefaultImporter(object):
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None,
-                    service=None):
+                    service=None, title=None):
 
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
         user = user or get_current_user()
 
         now = timezone.now()
+        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
+        finding_scan_date = scan_date
+        if not scan_date:
+            scan_date = now
+            finding_scan_date = now
         # retain weird existing logic to use current time for provided scan date
         scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
         if settings.USE_TZ:
@@ -318,7 +300,7 @@ class DojoDefaultImporter(object):
 
                 test = self.create_test(scan_type, test_type_name, engagement, lead, environment, scan_date=scan_date, tags=tags,
                                     version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
-                                    api_scan_configuration=api_scan_configuration)
+                                    api_scan_configuration=api_scan_configuration, title=title)
                 # This part change the name of the Test
                 # we get it from the data of the parser
                 test_raw = tests[0]
@@ -342,17 +324,41 @@ class DojoDefaultImporter(object):
             # by default test_type == scan_type
             test = self.create_test(scan_type, scan_type, engagement, lead, environment, scan_date=scan_date, tags=tags,
                                 version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
-                                api_scan_configuration=api_scan_configuration)
+                                api_scan_configuration=api_scan_configuration, title=title)
 
             logger.debug('IMPORT_SCAN: Parse findings')
             parser = get_parser(scan_type)
             parsed_findings = parser.get_findings(scan, test)
 
         logger.debug('IMPORT_SCAN: Processing findings')
-        new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
-                                                    verified, minimum_severity=minimum_severity,
-                                                    endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                    group_by=group_by, now=now, service=service)
+        new_findings = []
+        if settings.ASYNC_FINDING_IMPORT:
+            chunk_list = importer_utils.chunk_list(parsed_findings)
+            results_list = []
+            # First kick off all the workers
+            for findings_list in chunk_list:
+                result = self.process_parsed_findings(test, findings_list, scan_type, user, active,
+                                                            verified, minimum_severity=minimum_severity,
+                                                            endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
+                                                            group_by=group_by, now=now, service=service, scan_date=finding_scan_date, sync=False)
+                # Since I dont want to wait until the task is done right now, save the id
+                # So I can check on the task later
+                results_list += [result]
+            # After all tasks have been started, time to pull the results
+            logger.info('IMPORT_SCAN: Collecting Findings')
+            for results in results_list:
+                serial_new_findings = results.get()
+                new_findings += [next(serializers.deserialize("json", finding)).object for finding in serial_new_findings]
+            logger.info('IMPORT_SCAN: All Findings Collected')
+            # Indicate that the test is not complete yet as endpoints will still be rolling in.
+            test.percent_complete = 50
+            test.save()
+            importer_utils.update_test_progress(test)
+        else:
+            new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
+                                                            verified, minimum_severity=minimum_severity,
+                                                            endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
+                                                            group_by=group_by, now=now, service=service, scan_date=finding_scan_date, sync=True)
 
         closed_findings = []
         if close_old_findings:

@@ -100,11 +100,10 @@
                 </table>
             </div>
         </div>
-        {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">Product Type Members</h4>
+                    <h4 class="pull-left">Product Type Membership</h4>
                     &nbsp;
                     <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
@@ -177,7 +176,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">Product Members</h4>
+                    <h4 class="pull-left">Product Membership</h4>
                     &nbsp;
                     <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
@@ -251,7 +250,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">Group Members</h4>
+                    <h4 class="pull-left">Group Membership</h4>
                     &nbsp;
                     <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/#groups" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
@@ -321,8 +320,6 @@
             </div>
             {% endif %}
         </div>
-
-        {% endif %}
     </div>
     <div class="col-md-4">
         <div class="panel panel-default-secondary">
@@ -374,38 +371,10 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        {% if not 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
-                        <tr>
-                            <td style="width: 200px;"><strong>Authorized Products</strong></td>
-                            <td>
-                                {% if authorized_products.all.count > 1 %}
-                                {% for au in authorized_products.all %}
-                                {{au}}{%if not forloop.last%},{%endif%}
-                                {% endfor %}
-                                {% else %}
-                                {{ authorized_products.all.0 }}
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 200px;"><strong>Authorized Product Types</strong></td>
-                            <td>
-                                {% if authorized_product_types.all.count > 1 %}
-                                {% for au in authorized_product_types.all %}
-                                {{au}}{%if not forloop.last%},{%endif%}
-                                {% endfor %}
-                                {% else %}
-                                {{ authorized_product_types.all.0 }}
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endif %}
-                        {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                         <tr>
                             <td style="width: 200px;"><strong>Global role</strong></td>
                             <td>{% if user.global_role.role %} {{ user.global_role.role }} {% endif %}</td>
                         </tr>
-                        {% endif %}
                     </tbody>
                 </table>
             </div>

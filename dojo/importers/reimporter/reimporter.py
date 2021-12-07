@@ -5,12 +5,15 @@ import logging
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
+from dojo.decorators import dojo_async_task
+from dojo.celery import app
 from django.conf import settings
-from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.core.exceptions import ValidationError
+from django.core import serializers
+from django.core.files.base import ContentFile
 from django.utils import timezone
-from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.importers import utils as importer_utils
-from dojo.models import (BurpRawRequestResponse, Endpoint_Status, Finding,
+from dojo.models import (BurpRawRequestResponse, Finding,
                          Notes, Test_Import)
 from dojo.tools.factory import get_parser
 from dojo.utils import get_current_user
@@ -21,8 +24,10 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 class DojoDefaultReImporter(object):
 
+    @dojo_async_task
+    @app.task(ignore_result=False)
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, **kwargs):
 
         items = parsed_findings
         original_items = list(test.finding_set.all())
@@ -38,7 +43,9 @@ class DojoDefaultReImporter(object):
         logger.debug('starting reimport of %i items.', len(items) if items else 0)
         from dojo.importers.reimporter.utils import (
             get_deduplication_algorithm_from_conf,
-            match_new_finding_to_existing_finding, update_endpoint_status)
+            match_new_finding_to_existing_finding,
+            update_endpoint_status,
+            reactivate_endpoint_status)
         deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
 
         i = 0
@@ -51,8 +58,7 @@ class DojoDefaultReImporter(object):
 
             item.numerical_severity = Finding.get_numerical_severity(item.severity)
 
-            if minimum_severity and (Finding.SEVERITIES[item.severity] >
-                    Finding.SEVERITIES[minimum_severity]):
+            if minimum_severity and (Finding.SEVERITIES[item.severity] > Finding.SEVERITIES[minimum_severity]):
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
 
@@ -95,13 +101,22 @@ class DojoDefaultReImporter(object):
                         entry="Re-activated by %s re-upload." % scan_type,
                         author=user)
                     note.save()
-                    endpoint_status = finding.endpoint_status.all()
-                    for status in endpoint_status:
-                        status.mitigated_by = None
-                        status.mitigated_time = None
-                        status.mitigated = False
-                        status.last_modified = timezone.now()
-                        status.save()
+
+                    endpoint_statuses = finding.endpoint_status.all()
+
+                    # Determine if this can be run async
+                    if settings.ASYNC_FINDING_IMPORT:
+                        chunk_list = importer_utils.chunk_list(endpoint_statuses)
+                        # If there is only one chunk, then do not bother with async
+                        if len(chunk_list) < 2:
+                            reactivate_endpoint_status(endpoint_statuses, sync=True)
+                        logger.debug('IMPORT_SCAN: Split endpoints into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_list[0]))
+                        # First kick off all the workers
+                        for endpoint_status_list in chunk_list:
+                            reactivate_endpoint_status(endpoint_status_list, sync=False)
+                    else:
+                        reactivate_endpoint_status(endpoint_statuses, sync=True)
+
                     finding.notes.add(note)
                     reactivated_items.append(finding)
                     reactivated_count += 1
@@ -157,71 +172,30 @@ class DojoDefaultReImporter(object):
             # for existing findings: make sure endpoints are present or created
             if finding:
                 finding_count += 1
-                for endpoint in item.unsaved_endpoints:
-                    try:
-                        endpoint.clean()
-                    except ValidationError as e:
-                        logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
-                                       "{}".format(e))
-
-                    try:
-                        ep, created = endpoint_get_or_create(
-                            protocol=endpoint.protocol,
-                            userinfo=endpoint.userinfo,
-                            host=endpoint.host,
-                            port=endpoint.port,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=test.engagement.product)
-                    except (MultipleObjectsReturned):
-                        pass
-
-                    try:
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=finding,
-                            endpoint=ep)
-                    except (MultipleObjectsReturned):
-                        pass
-
-                    ep.endpoint_status.add(eps)
-                    finding.endpoints.add(ep)
-                    finding.endpoint_status.add(eps)
+                if settings.ASYNC_FINDING_IMPORT:
+                    importer_utils.chunk_endpoints_and_disperse(finding, test, item.unsaved_endpoints)
+                else:
+                    importer_utils.add_endpoints_to_unsaved_finding(finding, test, item.unsaved_endpoints, sync=True)
 
                 if endpoints_to_add:
-                    for endpoint in endpoints_to_add:
-                        # TODO Not sure what happens here, we get an endpoint model and try to create it again?
-                        try:
-                            endpoint.clean()
-                        except ValidationError as e:
-                            logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
-                                           "{}".format(e))
-
-                        try:
-                            ep, created = endpoint_get_or_create(
-                                protocol=endpoint.protocol,
-                                userinfo=endpoint.userinfo,
-                                host=endpoint.host,
-                                port=endpoint.port,
-                                path=endpoint.path,
-                                query=endpoint.query,
-                                fragment=endpoint.fragment,
-                                product=test.engagement.product)
-                        except (MultipleObjectsReturned):
-                            pass
-                        try:
-                            eps, created = Endpoint_Status.objects.get_or_create(
-                                finding=finding,
-                                endpoint=ep)
-                        except (MultipleObjectsReturned):
-                            pass
-
-                        ep.endpoint_status.add(eps)
-                        finding.endpoints.add(ep)
-                        finding.endpoint_status.add(eps)
+                    if settings.ASYNC_FINDING_IMPORT:
+                        importer_utils.chunk_endpoints_and_disperse(finding, test, endpoints_to_add)
+                    else:
+                        importer_utils.add_endpoints_to_unsaved_finding(finding, test, endpoints_to_add, sync=True)
 
                 if item.unsaved_tags:
                     finding.tags = item.unsaved_tags
+
+                if item.unsaved_files:
+                    for unsaved_file in item.unsaved_files:
+                        data = base64.b64decode(unsaved_file.get('data'))
+                        title = unsaved_file.get('title', '<No title>')
+                        file_upload = FileUpload(
+                            title=title,
+                            file=ContentFile(data, name=title)
+                        )
+                        file_upload.save()
+                        item.files.add(file_upload)
 
                 # existing findings may be from before we had component_name/version fields
                 finding.component_name = finding.component_name if finding.component_name else component_name
@@ -240,6 +214,13 @@ class DojoDefaultReImporter(object):
         if settings.FEATURE_FINDING_GROUPS and push_to_jira:
             for finding_group in set([finding.finding_group for finding in reactivated_items + unchanged_items + new_items if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
+        sync = kwargs.get('sync', False)
+        if not sync:
+            serialized_new_items = [serializers.serialize('json', [finding, ]) for finding in new_items]
+            serialized_reactivated_items = [serializers.serialize('json', [finding, ]) for finding in reactivated_items]
+            serialized_to_mitigate = [serializers.serialize('json', [finding, ]) for finding in to_mitigate]
+            serialized_untouched = [serializers.serialize('json', [finding, ]) for finding in untouched]
+            return serialized_new_items, serialized_reactivated_items, serialized_to_mitigate, serialized_untouched
 
         return new_items, reactivated_items, to_mitigate, untouched
 
@@ -319,10 +300,39 @@ class DojoDefaultReImporter(object):
             parsed_findings = parser.get_findings(scan, test)
 
         logger.debug('REIMPORT_SCAN: Processing findings')
-        new_findings, reactivated_findings, findings_to_mitigate, untouched_findings = \
-            self.process_parsed_findings(test, parsed_findings, scan_type, user, active, verified,
-                                         minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
-                                         push_to_jira=push_to_jira, group_by=group_by, now=now, service=service)
+        new_findings = []
+        reactivated_findings = []
+        findings_to_mitigate = []
+        untouched_findings = []
+        if settings.ASYNC_FINDING_IMPORT:
+            chunk_list = importer_utils.chunk_list(parsed_findings)
+            results_list = []
+            # First kick off all the workers
+            for findings_list in chunk_list:
+                result = self.process_parsed_findings(test, findings_list, scan_type, user, active, verified,
+                                                      minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
+                                                      push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, sync=False)
+                # Since I dont want to wait until the task is done right now, save the id
+                # So I can check on the task later
+                results_list += [result]
+            # After all tasks have been started, time to pull the results
+            logger.debug('REIMPORT_SCAN: Collecting Findings')
+            for results in results_list:
+                serial_new_findings, serial_reactivated_findings, serial_findings_to_mitigate, serial_untouched_findings = results.get()
+                new_findings += [next(serializers.deserialize("json", finding)).object for finding in serial_new_findings]
+                reactivated_findings += [next(serializers.deserialize("json", finding)).object for finding in serial_reactivated_findings]
+                findings_to_mitigate += [next(serializers.deserialize("json", finding)).object for finding in serial_findings_to_mitigate]
+                untouched_findings += [next(serializers.deserialize("json", finding)).object for finding in serial_untouched_findings]
+            logger.debug('REIMPORT_SCAN: All Findings Collected')
+            # Indicate that the test is not complete yet as endpoints will still be rolling in.
+            test.percent_complete = 50
+            test.save()
+            importer_utils.update_test_progress(test)
+        else:
+            new_findings, reactivated_findings, findings_to_mitigate, untouched_findings = \
+                self.process_parsed_findings(test, parsed_findings, scan_type, user, active, verified,
+                                             minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
+                                             push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, sync=True)
 
         closed_findings = []
         if close_old_findings:

@@ -1535,12 +1535,6 @@ div.tags .label {
     text-decoration: none;
 }
 
-@media (min-width: 768px) {
-    #findingImageModal .modal-dialog {
-        width: 50%;
-    }
-}
-
 #finding_pic, .modal_finding_pic:hover {
     cursor: url(../img/zoom-in.cur), zoom-in;
 }

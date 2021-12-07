@@ -1,28 +1,28 @@
 # Running with Docker Compose
 
-The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment. 
+The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment.
 
-Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. [Running in Production](docs/content/running/running-in-production.md) gives advice on which adjustments are useful for performance and operational reliability. 
+Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. [Running in Production](https://defectdojo.github.io/django-DefectDojo/getting_started/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
 
 
 # Prerequisites
 *  Docker version
     *  Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
 *  Proxies
-    *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ . 
+    *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ .
 
 
 # Setup via Docker Compose - introduction
 
 DefectDojo needs several docker images to run. Two of them depend on DefectDojo code:
 
-*  django service - defectdojo/defectdojo-django image 
+*  django service - defectdojo/defectdojo-django image
 *  nginx service - defectdojo/defectdojo-nginx image
 
 The nginx image is build based on the django image.
 
 Before running the application, it's advised to build local images to make sure that you'll be working on images consistent with your current code base.
-When running the application without building images, the application will run based on: 
+When running the application without building images, the application will run based on:
 *  a previously locally built image if it exists in the docker cache
 *  else the images pulled from dockerhub
     *  https://hub.docker.com/r/defectdojo/defectdojo-django
@@ -38,7 +38,7 @@ To build images and put them in your local docker cache, run:
 docker-compose build
 ```
 
-To build a single image, run: 
+To build a single image, run:
 
 ```zsh
 docker-compose build uwsgi
@@ -52,7 +52,7 @@ docker-compose build nginx
 > **_NOTE:_**  It's possible to add extra fixtures in folder "/docker/extra_fixtures".
 
 ## Run with Docker compose in release mode
-To run the application based on previously built image (or based on dockerhub images if none was locally built), run: 
+To run the application based on previously built image (or based on dockerhub images if none was locally built), run:
 
 ```zsh
 docker/setEnv.sh release
@@ -61,12 +61,12 @@ docker-compose up
 
 This will run the application based on docker-compose.yml only.
 
-In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers. 
+In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers.
 
 
 ## Run with Docker compose in development mode with hot-reloading
 
-For development, use: 
+For development, use:
 
 ```zsh
 docker/setEnv.sh dev
@@ -78,23 +78,23 @@ This will run the application based on merged configurations from docker-compose
 
 *  Volumes are mounted to synchronize between the host and the containers :
     *  static resources (nginx container)
-    *  python code (uwsgi and celeryworker containers). 
+    *  python code (uwsgi and celeryworker containers).
 
 *  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading for the **uwsgi** container.
-* Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with: 
+* Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with:
 
 ```
 docker-compose restart celeryworker
 ```
 
-*  The mysql port is forwarded to the host so that you can access your database from outside the container. 
+*  The mysql port is forwarded to the host so that you can access your database from outside the container.
 
 To update changes in static resources, served by nginx, just refresh the browser with ctrl + F5.
 
 
 *Notes about volume permissions*
 
-*If you run into permission issues with the mounted volumes, a way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
+*If you run into permission issues with the mounted volumes, a way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with*
 
 ```
 id -u
@@ -164,9 +164,9 @@ docker-compose logs initializer | grep "Admin password:"
 
 Make sure you write down the first password generated as you'll need it when re-starting the application.
 
-## Option to change the password 
-* If you dont have admin password use the below command to change the password. 
-* After starting the container and open another tab in the same folder.  
+## Option to change the password
+* If you dont have admin password use the below command to change the password.
+* After starting the container and open another tab in the same folder.
 * django-defectdojo_uwsgi_1 -- name obtained from running containers using ```zsh docker ps ``` command
 
 ```zsh
@@ -181,7 +181,7 @@ For docker-compose release mode the log level is INFO. In the other modes the lo
 LOGGING['loggers']['dojo.specific-loggers.deduplication']['level'] = 'DEBUG'
 ```
 
-Or you can modify `settings.dist.py` directly, but this adds the risk of having conflicts when `settings.dist.py` gets updated upstream. 
+Or you can modify `settings.dist.py` directly, but this adds the risk of having conflicts when `settings.dist.py` gets updated upstream.
 
 ```
           'dojo.specific-loggers.deduplication': {
@@ -198,18 +198,18 @@ This toolbar allows you to debug SQL queries, and shows some other interesting i
 
 # Exploitation, versioning
 ## Disable the database initialization
-The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`. 
+The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`.
 
 This will ensure that the database remains unchanged when re-running the application, keeping your previous settings and admin password.
 
 ## Versioning
-In order to use a specific version when building the images and running the containers, set the environment with 
+In order to use a specific version when building the images and running the containers, set the environment with
 *  For the nginx image: `NGINX_VERSION=x.y.z`
 *  For the django image: `DJANGO_VERSION=x.y.z`
 
 Building will tag the images with "x.y.z", then you can run the application based on a specific tagged images.
 
-*  Tagged images can be seen with: 
+*  Tagged images can be seen with:
 
 ```
 $ docker images
@@ -219,7 +219,7 @@ defectdojo/defectdojo-nginx    1.0.0               bc9c5f7bb4e5        About an 
 
 *  This will show on which tagged images the containers are running:
 
-``` 
+```
 $ docker ps
 CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS              PORTS                                NAMES
 aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"   2 minutes ago       Up 2 minutes        80/tcp, 0.0.0.0:8080->8080/tcp       django-defectdojo_nginx_1
@@ -247,19 +247,19 @@ To secure the application by https, follow those steps
 *  Generate a CSR (Certificate Signing Request)
 *  Have the CSR signed by a certificate authority
 *  Place the private key and the certificate under the nginx folder
-*  copy your secrets into: 
+*  copy your secrets into:
 ```
         server_name                 your.servername.com;
         ssl_certificate             /etc/nginx/ssl/nginx.crt
         ssl_certificate_key        /etc/nginx/ssl/nginx.key;
 ```
 *set the GENERATE_TLS_CERTIFICATE != True in the docker-compose.override.https.yml
-* Protect your private key from other users: 
+* Protect your private key from other users:
 ```
 chmod 400 nginx/*.key
 ```
 
-* Run defectDojo with: 
+* Run defectDojo with:
 ```
 rm -f docker-compose.override.yml
 ln -s docker-compose.override.https.yml docker-compose.override.yml
@@ -269,7 +269,7 @@ docker-compose up
 ## create Credentials on the fly
 * you can generate a Certificate on the fly (without valid domainname etc.)
 
-* Run defectDojo with: 
+* Run defectDojo with:
 ```
 rm -f docker-compose.override.yml
 ln -s docker-compose.override.https.yml docker-compose.override.yml
@@ -293,7 +293,7 @@ The integration-tests are under `tests`
 
 
 ## Running the unit-tests
-This will run all unit-tests and leave the uwsgi container up: 
+This will run all unit-tests and leave the uwsgi container up:
 
 ```
 docker/setEnv.sh unit_tests
@@ -307,23 +307,23 @@ docker-compose exec uwsgi bash
 Rerun all the tests:
 
 ```
-python manage.py test dojo.unittests --keepdb
+python manage.py test unittests --keepdb
 ```
 
 Run all the tests from a python file. Example:
 
 ```
-python manage.py test dojo.unittests.tools.test_dependency_check_parser --keepdb
+python manage.py test unittests.tools.test_dependency_check_parser --keepdb
 ```
 
 Run a single test. Example:
 
 ```
-python manage.py test dojo.unittests.tools.test_dependency_check_parser.TestDependencyCheckParser.test_parse_file_with_no_vulnerabilities_has_no_findings --keepdb
+python manage.py test unittests.tools.test_dependency_check_parser.TestDependencyCheckParser.test_parse_file_with_no_vulnerabilities_has_no_findings --keepdb
 ```
 
 ## Running the integration-tests
-This will run all integration-tests and leave the containers up: 
+This will run all integration-tests and leave the containers up:
 
 ```
 docker/setEnv.sh integration_tests
