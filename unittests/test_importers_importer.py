@@ -78,6 +78,7 @@ class TestDojoDefaultImporter(DojoTestCase):
         minimum_severity = "Info"
         active = True
         verified = True
+        scan_date = timezone.localtime(timezone.now()).date()
         new_findings = importer.process_parsed_findings(
             test,
             parsed_findings,
@@ -86,6 +87,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             active,
             verified,
             minimum_severity=minimum_severity,
+            scan_date=scan_date,
             sync=True
         )
 
