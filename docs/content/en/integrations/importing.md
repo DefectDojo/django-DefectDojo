@@ -125,8 +125,8 @@ A classic way of reimporting a scan is by specifying the ID of the test instead:
 DefectDojo offers a plethora of supported scanner reports, but not all of them contain the 
 information most important to a user. The `scan_date` field is a flexible smart feature that
 allows users to set the completion date of the a given scan report, and have it propagate
-down to all the findings imported. The default value for this field is the date of import
-(whenever the request is processed and a successful response is returned).
+down to all the findings imported. This field is **not** mandatory, but the default value for 
+this field is the date of import (whenever the request is processed and a successful response is returned). 
 
 Here are the following use cases for using this field:
 
@@ -138,13 +138,3 @@ Here are the following use cases for using this field:
     - Finding date will be whatever the user set for `scan_date`
 4. The report **sets** the date, and the `scan_date` is **set** at import
     - Finding date will be whatever the user set for `scan_date`
-
-#### UI
-
-In the import UI (pictured above) the "Scan Completion Date" (This is really the `scan_date`
-field under the hood) field is already filled out.  This is because the default value (date of import) is already filled out in the form for user convenience. General rule is if the date from the report (if available) is to be respected, then do not change the default value of Scan Completion Date.
-
-#### API
-
-In the API payloads used in the exmaple above, the `scan_date` field is used in every request, but it is **not** a mandatory field. Leaving it out of the payload will tell the importer to use 
-the default value (date of import) for the report. General rule is if the date from the report (if available) is to be respected, then do not add the `scan_date` field to the payload when importing.

@@ -58,7 +58,7 @@ class DojoDefaultImporter(object):
         return test
 
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None):
         logger.debug('endpoints_to_add: %s', endpoints_to_add)
         new_findings = []
         items = parsed_findings
@@ -96,24 +96,16 @@ class DojoDefaultImporter(object):
                 item.active = active
             if item.verified:
                 item.verified = verified
-            # Set the scan_date at import time to all findings imported
-            # Only allow this to happen if the scan_date is different than the default "today"
-            #   and different than what the scan report has.
-            # scan_date is set to both target_start and target_end in the creat_test function
-            target_start_date = test.target_start.date()
-            now_date = now.date()
-            if item.date == now_date:
-                # Parser did not set the date, so it is the default value
-                if target_start_date != now_date:
-                    # Import scan_date was set, and the parser has not overwritten it
-                    logger.debug('Parser did not set date, import override it ' + str(target_start_date) + ' : ' + str(now_date))
-                    item.date = test.target_start
-            else:
-                # The parser has set the date already
-                if target_start_date != now_date:
-                    # The date set by import scan_date should overwrite scan report date
-                    logger.debug('Parser set date, import override it ' + str(target_start_date) + ' : ' + str(now_date))
-                    item.date = test.target_start
+            # Set the date if the parser does not set it
+            if not item.date:
+                item.date = scan_date
+
+            # Indicates the scan_date is not the default, overwrite everything
+            print('\n\nitem.date:', item.date)
+            print('\n\nscan_date:', scan_date)
+            print('\n\nnow:', now)
+            if (scan_date.date() if isinstance(scan_date, datetime.datetime) else scan_date) != now.date():
+                item.date = scan_date
 
             item.created = now
             item.updated = now
@@ -321,6 +313,11 @@ class DojoDefaultImporter(object):
         user = user or get_current_user()
 
         now = timezone.now()
+        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
+        finding_scan_date = scan_date
+        if not scan_date:
+            scan_date = now
+            finding_scan_date = now
         # retain weird existing logic to use current time for provided scan date
         scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
         if settings.USE_TZ:
@@ -387,7 +384,7 @@ class DojoDefaultImporter(object):
         new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                     verified, minimum_severity=minimum_severity,
                                                     endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                    group_by=group_by, now=now, service=service)
+                                                    group_by=group_by, now=now, service=service, scan_date=finding_scan_date)
 
         closed_findings = []
         if close_old_findings:

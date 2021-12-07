@@ -1202,7 +1202,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class ImportScanSerializer(serializers.Serializer):
-    scan_date = serializers.DateField(default=timezone.localtime(timezone.now()).date())
+    scan_date = serializers.DateField()
 
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
