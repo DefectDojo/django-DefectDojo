@@ -1,6 +1,15 @@
+from django.core.exceptions import ValidationError
+from django.core.exceptions import MultipleObjectsReturned
+from django.conf import settings
+from dojo.decorators import dojo_async_task
+from dojo.celery import app
+from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.utils import max_safe
-from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, Test_Import, Test_Import_Finding_Action
+from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, \
+    IMPORT_REACTIVATED_FINDING, Test_Import, Test_Import_Finding_Action, \
+    Endpoint_Status
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -82,3 +91,72 @@ def construct_imported_message(scan_type, finding_count=0, new_finding_count=0, 
         message = 'No findings were added/updated/closed/reactivated as the findings in Defect Dojo are identical to those in the uploaded report.'
 
     return message
+
+
+def chunk_list(list):
+    chunk_size = settings.ASYNC_FINDING_IMPORT_CHUNK_SIZE
+    # Break the list of parsed findings into "chunk_size" lists
+    chunk_list = [list[i:i + chunk_size] for i in range(0, len(list), chunk_size)]
+    logger.debug('IMPORT_SCAN: Split endpoints into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_size))
+    return chunk_list
+
+
+def chunk_endpoints_and_disperse(finding, test, endpoints, **kwargs):
+    chunked_list = chunk_list(endpoints)
+    # If there is only one chunk, then do not bother with async
+    if len(chunked_list) < 2:
+        add_endpoints_to_unsaved_finding(finding, test, endpoints, sync=True)
+        return []
+    # First kick off all the workers
+    for endpoints_list in chunked_list:
+        add_endpoints_to_unsaved_finding(finding, test, endpoints_list, sync=False)
+
+
+# Since adding a model to a ManyToMany relationship does not require an additional
+# save, there is no need to keep track of when the task finishes.
+@dojo_async_task
+@app.task()
+def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
+    logger.debug('IMPORT_SCAN: Adding ' + str(len(endpoints)) + ' endpoints to finding:' + str(finding))
+    for endpoint in endpoints:
+        try:
+            endpoint.clean()
+        except ValidationError as e:
+            logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
+                            "{}".format(e))
+        ep = None
+        try:
+            ep, created = endpoint_get_or_create(
+                protocol=endpoint.protocol,
+                userinfo=endpoint.userinfo,
+                host=endpoint.host,
+                port=endpoint.port,
+                path=endpoint.path,
+                query=endpoint.query,
+                fragment=endpoint.fragment,
+                product=test.engagement.product)
+        except (MultipleObjectsReturned):
+            pass
+
+        eps = None
+        try:
+            eps, created = Endpoint_Status.objects.get_or_create(
+                finding=finding,
+                endpoint=ep)
+        except (MultipleObjectsReturned):
+            pass
+
+        if ep and eps:
+            ep.endpoint_status.add(eps)
+            finding.endpoint_status.add(eps)
+            finding.endpoints.add(ep)
+    logger.debug('IMPORT_SCAN: ' + str(len(endpoints)) + ' imported')
+
+
+# This function is added to the async queue at the end of all finding import tasks
+# and after endpoint task, so this should only run after all the other ones are done
+@dojo_async_task
+@app.task()
+def update_test_progress(test):
+    test.percent_complete = 100
+    test.save()

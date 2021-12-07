@@ -479,6 +479,9 @@
     {% endif %}
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
     <script type="text/javascript">
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {
@@ -507,27 +510,6 @@
                 }
             });
 
-            accepted_objs();
-            verified_objs();
-            inactive_objs();
-            open_objs();
-            closed_objs();
-            false_positive_objs();
-            out_of_scope_objs();
-            all_objs();
-            new_objs();
-            open_close_weekly();
-            severity_weekly();
-            severity_counts_weekly();
-            test_type();
-            finding_age();
-            open_vulnerabilities();
-            all_vulnerabilities();
-            //$(".product-graphs").hide();
-            $("#meta_accordion").accordion();
-        });
-
-        function accepted_objs() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -536,7 +518,6 @@
             var ticks = [
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
-
             {% for f in accepted_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
@@ -566,110 +547,13 @@
             var d5 = [
                 [4, info],
             ];
+            accepted_objs(d1, d2, d3, d4, d5, ticks);
 
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#accepted_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-
-        function inactive_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
+            critical = 0;
+            high = 0;
+            medium = 0;
+            low = 0;
+            info = 0;
             {% for f in inactive_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
@@ -684,124 +568,28 @@
                 {% endif %}
             {% endfor %}
 
-            var d1 = [
+            d1 = [
                 [0, critical],
             ];
-            var d2 = [
+            d2 = [
                 [1, high],
             ];
-            var d3 = [
+            d3 = [
                 [2, medium],
             ];
-            var d4 = [
+            d4 = [
                 [3, low],
             ];
-            var d5 = [
+            d5 = [
                 [4, info],
             ];
+            inactive_objs(d1, d2, d3, d4, d5, ticks);
 
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#inactive_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-        function open_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
+            critical = 0;
+            high = 0;
+            medium = 0;
+            low = 0;
+            info = 0;
             {% for f in open_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
@@ -816,124 +604,28 @@
                 {% endif %}
             {% endfor %}
 
-            var d1 = [
+            d1 = [
                 [0, critical],
             ];
-            var d2 = [
+            d2 = [
                 [1, high],
             ];
-            var d3 = [
+            d3 = [
                 [2, medium],
             ];
-            var d4 = [
+            d4 = [
                 [3, low],
             ];
-            var d5 = [
+            d5 = [
                 [4, info],
             ];
+            open_objs(d1, d2, d3, d4, d5, ticks);
 
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#open_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-        function false_positive_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
+            critical = 0;
+            high = 0;
+            medium = 0;
+            low = 0;
+            info = 0;
             {% for f in false_positive_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
@@ -948,124 +640,28 @@
                 {% endif %}
             {% endfor %}
 
-            var d1 = [
+            d1 = [
                 [0, critical],
             ];
-            var d2 = [
+            d2 = [
                 [1, high],
             ];
-            var d3 = [
+            d3 = [
                 [2, medium],
             ];
-            var d4 = [
+            d4 = [
                 [3, low],
             ];
-            var d5 = [
+            d5 = [
                 [4, info],
             ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#false_positive_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-        function verified_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
+            false_positive_objs(d1, d2, d3, d4, d5, ticks);
+            
+            critical = 0;
+            high = 0;
+            medium = 0;
+            low = 0;
+            info = 0;
             {% for f in verified_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
@@ -1080,123 +676,28 @@
                 {% endif %}
             {% endfor %}
 
-            var d1 = [
+            d1 = [
                 [0, critical],
             ];
-            var d2 = [
+            d2 = [
                 [1, high],
             ];
-            var d3 = [
+            d3 = [
                 [2, medium],
             ];
-            var d4 = [
+            d4 = [
                 [3, low],
             ];
-            var d5 = [
+            d5 = [
                 [4, info],
             ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#verified_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-            });
-        }
-        ;
-
-        function out_of_scope_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
+            verified_objs(d1, d2, d3, d4, d5, ticks);
+            
+            critical = 0;
+            high = 0;
+            medium = 0;
+            low = 0;
+            info = 0;
             {% for f in out_of_scope_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
@@ -1211,123 +712,28 @@
                 {% endif %}
             {% endfor %}
 
-            var d1 = [
+            d1 = [
                 [0, critical],
             ];
-            var d2 = [
+            d2 = [
                 [1, high],
             ];
-            var d3 = [
+            d3 = [
                 [2, medium],
             ];
-            var d4 = [
+            d4 = [
                 [3, low],
             ];
-            var d5 = [
+            d5 = [
                 [4, info],
             ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#out_of_scope_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-            });
-        }
-        ;
-
-        function all_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
+            out_of_scope_objs(d1, d2, d3, d4, d5, ticks);
+            
+            critical = 0;
+            high = 0;
+            medium = 0;
+            low = 0;
+            info = 0;
             {% for f in all_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
@@ -1342,124 +748,28 @@
                 {% endif %}
             {% endfor %}
 
-            var d1 = [
+            d1 = [
                 [0, critical],
             ];
-            var d2 = [
+            d2 = [
                 [1, high],
             ];
-            var d3 = [
+            d3 = [
                 [2, medium],
             ];
-            var d4 = [
+            d4 = [
                 [3, low],
             ];
-            var d5 = [
+            d5 = [
                 [4, info],
             ];
+            all_objs(d1, d2, d3, d4, d5, ticks);
 
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#all_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-        function closed_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
+            critical = 0;
+            high = 0;
+            medium = 0;
+            low = 0;
+            info = 0;
             {% for f in closed_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
@@ -1474,123 +784,28 @@
                 {% endif %}
             {% endfor %}
 
-            var d1 = [
+            d1 = [
                 [0, critical],
             ];
-            var d2 = [
+            d2 = [
                 [1, high],
             ];
-            var d3 = [
+            d3 = [
                 [2, medium],
             ];
-            var d4 = [
+            d4 = [
                 [3, low],
             ];
-            var d5 = [
+            d5 = [
                 [4, info],
             ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#closed_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-        function new_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
+            closed_objs(d1, d2, d3, d4, d5, ticks);
+            
+            critical = 0;
+            high = 0;
+            medium = 0;
+            low = 0;
+            info = 0;
             {% for f in new_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
@@ -1605,176 +820,41 @@
                 {% endif %}
             {% endfor %}
 
-            var d1 = [
+            d1 = [
                 [0, critical],
             ];
-            var d2 = [
+            d2 = [
                 [1, high],
             ];
-            var d3 = [
+            d3 = [
                 [2, medium],
             ];
-            var d4 = [
+            d4 = [
                 [3, low],
             ];
-            var d5 = [
+            d5 = [
                 [4, info],
             ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#new_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-        function open_close_weekly() {
-            var opened = []
-            var closed = []
-            var accepted = []
-            var ticks = []
-
+            new_objs(d1, d2, d3, d4, d5, ticks);
+            
+            var opened = [];
+            var closed = [];
+            var accepted = [];
+            ticks = [];
             {% for week, values in open_close_weekly.items %}
                 ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"])
                 opened.push([{{ forloop.counter0 }}, {{ values.open }}])
                 closed.push([{{ forloop.counter0 }}, {{ values.closed }}])
                 accepted.push([{{ forloop.counter0 }}, {{ values.accepted }}])
             {% endfor %}
-
-            var options = {
-                xaxes: [{
-                    ticks: ticks,
-                }],
-                yaxes: [{
-                    min: 0
-                }],
-                series: {
-                    lines: {
-                        show: true
-                    },
-                    points: {
-                        show: true
-                    }
-                },
-                grid: {
-                    hoverable: true,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7'
-
-                },
-                tooltip: true
-            };
-
-            var plotObj = $.plot($("#open_close_weekly"), [{
-                        data: opened,
-                        label: " Opened",
-                        color: "#d9534f"
-                    }, {
-                        data: closed,
-                        label: " Closed",
-                        color: '#f0ad4e'
-                    }, {
-                        data: accepted,
-                        label: " Accepted",
-                        color: '#80699B'
-                    }],
-                    options);
-        }
-        ;
-
-        function severity_weekly() {
-            var critical = []
-            var high = []
-            var medium = []
-            var low = []
-            var info = []
-            var ticks = []
-
+            open_close_weekly(opened, closed, accepted, ticks);
+            
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            info = [];
+            ticks = [];
             {% for week, values in severity_weekly.items %}
                 ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
                 critical.push([{{ forloop.counter0 }}, {{ values.Critical }}]);
@@ -1783,63 +863,12 @@
                 low.push([{{ forloop.counter0 }}, {{ values.Low }}]);
                 info.push([{{ forloop.counter0 }}, {{ values.Info }}]);
             {% endfor %}
-
-            var options = {
-                xaxes: [{
-                    ticks: ticks,
-                }],
-                yaxes: [{
-                    min: 0
-                }],
-                series: {
-                    lines: {
-                        show: true
-                    },
-                    points: {
-                        show: true
-                    }
-                },
-                grid: {
-                    hoverable: true,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7'
-
-                },
-                tooltip: true
-            };
-
-            var plotObj = $.plot($("#severity_weekly"), [{
-                        data: critical,
-                        label: " Critical",
-                        color: "#d9534f"
-                    }, {
-                        data: high,
-                        label: " High",
-                        color: '#f0ad4e'
-                    }, {
-                        data: medium,
-                        label: " Medium",
-                        color: '#f0de28'
-                    }, {
-                        data: low,
-                        label: " Low",
-                        color: '#337ab7'
-                    }, {
-                        data: info,
-                        label: " Info",
-                        color: '#80699B'
-                    }],
-                    options);
-
-        }
-        ;
-
-        function severity_counts_weekly() {
-            var critical = []
-            var high = []
-            var medium = []
-            var ticks = []
-
+            severity_weekly(critical, high, medium, low, info, ticks);
+            
+            critical = [];
+            high = [];
+            medium = [];
+            ticks = [];
             {% for week, values in critical_weekly.items %}
                 ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
                 critical.push([{{ forloop.counter0 }}, {{ values.count }}]);
@@ -1852,201 +881,52 @@
                 ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
                 medium.push([{{ forloop.counter0 }}, {{ values.count }}]);
             {% endfor %}
-
-            var options = {
-                xaxes: [{
-                    ticks: ticks,
-                }],
-                yaxes: [{
-                    min: 0
-                }],
-                series: {
-                    lines: {
-                        show: true
-                    },
-                    points: {
-                        show: true
-                    }
-                },
-                grid: {
-                    hoverable: true,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7'
-
-                },
-                tooltip: true
-            };
-
-            var plotObj = $.plot($("#severity_critical"), [{
-                        data: critical,
-                        label: " Critical",
-                        color: "#d9534f"
-                    }],
-                    options);
-            var plotObj = $.plot($("#severity_high"), [{
-                        data: high,
-                        label: " High",
-                        color: "#f0ad4e"
-                    }],
-                    options);
-            var plotObj = $.plot($("#severity_medium"), [{
-                        data: medium,
-                        label: " Medium",
-                        color: "#f0de28"
-                    }],
-                    options);
-
-        }
-        ;
-
-        function test_type() {
-
+            severity_counts_weekly(critical, high, medium, ticks);
+            
             var data = []
             {% for x, y in test_data.items %}
                 {% if y > 0 %}
                     data.push(['{{x}}', {{ y }}]);
                 {%  endif %}
             {% endfor %}
-
-            $.plot('#test_type', [data], {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .7,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    mode: "categories",
-                    tickLength: 4
-                },
-
-            });
-        }
-
-        function _draw_vulnerabilities_graph(tag, data) {
-            $.plot(tag, [data], {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .7,
-                        'align': "center"
-                    }
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7'
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    mode: "categories",
-                    tickLength: 4
-                }
-            });
-        }
-
-        function open_vulnerabilities() {
-            var data = [];
-            {% for x in open_vulnerabilities %}
-                data.push(['CWE-{{x.cwe}}', {{x.count}}]);
-            {% endfor %}
-
-            _draw_vulnerabilities_graph("#open_vulnerabilities", data);
-        }
-
-        function all_vulnerabilities() {
-            var data = [];
-            {% for x in all_vulnerabilities %}
-                data.push(['CWE-{{x.cwe}}', {{x.count}}]);
-            {% endfor %}
-
-            _draw_vulnerabilities_graph("#all_vulnerabilities", data);
-        }
-
-        function finding_age() {
-            var data = {};
-            var data_1 = []
+            test_type(data);
+            
+            var data_1 = {};
+            var data_2 = []
             var ticks = []
             {% for f in open_objs %}
-                if (data[{{ f.age }}]) {
-                    data[{{ f.age }}] += 1
+                if (data_1[{{ f.age }}]) {
+                    data_1[{{ f.age }}] += 1
                 }
                 else {
-                    data[{{ f.age }}] = 1
+                    data_1[{{ f.age }}] = 1
                 }
             {% endfor %}
             var i = 0;
-            $.each(data, function (index, value) {
+            $.each(data_1, function (index, value) {
                 if (value > 0) {
-                    data_1.push([i, value]);
+                    data_2.push([i, value]);
                     ticks.push([i, index])
                 }
                 i++;
             });
+            finding_age(data_2, ticks);
+            
+            data = [];
+            {% for x in open_vulnerabilities %}
+                data.push(['CWE-{{x.cwe}}', {{x.count}}]);
+            {% endfor %}
+            draw_vulnerabilities_graph("#open_vulnerabilities", data);
+            
+            data = [];
+            {% for x in all_vulnerabilities %}
+                data.push(['CWE-{{x.cwe}}', {{x.count}}]);
+            {% endfor %}
+            draw_vulnerabilities_graph("#all_vulnerabilities", data);
 
-
-            var dataset = [
-                {data: data_1, color: "#337ab7", fillColor: "#337ab7"}
-            ];
-
-            var options = {
-                series: {
-                    bars: {
-                        show: true,
-                        fill: true,
-                        fillColor: "#337ab7"
-                    }
-                },
-                bars: {
-                    align: "center",
-                    barWidth: 0.5
-                },
-                xaxis: {
-                    axisLabel: "Days Open",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 10,
-                    ticks: ticks,
-                },
-                yaxis: {
-                    axisLabel: "Number of Findings",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 3,
-                },
-                legend: {
-                    show: false,
-                },
-                grid: {
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-                }
-            };
-
-
-            $.plot("#finding_age", dataset, options);
-        }
+            //$(".product-graphs").hide();
+            $("#meta_accordion").accordion();
+        });
 
         {%  if punchcard %}
 

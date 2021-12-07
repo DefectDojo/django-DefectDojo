@@ -1,6 +1,7 @@
 {
   "name": "defectdojo",
-  "version": "2.4.1",
+  "version": "2.5.0",
+  "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
     "JUMFlot": "jumjum123/JUMFlot#*",
@@ -36,7 +37,7 @@
     "metismenu": "~3.0.7",
     "moment": "^2.29.1",
     "morris.js": "morrisjs/morris.js",
-    "pdfmake": "^0.2.2",
+    "pdfmake": "^0.2.4",
     "startbootstrap-sb-admin-2": "1.0.7"
   },
   "engines": {

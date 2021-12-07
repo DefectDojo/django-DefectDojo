@@ -9,6 +9,9 @@ For development purposes,
 and [Helm](https://helm.sh/) can be installed locally by following
 this [guide](https://helm.sh/docs/using_helm/#installing-helm).
 
+## Supported Kubernetes Versions
+The tests cover the deployment on the lastest [kubernetes version](https://kubernetes.io/releases/) and the oldest supported [version from AWS](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions). The assumption is that version in between do not have significant differences. Current tested versions can looks up in the [github k8s workflow](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/k8s-testing.yml).
+
 ## Helm chart
 Starting with version 1.14.0, a helm chart will be pushed onto the `helm-charts` branch during the release process. Don't look for a chart museum, we're leveraging the "raw" capabilities of GitHub at this time.
 
@@ -52,7 +55,6 @@ helm repo update
 
 Helm >= v3
 ```zsh
-helm repo add stable https://charts.helm.sh/stable
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 ```
@@ -399,5 +401,6 @@ helm uninstall defectdojo
 To remove persistent objects not removed by uninstall (this will remove any database):
 ```
 kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-rabbitmq-specific defectdojo-postgresql-specific defectdojo-mysql-specific
-kubectl delete pvc data-defectdojo-rabbitmq-0 data-defectdojo-postgresql-0
+kubectl delete serviceAccount defectdojo
+kubectl delete pvc data-defectdojo-rabbitmq-0 data-defectdojo-postgresql-0 data-defectdojo-mysql-0
 ```
