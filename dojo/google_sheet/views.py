@@ -200,7 +200,7 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
                     return True
 
 
-@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Test_View, 'tid')
 def export_to_sheet(request, tid):
     system_settings = get_object_or_404(System_Settings, id=1)
     google_sheets_enabled = system_settings.enable_google_sheets

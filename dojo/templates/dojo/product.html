@@ -80,7 +80,7 @@
                                               <i class="fa fa-list-alt"></i> View
                                           </a>
                                         </li>
-                                        {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
+                                        {% if prod|has_object_permission:"Product_Edit" %}
                                           <li role="presentation">
                                             <a class="" href="{% url 'edit_product' prod.id %}">
                                                 <i class="fa fa-pencil-square-o"></i> Edit
@@ -89,14 +89,14 @@
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
                                           <li><a href="{% url 'view_engagements' prod.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
-                                        {% if prod|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:prod %}
+                                        {% if prod|has_object_permission:"Engagement_Add" %}
                                           <li><a href="{% url 'new_eng_for_prod' prod.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
                                           <li><a href="{% url 'product_open_findings' prod.id %}"><i class="fa fa-list-alt"></i> View Open Findings</a></li>
                                           <li><a href="{% url 'product_open_findings' prod.id %}?severity=Critical"><i class="fa fa-exclamation-triangle"></i> View Critical Findings</a></li>
                                           <li><a href="{% url 'product_open_findings' prod.id %}?date=2"><i class="fa fa-calendar"></i> View Last 7 Days Findings</a></li>
-                                        {% if prod|has_object_permission:"Finding_Add" or user|is_authorized_for_staff:prod %}
+                                        {% if prod|has_object_permission:"Finding_Add" %}
                                           <li><a href="{% url 'ad_hoc_finding' prod.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
@@ -105,10 +105,10 @@
                                           <li><a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Endpoints</a></li>
                                           <li><a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Hosts</a></li>
                                           <li><a href="{% url 'product_endpoint_report' prod.id %}"><i class="fa fa-file-text-o"></i> Endpoint Report</a></li>
-                                        {% if prod|has_object_permission:"Endpoint_Add" or user|is_authorized_for_staff:prod %}
+                                        {% if prod|has_object_permission:"Endpoint_Add" %}
                                           <li><a href="{% url 'add_endpoint' prod.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
                                         {% endif %}
-                                        {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_staff:prod %}
+                                        {% if prod|has_object_permission:"Product_Edit" %}
                                           <li role="separator" class="divider"></li>
                                           <li role="presentation">
                                             <a class="" href="{% url 'add_meta_data' prod.id %}">
@@ -149,7 +149,7 @@
                                             <i class="fa fa-file-text-o"></i> Product Report
                                           </a>
                                         </li>
-                                        {% if prod|has_object_permission:"Benchmark_Edit" or user|is_authorized_for_staff:prod %}
+                                        {% if prod|has_object_permission:"Benchmark_Edit" %}
                                           {% if system_settings.enable_benchmark and benchmark_type %}
                                             <li role="separator" class="divider"></li>
                                             {% for bt in benchmark_type %}
@@ -167,7 +167,7 @@
                                               <i class="fa fa-history"></i> View History
                                           </a>
                                         </li>
-                                        {% if prod|has_object_permission:"Product_Delete" or user|is_authorized_for_delete:prod %}
+                                        {% if prod|has_object_permission:"Product_Delete" %}
                                           <li role="separator" class="divider"></li>
                                           <li role="presentation">
                                             <a class="text-danger" href="{% url 'delete_product' prod.id %}">
@@ -189,11 +189,7 @@
                                 </td>
                                 <!-- Tags column -->
                                 <td>
-                                    <sup>
-                                    {% for tag in prod.tags.all %}
-                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                    {% endfor %}
-                                  </sup>
+                                  {% include "dojo/snippets/tags.html" with tags=prod.tags.alll %}
                                 </td>
                                 <!-- End of Tags Column -->
                                 <td class="text-center">{{ prod.business_criticality|business_criticality_icon }}</td>

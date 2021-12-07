@@ -83,13 +83,13 @@ to be created. Closely follow the steps below to guarantee success.
    To authorize users you will need to set the following:
 
     {{< highlight python >}}
-    SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['example.com', 'example.org']
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['example.com', 'example.org']
     {{< /highlight >}}
 
     or
 
     {{< highlight python >}}
-    SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['<email@example.com>']
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['<email@example.com>']
     {{< /highlight >}}
 
 OKTA
@@ -242,6 +242,8 @@ homepage](https://github.com/IdentityPython/djangosaml2).
 
     {{< highlight python >}}
     DD_SAML2_ENABLED=(bool, **True**),
+    # SAML Login Button Text
+    DD_SAML2_LOGIN_BUTTON_TEXT=(str, 'Login with SAML'),
     # If the metadata can be accessed from a url, try the
     DD_SAML2_METADATA_AUTO_CONF_URL=(str, '<https://your_IdP.com/metadata.xml>'),
     # Otherwise, downlaod a copy of the metadata into an xml file, and
@@ -263,8 +265,7 @@ NOTE: *DD_SAML2_ATTRIBUTES_MAP* in k8s can be referenced as extraConfig (e.g. `D
 4.  Checkout the SAML section in dojo/`dojo/settings/settings.dist.py` and verfiy if it fits your requirement. If you need help, take a look at the [plugin
 documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
 
-5.  Restart DefectDojo, and you should now see a **Login with SAML**
-    button on the login page.
+5.  Restart DefectDojo, and you should now see a **Login with SAML** button (default setting of DD_SAML2_LOGIN_BUTTON_TEXT) on the login page.
 
 NOTE: In the case when IDP is configured to use self signed (private) certificate,
 than CA needs to be specified by define environments variable
@@ -313,6 +314,21 @@ Newly created users are neither staff nor superuser by default. The `is_staff` f
 **Example:**
 
 `.*@example.com` will make `alice@example.com` a staff user, while `bob@partner.example.com` or `chris@example.org` will be non-staff users.
+
+
+## Login speed-up
+
+If you are using only one Social authentication and you are not using the standard login mechanism (`SHOW_LOGIN_FORM` is
+set to `False`), showing login page could be useless because every time user clicks on the only existing button on the
+page like "Login with SAML" (or another similar button). If you set `SOCIAL_LOGIN_AUTO_REDIRECT` to `True`, the login
+page is skipped and the user is automatically redirected to the identity provider's page.
+
+### Login form fallback
+
+If you are using "login speed-up", it can be useful to be able to login by the standard way, for example when an admin
+user needs to log in because of a change of some settings or permissions. Accessing
+[`<DD_HOST>/login?force_login_form`](https://<DD_HOST>/login?force_login_form) shows login form even "login speed-up" is
+enabled.
 
 
 ## Other Providers

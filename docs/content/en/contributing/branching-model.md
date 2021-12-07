@@ -24,3 +24,6 @@ PRs that relate to security issues are done through [security advisories](https:
 ![Schemas](../../images/branching_model.png)
 
 Diagrams created with [plantUML](https://plantuml.com). Find a web-based editor for PlantUML at https://www.planttext.com.
+
+## Documentation
+A `dev` version of the documentation built from the `dev` branch is available at [DefectDojo Documentation - dev branch](https://defectdojo.github.io/django-DefectDojo/dev/).

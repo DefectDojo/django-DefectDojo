@@ -80,11 +80,7 @@
                                            data-trigger="hover" title="{{ finding.title|truncatechars_html:100 }}"
                                            data-content="{{ finding.description|truncatechars_html:500 }}">
                                             {{ finding.title }}
-                                            <sup>
-                                                {% for tag in finding.tags.all %}
-                                                <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                                {% endfor %}
-                                            </sup>
+                                            {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                         </a>
                                     {% elif apply_template %}
                                         <a href="{% url 'choose_finding_template_options' finding.id fid %}"
@@ -92,20 +88,12 @@
                                            data-trigger="hover" title="{{ finding.title|truncatechars_html:100 }}"
                                            data-content="{{ finding.description|truncatechars_html:500 }}">
                                             {{ finding.title }}
-                                            <sup>
-                                                {% for tag in finding.tags.all %}
-                                                    <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                                {% endfor %}
-                                            </sup>
+                                            {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                         </a>
                                     {% else %}
                                         <a title="{{ finding.title }}" href="{% url 'edit_template' finding.id %}">
                                             {{ finding.title }}
-                                            <sup>
-                                                {% for tag in finding.tags.all %}
-                                                <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                                {% endfor %}
-                                            </sup>
+                                            {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                         </a>
                                     {% endif %}
                                 </td>
