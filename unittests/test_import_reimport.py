@@ -3,7 +3,7 @@ from dojo.models import User, Test, Finding
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from django.test.client import Client
-import datetime
+from django.utils import timezone
 from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
 from .test_utils import assertTestImportModelsCreated
 from django.test import override_settings
@@ -174,7 +174,7 @@ class ImportReimportMixin(object):
 
         # Get the date
         date = findings['results'][0]['date']
-        self.assertEqual(date, str(datetime.date.today()))
+        self.assertEqual(date, str(timezone.localtime(timezone.now()).date()))
 
         return test_id
 
@@ -1235,7 +1235,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         if scan_date is not None:
             payload['scan_date'] = scan_date
         else:
-            payload['scan_date'] = str(datetime.date.today())
+            payload['scan_date'] = str(timezone.localtime(timezone.now()).date())
 
         return self.import_scan_ui(engagement, payload)
 
@@ -1259,7 +1259,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         if scan_date is not None:
             payload['scan_date'] = scan_date
         else:
-            payload['scan_date'] = str(datetime.date.today())
+            payload['scan_date'] = str(timezone.localtime(timezone.now()).date())
 
         return self.reimport_scan_ui(test_id, payload)
 

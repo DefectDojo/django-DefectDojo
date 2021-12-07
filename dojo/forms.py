@@ -376,7 +376,7 @@ class ImportScanForm(forms.Form):
         required=True,
         label="Scan Completion Date",
         help_text="Scan completion date will be used on all findings.",
-        initial=datetime.now().strftime("%Y-%m-%d"),
+        initial=timezone.localtime(timezone.now()).date(),
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
@@ -514,7 +514,7 @@ class ReImportScanForm(forms.Form):
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
         date = self.cleaned_data['scan_date']
-        if date.date() > datetime.today().date():
+        if date.date() > timezone.localtime(timezone.now()).date():
             raise forms.ValidationError("The date cannot be in the future!")
         return date
 

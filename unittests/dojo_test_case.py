@@ -15,7 +15,6 @@ from dojo.jira_link.views import get_custom_field
 import logging
 import pprint
 import copy
-import datetime
 from django.utils.http import urlencode
 
 logger = logging.getLogger(__name__)
@@ -472,7 +471,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if scan_date is not None:
             payload['scan_date'] = scan_date
         else:
-            payload['scan_date'] = str(datetime.date.today())
+            payload['scan_date'] = str(timezone.localtime(timezone.now()).date())
 
         return self.import_scan(payload, expected_http_status_code)
 
@@ -525,7 +524,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if scan_date is not None:
             payload['scan_date'] = scan_date
         else:
-            payload['scan_date'] = str(datetime.date.today())
+            payload['scan_date'] = str(timezone.localtime(timezone.now()).date())
 
         return self.reimport_scan(payload, expected_http_status_code=expected_http_status_code)
 
