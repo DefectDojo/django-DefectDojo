@@ -113,9 +113,13 @@ class NessusCSVParser(object):
                 find.unsaved_endpoints = list()
                 dupes[dupe_key] = find
             # manage endpoints
+            host = row.get('Host', row.get('DNS Name'))
+            if len(host) == 0:
+                host = row.get('IP Address', 'localhost')
+
             endpoint = Endpoint(
                           protocol=row.get('Protocol').lower() if 'Protocol' in row else None,
-                          host=row.get('Host', row.get('IP Address', 'localhost')),
+                          host=host,
                           port=row.get('Port')
                         )
             find.unsaved_endpoints.append(endpoint)
