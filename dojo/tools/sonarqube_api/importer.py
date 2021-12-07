@@ -5,7 +5,6 @@ import html2text
 from lxml import etree
 import textwrap
 from django.conf import settings
-from django.core.exceptions import ValidationError
 
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
@@ -58,14 +57,15 @@ class SonarQubeApiImporter(object):
             config = test.api_scan_configuration  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
             # Double check of config
             if config.product != product:
-                raise ValidationError('Product API Scan Configuration and Product do not match.')
+                raise Exception('Product API Scan Configuration and Product do not match.')
         else:
-            sqqs = product.product_api_scan_configuration_set.filter(product=product, tool_configuration__tool_type__name='SonarQube')
+            sqqs = product.product_api_scan_configuration_set.filter(product=product)
             if sqqs.count() == 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 4
                 config = sqqs.first()
             elif sqqs.count() > 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 6
-                raise ValidationError(
-                    'More than one Product API Scan Configuration has been configured, but none of them has been chosen. Please specify which one should be used.'
+                raise Exception(
+                    'More than one Product API Scan Configuration has been configured, but none of them has been chosen.\n'
+                    'Please specify at Test which one should be used.'
                 )
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
                 config = None

@@ -38,8 +38,7 @@ class Migration(migrations.Migration):
                     try:
                         if hasattr(obj, 'prod_type_id') and obj.prod_type_id == 0:
                             logger.warning('product found without product type (prod_type==0), changing to: "_tag migration lost and found" product type')
-                            Product_Type_Model = apps.get_model('dojo', 'Product_Type')
-                            prod_type_lost_and_found, created = Product_Type_Model.objects.get_or_create(name='_tag migration lost and found')
+                            prod_type_lost_and_found, created = Product_Type.objects.get_or_create(name='_tag migration lost and found')
                             obj.prod_type = prod_type_lost_and_found
                             obj.save()
                             logger.warning('product type succesfully changed to %i', prod_type_lost_and_found.id)

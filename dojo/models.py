@@ -225,8 +225,6 @@ class System_Settings(models.Model):
                                               "number of duplicates, the "
                                               "oldest will be deleted. Duplicate will not be deleted when left empty. A value of 0 will remove all duplicates.")
 
-    email_from = models.CharField(max_length=200, default='no-reply@example.com', blank=True)
-
     enable_jira = models.BooleanField(default=False,
                                       verbose_name='Enable JIRA integration',
                                       blank=False)
@@ -280,6 +278,9 @@ class System_Settings(models.Model):
                                     help_text='The full URL of the '
                                               'incoming webhook')
     enable_mail_notifications = models.BooleanField(default=False, blank=False)
+    mail_notifications_from = models.CharField(max_length=200,
+                                               default='from@example.com',
+                                               blank=True)
     mail_notifications_to = models.CharField(max_length=200, default='',
                                              blank=True)
     false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive. Not needed when using deduplication, advised to not combine these two.")
@@ -388,22 +389,17 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name='Enable checklists',
         help_text="With this setting turned off, checklists will be disabled in the user interface.")
-    enable_endpoint_metadata_import = models.BooleanField(
-        default=True,
-        blank=False,
-        verbose_name='Enable Endpoint Metadata Import',
-        help_text="With this setting turned off, endpoint metadata import will be disabled in the user interface.")
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
         blank=True,
-        help_text="New users will be assigned to this group.",
+        help_text="New users created by OAuth2 will be assigned to this group.",
         on_delete=models.RESTRICT)
     default_group_role = models.ForeignKey(
         Role,
         null=True,
         blank=True,
-        help_text="New users will be assigned to their default group with this role.",
+        help_text="New users created by OAuth2 will be assigned to their default group with this role.",
         on_delete=models.RESTRICT)
     staff_user_email_pattern = models.CharField(
         max_length=200,
@@ -518,6 +514,7 @@ class Product_Type(models.Model):
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
+    authorized_users = models.ManyToManyField(User, blank=True)
     members = models.ManyToManyField(Dojo_User, through='Product_Type_Member', related_name='prod_type_members', blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Type_Group', related_name='product_type_groups', blank=True)
 
@@ -720,6 +717,7 @@ class Product(models.Model):
                                   null=False, blank=False, on_delete=models.CASCADE)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
+    authorized_users = models.ManyToManyField(User, blank=True)
     members = models.ManyToManyField(Dojo_User, through='Product_Member', related_name='product_members', blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Group', related_name='product_groups', blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
@@ -1092,7 +1090,7 @@ class Engagement(models.Model):
         return False
 
     def __str__(self):
-        return "Engagement %i: %s (%s)" % (self.id if id else 0, self.name if self.name else '',
+        return "Engagement: %s (%s)" % (self.name if self.name else '',
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
 
@@ -1457,6 +1455,39 @@ class Sonarqube_Issue_Transition(models.Model):
 
     class Meta:
         ordering = ('-created', )
+
+
+# This class is not used anymore, but can't be deleted because it's referenced in dojo/db_migrations/0131_migrate_sonarcube_cobalt.py
+class Sonarqube_Product(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    sonarqube_project_key = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="SonarQube Project Key"
+    )
+    sonarqube_tool_config = models.ForeignKey(
+        Tool_Configuration, verbose_name="SonarQube Configuration",
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return '{} | {}'.format(self.sonarqube_tool_config.name if hasattr(self, 'sonarqube_tool_config') else '', self.sonarqube_project_key)
+
+
+# This class is not used anymore, but can't be deleted because it's referenced in dojo/db_migrations/0131_migrate_sonarcube_cobalt.py
+class Cobaltio_Product(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    cobaltio_asset_id = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="Cobalt.io Asset Id"
+    )
+    cobaltio_asset_name = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="Cobalt.io Asset Name"
+    )
+    cobaltio_tool_config = models.ForeignKey(
+        Tool_Configuration, verbose_name="Cobalt.io Configuration",
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return "{} ({})".format(self.cobaltio_asset_name, self.cobaltio_asset_id)
 
 
 class Test(models.Model):
@@ -1939,7 +1970,6 @@ class Finding(models.Model):
         self.unsaved_request = None
         self.unsaved_response = None
         self.unsaved_tags = None
-        self.unsaved_files = None
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -3703,9 +3733,7 @@ admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
 admin.site.register(CWE)
 admin.site.register(Regulation)
-admin.site.register(Global_Role)
-admin.site.register(Role)
-admin.site.register(Dojo_Group)
+admin.site.register(Notifications)
 
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)

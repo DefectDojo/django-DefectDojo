@@ -7,7 +7,7 @@ from datetime import datetime, date, timedelta
 from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
@@ -38,6 +38,7 @@ from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
+from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
@@ -103,6 +104,8 @@ def prefetch_for_product(prods):
                                                                                     engagement__test__finding__active=True,
                                                                                     engagement__test__finding__verified=True)))
         prefetched_prods = prefetched_prods.prefetch_related('jira_project_set__jira_instance')
+        prefetched_prods = prefetched_prods.prefetch_related('authorized_users')
+        prefetched_prods = prefetched_prods.prefetch_related('prod_type__authorized_users')
         prefetched_prods = prefetched_prods.prefetch_related('members')
         prefetched_prods = prefetched_prods.prefetch_related('prod_type__members')
         active_endpoint_query = Endpoint.objects.filter(
@@ -129,9 +132,10 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     return start + timedelta(weeks=iso_week - 1, days=iso_day - 1)
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_product(request, pid):
     prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager') \
+                                      .prefetch_related('authorized_users') \
                                       .prefetch_related('members') \
                                       .prefetch_related('prod_type__members')
     prod = get_object_or_404(prod_query, id=pid)
@@ -207,7 +211,7 @@ def view_product(request, pid):
         'personal_notifications_form': personal_notifications_form})
 
 
-@user_is_authorized(Product, Permissions.Component_View, 'pid')
+@user_is_authorized(Product, Permissions.Component_View, 'pid', 'view')
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
@@ -466,7 +470,7 @@ def endpoint_querys(request, prod):
     return filters
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_product_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
@@ -623,7 +627,7 @@ def view_product_metrics(request, pid):
                    'user': request.user})
 
 
-@user_is_authorized(Product, Permissions.Engagement_View, 'pid')
+@user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
 def view_engagements(request, pid):
     prod = get_object_or_404(Product, id=pid)
 
@@ -726,9 +730,12 @@ def new_product(request, ptid=None):
             gform = None
 
         if form.is_valid():
-            product_type = form.instance.prod_type
-            user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
-
+            if settings.FEATURE_AUTHORIZATION_V2:
+                product_type = form.instance.prod_type
+                user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
+            else:
+                if not request.user.is_staff:
+                    raise PermissionDenied
             product = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -792,7 +799,7 @@ def new_product(request, ptid=None):
                    'gform': gform})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def edit_product(request, pid):
     product = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
@@ -845,7 +852,8 @@ def edit_product(request, pid):
             if not error:
                 return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
-        form = ProductForm(instance=product)
+        form = ProductForm(instance=product,
+                        initial={'auth_users': product.authorized_users.all()})
 
         if jira_enabled:
             jira_project = jira_helper.get_jira_project(product)
@@ -872,7 +880,7 @@ def edit_product(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_Delete, 'pid')
+@user_is_authorized(Product, Permissions.Product_Delete, 'pid', 'delete')
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     form = DeleteProductForm(instance=product)
@@ -918,7 +926,7 @@ def delete_product(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Engagement_Add, 'pid')
+@user_is_authorized(Product, Permissions.Engagement_Add, 'pid', 'staff')
 def new_eng_for_app(request, pid, cicd=False):
     jira_project = None
     jira_project_form = None
@@ -926,6 +934,8 @@ def new_eng_for_app(request, pid, cicd=False):
 
     product = Product.objects.get(id=pid)
     jira_error = False
+    if not user_is_authorized(request.user, 'staff', product):
+        raise PermissionDenied
 
     if request.method == 'POST':
         form = EngForm(request.POST, cicd=cicd, product=product, user=request.user)
@@ -1013,7 +1023,7 @@ def new_eng_for_app(request, pid, cicd=False):
                    })
 
 
-@user_is_authorized(Product, Permissions.Technology_Add, 'pid')
+@user_is_authorized(Product, Permissions.Technology_Add, 'pid', 'staff')
 def new_tech_for_prod(request, pid):
     if request.method == 'POST':
         form = AppAnalysisForm(request.POST)
@@ -1035,7 +1045,7 @@ def new_tech_for_prod(request, pid):
                    'pid': pid})
 
 
-@user_is_authorized(App_Analysis, Permissions.Technology_Edit, 'tid')
+@user_is_authorized(App_Analysis, Permissions.Technology_Edit, 'tid', 'staff')
 def edit_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
     form = AppAnalysisForm(instance=technology)
@@ -1059,7 +1069,7 @@ def edit_technology(request, tid):
                    'technology': technology})
 
 
-@user_is_authorized(App_Analysis, Permissions.Technology_Delete, 'tid')
+@user_is_authorized(App_Analysis, Permissions.Technology_Delete, 'tid', 'staff')
 def delete_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
     form = DeleteAppAnalysisForm(instance=technology)
@@ -1081,13 +1091,13 @@ def delete_technology(request, tid):
     })
 
 
-@user_is_authorized(Product, Permissions.Engagement_Add, 'pid')
+@user_is_authorized(Product, Permissions.Engagement_Add, 'pid', 'staff')
 def new_eng_for_app_cicd(request, pid):
     # we have to use pid=pid here as new_eng_for_app expects kwargs, because that is how django calls the function based on urls.py named groups
     return new_eng_for_app(request, pid=pid, cicd=True)
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def add_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1115,7 +1125,7 @@ def add_meta_data(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1146,7 +1156,7 @@ def edit_meta_data(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Finding_Add, 'pid')
+@user_is_authorized(Product, Permissions.Finding_Add, 'pid', 'staff')
 def ad_hoc_finding(request, pid):
     prod = Product.objects.get(id=pid)
     test_type, _ = Test_Type.objects.get_or_create(name="Pen Test")
@@ -1300,7 +1310,7 @@ def ad_hoc_finding(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'staff')
 def engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     presets = Engagement_Presets.objects.filter(product=prod).all()
@@ -1313,7 +1323,7 @@ def engagement_presets(request, pid):
                    'prod': prod})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def edit_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
@@ -1339,7 +1349,7 @@ def edit_engagement_presets(request, pid, eid):
                    'prod': prod})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def add_engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -1362,7 +1372,7 @@ def add_engagement_presets(request, pid):
     return render(request, 'dojo/new_params.html', {'tform': tform, 'pid': pid, 'product_tab': product_tab})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def delete_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
@@ -1392,7 +1402,7 @@ def delete_engagement_presets(request, pid, eid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def edit_notifications(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -1509,7 +1519,7 @@ def delete_product_member(request, memberid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_API_Scan_Configuration_Add, 'pid')
+@user_is_authorized(Product, Permissions.Product_API_Scan_Configuration_Add, 'pid', 'staff')
 def add_api_scan_configuration(request, pid):
 
     product = get_object_or_404(Product, id=pid)
@@ -1554,7 +1564,7 @@ def add_api_scan_configuration(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_api_scan_configurations(request, pid):
 
     product_api_scan_configurations = Product_API_Scan_Configuration.objects.filter(product=pid)
@@ -1569,7 +1579,7 @@ def view_api_scan_configurations(request, pid):
                   })
 
 
-@user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Edit, 'pascid')
+@user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Edit, 'pascid', 'staff')
 def edit_api_scan_configuration(request, pid, pascid):
 
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
@@ -1614,7 +1624,7 @@ def edit_api_scan_configuration(request, pid, pascid):
                   })
 
 
-@user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Delete, 'pascid')
+@user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Delete, 'pascid', 'staff')
 def delete_api_scan_configuration(request, pid, pascid):
 
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
