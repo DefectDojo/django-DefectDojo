@@ -120,7 +120,7 @@ A classic way of reimporting a scan is by specifying the ID of the test instead:
 }
 ```
 
-## Using the `scan_date` field
+## Using the Scan Completion Date (API: `scan_date`) field
 
 DefectDojo offers a plethora of supported scanner reports, but not all of them contain the 
 information most important to a user. The `scan_date` field is a flexible smart feature that
