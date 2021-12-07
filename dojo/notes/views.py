@@ -8,6 +8,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
+from django.conf import settings
+
 
 # Local application/library imports
 from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
@@ -40,7 +42,11 @@ def delete_issue(request, id, page, objid):
     if page is None:
         raise PermissionDenied
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, object, Permissions.Note_Delete)
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, object, Permissions.Note_Delete)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
 
     if form.is_valid():
         note.delete()
@@ -78,7 +84,11 @@ def edit_issue(request, id, page, objid):
     if page is None:
         raise PermissionDenied
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, object, Permissions.Note_Edit)
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, object, Permissions.Note_Edit)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
 
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
@@ -156,7 +166,11 @@ def note_history(request, id, page, objid):
     if page is None:
         raise PermissionDenied
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, object, Permissions.Note_View_History)
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, object, Permissions.Note_View_History)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
 
     history = note.history.all()
 

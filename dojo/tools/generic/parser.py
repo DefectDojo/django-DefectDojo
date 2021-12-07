@@ -35,11 +35,6 @@ class GenericParser(object):
             if "endpoints" in item:
                 unsaved_endpoints = item["endpoints"]
                 del item["endpoints"]
-            # remove files of the dictionnary
-            unsaved_files = None
-            if "files" in item:
-                unsaved_files = item["files"]
-                del item["files"]
 
             finding = Finding(**item)
             # manage active/verified overrride
@@ -62,9 +57,6 @@ class GenericParser(object):
                     else:
                         endpoint = Endpoint(**item)
                     finding.unsaved_endpoints.append(endpoint)
-
-            if unsaved_files:
-                finding.unsaved_files = unsaved_files
             findings.append(finding)
         return findings
 

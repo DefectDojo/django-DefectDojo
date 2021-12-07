@@ -1,4 +1,3 @@
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 import unittest
 import sys
@@ -15,17 +14,17 @@ class EndpointTest(BaseTestCase):
         # Navigate to the Endpoint page
         driver.get(self.base_url + "endpoint")
         # "Click" the dropdown button to see options
-        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element_by_id("dropdownMenu1").click()
         # "Click" the New Endpoint
-        driver.find_element(By.LINK_TEXT, "New Endpoint").click()
+        driver.find_element_by_link_text("New Endpoint").click()
         # Keep a good practice of clearing field before entering value
         # Endpoints
-        driver.find_element(By.ID, "id_endpoint").clear()
-        driver.find_element(By.ID, "id_endpoint").send_keys("moving.com.rnd")
+        driver.find_element_by_id("id_endpoint").clear()
+        driver.find_element_by_id("id_endpoint").send_keys("moving.com.rnd")
         # Select product to assign endpoint to
-        Select(driver.find_element(By.ID, "id_product")).select_by_visible_text("QA Test")
+        Select(driver.find_element_by_id("id_product")).select_by_visible_text("QA Test")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
@@ -38,20 +37,20 @@ class EndpointTest(BaseTestCase):
         # Navigate to the endpoint page
         driver.get(self.base_url + "endpoint")
         # Select one of the previously created endpoint to edit
-        driver.find_element(By.LINK_TEXT, "moving.com.rnd").click()
+        driver.find_element_by_link_text("moving.com.rnd").click()
         # "Click" the dropdown button to see options
-        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element_by_id("dropdownMenu1").click()
         # "Click" the Edit Endpoint
-        driver.find_element(By.LINK_TEXT, "Edit Endpoint").click()
+        driver.find_element_by_link_text("Edit Endpoint").click()
         # Clear the old endpoint host name
-        driver.find_element(By.ID, "id_host").clear()
+        driver.find_element_by_id("id_host").clear()
         # Fill in the endpoint host name
-        driver.find_element(By.ID, "id_host").send_keys("rnd.moving.com")
+        driver.find_element_by_id("id_host").send_keys("rnd.moving.com")
         # Fill in port for endpoint
-        driver.find_element(By.ID, "id_port").clear()
-        driver.find_element(By.ID, "id_port").send_keys("8080")
+        driver.find_element_by_id("id_port").clear()
+        driver.find_element_by_id("id_port").send_keys("8080")
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
@@ -64,13 +63,13 @@ class EndpointTest(BaseTestCase):
         # Navigate to the endpoint page
         driver.get(self.base_url + "endpoint")
         # Select one of the previously created endpoint to delete
-        driver.find_element(By.LINK_TEXT, "rnd.moving.com:8080").click()
+        driver.find_element_by_link_text("rnd.moving.com:8080").click()
         # "Click" the dropdown button to see options
-        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element_by_id("dropdownMenu1").click()
         # "Click" the Delete Endpoint
-        driver.find_element(By.LINK_TEXT, "Delete Endpoint").click()
+        driver.find_element_by_link_text("Delete Endpoint").click()
         # "Click" the delete button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-danger").click()
+        driver.find_element_by_css_selector("button.btn.btn-danger").click()
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure

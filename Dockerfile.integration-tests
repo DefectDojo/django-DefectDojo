@@ -45,8 +45,7 @@ COPY tests/ ./tests/
 
 RUN chmod -R 0777 /app
 
-ARG uid=1001
-USER ${uid}
+USER 1001
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_PASSWORD='' \
