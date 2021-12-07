@@ -194,6 +194,10 @@ env = environ.Env(
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
     # when enabled standard users can't change their profile information, default True
     DD_USER_PROFILE_EDITABLE=(bool, True),
+    # when enabled, finding importing will occur asynchronously, default False
+    DD_ASYNC_FINDING_IMPORT=(bool, False),
+    # The number fo findings to be processed per celeryworker
+    DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE=(int, 100),
 )
 
 
@@ -1333,3 +1337,8 @@ SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
 
 # when enabled standard users can't change their profile information, default False
 USER_PROFILE_EDITABLE = env("DD_USER_PROFILE_EDITABLE")
+
+# when enabled, finding importing will occur asynchronously, default False
+ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")
+# The number fo findings to be processed per celeryworker
+ASYNC_FINDING_IMPORT_CHUNK_SIZE = env("DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE")
