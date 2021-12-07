@@ -10,7 +10,7 @@
 {% endif %}
 
 {% if engagement.product.enable_full_risk_acceptance %}
-    {% if engagement|has_object_permission:"Risk_Acceptance" or user|is_authorized_for_staff:risk_acceptance %}
+    {% if engagement|has_object_permission:"Risk_Acceptance" %}
         <li role="presentation">
             <a href="{% url 'edit_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
                 <i class="fa fa-pencil-square-o"></i> Edit Risk Acceptance
@@ -38,7 +38,7 @@
     <i class="fa fa-history"></i> View History
 </a>
 </li>
-{% if engagement|has_object_permission:"Risk_Acceptance" or user|is_authorized_for_staff:risk_acceptance %}
+{% if engagement|has_object_permission:"Risk_Acceptance" %}
 <li role="separator" class="divider"></li>
 <li role="presentation">
     <a class="text-danger delete-risk_acceptance" href="#">

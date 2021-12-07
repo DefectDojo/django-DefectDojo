@@ -21,7 +21,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
     NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset, UserContactInfoViewSet, \
-    ProductAPIScanConfigurationViewSet, UserProfileView
+    ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -68,6 +68,7 @@ admin.autodiscover()
 v2_api = DefaultRouter()
 v2_api.register(r'technologies', AppAnalysisViewSet)
 v2_api.register(r'endpoints', EndPointViewSet)
+v2_api.register(r'endpoint_meta_import', EndpointMetaImporterView, basename='endpointmetaimport')
 v2_api.register(r'endpoint_status', EndpointStatusViewSet)
 v2_api.register(r'engagements', EngagementViewSet)
 v2_api.register(r'development_environments', DevelopmentEnvironmentViewSet)
@@ -80,15 +81,14 @@ v2_api.register(r'jira_product_configurations', JiraProjectViewSet)  # backwards
 v2_api.register(r'jira_projects', JiraProjectViewSet)
 v2_api.register(r'products', ProductViewSet)
 v2_api.register(r'product_types', ProductTypeViewSet)
-if settings.FEATURE_AUTHORIZATION_V2:
-    v2_api.register(r'dojo_groups', DojoGroupViewSet)
-    v2_api.register(r'dojo_group_members', DojoGroupMemberViewSet)
-    v2_api.register(r'product_type_members', ProductTypeMemberViewSet)
-    v2_api.register(r'product_members', ProductMemberViewSet)
-    v2_api.register(r'product_type_groups', ProductTypeGroupViewSet)
-    v2_api.register(r'product_groups', ProductGroupViewSet)
-    v2_api.register(r'roles', RoleViewSet)
-    v2_api.register(r'global_roles', GlobalRoleViewSet)
+v2_api.register(r'dojo_groups', DojoGroupViewSet)
+v2_api.register(r'dojo_group_members', DojoGroupMemberViewSet)
+v2_api.register(r'product_type_members', ProductTypeMemberViewSet)
+v2_api.register(r'product_members', ProductMemberViewSet)
+v2_api.register(r'product_type_groups', ProductTypeGroupViewSet)
+v2_api.register(r'product_groups', ProductGroupViewSet)
+v2_api.register(r'roles', RoleViewSet)
+v2_api.register(r'global_roles', GlobalRoleViewSet)
 v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
 v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
 v2_api.register(r'product_api_scan_configurations', ProductAPIScanConfigurationViewSet)

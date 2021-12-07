@@ -6,7 +6,6 @@ from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from django.db.models import Count, Q
-
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.contrib.auth.password_validation import validate_password
@@ -35,7 +34,6 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Product_API_Scan_Configuration
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
-from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 from tagulous.forms import TagField
 import logging
@@ -148,25 +146,10 @@ class MonthYearWidget(Widget):
 class Product_TypeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False)
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_users = forms.ModelMultipleChoiceField(
-            queryset=None,
-            required=False, label="Authorized Users")
-
-    def __init__(self, *args, **kwargs):
-        non_staff = Dojo_User.objects.exclude(is_staff=True) \
-            .exclude(is_active=False).order_by('first_name', 'last_name')
-        super(Product_TypeForm, self).__init__(*args, **kwargs)
-
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            self.fields['authorized_users'].queryset = non_staff
 
     class Meta:
         model = Product_Type
-        if settings.FEATURE_AUTHORIZATION_V2:
-            fields = ['name', 'description', 'critical_product', 'key_product']
-        else:
-            fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
+        fields = ['name', 'description', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
@@ -255,33 +238,19 @@ class ProductForm(forms.ModelForm):
                                        queryset=Product_Type.objects.none(),
                                        required=True)
 
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_users = forms.ModelMultipleChoiceField(
-            queryset=None,
-            required=False, label="Authorized Users")
-
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     team_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
 
     def __init__(self, *args, **kwargs):
-        non_staff = Dojo_User.objects.exclude(is_staff=True) \
-            .exclude(is_active=False).order_by('first_name', 'last_name')
         super(ProductForm, self).__init__(*args, **kwargs)
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            self.fields['authorized_users'].queryset = non_staff
         self.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
 
     class Meta:
         model = Product
-        if settings.FEATURE_AUTHORIZATION_V2:
-            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
-                    'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                    'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
-        else:
-            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
-                    'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                    'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
+        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
+                'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
+                'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
 
 class DeleteProductForm(forms.ModelForm):
@@ -403,10 +372,9 @@ class DojoMetaDataForm(forms.ModelForm):
 
 class ImportScanForm(forms.Form):
     scan_date = forms.DateTimeField(
-        required=True,
+        required=False,
         label="Scan Completion Date",
         help_text="Scan completion date will be used on all findings.",
-        initial=datetime.now().strftime("%Y-%m-%d"),
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
@@ -434,7 +402,7 @@ class ImportScanForm(forms.Form):
         label="Choose report file",
         required=False)
 
-    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get mitigated when importing."
+    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing."
                                                         "This affects the whole engagement/product depending on your deduplication scope.",
                                             required=False, initial=False)
 
@@ -475,6 +443,9 @@ class ImportScanForm(forms.Form):
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
         date = self.cleaned_data['scan_date']
+        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
+        if not date:
+            return None
         if date.date() > datetime.today().date():
             raise forms.ValidationError("The date cannot be in the future!")
         return date
@@ -503,7 +474,7 @@ class ReImportScanForm(forms.Form):
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx, .txt, .sarif"}),
         label="Choose report file",
         required=False)
-    close_old_findings = forms.BooleanField(help_text="Select if old findings get mitigated when importing.",
+    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing.",
                                             required=False, initial=True)
     version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
@@ -536,7 +507,7 @@ class ReImportScanForm(forms.Form):
         tool_type = requires_tool_type(self.scan_type)
         if tool_type:
             api_scan_configuration = cleaned_data.get('api_scan_configuration')
-            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+            if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
                 raise forms.ValidationError(f'API scan configuration must be of tool type {tool_type}')
 
         return cleaned_data
@@ -544,9 +515,34 @@ class ReImportScanForm(forms.Form):
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
         date = self.cleaned_data['scan_date']
-        if date.date() > datetime.today().date():
+        if date.date() > timezone.localtime(timezone.now()).date():
             raise forms.ValidationError("The date cannot be in the future!")
         return date
+
+
+class ImportEndpointMetaForm(forms.Form):
+    file = forms.FileField(widget=forms.widgets.FileInput(
+        attrs={"accept": ".csv"}),
+        label="Choose meta file",
+        required=True)  # Could not get required=True to actually accept the file as present
+    create_endpoints = forms.BooleanField(
+        label="Create nonexisting Endpoint",
+        initial=True,
+        required=False,
+        help_text="Create endpoints that do not already exist",)
+    create_tags = forms.BooleanField(
+        label="Add Tags",
+        initial=True,
+        required=False,
+        help_text="Add meta from file as tags in the format key:value",)
+    create_dojo_meta = forms.BooleanField(
+        label="Add Meta",
+        initial=False,
+        required=False,
+        help_text="Add data from file as Metadata. Metadata is used for displaying custom fields",)
+
+    def __init__(self, *args, **kwargs):
+        super(ImportEndpointMetaForm, self).__init__(*args, **kwargs)
 
 
 class DoneForm(forms.Form):
@@ -754,11 +750,7 @@ class EngForm(forms.ModelForm):
 
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
-                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
-            else:
-                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
+            self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
@@ -834,11 +826,7 @@ class TestForm(forms.ModelForm):
 
         if obj:
             product = get_product(obj)
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
-                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
-            else:
-                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
+            self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
             self.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=product)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
@@ -1582,7 +1570,7 @@ class ReviewFindingForm(forms.Form):
 
         super(ReviewFindingForm, self).__init__(*args, **kwargs)
 
-        if finding is not None and settings.FEATURE_AUTHORIZATION_V2:
+        if finding is not None:
             self.fields['reviewers'].queryset = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
 
     class Meta:
@@ -1885,43 +1873,23 @@ class AddDojoUserForm(forms.ModelForm):
         required=False, validators=[validate_password],
         help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
                    and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?). Leave blank to set an unusable password for this user.')  # noqa W605
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_products = forms.ModelMultipleChoiceField(
-            queryset=Product.objects.all(), required=False,
-            help_text='Select the products this user should have access to.')
-        authorized_product_types = forms.ModelMultipleChoiceField(
-            queryset=Product_Type.objects.all(), required=False,
-            help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User
         fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active',
                   'is_staff', 'is_superuser']
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions']
-        else:
-            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
-                       'authorized_products', 'authorized_product_types']
+        exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
+                    'authorized_products', 'authorized_product_types']
 
 
 class EditDojoUserForm(forms.ModelForm):
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_products = forms.ModelMultipleChoiceField(
-            queryset=Product.objects.all(), required=False,
-            help_text='Select the products this user should have access to.')
-        authorized_product_types = forms.ModelMultipleChoiceField(
-            queryset=Product_Type.objects.all(), required=False,
-            help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User
         fields = ['username', 'first_name', 'last_name', 'email', 'is_active',
                   'is_staff', 'is_superuser']
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions']
-        else:
-            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
-                       'authorized_products', 'authorized_product_types']
+        exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
+                    'authorized_products', 'authorized_product_types']
 
 
 class DeleteUserForm(forms.ModelForm):

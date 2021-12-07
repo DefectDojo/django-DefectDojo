@@ -1,20 +1,23 @@
 docs:
-- any: ['docs/**/*', 'readme-docs/**/*']
+- docs/**/*
+- readme-docs/**/*
 
 docker:
-- any: ['docker/**/*', 'docker**', 'Docker*']
+- docker/**/*
+- docker**
+- Docker*
 
 "New Migration":
-- any: ['dojo/db_migrations/*']
+- dojo/db_migrations/*
 
 unittests:
-- any: ['dojo/unittests/**/*']
+- unittests/**/*
 
 integration_tests:
-- any: ['tests/**/*']
+- tests/**/*
 
 settings_changes:
-- any: ['dojo/settings/settings.dist.py']
+- dojo/settings/settings.dist.py
 
 apiv2:
-- any: ['dojo/api_v2/**/*']
+- dojo/api_v2/**/*
