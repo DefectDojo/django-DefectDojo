@@ -101,9 +101,6 @@ class DojoDefaultImporter(object):
                 item.date = scan_date
 
             # Indicates the scan_date is not the default, overwrite everything
-            print('\n\nitem.date:', item.date)
-            print('\n\nscan_date:', scan_date)
-            print('\n\nnow:', now)
             if (scan_date.date() if isinstance(scan_date, datetime.datetime) else scan_date) != now.date():
                 item.date = scan_date
 

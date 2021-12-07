@@ -1326,6 +1326,9 @@ class ImportScanSerializer(serializers.Serializer):
         return data
 
     def validate_scan_data(self, value):
+        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
+        if not value.date:
+            return None
         if value.date() > timezone.localtime(timezone.now()).date():
             raise serializers.ValidationError(
                 'The date cannot be in the future!')
