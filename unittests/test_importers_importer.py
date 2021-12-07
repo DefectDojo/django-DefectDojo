@@ -87,7 +87,8 @@ class TestDojoDefaultImporter(DojoTestCase):
             active,
             verified,
             minimum_severity=minimum_severity,
-            scan_date=scan_date
+            scan_date=scan_date,
+            sync=True
         )
 
         for finding in new_findings:
