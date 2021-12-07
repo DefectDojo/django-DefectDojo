@@ -4,8 +4,6 @@ from typing import Dict
 
 from dateutil.relativedelta import relativedelta
 
-from django.conf import settings
-from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import render
@@ -53,13 +51,6 @@ def dashboard(request: HttpRequest) -> HttpResponse:
             .filter(Q(engagement__isnull=True) | Q(engagement__in=engagements))
     else:
         unassigned_surveys = None
-
-    if request.user.is_superuser and not settings.FEATURE_AUTHORIZATION_V2:
-        message = '''Legacy authorization will be removed with version 2.5.0 / end of November 2021.
-                     If you have set `FEATURE_AUTHORIZATION_V2` to `False` in your local
-                     configuration, remove this local setting and start using
-                     the new authorization.'''
-        messages.add_message(request, messages.WARNING, message, extra_tags='alert-warning')
 
     add_breadcrumb(request=request, clear=True)
     return render(request, 'dojo/dashboard.html', {

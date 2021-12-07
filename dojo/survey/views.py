@@ -11,7 +11,6 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.html import escape
 from datetime import timedelta
 from django.utils import timezone as tz
-from django.conf import settings
 
 from dojo.filters import QuestionnaireFilter, QuestionFilter
 from dojo.models import Engagement, System_Settings
@@ -21,13 +20,12 @@ from dojo.forms import Add_Questionnaire_Form, Delete_Questionnaire_Form, Create
     CreateChoiceQuestionForm, EditTextQuestionForm, EditChoiceQuestionForm, AddChoicesForm, \
     AddEngagementForm, AddGeneralQuestionnaireForm, DeleteGeneralQuestionnaireForm
 from dojo.models import Answered_Survey, Engagement_Survey, Answer, TextQuestion, ChoiceQuestion, Choice, General_Survey, Question
-from dojo.user.helper import check_auth_users_list
 from dojo.authorization.authorization import user_has_permission_or_403, user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def delete_engagement_survey(request, eid, sid):
     engagement = get_object_or_404(Engagement, id=eid)
     survey = get_object_or_404(Answered_Survey, id=sid)
@@ -72,10 +70,7 @@ def answer_questionnaire(request, eid, sid):
     system_settings = System_Settings.objects.all()[0]
 
     if not system_settings.allow_anonymous_survey_repsonse:
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            auth = check_auth_users_list(request.user, prod)
-        else:
-            auth = user_has_permission(request.user, engagement, Permissions.Engagement_Edit)
+        auth = user_has_permission(request.user, engagement, Permissions.Engagement_Edit)
         if not auth:
             messages.add_message(request,
                                  messages.ERROR,
@@ -128,7 +123,7 @@ def answer_questionnaire(request, eid, sid):
                    })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def assign_questionnaire(request, eid, sid):
     survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
@@ -149,7 +144,7 @@ def assign_questionnaire(request, eid, sid):
                    })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def view_questionnaire(request, eid, sid):
     survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)

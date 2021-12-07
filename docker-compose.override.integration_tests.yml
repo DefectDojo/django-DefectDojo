@@ -30,6 +30,7 @@ services:
       DD_DEBUG: 'True'
       DD_DATABASE_URL: "${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}"
       DD_SECRET_KEY: "${DD_SECRET_KEY:-.}"
+      DD_EMAIL_URL: "smtp://mailhog:1025"
   celerybeat:
     environment:
       DD_DATABASE_URL: "${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}"
@@ -54,6 +55,13 @@ services:
       MYSQL_DATABASE: "${DD_TEST_DATABASE_NAME:-test_defectdojo}"
     volumes:
        - defectdojo_data_integration_tests:/var/lib/mysql
+  mailhog:
+    image: mailhog/mailhog:v1.0.1@sha256:8d76a3d4ffa32a3661311944007a415332c4bb855657f4f6c57996405c009bea
+    ports:
+      - target: 1025
+        published: 1025
+        protocol: tcp
+        mode: host
 volumes:
   defectdojo_data_integration_tests: {}
   defectdojo_media_integration_test: {}
