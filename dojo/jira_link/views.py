@@ -478,55 +478,6 @@ def edit_jira(request, jid):
 
 
 
-@user_passes_test(lambda u: u.is_staff)
-def edit_jira_oauth(request, jid):
-    jira = JIRA_Instance_OAUTH.objects.get(pk=jid)
-    if request.method == 'POST':
-        jform = JIRAFormOAUTH(request.POST, request.FILES, instance=jira)
-        if jform.is_valid():
-            logger.debug("form is valid")
-            jira_server = jform.cleaned_data.get('url').rstrip('/')
-            jira_access_token = jform.cleaned_data.get('access_token')
-            jira_access_token_secret = jform.cleaned_data.get('access_token_secret')
-            jira_consumer_key = jform.cleaned_data.get('consumer_key')
-            with open('/tmp/cert', 'wb+') as destination:
-                for chunk in request.FILES['cert'].chunks():
-                    destination.write(chunk)
-                    logger.error('uploaded cert')
-
-            logger.debug('calling get_jira_connection_oauth')
-            with open('/tmp/cert') as f:
-                jira_key_cert = f.read()
-            jira = jira_helper.get_jira_connection_oauth(jira_server, jira_access_token, jira_access_token_secret, jira_consumer_key, jira_key_cert)
-            logger.error('everything seems great!')
-            logger.error('trying to save this form')
-
-            new_j = jform.save(commit=False)
-            new_j.url = jira_server
-            new_j.key_cert = jira_key_cert
-            new_j.save()
-
-            messages.add_message(request,
-                                    messages.SUCCESS,
-                                    'JIRA Configuration Successfully Saved.',
-                                    extra_tags='alert-success')
-            create_notification(event='other',
-                                title='Edit of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
-                                description='JIRA "%s" was edited by %s' %
-                                            (jform.cleaned_data.get('configuration_name'), request.user),
-                                url=request.build_absolute_uri(reverse('jira')),
-                                )
-            return HttpResponseRedirect(reverse('jira', ))
-    else:
-        jform = JIRAFormOAUTH(instance=jira)
-        add_breadcrumb(title="Edit JIRA Configuration OAUTH", top_level=False, request=request)
-
-    return render(request,
-                  'dojo/edit_jira_oauth.html',
-                  {
-                      'jform': jform,
-                  })
-
 
 @user_passes_test(lambda u: u.is_staff)
 def jira(request):
