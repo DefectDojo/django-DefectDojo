@@ -1202,7 +1202,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class ImportScanSerializer(serializers.Serializer):
-    scan_date = serializers.DateField()
+    scan_date = serializers.DateField(required=False)
 
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1258,7 +1258,7 @@ class ImportScanSerializer(serializers.Serializer):
         verified = data['verified']
         minimum_severity = data['minimum_severity']
         endpoint_to_add = data['endpoint_to_add']
-        scan_date = data['scan_date']
+        scan_date = data.get('scan_date', None)
         # Will save in the provided environment or in the `Development` one if absent
         version = data.get('version', None)
         build_id = data.get('build_id', None)
