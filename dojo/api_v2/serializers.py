@@ -1202,7 +1202,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class ImportScanSerializer(serializers.Serializer):
-    scan_date = serializers.DateField(default=datetime.date.today)
+    scan_date = serializers.DateField(required=False)
 
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1258,7 +1258,7 @@ class ImportScanSerializer(serializers.Serializer):
         verified = data['verified']
         minimum_severity = data['minimum_severity']
         endpoint_to_add = data['endpoint_to_add']
-        scan_date = data['scan_date']
+        scan_date = data.get('scan_date', None)
         # Will save in the provided environment or in the `Development` one if absent
         version = data.get('version', None)
         build_id = data.get('build_id', None)
@@ -1326,7 +1326,10 @@ class ImportScanSerializer(serializers.Serializer):
         return data
 
     def validate_scan_data(self, value):
-        if value.date() > datetime.today().date():
+        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
+        if not value.date:
+            return None
+        if value.date() > timezone.localtime(timezone.now()).date():
             raise serializers.ValidationError(
                 'The date cannot be in the future!')
         return value

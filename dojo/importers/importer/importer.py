@@ -62,7 +62,7 @@ class DojoDefaultImporter(object):
     @dojo_async_task
     @app.task(ignore_result=False)
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, **kwargs):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None, **kwargs):
         logger.debug('endpoints_to_add: %s', endpoints_to_add)
         new_findings = []
         items = parsed_findings
@@ -100,6 +100,13 @@ class DojoDefaultImporter(object):
                 item.active = active
             if item.verified:
                 item.verified = verified
+            # Set the date if the parser does not set it
+            if not item.date:
+                item.date = scan_date
+
+            # Indicates the scan_date is not the default, overwrite everything
+            if (scan_date.date() if isinstance(scan_date, datetime.datetime) else scan_date) != now.date():
+                item.date = scan_date
 
             item.created = now
             item.updated = now
@@ -256,6 +263,11 @@ class DojoDefaultImporter(object):
         user = user or get_current_user()
 
         now = timezone.now()
+        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
+        finding_scan_date = scan_date
+        if not scan_date:
+            scan_date = now
+            finding_scan_date = now
         # retain weird existing logic to use current time for provided scan date
         scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
         if settings.USE_TZ:
@@ -328,7 +340,7 @@ class DojoDefaultImporter(object):
                 result = self.process_parsed_findings(test, findings_list, scan_type, user, active,
                                                             verified, minimum_severity=minimum_severity,
                                                             endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                            group_by=group_by, now=now, service=service, sync=False)
+                                                            group_by=group_by, now=now, service=service, scan_date=finding_scan_date, sync=False)
                 # Since I dont want to wait until the task is done right now, save the id
                 # So I can check on the task later
                 results_list += [result]
@@ -346,7 +358,7 @@ class DojoDefaultImporter(object):
             new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                             verified, minimum_severity=minimum_severity,
                                                             endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                            group_by=group_by, now=now, service=service, sync=True)
+                                                            group_by=group_by, now=now, service=service, scan_date=finding_scan_date, sync=True)
 
         closed_findings = []
         if close_old_findings:
