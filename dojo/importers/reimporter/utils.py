@@ -1,8 +1,11 @@
 from datetime import timedelta
 from crum import get_current_user
 from django.conf import settings
+from dojo.importers import utils as importer_utils
 from dojo.models import Engagement, Finding, Q, Product, Product_Member, Product_Type, Product_Type_Member, Role, Test
 from django.utils import timezone
+from dojo.decorators import dojo_async_task
+from dojo.celery import app
 import logging
 from dojo.utils import get_last_object_or_none, get_object_or_none
 
@@ -71,17 +74,42 @@ def update_endpoint_status(existing_finding, new_finding, user):
             lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint not in new_finding_endpoints_list,
             existing_finding_endpoint_status_list)
     )
-    for endpoint_status in endpoint_status_to_mitigate:
-        mitigate_endpoint_status(endpoint_status, user)
+    # Determine if this can be run async
+    if settings.ASYNC_FINDING_IMPORT:
+        chunk_list = importer_utils.chunk_list(endpoint_status_to_mitigate)
+        # If there is only one chunk, then do not bother with async
+        if len(chunk_list) < 2:
+            mitigate_endpoint_status(endpoint_status_to_mitigate, user, kwuser=user, sync=True)
+            return
+        # First kick off all the workers
+        for endpoint_status_list in chunk_list:
+            mitigate_endpoint_status(endpoint_status_list, user, kwuser=user, sync=False)
+    else:
+        mitigate_endpoint_status(endpoint_status_to_mitigate, user, kwuser=user, sync=True)
 
 
-def mitigate_endpoint_status(endpoint_status, user):
-    logger.debug("Re-import: mitigating endpoint %s that is no longer present", str(endpoint_status.endpoint))
-    endpoint_status.mitigated_by = user
-    endpoint_status.mitigated_time = timezone.now()
-    endpoint_status.mitigated = True
-    endpoint_status.last_modified = timezone.now()
-    endpoint_status.save()
+@dojo_async_task
+@app.task()
+def mitigate_endpoint_status(endpoint_status_list, user, **kwargs):
+    for endpoint_status in endpoint_status_list:
+        logger.debug("Re-import: mitigating endpoint %s that is no longer present", str(endpoint_status.endpoint))
+        endpoint_status.mitigated_by = user
+        endpoint_status.mitigated_time = timezone.now()
+        endpoint_status.mitigated = True
+        endpoint_status.last_modified = timezone.now()
+        endpoint_status.save()
+
+
+@dojo_async_task
+@app.task()
+def reactivate_endpoint_status(endpoint_status_list, **kwargs):
+    for endpoint_status in endpoint_status_list:
+        logger.debug("Re-import: reactivating endpoint %s that is present in this scan", str(endpoint_status.endpoint))
+        endpoint_status.mitigated_by = None
+        endpoint_status.mitigated_time = None
+        endpoint_status.mitigated = False
+        endpoint_status.last_modified = timezone.now()
+        endpoint_status.save()
 
 
 def get_target_product_if_exists(product_name=None, product_type_name=None):
