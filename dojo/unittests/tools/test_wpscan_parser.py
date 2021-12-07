@@ -59,7 +59,7 @@ class TestWpscanParser(TestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual(8, len(findings))
+        self.assertEqual(11, len(findings))
         finding = findings[0]
         self.assertEqual("8873", finding.unique_id_from_tool)
         self.assertNotEqual("Info", finding.severity)  # it is a vulnerability so not 'Info'
