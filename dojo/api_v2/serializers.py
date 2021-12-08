@@ -3,7 +3,7 @@ from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
 from rest_framework.exceptions import NotFound
 from rest_framework.fields import DictField, MultipleChoiceField
-
+from datetime import datetime
 from dojo.endpoint.utils import endpoint_filter
 from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists
@@ -27,7 +27,6 @@ from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
-import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
@@ -1282,11 +1281,12 @@ class ImportScanSerializer(serializers.Serializer):
 
         importer = Importer()
         try:
+            scan_date_time = datetime.combine(scan_date, datetime.min.time()) if scan_date else None
             test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment,
                                                                              active=active, verified=verified, tags=tags,
                                                                              minimum_severity=minimum_severity,
                                                                              endpoints_to_add=endpoints_to_add,
-                                                                             scan_date=scan_date, version=version,
+                                                                             scan_date=scan_date_time, version=version,
                                                                              branch_tag=branch_tag, build_id=build_id,
                                                                              commit_hash=commit_hash,
                                                                              push_to_jira=push_to_jira,
@@ -1420,10 +1420,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             if test:
                 # reimport into provided / latest test
                 reimporter = ReImporter()
+                scan_date_time = datetime.combine(scan_date, datetime.min.time()) if scan_date else None
                 test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
                                                 tags=None, minimum_severity=minimum_severity,
-                                                endpoints_to_add=endpoints_to_add, scan_date=scan_date,
+                                                endpoints_to_add=endpoints_to_add, scan_date=scan_date_time,
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings,
