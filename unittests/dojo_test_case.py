@@ -474,10 +474,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return self.import_scan(payload, expected_http_status_code)
 
     def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None,
-                                  tags=None, close_old_findings=True, group_by=None, engagement_name=None,
+                                  tags=None, close_old_findings=True, group_by=None, engagement_name=None, scan_date=None,
                                   product_name=None, product=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
         payload = {
-                "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
@@ -519,6 +518,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if test_title is not None:
             payload['test_title'] = test_title
+
+        if scan_date is not None:
+            payload['scan_date'] = scan_date
 
         return self.reimport_scan(payload, expected_http_status_code=expected_http_status_code)
 

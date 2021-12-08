@@ -162,7 +162,7 @@ class ImportReimportMixin(object):
 
     # import zap scan, testing:
     # - import
-    # - deafult scan_date (today) overrides date not set by parser
+    # - no scan_date and date not set by parser leads to today as date
     def test_import_default_scan_date_parser_not_sets_date(self):
         logger.debug('importing zap xml report with date set by parser')
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
@@ -180,7 +180,7 @@ class ImportReimportMixin(object):
 
     # import acunetix scan, testing:
     # - import
-    # - deafult scan_date (today) does not overrides date set by parser
+    # - no scan scan_date does not overrides date set by parser
     def test_import_default_scan_date_parser_sets_date(self):
         logger.debug('importing original acunetix xml report')
         with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
@@ -1237,9 +1237,8 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
         return self.import_scan_ui(engagement, payload)
 
-    def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
+    def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
         payload = {
-                "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
@@ -1254,6 +1253,9 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
         if tags is not None:
             payload['tags'] = tags
+
+        if scan_date is not None:
+            payload['scan_date'] = scan_date
 
         return self.reimport_scan_ui(test_id, payload)
 

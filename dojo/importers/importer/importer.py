@@ -101,12 +101,14 @@ class DojoDefaultImporter(object):
             if item.verified:
                 item.verified = verified
             # Set the date if the parser does not set it
-            if not item.date:
+            if scan_date:
                 item.date = scan_date
+            # if not item.date:
+            #     item.date = scan_date
 
-            # Indicates the scan_date is not the default, overwrite everything
-            if (scan_date.date() if isinstance(scan_date, datetime.datetime) else scan_date) != now.date():
-                item.date = scan_date
+            # # Indicates the scan_date is not the default, overwrite everything
+            # if (scan_date.date() if isinstance(scan_date, datetime.datetime) else scan_date) != now.date():
+            #     item.date = scan_date
 
             item.created = now
             item.updated = now
@@ -263,15 +265,8 @@ class DojoDefaultImporter(object):
         user = user or get_current_user()
 
         now = timezone.now()
-        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
-        finding_scan_date = scan_date
-        if not scan_date:
-            scan_date = now
-            finding_scan_date = now
-        # retain weird existing logic to use current time for provided scan date
-        scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
-        if settings.USE_TZ:
-            scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
+        if scan_date:
+            scan_date = datetime.datetime.combine(scan_date, now.time())
 
         if api_scan_configuration and api_scan_configuration.product != engagement.product:
             raise ValidationError('API Scan Configuration has to be from same product as  the Engagement')
@@ -340,7 +335,7 @@ class DojoDefaultImporter(object):
                 result = self.process_parsed_findings(test, findings_list, scan_type, user, active,
                                                             verified, minimum_severity=minimum_severity,
                                                             endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                            group_by=group_by, now=now, service=service, scan_date=finding_scan_date, sync=False)
+                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False)
                 # Since I dont want to wait until the task is done right now, save the id
                 # So I can check on the task later
                 results_list += [result]
@@ -358,15 +353,15 @@ class DojoDefaultImporter(object):
             new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                             verified, minimum_severity=minimum_severity,
                                                             endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                            group_by=group_by, now=now, service=service, scan_date=finding_scan_date, sync=True)
+                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True)
 
         closed_findings = []
         if close_old_findings:
             logger.debug('IMPORT_SCAN: Closing findings no longer present in scan report')
-            closed_findings = self.close_old_findings(test, scan_date_time, user=user, push_to_jira=push_to_jira)
+            closed_findings = self.close_old_findings(test, scan_date, user=user, push_to_jira=push_to_jira)
 
         logger.debug('IMPORT_SCAN: Updating test/engagement timestamps')
-        importer_utils.update_timestamps(test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time)
+        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, scan_date)
 
         if settings.TRACK_IMPORT_HISTORY:
             logger.debug('IMPORT_SCAN: Updating Import History')

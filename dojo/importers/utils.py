@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
@@ -14,13 +15,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def update_timestamps(test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time):
+def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date=timezone.now()):
     test.engagement.updated = now
     if test.engagement.engagement_type == 'CI/CD':
-        test.engagement.target_end = max_safe([scan_date_time.date(), test.engagement.target_end])
+        test.engagement.target_end = max_safe([scan_date.date(), test.engagement.target_end])
 
     test.updated = now
-    test.target_end = max_safe([scan_date_time, test.target_end])
+    test.target_end = max_safe([scan_date, test.target_end])
 
     if version:
         test.version = version

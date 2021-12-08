@@ -1,4 +1,3 @@
-import datetime
 from unittest.mock import patch
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_path
@@ -78,7 +77,7 @@ class TestDojoDefaultImporter(DojoTestCase):
         minimum_severity = "Info"
         active = True
         verified = True
-        scan_date = timezone.localtime(timezone.now()).date()
+        scan_date = None
         new_findings = importer.process_parsed_findings(
             test,
             parsed_findings,
@@ -115,7 +114,7 @@ class TestDojoDefaultImporter(DojoTestCase):
         )
 
         importer = Importer()
-        scan_date = timezone.make_aware(datetime.datetime(2021, 9, 1), timezone.get_default_timezone())
+        scan_date = None
         test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
                     active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
@@ -147,7 +146,7 @@ class TestDojoDefaultImporter(DojoTestCase):
         )
 
         importer = Importer()
-        scan_date = timezone.make_aware(datetime.datetime(2021, 9, 1), timezone.get_default_timezone())
+        scan_date = None
         test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
                     active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,

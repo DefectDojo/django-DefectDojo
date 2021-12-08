@@ -1327,8 +1327,8 @@ class ImportScanSerializer(serializers.Serializer):
 
     def validate_scan_data(self, value):
         # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
-        if not value.date:
-            return None
+        # if not value.date:
+        #     return None
         if value.date() > timezone.localtime(timezone.now()).date():
             raise serializers.ValidationError(
                 'The date cannot be in the future!')
@@ -1336,7 +1336,7 @@ class ImportScanSerializer(serializers.Serializer):
 
 
 class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
-    scan_date = serializers.DateField()
+    scan_date = serializers.DateField(required=False)
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
         default='Info')
@@ -1390,7 +1390,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan_type = data['scan_type']
         endpoint_to_add = data['endpoint_to_add']
         minimum_severity = data['minimum_severity']
-        scan_date = data['scan_date']
+        scan_date = data.get('scan_date', None)
         close_old_findings = data['close_old_findings']
         verified = data['verified']
         active = data['active']

@@ -1326,7 +1326,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         self.viewname = 'importscan'
         self.viewset = ImportScanView
         self.payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1350,7 +1349,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1380,7 +1378,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1411,7 +1408,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1443,7 +1439,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1477,7 +1472,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1513,7 +1507,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1545,7 +1538,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1589,7 +1581,6 @@ class ReimportScanTest(DojoAPITestCase):
         length = Test.objects.all().count()
         response = self.client.post(
             reverse('reimportscan-list'), {
-                "scan_date": '2017-12-30',
                 "minimum_severity": 'Low',
                 "active": True,
                 "verified": True,
@@ -1613,7 +1604,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1643,7 +1633,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1676,7 +1665,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1712,7 +1700,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1744,7 +1731,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1775,7 +1761,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-                "scan_date": '2017-12-30',
                 "minimum_severity": 'Low',
                 "active": True,
                 "verified": True,
@@ -1803,7 +1788,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1834,7 +1818,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1866,7 +1849,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1897,7 +1879,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1925,7 +1906,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
