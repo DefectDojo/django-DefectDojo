@@ -157,7 +157,57 @@
 
     },
     "vulnerabilities": [
-
+      {
+        "title": "WordPress 3.6.0-4.7.2 - Authenticated Cross-Site Scripting (XSS) via Media File Metadata",
+        "fixed_in": "4.6.4",
+        "references": {
+          "cve": [
+            "2017-6814"
+          ],
+          "url": [
+            "https://wordpress.org/news/2017/03/wordpress-4-7-3-security-and-maintenance-release/",
+            "https://github.com/WordPress/WordPress/commit/28f838ca3ee205b6f39cd2bf23eb4e5f52796bd7",
+            "https://sumofpwn.nl/advisory/2016/wordpress_audio_playlist_functionality_is_affected_by_cross_site_scripting.html",
+            "https://seclists.org/oss-sec/2017/q1/563"
+          ],
+          "wpvulndb": [
+            "2c5632d8-4d40-4099-9e8f-23afde51b56e"
+          ]
+        }
+      },
+      {
+        "title": "WordPress 2.8.1-4.7.2 - Control Characters in Redirect URL Validation",
+        "fixed_in": "4.6.4",
+        "references": {
+          "cve": [
+            "2017-6815"
+          ],
+          "url": [
+            "https://wordpress.org/news/2017/03/wordpress-4-7-3-security-and-maintenance-release/",
+            "https://github.com/WordPress/WordPress/commit/288cd469396cfe7055972b457eb589cea51ce40e"
+          ],
+          "wpvulndb": [
+            "d40374cf-ee95-40b7-9dd5-dbb160b877b1"
+          ]
+        }
+      },
+      {
+        "title": "WordPress 2.3-4.8.3 - Host Header Injection in Password Reset",
+        "fixed_in": null,
+        "references": {
+          "cve": [
+            "2017-8295"
+          ],
+          "url": [
+            "https://exploitbox.io/vuln/WordPress-Exploit-4-7-Unauth-Password-Reset-0day-CVE-2017-8295.html",
+            "https://blog.dewhurstsecurity.com/2017/05/04/exploitbox-wordpress-security-advisories.html",
+            "https://core.trac.wordpress.org/ticket/25239"
+          ],
+          "wpvulndb": [
+            "b3f2f3db-75e4-4d48-ae5e-d4ff172bc093"
+          ]
+        }
+      }
     ]
   },
   "main_theme": {

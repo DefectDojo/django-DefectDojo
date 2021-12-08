@@ -72,39 +72,40 @@ class WpscanParser(object):
                     dupes[dupe_key] = finding
 
         # Wordpress version findings
-        if tree.get('version', [])['vulnerabilities']:
-            for vul in tree.get('version', [])['vulnerabilities']:
-                description = "\n".join([
-                    '**Title:** `' + vul['title'] + "`\n",
-                ])
-                finding = Finding(
-                    title=vul['title'],
-                    description=description,
-                    severity='High',
-                    references=self.generate_references(vul['references']),
-                    dynamic_finding=True,
-                    static_finding=False,
-                    unique_id_from_tool=vul['references']['wpvulndb'][0],
-                )
-                # manage date of finding with report date
-                if report_date:
-                    finding.date = report_date
-                # if there is a fixed version fill mitigation
-                if 'fixed_in' in vul and vul['fixed_in']:
-                    finding.mitigation = 'fixed in : ' + vul['fixed_in']
-                # manage CVE
-                if 'cve' in vul['references']:
-                    finding.cve = "CVE-" + vul['references']['cve'][0]
+        if 'vulnerabilities' in tree.get('version', []):
+            if tree.get('version', [])['vulnerabilities']:
+                for vul in tree.get('version', [])['vulnerabilities']:
+                    description = "\n".join([
+                        '**Title:** `' + vul['title'] + "`\n",
+                    ])
+                    finding = Finding(
+                        title=vul['title'],
+                        description=description,
+                        severity='Medium',
+                        references=self.generate_references(vul['references']),
+                        dynamic_finding=True,
+                        static_finding=False,
+                        unique_id_from_tool=vul['references']['wpvulndb'][0],
+                    )
+                    # manage date of finding with report date
+                    if report_date:
+                        finding.date = report_date
+                    # if there is a fixed version fill mitigation
+                    if 'fixed_in' in vul and vul['fixed_in']:
+                        finding.mitigation = 'fixed in : ' + vul['fixed_in']
+                    # manage CVE
+                    if 'cve' in vul['references']:
+                        finding.cve = "CVE-" + vul['references']['cve'][0]
 
-                # internal de-duplication
-                dupe_key = hashlib.sha256(str(finding.unique_id_from_tool).encode('utf-8')).hexdigest()
-                if dupe_key in dupes:
-                    find = dupes[dupe_key]
-                    if finding.references:
-                        dupes[dupe_key].references += finding.references
-                    find.nb_occurences += finding.nb_occurences
-                else:
-                    dupes[dupe_key] = finding
+                    # internal de-duplication
+                    dupe_key = hashlib.sha256(str(finding.unique_id_from_tool).encode('utf-8')).hexdigest()
+                    if dupe_key in dupes:
+                        find = dupes[dupe_key]
+                        if finding.references:
+                            dupes[dupe_key].references += finding.references
+                        find.nb_occurences += finding.nb_occurences
+                    else:
+                        dupes[dupe_key] = finding
 
         # manage interesting interesting_findings
         for interesting_finding in tree.get('interesting_findings', []):
