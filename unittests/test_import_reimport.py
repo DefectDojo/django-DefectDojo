@@ -1268,7 +1268,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         self.client_ui.force_login(self.get_test_admin())
 
     def remove_non_ui_params(self, kwargs):
-        for param in ['product_type_name', 'product_name', 'engagement_name', 'test_title', 'auto_create_context']:
+        for param in ['product_type_name', 'product_name', 'engagement_name', 'test_title', 'auto_create_context', 'engagement']:
             if param in kwargs:
                 kwargs.pop(param)
         return kwargs
