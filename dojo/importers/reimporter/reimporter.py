@@ -1,5 +1,4 @@
 import base64
-import datetime
 import logging
 
 import dojo.finding.helper as finding_helper
@@ -272,8 +271,6 @@ class DojoDefaultReImporter(object):
         user = user or get_current_user()
 
         now = timezone.now()
-        if scan_date:
-            scan_date = datetime.datetime.combine(scan_date, now.time())
 
         if api_scan_configuration:
             if api_scan_configuration.product != test.engagement.product:
@@ -338,7 +335,7 @@ class DojoDefaultReImporter(object):
             closed_findings = self.close_old_findings(test, findings_to_mitigate, scan_date, user=user, push_to_jira=push_to_jira)
 
         logger.debug('REIMPORT_SCAN: Updating test/engagement timestamps')
-        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, scan_date)
+        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, scan_date if scan_date else now)
 
         if settings.TRACK_IMPORT_HISTORY:
             logger.debug('REIMPORT_SCAN: Updating Import History')

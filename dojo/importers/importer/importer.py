@@ -1,5 +1,4 @@
 import base64
-import datetime
 from dojo.importers import utils as importer_utils
 from dojo.decorators import dojo_async_task
 from dojo.utils import get_current_user, max_safe
@@ -265,8 +264,6 @@ class DojoDefaultImporter(object):
         user = user or get_current_user()
 
         now = timezone.now()
-        if scan_date:
-            scan_date = datetime.datetime.combine(scan_date, now.time())
 
         if api_scan_configuration and api_scan_configuration.product != engagement.product:
             raise ValidationError('API Scan Configuration has to be from same product as  the Engagement')
@@ -361,7 +358,7 @@ class DojoDefaultImporter(object):
             closed_findings = self.close_old_findings(test, scan_date, user=user, push_to_jira=push_to_jira)
 
         logger.debug('IMPORT_SCAN: Updating test/engagement timestamps')
-        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, scan_date)
+        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, scan_date if scan_date else now)
 
         if settings.TRACK_IMPORT_HISTORY:
             logger.debug('IMPORT_SCAN: Updating Import History')
