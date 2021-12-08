@@ -335,7 +335,7 @@ class DojoDefaultReImporter(object):
             closed_findings = self.close_old_findings(test, findings_to_mitigate, scan_date, user=user, push_to_jira=push_to_jira)
 
         logger.debug('REIMPORT_SCAN: Updating test/engagement timestamps')
-        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, scan_date if scan_date else now)
+        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
 
         if settings.TRACK_IMPORT_HISTORY:
             logger.debug('REIMPORT_SCAN: Updating Import History')

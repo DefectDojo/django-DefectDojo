@@ -1,7 +1,7 @@
 import base64
 from dojo.importers import utils as importer_utils
 from dojo.decorators import dojo_async_task
-from dojo.utils import get_current_user, max_safe
+from dojo.utils import get_current_user
 from dojo.celery import app
 from django.core.exceptions import ValidationError
 from django.core import serializers
@@ -230,30 +230,6 @@ class DojoDefaultImporter(object):
 
         return old_findings
 
-    def update_timestamps(self, test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time):
-        test.engagement.updated = now
-        if test.engagement.engagement_type == 'CI/CD':
-            test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
-
-        test.updated = now
-        test.target_end = max_safe([scan_date_time, test.target_end])
-
-        if version:
-            test.version = version
-
-        if branch_tag:
-            test.branch_tag = branch_tag
-            test.engagement.version = version
-
-        if build_id:
-            test.build_id = build_id
-
-        if branch_tag:
-            test.commit_hash = commit_hash
-
-        test.save()
-        test.engagement.save()
-
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None,
@@ -358,7 +334,7 @@ class DojoDefaultImporter(object):
             closed_findings = self.close_old_findings(test, scan_date, user=user, push_to_jira=push_to_jira)
 
         logger.debug('IMPORT_SCAN: Updating test/engagement timestamps')
-        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, scan_date if scan_date else now)
+        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
 
         if settings.TRACK_IMPORT_HISTORY:
             logger.debug('IMPORT_SCAN: Updating Import History')
