@@ -1267,12 +1267,18 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         self.client_ui = Client()
         self.client_ui.force_login(self.get_test_admin())
 
+    def remove_non_ui_params(self, kwargs):
+        for param in ['product_type_name', 'product_name', 'engagement_name', 'test_title', 'auto_create_context']:
+            if param in kwargs:
+                kwargs.pop(param)
+        return kwargs
+
     # override methods to use UI
     def import_scan_with_params(self, *args, **kwargs):
-        return self.import_scan_with_params_ui(*args, **kwargs)
+        return self.import_scan_with_params_ui(*args, **self.remove_non_ui_params(kwargs))
 
     def reimport_scan_with_params(self, *args, **kwargs):
-        return self.reimport_scan_with_params_ui(*args, **kwargs)
+        return self.reimport_scan_with_params_ui(*args, **self.remove_non_ui_params(kwargs))
 
     def import_scan_ui(self, engagement, payload):
         logger.debug('import_scan payload %s', payload)

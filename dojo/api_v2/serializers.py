@@ -1279,9 +1279,9 @@ class ImportScanSerializer(serializers.Serializer):
         _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(data)
         engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context)
 
+        scan_date_time = datetime.combine(scan_date, datetime.min.time()) if scan_date else None
         importer = Importer()
         try:
-            scan_date_time = datetime.combine(scan_date, datetime.min.time()) if scan_date else None
             test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment,
                                                                              active=active, verified=verified, tags=tags,
                                                                              minimum_severity=minimum_severity,
@@ -1416,11 +1416,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
+        scan_date_time = datetime.combine(scan_date, datetime.min.time()) if scan_date else None
         try:
             if test:
                 # reimport into provided / latest test
                 reimporter = ReImporter()
-                scan_date_time = datetime.combine(scan_date, datetime.min.time()) if scan_date else None
                 test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
                                                 tags=None, minimum_severity=minimum_severity,
@@ -1440,7 +1440,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                                                                 active=active, verified=verified, tags=tags,
                                                                                 minimum_severity=minimum_severity,
                                                                                 endpoints_to_add=endpoints_to_add,
-                                                                                scan_date=scan_date, version=version,
+                                                                                scan_date=scan_date_time, version=version,
                                                                                 branch_tag=branch_tag, build_id=build_id,
                                                                                 commit_hash=commit_hash,
                                                                                 push_to_jira=push_to_jira,
