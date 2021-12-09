@@ -158,7 +158,7 @@ Example for importing a scan result:
     active:true
     lead:1
     tags:test
-        scan_type:ZAP Scan
+    scan_type:ZAP Scan
     minimum_severity:Info
     skip_duplicates:true
     close_old_findings:false

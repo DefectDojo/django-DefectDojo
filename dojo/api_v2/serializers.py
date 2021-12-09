@@ -1279,7 +1279,7 @@ class ImportScanSerializer(serializers.Serializer):
         _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(data)
         engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context)
 
-        # have to make the scan_date_time timezon aware otherwise uploads via the API will fail (but unit tests for api upload will pass...)
+        # have to make the scan_date_time timezon aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
         scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
         importer = Importer()
         try:
@@ -1414,7 +1414,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
-        # have to make the scan_date_time timezon aware otherwise uploads via the API will fail (but unit tests for api upload will pass...)
+        # have to make the scan_date_time timezon aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
         scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
         try:
             if test:
