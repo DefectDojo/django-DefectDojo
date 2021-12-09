@@ -1279,7 +1279,8 @@ class ImportScanSerializer(serializers.Serializer):
         _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(data)
         engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context)
 
-        scan_date_time = datetime.combine(scan_date, datetime.min.time()) if scan_date else None
+        # have to make the scan_date_time timezon aware otherwise uploads via the API will fail (but unit tests for api upload will pass...)
+        scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
         importer = Importer()
         try:
             test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment,
@@ -1325,13 +1326,10 @@ class ImportScanSerializer(serializers.Serializer):
                 raise serializers.ValidationError(f'API scan configuration must be of tool type {tool_type}')
         return data
 
-    def validate_scan_data(self, value):
-        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
-        # if not value.date:
-        #     return None
-        if value.date() > timezone.localtime(timezone.now()).date():
+    def validate_scan_date(self, value):
+        if value and value > timezone.localdate():
             raise serializers.ValidationError(
-                'The date cannot be in the future!')
+                'The scan_date cannot be in the future!')
         return value
 
 
@@ -1416,7 +1414,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
-        scan_date_time = datetime.combine(scan_date, datetime.min.time()) if scan_date else None
+        # have to make the scan_date_time timezon aware otherwise uploads via the API will fail (but unit tests for api upload will pass...)
+        scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
         try:
             if test:
                 # reimport into provided / latest test
@@ -1482,10 +1481,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 raise serializers.ValidationError(f'API scan configuration must be of tool type {tool_type}')
         return data
 
-    def validate_scan_data(self, value):
-        if value.date() > datetime.today().date():
+    def validate_scan_date(self, value):
+        if value and value > timezone.localdate():
             raise serializers.ValidationError(
-                'The date cannot be in the future!')
+                'The scan_date cannot be in the future!')
         return value
 
 

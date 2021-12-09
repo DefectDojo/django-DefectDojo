@@ -266,6 +266,11 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             import0 = self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product=None, product_name=PRODUCT_NAME_NEW, expected_http_status_code=400)
 
     def test_import_with_invalid_parameters(self):
+        with self.subTest('scan_date in the future'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, product_type_name=PRODUCT_TYPE_NAME_NEW, auto_create_context=True, scan_date='2222-01-01',
+                expected_http_status_code=400)
+
         with self.subTest('no parameters'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, expected_http_status_code=400)
@@ -444,6 +449,11 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
         mock.assert_not_called()
 
     def test_reimport_with_invalid_parameters(self):
+        with self.subTest('scan_date in the future'):
+            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, product_type_name=PRODUCT_TYPE_NAME_NEW, auto_create_context=True, scan_date='2222-01-01',
+                expected_http_status_code=400)
+
         with self.subTest('no parameters'):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, expected_http_status_code=400)
