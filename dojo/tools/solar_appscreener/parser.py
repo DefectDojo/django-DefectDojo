@@ -46,8 +46,7 @@ class SolarAppscreenerParser(object):
             finding.line = row.get('Line', '')
 
             if not finding.line.isdigit():
-                finding.line = finding.line.split(
-                    "-")[0]
+                finding.line = int(finding.line.split("-")[0])
 
             finding.sast_source_line = finding.line
 
