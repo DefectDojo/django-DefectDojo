@@ -87,7 +87,7 @@ class TestWpscanParser(TestCase):
         self.assertEqual("Interesting finding: WordPress readme found: http://example/readme.html", finding.title)
         self.assertEqual(datetime.datetime(2021, 3, 17, 12, 21, 6), finding.date)
 
-    def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
+    def test_parse_file_with_multiple_vuln_in_version(self):
         testfile = open("dojo/unittests/scans/wpscan/wordpress_vuln_version.json")
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
