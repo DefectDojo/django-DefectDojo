@@ -2121,7 +2121,7 @@ class JIRAForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'])
+            jira = jira_helper.get_jira_connection_raw(form_data)
             logger.debug('valid JIRA config!')
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
@@ -2148,11 +2148,11 @@ class JIRAFormOAUTH(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            with open('/tmp/certs/cert', 'wb+') as destination:
+            with open('/tmp/cert', 'wb+') as destination:
                 for chunk in form_data['cert'].chunks():
                     destination.write(chunk)
             logger.error('uploaded cert')
-            jira = jira_helper.get_jira_connection_oauth(form_data['url'], form_data['access_token'], form_data['access_token_secret'], form_data['consumer_key'], form_data['cert'])
+            jira = jira_helper.get_jira_connection_raw(form_data)
             logger.debug('valid JIRA config!')
         except Exception as e:
             logger.debug('invalid JIRA config! forms 2159' + form_data['cert'] + form_data['url'])
@@ -2181,7 +2181,7 @@ class ExpressJIRAForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'],)
+            jira = jira_helper.get_jira_connection_raw(form_data)
             logger.debug('valid JIRA config!')
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
