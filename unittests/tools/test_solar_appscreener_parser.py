@@ -27,7 +27,7 @@ class TestSolarAppscreenerParser(DojoTestCase):
         self.assertEqual("Hardcoded password", finding.title)
         self.assertEqual("Critical", finding.severity)
         self.assertEqual("misc/shared.php", finding.file_path)
-        self.assertEqual("151", finding.line)
+        self.assertEqual(151, finding.line)
         self.assertEqual("misc/shared.php", finding.sast_source_file_path)
         self.assertEqual(151, finding.sast_source_line)
 

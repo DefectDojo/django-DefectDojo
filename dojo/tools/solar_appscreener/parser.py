@@ -46,7 +46,9 @@ class SolarAppscreenerParser(object):
             finding.line = row.get('Line', '')
 
             if not finding.line.isdigit():
-                finding.line = int(finding.line.split("-")[0])
+                finding.line = finding.line.split("-")[0]
+
+            finding.line = int(finding.line)
 
             finding.sast_source_line = finding.line
 
@@ -57,7 +59,7 @@ class SolarAppscreenerParser(object):
                     finding.description = ""
 
                 key = hashlib.sha256((finding.title + '|' + finding.file_path +
-                                     '|' + finding.line).encode("utf-8")).hexdigest()
+                                     '|' + finding.line.__str__()).encode("utf-8")).hexdigest()
 
                 if key not in dupes:
                     dupes[key] = finding
