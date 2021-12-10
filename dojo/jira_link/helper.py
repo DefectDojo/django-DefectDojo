@@ -344,6 +344,7 @@ def has_jira_configured(obj):
 
 
 def get_jira_connection_raw(jira_instance):
+
     if jira_instance.use_oauth :
         try:
             with open('/app/media/cert') as f:

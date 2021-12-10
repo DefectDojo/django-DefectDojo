@@ -2152,10 +2152,11 @@ class JIRAFormOAUTH(forms.ModelForm):
                 for chunk in form_data['cert'].chunks():
                     destination.write(chunk)
             logger.error('uploaded cert')
+            form_data.use_oauth = True
             jira = jira_helper.get_jira_connection_raw(form_data)
             logger.debug('valid JIRA config!')
         except Exception as e:
-            logger.debug('invalid JIRA config! forms 2159' + form_data['cert'] + form_data['url'])
+            logger.debug('invalid JIRA config! forms 2159')
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
             message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e)
             self.add_error('access_token', message)
