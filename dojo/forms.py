@@ -2153,6 +2153,7 @@ class JIRAFormOAUTH(forms.ModelForm):
                     destination.write(chunk)
             logger.error('uploaded cert')
             form_data.use_oauth = True
+            logger.error(form_data)
             jira = jira_helper.get_jira_connection_raw(form_data)
             logger.debug('valid JIRA config!')
         except Exception as e:
