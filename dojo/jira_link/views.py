@@ -370,7 +370,7 @@ def new_jira_oauth(request):
                     logger.error('uploaded cert to ', destination)
 
             logger.debug('calling get_jira_connection_oauth')
-            with open('/app/media/cert') as f:
+            with open('/app/dojo/jira_link/cert') as f:
                 jira_key_cert = f.read()
 #            jira = jira_helper.get_jira_connection_oauth(jira_server, jira_access_token, jira_access_token_secret, jira_consumer_key, jira_key_cert)
             logger.error('everything seems great!')
@@ -393,7 +393,7 @@ def new_jira_oauth(request):
                                                 close_status_key=jira_close_status_key,
                                                 finding_text='',
                                                 consumer_key=jira_consumer_key,
-                                                cert='/app/media/cert',
+                                                cert='/app/dojo/jira_link/cert',
                                                 use_oauth=True,
                                                 default_issue_type=jform.cleaned_data.get('default_issue_type'))
 

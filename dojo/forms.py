@@ -2148,12 +2148,12 @@ class JIRAFormOAUTH(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            with open('/app/media/cert', 'wb+') as destination:
+            with open('/app/dojo/jira_link/cert', 'wb+') as destination:
                 for chunk in form_data['cert'].chunks():
                     destination.write(chunk)
             logger.error('uploaded cert')
             logger.debug('form data type', type(form_data))
-            auth = JIRA_Instance(use_oauth = True, consumer_key = form_data['consumer_key'], username = form_data['access_token'], password = form_data['access_token_secret'], cert = '/app/media/cert', url = form_data['url'])
+            auth = JIRA_Instance(use_oauth = True, consumer_key = form_data['consumer_key'], username = form_data['access_token'], password = form_data['access_token_secret'], cert = '/app/dojo/jira_link/cert', url = form_data['url'])
             jira = jira_helper.get_jira_connection_raw(auth)
             logger.debug('valid JIRA config!')
         except Exception as e:
