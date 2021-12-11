@@ -12,7 +12,7 @@ from django.core import serializers
 from django.core.files.base import ContentFile
 from django.utils import timezone
 from dojo.importers import utils as importer_utils
-from dojo.models import (BurpRawRequestResponse, Finding,
+from dojo.models import (BurpRawRequestResponse, FileUpload, Finding,
                          Notes, Test_Import)
 from dojo.tools.factory import get_parser
 from dojo.utils import get_current_user

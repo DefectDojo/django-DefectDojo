@@ -52,6 +52,7 @@ PRODUCT_TYPE_NAME_DEFAULT = 'Type type'
 class ImportReimportMixin(object):
     def __init__(self, *args, **kwargs):
         self.scans_path = '/scans/'
+
         self.zap_sample0_filename = self.scans_path + 'zap/0_zap_sample.xml'
         self.zap_sample1_filename = self.scans_path + 'zap/1_zap_sample_0_and_new_absent.xml'
         self.zap_sample2_filename = self.scans_path + 'zap/2_zap_sample_0_and_new_endpoint.xml'
@@ -81,6 +82,10 @@ class ImportReimportMixin(object):
         self.clair_few_findings = self.scans_path + 'clair/few_vuln.json'
         self.clair_empty = self.scans_path + 'clair/empty.json'
         self.scan_type_clair = 'Clair Scan'
+
+        self.aws_prowler_file_name = self.scans_path + 'aws_prowler/many_vuln.json'
+        self.aws_prowler_file_name_plus_one = self.scans_path + 'aws_prowler/many_vuln_plus_one.json'
+        self.scan_type_aws_prowler = 'AWS Prowler Scan'
 
     # import zap scan, testing:
     # - import
@@ -239,6 +244,75 @@ class ImportReimportMixin(object):
         self.assertEqual(date, '2006-12-26')
 
         return test_id
+
+    # Test Scan_Date for reimport in UI. UI can only rupload for existing tests, non UI tests are in API class below
+
+    def test_import_reimport_no_scan_date_parser_no_date(self):
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        test_id = import0['test']
+
+        # reimport report with 1 extra finding
+        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
+
+        test_id = reimport0['test']
+
+        # 1 new finding imported
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(5, findings)
+        # no scan_date, so date should be today
+        self.assertEqual(findings['results'][4]['date'], str(timezone.localtime(timezone.now()).date()))
+
+    def test_import_reimport_scan_date_parser_no_date(self):
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        test_id = import0['test']
+
+        # reimport report with 1 extra finding
+        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename, scan_date='2020-02-02')
+
+        test_id = reimport0['test']
+
+        # 1 new finding imported
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(5, findings)
+        # scan_date provided, so date should be equal to that
+        self.assertEqual(findings['results'][4]['date'], "2020-02-02")
+
+    def test_import_reimport_no_scan_date_parser_date(self):
+        import0 = self.import_scan_with_params(self.aws_prowler_file_name, scan_type=self.scan_type_aws_prowler)
+
+        test_id = import0['test']
+
+        # reimport report with 1 extra finding
+        reimport0 = self.reimport_scan_with_params(test_id, self.aws_prowler_file_name_plus_one, scan_type=self.scan_type_aws_prowler)
+
+        test_id = reimport0['test']
+
+        # 1 new finding imported
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(5, findings)
+        self.log_finding_summary_json_api(findings)
+        # no scan_date, so date should be date from parser
+        # findings order by priority, third finding is the new one
+        self.assertEqual(findings['results'][2]['date'], "2021-08-23")
+
+    def test_import_reimport_scan_date_parser_date(self):
+        import0 = self.import_scan_with_params(self.aws_prowler_file_name, scan_type=self.scan_type_aws_prowler)
+
+        test_id = import0['test']
+
+        # reimport report with 1 extra finding
+        reimport0 = self.reimport_scan_with_params(test_id, self.aws_prowler_file_name_plus_one, scan_type=self.scan_type_aws_prowler, scan_date='2020-02-02')
+
+        test_id = reimport0['test']
+
+        # 1 new finding imported
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(5, findings)
+        # scan_date provided, so date should be equal to that overriding that from the parser
+        self.log_finding_summary_json_api(findings)
+        self.assertEqual(findings['results'][2]['date'], "2020-02-02")
 
     # import checkmarx scan. ZAP parser will never create a finding with active/verified false
     # checkmarx will (for false positive for example)
