@@ -99,18 +99,12 @@ class DojoDefaultImporter(object):
                 item.active = active
             if item.verified:
                 item.verified = verified
-            # Set the date if the parser does not set it
+
+            # if scan_date was provided, override value from parser
             if scan_date:
                 item.date = scan_date
-            # if not item.date:
-            #     item.date = scan_date
-
-            # # Indicates the scan_date is not the default, overwrite everything
-            # if (scan_date.date() if isinstance(scan_date, datetime.datetime) else scan_date) != now.date():
-            #     item.date = scan_date
 
             item.created = now
-            item.updated = now
 
             item.service = service
 
