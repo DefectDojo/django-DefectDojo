@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0012_alter_user_first_name_max_length'),
-        ('dojo', '0138_remove_authorized_users'),
+        ('dojo', '0139_google_sheets_rules_framework_enable'),
     ]
 
     operations = [
