@@ -2152,9 +2152,9 @@ class JIRAFormOAUTH(forms.ModelForm):
                 for chunk in form_data['cert'].chunks():
                     destination.write(chunk)
             logger.error('uploaded cert')
-            form_data.use_oauth = True
-            logger.error(form_data)
-            jira = jira_helper.get_jira_connection_raw(form_data)
+            logger.debug('form data type', type(form_data))
+            auth = JIRA_Instance(use_oauth = True, consumer_key = form_data['consumer_key'], password = form_data['access_token'], username = form_data['access_token_secret'], cert = '/app/media/cert', url = form_data['url'])
+            jira = jira_helper.get_jira_connection_raw(auth)
             logger.debug('valid JIRA config!')
         except Exception as e:
             logger.debug('invalid JIRA config! forms 2159')

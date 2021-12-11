@@ -2927,7 +2927,7 @@ class JIRA_Instance(models.Model):
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Globally send SLA notifications as comment?", help_text="This setting can be overidden at the Product level")
     consumer_key = models.CharField(null=True, max_length=2000)
     cert = models.FileField(null=True)
-    use_oauth = models.IntegerField(default=False)
+    use_oauth = models.BooleanField(default=False)
     @property
     def accepted_resolutions(self):
         return [m.strip() for m in (self.accepted_mapping_resolution or '').split(',')]

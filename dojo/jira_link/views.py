@@ -396,6 +396,7 @@ def new_jira_oauth(request):
                                                 cert='/app/media/cert',
                                                 use_oauth=True,
                                                 default_issue_type=jform.cleaned_data.get('default_issue_type'))
+
             jira = jira_helper.get_jira_connection_raw(jira_instance)
 
             jira_instance.save()
@@ -420,7 +421,7 @@ def new_jira_oauth(request):
                                 )
             return HttpResponseRedirect(reverse('jira', ))
         else:
-            logger.debug("form invalid")
+            logger.debug("form invalid" )
             logger.error('jform.errors: %s', jform.errors)
 
 
