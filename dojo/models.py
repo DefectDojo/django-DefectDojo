@@ -368,7 +368,6 @@ class System_Settings(models.Model):
                                   help_text="Include this custom disclaimer on all notifications and generated reports")
     column_widths = models.TextField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
-    enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
     email_address = models.EmailField(max_length=100, blank=True)
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text="Default expiry period for risk acceptance form.")
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
@@ -393,6 +392,16 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name='Enable Endpoint Metadata Import',
         help_text="With this setting turned off, endpoint metadata import will be disabled in the user interface.")
+    enable_google_sheets = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name='Enable Google Sheets Integration',
+        help_text="With this setting turned off, the Google sheets integration will be disabled in the user interface.")
+    enable_rules_framework = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name='Enable Rules Framework',
+        help_text="With this setting turned off, the rules framwork will be disabled in the user interface.")
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
