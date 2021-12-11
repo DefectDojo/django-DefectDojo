@@ -364,7 +364,7 @@ def new_jira_oauth(request):
             jira_epic_name_id = jform.cleaned_data.get('epic_name_id')
             jira_open_status_key = jform.cleaned_data.get('open_status_key')
             jira_close_status_key = jform.cleaned_data.get('close_status_key')
-            with open('/app/media/cert', 'wb+') as destination:
+            with open('/app/dojo/jira_link/cert', 'wb+') as destination:
                 for chunk in request.FILES['cert'].chunks():
                     destination.write(chunk)
                     logger.error('uploaded cert to ', destination)

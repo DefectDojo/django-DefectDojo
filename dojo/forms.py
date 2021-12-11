@@ -2148,7 +2148,7 @@ class JIRAFormOAUTH(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            with open('/tmp/cert', 'wb+') as destination:
+            with open('/app/media/cert', 'wb+') as destination:
                 for chunk in form_data['cert'].chunks():
                     destination.write(chunk)
             logger.error('uploaded cert')
