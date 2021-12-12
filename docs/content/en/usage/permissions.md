@@ -68,7 +68,7 @@ Users can be assigned as members to Products and Product Types, giving them one 
 | View Components             | x      | x      | x          | x     | x            |
 |                             |        |        |            |       |              |
 | View Note History           | x      | x      | x          | x     |              |
-| Add Note                    |        | x      | x          | x     |              |
+| Add Note                    | x      | x      | x          | x     |              |
 | Edit Note                   |        | x      | x          | x     |              |
 | Delete Note                 |        | (x) <sup>2)</sub> | x          | x     |              |
 
