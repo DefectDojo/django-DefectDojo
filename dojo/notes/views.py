@@ -18,7 +18,7 @@ from dojo.authorization.roles_permissions import Permissions
 logger = logging.getLogger(__name__)
 
 
-def delete_issue(request, id, page, objid):
+def delete_note(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
     object_id = None
@@ -57,7 +57,7 @@ def delete_issue(request, id, page, objid):
     return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
 
 
-def edit_issue(request, id, page, objid):
+def edit_note(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
     object_id = None
