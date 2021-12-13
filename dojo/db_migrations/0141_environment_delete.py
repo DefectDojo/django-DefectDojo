@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0139_google_sheets_rules_framework_enable'),
+        ('dojo', '0140_auth_group'),
     ]
 
     operations = [
