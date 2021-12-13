@@ -7,6 +7,22 @@ from dojo.models import Product_Type, Product_Type_Member, Product, Product_Memb
     Languages, App_Analysis, Stub_Finding, Product_API_Scan_Configuration
 
 
+def user_has_configuration_permission(user, permission, legacy=None):
+
+    if not user:
+        return False
+
+    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+        return user.has_perm(permission)
+    else:
+        if legacy == 'staff':
+            return user.is_staff
+        elif legacy == 'superuser':
+            return user.is_superuser
+        else:
+            raise Exception(f'{legacy} is not allowed for parameter legacy')
+
+
 def user_has_permission(user, obj, permission):
 
     if user.is_superuser:
@@ -93,6 +109,10 @@ def user_has_permission(user, obj, permission):
 
 
 def user_has_global_permission(user, permission):
+
+    if not user:
+        return False
+
     if user.is_superuser:
         return True
 

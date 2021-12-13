@@ -20,7 +20,7 @@ from rest_framework.authtoken.models import Token
 
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, ChangePasswordForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
-    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm
+    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm, ConfigurationPermissionsForm
 from dojo.models import Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 from dojo.product.queries import get_authorized_product_members_for_user
@@ -28,6 +28,7 @@ from dojo.group.queries import get_authorized_group_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.authorization.roles_permissions import Permissions
 from dojo.decorators import dojo_ratelimit
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
 import hyperlink
 
@@ -245,7 +246,7 @@ def change_password(request):
         'form': form})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('auth.view_user', 'staff')
 def user(request):
     users = Dojo_User.objects.all() \
         .select_related('usercontactinfo', 'global_role') \
@@ -261,7 +262,7 @@ def user(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.add_user', 'superuser')
 def add_user(request):
     form = AddDojoUserForm()
     if not request.user.is_superuser:
@@ -310,22 +311,24 @@ def add_user(request):
         'to_add': True})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('auth.view_user', 'staff')
 def view_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     product_members = get_authorized_product_members_for_user(user, Permissions.Product_View)
     product_type_members = get_authorized_product_type_members_for_user(user, Permissions.Product_Type_View)
     group_members = get_authorized_group_members_for_user(user)
+    configuration_permission_form = ConfigurationPermissionsForm(user=user)
 
     add_breadcrumb(title="View User", top_level=False, request=request)
     return render(request, 'dojo/view_user.html', {
         'user': user,
         'product_members': product_members,
         'product_type_members': product_type_members,
-        'group_members': group_members})
+        'group_members': group_members,
+        'configuration_permission_form': configuration_permission_form})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.change_user', 'superuser')
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = EditDojoUserForm(instance=user)
@@ -384,7 +387,7 @@ def edit_user(request, uid):
         'to_edit': user})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.delete_user', 'superuser')
 def delete_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = DeleteUserForm(instance=user)
@@ -425,7 +428,7 @@ def delete_user(request, uid):
                    })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.change_user', 'superuser')
 def add_product_type_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Type_Member_UserForm(initial={'user': user.id})
@@ -453,7 +456,7 @@ def add_product_type_member(request, uid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.change_user', 'superuser')
 def add_product_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Member_UserForm(initial={'user': user.id})
@@ -481,7 +484,7 @@ def add_product_member(request, uid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.change_user', 'superuser')
 def add_group_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Group_Member_UserForm(initial={'user': user.id})
@@ -509,6 +512,20 @@ def add_group_member(request, uid):
         'user': user,
         'form': memberform
     })
+
+
+@user_is_configuration_authorized('auth.change_permission', 'superuser')
+def edit_permissions(request, uid):
+    user = get_object_or_404(Dojo_User, id=uid)
+    if request.method == 'POST':
+        form = ConfigurationPermissionsForm(request.POST, user=user)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Permissions updated.',
+                                 extra_tags='alert-success')
+    return HttpResponseRedirect(reverse('view_user', args=(uid,)))
 
 
 class DojoPasswordResetForm(PasswordResetForm):
