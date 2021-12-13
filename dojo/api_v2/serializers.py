@@ -367,7 +367,7 @@ class DojoGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dojo_Group
-        fields = '__all__'
+        exclude = ['auth_group']
 
 
 class DojoGroupMemberSerializer(serializers.ModelSerializer):

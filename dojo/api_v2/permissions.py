@@ -1,5 +1,6 @@
 import re
 from rest_framework.exceptions import ParseError, PermissionDenied
+from django.conf import settings
 from dojo.api_v2.serializers import get_import_meta_data_from_dict, get_product_id_from_dict
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists,  \
@@ -7,7 +8,7 @@ from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
-from dojo.authorization.authorization import user_has_global_permission, user_has_permission
+from dojo.authorization.authorization import user_has_global_permission, user_has_permission, user_has_configuration_permission
 from dojo.authorization.roles_permissions import Permissions
 
 
@@ -44,13 +45,20 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
 
 class UserHasDojoGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method == 'POST':
-            return request.user.is_staff
+        if request.method == 'GET':
+            return user_has_configuration_permission(request.user, 'auth.view_group', 'staff')
+        elif request.method == 'POST':
+            return user_has_configuration_permission(request.user, 'auth.create_group', 'staff')
         else:
             return True
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Edit, Permissions.Group_Delete)
+        if request.method == 'GET':
+            # Users need to be authorized to view groups in general and only the groups they are a member of
+            # because with the group they can see user information that might be considered as confidential
+            return user_has_configuration_permission(request.user, 'auth.view_group', 'staff') and user_has_permission(request.user, obj, Permissions.Group_View)
+        else:
+            return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Edit, Permissions.Group_Delete)
 
 
 class UserHasDojoGroupMemberPermission(permissions.BasePermission):
@@ -401,3 +409,23 @@ def check_import_product_permission(user, product, product_name, product_type, p
 
         # product can be created, so objects in it can be created as well
         return True
+
+
+class UserHasConfigurationPermissionStaff(permissions.DjangoModelPermissions):
+
+    # Override map to also provide 'view' permissions
+    perms_map = {
+        'GET': ['%(app_label)s.view_%(model_name)s'],
+        'OPTIONS': [],
+        'HEAD': [],
+        'POST': ['%(app_label)s.add_%(model_name)s'],
+        'PUT': ['%(app_label)s.change_%(model_name)s'],
+        'PATCH': ['%(app_label)s.change_%(model_name)s'],
+        'DELETE': ['%(app_label)s.delete_%(model_name)s'],
+    }
+
+    def has_permission(self, request, view):
+        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+            return super().has_permission(request, view)
+        else:
+            return request.user.is_staff

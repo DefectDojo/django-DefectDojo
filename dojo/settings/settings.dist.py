@@ -198,6 +198,8 @@ env = environ.Env(
     DD_ASYNC_FINDING_IMPORT=(bool, False),
     # The number fo findings to be processed per celeryworker
     DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE=(int, 100),
+    # Feature toggle for new authorization for configurations
+    DD_FEATURE_CONFIGURATION_AUTHORIZATION=(bool, False),
 )
 
 
@@ -1342,3 +1344,5 @@ USER_PROFILE_EDITABLE = env("DD_USER_PROFILE_EDITABLE")
 ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")
 # The number fo findings to be processed per celeryworker
 ASYNC_FINDING_IMPORT_CHUNK_SIZE = env("DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE")
+# Feature toggle for new authorization for configurations
+FEATURE_CONFIGURATION_AUTHORIZATION = env("DD_FEATURE_CONFIGURATION_AUTHORIZATION")
