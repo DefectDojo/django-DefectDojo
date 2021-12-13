@@ -9,6 +9,7 @@ from django.db.models import Count, Q
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.models import Permission
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
@@ -3160,3 +3161,98 @@ class AddEngagementForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(AddEngagementForm, self).__init__(*args, **kwargs)
         self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add)
+
+
+class ConfigurationPermissionsForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        self.group = kwargs.pop('group', None)
+        super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
+
+        self.permission_fields = [
+            Permission_Helper(name='group', app='auth', view=True, add=True),
+            Permission_Helper(name='permission', app='auth', change=True),
+            Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
+        ]
+
+        for permission_field in self.permission_fields:
+            for codename in permission_field.codenames():
+                self.fields[codename] = forms.BooleanField(required=False)
+                if not get_current_user().has_perm('auth.change_permission'):
+                    self.fields[codename].disabled = True
+
+        permissions_list = Permission.objects.all()
+        self.permissions = {}
+        for permission in permissions_list:
+            self.permissions[permission.codename] = permission
+
+    def save(self):
+        for permission_field in self.permission_fields:
+            for codename in permission_field.codenames():
+                self.set_permission(codename)
+
+    def set_permission(self, codename):
+        if self.cleaned_data[codename]:
+            # Checkbox is set
+            if self.user:
+                self.user.user_permissions.add(self.permissions[codename])
+            elif self.group:
+                self.group.auth_group.permissions.add(self.permissions[codename])
+            else:
+                raise Exception('Neither user or group are set')
+        else:
+            # Checkbox is unset
+            if self.user:
+                self.user.user_permissions.remove(self.permissions[codename])
+            elif self.group:
+                self.group.auth_group.permissions.remove(self.permissions[codename])
+            else:
+                raise Exception('Neither user or group are set')
+
+
+class Permission_Helper:
+    def __init__(self, *args, **kwargs):
+        self.name = kwargs.pop('name')
+        self.app = kwargs.pop('app')
+        self.view = kwargs.pop('view', False)
+        self.add = kwargs.pop('add', False)
+        self.change = kwargs.pop('change', False)
+        self.delete = kwargs.pop('delete', False)
+
+    def view_codename(self):
+        if self.view:
+            return f'view_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def add_codename(self):
+        if self.add:
+            return f'add_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def change_codename(self):
+        if self.change:
+            return f'change_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def delete_codename(self):
+        if self.delete:
+            return f'delete_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def codenames(self):
+        codenames = []
+        if self.view:
+            codenames.append(self.view_codename())
+        if self.add:
+            codenames.append(self.add_codename())
+        if self.change:
+            codenames.append(self.change_codename())
+        if self.delete:
+            codenames.append(self.delete_codename())
+        return codenames

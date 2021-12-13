@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load authorization_tags %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -8,6 +9,7 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         Tool Types
+                        {% if "dojo.add_tool_type"|has_configuration_permission:"superuser" %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -23,6 +25,7 @@
                                     </li>
                             </ul>
                         </div>
+                        {% endif %}
                     </h3>
                 </div>
 
@@ -45,7 +48,11 @@
                         {% for conf in confs %}
                             <tr>
                                 <td>
+                                    {% if "dojo.change_tool_type"|has_configuration_permission:"superuser" %}
                                     <a href="{% url 'edit_tool_type' conf.id %}"><b>{{ conf.name }}</b></a>
+                                    {% else %}
+                                    {{ conf.name }}
+                                    {% endif %}
                                 </td>
                                 <td>{% if conf.description %}{{ conf.description }}{% endif %}
                                 </td>

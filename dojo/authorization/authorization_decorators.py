@@ -1,6 +1,7 @@
 import functools
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
+from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403, user_has_configuration_permission
 
 
 def user_is_authorized(model, permission, arg, lookup="pk", func=None):
@@ -41,6 +42,24 @@ def user_has_global_permission(permission, func=None):
     @functools.wraps(func)
     def _wrapped(request, *args, **kwargs):
         user_has_global_permission_or_403(request.user, permission)
+        return func(request, *args, **kwargs)
+
+    return _wrapped
+
+
+def user_is_configuration_authorized(permission, legacy, func=None):
+    """
+    Decorator for views that checks whether a user has a particular permission enabled.
+    """
+
+    if func is None:
+        return functools.partial(user_is_configuration_authorized, permission, legacy)
+
+    @functools.wraps(func)
+    def _wrapped(request, *args, **kwargs):
+
+        if not user_has_configuration_permission(request.user, permission, legacy):
+            raise PermissionDenied
         return func(request, *args, **kwargs)
 
     return _wrapped
