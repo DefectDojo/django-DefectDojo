@@ -3171,8 +3171,11 @@ class ConfigurationPermissionsForm(forms.Form):
         super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
 
         self.permission_fields = [
+            Permission_Helper(name='development environment', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='group', app='auth', view=True, add=True),
             Permission_Helper(name='permission', app='auth', change=True),
+            Permission_Helper(name='test type', app='dojo', view=True, add=True, change=True),
             Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
         ]

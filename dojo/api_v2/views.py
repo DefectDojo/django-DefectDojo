@@ -417,7 +417,7 @@ class AppAnalysisViewSet(mixins.ListModelMixin,
         return get_authorized_app_analysis(Permissions.Product_View)
 
 
-# Authorization: staff
+# Authorization: configuration
 class FindingTemplatesViewSet(mixins.ListModelMixin,
                               mixins.RetrieveModelMixin,
                               mixins.UpdateModelMixin,
@@ -428,7 +428,7 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
     queryset = Finding_Template.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiTemplateFindingFilter
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
 
 
 # Authorization: object-based
@@ -1498,7 +1498,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
             return serializers.StubFindingSerializer
 
 
-# Authorization: authenticated users
+# Authorization: configuration
 class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
                                     mixins.RetrieveModelMixin,
                                     mixins.CreateModelMixin,
@@ -1508,7 +1508,7 @@ class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
     serializer_class = serializers.DevelopmentEnvironmentSerializer
     queryset = Development_Environment.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
 
 
 # Authorization: object-based
@@ -1666,18 +1666,17 @@ class TestsViewSet(mixins.ListModelMixin,
         return Response(serialized_files.data, status=status.HTTP_200_OK)
 
 
-# Authorization: authenticated users
+# Authorization: configuration
 class TestTypesViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.UpdateModelMixin,
-                       mixins.DestroyModelMixin,
                        mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.TestTypeSerializer
     queryset = Test_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('name',)
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
 
 
 @extend_schema_view(
@@ -1770,7 +1769,7 @@ class ToolProductSettingsViewSet(mixins.ListModelMixin,
     permission_classes = (IsAdminUser, DjangoModelPermissions)
 
 
-# Authorization: staff
+# Authorization: configuration
 class ToolTypesViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.DestroyModelMixin,
@@ -1798,7 +1797,7 @@ class RegulationsViewSet(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
-# Authorization: staff
+# Authorization: configuration
 class UsersViewSet(mixins.CreateModelMixin,
                    mixins.UpdateModelMixin,
                    mixins.ListModelMixin,
