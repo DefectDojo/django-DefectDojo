@@ -409,6 +409,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name='Enable user profile for writing',
         help_text="When turned on users can edit their profiles")
+    enable_product_tracking_files = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable Product Tracking Files',
+        help_text="With this setting turned off, the product tracking files will be disabled in the user interface.")
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
@@ -3251,27 +3256,6 @@ class Objects_Product(models.Model):
         return name
 
 
-class Objects_Engagement(models.Model):
-    engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE)
-    object_id = models.ForeignKey(Objects_Product, on_delete=models.CASCADE)
-    build_id = models.CharField(max_length=150, null=True, blank=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    full_url = models.URLField(max_length=400, null=True, blank=True)
-    type = models.CharField(max_length=30, null=True, blank=True)
-    percentUnchanged = models.CharField(max_length=10, null=True, blank=True)
-
-    def __str__(self):
-        data = ""
-        if self.object_id.path:
-            data = self.object_id.path
-        elif self.object_id.folder:
-            data = self.object_id.folder
-        elif self.object_id.artifact:
-            data = self.object_id.artifact
-
-        return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
-
-
 class Testing_Guide_Category(models.Model):
     name = models.CharField(max_length=300)
     created = models.DateTimeField(null=False, editable=False, default=now)
@@ -3686,7 +3670,6 @@ admin.site.register(Engagement_Presets)
 admin.site.register(Network_Locations)
 admin.site.register(Objects_Product)
 admin.site.register(Objects_Review)
-admin.site.register(Objects_Engagement)
 admin.site.register(Languages)
 admin.site.register(Language_Type)
 admin.site.register(App_Analysis)

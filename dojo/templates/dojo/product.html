@@ -131,6 +131,7 @@
                                                 <i class="fa fa-history"></i> View Scan API Configurations
                                               </a>
                                           </li>
+                                          {% if system_settings.enable_product_tracking_files %}
                                           <li role="separator" class="divider"></li>
                                           <li role="presentation">
                                             <a class="" href="{% url 'new_object' prod.id %}">
@@ -142,6 +143,7 @@
                                               <i class="fa fa-history"></i> View Product Tracking Files
                                             </a>
                                           </li>
+                                          {% endif %}
                                         {% endif %}
                                         <li role="separator" class="divider"></li>
                                         <li role="presentation">
