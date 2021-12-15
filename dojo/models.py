@@ -404,6 +404,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name='Enable Rules Framework',
         help_text="With this setting turned off, the rules framwork will be disabled in the user interface.")
+    enable_user_profile_editable = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable user profile for writing',
+        help_text="When turned on users can edit their profiles")
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
@@ -422,6 +427,7 @@ class System_Settings(models.Model):
         blank=True,
         verbose_name='Email pattern for staff users',
         help_text="When the email address of a new user created by OAuth2 matches this regex pattern, their is_staff flag will be set to True.")
+
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
