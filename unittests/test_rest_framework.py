@@ -33,6 +33,7 @@ from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
 from rest_framework.mixins import \
     ListModelMixin, RetrieveModelMixin, CreateModelMixin, \
     DestroyModelMixin, UpdateModelMixin
+from dojo.api_v2.mixins import DeletePreviewModelMixin
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from drf_spectacular.settings import spectacular_settings
 import logging
@@ -428,6 +429,32 @@ class BaseClass():
             # print(response.data)
 
             self.check_schema_response('put', '200', response, detail=True)
+
+        @skipIfNotSubclass(DeletePreviewModelMixin)
+        def test_delete_preview(self):
+            current_objects = self.client.get(self.url, format='json').data
+            relative_url = self.url + '%s/delete_preview/' % current_objects['results'][0]['id']
+            response = self.client.get(relative_url)
+            # print('delete_preview response.data')
+            # print(relative_url)
+            # print(response.data)
+
+            self.assertEqual(200, response.status_code, response.content[:1000])
+
+            self.check_schema_response('get', '200', response, detail=True)
+
+            self.assertFalse('push_to_jira' in response.data)
+            self.assertFalse('password' in response.data)
+            self.assertFalse('ssh' in response.data)
+            self.assertFalse('api_key' in response.data)
+
+            self.assertIsInstance(response.data, list)
+            self.assertTrue(len(response.data) > 0, "Length: {}".format(len(response.data)))
+
+            for obj in response.data:
+                self.assertIsInstance(obj, dict)
+                self.assertTrue(len(obj), 3)
+                self.assertIsInstance(list(obj.values())[0], str)
 
         @skipIfNotSubclass(PrefetchRetrieveMixin)
         def test_detail_prefetch(self):
