@@ -428,7 +428,6 @@ class System_Settings(models.Model):
         verbose_name='Email pattern for staff users',
         help_text="When the email address of a new user created by OAuth2 matches this regex pattern, their is_staff flag will be set to True.")
 
-
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
 
