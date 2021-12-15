@@ -197,20 +197,20 @@ In a similar fashion to that of Google and OKTA, using Gitlab as a
 OAuth2 provider carries the same attributes and a similar procedure.
 Follow along below.
 
-1.  Navigate to your Gitlab settings page and got to the Applications
+1. Navigate to your Gitlab settings page and got to the Applications
     section
 
     -   <https://gitlab.com/profile/applications>
     -   **OR**
     -   [https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications](https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications)
 
-2.  Choose a name for your application
-3.  For the Redirect URI, enter the DefectDojo URL with the following
+2. Choose a name for your application
+3. For the Redirect URI, enter the DefectDojo URL with the following
     format
 
     -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/)
 
-4.  Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+4. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
     information:
 
     {{< highlight python >}}
@@ -227,14 +227,23 @@ Follow along below.
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT = True
     {{< /highlight >}}
 
-5.  Restart DefectDojo, and you should now see a **Login with Gitlab**
+5. Restart DefectDojo, and you should now see a **Login with Gitlab**
     button on the login page.
+
+## Keycloak
+1. go to your keycloak realm and add a new client <CLIENT_ID>
+2. in the client settings:
+   1. set access type to confidential
+   2. under valid Redirect URIs, add '<YOUR_SITE>/*'
+   3. under web origins, add the same (or '+')
+   4. fine grained openID connect configuration > User info signed response alogrith: set to RS256
+   5. fine grained openID connect configuration > request object signature algorithm: set to RS256
+3. 
 
 ## SAML 2.0
 In a similar direction to OAuth, this SAML addition provides a more secure
 perogative to SSO. For definitions of terms used and more information,
-see the plugin [plugin
-homepage](https://github.com/IdentityPython/djangosaml2). 
+see the plugin [plugin homepage](https://github.com/IdentityPython/djangosaml2). 
 
 1.  Navigate to your SAML IdP and find your metadata
 2.  Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following

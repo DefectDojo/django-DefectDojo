@@ -45,8 +45,9 @@
                     </div>
                 {% endif %}
 
+
                 {% if OKTA_ENABLED is True %}
-                    <div class="col-sm-offset-1 col-sm-2">
+                <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
                             <a href="{% url 'social:begin' 'okta-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with OKTA</a>
                         </button>
@@ -75,6 +76,14 @@
                             <a href="{% url 'social:begin' 'auth0' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Auth0</a>
                         </button>
                     </div>
+                {% endif %}
+
+                {% if KEYCLOAK_ENABLED is True %}
+                <div class="col-sm-offset-1 col-sm-2">
+                    <button class="btn btn-success" type="button">
+                        <a href="{% url 'social:begin' 'keycloak' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Keycloak</a>
+                    </button>
+                </div>
                 {% endif %}
 
                 {% if SAML2_ENABLED is True %}
