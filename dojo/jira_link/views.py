@@ -393,7 +393,6 @@ def new_jira_oauth(request):
                                                 close_status_key=jira_close_status_key,
                                                 finding_text='',
                                                 consumer_key=jira_consumer_key,
-                                                cert='/app/dojo/jira_link/cert',
                                                 cert_data= jira_key_cert,
                                                 use_oauth=True,
                                                 default_issue_type=jform.cleaned_data.get('default_issue_type'))

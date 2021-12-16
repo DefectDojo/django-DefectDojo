@@ -2149,7 +2149,7 @@ class JIRAFormOAUTH(forms.ModelForm):
 
         try:
             with open('/app/dojo/jira_link/cert', 'wb+') as destination:
-                for chunk in form_data['cert'].chunks():
+                for chunk in form_data['cert_file'].chunks():
                     destination.write(chunk)
             logger.error('uploaded cert')
             logger.debug('form data type', type(form_data))
