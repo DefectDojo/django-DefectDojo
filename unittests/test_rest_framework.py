@@ -436,8 +436,8 @@ class BaseClass():
             relative_url = self.url + '%s/delete_preview/' % current_objects['results'][0]['id']
             response = self.client.get(relative_url)
             # print('delete_preview response.data')
-            # print(relative_url)
-            # print(response.data)
+            print(relative_url)
+            print(response.data)
 
             self.assertEqual(200, response.status_code, response.content[:1000])
 
@@ -454,7 +454,9 @@ class BaseClass():
             for obj in response.data:
                 self.assertIsInstance(obj, dict)
                 self.assertTrue(len(obj), 3)
-                self.assertIsInstance(list(obj.values())[0], str)
+                self.assertIsInstance(list(obj.values())[0], str) # model
+                self.assertIsInstance(list(obj.values())[1], int) # id
+                self.assertIsInstance(list(obj.values())[2], str) # name
 
         @skipIfNotSubclass(PrefetchRetrieveMixin)
         def test_detail_prefetch(self):
