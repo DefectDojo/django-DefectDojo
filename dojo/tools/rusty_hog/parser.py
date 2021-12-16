@@ -43,27 +43,27 @@ class RustyhogParser(object):
 def get_item(vulnerability, test):
     cwe = 200
     description = "**This string was found:** {}".format(vulnerability.get('stringsFound'))
-    if vulnerability.get('commit') != None:
+    if vulnerability.get('commit') is not None:
         description += "\n**Commit message:** {}".format(vulnerability.get('commit'))
-    if vulnerability.get('commitHash') != None:
+    if vulnerability.get('commitHash') is not None:
         description += "\n**Commit hash:** {}".format(vulnerability.get('commitHash'))
-    if vulnerability.get('parent_commit_hash') != None:
+    if vulnerability.get('parent_commit_hash') is not None:
         description += "\n**Parent commit hash:** {}".format(vulnerability.get('parent_commit_hash'))
-    if vulnerability.get('date') != None:
+    if vulnerability.get('date') is not None:
         description += "\n**Date:** {}".format(vulnerability.get('date'))
-    if vulnerability.get('old_file_id') != None and vulnerability.get('new_file_id') != None:
+    if vulnerability.get('old_file_id') is not None and vulnerability.get('new_file_id') is not None:
         description += "\n**Old and new file IDs:** {} - {}".format(
                         vulnerability.get('old_file_id'),
                         vulnerability.get('new_file_id'))
-    if vulnerability.get('old_line_num') != None and vulnerability.get('new_line_num') != None:
+    if vulnerability.get('old_line_num') is not None and vulnerability.get('new_line_num') is not None:
         description += "\n**Old and new line numbers:** {} - {}".format(
                         vulnerability.get('old_line_num'),
                         vulnerability.get('new_line_num'))
-    if vulnerability.get('issue_id') != None:
+    if vulnerability.get('issue_id') is not None:
         description += "\n**JIRA Issue ID:** {}".format(vulnerability.get('issue_id'))
-    if vulnerability.get('location') != None:
+    if vulnerability.get('location') is not None:
         description += "\n**JIRA location:** {}".format(vulnerability.get('location'))
-    if vulnerability.get('url') != None:
+    if vulnerability.get('url') is not None:
         description += "\n**JIRA url:** {}".format(vulnerability.get('url'))
     file_path = vulnerability.get('path')
     title = "{} found in {} ({})".format(
