@@ -38,4 +38,4 @@ class TestRustyhogParser(DojoTestCase):
         testfile = open("unittests/scans/rusty_hog/gottingenhog_many_vulns.json")
         parser = RustyhogParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(13, len(findings))
+        self.assertEqual(10, len(findings))
