@@ -2140,7 +2140,7 @@ class JIRAFormOAUTH(forms.ModelForm):
         model = JIRA_Instance
         exclude = ['product', 'info_mapping_severity',
                     'low_mapping_severity', 'medium_mapping_severity',
-                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text', 'use_oauth', 'username', 'password']
+                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text', 'use_oauth', 'username', 'password', 'cert_data']
 
 
     def clean(self):
@@ -2153,7 +2153,9 @@ class JIRAFormOAUTH(forms.ModelForm):
                     destination.write(chunk)
             logger.error('uploaded cert')
             logger.debug('form data type', type(form_data))
-            auth = JIRA_Instance(use_oauth = True, consumer_key = form_data['consumer_key'], username = form_data['access_token'], password = form_data['access_token_secret'], cert = '/app/dojo/jira_link/cert', url = form_data['url'])
+            with open('/app/dojo/jira_link/cert') as f:
+                jira_key_cert = f.read()
+            auth = JIRA_Instance(use_oauth = True, consumer_key = form_data['consumer_key'], username = form_data['access_token'], password = form_data['access_token_secret'], cert_data = jira_key_cert, url = form_data['url'])
             jira = jira_helper.get_jira_connection_raw(auth)
             logger.debug('valid JIRA config!')
         except Exception as e:

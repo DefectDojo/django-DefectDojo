@@ -347,13 +347,12 @@ def get_jira_connection_raw(jira_instance):
     logger.debug('get jira connection raw obj type', type(jira_instance))
     if jira_instance.consumer_key :
         try:
-            with open('/app/dojo/jira_link/cert') as f:
-                jira_key_cert = f.read()
+
             oauth_dict = {
                 'access_token': jira_instance.username,
                 'access_token_secret': jira_instance.password,
                 'consumer_key': jira_instance.consumer_key,
-                'key_cert': jira_key_cert
+                'key_cert': jira_instance.cert_data
                 }
             jira = JIRA(server=jira_instance.url, oauth=oauth_dict)
             logger.debug('logged in to JIRA ''%s'' successfully', jira_instance.url)
