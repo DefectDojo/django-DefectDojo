@@ -454,9 +454,9 @@ class BaseClass():
             for obj in response.data:
                 self.assertIsInstance(obj, dict)
                 self.assertTrue(len(obj), 3)
-                self.assertIsInstance(list(obj.values())[0], str) # model
-                self.assertIsInstance(list(obj.values())[1], int) # id
-                self.assertIsInstance(list(obj.values())[2], str) # name
+                self.assertIsInstance(obj['model'], str)
+                self.assertIsInstance(obj['id'], int)
+                self.assertIsInstance(obj['name'], str)
 
         @skipIfNotSubclass(PrefetchRetrieveMixin)
         def test_detail_prefetch(self):
