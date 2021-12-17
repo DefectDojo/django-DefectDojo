@@ -1016,7 +1016,7 @@ class JiraInstanceViewSet(mixins.ListModelMixin,
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
-# Authorization: staff
+# Authorization: object-based
 class JiraIssuesViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.DestroyModelMixin,
