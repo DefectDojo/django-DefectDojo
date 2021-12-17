@@ -2108,3 +2108,15 @@ def get_file_images(obj, return_objects=False):
             else:
                 images.append(file_name)
     return images
+
+
+def get_enabled_notifications_list():
+    # Alerts need to enabled by default
+    enabled = ['alert']
+    if get_system_setting('enable_slack_notifications'):
+        enabled.append('slack')
+    if get_system_setting('enable_mail_notifications'):
+        enabled.append('mail')
+    if get_system_setting('enable_mail_notifications'):
+        enabled.append('msteams')
+    return enabled

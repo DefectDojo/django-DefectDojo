@@ -6,13 +6,12 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render
 
 from dojo.models import Notifications
-from dojo.utils import get_system_setting
+from dojo.utils import get_enabled_notifications_list
 from dojo.utils import add_breadcrumb
 from dojo.forms import NotificationsForm
 
 
 logger = logging.getLogger(__name__)
-
 
 def personal_notifications(request):
     try:
@@ -21,14 +20,6 @@ def personal_notifications(request):
         notifications_obj = Notifications(user=request.user)
 
     form = NotificationsForm(instance=notifications_obj)
-
-    # Alerts need to enabled by default
-    enabled = ['alert']
-    if get_system_setting('enable_slack_notifications'):
-        enabled.append('slack')
-    if get_system_setting('enable_mail_notifications'):
-        enabled.append('mail')
-
 
     if request.method == 'POST':
         form = NotificationsForm(request.POST, instance=notifications_obj)
@@ -44,7 +35,7 @@ def personal_notifications(request):
     return render(request, 'dojo/notifications.html',
                   {'form': form,
                    'scope': 'personal',
-                   'enabled': enabled,
+                   'enabled': get_enabled_notifications_list(),
                    'admin': request.user.is_superuser
                    })
 
@@ -70,4 +61,5 @@ def system_notifications(request):
     return render(request, 'dojo/notifications.html',
                   {'form': form,
                    'scope': 'system',
+                   'enabled': get_enabled_notifications_list(),
                    'admin': request.user.is_superuser})
