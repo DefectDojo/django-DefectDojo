@@ -56,6 +56,7 @@ from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
 from dojo.group.queries import get_authorized_groups, get_authorized_group_members
+from dojo.jira_link.queries import get_authorized_jira_projects, get_authorized_jira_issues
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from dojo.authorization.roles_permissions import Permissions
 
@@ -1023,13 +1024,16 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
                         mixins.UpdateModelMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.JIRAIssueSerializer
-    queryset = JIRA_Issue.objects.all()
+    queryset = JIRA_Issue.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'jira_id', 'jira_key', 'finding_id')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    filter_fields = ('id', 'jira_id', 'jira_key', 'finding', 'engagement', 'finding_group')
+    permission_classes = (IsAuthenticated, permissions.UserHasJiraIssuePermission)
+
+    def get_queryset(self):
+        return get_authorized_jira_issues(Permissions.Product_View)
 
 
-# Authorization: staff
+# Authorization: object-based
 class JiraProjectViewSet(mixins.ListModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.DestroyModelMixin,
@@ -1037,12 +1041,15 @@ class JiraProjectViewSet(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
     serializer_class = serializers.JIRAProjectSerializer
-    queryset = JIRA_Project.objects.all()
+    queryset = JIRA_Project.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'jira_instance', 'product', 'component', 'project_key',
+    filter_fields = ('id', 'jira_instance', 'product', 'engagement', 'component', 'project_key',
                      'push_all_issues', 'enable_engagement_epic_mapping',
                      'push_notes')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, permissions.UserHasJiraProductPermission)
+
+    def get_queryset(self):
+        return get_authorized_jira_projects(Permissions.Product_View)
 
 
 # Authorization: superuser

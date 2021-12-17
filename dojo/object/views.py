@@ -7,11 +7,13 @@ from django.shortcuts import render, get_object_or_404
 from dojo.models import Product, Objects_Product
 from dojo.forms import ObjectSettingsForm, DeleteObjectsSettingsForm
 from dojo.utils import Product_Tab
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization_decorators import user_is_authorized
 
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Tracking_Files_Add, 'pid')
 def new_object(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -36,8 +38,9 @@ def new_object(request, pid):
                        'pid': prod.id})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Tracking_Files_View, 'pid')
 def view_objects(request, pid):
+    product = get_object_or_404(Product, id=pid)
     object_queryset = Objects_Product.objects.filter(product=pid).order_by('path', 'folder', 'artifact')
 
     product_tab = Product_Tab(pid, title="Tracked Product Files, Paths and Artifacts", tab="settings")
@@ -46,11 +49,11 @@ def view_objects(request, pid):
                   {
                       'object_queryset': object_queryset,
                       'product_tab': product_tab,
-                      'pid': pid
+                      'product': product
                   })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Tracking_Files_Edit, 'pid')
 def edit_object(request, pid, ttid):
     object = Objects_Product.objects.get(pk=ttid)
 
@@ -76,7 +79,7 @@ def edit_object(request, pid, ttid):
                   })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Tracking_Files_Delete, 'pid')
 def delete_object(request, pid, ttid):
     object = Objects_Product.objects.get(pk=ttid)
 
