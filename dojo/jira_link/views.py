@@ -365,7 +365,7 @@ def new_jira_oauth(request):
             jira_open_status_key = jform.cleaned_data.get('open_status_key')
             jira_close_status_key = jform.cleaned_data.get('close_status_key')
             with open('/app/dojo/jira_link/cert', 'wb+') as destination:
-                for chunk in request.FILES['cert'].chunks():
+                for chunk in request.FILES['cert_file'].chunks():
                     destination.write(chunk)
                     logger.error('uploaded cert to ', destination)
 
