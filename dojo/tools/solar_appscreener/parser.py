@@ -33,7 +33,7 @@ class SolarAppscreenerParser(object):
         for row in reader:
             csvarray.append(row)
 
-        dupes = dict()
+        items = list()
         for row in csvarray:
             finding = Finding(test=test)
             finding.title = row.get('Vulnerability', '')
@@ -55,10 +55,6 @@ class SolarAppscreenerParser(object):
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.sha256((finding.title + '|' + finding.sast_source_file_path +
-                                     '|' + finding.sast_source_line).encode("utf-8")).hexdigest()
+            items.append(finding)
 
-                if key not in dupes:
-                    dupes[key] = finding
-
-        return list(dupes.values())
+        return items
