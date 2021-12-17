@@ -43,11 +43,14 @@ class SolarAppscreenerParser(object):
             finding.severity = row.get('Severity Level', 'Info')
             finding.file_path = row.get('File', '')
             finding.sast_source_file_path = row.get('File', '')
-            finding.sast_source_line = row.get('Line', '')
+            finding.line = row.get('Line', '')
 
-            if not finding.sast_source_line.isdigit():
-                finding.sast_source_line = finding.sast_source_line.split(
-                    "-")[0]
+            if not finding.line.isdigit():
+                finding.line = finding.line.split("-")[0]
+
+            finding.line = int(finding.line)
+
+            finding.sast_source_line = finding.line
 
             if finding is not None:
                 if finding.title is None:
