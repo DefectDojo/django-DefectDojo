@@ -347,17 +347,23 @@
                                         <span>Calendar</span>
                                     </a>
                                 </li>
-                            {% if request.user.is_staff and system_settings.enable_questionnaires %}
+                            {% if system_settings.enable_questionnaires %}
+                            {% if "dojo.view_engagement_survey"|has_configuration_permission:"staff" or "dojo.view_question"|has_configuration_permission:"staff" %}
                                 <li>
                                     <a href="#"><i class="fa fa-hospital-o fa-fw"> </i> <span>Questionnaires</span><span
                                             class="glyphicon arrow"></span></a>
                                     <ul class="nav nav-second-level">
+                                        {% if "dojo.view_engagement_survey"|has_configuration_permission:"staff"  %}
                                         <li><a href="{% url 'questionnaire' %}">All Questionnaires </a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_question"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'questions' %}">All Questions </a></li>
+                                        {% endif %}
 
                                     </ul>
                                     <!-- /.nav-second-level -->
                                 </li>
+                            {% endif %}
                             {% endif %}
                                 <li id="menu_configuration">
 				                    <a href="#" aria-expanded="false" aria-label="Configuration">
