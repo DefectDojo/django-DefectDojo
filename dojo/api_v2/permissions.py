@@ -1,5 +1,5 @@
 import re
-from rest_framework.exceptions import ParseError, PermissionDenied
+from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
 from dojo.api_v2.serializers import get_import_meta_data_from_dict, get_product_id_from_dict
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists,  \
@@ -185,13 +185,12 @@ class UserHasImportPermission(permissions.BasePermission):
             raise serializers.ValidationError("Engagement '%s' doesn''t exist" % engagement_id)
 
         if not auto_create_context:
-            raise serializers.ValidationError("Engagement '%s' doesn't exist in Product %s" % (engagement_name, product_name))
+            raise_no_auto_create_import_validation_error(None, None, engagement_name, product_name, product_type_name, engagement, product, product_type,
+                                                "Need engagement_id or product_name + engagement_name to perform import")
         else:
             # the engagement doesn't exist, so we need to check if the user has requested and is allowed to use auto_create
-            if check_auto_create_permission(request.user, product, product_name, engagement, engagement_name, product_type, product_type_name):
-                return True
-
-        raise serializers.ValidationError("Need engagement_id or product_name + engagement_name to perform import")
+            return check_auto_create_permission(request.user, product, product_name, engagement, engagement_name, product_type, product_type_name,
+                                                 "Need engagement_id or product_name + engagement_name to perform import")
 
 
 class UserHasMetaImportPermission(permissions.BasePermission):
@@ -286,19 +285,12 @@ class UserHasReimportPermission(permissions.BasePermission):
             raise serializers.ValidationError("Test '%s' doesn't exist" % test_id)
 
         if not auto_create_context:
-            # avoid NoneType errors on logging
-            if not engagement_name:
-                engagement_name = ''
-
-            if test_title:
-                raise serializers.ValidationError("Test '%s' with scan_type '%s'  doesn't exist in Engagement %s" % (scan_type, test_title, engagement_name))
-            raise serializers.ValidationError("Test with scan_type '%s' doesn't exist in Engagement %s" % (scan_type, engagement_name))
+            raise_no_auto_create_import_validation_error(test_title, scan_type, engagement_name, product_name, product_type_name, engagement, product, product_type,
+                                                "Need test_id or product_name + engagement_name + scan_type to perform reimport")
         else:
             # the test doesn't exist, so we need to check if the user has requested and is allowed to use auto_create
-            if check_auto_create_permission(request.user, product, product_name, engagement, engagement_name, product_type, product_type_name):
-                return True
-
-        raise serializers.ValidationError("Need test_id or product_name + engagement_name + test_title to perform reimport")
+            return check_auto_create_permission(request.user, product, product_name, engagement, engagement_name, product_type, product_type_name,
+                                                "Need test_id or product_name + engagement_name + scan_type to perform reimport")
 
 
 class UserHasTestPermission(permissions.BasePermission):
@@ -360,7 +352,37 @@ class UserHasEngagementPresetPermission(permissions.BasePermission):
         return check_object_permission(request, obj.product, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Edit, Permissions.Product_Edit)
 
 
-def check_auto_create_permission(user, product, product_name, engagement, engagement_name, product_type, product_type_name):
+def raise_no_auto_create_import_validation_error(test_title, scan_type, engagement_name, product_name, product_type_name, engagement, product, product_type, error_message):
+    # check for mandatory fields first
+    if not product_name:
+        raise ValidationError("product_name parameter missing")
+
+    if not engagement_name:
+        raise ValidationError("engagement_name parameter missing")
+
+    if product_type_name and not product_type:
+        raise serializers.ValidationError("Product Type '%s' doesn't exist in Product %s" % (product_type_name))
+
+    if product_name and not product:
+        if product_type_name:
+            raise serializers.ValidationError("Product '%s' doesn't exist in Product_Type %s" % (product_name, product_type_name))
+        else:
+            raise serializers.ValidationError("Product '%s' doesn't exist" % product_name)
+
+    if engagement_name and not engagement:
+        raise serializers.ValidationError("Engagement '%s' doesn't exist in Product %s" % (engagement_name, product_name))
+
+    # these are only set for reimport
+    if test_title:
+        raise serializers.ValidationError("Test '%s' with scan_type '%s' doesn't exist in Engagement %s" % (test_title, scan_type, engagement_name))
+
+    if scan_type:
+        raise serializers.ValidationError("Test with scan_type '%s' doesn't exist in Engagement %s" % (scan_type, engagement_name))
+
+    raise ValidationError(error_message)
+
+
+def check_auto_create_permission(user, product, product_name, engagement, engagement_name, product_type, product_type_name, error_message):
     """
     For an existing engagement, to be allowed to import a scan, the following must all be True:
     - User must have Import_Scan_Result permission for this Engagement
@@ -376,6 +398,12 @@ def check_auto_create_permission(user, product, product_name, engagement, engage
     - Product_Type already exists, or the user has the Product_Type_Add permission
     - User must have Product_Type_Add_Product permission for the Product_Type, or the user has the Product_Type_Add permission
     """
+    if not product_name:
+        raise ValidationError("product_name parameter missing")
+
+    if not engagement_name:
+        raise ValidationError("engagement_name parameter missing")
+
     if engagement:
         # existing engagement, nothing special to check
         return user_has_permission(user, engagement, Permissions.Import_Scan_Result)
@@ -405,3 +433,5 @@ def check_auto_create_permission(user, product, product_name, engagement, engage
 
         # product can be created, so objects in it can be created as well
         return True
+
+    raise ValidationError(error_message)

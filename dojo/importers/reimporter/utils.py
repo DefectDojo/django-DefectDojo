@@ -177,7 +177,7 @@ def get_target_test_if_exists(test_id=None, test_title=None, scan_type=None, eng
 
 
 def get_or_create_product(product_name=None, product_type_name=None, auto_create_context=None):
-    # try to find the procut (withing the provided product_type)
+    # try to find the product (withing the provided product_type)
     product = get_target_product_if_exists(product_name, product_type_name)
     if product:
         return product
