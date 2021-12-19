@@ -369,23 +369,23 @@ def raise_no_auto_create_import_validation_error(test_title, scan_type, engageme
         raise ValidationError("engagement_name parameter missing")
 
     if product_type_name and not product_type:
-        raise serializers.ValidationError("Product Type '%s' doesn't exist in Product %s" % (product_type_name))
+        raise serializers.ValidationError("Product Type '%s' doesn't exist" % (product_type_name))
 
     if product_name and not product:
         if product_type_name:
-            raise serializers.ValidationError("Product '%s' doesn't exist in Product_Type %s" % (product_name, product_type_name))
+            raise serializers.ValidationError("Product '%s' doesn't exist in Product_Type '%s'" % (product_name, product_type_name))
         else:
             raise serializers.ValidationError("Product '%s' doesn't exist" % product_name)
 
     if engagement_name and not engagement:
-        raise serializers.ValidationError("Engagement '%s' doesn't exist in Product %s" % (engagement_name, product_name))
+        raise serializers.ValidationError("Engagement '%s' doesn't exist in Product '%s'" % (engagement_name, product_name))
 
     # these are only set for reimport
     if test_title:
-        raise serializers.ValidationError("Test '%s' with scan_type '%s' doesn't exist in Engagement %s" % (test_title, scan_type, engagement_name))
+        raise serializers.ValidationError("Test '%s' with scan_type '%s' doesn't exist in Engagement '%s'" % (test_title, scan_type, engagement_name))
 
     if scan_type:
-        raise serializers.ValidationError("Test with scan_type '%s' doesn't exist in Engagement %s" % (scan_type, engagement_name))
+        raise serializers.ValidationError("Test with scan_type '%s' doesn't exist in Engagement '%s'" % (scan_type, engagement_name))
 
     raise ValidationError(error_message)
 
@@ -418,26 +418,26 @@ def check_auto_create_permission(user, product, product_name, engagement, engage
 
     if product and product_name and engagement_name:
         if not user_has_permission(user, product, Permissions.Engagement_Add):
-            raise PermissionDenied('No permission to create engagements in product %s', product_name)
+            raise PermissionDenied("No permission to create engagements in product '%s'", product_name)
 
         if not user_has_permission(user, product, Permissions.Import_Scan_Result):
-            raise PermissionDenied('No permission to import scans into product %s', product_name)
+            raise PermissionDenied("No permission to import scans into product '%s'", product_name)
 
         # all good
         return True
 
     if not product and product_name:
         if not product_type_name:
-            raise serializers.ValidationError("Product '%s' doesn't exist and no product_type_name provided to create the new product in" % product_name)
+            raise serializers.ValidationError("Product '%s' doesn't exist and no product_type_name provided to create the new product in." % product_name)
 
         if not product_type:
             if not user_has_global_permission(user, Permissions.Product_Type_Add):
-                raise PermissionDenied('No permission to create product_type %s', product_type_name)
+                raise PermissionDenied("No permission to create product_type '%s'", product_type_name)
             # new product type can be created with current user as owner, so all objects in it can be created as well
             return True
         else:
             if not user_has_permission(user, product_type, Permissions.Product_Type_Add_Product):
-                raise PermissionDenied('No permission to create products in product_type %s', product_type)
+                raise PermissionDenied("No permission to create products in product_type '%s'", product_type)
 
         # product can be created, so objects in it can be created as well
         return True

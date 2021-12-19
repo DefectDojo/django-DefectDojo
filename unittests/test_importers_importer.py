@@ -284,6 +284,11 @@ class FlexibleImportTestAPI(DojoAPITestCase):
 
         with self.subTest('invalid product'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement=None, product_type_name='valentijn', product_name='67283', engagement_name='valentijn', expected_http_status_code=400)
+            self.assertEqual(import0, ["Product Type 'valentijn' doesn't exist"])
+
+        with self.subTest('invalid product'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, product_name='67283', engagement_name='valentijn', expected_http_status_code=400)
             self.assertEqual(import0, ["Product '67283' doesn't exist"])
 
@@ -471,6 +476,11 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, product_name='67283', expected_http_status_code=400)
             self.assertEqual(import0, ['engagement_name parameter missing'])
+
+        with self.subTest('invalid product type'):
+            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement=None, product_type_name='valentijn', product_name='67283', engagement_name='valentijn', expected_http_status_code=400)
+            self.assertEqual(import0, ["Product Type 'valentijn' doesn't exist"])
 
         with self.subTest('invalid product'):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
