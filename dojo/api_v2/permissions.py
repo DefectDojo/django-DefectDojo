@@ -428,7 +428,7 @@ def check_auto_create_permission(user, product, product_name, engagement, engage
 
     if not product and product_name:
         if not product_type_name:
-            raise serializers.ValidationError("Product '%s' doesn't exist and no product_type_name provided to create the new product in." % product_name)
+            raise serializers.ValidationError("Product '%s' doesn't exist and no product_type_name provided to create the new product in" % product_name)
 
         if not product_type:
             if not user_has_global_permission(user, Permissions.Product_Type_Add):
