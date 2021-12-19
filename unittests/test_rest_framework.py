@@ -2007,6 +2007,20 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
         self.permission_delete = Permissions.Group_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_list_not_authorized(self):
+        self.setUp_not_authorized()
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_detail_not_authorized(self):
+        self.setUp_not_authorized()
+
+        current_objects = self.endpoint_model.objects.all()
+        relative_url = self.url + '%s/' % current_objects[0].id
+        response = self.client.get(relative_url)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
     def test_create_not_authorized(self):
         self.setUp_not_authorized()
 

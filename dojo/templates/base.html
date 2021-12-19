@@ -322,7 +322,7 @@
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% if request.user.is_staff %}
+                            {% if "auth.view_user"|has_configuration_permission:"staff" or "auth.view_group"|has_configuration_permission:"staff" %}
                                 <li>
                                     <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users">
                                         <i class="fa fa-user fa-fw"></i>
@@ -330,8 +330,12 @@
                                         <span class="glyphicon arrow"></span>
                                     </a>
                                     <ul class="nav nav-second-level">
+                                        {% if "auth.view_user"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'users' %}"> Users </a></li>
+                                        {% endif %}
+                                        {% if "auth.view_group"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'groups' %}"> Groups </a></li>
+                                        {% endif %}
                                     </ul>
                                 </li>
                             {% endif %}
@@ -370,7 +374,11 @@
                                         <li><a href="{% url 'github' %}">GitHub </a></li>
                                         {% endif %}
                                         <li><a href="{% url 'tool_config' %}">Tool Configuration </a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_tool_type"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'tool_type' %}">Tool Type </a></li>
+                                        {% endif %}
+                                        {% if request.user.is_superuser %}
                                         <li><a href="{% url 'rules' %}">Rules Framework </a></li>
                                         {% endif %}
                                         <li><a href="{% url 'regulations' %}">Regulations </a></li>
