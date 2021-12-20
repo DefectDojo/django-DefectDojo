@@ -118,7 +118,7 @@ def get_target_product_if_exists(product_name=None, product_type_name=None):
         if product:
             # product type name must match if provided
             if product_type_name:
-                if product.product_type.name == product_type_name:
+                if product.prod_type.name == product_type_name:
                     return product
             else:
                 return product

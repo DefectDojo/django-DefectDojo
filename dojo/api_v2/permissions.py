@@ -281,7 +281,7 @@ class UserHasReimportPermission(permissions.BasePermission):
         test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(request.data)
 
         product_type = get_target_product_type_if_exists(product_type_name)
-        product = get_target_product_if_exists(product_name)
+        product = get_target_product_if_exists(product_name, product_type_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
