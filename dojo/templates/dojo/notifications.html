@@ -40,7 +40,7 @@
                         {% if 'slack' in enabled_notifications %}
                         <th class="centered">Slack</th>
                         {% endif %}
-                        {% if scope == 'system' %}
+                        {% if scope == 'system' and 'msteams' in enabled_notifications %}
                         <th class="centered">Microsoft Teams</th>
                         {% endif %}
                         {% if 'mail' in enabled_notifications %}
@@ -61,7 +61,11 @@
                             </td>
                     {% endif %}
                     {% for pk,c in field.field.widget.choices %}
-                    {% if scope == 'system' or scope == 'personal' and c != "msteams" and c in enabled_notifications %}
+                    {% if scope == 'system' and c in enabled_notifications %}
+                        <td class="centered">
+                            <input type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/>
+                        </td>
+                    {% elif  scope == 'personal' and c in enabled_notifications and c != 'msteams' %}
                         <td class="centered">
                             <input type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/>
                         </td>

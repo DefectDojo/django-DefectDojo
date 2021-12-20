@@ -2117,6 +2117,6 @@ def get_enabled_notifications_list():
         enabled.append('slack')
     if get_system_setting('enable_mail_notifications'):
         enabled.append('mail')
-    if get_system_setting('enable_mail_notifications'):
+    if get_system_setting('enable_msteams_notifications'):
         enabled.append('msteams')
     return enabled
