@@ -1074,7 +1074,6 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Hadolint Dockerfile check': True,
     'Semgrep JSON Report': True,
     'Generic Findings Import': True,
-    'Solar Appscreener Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
