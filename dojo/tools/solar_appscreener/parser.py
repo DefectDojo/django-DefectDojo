@@ -1,5 +1,4 @@
 import csv
-import hashlib
 import io
 from dojo.models import Finding
 
@@ -33,7 +32,7 @@ class SolarAppscreenerParser(object):
         for row in reader:
             csvarray.append(row)
 
-        dupes = dict()
+        items = list()
         for row in csvarray:
             finding = Finding(test=test)
             finding.title = row.get('Vulnerability', '')
@@ -43,11 +42,14 @@ class SolarAppscreenerParser(object):
             finding.severity = row.get('Severity Level', 'Info')
             finding.file_path = row.get('File', '')
             finding.sast_source_file_path = row.get('File', '')
-            finding.sast_source_line = row.get('Line', '')
+            finding.line = row.get('Line', '')
 
-            if not finding.sast_source_line.isdigit():
-                finding.sast_source_line = finding.sast_source_line.split(
-                    "-")[0]
+            if not finding.line.isdigit():
+                finding.line = finding.line.split("-")[0]
+
+            finding.line = int(finding.line)
+
+            finding.sast_source_line = finding.line
 
             if finding is not None:
                 if finding.title is None:
@@ -55,10 +57,6 @@ class SolarAppscreenerParser(object):
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.sha256((finding.title + '|' + finding.sast_source_file_path +
-                                     '|' + finding.sast_source_line).encode("utf-8")).hexdigest()
+            items.append(finding)
 
-                if key not in dupes:
-                    dupes[key] = finding
-
-        return list(dupes.values())
+        return items
