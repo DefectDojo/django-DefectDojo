@@ -99,6 +99,7 @@ jobs:
           "tests/file_test.py",
           "tests/dedupe_test.py",
           "tests/check_various_pages.py",
+          "tests/notifications_test.py",
         ]
       fail-fast: false
 

@@ -176,9 +176,6 @@ def suite():
     suite.addTest(UserTest('test_user_edit_permissions'))
     suite.addTest(UserTest('test_user_delete'))
 
-    # not really for the user we created, but still related to user settings
-    suite.addTest(UserTest('test_user_notifications_change'))
-
     return suite
 
 
