@@ -35,7 +35,7 @@ def personal_notifications(request):
     return render(request, 'dojo/notifications.html',
                   {'form': form,
                    'scope': 'personal',
-                   'enabled': get_enabled_notifications_list(),
+                   'enabled_notifications': get_enabled_notifications_list(),
                    'admin': request.user.is_superuser
                    })
 

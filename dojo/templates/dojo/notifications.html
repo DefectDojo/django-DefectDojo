@@ -37,13 +37,13 @@
                 <thead>
                     <tr>
                         <th>Event</th>
-                        {% if 'slack' in enabled %}
+                        {% if 'slack' in enabled_notifications %}
                         <th class="centered">Slack</th>
                         {% endif %}
                         {% if scope == 'system' %}
                         <th class="centered">Microsoft Teams</th>
                         {% endif %}
-                        {% if 'mail' in enabled %}
+                        {% if 'mail' in enabled_notifications %}
                         <th class="centered">Mail</th>
                         {% endif %}
                         <th class="centered">Alert</th>
@@ -61,7 +61,7 @@
                             </td>
                     {% endif %}
                     {% for pk,c in field.field.widget.choices %}
-                    {% if scope == 'system' or scope == 'personal' and c != "msteams" and c in enabled %}
+                    {% if scope == 'system' or scope == 'personal' and c != "msteams" and c in enabled_notifications %}
                         <td class="centered">
                             <input type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/>
                         </td>
