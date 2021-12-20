@@ -13,6 +13,7 @@ from dojo.forms import NotificationsForm
 
 logger = logging.getLogger(__name__)
 
+
 def personal_notifications(request):
     try:
         notifications_obj = Notifications.objects.get(user=request.user, product__isnull=True)
