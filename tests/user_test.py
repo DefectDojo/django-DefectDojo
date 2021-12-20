@@ -130,33 +130,6 @@ class UserTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='User and relationships removed.'))
 
-    def test_user_notifications_change(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
-        driver = self.driver
-
-        wait = WebDriverWait(driver, 5)
-        actions = ActionChains(driver)
-        configuration_menu = driver.find_element(By.ID, 'menu_configuration')
-        actions.move_to_element(configuration_menu).perform()
-        wait.until(EC.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
-
-        originally_selected = {
-            'product_added': driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").is_selected(),
-            'scan_added': driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected()
-        }
-
-        driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").click()
-        driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").click()
-
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
-
-        self.assertTrue(self.is_success_message_present(text='Settings saved'))
-        self.assertNotEqual(originally_selected['product_added'],
-            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").is_selected())
-        self.assertNotEqual(originally_selected['scan_added'],
-            driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected())
-
     def test_standard_user_login(self):
         self.login_standard_page()
 
