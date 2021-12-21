@@ -11,7 +11,6 @@ from selenium.common.exceptions import NoSuchElementException
 
 class NotificationTest(BaseTestCase):
 
-
     def test_enable_mail_notification(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container

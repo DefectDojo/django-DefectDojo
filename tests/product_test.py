@@ -7,6 +7,7 @@ import time
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from notifications_test import NotificationTest
 
+
 class WaitForPageLoad(object):
     def __init__(self, browser, timeout):
         self.browser = browser
