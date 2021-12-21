@@ -11,6 +11,65 @@ from selenium.common.exceptions import NoSuchElementException
 
 class NotificationTest(BaseTestCase):
 
+    def enable_notification(self, type):
+        driver = self.driver
+        # Navigate to the System Settimgs
+        driver.get(self.base_url + "system_settings")
+        mail_control = driver.find_element(By.ID, "id_enable_{}_notifications".format(type))
+        if not mail_control.is_selected():
+            mail_control.click()
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+
+    def disable_notification(self, type):
+        driver = self.driver
+        # Navigate to the System Settimgs
+        driver.get(self.base_url + "system_settings")
+        mail_control = driver.find_element(By.ID, "id_enable_{}_notifications".format(type))
+        if mail_control.is_selected():
+            mail_control.click()
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+
+    def test_disable_mail_notification(self):
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+        driver = self.driver
+
+        self.disable_notification('mail')
+        driver.get(self.base_url + "notifications")
+        try:
+            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']")
+            assert False
+        except NoSuchElementException:
+            assert True
+
+    def test_disable_slack_notification(self):
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+        driver = self.driver
+
+        self.disable_notification("slack")
+
+        driver.get(self.base_url + "notifications")
+        try:
+            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='slack']")
+            assert False
+        except NoSuchElementException:
+            assert True
+
+    def test_disable_msteams_notification(self):
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+        driver = self.driver
+
+        self.disable_notification("msteams")
+
+        driver.get(self.base_url + "notifications")
+        try:
+            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='msteams']")
+            assert False
+        except NoSuchElementException:
+            assert True
+
     def test_enable_mail_notification(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
@@ -23,15 +82,6 @@ class NotificationTest(BaseTestCase):
             assert True
         except NoSuchElementException:
             assert False
-
-    def enable_notification(self, type):
-        driver = self.driver
-        # Navigate to the System Settimgs
-        driver.get(self.base_url + "system_settings")
-        mail_control = driver.find_element(By.ID, "id_enable_{}_notifications".format(type))
-        if not mail_control.is_selected():
-            mail_control.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
     def test_enable_slack_notification(self):
         # Login to the site. Password will have to be modified
@@ -95,6 +145,9 @@ def suite():
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(NotificationTest('test_disable_mail_notification'))
+    suite.addTest(NotificationTest('test_disable_slack_notification'))
+    suite.addTest(NotificationTest('test_disable_msteams_notification'))
     suite.addTest(NotificationTest('test_enable_mail_notification'))
     suite.addTest(NotificationTest('test_enable_slack_notification'))
     suite.addTest(NotificationTest('test_enable_msteams_notification'))
