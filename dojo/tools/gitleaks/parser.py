@@ -35,7 +35,7 @@ class GitleaksParser(object):
             elif issue.get('Description'):
                 self.get_finding_current(issue, test, dupes)
             else:
-                raise Exception('Format is not recognized for Trufflehog3')
+                raise Exception('Format is not recognized for Gitleaks')
 
         return list(dupes.values())
 
