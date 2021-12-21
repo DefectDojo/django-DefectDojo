@@ -48,21 +48,21 @@ class NotificationTest(BaseTestCase):
             assert True
 
     def test_enable_personal_notification(self):
-       # Login to the site. Password will have to be modified
-       # to match an admin password in your own container
-       driver = self.driver
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+        driver = self.driver
 
-       self.enable_notification()
-       driver.get(self.base_url + "notifications")
-       try:
-           driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
-           assert True
-       except NoSuchElementException:
-           if self.type == 'msteams':
-               # msteam should be not in personal notifications
-               assert True
-           else:
-               assert False
+        self.enable_notification()
+        driver.get(self.base_url + "notifications")
+        try:
+            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
+            assert True
+        except NoSuchElementException:
+            if self.type == 'msteams':
+                # msteam should be not in personal notifications
+                assert True
+            else:
+                assert False
 
     def test_disable_system_notification(self):
         # Login to the site. Password will have to be modified
@@ -79,17 +79,17 @@ class NotificationTest(BaseTestCase):
             assert True
 
     def test_enable_system_notification(self):
-       # Login to the site. Password will have to be modified
-       # to match an admin password in your own container
-       driver = self.driver
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+        driver = self.driver
 
-       self.enable_notification()
-       driver.get(self.base_url + "notifications/system")
-       try:
-           driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
-           assert True
-       except NoSuchElementException:
-               assert False
+        self.enable_notification()
+        driver.get(self.base_url + "notifications/system")
+        try:
+            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
+            assert True
+        except NoSuchElementException:
+                assert False
 
     def test_user_mail_notifications_change(self):
         # Login to the site. Password will have to be modified
