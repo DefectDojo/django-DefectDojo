@@ -122,7 +122,7 @@ fi
 
 test="Test notifications"
 echo "Running: $test"
-if python3 tests/notification_test.py ; then
+if python3 tests/notifications_test.py ; then
     success $test
 else
     fail $test

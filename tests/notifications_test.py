@@ -11,18 +11,13 @@ from selenium.common.exceptions import NoSuchElementException
 
 class NotificationTest(BaseTestCase):
 
+
     def test_enable_mail_notification(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
         driver = self.driver
 
-        # Navigate to the User managegement page
-        driver.get(self.base_url + "system_settings")
-        mail_control = driver.find_element(By.ID, "id_enable_mail_notifications")
-        if not mail_control.is_selected():
-            mail_control.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
-
+        self.enable_notification('mail')
         driver.get(self.base_url + "notifications")
         try:
             driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']")
@@ -30,17 +25,21 @@ class NotificationTest(BaseTestCase):
         except NoSuchElementException:
             assert False
 
+    def enable_notification(self, type):
+        driver = self.driver
+        # Navigate to the System Settimgs
+        driver.get(self.base_url + "system_settings")
+        mail_control = driver.find_element(By.ID, "id_enable_{}_notifications".format(type))
+        if not mail_control.is_selected():
+            mail_control.click()
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+
     def test_enable_slack_notification(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
         driver = self.driver
 
-        # Navigate to the User managegement page
-        driver.get(self.base_url + "system_settings")
-        mail_control = driver.find_element(By.ID, "id_enable_slack_notifications")
-        if not mail_control.is_selected():
-            mail_control.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.enable_notification("slack")
 
         driver.get(self.base_url + "notifications")
         try:
@@ -54,12 +53,7 @@ class NotificationTest(BaseTestCase):
         # to match an admin password in your own container
         driver = self.driver
 
-        # Navigate to the User managegement page
-        driver.get(self.base_url + "system_settings")
-        mail_control = driver.find_element(By.ID, "id_enable_msteams_notifications")
-        if not mail_control.is_selected():
-            mail_control.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.enable_notification("msteams")
 
         driver.get(self.base_url + "notifications")
         try:
