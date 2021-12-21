@@ -89,7 +89,7 @@ class NotificationTest(BaseTestCase):
             driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
             assert True
         except NoSuchElementException:
-                assert False
+            assert False
 
     def test_user_mail_notifications_change(self):
         # Login to the site. Password will have to be modified
