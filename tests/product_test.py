@@ -462,7 +462,7 @@ class ProductTest(BaseTestCase):
     def test_product_notifications_change(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
-        NotificationTest("enable_notification", "mail")
+        NotificationTest("enable_notification", "mail").enable_notification()
         driver = self.driver
 
         self.goto_product_overview(driver)
