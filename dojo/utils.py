@@ -26,7 +26,7 @@ import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
     Dojo_User, Test, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Dojo_Group_Member
+    Language_Type, Languages, Rule, Dojo_Group_Member, NOTIFICATION_CHOICES
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
 import logging
@@ -2113,10 +2113,7 @@ def get_file_images(obj, return_objects=False):
 def get_enabled_notifications_list():
     # Alerts need to enabled by default
     enabled = ['alert']
-    if get_system_setting('enable_slack_notifications'):
-        enabled.append('slack')
-    if get_system_setting('enable_mail_notifications'):
-        enabled.append('mail')
-    if get_system_setting('enable_msteams_notifications'):
-        enabled.append('msteams')
+    for choice in NOTIFICATION_CHOICES:
+        if get_system_setting('enable_{}_notifications'.format(choice[0])):
+            enabled.append(choice[0])
     return enabled
