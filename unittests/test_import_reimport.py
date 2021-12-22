@@ -76,7 +76,7 @@ class ImportReimportMixin(object):
         self.clair_empty = self.scans_path + 'clair/empty.json'
         self.scan_type_clair = 'Clair Scan'
 
-        self.generic_filename_with_file = "generic/test_with_image.json"
+        self.generic_filename_with_file = self.scans_path + "generic/test_with_image.json"
 
     # import zap scan, testing:
     # - import
