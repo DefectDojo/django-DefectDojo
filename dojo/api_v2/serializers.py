@@ -1230,10 +1230,15 @@ class ImportScanSerializer(serializers.Serializer):
         default=None,
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
-    close_old_findings = serializers.BooleanField(required=False, default=False)
+    close_old_findings = serializers.BooleanField(required=False, default=False,
+        help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
+                  "If service has been set, only the findings for this service will be closed.")
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
-    version = serializers.CharField(required=False)
+    version = serializers.CharField(required=False,
+        help_text="A service is a self-contained piece of functionality within a Product. "
+                  "This is an optional field which is used in deduplication and closing of old findings when set. "
+                  "This affects the whole engagement/product depending on your deduplication scope.")
     build_id = serializers.CharField(required=False)
     branch_tag = serializers.CharField(required=False)
     commit_hash = serializers.CharField(required=False)
