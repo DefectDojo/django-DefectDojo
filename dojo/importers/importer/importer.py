@@ -170,7 +170,7 @@ class DojoDefaultImporter(object):
             return [serializers.serialize('json', [finding, ]) for finding in new_findings]
         return new_findings
 
-    def close_old_findings(self, test, scan_date_time, user, push_to_jira=None):
+    def close_old_findings(self, test, scan_date_time, user, push_to_jira=None, service=None):
         old_findings = []
         # Close old active findings that are not reported by this scan.
         new_hash_codes = test.finding_set.values('hash_code')
@@ -179,18 +179,32 @@ class DojoDefaultImporter(object):
         # Would it make more sense to exclude duplicates? But the deduplication process can be unfinished because it's
         # run in a celery async task...
         if test.engagement.deduplication_on_engagement:
-            old_findings = Finding.objects.exclude(test=test) \
-                                            .exclude(hash_code__in=new_hash_codes) \
-                                            .filter(test__engagement=test.engagement,
-                                                test__test_type=test.test_type,
-                                                active=True)
+            if service:
+                old_findings = Finding.objects.exclude(test=test) \
+                                                .exclude(hash_code__in=new_hash_codes) \
+                                                .filter(test__engagement=test.engagement,
+                                                    test__test_type=test.test_type,
+                                                    active=True, service=service)
+            else:
+                old_findings = Finding.objects.exclude(test=test) \
+                                                .exclude(hash_code__in=new_hash_codes) \
+                                                .filter(test__engagement=test.engagement,
+                                                    test__test_type=test.test_type,
+                                                    active=True)
         else:
             # TODO BUG? this will violate the deduplication_on_engagement setting for other engagements
-            old_findings = Finding.objects.exclude(test=test) \
-                                            .exclude(hash_code__in=new_hash_codes) \
-                                            .filter(test__engagement__product=test.engagement.product,
-                                                test__test_type=test.test_type,
-                                                active=True)
+            if service:
+                old_findings = Finding.objects.exclude(test=test) \
+                                                .exclude(hash_code__in=new_hash_codes) \
+                                                .filter(test__engagement__product=test.engagement.product,
+                                                    test__test_type=test.test_type,
+                                                    active=True, service=service)
+            else:
+                old_findings = Finding.objects.exclude(test=test) \
+                                                .exclude(hash_code__in=new_hash_codes) \
+                                                .filter(test__engagement__product=test.engagement.product,
+                                                    test__test_type=test.test_type,
+                                                    active=True)
 
         for old_finding in old_findings:
             old_finding.active = False
@@ -323,7 +337,7 @@ class DojoDefaultImporter(object):
         closed_findings = []
         if close_old_findings:
             logger.debug('IMPORT_SCAN: Closing findings no longer present in scan report')
-            closed_findings = self.close_old_findings(test, scan_date, user=user, push_to_jira=push_to_jira)
+            closed_findings = self.close_old_findings(test, scan_date, user=user, push_to_jira=push_to_jira, service=service)
 
         logger.debug('IMPORT_SCAN: Updating test/engagement timestamps')
         importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
