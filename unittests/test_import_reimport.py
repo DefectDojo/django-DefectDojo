@@ -1151,13 +1151,13 @@ class ImportReimportMixin(object):
         This test is useful because some features are only activated in generic JSON format
         """
 
-        import0 = self.import_scan_with_params(self.generic_filename_with_file)
+        import0 = self.import_scan_with_params(self.generic_filename_with_file, scan_type="Generic Findings Import")
 
         test_id = import0['test']
 
         # reimport exact same report
         with assertTestImportModelsCreated(self, reimports=1):
-            reimport0 = self.reimport_scan_with_params(test_id, self.generic_filename_with_file)
+            reimport0 = self.reimport_scan_with_params(test_id, self.generic_filename_with_file, scan_type="Generic Findings Import")
 
         test_id2 = reimport0['test']
         self.assertEqual(test_id, test_id2)
