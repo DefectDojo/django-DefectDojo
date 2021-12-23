@@ -1168,7 +1168,7 @@ class ImportReimportMixin(object):
         # reimported count must match count in xml report
         # we set verified=False in this reimport, but currently DD does not update this flag, so it's still True from previous import
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(4, findings)
+        self.assert_finding_count_json(1, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
