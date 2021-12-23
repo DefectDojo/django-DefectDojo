@@ -1250,6 +1250,7 @@ class ImportScanSerializer(serializers.Serializer):
     engagement_id = serializers.IntegerField(read_only=True)
     product_id = serializers.IntegerField(read_only=True)
     product_type_id = serializers.IntegerField(read_only=True)
+    statistics = serializers.DictField(read_only=True)
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1302,6 +1303,7 @@ class ImportScanSerializer(serializers.Serializer):
                 data['engagement_id'] = test.engagement.id
                 data['product_id'] = test.engagement.product.id
                 data['product_type_id'] = test.engagement.product.prod_type.id
+                data['statistics'] = {'after': test.statistics}
 
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
@@ -1383,6 +1385,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     engagement_id = serializers.IntegerField(read_only=True)  # need to use the _id suffix as without the serializer framework gets confused
     product_id = serializers.IntegerField(read_only=True)
     product_type_id = serializers.IntegerField(read_only=True)
+    statistics = serializers.DictField(read_only=True)
 
     def save(self, push_to_jira=False):
         logger.debug('push_to_jira: %s', push_to_jira)
@@ -1416,9 +1419,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
+        statistics_before = None
         try:
             if test:
                 # reimport into provided / latest test
+                statistics_before = test.statistics
                 reimporter = ReImporter()
                 test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
@@ -1458,6 +1463,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 data['engagement_id'] = test.engagement.id
                 data['product_id'] = test.engagement.product.id
                 data['product_type_id'] = test.engagement.product.prod_type.id
+                data['statistics'] = {'after': test.statistics}
+                if statistics_before:
+                    data['statistics']['before'] = statistics_before
 
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer

@@ -11,6 +11,7 @@ from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.db.models.expressions import Case, When
 from django.urls import reverse
 from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
@@ -36,11 +37,17 @@ from cvss import CVSS3
 from dojo.settings.settings import SLA_BUSINESS_DAYS
 from numpy import busday_count
 
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
+
+SEVERITIES = [s[0] for s in SEVERITY_CHOICES]
+
+STATS_FIELDS = ['active', 'verified', 'duplicate', 'false_p', 'out_of_scope', 'is_mitigated']
+DEFAULT_STATS = {sev: {stat_field: 0 for stat_field in STATS_FIELDS + ['total']} for sev in SEVERITIES}
 
 IMPORT_CREATED_FINDING = 'N'
 IMPORT_CLOSED_FINDING = 'C'
@@ -1551,6 +1558,25 @@ class Test(models.Model):
         logger.debug('%d test delete', self.id)
         super().delete(*args, **kwargs)
         calculate_grade(self.engagement.product)
+
+    @property
+    def statistics(self):
+        # Do not copy and past this, but extract the common part of when needed elsewhere
+        stats = Finding.objects.filter(test=self).values('severity')
+        # build annotation dynamically based on stat fields
+        annotations = {stats_field: Count(Case(When(**{stats_field: True}, then=1))) for stats_field in STATS_FIELDS}
+        # add total
+        annotations['total'] = Count('id')
+        stats = stats.annotate(**annotations)
+        stats = stats.order_by()
+        stat_fields = STATS_FIELDS + ['severity', 'total']
+        print(stats.query)
+        values = stats.values(*stat_fields)
+        stats = DEFAULT_STATS
+        for row in values:
+            sev = row.pop('severity')
+            stats[sev] = row
+        return stats
 
 
 class Test_Import(TimeStampedModel):
