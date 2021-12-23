@@ -1569,7 +1569,7 @@ class Test(models.Model):
         annotations['total'] = Count('id')
         stats = stats.annotate(**annotations)
         stats = stats.order_by()
-        stat_fields = STATS_FIELDS + ['severity', 'total']
+        stat_fields = ['severity', 'total'] + STATS_FIELDS
         print(stats.query)
         values = stats.values(*stat_fields)
         stats = DEFAULT_STATS
