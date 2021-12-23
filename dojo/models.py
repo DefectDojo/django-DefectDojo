@@ -46,7 +46,9 @@ SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
 
 SEVERITIES = [s[0] for s in SEVERITY_CHOICES]
 
-STATS_FIELDS = ['active', 'verified', 'duplicate', 'false_p', 'out_of_scope', 'is_mitigated']
+# fields returned in statistics, typically all status fields
+STATS_FIELDS = ['active', 'verified', 'duplicate', 'false_p', 'out_of_scope', 'is_mitigated', 'risk_accepted']
+# default template with all values set to 0
 DEFAULT_STATS = {sev: {stat_field: 0 for stat_field in STATS_FIELDS + ['total']} for sev in SEVERITIES}
 
 IMPORT_CREATED_FINDING = 'N'
@@ -1559,23 +1561,32 @@ class Test(models.Model):
         super().delete(*args, **kwargs)
         calculate_grade(self.engagement.product)
 
-    @property
-    def statistics(self):
-        # Do not copy and past this, but extract the common part of when needed elsewhere
-        stats = Finding.objects.filter(test=self).values('severity')
-        # build annotation dynamically based on stat fields
+    def _get_annotations_for_statistics(self):
         annotations = {stats_field: Count(Case(When(**{stats_field: True}, then=1))) for stats_field in STATS_FIELDS}
         # add total
         annotations['total'] = Count('id')
-        stats = stats.annotate(**annotations)
-        stats = stats.order_by()
-        stat_fields = ['severity', 'total'] + STATS_FIELDS
-        print(stats.query)
-        values = stats.values(*stat_fields)
+        return annotations
+
+    @property
+    def statistics(self):
+        # Do not copy and past this, but extract the common part of when needed elsewhere
+        # order by to get rid of default ordering that would mess with group_by
+        # group by severity
+        values = Finding.objects.filter(test=self).values('severity').order_by()
+        values = values.annotate(**self._get_annotations_for_statistics())
+
+        stat_fields = ['severity'] + STATS_FIELDS
+        values = values.values(*stat_fields)
+
+        # not sure if there's a smarter way to convert a list of dicts into a dict of dicts
         stats = DEFAULT_STATS
         for row in values:
             sev = row.pop('severity')
             stats[sev] = row
+
+        values_total = Finding.objects.filter(test=self).values()
+        values_total = values_total.aggregate(**self._get_annotations_for_statistics())
+        stats['total'] = values_total
         return stats
 
 
