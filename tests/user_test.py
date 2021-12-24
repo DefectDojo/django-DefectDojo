@@ -4,9 +4,6 @@ import sys
 from pathlib import Path
 from base_test_class import BaseTestCase
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver import ActionChains
 
 
 class UserTest(BaseTestCase):
@@ -130,33 +127,6 @@ class UserTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='User and relationships removed.'))
 
-    def test_user_notifications_change(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
-        driver = self.driver
-
-        wait = WebDriverWait(driver, 5)
-        actions = ActionChains(driver)
-        configuration_menu = driver.find_element(By.ID, 'menu_configuration')
-        actions.move_to_element(configuration_menu).perform()
-        wait.until(EC.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
-
-        originally_selected = {
-            'product_added': driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").is_selected(),
-            'scan_added': driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected()
-        }
-
-        driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").click()
-        driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").click()
-
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
-
-        self.assertTrue(self.is_success_message_present(text='Settings saved'))
-        self.assertNotEqual(originally_selected['product_added'],
-            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").is_selected())
-        self.assertNotEqual(originally_selected['scan_added'],
-            driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected())
-
     def test_standard_user_login(self):
         self.login_standard_page()
 
@@ -205,9 +175,6 @@ def suite():
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(UserTest('test_user_edit_permissions'))
     suite.addTest(UserTest('test_user_delete'))
-
-    # not really for the user we created, but still related to user settings
-    suite.addTest(UserTest('test_user_notifications_change'))
 
     return suite
 
