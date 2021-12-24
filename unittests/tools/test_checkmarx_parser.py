@@ -35,11 +35,10 @@ class TestCheckmarxParser(DojoTestCase):
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(0, len(findings))
-        mock.assert_called_with(product, 'Java')
 
-    # Checkmarx detailed scanner, with all vulnerabilities from checkmarx
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_detailed_parse_file_with_no_vulnerabilities_has_no_findings(self, mock):
+        """Checkmarx detailed scanner, with all vulnerabilities from checkmarx"""
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/checkmarx/no_finding.xml"
         )
@@ -48,7 +47,6 @@ class TestCheckmarxParser(DojoTestCase):
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(0, len(findings))
-        mock.assert_called_with(product, 'Java')
 
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_name_aggregated_parse_file_with_single_vulnerability_has_single_finding(self, mock):
@@ -198,17 +196,11 @@ class TestCheckmarxParser(DojoTestCase):
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
         self.assertEqual("High", item.severity)
-        self.assertEqual(str, type(item.mitigation))
-        self.assertEqual("N/A", item.mitigation)
-        self.assertEqual(str, type(item.references))
-        self.assertEqual("", item.references)
         self.assertEqual(str, type(item.file_path))
         self.assertEqual(
             "WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java",
             item.file_path,
         )
-        self.assertEqual(str, type(item.url))
-        self.assertEqual("N/A", item.url)
         # ScanStart
         self.assertEqual(datetime.datetime, type(item.date))
         self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), item.date)
@@ -503,17 +495,11 @@ class TestCheckmarxParser(DojoTestCase):
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
         self.assertEqual("High", item.severity)
-        self.assertEqual(str, type(item.mitigation))
-        self.assertEqual("N/A", item.mitigation)
-        self.assertEqual(str, type(item.references))
-        self.assertEqual("", item.references)
         self.assertEqual(str, type(item.file_path))
         self.assertEqual(
             "WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java�",
             item.file_path,
         )
-        self.assertEqual(str, type(item.url))
-        self.assertEqual("N/A", item.url)
         # ScanStart
         self.assertEqual(datetime.datetime, type(item.date))
         self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), item.date)
@@ -658,17 +644,11 @@ class TestCheckmarxParser(DojoTestCase):
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
         self.assertEqual("High", item.severity)
-        self.assertEqual(str, type(item.mitigation))
-        self.assertEqual("N/A", item.mitigation)
-        self.assertEqual(str, type(item.references))
-        self.assertEqual("", item.references)
         self.assertEqual(str, type(item.file_path))
         self.assertEqual(
             "WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſUsers.java",
             item.file_path,
         )
-        self.assertEqual(str, type(item.url))
-        self.assertEqual("N/A", item.url)
         # ScanStart
         self.assertEqual(datetime.datetime, type(item.date))
         self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), item.date)
@@ -678,9 +658,19 @@ class TestCheckmarxParser(DojoTestCase):
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_file_with_multiple_findings_is_aggregated_with_query_id(self, mock):
         my_file_handle, product, engagement, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx/multiple_findings_same_query_id.xml"
+            get_unit_tests_path() + "/scans/checkmarx/single_no_filename.xml"
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
-        self.assertEqual(6, len(findings))
+        self.assertEqual(1, len(findings))
+        mock.assert_called_with(product, 'PHP')
+        with self.subTest(i=0):
+            finding = findings[0]
+            # ScanStart
+            self.assertEqual("Missing HSTS Header", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual(datetime.datetime, type(finding.date))
+            self.assertEqual(datetime.datetime(2021, 12, 24, 9, 12, 14), finding.date)
+            self.assertEqual(bool, type(finding.static_finding))
+            self.assertEqual(True, finding.static_finding)

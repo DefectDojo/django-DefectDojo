@@ -1,11 +1,8 @@
-__author__ = 'aaronweaver'
 
 import logging
-import ntpath
 
 from dateutil import parser
 from defusedxml import ElementTree
-
 from dojo.models import Finding
 from dojo.utils import add_language
 
@@ -45,14 +42,9 @@ class CheckmarxParser(object):
     def set_mode(self, mode):
         self.mode = mode
 
-    # FIXME get rid of local variables
-    language_list = []
-    mitigation = 'N/A'
-    impact = 'N/A'
-    references = ''
-
     def get_findings(self, filename, test):
         cxscan = ElementTree.parse(filename)
+        # FIXME get rid of local variable
         self.test = test
         root = cxscan.getroot()
 
@@ -60,6 +52,7 @@ class CheckmarxParser(object):
         #  - key: the concatenated aggregate keys
         #  - value: the finding
         dupes = dict()
+        language_list = dict()
         for query in root.findall('Query'):
             name, cwe, categories, queryId = self.getQueryElements(query)
             language = ''
@@ -79,8 +72,10 @@ class CheckmarxParser(object):
 
                 if language is not None:
                     findingdetail = "{}**Language:** {}\n".format(findingdetail, language)
-                    if language not in self.language_list:
-                        self.language_list.append(language)
+                    if language not in language_list:
+                        language_list[language] = 1
+                    else:
+                        language_list[language] = language_list[language] + 1
 
                 if group is not None:
                     findingdetail = "{}**Group:** {}\n".format(findingdetail, group)
@@ -97,8 +92,8 @@ class CheckmarxParser(object):
                     self.process_result_file_name_aggregated(dupes, findingdetail, query, result, find_date)
                 findingdetail = ''
 
-        for lang in self.language_list:
-            add_language(test.engagement.product, lang)
+        for lang in language_list:
+            add_language(test.engagement.product, lang, files=language_list[lang])
 
         return list(dupes.values())
 
@@ -110,7 +105,10 @@ class CheckmarxParser(object):
         titleStart = query.get('name').replace('_', ' ')
         description, lastPathnode = self.get_description_file_name_aggregated(query, result)
         sinkFilename = lastPathnode.find('FileName').text
-        title = "{} ({})".format(titleStart, ntpath.basename(sinkFilename))
+        if sinkFilename:
+            title = "{} ({})".format(titleStart, sinkFilename.split("/")[-1])
+        else:
+            title = titleStart
         false_p = result.get('FalsePositive')
         sev = result.get('Severity')
         aggregateKeys = "{}{}{}".format(cwe, sev, sinkFilename)
@@ -129,12 +127,8 @@ class CheckmarxParser(object):
                            # Concatenates the query information with this specific finding information
                            description=findingdetail + description,
                            severity=sev,
-                           mitigation=self.mitigation,
-                           impact=self.impact,
-                           references=self.references,
                            file_path=sinkFilename,
                            # No line number because we have aggregated different vulnerabilities that may have different line numbers
-                           url='N/A',
                            date=find_date,
                            static_finding=True,
                            nb_occurences=1,
@@ -179,7 +173,6 @@ class CheckmarxParser(object):
     # Create the finding and add it into the dupes list
     def process_result_detailed(self, dupes, findingdetail, query, result, find_date):
         name, cwe, categories, queryId = self.getQueryElements(query)
-        title = ''
         sev = result.get('Severity')
         title = query.get('name').replace('_', ' ')
         state = result.get('state')
@@ -210,7 +203,7 @@ class CheckmarxParser(object):
             # pathId is the unique id from tool which means that there is basically no aggregation except real duplicates
             aggregateKeys = "{}{}{}{}{}".format(categories, cwe, name, sinkFilename, pathId)
             if title and sinkFilename:
-                title = "{} ({})".format(title, ntpath.basename(sinkFilename))
+                title = "{} ({})".format(title, sinkFilename.split("/")[-1])
 
             find = Finding(title=title,
                        cwe=int(cwe),
@@ -220,12 +213,8 @@ class CheckmarxParser(object):
                        false_p=result.get('FalsePositive') == "True",
                        description=findingdetail,
                        severity=sev,
-                       mitigation=self.mitigation,
-                       impact=self.impact,
-                       references=self.references,
                        file_path=sinkFilename,
                        line=sinkLineNumber,
-                       url='N/A',
                        date=find_date,
                        static_finding=True,
                        unique_id_from_tool=pathId,
