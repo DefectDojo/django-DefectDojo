@@ -20,7 +20,6 @@ class AnchoreGrypeParser(object):
 
     def get_findings(self, file, test):
         data = json.load(file)
-        findings = []
         dupes = dict()
         for item in data.get("matches", []):
             vulnerability = item['vulnerability']
