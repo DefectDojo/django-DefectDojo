@@ -39,6 +39,7 @@ class AnchoreGrypeParser(object):
             rel_datasource = None
             rel_urls = None
             rel_description = None
+            rel_cvss = None
             related_vulnerabilities = item.get('relatedVulnerabilities', None)
             if related_vulnerabilities:
                 related_vulnerability = related_vulnerabilities[0]
@@ -46,14 +47,9 @@ class AnchoreGrypeParser(object):
                 rel_datasource = related_vulnerability.get('dataSource', None)
                 rel_urls = related_vulnerability.get('urls', None)
                 rel_description = related_vulnerability.get('description', None)
-            rel_cvss = related_vulnerability.get('cvss', None)
+                rel_cvss = related_vulnerability.get('cvss', None)
 
-            match_matcher = None
             matches = item['matchDetails']
-            if matches:
-                match_matcher = matches[0]['matcher']
-                if match_matcher.endswith('-matcher'):
-                    match_matcher = match_matcher.replace('-matcher', '')
 
             artifact = item['artifact']
             artifact_name = artifact.get('name', None)
@@ -63,6 +59,7 @@ class AnchoreGrypeParser(object):
             cve = self.get_cve(vuln_id, rel_id)
             finding_title = f'{cve} in {artifact_name}:{artifact_version}'
 
+            finding_tags = None
             finding_description = f'**Vulnerability Id:** {vuln_id}'
             if vuln_namespace:
                 finding_description += f'\n**Vulnerability Namespace:** {vuln_namespace}'
@@ -73,12 +70,20 @@ class AnchoreGrypeParser(object):
             if rel_description and rel_description != vuln_description:
                 finding_description += f'\n**Related Vulnerability Description:** {rel_description}'
             if matches:
-                if len(matches) == 1:
+                if type(item["matchDetails"]) is dict:
+                    finding_description += f"\n**Matcher:** {matches['matcher']}"
+                    finding_tags = [matches['matcher'].replace('-matcher', '')]
+                elif len(matches) == 1:
                     finding_description += f"\n**Matcher:** {matches[0]['matcher']}"
+                    finding_tags = [matches[0]['matcher'].replace('-matcher', '')]
                 else:
                     finding_description += '\n**Matchers:**'
+                    finding_tags = []
                     for match in matches:
                         finding_description += f"\n- {match['matcher']}"
+                        tag = match['matcher'].replace('-matcher', '')
+                        if tag not in finding_tags:
+                            finding_tags.append(tag)
 
             if artifact_purl:
                 finding_description += f'\n**Package URL:** {artifact_purl}'
@@ -90,9 +95,9 @@ class AnchoreGrypeParser(object):
 
             finding_mitigation = None
             if vuln_fix_versions:
-                finding_mitigation = 'Upgrade to version: '
+                finding_mitigation = 'Upgrade to version:'
                 if len(vuln_fix_versions) == 1:
-                    finding_mitigation += vuln_fix_versions[0]
+                    finding_mitigation += f' {vuln_fix_versions[0]}'
                 else:
                     for fix_version in vuln_fix_versions:
                         finding_mitigation += f'\n- {fix_version}'
@@ -120,16 +125,14 @@ class AnchoreGrypeParser(object):
                     for url in rel_urls:
                         if url != vuln_datasource:
                             finding_references += f'- {url}\n'
-            if finding_references[-1] == '\n':
+            if finding_references and finding_references[-1] == '\n':
                 finding_references = finding_references[:-1]
 
-            if match_matcher:
-                finding_tags = [match_matcher]
-            else:
-                finding_tags = None
-
-            finding_cvss3_score, finding_cvss3 = self.get_cvss(vuln_cvss)
-            if not finding_cvss3_score:
+            finding_cvss3_score = None
+            finding_cvss3 = None
+            if vuln_cvss:
+                finding_cvss3_score, finding_cvss3 = self.get_cvss(vuln_cvss)
+            if not finding_cvss3_score and rel_cvss:
                 finding_cvss3_score, finding_cvss3 = self.get_cvss(rel_cvss)
 
             findings.append(Finding(
@@ -144,6 +147,7 @@ class AnchoreGrypeParser(object):
                     references=finding_references,
                     component_name=artifact_name,
                     component_version=artifact_version,
+                    vuln_id_from_tool=vuln_id,
                     tags=finding_tags,
                     static_finding=True,
                     dynamic_finding=False,
