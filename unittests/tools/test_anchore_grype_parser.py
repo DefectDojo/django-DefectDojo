@@ -126,6 +126,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual('1.17-3+deb10u3', finding.component_version)
         self.assertEqual('CVE-2004-0971', finding.vuln_id_from_tool)
         self.assertEqual(['dpkg'], finding.tags)
+        self.assertEqual(1, finding.nb_occurences)
 
         finding = findings[1]
         self.assertEqual('CVE-2021-32626 in redis:4.0.2', finding.title)
@@ -161,6 +162,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual('4.0.2', finding.component_version)
         self.assertEqual('CVE-2021-32626', finding.vuln_id_from_tool)
         self.assertEqual(['python', 'python2'], finding.tags)
+        self.assertEqual(1, finding.nb_occurences)
 
         finding = findings[2]
         self.assertEqual('CVE-2021-33574 in libc-bin:2.28-10', finding.title)
@@ -190,6 +192,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual('2.28-10', finding.component_version)
         self.assertEqual('CVE-2021-33574', finding.vuln_id_from_tool)
         self.assertEqual(['dpkg'], finding.tags)
+        self.assertEqual(1, finding.nb_occurences)
 
         finding = findings[3]
         self.assertEqual('CVE-2021-33574 in libc6:2.28-10', finding.title)
@@ -219,6 +222,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual('2.28-10', finding.component_version)
         self.assertEqual('CVE-2021-33574', finding.vuln_id_from_tool)
         self.assertEqual(['dpkg'], finding.tags)
+        self.assertEqual(1, finding.nb_occurences)
 
         finding = findings[4]
         self.assertEqual('CVE-2021-44420 in Django:3.2.9', finding.title)
@@ -249,3 +253,4 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual('3.2.9', finding.component_version)
         self.assertEqual('GHSA-v6rh-hp5x-86rv', finding.vuln_id_from_tool)
         self.assertEqual(['python'], finding.tags)
+        self.assertEqual(2, finding.nb_occurences)

@@ -568,7 +568,121 @@
        "purl": "pkg:pypi/Django@3.2.9",
        "metadata": null
       }
+    },
+    {
+     "vulnerability": {
+      "id": "GHSA-v6rh-hp5x-86rv",
+      "dataSource": "https://github.com/advisories/GHSA-v6rh-hp5x-86rv",
+      "namespace": "github:python",
+      "severity": "High",
+      "urls": [
+       "https://github.com/advisories/GHSA-v6rh-hp5x-86rv"
+      ],
+      "description": "Potential bypass of an upstream access control based on URL paths in Django",
+      "cvss": [],
+      "fix": {
+       "versions": [
+        "3.2.10"
+       ],
+       "state": "fixed"
+      },
+      "advisories": []
+     },
+     "relatedVulnerabilities": [
+      {
+       "id": "CVE-2021-44420",
+       "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-44420",
+       "namespace": "nvd",
+       "severity": "High",
+       "urls": [
+        "https://docs.djangoproject.com/en/3.2/releases/security/",
+        "https://www.openwall.com/lists/oss-security/2021/12/07/1",
+        "https://www.djangoproject.com/weblog/2021/dec/07/security-releases/",
+        "https://groups.google.com/forum/#!forum/django-announce"
+       ],
+       "description": "In Django 2.2 before 2.2.25, 3.1 before 3.1.14, and 3.2 before 3.2.10, HTTP requests for URLs with trailing newlines could bypass upstream access control based on URL paths.",
+       "cvss": [
+        {
+         "version": "2.0",
+         "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+         "metrics": {
+          "baseScore": 7.5,
+          "exploitabilityScore": 10,
+          "impactScore": 6.4
+         },
+         "vendorMetadata": {}
+        },
+        {
+         "version": "3.1",
+         "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L",
+         "metrics": {
+          "baseScore": 7.3,
+          "exploitabilityScore": 3.9,
+          "impactScore": 3.4
+         },
+         "vendorMetadata": {}
+        }
+       ]
+      }
+     ],
+     "matchDetails": [
+      {
+       "matcher": "python-matcher",
+       "searchedBy": {
+        "language": "python",
+        "namespace": "github:python"
+       },
+       "found": {
+        "versionConstraint": ">=3.2,<3.2.10 (python)"
+       }
+      }
+     ],
+     "artifact": {
+      "name": "Django",
+      "version": "3.2.9",
+      "type": "python",
+      "locations": [
+       {
+        "path": "/usr/local/lib/python3.8/site-packages/Django-3.2.9.dist-info/METADATA",
+        "layerID": "sha256:b1d4455cf82b15a50b006fe87bd29f694c8f9155456253eb67fdd155b5edcf4a"
+       },
+       {
+        "path": "/usr/local/lib/python3.8/site-packages/Django-3.2.9.dist-info/RECORD",
+        "layerID": "sha256:b1d4455cf82b15a50b006fe87bd29f694c8f9155456253eb67fdd155b5edcf4a"
+       },
+       {
+        "path": "/usr/local/lib/python3.8/site-packages/Django-3.2.9.dist-info/top_level.txt",
+        "layerID": "sha256:b1d4455cf82b15a50b006fe87bd29f694c8f9155456253eb67fdd155b5edcf4a"
+       }
+      ],
+      "language": "python",
+      "licenses": [
+       "BSD-3-Clause"
+      ],
+      "cpes": [
+       "cpe:2.3:a:django_software_foundation:python-Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:django_software_foundation:python_Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:django_software_foundation:Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:python-Django:python-Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:python-Django:python_Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:python_Django:python-Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:python_Django:python_Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:foundation:python-Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:foundation:python_Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:Django:python-Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:Django:python_Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:python-Django:Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:python:python-Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:python:python_Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:python_Django:Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:foundation:Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:Django:Django:3.2.9:*:*:*:*:*:*:*",
+       "cpe:2.3:a:python:Django:3.2.9:*:*:*:*:*:*:*"
+      ],
+      "purl": "pkg:pypi/Django@3.2.9",
+      "metadata": null
      }
+    }
     ],
     "source": {
      "type": "image",

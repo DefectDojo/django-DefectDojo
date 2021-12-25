@@ -21,6 +21,7 @@ class AnchoreGrypeParser(object):
     def get_findings(self, file, test):
         data = json.load(file)
         findings = []
+        dupes = dict()
         for item in data.get("matches", []):
             vulnerability = item['vulnerability']
             vuln_id = vulnerability["id"]
@@ -135,25 +136,31 @@ class AnchoreGrypeParser(object):
             if not finding_cvss3_score and rel_cvss:
                 finding_cvss3_score, finding_cvss3 = self.get_cvss(rel_cvss)
 
-            findings.append(Finding(
-                    title=finding_title,
-                    description=finding_description,
-                    cve=finding_cve,
-                    cwe=1352,
-                    cvssv3=finding_cvss3,
-                    cvssv3_score=finding_cvss3_score,
-                    severity=vuln_severity,
-                    mitigation=finding_mitigation,
-                    references=finding_references,
-                    component_name=artifact_name,
-                    component_version=artifact_version,
-                    vuln_id_from_tool=vuln_id,
-                    tags=finding_tags,
-                    static_finding=True,
-                    dynamic_finding=False,
-                   ))
+            dupe_key = finding_title
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]
+                finding.nb_occurences += 1
+            else:
+                dupes[dupe_key] = Finding(
+                            title=finding_title,
+                            description=finding_description,
+                            cve=finding_cve,
+                            cwe=1352,
+                            cvssv3=finding_cvss3,
+                            cvssv3_score=finding_cvss3_score,
+                            severity=vuln_severity,
+                            mitigation=finding_mitigation,
+                            references=finding_references,
+                            component_name=artifact_name,
+                            component_version=artifact_version,
+                            vuln_id_from_tool=vuln_id,
+                            tags=finding_tags,
+                            static_finding=True,
+                            dynamic_finding=False,
+                            nb_occurences=1,
+                        )
 
-        return findings
+        return list(dupes.values())
 
     def _convert_severity(self, val):
         if "Unknown" == val:
