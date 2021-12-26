@@ -37,30 +37,29 @@ class RustyhogParser(object):
             items[unique_key] = item
         return list(items.values())
 
-    def get_tests(self, scan_type, handle):
-            tree = json.load(handle)
-            tests = list()
-            parsername = "Rusty Hog"
-            for node in tree:
-                if 'commit' in node or 'commitHash' in node or 'parent_commit_hash' in node or 'old_file_id' in node or 'new_file_id' in node:
-                    parsername = "Choctaw Hog"
-                    break
-                if 'issue_id' in node or 'location' in node or 'url' in node:
-                    parsername = "Gottingen Hog"
-                    break
-            #for run in tree.get('runs', list()):
-            test = ParserTest(
-                name=parsername,
-                type=parsername,
-                version="",
-            )
-            if parsername == "Rusty Hog":
-                test.description = "The exact scanner within Rusty Hog could not be determined due to missing information within the scan result."
-            else:
-                test.description = parsername
-            test.findings = self.__getitem(vulnerabilities=tree, scanner=parsername)
-            tests.append(test)
-            return tests
+    def get_tests(self, handle):
+        tree = json.load(handle)
+        tests = list()
+        parsername = "Rusty Hog"
+        for node in tree:
+            if 'commit' in node or 'commitHash' in node or 'parent_commit_hash' in node or 'old_file_id' in node or 'new_file_id' in node:
+                parsername = "Choctaw Hog"
+                break
+            if 'issue_id' in node or 'location' in node or 'url' in node:
+                parsername = "Gottingen Hog"
+                break
+        test = ParserTest(
+            name=parsername,
+            type=parsername,
+            version="",
+        )
+        if parsername == "Rusty Hog":
+            test.description = "The exact scanner within Rusty Hog could not be determined due to missing information within the scan result."
+        else:
+            test.description = parsername
+        test.findings = self.__getitem(vulnerabilities=tree, scanner=parsername)
+        tests.append(test)
+        return tests
 
     def __getitem(self, vulnerabilities, scanner):
         findings = []
@@ -106,14 +105,13 @@ class RustyhogParser(object):
                         vulnerability.get('path'),
                         vulnerability.get('commitHash'))
             elif scanner == "Gottingen Hog":
-                title = "{} found in Jira ID {}".format(
+                title = "{} found in Jira ID {} ({})".format(
                         vulnerability.get('reason'),
                         vulnerability.get('issue_id'),
                         vulnerability.get('location'))
             # create the finding object
             finding = Finding(
                 title=title,
-                #test=test,
                 severity='High',
                 cwe=cwe,
                 description=description,
