@@ -1,4 +1,6 @@
 import json
+from cvss import parser as cvss_parser
+from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
 
@@ -176,7 +178,9 @@ class AnchoreGrypeParser(object):
     def get_cvss(self, cvss):
         if cvss:
             for cvss_item in cvss:
-                if cvss_item['version'].startswith('3'):
+                vector = cvss_item['vector']
+                cvss_objects = cvss_parser.parse_cvss_from_text(vector)
+                if len(cvss_objects) > 0 and type(cvss_objects[0]) == CVSS3:
                     vector = cvss_item['vector']
                     return vector
         return None
