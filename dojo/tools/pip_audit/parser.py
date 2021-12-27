@@ -19,18 +19,18 @@ class PipAuditParser:
 
     def get_findings(self, scan_file, test):
 
-        data = json.loads(scan_file)
+        data = json.load(scan_file)
 
         findings = list()
         for item in data:
             vulnerabilities = item.get('vulns', [])
             if vulnerabilities:
                 component_name = item['name']
-                component_version = item.get('version', None)
+                component_version = item.get('version')
                 for vulnerability in vulnerabilities:
-                    vuln_id = vulnerability.get('id', None)
-                    vuln_fix_versions = vulnerability.get('fix_versions', None)
-                    vuln_description = vulnerability.get('description', None)
+                    vuln_id = vulnerability.get('id')
+                    vuln_fix_versions = vulnerability.get('fix_versions')
+                    vuln_description = vulnerability.get('description')
 
                     title = f'{vuln_id} in {component_name}:{component_version}'
 
@@ -62,6 +62,7 @@ class PipAuditParser:
                             mitigation=mitigation,
                             component_name=component_name,
                             component_version=component_version,
+                            vuln_id_from_tool=vuln_id,
                             static_finding=True,
                             dynamic_finding=False,
                         )

@@ -37,6 +37,7 @@ class TestPipAuditParser(DojoTestCase):
         self.assertEqual('Upgrade to version: 3.7.4', finding.mitigation)
         self.assertEqual('aiohttp', finding.component_name)
         self.assertEqual('3.6.2', finding.component_version)
+        self.assertEqual('PYSEC-2021-76', finding.vuln_id_from_tool)
 
         finding = findings[1]
         self.assertEqual('PYSEC-2021-439 in django:3.2.9', finding.title)
@@ -52,6 +53,7 @@ class TestPipAuditParser(DojoTestCase):
         self.assertEqual(mitigation, finding.mitigation)
         self.assertEqual('django', finding.component_name)
         self.assertEqual('3.2.9', finding.component_version)
+        self.assertEqual('PYSEC-2021-439', finding.vuln_id_from_tool)
 
         finding = findings[2]
         self.assertEqual('PYSEC-2021-852 in lxml:4.6.4', finding.title)
@@ -63,6 +65,7 @@ class TestPipAuditParser(DojoTestCase):
         self.assertIsNone(finding.mitigation)
         self.assertEqual('lxml', finding.component_name)
         self.assertEqual('4.6.4', finding.component_version)
+        self.assertEqual('PYSEC-2021-852', finding.vuln_id_from_tool)
 
         finding = findings[3]
         self.assertEqual('PYSEC-2019-128 in twisted:18.9.0', finding.title)
