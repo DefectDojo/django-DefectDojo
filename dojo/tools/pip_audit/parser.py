@@ -19,11 +19,7 @@ class PipAuditParser:
 
     def get_findings(self, scan_file, test):
 
-        scan_data = scan_file.read()
-        try:
-            data = json.loads(str(scan_data, 'utf-8'))
-        except:
-            data = json.loads(scan_data)
+        data = json.loads(scan_file)
 
         findings = list()
         for item in data:
