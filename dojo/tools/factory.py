@@ -38,6 +38,13 @@ def get_parser(scan_type):
 def get_choices_sorted():
     res = list()
     for key in PARSERS:
+        res.append((key, key))
+    return sorted(tuple(res), key=lambda x: x[1].lower())
+
+
+def get_scan_types_sorted():
+    res = list()
+    for key in PARSERS:
         res.append((key, PARSERS[key].get_description_for_scan_types(key)))
     return sorted(tuple(res), key=lambda x: x[0].lower())
 
