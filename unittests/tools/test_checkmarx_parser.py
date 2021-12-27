@@ -159,8 +159,8 @@ class TestCheckmarxParser(DojoTestCase):
             "-----\n",
             item.description,
         )
-        self.assertEqual(str, type(item.line))
-        self.assertEqual("58", item.line)
+        self.assertEqual(int, type(item.line))
+        self.assertEqual(58, item.line)
         # Added field for detailed scanner
         self.assertEqual(str, type(item.unique_id_from_tool))
         # unique_id_from_tool update from PathId to SimilarityId+PathId
@@ -169,8 +169,8 @@ class TestCheckmarxParser(DojoTestCase):
         self.assertEqual("executeQuery", item.sast_source_object)
         self.assertEqual(str, type(item.sast_sink_object))
         self.assertEqual("allUsersMap", item.sast_sink_object)
-        self.assertEqual(str, type(item.sast_source_line))
-        self.assertEqual("39", item.sast_source_line)
+        self.assertEqual(int, type(item.sast_source_line))
+        self.assertEqual(39, item.sast_source_line)
         self.assertEqual(str, type(item.sast_source_file_path))
         self.assertEqual(
             "WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java",
@@ -288,6 +288,13 @@ class TestCheckmarxParser(DojoTestCase):
         # checkmarx says 3 but we're down to 2 due to the aggregation on sink filename rather than source filename + source line number + sink filename + sink line number
         self.assertEqual(2, len(findings))
         mock.assert_called_with(product, 'Java', files=3)
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("SQL Injection (Assignment5.java)", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), finding.date)
+            self.assertEqual(True, finding.static_finding)
+            self.assertEqual("WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java", finding.file_path)
 
     @patch('dojo.tools.checkmarx.parser.add_language')
     def test_detailed_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self, mock):
@@ -300,6 +307,14 @@ class TestCheckmarxParser(DojoTestCase):
         self.teardown(my_file_handle)
         self.assertEqual(3, len(findings))
         mock.assert_called_with(product, 'Java', files=3)
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("SQL Injection (Assignment5.java)", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), finding.date)
+            self.assertEqual(True, finding.static_finding)
+            self.assertEqual("WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java", finding.file_path)
+            self.assertEqual(50, finding.line)
 
     # ----------------------------------------------------------------------------
     # multiple_findings : different sourceFilename but same sinkFilename
@@ -474,8 +489,8 @@ class TestCheckmarxParser(DojoTestCase):
             "-----\n",
             item.description,
         )
-        self.assertEqual(str, type(item.line))
-        self.assertEqual("58", item.line)
+        self.assertEqual(int, type(item.line))
+        self.assertEqual(58, item.line)
         mock.assert_called_with(product, 'Java', files=1)
 
     def check_parse_file_with_utf8_replacement_char(self, findings):
@@ -620,8 +635,8 @@ class TestCheckmarxParser(DojoTestCase):
             "-----\n",
             item.description,
         )
-        self.assertEqual(str, type(item.line))
-        self.assertEqual("58", item.line)
+        self.assertEqual(int, type(item.line))
+        self.assertEqual(58, item.line)
         mock.assert_called_with(product, 'Java', files=1)
 
     def check_parse_file_with_utf8_various_non_ascii_char(self, findings):
