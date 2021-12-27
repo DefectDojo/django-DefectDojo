@@ -141,7 +141,6 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual('CVE-2021-32626', finding.cve)
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
-        self.assertEqual(8.8, finding.cvssv3_score)
         self.assertEqual('High', finding.severity)
         mitigation = '''Upgrade to version:
 - fix_1
@@ -175,7 +174,6 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual('CVE-2021-33574', finding.cve)
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
-        self.assertEqual(9.8, finding.cvssv3_score)
         self.assertEqual('Critical', finding.severity)
         self.assertIsNone(finding.mitigation)
         references = '''**Vulnerability Datasource:** https://security-tracker.debian.org/tracker/CVE-2021-33574
@@ -205,7 +203,6 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual('CVE-2021-33574', finding.cve)
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
-        self.assertEqual(9.8, finding.cvssv3_score)
         self.assertEqual('Critical', finding.severity)
         self.assertIsNone(finding.mitigation)
         references = '''**Vulnerability Datasource:** https://security-tracker.debian.org/tracker/CVE-2021-33574
@@ -237,7 +234,6 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual('CVE-2021-44420', finding.cve)
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L', finding.cvssv3)
-        self.assertEqual(7.3, finding.cvssv3_score)
         self.assertEqual('High', finding.severity)
         mitigation = 'Upgrade to version: 3.2.10'
         self.assertEqual(mitigation, finding.mitigation)
