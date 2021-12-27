@@ -192,8 +192,6 @@ env = environ.Env(
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
     # when enabled SonarQube API parser will download the security hotspots
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
-    # when enabled standard users can't change their profile information, default True
-    DD_USER_PROFILE_EDITABLE=(bool, True),
     # when enabled, finding importing will occur asynchronously, default False
     DD_ASYNC_FINDING_IMPORT=(bool, False),
     # The number fo findings to be processed per celeryworker
@@ -1339,9 +1337,6 @@ DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')
 
 # Deside if SonarQube API parser should download the security hotspots
 SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
-
-# when enabled standard users can't change their profile information, default False
-USER_PROFILE_EDITABLE = env("DD_USER_PROFILE_EDITABLE")
 
 # when enabled, finding importing will occur asynchronously, default False
 ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")
