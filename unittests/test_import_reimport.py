@@ -4,6 +4,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from django.test.client import Client
 from django.utils import timezone
+
 from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
 from .test_utils import assertTestImportModelsCreated
 from django.test import override_settings
@@ -12,6 +13,11 @@ import logging
 
 
 logger = logging.getLogger(__name__)
+
+
+ENGAGEMENT_NAME_DEFAULT = 'Engagement 1'
+PRODUCT_NAME_DEFAULT = 'Product A'
+PRODUCT_TYPE_NAME_DEFAULT = 'Type type'
 
 
 # 0_zap_sample.xml: basic file with 4 out of 5 findings reported, zap4 absent
@@ -46,6 +52,7 @@ logger = logging.getLogger(__name__)
 class ImportReimportMixin(object):
     def __init__(self, *args, **kwargs):
         self.scans_path = '/scans/'
+
         self.zap_sample0_filename = self.scans_path + 'zap/0_zap_sample.xml'
         self.zap_sample1_filename = self.scans_path + 'zap/1_zap_sample_0_and_new_absent.xml'
         self.zap_sample2_filename = self.scans_path + 'zap/2_zap_sample_0_and_new_endpoint.xml'
@@ -75,6 +82,10 @@ class ImportReimportMixin(object):
         self.clair_few_findings = self.scans_path + 'clair/few_vuln.json'
         self.clair_empty = self.scans_path + 'clair/empty.json'
         self.scan_type_clair = 'Clair Scan'
+
+        self.aws_prowler_file_name = self.scans_path + 'aws_prowler/many_vuln.json'
+        self.aws_prowler_file_name_plus_one = self.scans_path + 'aws_prowler/many_vuln_plus_one.json'
+        self.scan_type_aws_prowler = 'AWS Prowler Scan'
 
     # import zap scan, testing:
     # - import
@@ -160,9 +171,11 @@ class ImportReimportMixin(object):
 
         return test_id
 
-    # import zap scan, testing:
+    # Test Scan_Date logic for Import. Reimport without a test_id cannot work for UI, so those tests are only in the API class below.
+
+    # import zap scan without dates
     # - import
-    # - deafult scan_date (today) overrides date not set by parser
+    # - no scan_date and date not set by parser leads to today as date
     def test_import_default_scan_date_parser_not_sets_date(self):
         logger.debug('importing zap xml report with date set by parser')
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
@@ -178,9 +191,9 @@ class ImportReimportMixin(object):
 
         return test_id
 
-    # import acunetix scan, testing:
+    # import acunetix scan with dates
     # - import
-    # - deafult scan_date (today) does not overrides date set by parser
+    # - no scan scan_date does not overrides date set by parser
     def test_import_default_scan_date_parser_sets_date(self):
         logger.debug('importing original acunetix xml report')
         with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
@@ -196,7 +209,7 @@ class ImportReimportMixin(object):
 
         return test_id
 
-    # import acunetix scan, testing:
+    # import zap scan without dates
     # - import
     # - set scan_date overrides date not set by parser
     def test_import_set_scan_date_parser_not_sets_date(self):
@@ -214,7 +227,7 @@ class ImportReimportMixin(object):
 
         return test_id
 
-    # import acunetix scan, testing:
+    # import acunetix scan with dates
     # - import
     # - set scan_date overrides date set by parser
     def test_import_set_scan_date_parser_sets_date(self):
@@ -231,6 +244,75 @@ class ImportReimportMixin(object):
         self.assertEqual(date, '2006-12-26')
 
         return test_id
+
+    # Test Scan_Date for reimport in UI. UI can only rupload for existing tests, non UI tests are in API class below
+
+    def test_import_reimport_no_scan_date_parser_no_date(self):
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        test_id = import0['test']
+
+        # reimport report with 1 extra finding
+        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
+
+        test_id = reimport0['test']
+
+        # 1 new finding imported
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(5, findings)
+        # no scan_date, so date should be today
+        self.assertEqual(findings['results'][4]['date'], str(timezone.localtime(timezone.now()).date()))
+
+    def test_import_reimport_scan_date_parser_no_date(self):
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        test_id = import0['test']
+
+        # reimport report with 1 extra finding
+        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename, scan_date='2020-02-02')
+
+        test_id = reimport0['test']
+
+        # 1 new finding imported
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(5, findings)
+        # scan_date provided, so date should be equal to that
+        self.assertEqual(findings['results'][4]['date'], "2020-02-02")
+
+    def test_import_reimport_no_scan_date_parser_date(self):
+        import0 = self.import_scan_with_params(self.aws_prowler_file_name, scan_type=self.scan_type_aws_prowler)
+
+        test_id = import0['test']
+
+        # reimport report with 1 extra finding
+        reimport0 = self.reimport_scan_with_params(test_id, self.aws_prowler_file_name_plus_one, scan_type=self.scan_type_aws_prowler)
+
+        test_id = reimport0['test']
+
+        # 1 new finding imported
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(5, findings)
+        self.log_finding_summary_json_api(findings)
+        # no scan_date, so date should be date from parser
+        # findings order by priority, third finding is the new one
+        self.assertEqual(findings['results'][2]['date'], "2021-08-23")
+
+    def test_import_reimport_scan_date_parser_date(self):
+        import0 = self.import_scan_with_params(self.aws_prowler_file_name, scan_type=self.scan_type_aws_prowler)
+
+        test_id = import0['test']
+
+        # reimport report with 1 extra finding
+        reimport0 = self.reimport_scan_with_params(test_id, self.aws_prowler_file_name_plus_one, scan_type=self.scan_type_aws_prowler, scan_date='2020-02-02')
+
+        test_id = reimport0['test']
+
+        # 1 new finding imported
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(5, findings)
+        # scan_date provided, so date should be equal to that overriding that from the parser
+        self.log_finding_summary_json_api(findings)
+        self.assertEqual(findings['results'][2]['date'], "2020-02-02")
 
     # import checkmarx scan. ZAP parser will never create a finding with active/verified false
     # checkmarx will (for false positive for example)
@@ -1161,6 +1243,84 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         # self.url = reverse(self.viewname + '-list')
 
+    # Reimport tests to test Scan_Date logic (usecase not supported on UI)
+
+    # reimport zap scan without dates (non existing test, so import is called inside DD)
+    # - reimport
+    # - no scan_date overrides date not set by parser
+    def test_reimport_default_scan_date_parser_not_sets_date(self):
+        logger.debug('importing zap xml report with date set by parser')
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
+            import0 = self.reimport_scan_with_params(None, self.zap_sample0_filename, active=False, verified=False,
+                product_name=PRODUCT_NAME_DEFAULT, engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, product_type_name=PRODUCT_TYPE_NAME_DEFAULT, auto_create_context=True)
+
+        test_id = import0['test']
+        findings = self.get_test_findings_api(test_id, active=False, verified=False)
+        self.log_finding_summary_json_api(findings)
+
+        # Get the date
+        date = findings['results'][0]['date']
+        self.assertEqual(date, str(timezone.localtime(timezone.now()).date()))
+
+        return test_id
+
+    # reimport acunetix scan with dates (non existing test, so import is called inside DD)
+    # - reimport
+    # - deafult scan_date (today) does not overrides date set by parser
+    def test_reimport_default_scan_date_parser_sets_date(self):
+        logger.debug('importing original acunetix xml report')
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import0 = self.reimport_scan_with_params(None, self.acunetix_file_name, scan_type=self.scan_type_acunetix, active=False, verified=False,
+                product_name=PRODUCT_NAME_DEFAULT, engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, product_type_name=PRODUCT_TYPE_NAME_DEFAULT, auto_create_context=True)
+
+        test_id = import0['test']
+        findings = self.get_test_findings_api(test_id, active=False, verified=False)
+        self.log_finding_summary_json_api(findings)
+
+        # Get the date
+        date = findings['results'][0]['date']
+        self.assertEqual(date, '2018-09-24')
+
+        return test_id
+
+    # reimport zap scan without dates (non existing test, so import is called inside DD)
+    # - reimport
+    # - set scan_date overrides date not set by parser
+    def test_reimport_set_scan_date_parser_not_sets_date(self):
+        logger.debug('importing original zap xml report')
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
+            import0 = self.reimport_scan_with_params(None, self.zap_sample0_filename, active=False, verified=False, scan_date='2006-12-26',
+                            product_name=PRODUCT_NAME_DEFAULT, engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, product_type_name=PRODUCT_TYPE_NAME_DEFAULT, auto_create_context=True)
+
+        test_id = import0['test']
+        findings = self.get_test_findings_api(test_id, active=False, verified=False)
+        self.log_finding_summary_json_api(findings)
+
+        # Get the date
+        date = findings['results'][0]['date']
+        self.assertEqual(date, '2006-12-26')
+
+        return test_id
+
+    # reimport acunetix scan with dates (non existing test, so import is called inside DD)
+    # - reimport
+    # - set scan_date overrides date set by parser
+    def test_reimport_set_scan_date_parser_sets_date(self):
+        logger.debug('importing acunetix xml report with date set by parser')
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import0 = self.reimport_scan_with_params(None, self.acunetix_file_name, scan_type=self.scan_type_acunetix, active=False, verified=False, scan_date='2006-12-26',
+                            product_name=PRODUCT_NAME_DEFAULT, engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, product_type_name=PRODUCT_TYPE_NAME_DEFAULT, auto_create_context=True)
+
+        test_id = import0['test']
+        findings = self.get_test_findings_api(test_id, active=False, verified=False)
+        self.log_finding_summary_json_api(findings)
+
+        # Get the date
+        date = findings['results'][0]['date']
+        self.assertEqual(date, '2006-12-26')
+
+        return test_id
+
 
 @override_settings(TRACK_IMPORT_HISTORY=True)
 class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
@@ -1184,6 +1344,12 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
         self.client_ui = Client()
         self.client_ui.force_login(self.get_test_admin())
+
+    # def remove_non_ui_params(self, kwargs):
+    #     for param in ['product_type_name', 'product_name', 'engagement_name', 'test_title', 'auto_create_context', 'engagement']:
+    #         if param in kwargs:
+    #             kwargs.pop(param)
+    #     return kwargs
 
     # override methods to use UI
     def import_scan_with_params(self, *args, **kwargs):
@@ -1237,9 +1403,8 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
         return self.import_scan_ui(engagement, payload)
 
-    def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
+    def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
         payload = {
-                "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
@@ -1254,6 +1419,9 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
         if tags is not None:
             payload['tags'] = tags
+
+        if scan_date is not None:
+            payload['scan_date'] = scan_date
 
         return self.reimport_scan_ui(test_id, payload)
 
