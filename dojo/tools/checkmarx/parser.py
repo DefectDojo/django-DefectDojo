@@ -44,13 +44,8 @@ class CheckmarxParser(object):
 
     def get_findings(self, filename, test):
         cxscan = ElementTree.parse(filename)
-        # FIXME get rid of local variable
-        self.test = test
         root = cxscan.getroot()
 
-        # Dictonary to hold the aggregated findings with:
-        #  - key: the concatenated aggregate keys
-        #  - value: the finding
         dupes = dict()
         language_list = dict()
         for query in root.findall('Query'):
@@ -87,9 +82,9 @@ class CheckmarxParser(object):
                 findingdetail = "{}**Finding Link:** {}\n".format(findingdetail, deeplink)
 
                 if self.mode == 'detailed':
-                    self.process_result_detailed(dupes, findingdetail, query, result, find_date)
+                    self._process_result_detailed(test, dupes, findingdetail, query, result, find_date)
                 else:
-                    self.process_result_file_name_aggregated(dupes, findingdetail, query, result, find_date)
+                    self._process_result_file_name_aggregated(test, dupes, findingdetail, query, result, find_date)
                 findingdetail = ''
 
         for lang in language_list:
@@ -97,10 +92,11 @@ class CheckmarxParser(object):
 
         return list(dupes.values())
 
-    # Process one result = one pathId for default "Checkmarx Scan"
-    # Create the finding and add it into the dupes list
-    # If a vuln with the same file_path was found before, updates the description
-    def process_result_file_name_aggregated(self, dupes, findingdetail, query, result, find_date):
+    def _process_result_file_name_aggregated(self, test, dupes, findingdetail, query, result, find_date):
+        """Process one result = one pathId for default "Checkmarx Scan"
+        Create the finding and add it into the dupes list
+        If a vuln with the same file_path was found before, updates the description
+        """
         name, cwe, categories, queryId = self.getQueryElements(query)
         titleStart = query.get('name').replace('_', ' ')
         description, lastPathnode = self.get_description_file_name_aggregated(query, result)
@@ -119,7 +115,7 @@ class CheckmarxParser(object):
         if not(aggregateKeys in dupes):
             find = Finding(title=title,
                            cwe=int(cwe),
-                           test=self.test,
+                           test=test,
                            # active, verified and false_p may be overwritten later by another member of the aggregate, see "else" below
                            active=active,
                            verified=verified,
@@ -169,9 +165,10 @@ class CheckmarxParser(object):
         description = "{}\n<b>Sink file: </b>{} (line {})\n<b>Sink object: </b> {}".format(description, sinkFilename, sinkLineNumber, sinkObject)
         return description, pathnode
 
-    # Process one result = one pathId for scanner "Checkmarx Scan detailed"
-    # Create the finding and add it into the dupes list
-    def process_result_detailed(self, dupes, findingdetail, query, result, find_date):
+    def _process_result_detailed(self, test, dupes, findingdetail, query, result, find_date):
+        """Process one result = one pathId for scanner "Checkmarx Scan detailed"
+        Create the finding and add it into the dupes list
+        """
         name, cwe, categories, queryId = self.getQueryElements(query)
         sev = result.get('Severity')
         title = query.get('name').replace('_', ' ')
@@ -205,24 +202,26 @@ class CheckmarxParser(object):
             if title and sinkFilename:
                 title = "{} ({})".format(title, sinkFilename.split("/")[-1])
 
-            find = Finding(title=title,
-                       cwe=int(cwe),
-                       test=self.test,
-                       active=self.isActive(state),
-                       verified=self.isVerified(state),
-                       false_p=result.get('FalsePositive') == "True",
-                       description=findingdetail,
-                       severity=sev,
-                       file_path=sinkFilename,
-                       line=sinkLineNumber,
-                       date=find_date,
-                       static_finding=True,
-                       unique_id_from_tool=pathId,
-                       sast_source_object=sourceObject,
-                       sast_sink_object=sinkObject,
-                       sast_source_line=sourceLineNumber,
-                       sast_source_file_path=sourceFilename,
-                       vuln_id_from_tool=queryId)
+            find = Finding(
+                title=title,
+                cwe=int(cwe),
+                test=test,
+                active=self.isActive(state),
+                verified=self.isVerified(state),
+                false_p=result.get('FalsePositive') == "True",
+                description=findingdetail,
+                severity=sev,
+                file_path=sinkFilename,
+                line=sinkLineNumber,
+                date=find_date,
+                static_finding=True,
+                unique_id_from_tool=pathId,
+                sast_source_object=sourceObject,
+                sast_sink_object=sinkObject,
+                sast_source_line=sourceLineNumber,
+                sast_source_file_path=sourceFilename,
+                vuln_id_from_tool=queryId,
+            )
         dupes[aggregateKeys] = find
 
     # Return filename, lineNumber and object (function/parameter...) for a given pathnode
