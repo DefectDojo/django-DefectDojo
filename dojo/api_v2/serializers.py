@@ -3,7 +3,7 @@ from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
 from rest_framework.exceptions import NotFound
 from rest_framework.fields import DictField, MultipleChoiceField
-
+from datetime import datetime
 from dojo.endpoint.utils import endpoint_filter
 from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists
@@ -27,7 +27,6 @@ from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
-import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
@@ -1280,13 +1279,15 @@ class ImportScanSerializer(serializers.Serializer):
         _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(data)
         engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context)
 
+        # have to make the scan_date_time timezone aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
+        scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
         importer = Importer()
         try:
             test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment,
                                                                              active=active, verified=verified, tags=tags,
                                                                              minimum_severity=minimum_severity,
                                                                              endpoints_to_add=endpoints_to_add,
-                                                                             scan_date=scan_date, version=version,
+                                                                             scan_date=scan_date_time, version=version,
                                                                              branch_tag=branch_tag, build_id=build_id,
                                                                              commit_hash=commit_hash,
                                                                              push_to_jira=push_to_jira,
@@ -1325,18 +1326,15 @@ class ImportScanSerializer(serializers.Serializer):
                 raise serializers.ValidationError(f'API scan configuration must be of tool type {tool_type}')
         return data
 
-    def validate_scan_data(self, value):
-        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
-        if not value.date:
-            return None
-        if value.date() > timezone.localtime(timezone.now()).date():
+    def validate_scan_date(self, value):
+        if value and value > timezone.localdate():
             raise serializers.ValidationError(
-                'The date cannot be in the future!')
+                'The scan_date cannot be in the future!')
         return value
 
 
 class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
-    scan_date = serializers.DateField()
+    scan_date = serializers.DateField(required=False)
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
         default='Info')
@@ -1390,7 +1388,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan_type = data['scan_type']
         endpoint_to_add = data['endpoint_to_add']
         minimum_severity = data['minimum_severity']
-        scan_date = data['scan_date']
+        scan_date = data.get('scan_date', None)
         close_old_findings = data['close_old_findings']
         verified = data['verified']
         active = data['active']
@@ -1416,6 +1414,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
+        # have to make the scan_date_time timezone aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
+        scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
         try:
             if test:
                 # reimport into provided / latest test
@@ -1423,7 +1423,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
                                                 tags=None, minimum_severity=minimum_severity,
-                                                endpoints_to_add=endpoints_to_add, scan_date=scan_date,
+                                                endpoints_to_add=endpoints_to_add, scan_date=scan_date_time,
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings,
@@ -1439,7 +1439,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                                                                 active=active, verified=verified, tags=tags,
                                                                                 minimum_severity=minimum_severity,
                                                                                 endpoints_to_add=endpoints_to_add,
-                                                                                scan_date=scan_date, version=version,
+                                                                                scan_date=scan_date_time, version=version,
                                                                                 branch_tag=branch_tag, build_id=build_id,
                                                                                 commit_hash=commit_hash,
                                                                                 push_to_jira=push_to_jira,
@@ -1481,10 +1481,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 raise serializers.ValidationError(f'API scan configuration must be of tool type {tool_type}')
         return data
 
-    def validate_scan_data(self, value):
-        if value.date() > datetime.today().date():
+    def validate_scan_date(self, value):
+        if value and value > timezone.localdate():
             raise serializers.ValidationError(
-                'The date cannot be in the future!')
+                'The scan_date cannot be in the future!')
         return value
 
 
