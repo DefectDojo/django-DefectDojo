@@ -20,7 +20,7 @@ class CobaltApiParser(object):
         return SCAN_COBALTIO_API
 
     def get_description_for_scan_types(self, scan_type):
-        return "Cobalt.io API findings can be imported in JSON format (option --json)."
+        return "Cobalt.io findings can be directly imported using the Cobalt.io API. An API Scan Configuration has to be setup in the Product."
 
     def requires_file(self, scan_type):
         return False
