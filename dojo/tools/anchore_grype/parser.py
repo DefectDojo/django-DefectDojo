@@ -181,6 +181,5 @@ class AnchoreGrypeParser(object):
                 vector = cvss_item['vector']
                 cvss_objects = cvss_parser.parse_cvss_from_text(vector)
                 if len(cvss_objects) > 0 and type(cvss_objects[0]) == CVSS3:
-                    vector = cvss_item['vector']
                     return vector
         return None
