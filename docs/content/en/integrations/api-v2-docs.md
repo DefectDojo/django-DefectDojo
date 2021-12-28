@@ -158,7 +158,6 @@ Example for importing a scan result:
     active:true
     lead:1
     tags:test
-    scan_date:2019-04-30
     scan_type:ZAP Scan
     minimum_severity:Info
     skip_duplicates:true
