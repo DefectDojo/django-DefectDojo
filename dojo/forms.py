@@ -443,11 +443,8 @@ class ImportScanForm(forms.Form):
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
-        date = self.cleaned_data['scan_date']
-        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
-        if not date:
-            return None
-        if date.date() > datetime.today().date():
+        date = self.cleaned_data.get('scan_date', None)
+        if date and date.date() > datetime.today().date():
             raise forms.ValidationError("The date cannot be in the future!")
         return date
 
@@ -458,10 +455,9 @@ class ImportScanForm(forms.Form):
 
 class ReImportScanForm(forms.Form):
     scan_date = forms.DateTimeField(
-        required=True,
+        required=False,
         label="Scan Completion Date",
         help_text="Scan completion date will be used on all findings.",
-        initial=datetime.now().strftime("%m/%d/%Y"),
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
@@ -515,8 +511,8 @@ class ReImportScanForm(forms.Form):
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
-        date = self.cleaned_data['scan_date']
-        if date.date() > timezone.localtime(timezone.now()).date():
+        date = self.cleaned_data.get('scan_date', None)
+        if date and date.date() > timezone.localtime(timezone.now()).date():
             raise forms.ValidationError("The date cannot be in the future!")
         return date
 
@@ -1824,7 +1820,7 @@ class Delete_Product_Type_GroupForm(Edit_Product_Type_Group_Form):
 class DojoUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DojoUserForm, self).__init__(*args, **kwargs)
-        if not get_current_user().is_superuser and not settings.USER_PROFILE_EDITABLE:
+        if not get_current_user().is_superuser and not get_system_setting('enable_user_profile_editable'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -1912,7 +1908,7 @@ class UserContactInfoForm(forms.ModelForm):
         current_user = get_current_user()
         if not current_user.is_superuser:
             del self.fields['force_password_reset']
-            if not settings.USER_PROFILE_EDITABLE:
+            if not get_system_setting('enable_user_profile_editable'):
                 for field in self.fields:
                     self.fields[field].disabled = True
 

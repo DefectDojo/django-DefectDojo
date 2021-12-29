@@ -6,8 +6,10 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render
 
 from dojo.models import Notifications
+from dojo.utils import get_enabled_notifications_list
 from dojo.utils import add_breadcrumb
 from dojo.forms import NotificationsForm
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +21,7 @@ def personal_notifications(request):
         notifications_obj = Notifications(user=request.user)
 
     form = NotificationsForm(instance=notifications_obj)
+
     if request.method == 'POST':
         form = NotificationsForm(request.POST, instance=notifications_obj)
         if form.is_valid():
@@ -33,6 +36,7 @@ def personal_notifications(request):
     return render(request, 'dojo/notifications.html',
                   {'form': form,
                    'scope': 'personal',
+                   'enabled_notifications': get_enabled_notifications_list(),
                    'admin': request.user.is_superuser
                    })
 
@@ -58,4 +62,5 @@ def system_notifications(request):
     return render(request, 'dojo/notifications.html',
                   {'form': form,
                    'scope': 'system',
+                   'enabled_notifications': get_enabled_notifications_list(),
                    'admin': request.user.is_superuser})

@@ -1,31 +1,11 @@
-import time
 import unittest
 import sys
-from pathlib import Path
+
 from base_test_class import BaseTestCase
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver import ActionChains
 
 
 class UserTest(BaseTestCase):
-
-    @staticmethod
-    def add_user_read_only_parameter():
-        f = open('dojo/settings/local_settings.py', 'w')
-        f.write("USER_PROFILE_EDITABLE=False")
-        f.close()
-
-    @staticmethod
-    def unset_user_read_only_parameter():
-        f = open('dojo/settings/local_settings.py', 'w')
-        f.write("USER_PROFILE_EDITABLE=True")
-        f.close()
-
-    @staticmethod
-    def reload_service():
-        Path("dojo/settings/settings.py").touch()
 
     def test_create_user(self):
         # Login to the site.
@@ -73,6 +53,26 @@ class UserTest(BaseTestCase):
 
         self.assertFalse(self.is_element_by_css_selector_present('.alert-danger', 'Please enter a correct username and password'))
         return driver
+
+    def enable_user_profile_writing(self):
+        self.login_page()
+        driver = self.driver
+        driver.get(self.base_url + "system_settings")
+        checkbox = driver.find_element(By.ID, "id_enable_user_profile_editable")
+        if not checkbox.is_selected():
+            checkbox.click()
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.logout()
+
+    def disable_user_profile_writing(self):
+        self.login_page()
+        driver = self.driver
+        driver.get(self.base_url + "system_settings")
+        checkbox = driver.find_element(By.ID, "id_enable_user_profile_editable")
+        if checkbox.is_selected():
+            checkbox.click()
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.logout()
 
     def test_user_edit_permissions(self):
         # Login to the site. Password will have to be modified
@@ -130,50 +130,24 @@ class UserTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='User and relationships removed.'))
 
-    def test_user_notifications_change(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
-        driver = self.driver
-
-        wait = WebDriverWait(driver, 5)
-        actions = ActionChains(driver)
-        configuration_menu = driver.find_element(By.ID, 'menu_configuration')
-        actions.move_to_element(configuration_menu).perform()
-        wait.until(EC.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
-
-        originally_selected = {
-            'product_added': driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").is_selected(),
-            'scan_added': driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected()
-        }
-
-        driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").click()
-        driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").click()
-
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
-
-        self.assertTrue(self.is_success_message_present(text='Settings saved'))
-        self.assertNotEqual(originally_selected['product_added'],
-            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").is_selected())
-        self.assertNotEqual(originally_selected['scan_added'],
-            driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected())
-
     def test_standard_user_login(self):
         self.login_standard_page()
 
     def test_admin_profile_form(self):
-        self.add_user_read_only_parameter()
-        self.reload_service()
+        self.enable_user_profile_writing()
+        self.login_page()
         self.driver.get(self.base_url + "profile")
         self.assertTrue(self.driver.find_element(By.ID, 'id_first_name').is_enabled())
 
     def test_user_profile_form_disabled(self):
+        self.disable_user_profile_writing()
+        self.login_standard_page()
         self.driver.get(self.base_url + "profile")
         self.assertFalse(self.driver.find_element(By.ID, 'id_first_name').is_enabled())
 
     def test_user_profile_form_enabled(self):
-        self.unset_user_read_only_parameter()
-        # Do not do function reload to avoid double reloading
-        time.sleep(5)
+        self.enable_user_profile_writing()
+        self.login_standard_page()
         self.driver.get(self.base_url + "profile")
         self.assertTrue(self.driver.find_element(By.ID, 'id_first_name').is_enabled())
 
@@ -196,18 +170,13 @@ def suite():
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(UserTest('test_create_user'))
     suite.addTest(UserTest('test_admin_profile_form'))
-    suite.addTest(BaseTestCase('test_logout'))
     suite.addTest(UserTest('test_standard_user_login'))
     suite.addTest(UserTest('test_user_profile_form_disabled'))
     suite.addTest(UserTest('test_user_profile_form_enabled'))
-    suite.addTest(BaseTestCase('test_logout'))
     suite.addTest(UserTest('test_forgot_password'))
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(UserTest('test_user_edit_permissions'))
     suite.addTest(UserTest('test_user_delete'))
-
-    # not really for the user we created, but still related to user settings
-    suite.addTest(UserTest('test_user_notifications_change'))
 
     return suite
 
