@@ -13,7 +13,7 @@ class SonarQubeAPIParser(object):
         return SCAN_SONARQUBE_API
 
     def get_description_for_scan_types(self, scan_type):
-        return "Aggregates findings per cwe, title, description, file_path. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0"
+        return "SonarQube findings can be directly imported using the SonarQube API. An API Scan Configuration has to be setup in the Product."
 
     def requires_file(self, scan_type):
         return False

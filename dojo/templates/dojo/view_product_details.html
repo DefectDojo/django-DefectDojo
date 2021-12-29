@@ -553,8 +553,12 @@
         <tbody>
           <tr>
               <td id="saving_notifications">&nbsp;</td>
+              {% if "slack" in enabled_notifications %}
               <td class="centered">Slack</td>
+              {% endif %}
+              {% if "mail" in enabled_notifications %}
               <td class="centered">Mail</td>
+              {% endif %}
               <td class="centered">Alert</td>
           </tr>
           {% for field in personal_notifications_form.visible_fields %}
@@ -565,7 +569,7 @@
               {% endif %}
             </td>
             {% for pk,c in field.field.widget.choices %}
-            {% if c != "msteams" %}
+            {% if c != "msteams" and c in enabled_notifications %}
             <td class="centered"><input id="{{ field.name }}_{{ c }}" type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/></td>
             {% endif %}
             {% endfor %}
