@@ -5,6 +5,7 @@ import unittest
 import sys
 import time
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
+from notifications_test import NotificationTest
 
 
 class WaitForPageLoad(object):
@@ -461,7 +462,9 @@ class ProductTest(BaseTestCase):
     def test_product_notifications_change(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
+        NotificationTest("enable_notification", "mail").enable_notification()
         driver = self.driver
+
         self.goto_product_overview(driver)
         # Select the specific product to delete
         driver.find_element(By.LINK_TEXT, "QA Test").click()

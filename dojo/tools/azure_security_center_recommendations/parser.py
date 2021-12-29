@@ -14,7 +14,7 @@ class AzureSecurityCenterRecommendationsParser(object):
         return "Azure Security Center Recommendations Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Export of Azure Security Center Recommendations in CSV format."
+        return "Import of Microsoft Defender for Cloud (formerly known as Azure Security Center) recommendations in CSV format."
 
     def get_findings(self, file, test):
         if file.name.lower().endswith('.csv'):

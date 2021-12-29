@@ -192,8 +192,6 @@ env = environ.Env(
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
     # when enabled SonarQube API parser will download the security hotspots
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
-    # when enabled standard users can't change their profile information, default True
-    DD_USER_PROFILE_EDITABLE=(bool, True),
     # when enabled, finding importing will occur asynchronously, default False
     DD_ASYNC_FINDING_IMPORT=(bool, False),
     # The number fo findings to be processed per celeryworker
@@ -1040,6 +1038,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
     'Github Vulnerability Scan': ['unique_id_from_tool'],
     'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
+    'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1160,6 +1159,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Generic Findings Import': DEDUPE_ALGO_HASH_CODE,
     'Trufflehog3 Scan': DEDUPE_ALGO_HASH_CODE,
     'Detect-secrets Scan': DEDUPE_ALGO_HASH_CODE,
+    'Solar Appscreener Scan': DEDUPE_ALGO_HASH_CODE,
+    'Gitleaks Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1336,9 +1337,6 @@ DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')
 
 # Deside if SonarQube API parser should download the security hotspots
 SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
-
-# when enabled standard users can't change their profile information, default False
-USER_PROFILE_EDITABLE = env("DD_USER_PROFILE_EDITABLE")
 
 # when enabled, finding importing will occur asynchronously, default False
 ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")

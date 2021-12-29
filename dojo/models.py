@@ -404,6 +404,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name='Enable Rules Framework',
         help_text="With this setting turned off, the rules framwork will be disabled in the user interface.")
+    enable_user_profile_editable = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable user profile for writing',
+        help_text="When turned on users can edit their profiles")
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
