@@ -2502,7 +2502,7 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ['product', 'engagement']
-        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'push_all_issues', 'enable_engagement_epic_mapping', 'enable_parent_issue_linking','push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
+        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'push_all_issues', 'enable_engagement_epic_mapping', 'enable_parent_issue_linking', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
 
     def __init__(self, *args, **kwargs):
         from dojo.jira_link import helper as jira_helper
@@ -2772,7 +2772,7 @@ class JIRAEngagementForm(forms.Form):
                 self.fields['push_to_jira'].help_text = 'Checking this will update the existing EPIC in JIRA.'
 
     push_to_jira = forms.BooleanField(required=False, label="Create EPIC", help_text="Checking this will create an EPIC in JIRA for this engagement.")
-    jira_parent_issue = forms.CharField(required=False, label="Parent Issue",  help_text='Parent issue for JIRA issue associated with a finding')
+    jira_parent_issue = forms.CharField(required=False, label="Parent Issue", help_text='Parent issue for JIRA issue associated with a finding')
 
 
 class GoogleSheetFieldsForm(forms.Form):

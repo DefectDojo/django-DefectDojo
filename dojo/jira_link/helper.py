@@ -569,6 +569,7 @@ def add_issues_to_epic(jira, obj, epic_id, issue_keys, ignore_epics=True):
         log_jira_alert(e.text, obj)
         return False
 
+
 # add parent issue to existing Jira issues
 # NOTE: using Jira next gen API to update parent issue instead of Jira classic API add_issues_to_epic
 def add_issue_to_parent(obj, jira_project, issue):
@@ -585,7 +586,7 @@ def add_issue_to_parent(obj, jira_project, issue):
 
     if j_issue.jira_id:
         try:
-            parent_dict= {'parent': {'id' : j_issue.jira_id}}
+            parent_dict = {'parent': {'id': j_issue.jira_id}}
             issue.update(fields=parent_dict)
             return True
         except JIRAError as e:
@@ -595,7 +596,7 @@ def add_issue_to_parent(obj, jira_project, issue):
             return False
     else:
         # could this be the case of removing association with parent issue?
-        parent_dict= {'parent': {'id' : None}}
+        parent_dict = {'parent': {'id': None}}
         try:
             issue.update(fields=parent_dict)
             return True
@@ -603,6 +604,7 @@ def add_issue_to_parent(obj, jira_project, issue):
             # if Jira issue is alreay without parent issue, then error is returned; so ignore
             logger.debug('error updating parent issues for %s', obj.id)
             return False
+
 
 # we need two separate celery tasks due to the decorators we're using to map to/from ids
 
