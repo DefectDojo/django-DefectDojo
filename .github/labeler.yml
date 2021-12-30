@@ -21,3 +21,8 @@ settings_changes:
 
 apiv2:
 - dojo/api_v2/**/*
+
+ui:
+  - dojo/static/**/*
+  - dojo/templates/**/*
+  - dojo/templatetags/**/*
