@@ -17,6 +17,9 @@ from dojo.models import Answered_Survey, BannerConf
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -55,14 +58,19 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         unassigned_surveys = None
 
     if not settings.SHOW_LOGIN_FORM:
-        banner_config = BannerConf.objects.get()
-        if banner_config and banner_config.banner_enable:
-            messages.add_message(
-                request,
-                messages.INFO,
-                banner_config.banner_message,
-                extra_tags="alert-banner",
-            )
+        try:
+            banner_config = BannerConf.objects.get()
+            if banner_config and banner_config.banner_enable:
+                messages.add_message(
+                    request,
+                    messages.INFO,
+                    banner_config.banner_message,
+                    extra_tags="alert-banner",
+                )
+        except BannerConf.DoesNotExist:
+            logger.debug('Login form skipped and no banner is configured, nothing to display.')
+        except BannerConf.MultipleObjectsReturned:
+            logger.warn('Login form skipped but multiple banner objects exist, which is unexpected.')
 
     add_breadcrumb(request=request, clear=True)
     return render(request, 'dojo/dashboard.html', {

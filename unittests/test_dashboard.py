@@ -1,14 +1,17 @@
 from datetime import datetime, timedelta
+from logging import DEBUG, WARN
 from typing import List, Tuple
 from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.messages import get_messages
 from .dojo_test_case import DojoTestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.models import Finding, Test, Engagement, Risk_Acceptance, System_Settings
+from dojo.models import Finding, Test, Engagement, Risk_Acceptance, System_Settings, BannerConf
 
 User = get_user_model()
 
@@ -75,6 +78,9 @@ class TestDashboard(DojoTestCase):
     def setUpTestData(cls) -> None:
         System_Settings.objects.update(enable_deduplication=False)  # The default deduplication does not work.
         Engagement.objects.all().delete()
+
+    def setUp(self):
+        BannerConf.objects.all().delete()
 
     def _setup_test_counters_findings(self, product_id: int):
         when = self.week_ago
@@ -191,6 +197,61 @@ class TestDashboard(DojoTestCase):
             {'y': f"{self.now.year}-{self.now.month:02}",             'a': 1, 'b': 0, 'c': 0, 'd': 0, 'e': 0, None: 0},  # noqa: E241
         ]
         self.assertEqual(expected, response.context['by_month'])
+
+    def test_banner_message_not_displayed_when_showing_login_form_even_if_banner_is_enabled(self):
+        settings.SHOW_LOGIN_FORM = True
+        BannerConf.objects.create(banner_enable=True, banner_message='This message should not be shown')
+
+        response = self._request("user1")
+        banner_messages = [m.message for m in get_messages(response.wsgi_request) if m.extra_tags == 'alert-banner']
+
+        self.assertFalse(banner_messages)
+
+    def test_banner_message_not_displayed_when_banner_is_disablled(self):
+        settings.SHOW_LOGIN_FORM = False
+        BannerConf.objects.create(banner_enable=False, banner_message='This message should not be shown')
+
+        response = self._request("user1")
+        banner_messages = [m.message for m in get_messages(response.wsgi_request) if m.extra_tags == 'alert-banner']
+
+        self.assertFalse(banner_messages)
+
+    def test_banner_message_not_displayed_when_banner_object_does_not_exist(self):
+        settings.SHOW_LOGIN_FORM = False
+
+        with self.assertLogs('dojo', DEBUG) as logManager:
+            response = self._request("user1")
+            banner_messages = [m.message for m in get_messages(response.wsgi_request) if m.extra_tags == 'alert-banner']
+
+            self.assertFalse(banner_messages)
+            logRecords = [record for record in logManager.records if record.levelno == DEBUG and
+                record.message == 'Login form skipped and no banner is configured, nothing to display.']
+            self.assertEqual(1, len(logRecords))
+
+    def test_banner_message_not_displayed_when_multiple_banner_objects_exist(self):
+        settings.SHOW_LOGIN_FORM = False
+        BannerConf.objects.create(banner_enable=True, banner_message='Message1')
+        BannerConf.objects.create(banner_enable=True, banner_message='Message2')
+
+        with self.assertLogs('dojo', DEBUG) as logManager:
+            response = self._request("user1")
+            banner_messages = [m.message for m in get_messages(response.wsgi_request) if m.extra_tags == 'alert-banner']
+
+            self.assertFalse(banner_messages)
+            logRecords = [record for record in logManager.records if record.levelno == WARN and
+                record.message == 'Login form skipped but multiple banner objects exist, which is unexpected.']
+            self.assertEqual(1, len(logRecords))
+
+    def test_banner_message_displayed_when_banner_is_enabled_and_login_form_skipped(self):
+        expectedMessage = 'This message should be displayed on the banner!'
+        settings.SHOW_LOGIN_FORM = False
+        BannerConf.objects.create(banner_enable=True, banner_message=expectedMessage)
+
+        response = self._request("user1")
+        banner_messages = [m.message for m in get_messages(response.wsgi_request) if m.extra_tags == 'alert-banner']
+
+        self.assertEqual(1, len(banner_messages))
+        self.assertEqual(expectedMessage, banner_messages[0])
 
     def _request(self, username: str):
         user = User.objects.get(username=username)
