@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0140_auth_group'),
+        ('dojo', '0141_enable_user_profile_editable'),
     ]
 
     operations = [
