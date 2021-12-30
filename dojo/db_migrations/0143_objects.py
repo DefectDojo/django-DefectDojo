@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0141_enable_user_profile_editable'),
+        ('dojo', '0142_environment_delete'),
     ]
 
     operations = [
