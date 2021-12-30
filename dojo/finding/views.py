@@ -289,6 +289,7 @@ def view_finding(request, fid):
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
     if request.method == 'POST':
+        user_has_permission_or_403(request.user, finding, Permissions.Note_Add)
         if note_type_activation:
             form = TypedNoteForm(request.POST, available_note_types=available_note_types)
         else:
