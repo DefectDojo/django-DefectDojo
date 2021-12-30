@@ -1576,8 +1576,8 @@ def tab_view_count(product_id):
     return product, engagements, open_findings, endpoints, benchmark_type
 
 
-# Add a lanaguage to product
-def add_language(product, language):
+def add_language(product, language, files=1, code=1):
+    """Add a language to product"""
     prod_language = Languages.objects.filter(
         language__language__iexact=language, product=product)
 
@@ -1587,7 +1587,7 @@ def add_language(product, language):
                 language__iexact=language)
 
             if language_type:
-                lang = Languages(language=language_type, product=product)
+                lang = Languages(language=language_type, product=product, files=files, code=code)
                 lang.save()
         except Language_Type.DoesNotExist:
             pass
