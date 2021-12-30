@@ -1342,6 +1342,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     push_to_jira = forms.BooleanField(required=False)
     # unlink_from_jira = forms.BooleanField(required=False)
+    link_to_jira_parent_issue = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
     tags = TagField(required=False, autocomplete_tags=Finding.tags.tag_model.objects.all().order_by('name'))
 
@@ -2501,7 +2502,7 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ['product', 'engagement']
-        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
+        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'push_all_issues', 'enable_engagement_epic_mapping', 'enable_parent_issue_linking','push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
 
     def __init__(self, *args, **kwargs):
         from dojo.jira_link import helper as jira_helper
@@ -2537,6 +2538,7 @@ class JIRAProjectForm(forms.ModelForm):
                 self.fields['component'].disabled = False
                 self.fields['push_all_issues'].disabled = False
                 self.fields['enable_engagement_epic_mapping'].disabled = False
+                self.fields['enable_parent_issue_linking'].disabled = False
                 self.fields['push_notes'].disabled = False
                 self.fields['product_jira_sla_notification'].disabled = False
                 self.fields['risk_acceptance_expiration_notification'].disabled = False
@@ -2556,6 +2558,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.initial['component'] = jira_project_product.component
                     self.initial['push_all_issues'] = jira_project_product.push_all_issues
                     self.initial['enable_engagement_epic_mapping'] = jira_project_product.enable_engagement_epic_mapping
+                    self.initial['enable_parent_issue_linking'] = jira_project_product.enable_parent_issue_linking
                     self.initial['push_notes'] = jira_project_product.push_notes
                     self.initial['product_jira_sla_notification'] = jira_project_product.product_jira_sla_notification
                     self.initial['risk_acceptance_expiration_notification'] = jira_project_product.risk_acceptance_expiration_notification
@@ -2566,6 +2569,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.fields['component'].disabled = True
                     self.fields['push_all_issues'].disabled = True
                     self.fields['enable_engagement_epic_mapping'].disabled = True
+                    self.fields['enable_parent_issue_linking'].disabled = True
                     self.fields['push_notes'].disabled = True
                     self.fields['product_jira_sla_notification'].disabled = True
                     self.fields['risk_acceptance_expiration_notification'].disabled = True
@@ -2744,18 +2748,31 @@ class JIRAImportScanForm(forms.Form):
 class JIRAEngagementForm(forms.Form):
     prefix = 'jira-epic-form'
 
+    class Meta:
+        fields = ['push_to_jira', 'jira_parent_issue']
+
     def __init__(self, *args, **kwargs):
         self.instance = kwargs.pop('instance', None)
 
         super(JIRAEngagementForm, self).__init__(*args, **kwargs)
 
         if self.instance:
-            if self.instance.has_jira_issue:
+            import dojo.jira_link.helper as jira_helper
+
+            jira_project = jira_helper.get_jira_project(self.instance)
+            j_issue = jira_helper.get_jira_issue(self.instance)
+
+            if self.instance.has_jira_issue and jira_project.enable_parent_issue_linking:
+                logger.debug("jira enagement form %s", self.instance.jira_issue)
+                self.fields['jira_parent_issue'].initial = jira_helper.get_jira_issue_key(self.instance)
+
+            if self.instance.has_jira_issue and j_issue.jira_id and not jira_project.enable_parent_issue_linking:
                 self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
                 self.fields['push_to_jira'].label = 'Update JIRA Epic'
                 self.fields['push_to_jira'].help_text = 'Checking this will update the existing EPIC in JIRA.'
 
     push_to_jira = forms.BooleanField(required=False, label="Create EPIC", help_text="Checking this will create an EPIC in JIRA for this engagement.")
+    jira_parent_issue = forms.CharField(required=False, label="Parent Issue",  help_text='Parent issue for JIRA issue associated with a finding')
 
 
 class GoogleSheetFieldsForm(forms.Form):

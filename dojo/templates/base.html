@@ -772,6 +772,17 @@
             }, 100);
         });
 
+        $("#id_jira-epic-form-jira_parent_issue").on('paste', function(e) {
+            var clipboardData = e.clipboardData || e.originalEvent.clipboardData || window.clipboardData;
+            var pastedData = clipboardData.getData('text');
+
+            $this = $(this)
+            // if someone entered/pasted a full URL, we strip evertyhing until last '/'
+            setTimeout(function (elem) {
+                $this.val($this.val().substring($this.val().lastIndexOf("/") + 1));
+            }, 100);
+        });
+
         <!-- TODO not working with django tagulous which uses select2, break styling -->
         <!-- $('#id_tags').select2({ -->
             <!-- 'placeholder': 'Select or add some tags...', -->

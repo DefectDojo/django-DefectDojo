@@ -569,6 +569,40 @@ def add_issues_to_epic(jira, obj, epic_id, issue_keys, ignore_epics=True):
         log_jira_alert(e.text, obj)
         return False
 
+# add parent issue to existing Jira issues
+# NOTE: using Jira next gen API to update parent issue instead of Jira classic API add_issues_to_epic
+def add_issue_to_parent(obj, jira_project, issue):
+    logger.debug('add_issue_to_parent')
+    if jira_project.enable_engagement_epic_mapping or not jira_project.enable_parent_issue_linking:
+        return False
+
+    if isinstance(obj, Engagement):
+        engagement = obj
+    elif isinstance(obj, Finding):
+        engagement = obj.test.engagement
+
+    j_issue = get_jira_issue(engagement)
+
+    if j_issue.jira_id:
+        try:
+            parent_dict= {'parent': {'id' : j_issue.jira_id}}
+            issue.update(fields=parent_dict)
+            return True
+        except JIRAError as e:
+            logger.error('error updating parent issues for %s', obj.id)
+            logger.exception(e)
+            log_jira_alert(e.text, obj)
+            return False
+    else:
+        # could this be the case of removing association with parent issue?
+        parent_dict= {'parent': {'id' : None}}
+        try:
+            issue.update(fields=parent_dict)
+            return True
+        except JIRAError as e:
+            # if Jira issue is alreay without parent issue, then error is returned; so ignore
+            logger.debug('error updating parent issues for %s', obj.id)
+            return False
 
 # we need two separate celery tasks due to the decorators we're using to map to/from ids
 
@@ -696,6 +730,9 @@ def add_jira_issue(obj, *args, **kwargs):
             else:
                 logger.info('The following EPIC does not exist: %s', eng.name)
 
+        # check if Jira parent issue needs to be updated
+        add_issue_to_parent(obj, jira_project, new_issue)
+
         # only link the new issue if it was succefully created, incl attachments and epic link
         logger.debug('saving JIRA_Issue for %s finding %s', new_issue.key, obj.id)
         j_issue = JIRA_Issue(
@@ -817,6 +854,9 @@ def update_jira_issue(obj, *args, **kwargs):
                 add_issues_to_epic(jira, obj, epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             else:
                 logger.info('The following EPIC does not exist: %s', eng.name)
+
+        # check if Jira parent issue needs to be updated
+        add_issue_to_parent(obj, jira_project, issue)
 
         j_issue.jira_change = timezone.now()
         j_issue.save()
@@ -1100,29 +1140,6 @@ def add_epic(engagement):
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
     if jira_project.enable_engagement_epic_mapping:
-        # If existing Epic configured in Tracker field, then use the same to get Epic details
-        if engagement.tracker:
-            epic = engagement.tracker.split(jira_project.jira_instance.url + '/browse/')[1]
-            try:
-                jira = get_jira_connection(jira_instance)
-                existing_issue = jira.issue(epic)
-                logger.debug('add_epic: %s', epic)
-                j_issue = JIRA_Issue(
-                    jira_id=existing_issue.id,
-                    jira_key=existing_issue.key,
-                    engagement=engagement,
-                    jira_project=jira_project)
-                j_issue.save()
-                return True
-            except JIRAError as e:
-                logger.exception(e)
-                error = str(e)
-                message = ""
-                if "customfield" in error:
-                    message = "The 'Tracker' in your DefectDojo Engagement Configuration does not appear to be correct"
-                log_jira_generic_alert('Jira Engagement/Epic Mapping Error',
-                                    message + error)
-                return False
 
         issue_dict = {
             'project': {
@@ -1377,6 +1394,50 @@ def process_jira_epic_form(request, engagement=None):
                         messages.ERROR,
                         'Push to JIRA for Epic failed, check alerts on the top right for errors',
                         extra_tags='alert-danger')
+            # if parent issue details configured, then store the same in Jira issue associated with Engagement
+            # process the parent issue configurations if it is already set in Jira project or set in the form
+            parent_name = jira_epic_form.cleaned_data.get('jira_parent_issue')
+
+            if parent_name and not jira_project.enable_parent_issue_linking:
+                if engagement.has_jira_issue:
+                    j_issue = engagement.jira_issue
+                    if j_issue.jira_key:
+                        # if enable_parent_issue_linking is not set, then don't consider the configured parent issue text configured
+                        if parent_name == j_issue.jira_key:
+                            j_issue.jira_key = ''
+                            j_issue.jira_id = ''
+                            j_issue.save()
+
+            if jira_project.enable_parent_issue_linking and not jira_project.enable_engagement_epic_mapping:
+                if parent_name:
+                    jira_instance = jira_project.jira_instance
+                    jira = get_jira_connection(jira_instance)
+                    try:
+                        new_issue = jira.issue(parent_name)
+                        if engagement.has_jira_issue:
+                            # update existing issue details; but it won't update parent of existing finding automatically; for that
+                            # use bulk updating findings
+                            j_issue = engagement.jira_issue
+                            j_issue.jira_key = parent_name
+                            j_issue.jira_id = new_issue.id
+                        else:
+                            j_issue = JIRA_Issue(
+                                jira_id=new_issue.id,
+                                jira_key=new_issue.key,
+                                engagement=engagement,
+                                jira_project=jira_project)
+                        j_issue.save()
+                    except JIRAError as e:
+                        logger.error('error getting details of parent Jira issue')
+                        logger.exception(e)
+                        log_jira_alert(e.text, engagement)
+                else:
+                    # case of removing parent Jira issue
+                    if engagement.has_jira_issue:
+                        j_issue = engagement.jira_issue
+                        j_issue.jira_key = ''
+                        j_issue.jira_id = ''
+                        j_issue.save()
         else:
             logger.debug('invalid jira epic form')
     else:

@@ -1996,6 +1996,19 @@ def finding_bulk_update_all(request, pid=None):
                                         messages.SUCCESS,
                                         'Bulk update of {} findings was successful.'.format(updated_find_count),
                                         extra_tags='alert-success')
+
+                link_to_jira_parent_issue = form.cleaned_data['link_to_jira_parent_issue']
+                for finding in finds:
+                    # bulk edit related to parent Jira issue
+                    if link_to_jira_parent_issue:
+                        logger.debug('link_to_jira_parent_issue checked!')
+                        jira_project = jira_helper.get_jira_project(finding)
+                        if finding.has_jira_issue:
+                            logger.debug('findinghas_jira_issue, so update parent issue')
+                            jira = jira_helper.get_jira_connection(finding)
+                            j_issue = jira.issue(finding.jira_issue.jira_id)
+                            jira_helper.add_issue_to_parent(finding, jira_project, j_issue)
+
             else:
                 messages.add_message(request,
                                      messages.ERROR,

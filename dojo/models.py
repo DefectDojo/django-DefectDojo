@@ -2921,6 +2921,8 @@ class JIRA_Project(models.Model):
          help_text="Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product.")
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
+    enable_parent_issue_linking = models.BooleanField(default=False,
+                                                        blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name="Send SLA notifications as comment?")
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name="Send Risk Acceptance expiration notifications as comment?")
