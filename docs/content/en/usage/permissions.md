@@ -68,14 +68,14 @@ Users can be assigned as members to Products and Product Types, giving them one 
 | View Components             | x      | x      | x          | x     | x            |
 |                             |        |        |            |       |              |
 | View Note History           | x      | x      | x          | x     |              |
-| Add Note                    |        | x      | x          | x     |              |
-| Edit Note                   |        | x      | x          | x     |              |
-| Delete Note                 |        | (x) <sup>2)</sub> | x          | x     |              |
+| Add Note                    | x      | x      | x          | x     |              |
+| Edit Note                   | (x) <sup>2)</sub> | x                 | x          | x     |              |
+| Delete Note                 | (x) <sup>2)</sub> | (x) <sup>2)</sub> | x          | x     |              |
 
 
 <sup>1)</sup> Every staff user and administrator can add Product Types. Regular users are not allowed to add Product Types, unless they are Global Owner or Maintainer.
 
-<sup>2)</sup> Every user is allowed to delete his own notes.
+<sup>2)</sup> Every user is allowed to edit and delete his own notes.
 
 The role of a user within a Product Type is inherited by all Products of that Product Type, unless the user is explicitly defined as a member of a Product with a different role. In that case, if a user doesn't have a certain right for the Product Type, it is then checked if he has the right for the Product.
 
