@@ -156,8 +156,23 @@ spec:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
+            {{- if eq .Values.celery.broker "rabbitmq" }}
+            {{- if .Values.rabbitmq.enabled }}
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
+            {{- else }}
+              name: {{ .Values.rabbitmq.existingPasswordSecret }}
+              key: {{ .Values.rabbitmq.secretPasswordKey }}  
+            {{- end }}            
+            {{- else if eq .Values.celery.broker "redis" }}
+            {{- if .Values.redis.enabled }}
+              name: defectdojo-{{ .Values.celery.broker }}-specific
+              key: {{ .Values.celery.broker }}-password
+            {{- else }}
+              name: {{ .Values.redis.existingSecret }}
+              key: {{ .Values.redis.secretKey }}
+            {{- end }}  
+            {{- end }}
         {{- if .Values.django.uwsgi.enable_debug }}
         - name: DD_DEBUG
           value: 'True'
