@@ -58,11 +58,11 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         banner_config = BannerConf.objects.get()
         if banner_config and banner_config.banner_enable:
             messages.add_message(
-                    request,
-                    messages.INFO,
-                    banner_config.banner_message,
-                    extra_tags="alert-banner",
-                )
+                request,
+                messages.INFO,
+                banner_config.banner_message,
+                extra_tags="alert-banner",
+            )
 
     add_breadcrumb(request=request, clear=True)
     return render(request, 'dojo/dashboard.html', {
