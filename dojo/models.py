@@ -1492,7 +1492,7 @@ class Test(models.Model):
                                    editable=False)
     files = models.ManyToManyField(FileUpload, blank=True, editable=False)
     environment = models.ForeignKey(Development_Environment, null=True,
-                                    blank=False, on_delete=models.CASCADE)
+                                    blank=False, on_delete=models.RESTRICT)
 
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
@@ -3139,7 +3139,7 @@ class Cred_User(models.Model):
                                            null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
     url = models.URLField(max_length=2000, null=False)
-    environment = models.ForeignKey(Development_Environment, null=False, on_delete=models.CASCADE)
+    environment = models.ForeignKey(Development_Environment, null=False, on_delete=models.RESTRICT)
     login_regex = models.CharField(max_length=200, null=True, blank=True)
     logout_regex = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
