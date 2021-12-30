@@ -62,6 +62,7 @@ def get_import_meta_data_from_dict(data):
             engagement_id = engagement_id.id
         elif isinstance(engagement_id, str) and not engagement_id.isdigit():
             raise serializers.ValidationError('engagement must be an integer')
+
     engagement_name = data.get('engagement_name', None)
 
     product_name = data.get('product_name', None)
