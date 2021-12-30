@@ -453,6 +453,8 @@ def add_tests(request, eid):
             engagement=eng).order_by('cred_id')
         if form.is_valid():
             new_test = form.save(commit=False)
+            # set default scan_type as it's used in reimport
+            new_test.scan_type = new_test.test_type.name
             new_test.engagement = eng
             try:
                 new_test.lead = User.objects.get(id=form['lead'].value())
