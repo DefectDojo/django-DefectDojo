@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
+from django.db.models.deletion import RestrictedError
 
 from dojo.filters import DevelopmentEnvironmentFilter
 from dojo.forms import Development_EnvironmentForm, Delete_Dev_EnvironmentForm
@@ -71,12 +72,18 @@ def edit_dev_env(request, deid):
     if request.method == 'POST' and request.POST.get('delete_dev_env'):
         form2 = Delete_Dev_EnvironmentForm(request.POST, instance=de)
         if form2.is_valid():
-            de.delete()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Environment deleted successfully.',
-                extra_tags='alert-success')
+            try:
+                de.delete()
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'Environment deleted successfully.',
+                    extra_tags='alert-success')
+            except RestrictedError as err:
+                messages.add_message(request,
+                                        messages.WARNING,
+                                        'Environment cannot be deleted: {}'.format(err),
+                                        extra_tags='alert-warning')
             return HttpResponseRedirect(reverse('dev_env'))
 
     add_breadcrumb(title="Edit Environment", top_level=False, request=request)
