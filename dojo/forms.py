@@ -750,11 +750,11 @@ class EngForm(forms.ModelForm):
 
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
-            self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
+            self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View).filter(is_active=True)
         else:
             self.fields['lead'].queryset = User.objects.filter(is_active=True)
 
-        self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add).filter(is_active=True)
+        self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add)
 
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
