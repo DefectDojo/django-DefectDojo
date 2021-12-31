@@ -533,8 +533,8 @@ def import_scan_results(request, eid=None, pid=None):
     elif pid:
         product = get_object_or_404(Product, id=pid)
         engagement_or_product = product
-    elif not user.is_staff:
-        raise PermissionDenied
+    else:
+        raise Exception('Either Engagement or Product has to be provided')
 
     user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
 

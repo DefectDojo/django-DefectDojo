@@ -722,7 +722,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         else:
             return Response({"error": "('note_id') parameter missing"},
                 status=status.HTTP_400_BAD_REQUEST)
-        if note.author.username == request.user.username or request.user.is_staff:
+        if note.author.username == request.user.username or request.user.is_superuser:
             finding.notes.remove(note)
             note.delete()
         else:

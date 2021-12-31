@@ -752,9 +752,9 @@ class EngForm(forms.ModelForm):
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
             self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
         else:
-            self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
+            self.fields['lead'].queryset = User.objects.filter(is_active=True)
 
-        self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add)
+        self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add).filter(is_active=True)
 
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
@@ -826,10 +826,10 @@ class TestForm(forms.ModelForm):
 
         if obj:
             product = get_product(obj)
-            self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
+            self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View).filter(is_active=True)
             self.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=product)
         else:
-            self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
+            self.fields['lead'].queryset = User.objects.filter(is_active=True)
 
     class Meta:
         model = Test
@@ -1553,7 +1553,7 @@ class ClearFindingReviewForm(forms.ModelForm):
 
 
 class ReviewFindingForm(forms.Form):
-    reviewers = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.filter(is_staff=True, is_active=True),
+    reviewers = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.filter(is_active=True),
                                                help_text="Select all users who can review Finding.")
     entry = forms.CharField(
         required=True, max_length=2400,
