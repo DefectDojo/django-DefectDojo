@@ -13,6 +13,7 @@
                         Product Type List
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            {% if "Product_Type_Add"|has_global_permission %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -20,15 +21,13 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                {% if "Product_Type_Add"|has_global_permission %}
                                     <li role="presentation">
                                         <a href="{% url 'add_product_type' %}">
                                             <i class="fa fa-plus"></i> Add Product Type
                                         </a>
                                     </li>
-                                {% endif %}
-
                             </ul>
+                            {% endif %}
                         </div>
                     </h3>
                 </div>

@@ -19,7 +19,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                {% if "auth.change_user"|has_configuration_permission:"superuser" %}
+                                {% if request.user.is_superuser %}
                                 <li>
                                     <a class="" href="{% url 'edit_user' user.id %}">
                                         <i class="fa fa-pencil-square-o"></i> Edit</a>
@@ -30,7 +30,7 @@
                                     <a href="{% url 'action_history' user|content_type user.id %}">
                                         <i class="fa fa-history"></i> View History</a>
                                 </li>
-                                {% if "auth.delete_user"|has_configuration_permission:"superuser" and user.id != request.user.id %}
+                                {% if request.user.is_superuser and user.id != request.user.id %}
                                 <li role="separator" class="divider"></li>
                                 <li>
                                     <a class="" href="{% url 'delete_user' user.id %}" id="deleteUser"> 
@@ -107,7 +107,7 @@
                     &nbsp;
                     <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
-                    {% if "auth.change_user"|has_configuration_permission:"superuser" %}
+                    {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddProductTypeMember"
                             data-toggle="dropdown" aria-expanded="true">
@@ -180,7 +180,7 @@
                     &nbsp;
                     <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
-                    {% if "auth.change_user"|has_configuration_permission:"superuser" %}
+                    {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button"  id="dropdownMenuAddProductMember"
                             data-toggle="dropdown" aria-expanded="true">
@@ -254,7 +254,7 @@
                     &nbsp;
                     <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/#groups" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
-                    {% if "auth.change_user"|has_configuration_permission:"superuser" %}
+                    {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
                                 data-toggle="dropdown" aria-expanded="true">

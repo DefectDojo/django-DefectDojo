@@ -27,7 +27,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
-    Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
+    App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
@@ -2195,18 +2195,6 @@ class RegulationForm(forms.ModelForm):
         exclude = ['product']
 
 
-class LanguagesTypeForm(forms.ModelForm):
-    class Meta:
-        model = Languages
-        exclude = ['product']
-
-
-class Languages_TypeTypeForm(forms.ModelForm):
-    class Meta:
-        model = Language_Type
-        exclude = ['product']
-
-
 class AppAnalysisForm(forms.ModelForm):
     user = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=True)
 
@@ -3169,6 +3157,15 @@ class ConfigurationPermissionsForm(forms.Form):
         self.group = kwargs.pop('group', None)
         super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
 
+        permission_fields_1 = [
+            Permission_Helper(name='permission', app='auth', change=True),
+            Permission_Helper(name='development environment', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='group', app='auth', view=True, add=True),
+            Permission_Helper(name='language type', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='product type', app='dojo', add=True),
+        ]
+
         if get_system_setting('enable_questionnaires'):
             questionnaire_permissions = [
                 Permission_Helper(name='engagement survey', app='dojo', view=True, add=True, change=True, delete=True),
@@ -3177,16 +3174,10 @@ class ConfigurationPermissionsForm(forms.Form):
         else:
             questionnaire_permissions = []
 
-        permission_fields_1 = [
-            Permission_Helper(name='development environment', app='dojo', view=True, add=True, change=True, delete=True),
-            Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
-            Permission_Helper(name='group', app='auth', view=True, add=True),
-            Permission_Helper(name='permission', app='auth', change=True)
-        ]
         permission_fields_2 = [
             Permission_Helper(name='test type', app='dojo', view=True, add=True, change=True),
             Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
-            Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='user', app='auth', view=True),
         ]
 
         self.permission_fields = permission_fields_1 + questionnaire_permissions + permission_fields_2
@@ -3237,9 +3228,11 @@ class Permission_Helper:
 
     def display_name(self):
         if self.name == 'engagement survey':
-            return 'Questionnaire'
+            return 'Questionnaires'
+        if self.name == 'permission':
+            return 'Configuration Permissions'
         else:
-            return self.name.title()
+            return self.name.title() + 's'
 
     def view_codename(self):
         if self.view:

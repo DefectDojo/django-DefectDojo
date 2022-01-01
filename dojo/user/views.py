@@ -262,7 +262,7 @@ def user(request):
                    })
 
 
-@user_is_configuration_authorized('auth.add_user', 'superuser')
+@user_passes_test(lambda u: u.is_superuser)
 def add_user(request):
     form = AddDojoUserForm()
     if not request.user.is_superuser:
@@ -328,7 +328,7 @@ def view_user(request, uid):
         'configuration_permission_form': configuration_permission_form})
 
 
-@user_is_configuration_authorized('auth.change_user', 'superuser')
+@user_passes_test(lambda u: u.is_superuser)
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = EditDojoUserForm(instance=user)
@@ -387,7 +387,7 @@ def edit_user(request, uid):
         'to_edit': user})
 
 
-@user_is_configuration_authorized('auth.delete_user', 'superuser')
+@user_passes_test(lambda u: u.is_superuser)
 def delete_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = DeleteUserForm(instance=user)
@@ -428,7 +428,7 @@ def delete_user(request, uid):
                    })
 
 
-@user_is_configuration_authorized('auth.change_user', 'superuser')
+@user_passes_test(lambda u: u.is_superuser)
 def add_product_type_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Type_Member_UserForm(initial={'user': user.id})
@@ -456,7 +456,7 @@ def add_product_type_member(request, uid):
     })
 
 
-@user_is_configuration_authorized('auth.change_user', 'superuser')
+@user_passes_test(lambda u: u.is_superuser)
 def add_product_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Member_UserForm(initial={'user': user.id})
@@ -484,7 +484,7 @@ def add_product_member(request, uid):
     })
 
 
-@user_is_configuration_authorized('auth.change_user', 'superuser')
+@user_passes_test(lambda u: u.is_superuser)
 def add_group_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Group_Member_UserForm(initial={'user': user.id})

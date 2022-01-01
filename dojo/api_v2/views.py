@@ -1819,7 +1819,7 @@ class UsersViewSet(mixins.CreateModelMixin,
     queryset = User.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'username', 'first_name', 'last_name', 'email')
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
+    permission_classes = (permissions.UserHasUserPermission, )
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -1964,7 +1964,7 @@ class EndpointMetaImporterView(mixins.CreateModelMixin,
         return get_authorized_products(Permissions.Endpoint_Edit)
 
 
-# Authorization: staff users
+# Authorization: configuration
 class LanguageTypeViewSet(mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
                           mixins.CreateModelMixin,
@@ -1975,7 +1975,7 @@ class LanguageTypeViewSet(mixins.ListModelMixin,
     queryset = Language_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'language', 'color')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
 
 
 # Authorization: object-based
