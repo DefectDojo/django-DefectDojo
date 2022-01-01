@@ -6,7 +6,7 @@ from dojo.celery import app
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.utils import max_safe
 from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, \
-    IMPORT_REACTIVATED_FINDING, Test_Import, Test_Import_Finding_Action, \
+    IMPORT_REACTIVATED_FINDING, IMPORT_UNTOUCHED_FINDING, Test_Import, Test_Import_Finding_Action, \
     Endpoint_Status
 import logging
 
@@ -44,7 +44,7 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
 
 def update_import_history(type, active, verified, tags, minimum_severity, endpoints_to_add, version, branch_tag,
                             build_id, commit_hash, push_to_jira, close_old_findings, test,
-                            new_findings=[], closed_findings=[], reactivated_findings=[]):
+                            new_findings=[], closed_findings=[], reactivated_findings=[], untouched_findings=[]):
     logger.debug("new: %d closed: %d reactivated: %d", len(new_findings), len(closed_findings), len(reactivated_findings))
     # json field
     import_settings = {}
@@ -72,8 +72,13 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
     for finding in reactivated_findings:
         logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
         test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_REACTIVATED_FINDING))
+    for finding in untouched_findings:
+        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_UNTOUCHED_FINDING))
 
     Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
+
+    return test_import
 
 
 def construct_imported_message(scan_type, finding_count=0, new_finding_count=0, closed_finding_count=0, reactivated_finding_count=0, untouched_finding_count=0):
@@ -163,3 +168,7 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
 def update_test_progress(test):
     test.percent_complete = 100
     test.save()
+
+
+def calculate_delta_statistics(new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count):
+    return {}

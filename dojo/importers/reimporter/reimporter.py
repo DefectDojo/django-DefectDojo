@@ -342,11 +342,12 @@ class DojoDefaultReImporter(object):
         logger.debug('REIMPORT_SCAN: Updating test/engagement timestamps')
         importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
 
+        test_import = None
         if settings.TRACK_IMPORT_HISTORY:
             logger.debug('REIMPORT_SCAN: Updating Import History')
-            importer_utils.update_import_history(Test_Import.REIMPORT_TYPE, active, verified, tags, minimum_severity, endpoints_to_add,
-                                                 version, branch_tag, build_id, commit_hash, push_to_jira, close_old_findings,
-                                                 test, new_findings, closed_findings, reactivated_findings)
+            test_import = importer_utils.update_import_history(Test_Import.REIMPORT_TYPE, active, verified, tags, minimum_severity, endpoints_to_add,
+                                                                version, branch_tag, build_id, commit_hash, push_to_jira, close_old_findings,
+                                                                test, new_findings, closed_findings, reactivated_findings, untouched_findings)
 
         logger.debug('REIMPORT_SCAN: Generating notifications')
 
@@ -357,4 +358,4 @@ class DojoDefaultReImporter(object):
 
         logger.debug('REIMPORT_SCAN: Done')
 
-        return test, updated_count, len(new_findings), len(closed_findings), len(reactivated_findings), len(untouched_findings)
+        return test, updated_count, len(new_findings), len(closed_findings), len(reactivated_findings), len(untouched_findings), test_import

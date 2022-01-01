@@ -7,7 +7,7 @@ from datetime import datetime
 from dojo.endpoint.utils import endpoint_filter
 from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists
-from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
+from dojo.models import SEVERITIES, STATS_FIELDS, Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
@@ -80,6 +80,41 @@ def get_product_id_from_dict(data):
         elif isinstance(product_id, str) and not product_id.isdigit():
             raise serializers.ValidationError('product must be an integer')
     return product_id
+
+
+class InludeStatisticsMixin(object):
+    def __init__(self, *args, **kwargs):
+        request = self.context.get('request', None)
+        if not request:
+            include_stats = False
+        else:
+            include_stats_param = request.GET.get('include_stats', 'false')
+            include_stats = include_stats_param.lower() == 'true'
+
+        if not include_stats:
+            del self.fields['statistics']
+
+
+class StatusStatisticsSerializer(serializers.Serializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for stat in STATS_FIELDS:
+            self.fields[stat.lower()] = serializers.IntegerField()
+
+
+class SeverityStatusStatisticsSerializer(serializers.Serializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for sev in SEVERITIES:
+            self.fields[sev.lower()] = StatusStatisticsSerializer()
+
+        self.fields['total'] = StatusStatisticsSerializer()
+
+
+class ImportStatisticsSerializer(serializers.Serializer):
+    before = SeverityStatusStatisticsSerializer(required=False)
+    delta = SeverityStatusStatisticsSerializer(required=False)
+    after = SeverityStatusStatisticsSerializer()
 
 
 @extend_schema_field(serializers.ListField(child=serializers.CharField()))  # also takes basic python types
@@ -588,19 +623,31 @@ class ProductTypeGroupSerializer(serializers.ModelSerializer):
         return data
 
 
-class ProductTypeSerializer(serializers.ModelSerializer):
+class ProductTypeSerializer(serializers.ModelSerializer, InludeStatisticsMixin):
+    statistics = SeverityStatusStatisticsSerializer(required=False)
 
     class Meta:
         model = Product_Type
         fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        # init is not automatically called by Python
+        InludeStatisticsMixin.__init__(self, *args, **kwargs)
 
-class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
+
+class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer, InludeStatisticsMixin):
     tags = TagListSerializerField(required=False)
+    statistics = SeverityStatusStatisticsSerializer(required=False)
 
     class Meta:
         model = Engagement
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        # init is not automatically called by Python
+        InludeStatisticsMixin.__init__(self, *args, **kwargs)
 
     def validate(self, data):
         if self.context['request'].method == 'POST':
@@ -828,14 +875,20 @@ class FindingGroupSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'test', 'jira_issue')
 
 
-class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestSerializer(TaggitSerializer, serializers.ModelSerializer, InludeStatisticsMixin):
     tags = TagListSerializerField(required=False)
     test_type_name = serializers.ReadOnlyField()
     finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
+    statistics = SeverityStatusStatisticsSerializer(required=False)
 
     class Meta:
         model = Test
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        # init is not automatically called by Python
+        InludeStatisticsMixin.__init__(self, *args, **kwargs)
 
     def build_relational_field(self, field_name, relation_info):
         if field_name == 'notes':
@@ -1180,16 +1233,23 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         }
 
 
-class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+class ProductSerializer(TaggitSerializer, serializers.ModelSerializer, InludeStatisticsMixin):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
 
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)
 
+    statistics = SeverityStatusStatisticsSerializer(required=False)
+
     class Meta:
         model = Product
         exclude = ['tid', 'updated']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        # init is not automatically called by Python
+        InludeStatisticsMixin.__init__(self, *args, **kwargs)
 
     def get_findings_count(self, obj) -> int:
         return obj.findings_count
@@ -1249,7 +1309,8 @@ class ImportScanSerializer(serializers.Serializer):
     engagement_id = serializers.IntegerField(read_only=True)
     product_id = serializers.IntegerField(read_only=True)
     product_type_id = serializers.IntegerField(read_only=True)
-    statistics = serializers.DictField(read_only=True)
+
+    statistics = ImportStatisticsSerializer(read_only=True, required=False)
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1284,19 +1345,19 @@ class ImportScanSerializer(serializers.Serializer):
         scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
         importer = Importer()
         try:
-            test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment,
-                                                                             active=active, verified=verified, tags=tags,
-                                                                             minimum_severity=minimum_severity,
-                                                                             endpoints_to_add=endpoints_to_add,
-                                                                             scan_date=scan_date_time, version=version,
-                                                                             branch_tag=branch_tag, build_id=build_id,
-                                                                             commit_hash=commit_hash,
-                                                                             push_to_jira=push_to_jira,
-                                                                             close_old_findings=close_old_findings,
-                                                                             group_by=group_by,
-                                                                             api_scan_configuration=api_scan_configuration,
-                                                                             service=service,
-                                                                             title=test_title)
+            test, finding_count, closed_finding_count, test_import = importer.import_scan(scan, scan_type, engagement, lead, environment,
+                                                                                            active=active, verified=verified, tags=tags,
+                                                                                            minimum_severity=minimum_severity,
+                                                                                            endpoints_to_add=endpoints_to_add,
+                                                                                            scan_date=scan_date_time, version=version,
+                                                                                            branch_tag=branch_tag, build_id=build_id,
+                                                                                            commit_hash=commit_hash,
+                                                                                            push_to_jira=push_to_jira,
+                                                                                            close_old_findings=close_old_findings,
+                                                                                            group_by=group_by,
+                                                                                            api_scan_configuration=api_scan_configuration,
+                                                                                            service=service,
+                                                                                            title=test_title)
 
             if test:
                 data['test'] = test.id
@@ -1383,7 +1444,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     engagement_id = serializers.IntegerField(read_only=True)  # need to use the _id suffix as without the serializer framework gets confused
     product_id = serializers.IntegerField(read_only=True)
     product_type_id = serializers.IntegerField(read_only=True)
-    statistics = serializers.DictField(read_only=True)
+
+    statistics = ImportStatisticsSerializer(read_only=True, required=False)
 
     def save(self, push_to_jira=False):
         logger.debug('push_to_jira: %s', push_to_jira)
@@ -1417,15 +1479,15 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
-        statistics_before = None
         # have to make the scan_date_time timezone aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
         scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
+        statistics_before, statistics_delta = None, None
         try:
             if test:
                 # reimport into provided / latest test
                 statistics_before = test.statistics
                 reimporter = ReImporter()
-                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
+                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, test_import = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
                                                 tags=None, minimum_severity=minimum_severity,
                                                 endpoints_to_add=endpoints_to_add, scan_date=scan_date_time,
@@ -1435,24 +1497,26 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                                 group_by=group_by, api_scan_configuration=api_scan_configuration,
                                                 service=service)
 
+                statistics_delta = test_import.statistics
             elif auto_create_context:
                 # perform Import to create test
                 logger.debug('reimport for non-existing test, using import to create new test')
                 engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context)
                 importer = Importer()
-                test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment,
-                                                                                active=active, verified=verified, tags=tags,
-                                                                                minimum_severity=minimum_severity,
-                                                                                endpoints_to_add=endpoints_to_add,
-                                                                                scan_date=scan_date_time, version=version,
-                                                                                branch_tag=branch_tag, build_id=build_id,
-                                                                                commit_hash=commit_hash,
-                                                                                push_to_jira=push_to_jira,
-                                                                                close_old_findings=close_old_findings,
-                                                                                group_by=group_by,
-                                                                                api_scan_configuration=api_scan_configuration,
-                                                                                service=service,
-                                                                                title=test_title)
+                test, finding_count, closed_finding_count, test_import = importer.import_scan(scan, scan_type, engagement, lead, environment,
+                                                                                                active=active, verified=verified, tags=tags,
+                                                                                                minimum_severity=minimum_severity,
+                                                                                                endpoints_to_add=endpoints_to_add,
+                                                                                                scan_date=scan_date_time, version=version,
+                                                                                                branch_tag=branch_tag, build_id=build_id,
+                                                                                                commit_hash=commit_hash,
+                                                                                                push_to_jira=push_to_jira,
+                                                                                                close_old_findings=close_old_findings,
+                                                                                                group_by=group_by,
+                                                                                                api_scan_configuration=api_scan_configuration,
+                                                                                                service=service,
+                                                                                                title=test_title)
+
             else:
                 # should be captured by validation / permission check already
                 raise NotFound('test not found')
@@ -1463,9 +1527,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 data['engagement_id'] = test.engagement.id
                 data['product_id'] = test.engagement.product.id
                 data['product_type_id'] = test.engagement.product.prod_type.id
-                data['statistics'] = {'after': test.statistics}
+                data['statistics'] = {}
                 if statistics_before:
                     data['statistics']['before'] = statistics_before
+                if statistics_delta:
+                    data['statistics']['delta'] = statistics_delta
+                data['statistics']['after'] = test.statistics
 
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer

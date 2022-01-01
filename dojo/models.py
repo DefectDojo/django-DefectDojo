@@ -17,6 +17,7 @@ from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, Count
+from django.db.models.functions import Lower
 from django_extensions.db.models import TimeStampedModel
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
@@ -47,21 +48,58 @@ SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
 SEVERITIES = [s[0] for s in SEVERITY_CHOICES]
 
 # fields returned in statistics, typically all status fields
-STATS_FIELDS = ['active', 'verified', 'duplicate', 'false_p', 'out_of_scope', 'is_mitigated', 'risk_accepted']
+STATS_FIELDS = ['active', 'verified', 'duplicate', 'false_p', 'out_of_scope', 'is_mitigated', 'risk_accepted', 'total']
 # default template with all values set to 0
-DEFAULT_STATS = {sev: {stat_field: 0 for stat_field in STATS_FIELDS + ['total']} for sev in SEVERITIES}
+DEFAULT_STATS = {sev.lower(): {stat_field: 0 for stat_field in STATS_FIELDS} for sev in SEVERITIES}
 
 IMPORT_CREATED_FINDING = 'N'
 IMPORT_CLOSED_FINDING = 'C'
 IMPORT_REACTIVATED_FINDING = 'R'
-IMPORT_UPDATED_FINDING = 'U'
+IMPORT_UNTOUCHED_FINDING = 'U'
 
 IMPORT_ACTIONS = [
     (IMPORT_CREATED_FINDING, 'created'),
     (IMPORT_CLOSED_FINDING, 'closed'),
     (IMPORT_REACTIVATED_FINDING, 'reactivated'),
-    (IMPORT_UPDATED_FINDING, 'updated'),
+    (IMPORT_UNTOUCHED_FINDING, 'left untouched'),
 ]
+
+
+def _get_annotations_for_statistics():
+    annotations = {stats_field.lower(): Count(Case(When(**{stats_field: True}, then=1))) for stats_field in STATS_FIELDS if stats_field != 'total'}
+    # add total
+    annotations['total'] = Count('id')
+    return annotations
+
+
+def _get_statistics_for_queryset(qs, annotation_factory):
+    # order by to get rid of default ordering that would mess with group_by
+    # group by severity (lowercase)
+    values = qs.annotate(sev=Lower('severity')).values('sev').order_by()
+    values = values.annotate(**annotation_factory())
+
+    stat_fields = ['sev', 'total'] + STATS_FIELDS
+    values = values.values(*stat_fields)
+
+    # not sure if there's a smarter way to convert a list of dicts into a dict of dicts
+    stats = DEFAULT_STATS
+    for row in values:
+        print(row)
+        sev = row.pop('sev')
+        stats[sev] = row
+
+    values_total = qs.values()
+    values_total = values_total.aggregate(**annotation_factory())
+    stats['total'] = values_total
+    print(stats)
+    return stats
+
+
+def _get_annotations_for_delta_statistics():
+    annotations = {import_action.lower(): Count(Case(When(**{import_action: import_action}, then=1))) for import_action in IMPORT_ACTIONS.keys()}
+    # add total
+    annotations['total'] = Count('id')
+    return annotations
 
 
 @deconstructible
@@ -599,6 +637,11 @@ class Product_Type(models.Model):
         from django.urls import reverse
         return reverse('product_type', args=[str(self.id)])
 
+    @property
+    def statistics(self):
+        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        return _get_statistics_for_queryset(Finding.objects.filter(test__engagement__product__prod_type=self), _get_annotations_for_statistics)
+
 
 class Product_Line(models.Model):
     name = models.CharField(max_length=300)
@@ -888,6 +931,11 @@ class Product(models.Model):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
 
+    @property
+    def statistics(self):
+        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        return _get_statistics_for_queryset(Finding.objects.filter(test__engagement__product=self), _get_annotations_for_statistics)
+
 
 class Product_Member(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -1154,6 +1202,11 @@ class Engagement(models.Model):
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
         calculate_grade(self.product)
+
+    @property
+    def statistics(self):
+        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        return _get_statistics_for_queryset(Finding.objects.filter(test__engagement=self), _get_annotations_for_statistics)
 
 
 class CWE(models.Model):
@@ -1566,33 +1619,10 @@ class Test(models.Model):
         super().delete(*args, **kwargs)
         calculate_grade(self.engagement.product)
 
-    def _get_annotations_for_statistics(self):
-        annotations = {stats_field: Count(Case(When(**{stats_field: True}, then=1))) for stats_field in STATS_FIELDS}
-        # add total
-        annotations['total'] = Count('id')
-        return annotations
-
     @property
     def statistics(self):
-        # Do not copy and past this, but extract the common part of when needed elsewhere
-        # order by to get rid of default ordering that would mess with group_by
-        # group by severity
-        values = Finding.objects.filter(test=self).values('severity').order_by()
-        values = values.annotate(**self._get_annotations_for_statistics())
-
-        stat_fields = ['severity'] + STATS_FIELDS
-        values = values.values(*stat_fields)
-
-        # not sure if there's a smarter way to convert a list of dicts into a dict of dicts
-        stats = DEFAULT_STATS
-        for row in values:
-            sev = row.pop('severity')
-            stats[sev] = row
-
-        values_total = Finding.objects.filter(test=self).values()
-        values_total = values_total.aggregate(**self._get_annotations_for_statistics())
-        stats['total'] = values_total
-        return stats
+        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        return _get_statistics_for_queryset(Finding.objects.filter(test=self), _get_annotations_for_statistics)
 
 
 class Test_Import(TimeStampedModel):
@@ -1619,7 +1649,7 @@ class Test_Import(TimeStampedModel):
         super_query = super_query.annotate(created_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CREATED_FINDING)))
         super_query = super_query.annotate(closed_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CLOSED_FINDING)))
         super_query = super_query.annotate(reactivated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_REACTIVATED_FINDING)))
-        super_query = super_query.annotate(updated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_UPDATED_FINDING)))
+        super_query = super_query.annotate(untouched_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_UNTOUCHED_FINDING)))
         return super_query
 
     class Meta:
@@ -1631,6 +1661,16 @@ class Test_Import(TimeStampedModel):
     def __str__(self):
         return self.created.strftime("%Y-%m-%d %H:%M:%S")
 
+    @property
+    def statistics(self):
+        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        stats = {}
+        # stats['created'] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=IMPORT_CREATED_FINDING), _get_annotations_for_test_import_statistics)
+        # stats['closed'] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=IMPORT_CLOSED_FINDING), _get_annotations_for_test_import_statistics))
+        # stats['reactivated'] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=IMPORT_REACTIVATED_FINDING), _get_annotations_for_test_import_statistics))
+        # stats['untouched'] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=IMPORT_UNTOUCHED_FINDING), _get_annotations_for_test_import_statistics))
+        return stats
+
 
 class Test_Import_Finding_Action(TimeStampedModel):
     test_import = models.ForeignKey(Test_Import, editable=False, null=False, blank=False, on_delete=models.CASCADE)
@@ -1638,6 +1678,9 @@ class Test_Import_Finding_Action(TimeStampedModel):
     action = models.CharField(max_length=100, null=True, blank=True, choices=IMPORT_ACTIONS)
 
     class Meta:
+        indexes = [
+            models.Index(fields=['finding', 'action', 'test_import']),
+        ]
         unique_together = (('test_import', 'finding'))
         ordering = ('test_import', 'action', 'finding')
 
