@@ -109,6 +109,14 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
         return has_permission_result
 
 
+class UserHasToolProductSettingsPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Product, 'product', Permissions.Product_Edit)
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj.product, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Edit)
+
+
 class UserHasEndpointPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(request, Product, 'product', Permissions.Endpoint_Add)

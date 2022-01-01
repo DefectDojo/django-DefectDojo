@@ -1,6 +1,7 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import BadRequest
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -56,6 +57,9 @@ def view_objects(request, pid):
 @user_is_authorized(Product, Permissions.Product_Tracking_Files_Edit, 'pid')
 def edit_object(request, pid, ttid):
     object = Objects_Product.objects.get(pk=ttid)
+    product = get_object_or_404(Product, id=pid)
+    if object.product != product:
+        raise BadRequest(f'Product {pid} does not fit to product of Object {object.product.id}')
 
     if request.method == 'POST':
         tform = ObjectSettingsForm(request.POST, instance=object)
@@ -82,6 +86,9 @@ def edit_object(request, pid, ttid):
 @user_is_authorized(Product, Permissions.Product_Tracking_Files_Delete, 'pid')
 def delete_object(request, pid, ttid):
     object = Objects_Product.objects.get(pk=ttid)
+    product = get_object_or_404(Product, id=pid)
+    if object.product != product:
+        raise BadRequest(f'Product {pid} does not fit to product of Object {object.product.id}')
 
     if request.method == 'POST':
         tform = ObjectSettingsForm(request.POST, instance=object)

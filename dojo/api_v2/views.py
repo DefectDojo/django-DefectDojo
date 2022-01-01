@@ -57,6 +57,7 @@ from dojo.finding.queries import get_authorized_findings, get_authorized_stub_fi
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
 from dojo.group.queries import get_authorized_groups, get_authorized_group_members
 from dojo.jira_link.queries import get_authorized_jira_projects, get_authorized_jira_issues
+from dojo.tool_product.queries import get_authorized_tool_product_settings
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from dojo.authorization.roles_permissions import Permissions
 
@@ -1761,7 +1762,7 @@ class ToolConfigurationsViewSet(mixins.ListModelMixin,
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
-# Authorization: staff
+# Authorization: object-based
 class ToolProductSettingsViewSet(mixins.ListModelMixin,
                                  mixins.RetrieveModelMixin,
                                  mixins.DestroyModelMixin,
@@ -1769,11 +1770,14 @@ class ToolProductSettingsViewSet(mixins.ListModelMixin,
                                  mixins.UpdateModelMixin,
                                  viewsets.GenericViewSet):
     serializer_class = serializers.ToolProductSettingsSerializer
-    queryset = Tool_Product_Settings.objects.all()
+    queryset = Tool_Product_Settings.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'product', 'tool_configuration',
                      'tool_project_id', 'url')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, permissions.UserHasToolProductSettingsPermission)
+
+    def get_queryset(self):
+        return get_authorized_tool_product_settings(Permissions.Product_View)
 
 
 # Authorization: configuration
