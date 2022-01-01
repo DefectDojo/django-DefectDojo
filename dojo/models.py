@@ -637,11 +637,6 @@ class Product_Type(models.Model):
         from django.urls import reverse
         return reverse('product_type', args=[str(self.id)])
 
-    @property
-    def statistics(self):
-        """ Queries the database, no prefetching, so could be slow for lists of model instances """
-        return _get_statistics_for_queryset(Finding.objects.filter(test__engagement__product__prod_type=self), _get_annotations_for_statistics)
-
 
 class Product_Line(models.Model):
     name = models.CharField(max_length=300)
@@ -931,11 +926,6 @@ class Product(models.Model):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
 
-    @property
-    def statistics(self):
-        """ Queries the database, no prefetching, so could be slow for lists of model instances """
-        return _get_statistics_for_queryset(Finding.objects.filter(test__engagement__product=self), _get_annotations_for_statistics)
-
 
 class Product_Member(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -1202,11 +1192,6 @@ class Engagement(models.Model):
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
         calculate_grade(self.product)
-
-    @property
-    def statistics(self):
-        """ Queries the database, no prefetching, so could be slow for lists of model instances """
-        return _get_statistics_for_queryset(Finding.objects.filter(test__engagement=self), _get_annotations_for_statistics)
 
 
 class CWE(models.Model):

@@ -82,19 +82,6 @@ def get_product_id_from_dict(data):
     return product_id
 
 
-class InludeStatisticsMixin(object):
-    def __init__(self, *args, **kwargs):
-        request = self.context.get('request', None)
-        if not request:
-            include_stats = False
-        else:
-            include_stats_param = request.GET.get('include_stats', 'false')
-            include_stats = include_stats_param.lower() == 'true'
-
-        if not include_stats:
-            del self.fields['statistics']
-
-
 class StatusStatisticsSerializer(serializers.Serializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -623,31 +610,19 @@ class ProductTypeGroupSerializer(serializers.ModelSerializer):
         return data
 
 
-class ProductTypeSerializer(serializers.ModelSerializer, InludeStatisticsMixin):
-    statistics = SeverityStatusStatisticsSerializer(required=False)
+class ProductTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product_Type
         fields = '__all__'
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
-        # init is not automatically called by Python
-        InludeStatisticsMixin.__init__(self, *args, **kwargs)
 
-
-class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer, InludeStatisticsMixin):
+class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
-    statistics = SeverityStatusStatisticsSerializer(required=False)
 
     class Meta:
         model = Engagement
         fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
-        # init is not automatically called by Python
-        InludeStatisticsMixin.__init__(self, *args, **kwargs)
 
     def validate(self, data):
         if self.context['request'].method == 'POST':
@@ -875,20 +850,14 @@ class FindingGroupSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'test', 'jira_issue')
 
 
-class TestSerializer(TaggitSerializer, serializers.ModelSerializer, InludeStatisticsMixin):
+class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     test_type_name = serializers.ReadOnlyField()
     finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
-    statistics = SeverityStatusStatisticsSerializer(required=False)
 
     class Meta:
         model = Test
         fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
-        # init is not automatically called by Python
-        InludeStatisticsMixin.__init__(self, *args, **kwargs)
 
     def build_relational_field(self, field_name, relation_info):
         if field_name == 'notes':
@@ -1233,23 +1202,16 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         }
 
 
-class ProductSerializer(TaggitSerializer, serializers.ModelSerializer, InludeStatisticsMixin):
+class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
 
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)
 
-    statistics = SeverityStatusStatisticsSerializer(required=False)
-
     class Meta:
         model = Product
         exclude = ['tid', 'updated']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
-        # init is not automatically called by Python
-        InludeStatisticsMixin.__init__(self, *args, **kwargs)
 
     def get_findings_count(self, obj) -> int:
         return obj.findings_count

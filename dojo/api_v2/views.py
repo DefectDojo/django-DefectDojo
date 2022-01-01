@@ -250,36 +250,6 @@ class EngagementViewSet(mixins.ListModelMixin,
                                                     'files').distinct()
         return engs
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        # context['include_stats'] = True
-        return context
-
-    def paginate_queryset(self, qs):
-        page = super().paginate_queryset(qs)
-        print('p: ', page)
-        # raise Exception('valentijn')
-        return page
-
-    def get_paginated_response(self, data):
-        response = super().get_paginated_response(data)
-        print('d: ', response)
-        return response
-
-    def filter_queryset(self, qs):
-        filtered = super().filter_queryset(qs)
-        print('f: ', filtered.query)
-        return filtered
-
-    def list(self, request):
-        print(vars(request))
-        # Note the use of `get_queryset()` instead of `self.queryset`
-        queryset = self.get_queryset()
-        print('q: ', queryset.query)
-        # serializer = self.serializer_class(queryset, many=True)
-        # return Response(serializer.data)
-        return super().list(request)
-
     @extend_schema(
         request=OpenApiTypes.NONE,
         responses={status.HTTP_200_OK: ""}
