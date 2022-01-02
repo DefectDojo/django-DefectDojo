@@ -224,8 +224,10 @@
                                     <li><a href="{% url 'active_engagements' %}">Active Engagements</a></li>
                                     <li><a href="{% url 'all_engagements' %}">All Engagements</a></li>
                                     <li><a href="{% url 'engagements_all' %}">Engagements by Product</a></li>
-                                    {% if request.user.is_staff %}
+                                    {% if "dojo.view_test_type"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'test_type' %}">Test Types</a></li>
+                                    {% endif %}
+                                    {% if "dojo.view_development_environment"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'dev_env' %}">Environments</a></li>
                                     {% endif %}
                                 </ul>
@@ -250,7 +252,7 @@
                                         <li>
                                             <a href="{% url 'accepted_findings' %}">Risk Accepted Findings</a>
                                         </li>
-                                        {% if request.user.is_staff %}
+                                        {% if "dojo.view_finding_template"|has_configuration_permission:"staff" %}
                                         <li>
                                             <a href="{% url 'templates' %}">Finding Templates</a>
                                         </li>
@@ -345,17 +347,23 @@
                                         <span>Calendar</span>
                                     </a>
                                 </li>
-                            {% if request.user.is_staff and system_settings.enable_questionnaires %}
+                            {% if system_settings.enable_questionnaires %}
+                            {% if "dojo.view_engagement_survey"|has_configuration_permission:"staff" or "dojo.view_question"|has_configuration_permission:"staff" %}
                                 <li>
                                     <a href="#"><i class="fa fa-hospital-o fa-fw"> </i> <span>Questionnaires</span><span
                                             class="glyphicon arrow"></span></a>
                                     <ul class="nav nav-second-level">
+                                        {% if "dojo.view_engagement_survey"|has_configuration_permission:"staff"  %}
                                         <li><a href="{% url 'questionnaire' %}">All Questionnaires </a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_question"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'questions' %}">All Questions </a></li>
+                                        {% endif %}
 
                                     </ul>
                                     <!-- /.nav-second-level -->
                                 </li>
+                            {% endif %}
                             {% endif %}
                                 <li id="menu_configuration">
 				                    <a href="#" aria-expanded="false" aria-label="Configuration">

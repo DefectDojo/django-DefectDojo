@@ -3166,12 +3166,27 @@ class ConfigurationPermissionsForm(forms.Form):
         self.group = kwargs.pop('group', None)
         super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
 
-        self.permission_fields = [
+        if get_system_setting('enable_questionnaires'):
+            questionnaire_permissions = [
+                Permission_Helper(name='engagement survey', app='dojo', view=True, add=True, change=True, delete=True),
+                Permission_Helper(name='question', app='dojo', view=True, add=True, change=True),
+            ]
+        else:
+            questionnaire_permissions = []
+
+        permission_fields_1 = [
+            Permission_Helper(name='development environment', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='group', app='auth', view=True, add=True),
-            Permission_Helper(name='permission', app='auth', change=True),
+            Permission_Helper(name='permission', app='auth', change=True)
+        ]
+        permission_fields_2 = [
+            Permission_Helper(name='test type', app='dojo', view=True, add=True, change=True),
             Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
         ]
+
+        self.permission_fields = permission_fields_1 + questionnaire_permissions + permission_fields_2
 
         for permission_field in self.permission_fields:
             for codename in permission_field.codenames():
@@ -3216,6 +3231,12 @@ class Permission_Helper:
         self.add = kwargs.pop('add', False)
         self.change = kwargs.pop('change', False)
         self.delete = kwargs.pop('delete', False)
+
+    def display_name(self):
+        if self.name == 'engagement survey':
+            return 'Questionnaire'
+        else:
+            return self.name.title()
 
     def view_codename(self):
         if self.view:

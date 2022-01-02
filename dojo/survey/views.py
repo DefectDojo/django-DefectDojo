@@ -2,7 +2,6 @@ import pickle
 from datetime import date
 
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
@@ -20,9 +19,9 @@ from dojo.forms import Add_Questionnaire_Form, Delete_Questionnaire_Form, Create
     CreateChoiceQuestionForm, EditTextQuestionForm, EditChoiceQuestionForm, AddChoicesForm, \
     AddEngagementForm, AddGeneralQuestionnaireForm, DeleteGeneralQuestionnaireForm
 from dojo.models import Answered_Survey, Engagement_Survey, Answer, TextQuestion, ChoiceQuestion, Choice, General_Survey, Question
-from dojo.authorization.authorization import user_has_permission_or_403, user_has_permission
+from dojo.authorization.authorization import user_has_permission_or_403, user_has_permission, user_has_configuration_permission
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
@@ -177,7 +176,7 @@ def get_answered_questions(survey=None, read_only=False):
     return questions
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def add_questionnaire(request, eid):
     user = request.user
     engagement = get_object_or_404(Engagement, id=eid)
@@ -215,7 +214,7 @@ def add_questionnaire(request, eid):
                    'engagement': engagement})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.change_engagement_survey', 'staff')
 def edit_questionnaire(request, sid):
     survey = get_object_or_404(Engagement_Survey, id=sid)
     old_name = survey.name
@@ -264,7 +263,7 @@ def edit_questionnaire(request, sid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.delete_engagement_survey', 'staff')
 def delete_questionnaire(request, sid):
     survey = get_object_or_404(Engagement_Survey, id=sid)
     form = Delete_Eng_Survey_Form(instance=survey)
@@ -294,7 +293,7 @@ def delete_questionnaire(request, sid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_engagement_survey', 'staff')
 def create_questionnaire(request):
     form = CreateQuestionnaireForm()
     survey = None
@@ -325,9 +324,12 @@ def create_questionnaire(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# complex permission check inside the function
 def edit_questionnaire_questions(request, sid):
     survey = get_object_or_404(Engagement_Survey, id=sid)
+    if not user_has_configuration_permission(request.user, 'dojo.add_engagement_survey', 'staff') and \
+            not user_has_configuration_permission(request.user, 'dojo.change_engagement_survey', 'staff'):
+        raise PermissionDenied()
 
     answered_surveys = Answered_Survey.objects.filter(survey=survey)
     reverted = False
@@ -368,7 +370,7 @@ def edit_questionnaire_questions(request, sid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.view_engagement_survey', 'staff')
 def questionnaire(request):
     user = request.user
     surveys = Engagement_Survey.objects.all()
@@ -394,7 +396,7 @@ def questionnaire(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.view_question', 'staff')
 def questions(request):
     questions = Question.objects.all()
     questions = QuestionFilter(request.GET, queryset=questions)
@@ -407,7 +409,7 @@ def questions(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_question', 'staff')
 def create_question(request):
     error = False
     form = CreateQuestionForm()
@@ -477,7 +479,7 @@ def create_question(request):
         'choiceForm': choiceQuestionFrom})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.change_question', 'staff')
 def edit_question(request, qid):
     error = False
 
@@ -485,6 +487,7 @@ def edit_question(request, qid):
     survey = Engagement_Survey.objects.filter(questions__in=[question])
     reverted = False
 
+    answered = []
     if survey:
         answered = Answered_Survey.objects.filter(survey__in=survey)
         if answered.count() > 0:
@@ -538,7 +541,7 @@ def edit_question(request, qid):
         'form': form})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.change_question', 'staff')
 def add_choices(request):
     form = AddChoicesForm()
     if request.method == 'POST':
@@ -564,7 +567,7 @@ def add_choices(request):
 
 
 # Empty questionnaire functions
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_engagement_survey', 'staff')
 def add_empty_questionnaire(request):
     user = request.user
     surveys = Engagement_Survey.objects.all()
@@ -598,7 +601,7 @@ def add_empty_questionnaire(request):
                    'engagement': engagement})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.view_engagement_survey', 'staff')
 def view_empty_survey(request, esid):
     survey = get_object_or_404(Answered_Survey, id=esid)
     engagement = None
@@ -614,7 +617,7 @@ def view_empty_survey(request, esid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.delete_engagement_survey', 'staff')
 def delete_empty_questionnaire(request, esid):
     engagement = None
     survey = get_object_or_404(Answered_Survey, id=esid)
@@ -652,7 +655,7 @@ def delete_empty_questionnaire(request, esid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.delete_engagement_survey', 'staff')
 def delete_general_questionnaire(request, esid):
     engagement = None
     questions = None
