@@ -168,7 +168,3 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
 def update_test_progress(test):
     test.percent_complete = 100
     test.save()
-
-
-def calculate_delta_statistics(new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count):
-    return {}

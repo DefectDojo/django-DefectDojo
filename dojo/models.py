@@ -76,35 +76,24 @@ def _get_statistics_for_queryset(qs, annotation_factory):
     # order by to get rid of default ordering that would mess with group_by
     # group by severity (lowercase)
     values = qs.annotate(sev=Lower('severity')).values('sev').order_by()
-    print(values.query)
-    print(len(values))
+    # add annotation for each status field
     values = values.annotate(**annotation_factory())
-    print(values.query)
-    print(len(values))
+    # make sure sev and total are included
     stat_fields = ['sev', 'total'] + STATS_FIELDS
+    # go for it
     values = values.values(*stat_fields)
-    print(values.query)
-    print(len(values))
 
     # not sure if there's a smarter way to convert a list of dicts into a dict of dicts
+    # need to copy the DEFAULT_STATS otherwise it gets overwritten
     stats = copy.copy(DEFAULT_STATS)
     for row in values:
-        print('row: ', row)
         sev = row.pop('sev')
         stats[sev] = row
 
     values_total = qs.values()
     values_total = values_total.aggregate(**annotation_factory())
     stats['total'] = values_total
-    print('stats: ', stats)
     return stats
-
-
-def _get_annotations_for_delta_statistics():
-    annotations = {import_action.lower(): Count(Case(When(**{import_action: import_action}, then=1))) for import_action in IMPORT_ACTIONS.keys()}
-    # add total
-    annotations['total'] = Count('id')
-    return annotations
 
 
 @deconstructible

@@ -244,11 +244,10 @@ class EngagementViewSet(mixins.ListModelMixin,
         return Engagement
 
     def get_queryset(self):
-        engs = get_authorized_engagements(Permissions.Engagement_View).prefetch_related(
+        return get_authorized_engagements(Permissions.Engagement_View).prefetch_related(
                                                     'notes',
                                                     'risk_acceptance',
                                                     'files').distinct()
-        return engs
 
     @extend_schema(
         request=OpenApiTypes.NONE,
