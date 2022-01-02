@@ -2100,7 +2100,7 @@ class NotesViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'entry', 'author',
                     'private', 'date', 'edited',
                     'edit_time', 'editor')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
 def report_generate(request, obj, options):
