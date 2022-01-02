@@ -551,6 +551,7 @@
                                 <i class="fa fa-list-alt"></i> View API Scan Configurations
                             </a>
                         </li>
+                        {% if system_settings.enable_product_tracking_files %}
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
                             <a class="" href="{% url 'new_object' product_tab.product.id %}">
@@ -562,6 +563,7 @@
                                 <i class="fa fa-list-alt"></i> View Product Tracking Files
                             </a>
                         </li>
+                        {% endif %}
                         {% if system_settings.enable_credentials %}
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
