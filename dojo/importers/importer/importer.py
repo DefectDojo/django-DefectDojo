@@ -1,4 +1,6 @@
 import base64
+
+from django.db.models.query_utils import Q
 from dojo.importers import utils as importer_utils
 from dojo.decorators import dojo_async_task
 from dojo.utils import get_current_user
@@ -179,32 +181,23 @@ class DojoDefaultImporter(object):
         # Would it make more sense to exclude duplicates? But the deduplication process can be unfinished because it's
         # run in a celery async task...
         if test.engagement.deduplication_on_engagement:
-            if service:
-                old_findings = Finding.objects.exclude(test=test) \
-                                                .exclude(hash_code__in=new_hash_codes) \
-                                                .filter(test__engagement=test.engagement,
-                                                    test__test_type=test.test_type,
-                                                    active=True, service=service)
-            else:
-                old_findings = Finding.objects.exclude(test=test) \
-                                                .exclude(hash_code__in=new_hash_codes) \
-                                                .filter(test__engagement=test.engagement,
-                                                    test__test_type=test.test_type,
-                                                    active=True)
+            old_findings = Finding.objects.exclude(test=test) \
+                                            .exclude(hash_code__in=new_hash_codes) \
+                                            .filter(test__engagement=test.engagement,
+                                                test__test_type=test.test_type,
+                                                active=True)
         else:
             # TODO BUG? this will violate the deduplication_on_engagement setting for other engagements
-            if service:
-                old_findings = Finding.objects.exclude(test=test) \
-                                                .exclude(hash_code__in=new_hash_codes) \
-                                                .filter(test__engagement__product=test.engagement.product,
-                                                    test__test_type=test.test_type,
-                                                    active=True, service=service)
-            else:
-                old_findings = Finding.objects.exclude(test=test) \
-                                                .exclude(hash_code__in=new_hash_codes) \
-                                                .filter(test__engagement__product=test.engagement.product,
-                                                    test__test_type=test.test_type,
-                                                    active=True)
+            old_findings = Finding.objects.exclude(test=test) \
+                                            .exclude(hash_code__in=new_hash_codes) \
+                                            .filter(test__engagement__product=test.engagement.product,
+                                                test__test_type=test.test_type,
+                                                active=True)
+
+        if service:
+            old_findings = old_findings.filter(service=service)
+        else:
+            old_findings = old_findings.filter(Q(service=True) | Q(service__exact=''))
 
         for old_finding in old_findings:
             old_finding.active = False
