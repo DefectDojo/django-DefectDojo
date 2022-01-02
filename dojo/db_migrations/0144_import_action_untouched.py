@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0142_environment_delete'),
+        ('dojo', '0143_objects'),
     ]
 
     operations = [
