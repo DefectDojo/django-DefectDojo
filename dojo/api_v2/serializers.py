@@ -7,7 +7,7 @@ from datetime import datetime
 from dojo.endpoint.utils import endpoint_filter
 from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists
-from dojo.models import SEVERITIES, STATS_FIELDS, Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
+from dojo.models import IMPORT_ACTIONS, SEVERITIES, STATS_FIELDS, Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
@@ -98,9 +98,16 @@ class SeverityStatusStatisticsSerializer(serializers.Serializer):
         self.fields['total'] = StatusStatisticsSerializer()
 
 
+class DeltaStatisticsSerializer(serializers.Serializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for action in IMPORT_ACTIONS:
+            self.fields[action[1].lower()] = SeverityStatusStatisticsSerializer()
+
+
 class ImportStatisticsSerializer(serializers.Serializer):
     before = SeverityStatusStatisticsSerializer(required=False)
-    delta = SeverityStatusStatisticsSerializer(required=False)
+    delta = DeltaStatisticsSerializer(required=False)
     after = SeverityStatusStatisticsSerializer()
 
 

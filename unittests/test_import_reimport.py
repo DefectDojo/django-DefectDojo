@@ -1243,6 +1243,200 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         # self.url = reverse(self.viewname + '-list')
 
+    # Statistics only available in API Response
+    # One testcase covering intial import, closing during reimport and reactivating during reimport
+
+    # import 0 and then reimport 1 with zap4 as extra finding, zap1 closed and then reimport 0 again
+    # - active findings count should be 4
+    # - total  findings count should be 5
+    # - zap1 active, zap4 inactive
+    def test_import_0_reimport_1_active_verified_reimport_0_active_verified_statistics(self):
+        logger.debug('reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=True and then 0 again')
+
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        print(import0['statistics'])
+        self.assertEqual(import0['statistics'],
+        {'after': {'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+         'low': {'active': 3, 'verified': 3, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
+         'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+         'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+         'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+         'total': {'active': 4, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}}})
+
+        test_id = import0['test']
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        finding_count_before = self.db_finding_count()
+        endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
+        endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
+        notes_count_before = self.db_notes_count()
+
+        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
+
+        print(reimport1['statistics'])
+        self.assertEqual(reimport1['statistics'],
+        {
+            'before': {
+                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'low': {'active': 3, 'verified': 3, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
+                    'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'total': {'active': 4, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
+            },
+            'delta': {
+                'created': {
+                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'low': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'total': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1}
+                },
+                'closed': {
+                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'low': {'active': 0, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 1},
+                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'total': {'active': 0, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 1}
+                },
+                'reactivated': {
+                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'low': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'total': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0}
+                },
+                'left untouched': {
+                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0}, 'low': {'active': 2, 'verified': 2, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 2},
+                    'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'total': {'active': 3, 'verified': 3, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3}
+                }
+            },
+            'after': {
+                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'low': {'active': 3, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
+                'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'total': {'active': 4, 'verified': 5, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
+            }
+        })
+
+        # zap1 should be closed 2 endpoint statuses less, but 2 extra for zap4
+        self.assertEqual(endpoint_status_count_before_active - 3 + 2, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated + 2, self.db_endpoint_status_count(mitigated=True))
+
+        endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
+        endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
+
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=5, closed=1, reactivated=1, untouched=3):
+            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+
+        print(reimport0['statistics'])
+        self.maxDiff = None
+        self.assertEqual(reimport0['statistics'],
+        {
+            'before': {
+                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'low': {'active': 3, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
+                    'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'total': {'active': 4, 'verified': 5, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
+            },
+            'delta': {
+                'created': {
+                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'low': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'total': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0}
+                },
+                'closed': {
+                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'low': {'active': 0, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 1},
+                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'total': {'active': 0, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 1}
+                },
+                'reactivated': {
+                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'low': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'total': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1}
+                },
+                'left untouched': {
+                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'low': {'active': 2, 'verified': 2, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 2},
+                    'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                    'total': {'active': 3, 'verified': 3, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3}
+                }
+            },
+            'after': {
+                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'low': {'active': 3, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
+                'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'total': {'active': 4, 'verified': 5, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
+            }
+        })
+
+        test_id = reimport1['test']
+        self.assertEqual(test_id, test_id)
+
+        test = self.get_test_api(test_id)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # active findings must be equal to those in both reports
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(4 + 1, findings)
+
+        zap1_ok = False
+        zap4_ok = False
+        for finding in findings['results']:
+            if 'Zap1' in finding['title']:
+                self.assertTrue(finding['active'])
+                zap1_ok = True
+            if 'Zap4' in finding['title']:
+                self.assertFalse(finding['active'])
+                zap4_ok = True
+
+        self.assertTrue(zap1_ok)
+        self.assertTrue(zap4_ok)
+
+        # verified findings must be equal to those in report 0
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(4 + 1, findings)
+
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
+
+        self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+
+        # zap4 should be closed again so 2 mitigated eps, zap1 should be open again so 3 active extra
+        self.assertEqual(endpoint_status_count_before_active + 3 - 2, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated - 3 + 2, self.db_endpoint_status_count(mitigated=True))
+
+        # zap1 was closed and then opened -> 2 notes
+        # zap4 was created and then closed -> only 1 note
+        self.assertEqual(notes_count_before + 2 + 1, self.db_notes_count())
+
     # Reimport tests to test Scan_Date logic (usecase not supported on UI)
 
     # reimport zap scan without dates (non existing test, so import is called inside DD)

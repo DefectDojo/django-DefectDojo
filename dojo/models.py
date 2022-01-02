@@ -3,10 +3,10 @@ import hashlib
 import logging
 import os
 import re
+import copy
 from typing import Dict, Set, Optional
 from uuid import uuid4
 from django.conf import settings
-
 from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
@@ -76,22 +76,27 @@ def _get_statistics_for_queryset(qs, annotation_factory):
     # order by to get rid of default ordering that would mess with group_by
     # group by severity (lowercase)
     values = qs.annotate(sev=Lower('severity')).values('sev').order_by()
+    print(values.query)
+    print(len(values))
     values = values.annotate(**annotation_factory())
-
+    print(values.query)
+    print(len(values))
     stat_fields = ['sev', 'total'] + STATS_FIELDS
     values = values.values(*stat_fields)
+    print(values.query)
+    print(len(values))
 
     # not sure if there's a smarter way to convert a list of dicts into a dict of dicts
-    stats = DEFAULT_STATS
+    stats = copy.copy(DEFAULT_STATS)
     for row in values:
-        print(row)
+        print('row: ', row)
         sev = row.pop('sev')
         stats[sev] = row
 
     values_total = qs.values()
     values_total = values_total.aggregate(**annotation_factory())
     stats['total'] = values_total
-    print(stats)
+    print('stats: ', stats)
     return stats
 
 
@@ -1650,10 +1655,8 @@ class Test_Import(TimeStampedModel):
     def statistics(self):
         """ Queries the database, no prefetching, so could be slow for lists of model instances """
         stats = {}
-        # stats['created'] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=IMPORT_CREATED_FINDING), _get_annotations_for_test_import_statistics)
-        # stats['closed'] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=IMPORT_CLOSED_FINDING), _get_annotations_for_test_import_statistics))
-        # stats['reactivated'] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=IMPORT_REACTIVATED_FINDING), _get_annotations_for_test_import_statistics))
-        # stats['untouched'] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=IMPORT_UNTOUCHED_FINDING), _get_annotations_for_test_import_statistics))
+        for action in IMPORT_ACTIONS:
+            stats[action[1].lower()] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=action[0]), _get_annotations_for_statistics)
         return stats
 
 
