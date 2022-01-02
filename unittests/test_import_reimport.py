@@ -375,7 +375,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
-        with assertTestImportModelsCreated(self, reimports=1):
+        with assertTestImportModelsCreated(self, reimports=1, untouched=4):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         test_id = reimport0['test']
@@ -413,7 +413,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
-        with assertTestImportModelsCreated(self, reimports=1):
+        with assertTestImportModelsCreated(self, reimports=1, untouched=4):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename, verified=False)
 
         test_id = reimport0['test']
@@ -454,7 +454,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
-        with assertTestImportModelsCreated(self, reimports=1):
+        with assertTestImportModelsCreated(self, reimports=1, untouched=6):
             reimportsonar1 = self.reimport_scan_with_params(test_id, self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, verified=False)
 
         test_id = reimportsonar1['test']
@@ -489,7 +489,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
-        with assertTestImportModelsCreated(self, reimports=1):
+        with assertTestImportModelsCreated(self, reimports=1, untouched=4):
             reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_many_findings, scan_type=self.scan_type_veracode, verified=False)
 
         test_id = reimport_veracode_many_findings['test']
@@ -524,7 +524,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport other report
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1, untouched=5):
             reimportsonar1 = self.reimport_scan_with_params(test_id, self.sonarqube_file_name2, scan_type=self.scan_type_sonarqube_detailed, verified=False)
 
         test_id = reimportsonar1['test']
@@ -564,7 +564,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport
-        with assertTestImportModelsCreated(self, reimports=1):
+        with assertTestImportModelsCreated(self, reimports=1, untouched=4):
             reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_same_hash_code_different_unique_id, scan_type=self.scan_type_veracode, verified=False)
 
         test_id = reimport_veracode_many_findings['test']
@@ -598,7 +598,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport
-        with assertTestImportModelsCreated(self, reimports=1):
+        with assertTestImportModelsCreated(self, reimports=1, untouched=4):
             reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_same_unique_id_different_hash_code, scan_type=self.scan_type_veracode, verified=False)
 
         test_id = reimport_veracode_many_findings['test']
@@ -633,7 +633,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1, untouched=3):
             reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_different_hash_code_different_unique_id, scan_type=self.scan_type_veracode, verified=False)
 
         test_id = reimport_veracode_many_findings['test']
@@ -675,7 +675,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport updated report
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1, untouched=3):
             reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename, verified=False)
 
         test_id = reimport1['test']
@@ -736,7 +736,7 @@ class ImportReimportMixin(object):
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
 
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1, untouched=3):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         test_id = reimport1['test']
@@ -798,7 +798,7 @@ class ImportReimportMixin(object):
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
         notes_count_before = self.db_notes_count()
 
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, untouched=4):
             reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
 
         test_id = reimport2['test']
@@ -832,7 +832,7 @@ class ImportReimportMixin(object):
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, untouched=4):
             reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
 
         test_id = reimport2['test']
@@ -889,7 +889,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport updated report
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=4, created=2, closed=2):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=4, created=2, closed=2, untouched=2):
             reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample3_filename)
 
         test_id = reimport1['test']
@@ -943,7 +943,7 @@ class ImportReimportMixin(object):
         findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(4, findings)
 
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1, untouched=3):
             reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename, close_old_findings=False)
 
         test_id = reimport1['test']
@@ -988,7 +988,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, untouched=4):
             reimport0 = self.reimport_scan_with_params(test_id, self.anchore_file_name, scan_type=self.scan_type_anchore)
 
         active_findings_after = self.get_test_findings_api(test_id, active=True)
@@ -1117,7 +1117,7 @@ class ImportReimportMixin(object):
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(6, active_findings_before)
 
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0, untouched=6):
             reimport0 = self.reimport_scan_with_params(test_id,
                                                        self.gitlab_dep_scan_components_filename,
                                                        scan_type=self.scan_type_gtlab_dep_scan,
@@ -1300,7 +1300,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
 
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=5, closed=1, reactivated=1, untouched=3):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1, untouched=3):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         print(reimport0['statistics'])
