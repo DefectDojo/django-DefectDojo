@@ -81,6 +81,8 @@ class ImportReimportMixin(object):
         self.clair_empty = self.scans_path + 'clair/empty.json'
         self.scan_type_clair = 'Clair Scan'
 
+        self.generic_filename_with_file = self.scans_path + "generic/test_with_image.json"
+
         self.aws_prowler_file_name = self.scans_path + 'aws_prowler/many_vuln.json'
         self.aws_prowler_file_name_plus_one = self.scans_path + 'aws_prowler/many_vuln_plus_one.json'
         self.scan_type_aws_prowler = 'AWS Prowler Scan'
@@ -1187,6 +1189,35 @@ class ImportReimportMixin(object):
         # all findings from import0 should be closed now
         engagement_findings_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False).count()
         self.assertEqual(engagement_findings_count, 0)
+
+    def test_import_reimport_generic(self):
+        """This test do a basic import and re-import of a generic JSON report
+
+        This test is useful because some features are only activated in generic JSON format
+        """
+
+        import0 = self.import_scan_with_params(self.generic_filename_with_file, scan_type="Generic Findings Import")
+
+        test_id = import0['test']
+
+        # reimport exact same report
+        with assertTestImportModelsCreated(self, reimports=1):
+            reimport0 = self.reimport_scan_with_params(test_id, self.generic_filename_with_file, scan_type="Generic Findings Import")
+
+        test_id2 = reimport0['test']
+        self.assertEqual(test_id, test_id2)
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # reimported count must match count in xml report
+        # we set verified=False in this reimport, but currently DD does not update this flag, so it's still True from previous import
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(1, findings)
+
+        # inversely, we should see no findings with verified=False
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
 
 
 @override_settings(TRACK_IMPORT_HISTORY=True)

@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from dojo.models import Product, Objects_Product, Objects_Engagement, Engagement
+from dojo.models import Product, Objects_Product
 from dojo.forms import ObjectSettingsForm, DeleteObjectsSettingsForm
 from dojo.utils import Product_Tab
 
@@ -97,19 +97,4 @@ def delete_object(request, pid, ttid):
                   {
                       'tform': tform,
                       'product_tab': product_tab
-                  })
-
-
-@user_passes_test(lambda u: u.is_staff)
-def view_object_eng(request, id):
-    object_queryset = Objects_Engagement.objects.filter(engagement=id).order_by('object_id__path', 'object_id__folder', 'object_id__artifact')
-    engagement = Engagement.objects.get(id=id)
-    product_tab = Product_Tab(engagement.product.id, title="Tracked Files, Folders and Artifacts on a Product", tab="engagements")
-    product_tab.setEngagement(engagement)
-    return render(request,
-                  'dojo/view_objects_eng.html',
-                  {
-                      'object_queryset': object_queryset,
-                      'product_tab': product_tab,
-                      'id': id
                   })

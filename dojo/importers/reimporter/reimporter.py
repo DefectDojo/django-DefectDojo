@@ -194,12 +194,12 @@ class DojoDefaultReImporter(object):
                     for unsaved_file in item.unsaved_files:
                         data = base64.b64decode(unsaved_file.get('data'))
                         title = unsaved_file.get('title', '<No title>')
-                        file_upload = FileUpload(
+                        file_upload, file_upload_created = FileUpload.objects.get_or_create(
                             title=title,
-                            file=ContentFile(data, name=title)
                         )
+                        file_upload.file.save(title, ContentFile(data))
                         file_upload.save()
-                        item.files.add(file_upload)
+                        finding.files.add(file_upload)
 
                 # existing findings may be from before we had component_name/version fields
                 finding.component_name = finding.component_name if finding.component_name else component_name
