@@ -1473,7 +1473,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 logger.debug('reimport for non-existing test, using import to create new test')
                 engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context)
                 importer = Importer()
-                test, finding_count, closed_finding_count, test_import = importer.import_scan(scan, scan_type, engagement, lead, environment,
+                test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, lead, environment,
                                                                                                 active=active, verified=verified, tags=tags,
                                                                                                 minimum_severity=minimum_severity,
                                                                                                 endpoints_to_add=endpoints_to_add,

@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from drf_spectacular.drainage import GENERATOR_STATS
 # from drf_spectacular.renderers import OpenApiJsonRenderer
-from unittest.mock import call, patch, ANY
+from unittest.mock import MagicMock, call, patch, ANY
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
@@ -51,6 +51,9 @@ TYPE_INTEGER = "integer"  #:
 TYPE_BOOLEAN = "boolean"  #:
 TYPE_ARRAY = "array"  #:
 TYPE_FILE = "file"  #:
+
+IMPORTER_MOCK_RETURN_VALUE = None, 0, 0, None
+REIMPORTER_MOCK_RETURN_VALUE = None, 0, 0, 0, 0, 0, MagicMock()
 
 
 def get_open_api3_json_schema():
@@ -1345,8 +1348,8 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1374,8 +1377,8 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1404,8 +1407,8 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1435,8 +1438,8 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1468,8 +1471,8 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         Test creating a new engagement should also check for import scan permission in the product
         """
         mock.return_value = True
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1503,8 +1506,8 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1534,8 +1537,8 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1575,8 +1578,8 @@ class ReimportScanTest(DojoAPITestCase):
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
     @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
     def test_reimport_zap_xml(self, importer_mock, reimporter_mock):
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         length = Test.objects.all().count()
         response = self.client.post(
@@ -1600,8 +1603,8 @@ class ReimportScanTest(DojoAPITestCase):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1629,8 +1632,8 @@ class ReimportScanTest(DojoAPITestCase):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_scan_type_title_auto_create(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1661,8 +1664,8 @@ class ReimportScanTest(DojoAPITestCase):
         Test creating a new engagement should also check for import scan permission in the product
         """
         mock.return_value = True
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1696,8 +1699,8 @@ class ReimportScanTest(DojoAPITestCase):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1727,8 +1730,8 @@ class ReimportScanTest(DojoAPITestCase):
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1757,8 +1760,8 @@ class ReimportScanTest(DojoAPITestCase):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_test_id(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
                 "minimum_severity": 'Low',
@@ -1784,8 +1787,8 @@ class ReimportScanTest(DojoAPITestCase):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1814,8 +1817,8 @@ class ReimportScanTest(DojoAPITestCase):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1845,8 +1848,8 @@ class ReimportScanTest(DojoAPITestCase):
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1875,8 +1878,8 @@ class ReimportScanTest(DojoAPITestCase):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_scan_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
@@ -1902,8 +1905,8 @@ class ReimportScanTest(DojoAPITestCase):
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_scan_type_title(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
-        importer_mock.return_value = None, 0, 0
-        reimporter_mock.return_value = None, 0, 0, 0, 0, 0
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
         payload = {
             "minimum_severity": 'Low',
