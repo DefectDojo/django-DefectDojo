@@ -45,7 +45,7 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
 def update_import_history(type, active, verified, tags, minimum_severity, endpoints_to_add, version, branch_tag,
                             build_id, commit_hash, push_to_jira, close_old_findings, test,
                             new_findings=[], closed_findings=[], reactivated_findings=[], untouched_findings=[]):
-    logger.debug("new: %d closed: %d reactivated: %d", len(new_findings), len(closed_findings), len(reactivated_findings))
+    logger.debug("new: %d closed: %d reactivated: %d untouched: %d", len(new_findings), len(closed_findings), len(reactivated_findings), len(untouched_findings))
     # json field
     import_settings = {}
     import_settings['active'] = active
@@ -64,16 +64,16 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
 
     test_import_finding_action_list = []
     for finding in closed_findings:
-        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+        logger.debug('preparing Test_Import_Finding_Action for closed finding: %i', finding.id)
         test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
     for finding in new_findings:
-        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+        logger.debug('preparing Test_Import_Finding_Action for created finding: %i', finding.id)
         test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
     for finding in reactivated_findings:
-        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+        logger.debug('preparing Test_Import_Finding_Action for reactivated finding: %i', finding.id)
         test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_REACTIVATED_FINDING))
     for finding in untouched_findings:
-        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+        logger.debug('preparing Test_Import_Finding_Action for untouched finding: %i', finding.id)
         test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_UNTOUCHED_FINDING))
 
     Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)

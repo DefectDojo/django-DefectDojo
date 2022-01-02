@@ -213,7 +213,13 @@ class DojoDefaultReImporter(object):
                     finding.save(push_to_jira=push_to_jira)
 
         to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
-        untouched = set(unchanged_items) - set(to_mitigate)
+        # due to #3958 we can have duplicates inside the same report
+        # this could mean that a new finding is created and right after
+        # that it is detected as the 'matched existing finding' for a
+        # following finding in the same report
+        # this means untouched can have this finding inside it,
+        # while it is in fact a new finding. So we substract new_items
+        untouched = set(unchanged_items) - set(to_mitigate) - set(new_items)
 
         if settings.FEATURE_FINDING_GROUPS and push_to_jira:
             for finding_group in set([finding.finding_group for finding in reactivated_items + unchanged_items + new_items if finding.finding_group is not None]):
