@@ -1201,7 +1201,7 @@ class ImportReimportMixin(object):
         test_id = import0['test']
 
         # reimport exact same report
-        with assertTestImportModelsCreated(self, reimports=1):
+        with assertTestImportModelsCreated(self, reimports=1, untouched=1):
             reimport0 = self.reimport_scan_with_params(test_id, self.generic_filename_with_file, scan_type="Generic Findings Import")
 
         test_id2 = reimport0['test']
