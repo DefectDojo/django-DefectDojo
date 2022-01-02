@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created', django_extensions.db.fields.CreationDateTimeField(auto_now_add=True, verbose_name='created')),
                 ('modified', django_extensions.db.fields.ModificationDateTimeField(auto_now=True, verbose_name='modified')),
-                ('action', models.CharField(blank=True, choices=[('N', 'created'), ('C', 'closed'), ('R', 'reactivated'), ('U', 'updated')], max_length=100, null=True)),
+                ('action', models.CharField(blank=True, choices=[('N', 'created'), ('C', 'closed'), ('R', 'reactivated'), ('U', 'left untouched')], max_length=100, null=True)),
                 ('finding', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, to='dojo.Finding')),
                 ('test_import', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, to='dojo.Test_Import')),
             ],
