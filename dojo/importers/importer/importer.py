@@ -197,7 +197,7 @@ class DojoDefaultImporter(object):
         if service:
             old_findings = old_findings.filter(service=service)
         else:
-            old_findings = old_findings.filter(Q(service=True) | Q(service__exact=''))
+            old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=''))
 
         for old_finding in old_findings:
             old_finding.active = False
