@@ -206,6 +206,7 @@ def get_roles_with_permissions():
             Permissions.Finding_Group_View,
             Permissions.Endpoint_View,
             Permissions.Component_View,
+            Permissions.Note_Add,
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
             Permissions.Group_View,
