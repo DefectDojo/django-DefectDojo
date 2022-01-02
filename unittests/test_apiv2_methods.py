@@ -16,7 +16,7 @@ class ApiEndpointMethods(DojoTestCase):
     def test_is_defined(self):
 
         for reg, _, _ in sorted(self.registry):
-            if reg in ['import-scan', 'reimport-scan', 'notes', 'system_settings', 'users', 'roles', 'import-languages', 'endpoint_meta_import']:
+            if reg in ['import-scan', 'reimport-scan', 'notes', 'system_settings', 'users', 'roles', 'import-languages', 'endpoint_meta_import', 'test_types']:
                 continue
 
             for method in ['get', 'post']:

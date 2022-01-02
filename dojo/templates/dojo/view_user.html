@@ -397,7 +397,7 @@
                     </tr>
                     {% for field in configuration_permission_form.permission_fields %}
                     <tr>
-                        <td><strong>{{ field.name|title }}</strong></td>
+                        <td><strong>{{ field.display_name }}</strong></td>
                         <td class="centered">
                             {% if field.view_codename %}
                             <input id="id_{{ field.view_codename }}" 
