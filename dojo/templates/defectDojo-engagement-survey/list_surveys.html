@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load authorization_tags %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -21,9 +22,13 @@
                         <tbody>
                         {% for survey in surveys %}
                             <tr>
-                                <td><a title="{{ survey.name }}"
-                                                      href="{% url 'edit_questionnaire' survey.id %}">{{ survey.name }}</a>
-                                </td>
+                                <td>
+                                    {% if "dojo.change_engagement_survey"|has_configuration_permission:"staff" %}
+                                    <a title="{{ survey.name }}" href="{% url 'edit_questionnaire' survey.id %}">{{ survey.name }}</a>
+                                    {% else %}
+                                    {{ survey.name }}
+                                    {% endif %}
+                                    </td>
                                 <td class="nowrap">{{ survey.questions.all|length }}</td>
                                 <td>{{ survey.active }}</td>
                             </tr>
@@ -40,8 +45,10 @@
         
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    General Engagement Questionnaires
+                    General Questionnaires
+                    {% if "dojo.add_engagement_survey"|has_configuration_permission:"staff" %}
                     <a title="Add Questionnaire" class="pull-right btn btn-sm btn-primary" href="/empty_questionnaire"><span class="fa fa-plus"></span></a>
+                    {% endif %}
                 </div>
                 <div class="panel-body">
                     {% if general %}
@@ -63,14 +70,16 @@
                                     <td>{{ survey.expiration }}</td> 
                                     <td>
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
+                                            <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal"
                                                     data-target="#shareQuestionnaireModal"
                                                     data-whatever="/empty_questionnaire/{{ survey.id }}/answer">
                                                 <i class="fa fa-share-alt"></i> Share Questionnaire
                                             </button>
+                                            {% if "dojo.delete_engagement_survey"|has_configuration_permission:"staff" %}
                                             <a class="btn btn-sm btn-danger"
                                                 href="general_questionnaire/{{ survey.id }}/delete"> Delete
                                             Questionnaire </a>
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </tr>
@@ -88,10 +97,10 @@
         <div class="col-md-2">
             <div class="panel panel-default filters">
                 {% if filtered.form %}
-                    {% if request.user.is_staff %}
+                {% if "dojo.add_engagement_survey"|has_configuration_permission:"staff" %}
                         <div class="panel-heading">Actions</div>
                         <div class="panel-body centered">
-                            <a class="btn btn-sm btn-primary" href="{% url 'create_questionnaire' %}">
+                            <a class="btn btn-sm btn-secondary" href="{% url 'create_questionnaire' %}">
                                 Create Questionnaire
                             </a>
                         </div>
@@ -100,7 +109,7 @@
                     <form method="get" class="panel-body">
                         {{ filtered.form.as_p }}
                         <div class="centered">
-                            <input type="submit" class="btn btn-primary inline top" label="submit" value="Apply"/><br/><br/>
+                            <input type="submit" class="btn btn-secondary inline top" label="submit" value="Apply"/><br/><br/>
                             <a href="{% url 'questionnaire' %}"> [Clear Filters] </a>
                         </div>
                     </form>
