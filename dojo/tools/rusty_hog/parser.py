@@ -31,14 +31,14 @@ class RustyhogParser(object):
 
     def get_items(self, json_output, scanner, test):
         items = {}
-        findings = self.__getitem(vulnerabilities=json.load(json_output), scanner=scanner)
+        findings = self.__getitem(vulnerabilities=self.parse_json(json_output), scanner=scanner)
         for finding in findings:
             unique_key = "Finding {}".format(finding)
             items[unique_key] = finding
         return list(items.values())
 
     def get_tests(self, scan_type, handle):
-        tree = json.load(handle)
+        tree = self.parse_json(handle)
         tests = list()
         parsername = "Rusty Hog"
         for node in tree:
@@ -121,5 +121,7 @@ class RustyhogParser(object):
                 dynamic_finding=False
             )
             finding.description = finding.description.strip()
+            if scanner == "Choctaw Hog":
+                finding.line = int(vulnerability.get('new_line_num'))
             findings.append(finding)
         return findings
