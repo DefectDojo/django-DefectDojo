@@ -15,8 +15,7 @@ class RustyhogParser(object):
         return "Rusty Hog Scan - JSON Report"
 
     def get_findings(self, json_output, test):
-        tree = json.load(json_output)
-        return self.get_items(tree, test)
+        return self.get_items(json_output, test)
 
     def parse_json(self, json_output):
         try:
@@ -29,15 +28,15 @@ class RustyhogParser(object):
             raise Exception("Invalid format")
         return tree
 
-    def get_items(self, tree, test):
+    def get_findings(self, json_output, scanner, test):
         items = {}
-        for node in tree:
-            item = self.get_item(node, test)
-            unique_key = "Finding {}".format(tree.index(node))
-            items[unique_key] = item
+        findings = self.__getitem(vulnerabilities = json.load(json_output), scanner = scanner)
+        for finding in findings:
+            unique_key = "Finding {}".format(finding)
+            items[unique_key] = finding
         return list(items.values())
 
-    def get_tests(self, handle):
+    def get_tests(self, scan_type, handle):
         tree = json.load(handle)
         tests = list()
         parsername = "Rusty Hog"
@@ -53,7 +52,7 @@ class RustyhogParser(object):
             type=parsername,
             version="",
         )
-        if parsername == "Rusty Hog":
+        if parsername == "Rusty Hog": # The outputfile is empty. A subscanner can't be classified
             test.description = "The exact scanner within Rusty Hog could not be determined due to missing information within the scan result."
         else:
             test.description = parsername
