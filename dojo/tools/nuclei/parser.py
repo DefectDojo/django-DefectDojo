@@ -8,7 +8,7 @@ class NucleiParser(object):
     A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file
     """
 
-    def get_scan_types(self): 
+    def get_scan_types(self):
         return ["Nuclei Scan"]
 
     def get_label_for_scan_types(self, scan_type):
@@ -42,7 +42,7 @@ class NucleiParser(object):
                     nb_occurences=1,
                     vuln_id_from_tool=template_id,
                 )
-               
+
                 if info.get('description'):
                     finding.description = info.get('description')
                 if info.get('tags'):
