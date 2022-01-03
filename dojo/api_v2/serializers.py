@@ -107,9 +107,9 @@ class DeltaStatisticsSerializer(serializers.Serializer):
 
 
 class ImportStatisticsSerializer(serializers.Serializer):
-    before = SeverityStatusStatisticsSerializer(required=False)
-    delta = DeltaStatisticsSerializer(required=False)
-    after = SeverityStatusStatisticsSerializer()
+    before = SeverityStatusStatisticsSerializer(required=False, help_text="Finding statistics as stored in Defect Dojo before the import")
+    delta = DeltaStatisticsSerializer(required=False, help_text="Finding statistics of modifications made by the reimport. Only available when TRACK_IMPORT_HISTORY hass not disabled.")
+    after = SeverityStatusStatisticsSerializer(help_text="Finding statistics as stored in Defect Dojo after the import")
 
 
 @extend_schema_field(serializers.ListField(child=serializers.CharField()))  # also takes basic python types
@@ -1467,7 +1467,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                                 group_by=group_by, api_scan_configuration=api_scan_configuration,
                                                 service=service)
 
-                statistics_delta = test_import.statistics
+                if test_import:
+                    statistics_delta = test_import.statistics
             elif auto_create_context:
                 # perform Import to create test
                 logger.debug('reimport for non-existing test, using import to create new test')

@@ -1,7 +1,6 @@
 from unittest.mock import patch
 import uuid
 from .dojo_test_case import DojoTestCase, get_unit_tests_path
-from django.test.utils import override_settings
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -157,7 +156,6 @@ class TestDojoDefaultImporter(DojoTestCase):
         self.assertEqual(0, len_closed_findings)
 
 
-@override_settings(TRACK_IMPORT_HISTORY=True)
 class FlexibleImportTestAPI(DojoAPITestCase):
     def __init__(self, *args, **kwargs):
         # TODO remove __init__ if it does nothing...
@@ -328,7 +326,6 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.assertEqual(import0, ['product_name parameter missing'])
 
 
-@override_settings(TRACK_IMPORT_HISTORY=True)
 class FlexibleReimportTestAPI(DojoAPITestCase):
     def __init__(self, *args, **kwargs):
         # TODO remove __init__ if it does nothing...
