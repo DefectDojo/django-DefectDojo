@@ -1230,7 +1230,9 @@ class ImportScanSerializer(serializers.Serializer):
         default=None,
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
-    close_old_findings = serializers.BooleanField(required=False, default=False)
+    close_old_findings = serializers.BooleanField(required=False, default=False,
+        help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
+                  "If service has been set, only the findings for this service will be closed.")
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
     version = serializers.CharField(required=False)
@@ -1239,7 +1241,10 @@ class ImportScanSerializer(serializers.Serializer):
     commit_hash = serializers.CharField(required=False)
     api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Product_API_Scan_Configuration.objects.all())
-    service = serializers.CharField(required=False)
+    service = serializers.CharField(required=False,
+        help_text="A service is a self-contained piece of functionality within a Product. "
+                  "This is an optional field which is used in deduplication and closing of old findings when set. "
+                  "This affects the whole engagement/product depending on your deduplication scope.")
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
@@ -1366,7 +1371,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     commit_hash = serializers.CharField(required=False)
     api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Product_API_Scan_Configuration.objects.all())
-    service = serializers.CharField(required=False)
+    service = serializers.CharField(required=False,
+        help_text="A service is a self-contained piece of functionality within a Product. "
+                  "This is an optional field which is used in deduplication and closing of old findings when set. "
+                  "This affects the whole engagement/product depending on your deduplication scope.")
     environment = serializers.CharField(required=False)
     lead = serializers.PrimaryKeyRelatedField(
         allow_null=True,
