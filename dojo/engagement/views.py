@@ -641,7 +641,7 @@ def import_scan_results(request, eid=None, pid=None):
 
             if not error:
                 return HttpResponseRedirect(
-                    reverse('product_open_findings', args=(pid, ))) 
+                    reverse('product_open_findings', args=(pid, )))
 
     prod_id = None
     custom_breadcrumb = None
