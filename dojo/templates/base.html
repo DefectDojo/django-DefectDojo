@@ -204,7 +204,7 @@
                                 </a>
                                 <ul class="nav nav-second-level">
                                     <li><a href="{% url 'product' %}"> All Products</a></li>
-                                    {% if request.user.is_staff %}
+                                    {% if request.user|can_add_product %}
                                         <li><a href="{% url 'new_product' %}"> Add Product</a></li>
                                     {% endif %}
                                     <li><a href="{% url 'product_type' %}">All Product Types</a></li>
