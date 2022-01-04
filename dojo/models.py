@@ -10,6 +10,7 @@ from django.conf import settings
 from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.urls import reverse
 from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
@@ -181,6 +182,7 @@ class Dojo_Group(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
+    auth_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -368,7 +370,6 @@ class System_Settings(models.Model):
                                   help_text="Include this custom disclaimer on all notifications and generated reports")
     column_widths = models.TextField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
-    enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
     email_address = models.EmailField(max_length=100, blank=True)
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text="Default expiry period for risk acceptance form.")
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
@@ -393,6 +394,26 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name='Enable Endpoint Metadata Import',
         help_text="With this setting turned off, endpoint metadata import will be disabled in the user interface.")
+    enable_google_sheets = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name='Enable Google Sheets Integration',
+        help_text="With this setting turned off, the Google sheets integration will be disabled in the user interface.")
+    enable_rules_framework = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name='Enable Rules Framework',
+        help_text="With this setting turned off, the rules framwork will be disabled in the user interface.")
+    enable_user_profile_editable = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable user profile for writing',
+        help_text="When turned on users can edit their profiles")
+    enable_product_tracking_files = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable Product Tracking Files',
+        help_text="With this setting turned off, the product tracking files will be disabled in the user interface.")
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
@@ -1476,7 +1497,7 @@ class Test(models.Model):
                                    editable=False)
     files = models.ManyToManyField(FileUpload, blank=True, editable=False)
     environment = models.ForeignKey(Development_Environment, null=True,
-                                    blank=False, on_delete=models.CASCADE)
+                                    blank=False, on_delete=models.RESTRICT)
 
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
@@ -3123,7 +3144,7 @@ class Cred_User(models.Model):
                                            null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
     url = models.URLField(max_length=2000, null=False)
-    environment = models.ForeignKey(Development_Environment, null=False, on_delete=models.CASCADE)
+    environment = models.ForeignKey(Development_Environment, null=False, on_delete=models.RESTRICT)
     login_regex = models.CharField(max_length=200, null=True, blank=True)
     logout_regex = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
@@ -3233,27 +3254,6 @@ class Objects_Product(models.Model):
             name = self.artifact
 
         return name
-
-
-class Objects_Engagement(models.Model):
-    engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE)
-    object_id = models.ForeignKey(Objects_Product, on_delete=models.CASCADE)
-    build_id = models.CharField(max_length=150, null=True, blank=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    full_url = models.URLField(max_length=400, null=True, blank=True)
-    type = models.CharField(max_length=30, null=True, blank=True)
-    percentUnchanged = models.CharField(max_length=10, null=True, blank=True)
-
-    def __str__(self):
-        data = ""
-        if self.object_id.path:
-            data = self.object_id.path
-        elif self.object_id.folder:
-            data = self.object_id.folder
-        elif self.object_id.artifact:
-            data = self.object_id.artifact
-
-        return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
 
 
 class Testing_Guide_Category(models.Model):
@@ -3670,7 +3670,6 @@ admin.site.register(Engagement_Presets)
 admin.site.register(Network_Locations)
 admin.site.register(Objects_Product)
 admin.site.register(Objects_Review)
-admin.site.register(Objects_Engagement)
 admin.site.register(Languages)
 admin.site.register(Language_Type)
 admin.site.register(App_Analysis)

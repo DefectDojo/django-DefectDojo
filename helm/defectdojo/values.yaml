@@ -63,7 +63,7 @@ monitoring:
   # Add the nginx prometheus exporter sidecar
   prometheus:
     enabled: false
-    image: nginx/nginx-prometheus-exporter:0.9.0
+    image: nginx/nginx-prometheus-exporter:0.10.0
     imagePullPolicy: IfNotPresent
 
 annotations: {}
@@ -188,7 +188,7 @@ django:
     app_settings:
       processes: 2
       threads: 2
-    enable_debugpy: false  # this also requires DD_DEBUG to be set to True
+    enable_debug: false  # this also requires DD_DEBUG to be set to True
     certificates:
     # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
     # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
@@ -328,7 +328,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.27.0
+    tag: 1.27.1
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
@@ -355,6 +355,7 @@ rabbitmq:
     password: ""
     erlangCookie: ""
     existingPasswordSecret: defectdojo-rabbitmq-specific
+    secretPasswordKey: ""
     existingErlangSecret: defectdojo-rabbitmq-specific
   memoryHighWatermark:
     enabled: true

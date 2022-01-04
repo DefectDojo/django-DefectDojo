@@ -14,13 +14,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def update_timestamps(test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time):
+def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date):
+    if not scan_date:
+        scan_date = now
+
     test.engagement.updated = now
     if test.engagement.engagement_type == 'CI/CD':
-        test.engagement.target_end = max_safe([scan_date_time.date(), test.engagement.target_end])
+        test.engagement.target_end = max_safe([scan_date.date(), test.engagement.target_end])
 
     test.updated = now
-    test.target_end = max_safe([scan_date_time, test.target_end])
+    test.target_end = max_safe([scan_date, test.target_end])
 
     if version:
         test.version = version
@@ -142,7 +145,8 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
         try:
             eps, created = Endpoint_Status.objects.get_or_create(
                 finding=finding,
-                endpoint=ep)
+                endpoint=ep,
+                date=finding.date)
         except (MultipleObjectsReturned):
             pass
 

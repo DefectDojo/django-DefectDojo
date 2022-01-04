@@ -1,11 +1,8 @@
-__author__ = 'aaronweaver'
 
 import logging
-import ntpath
 
 from dateutil import parser
 from defusedxml import ElementTree
-
 from dojo.models import Finding
 from dojo.utils import add_language
 
@@ -45,21 +42,12 @@ class CheckmarxParser(object):
     def set_mode(self, mode):
         self.mode = mode
 
-    # FIXME get rid of local variables
-    language_list = []
-    mitigation = 'N/A'
-    impact = 'N/A'
-    references = ''
-
     def get_findings(self, filename, test):
         cxscan = ElementTree.parse(filename)
-        self.test = test
         root = cxscan.getroot()
 
-        # Dictonary to hold the aggregated findings with:
-        #  - key: the concatenated aggregate keys
-        #  - value: the finding
         dupes = dict()
+        language_list = dict()
         for query in root.findall('Query'):
             name, cwe, categories, queryId = self.getQueryElements(query)
             language = ''
@@ -79,8 +67,10 @@ class CheckmarxParser(object):
 
                 if language is not None:
                     findingdetail = "{}**Language:** {}\n".format(findingdetail, language)
-                    if language not in self.language_list:
-                        self.language_list.append(language)
+                    if language not in language_list:
+                        language_list[language] = 1
+                    else:
+                        language_list[language] = language_list[language] + 1
 
                 if group is not None:
                     findingdetail = "{}**Group:** {}\n".format(findingdetail, group)
@@ -92,25 +82,29 @@ class CheckmarxParser(object):
                 findingdetail = "{}**Finding Link:** {}\n".format(findingdetail, deeplink)
 
                 if self.mode == 'detailed':
-                    self.process_result_detailed(dupes, findingdetail, query, result, find_date)
+                    self._process_result_detailed(test, dupes, findingdetail, query, result, find_date)
                 else:
-                    self.process_result_file_name_aggregated(dupes, findingdetail, query, result, find_date)
+                    self._process_result_file_name_aggregated(test, dupes, findingdetail, query, result, find_date)
                 findingdetail = ''
 
-        for lang in self.language_list:
-            add_language(test.engagement.product, lang)
+        for lang in language_list:
+            add_language(test.engagement.product, lang, files=language_list[lang])
 
         return list(dupes.values())
 
-    # Process one result = one pathId for default "Checkmarx Scan"
-    # Create the finding and add it into the dupes list
-    # If a vuln with the same file_path was found before, updates the description
-    def process_result_file_name_aggregated(self, dupes, findingdetail, query, result, find_date):
+    def _process_result_file_name_aggregated(self, test, dupes, findingdetail, query, result, find_date):
+        """Process one result = one pathId for default "Checkmarx Scan"
+        Create the finding and add it into the dupes list
+        If a vuln with the same file_path was found before, updates the description
+        """
         name, cwe, categories, queryId = self.getQueryElements(query)
         titleStart = query.get('name').replace('_', ' ')
         description, lastPathnode = self.get_description_file_name_aggregated(query, result)
         sinkFilename = lastPathnode.find('FileName').text
-        title = "{} ({})".format(titleStart, ntpath.basename(sinkFilename))
+        if sinkFilename:
+            title = "{} ({})".format(titleStart, sinkFilename.split("/")[-1])
+        else:
+            title = titleStart
         false_p = result.get('FalsePositive')
         sev = result.get('Severity')
         aggregateKeys = "{}{}{}".format(cwe, sev, sinkFilename)
@@ -121,7 +115,7 @@ class CheckmarxParser(object):
         if not(aggregateKeys in dupes):
             find = Finding(title=title,
                            cwe=int(cwe),
-                           test=self.test,
+                           test=test,
                            # active, verified and false_p may be overwritten later by another member of the aggregate, see "else" below
                            active=active,
                            verified=verified,
@@ -129,12 +123,8 @@ class CheckmarxParser(object):
                            # Concatenates the query information with this specific finding information
                            description=findingdetail + description,
                            severity=sev,
-                           mitigation=self.mitigation,
-                           impact=self.impact,
-                           references=self.references,
                            file_path=sinkFilename,
                            # No line number because we have aggregated different vulnerabilities that may have different line numbers
-                           url='N/A',
                            date=find_date,
                            static_finding=True,
                            nb_occurences=1,
@@ -175,11 +165,11 @@ class CheckmarxParser(object):
         description = "{}\n<b>Sink file: </b>{} (line {})\n<b>Sink object: </b> {}".format(description, sinkFilename, sinkLineNumber, sinkObject)
         return description, pathnode
 
-    # Process one result = one pathId for scanner "Checkmarx Scan detailed"
-    # Create the finding and add it into the dupes list
-    def process_result_detailed(self, dupes, findingdetail, query, result, find_date):
+    def _process_result_detailed(self, test, dupes, findingdetail, query, result, find_date):
+        """Process one result = one pathId for scanner "Checkmarx Scan detailed"
+        Create the finding and add it into the dupes list
+        """
         name, cwe, categories, queryId = self.getQueryElements(query)
-        title = ''
         sev = result.get('Severity')
         title = query.get('name').replace('_', ' ')
         state = result.get('state')
@@ -210,35 +200,33 @@ class CheckmarxParser(object):
             # pathId is the unique id from tool which means that there is basically no aggregation except real duplicates
             aggregateKeys = "{}{}{}{}{}".format(categories, cwe, name, sinkFilename, pathId)
             if title and sinkFilename:
-                title = "{} ({})".format(title, ntpath.basename(sinkFilename))
+                title = "{} ({})".format(title, sinkFilename.split("/")[-1])
 
-            find = Finding(title=title,
-                       cwe=int(cwe),
-                       test=self.test,
-                       active=self.isActive(state),
-                       verified=self.isVerified(state),
-                       false_p=result.get('FalsePositive') == "True",
-                       description=findingdetail,
-                       severity=sev,
-                       mitigation=self.mitigation,
-                       impact=self.impact,
-                       references=self.references,
-                       file_path=sinkFilename,
-                       line=sinkLineNumber,
-                       url='N/A',
-                       date=find_date,
-                       static_finding=True,
-                       unique_id_from_tool=pathId,
-                       sast_source_object=sourceObject,
-                       sast_sink_object=sinkObject,
-                       sast_source_line=sourceLineNumber,
-                       sast_source_file_path=sourceFilename,
-                       vuln_id_from_tool=queryId)
+            find = Finding(
+                title=title,
+                cwe=int(cwe),
+                test=test,
+                active=self.isActive(state),
+                verified=self.isVerified(state),
+                false_p=result.get('FalsePositive') == "True",
+                description=findingdetail,
+                severity=sev,
+                file_path=sinkFilename,
+                line=sinkLineNumber,
+                date=find_date,
+                static_finding=True,
+                unique_id_from_tool=pathId,
+                sast_source_object=sourceObject,
+                sast_sink_object=sinkObject,
+                sast_source_line=sourceLineNumber,
+                sast_source_file_path=sourceFilename,
+                vuln_id_from_tool=queryId,
+            )
         dupes[aggregateKeys] = find
 
     # Return filename, lineNumber and object (function/parameter...) for a given pathnode
     def get_pathnode_elements(self, pathnode):
-        return pathnode.find('FileName').text, pathnode.find('Line').text, pathnode.find('Name').text
+        return pathnode.find('FileName').text, int(pathnode.find('Line').text), pathnode.find('Name').text
 
     # Builds the finding description for scanner "Checkmarx Scan detailed"
     def get_description_detailed(self, pathnode, findingdetail):

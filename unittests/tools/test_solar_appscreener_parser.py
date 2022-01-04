@@ -26,8 +26,10 @@ class TestSolarAppscreenerParser(DojoTestCase):
         self.assertEqual(1, len(findings))
         self.assertEqual("Hardcoded password", finding.title)
         self.assertEqual("Critical", finding.severity)
+        self.assertEqual("misc/shared.php", finding.file_path)
+        self.assertEqual(151, finding.line)
         self.assertEqual("misc/shared.php", finding.sast_source_file_path)
-        self.assertEqual("151", finding.sast_source_line)
+        self.assertEqual(151, finding.sast_source_line)
 
     def test_solar_appscreener_parser_with_many_vuln_has_many_findings(self):
         testfile = open(
@@ -42,15 +44,21 @@ class TestSolarAppscreenerParser(DojoTestCase):
         self.assertEqual(3, len(findings))
         self.assertEqual("Hardcoded password", finding.title)
         self.assertEqual("Critical", finding.severity)
+        self.assertEqual("misc/shared.php", finding.file_path)
+        self.assertEqual(151, finding.line)
         self.assertEqual("misc/shared.php", finding.sast_source_file_path)
-        self.assertEqual("151", finding.sast_source_line)
+        self.assertEqual(151, finding.sast_source_line)
         finding = findings[1]
         self.assertEqual("Internal information leak", finding.title)
         self.assertEqual("Medium", finding.severity)
+        self.assertEqual("index.php", finding.file_path)
+        self.assertEqual(5, finding.line)
         self.assertEqual("index.php", finding.sast_source_file_path)
-        self.assertEqual("5", finding.sast_source_line)
+        self.assertEqual(5, finding.sast_source_line)
         finding = findings[2]
         self.assertEqual("Trust boundary violation", finding.title)
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("index.php", finding.sast_source_file_path)
-        self.assertEqual("51", finding.sast_source_line)
+        self.assertEqual(51, finding.sast_source_line),
+        self.assertEqual("index.php", finding.file_path)
+        self.assertEqual(51, finding.line)

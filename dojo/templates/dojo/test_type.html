@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load authorization_tags %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -8,6 +9,7 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         Test Type List
+                        {% if "dojo.add_test_type"|has_configuration_permission:"staff" %}
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -25,6 +27,7 @@
                                 {% endif %}
                             </ul>
                         </div>
+                        {% endif %}
                     </h3>
                 </div>
                 <div id="the-filters" class="is-filters panel-body collapse {% if test_types.form.has_changed %}in{% endif %}">
@@ -46,7 +49,7 @@
                         <tbody>
                         {% for tt in tts %}
                             <tr>
-                                {% if user.is_staff %}
+                                {% if "dojo.change_test_type"|has_configuration_permission:"staff" %}
                                     <td><a href="{% url 'edit_test_type' tt.id %}"> {{ tt.name }} </a></td>
                                 {% else %}
                                     <td> {{ tt.name }} </a> </td>
