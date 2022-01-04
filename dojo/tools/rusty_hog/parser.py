@@ -115,7 +115,6 @@ class RustyhogParser(object):
                 severity='High',
                 cwe=cwe,
                 description=description,
-                mitigation="Please ensure no secret material nor confidential information is kept in clear within git repositories.",
                 file_path=file_path,
                 static_finding=True,
                 dynamic_finding=False
@@ -123,5 +122,8 @@ class RustyhogParser(object):
             finding.description = finding.description.strip()
             if scanner == "Choctaw Hog":
                 finding.line = int(vulnerability.get('new_line_num'))
+                finding.mitigation = "Please ensure no secret material nor confidential information is kept in clear within git repositories."
+            elif scanner == "Gottingen Hog":
+                finding.mitigation = "Please ensure no secret material nor confidential information is kept in clear within JIRA Tickets."
             findings.append(finding)
         return findings
