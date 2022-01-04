@@ -1,6 +1,5 @@
 import logging
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import BadRequest
 from django.urls import reverse
 from django.http import HttpResponseRedirect
