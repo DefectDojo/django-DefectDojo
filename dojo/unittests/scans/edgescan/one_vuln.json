@@ -1,0 +1,34 @@
+[
+    {
+        "id": 21581,
+        "asset_id": 60,
+        "name": "Cross-site scripting (reflected)",
+        "location": "http://test.example.com",
+        "location_specifier_id": 1904,
+        "asset_name": "test_asset",
+        "label": "",
+        "status": "closed",
+        "pci_compliance_status": "fail",
+        "date_opened": "2014-12-05 14:53:43 UTC",
+        "date_closed": "2020-07-13 09:39:56 UTC",
+        "risk": 1,
+        "severity": 4,
+        "threat": 5,
+        "layer": "application",
+        "remediation": "In most situations where user-controllable data is copied into application responses, cross-site scripting attacks can be prevented using two layers of defenses:\n\n- Input should be validated as strictly as possible on arrival, given the kind of content which it is expected to contain. For example, personal names should consist of alphabetical and a small range of typographical characters, and be relatively short; a year of birth should consist of exactly four numerals; email addresses should match a well-defined regular expression. Input which fails the validation should be rejected, not sanitized. \n- User input should be HTML-encoded at any point where it is copied into application responses. All HTML metacharacters, including < > \" ' and =, should be replaced with the corresponding HTML entities (&lt; &gt; etc). \nIn cases where the application's functionality allows users to author content using a restricted subset of HTML tags and attributes (for example, blog comments which allow limited formatting and linking), it is necessary to parse the supplied HTML to validate that it does not use any dangerous syntax; this is a non-trivial task.",
+        "description": "Reflected cross-site scripting vulnerabilities arise when data is copied from a request and echoed into the application's immediate response in an unsafe way. An attacker can use the vulnerability to construct a request which, if issued by another application user, will cause JavaScript code supplied by the attacker to execute within the user's browser in the context of that user's session with the application.  \n  \nThe attacker-supplied code can perform a wide variety of actions, such as stealing the victim's session token or login credentials, performing arbitrary actions on the victim's behalf, and logging their keystrokes.  \n  \nUsers can be induced to issue the attacker's crafted request in various ways. For example, the attacker can send a victim a link containing a malicious URL in an email or instant message. They can submit the link to popular web sites that allow content authoring, for example in blog comments. And they can create an innocuous looking web site which causes anyone viewing it to make arbitrary cross-domain requests to the vulnerable application (using either the GET or the POST method).  \n  \nThe security impact of cross-site scripting vulnerabilities is dependent upon the nature of the vulnerable application, the kinds of data and functionality which it contains, and the other applications which belong to the same domain and organization. If the application is used only to display non-sensitive public content, with no authentication or access control functionality, then a cross-site scripting flaw may be considered low risk. However, if the same application resides on a domain which can access cookies for other more security-critical applications, then the vulnerability could be used to attack those other applications, and so may be considered high risk. Similarly, if the organization which owns the application is a likely target for phishing attacks, then the vulnerability could be leveraged to lend credibility to such attacks, by injecting Trojan functionality into the vulnerable application, and exploiting users' trust in the organization in order to capture credentials for other applications which it owns. In many kinds of application, such as those providing online banking functionality, cross-site scripting should always be considered high risk.\n\n",
+        "cwes": [
+            "CWE-75"
+        ],
+        "cves": [
+            "CVE-91"
+        ],
+        "pci_exception": "none",
+        "pci_exception_description": null,
+        "pci_exception_expiry": null,
+        "cvss_score": 0.0,
+        "cvss_vector": null,
+        "cvss_version": null,
+        "asset_tags": null
+    }
+]
