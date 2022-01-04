@@ -780,6 +780,25 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
     def get_url(self, obj) -> str:
         return jira_helper.get_jira_issue_url(obj)
 
+    def validate(self, data):
+        if self.context['request'].method == 'PATCH':
+            engagement = data.get('engagement', self.instance.engagement)
+            finding = data.get('finding', self.instance.finding)
+            finding_group = data.get('finding_group', self.instance.finding_group)
+        else:
+            engagement = data.get('engagement', None)
+            finding = data.get('finding', None)
+            finding_group = data.get('finding_group', None)
+
+        if ((engagement and not finding and not finding_group) or
+                (finding and not engagement and not finding_group) or
+                (finding_group and not engagement and not finding)):
+            pass
+        else:
+            raise serializers.ValidationError('Either engagement or finding or finding_group has to be set.')
+
+        return data
+
 
 class JIRAInstanceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -794,6 +813,19 @@ class JIRAProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = JIRA_Project
         fields = '__all__'
+
+    def validate(self, data):
+        if self.context['request'].method == 'PATCH':
+            engagement = data.get('engagement', self.instance.engagement)
+            product = data.get('product', self.instance.product)
+        else:
+            engagement = data.get('engagement', None)
+            product = data.get('product', None)
+
+        if ((engagement and product) or (not engagement and not product)):
+            raise serializers.ValidationError('Either engagement or product has to be set.')
+
+        return data
 
 
 class SonarqubeIssueSerializer(serializers.ModelSerializer):
