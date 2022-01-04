@@ -146,8 +146,7 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
             eps, created = Endpoint_Status.objects.get_or_create(
                 finding=finding,
                 endpoint=ep,
-                date=finding.date,
-                last_modified=finding.date)
+                date=finding.date)
         except (MultipleObjectsReturned):
             pass
 
