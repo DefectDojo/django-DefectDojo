@@ -1,7 +1,7 @@
 import json
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.edgescan.importer import EdgescanApiImporter
+from dojo.tools.edgescan.importer import EdgescanImporter
 
 ES_SEVERITIES = {1: "Info", 2: "Low", 3: "Medium", 4: "High", 5: "Critical"}
 SCAN_EDGESCAN_API = 'Edgescan API Scan'
@@ -39,7 +39,7 @@ class EdgescanParser(object):
                 except:
                     data = json.loads(serialized_data)
             else:
-                data = EdgescanApiImporter().get_findings(test)
+                data = EdgescanImporter().get_findings(test)
         except:
             raise Exception("Invalid details provided")
 

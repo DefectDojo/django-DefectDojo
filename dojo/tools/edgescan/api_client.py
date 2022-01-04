@@ -44,7 +44,7 @@ class EdgescanAPI(object):
             return {}
 
     def get_findings(self, asset_id):
-        url = f"{self.url}/api/v1/vulnerabilities/export.json?c[asset_id]={asset_id}&c[status]=open"         
+        url = f"{self.url}/api/v1/vulnerabilities/export.json?c[asset_id]={asset_id}&c[status]=open"
         if 'date' in self.options:
             url += f"&c[date_opened_after]={self.options['date']}"
 
@@ -64,7 +64,7 @@ class EdgescanAPI(object):
 
     def get_headers(self):
         headers = {
-            "X-API-TOKEN": self.api_key, 
+            "X-API-TOKEN": self.api_key,
             "Content-Type": "application/json",
             "User-Agent": "DefectDojo",
         }
@@ -72,7 +72,7 @@ class EdgescanAPI(object):
         return headers
 
     def get_proxies(self):
-        if not "proxy" in self.options:
+        if "proxy" not in self.options:
             return None
 
         return {"https": self.options["proxy"]}

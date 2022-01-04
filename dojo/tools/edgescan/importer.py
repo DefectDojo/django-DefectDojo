@@ -32,6 +32,6 @@ class EdgescanImporter(object):
                     'There are no API Scan Configurations for this Product.\n'
                     'Please add at least one API Scan Configuration for Edgescan to this Product.'
                 )
-        
+
         tool_config = config.tool_configuration
         return EdgescanAPI(tool_config), config
