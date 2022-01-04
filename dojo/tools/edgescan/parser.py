@@ -1,34 +1,49 @@
 import json
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
+from dojo.tools.edgescan.importer import EdgescanApiImporter
 
 ES_SEVERITIES = {1: "Info", 2: "Low", 3: "Medium", 4: "High", 5: "Critical"}
+SCAN_EDGESCAN_API = 'Edgescan API Scan'
+SCAN_EDGESCAN = 'Edgescan Scan'
+
 
 class EdgescanParser(object):
+    """
+    Import from Edgescan API or JSON file
+    """
 
     def get_scan_types(self):
-        return ["Edgescan Scan"]
+        return [SCAN_EDGESCAN, SCAN_EDGESCAN_API]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import JSON"
+        if scan_type == SCAN_EDGESCAN_API:
+            return "Edgescan findings can be imported by API."
+        return "Edgescan findings can be imported in JSON format."
+
+    def requires_file(self, scan_type):
+        return False if scan_type == SCAN_EDGESCAN_API else True
+
+    def requires_tool_type(self, scan_type):
+        return 'Edgescan' if scan_type == SCAN_EDGESCAN_API else None
 
     def get_findings(self, file, test):
-        if file is None:
-            return list()
-
         try:
-            data = file.read()
-            try:
-                deserialized = json.loads(str(data, "utf-8"))
-            except:
-                deserialized = json.loads(data)
-
-            return self.process_vulnerabilities(test, deserialized)
+            if file:
+                serialized_data = file.read()
+                try:
+                    data = json.loads(str(serialized_data, "utf-8"))
+                except:
+                    data = json.loads(serialized_data)
+            else:
+                data = EdgescanApiImporter().get_findings(test)
         except:
-            raise Exception("Invalid format")
+            raise Exception("Invalid details provided")
+
+        return self.process_vulnerabilities(test, data)
 
     def process_vulnerabilities(self, test, vulnerabilities):
         findings = []
@@ -56,8 +71,8 @@ class EdgescanParser(object):
         finding.duplicate = False
         finding.out_of_scope = False
         finding.numerical_severity = Finding.get_numerical_severity(ES_SEVERITIES[vulnerability["severity"]])
-        finding.vuln_id_from_tool = vulnerability["id"]
         finding.tags = vulnerability["asset_tags"]
+        finding.unique_id_from_tool = vulnerability["id"]
 
         finding.unsaved_endpoints = [Endpoint.from_uri(vulnerability["location"])]
 
