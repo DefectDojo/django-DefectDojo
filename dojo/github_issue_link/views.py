@@ -25,12 +25,7 @@ def webhook(request):
     return HttpResponse('')
 
 
-@user_passes_test(lambda u: u.is_staff)
-def express_new_github(request):
-    return HttpResponse('')
-
-
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def new_github(request):
     if request.method == 'POST':
         gform = GITHUBForm(request.POST, instance=GITHUB_Conf())
@@ -63,7 +58,7 @@ def new_github(request):
                     {'gform': gform})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def github(request):
     confs = GITHUB_Conf.objects.all()
     add_breadcrumb(title="Github List", top_level=not len(request.GET), request=request)
@@ -73,7 +68,7 @@ def github(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def delete_github(request, tid):
     github_instance = get_object_or_404(GITHUB_Conf, pk=tid)
     # eng = test.engagement

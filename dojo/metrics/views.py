@@ -10,7 +10,7 @@ from operator import itemgetter
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.db.models.query import QuerySet
@@ -20,7 +20,7 @@ from django.utils.html import escape
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
 
-from dojo.filters import MetricsFindingFilter, EngineerFilter, MetricsEndpointFilter
+from dojo.filters import MetricsFindingFilter, UserFilter, MetricsEndpointFilter
 from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User, Endpoint_Status
@@ -739,31 +739,23 @@ def product_type_counts(request):
                   )
 
 
-"""
-Greg
-Status: in production
-name self explaintory, only Jim, senior mananger and root user have access to
-view others metrics
-"""
-
-
-@user_passes_test(lambda u: u.is_staff)
 def engineer_metrics(request):
-    # checking if user is super_user
+    # only superusers can select other users to view
     if request.user.is_superuser:
-        users = Dojo_User.objects.filter(is_staff=True).order_by('username')
+        users = Dojo_User.objects.all().order_by('username')
     else:
         return HttpResponseRedirect(reverse('view_engineer', args=(request.user.id,)))
 
-    users = EngineerFilter(request.GET,
-                           queryset=users)
-    paged_users = get_page_items(request, users.qs, 15)
+    users = UserFilter(request.GET, queryset=users)
+    paged_users = get_page_items(request, users.qs, 25)
 
     add_breadcrumb(title="Engineer Metrics", top_level=True, request=request)
 
     return render(request,
                   'dojo/engineer_metrics.html',
-                  {'users': paged_users})
+                  {'users': paged_users,
+                   "filtered": users,
+                   })
 
 
 """
@@ -775,15 +767,13 @@ and root can view others metrics
 
 
 # noinspection DjangoOrm
-@user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def view_engineer(request, eid):
     user = get_object_or_404(Dojo_User, pk=eid)
     if not (request.user.is_superuser or
-            request.user.username == 'root' or
             request.user.username == user.username):
-        return HttpResponseRedirect(reverse('engineer_metrics'))
+        raise PermissionDenied()
     now = timezone.now()
 
     findings = Finding.objects.filter(reporter=user, verified=True)
@@ -1080,55 +1070,4 @@ def view_engineer(request, eid):
         'accepted_week_count': accepted_week_count,
         'closed_week_count': closed_week_count,
         'user': request.user,
-    })
-
-
-"""
-Greg
-For tracking issues reported by SEC researchers.
-"""
-
-
-@user_passes_test(lambda u: u.is_staff)
-def research_metrics(request):
-    now = timezone.now()
-    findings = Finding.objects.filter(
-        test__test_type__name='Security Research')
-    findings = findings.filter(date__year=now.year, date__month=now.month)
-    verified_month = findings.filter(verified=True)
-    month_all_by_product, month_all_aggregate = count_findings(findings)
-    month_verified_by_product, month_verified_aggregate = count_findings(
-        verified_month)
-
-    remaining_by_product, remaining_aggregate = count_findings(
-        Finding.objects.filter(mitigated__isnull=True,
-                               test__test_type__name='Security Research'))
-
-    closed_findings = Finding.objects.filter(
-        mitigated__isnull=False,
-        test__test_type__name='Security Research')
-    closed_findings_dict = {'S0': closed_findings.filter(severity='Critical'),
-                            'S1': closed_findings.filter(severity='High'),
-                            'S2': closed_findings.filter(severity='Medium'),
-                            'S3': closed_findings.filter(severity='Low')}
-
-    time_to_close = {}
-    for sev, finds in list(closed_findings_dict.items()):
-        total = 0
-        for f in finds:
-            total += (datetime.date(f.mitigated) - f.date).days
-        if finds.count() != 0:
-            time_to_close[sev] = total / finds.count()
-        else:
-            time_to_close[sev] = 'N/A'
-
-    add_breadcrumb(title="Security Research Metrics", top_level=True, request=request)
-
-    return render(request, 'dojo/research_metrics.html', {
-        'user': request.user,
-        'month_all_by_product': month_all_by_product,
-        'month_verified_by_product': month_verified_by_product,
-        'remaining_by_product': remaining_by_product,
-        'remaining_aggregate': remaining_aggregate,
-        'time_to_close': time_to_close,
     })

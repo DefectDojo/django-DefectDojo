@@ -1,8 +1,9 @@
 import base64
-import datetime
+
+from django.db.models.query_utils import Q
 from dojo.importers import utils as importer_utils
 from dojo.decorators import dojo_async_task
-from dojo.utils import get_current_user, max_safe
+from dojo.utils import get_current_user
 from dojo.celery import app
 from django.core.exceptions import ValidationError
 from django.core import serializers
@@ -100,16 +101,10 @@ class DojoDefaultImporter(object):
                 item.active = active
             if item.verified:
                 item.verified = verified
-            # Set the date if the parser does not set it
-            if not item.date:
-                item.date = scan_date
 
-            # Indicates the scan_date is not the default, overwrite everything
-            if (scan_date.date() if isinstance(scan_date, datetime.datetime) else scan_date) != now.date():
+            # if scan_date was provided, override value from parser
+            if scan_date:
                 item.date = scan_date
-
-            item.created = now
-            item.updated = now
 
             item.service = service
 
@@ -155,10 +150,10 @@ class DojoDefaultImporter(object):
                 for unsaved_file in item.unsaved_files:
                     data = base64.b64decode(unsaved_file.get('data'))
                     title = unsaved_file.get('title', '<No title>')
-                    file_upload = FileUpload(
+                    file_upload, file_upload_created = FileUpload.objects.get_or_create(
                         title=title,
-                        file=ContentFile(data, name=title)
                     )
+                    file_upload.file.save(title, ContentFile(data))
                     file_upload.save()
                     item.files.add(file_upload)
 
@@ -177,7 +172,7 @@ class DojoDefaultImporter(object):
             return [serializers.serialize('json', [finding, ]) for finding in new_findings]
         return new_findings
 
-    def close_old_findings(self, test, scan_date_time, user, push_to_jira=None):
+    def close_old_findings(self, test, scan_date_time, user, push_to_jira=None, service=None):
         old_findings = []
         # Close old active findings that are not reported by this scan.
         new_hash_codes = test.finding_set.values('hash_code')
@@ -198,6 +193,11 @@ class DojoDefaultImporter(object):
                                             .filter(test__engagement__product=test.engagement.product,
                                                 test__test_type=test.test_type,
                                                 active=True)
+
+        if service:
+            old_findings = old_findings.filter(service=service)
+        else:
+            old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=''))
 
         for old_finding in old_findings:
             old_finding.active = False
@@ -229,30 +229,6 @@ class DojoDefaultImporter(object):
 
         return old_findings
 
-    def update_timestamps(self, test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time):
-        test.engagement.updated = now
-        if test.engagement.engagement_type == 'CI/CD':
-            test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
-
-        test.updated = now
-        test.target_end = max_safe([scan_date_time, test.target_end])
-
-        if version:
-            test.version = version
-
-        if branch_tag:
-            test.branch_tag = branch_tag
-            test.engagement.version = version
-
-        if build_id:
-            test.build_id = build_id
-
-        if branch_tag:
-            test.commit_hash = commit_hash
-
-        test.save()
-        test.engagement.save()
-
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None,
@@ -263,15 +239,6 @@ class DojoDefaultImporter(object):
         user = user or get_current_user()
 
         now = timezone.now()
-        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
-        finding_scan_date = scan_date
-        if not scan_date:
-            scan_date = now
-            finding_scan_date = now
-        # retain weird existing logic to use current time for provided scan date
-        scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
-        if settings.USE_TZ:
-            scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
 
         if api_scan_configuration and api_scan_configuration.product != engagement.product:
             raise ValidationError('API Scan Configuration has to be from same product as  the Engagement')
@@ -340,7 +307,7 @@ class DojoDefaultImporter(object):
                 result = self.process_parsed_findings(test, findings_list, scan_type, user, active,
                                                             verified, minimum_severity=minimum_severity,
                                                             endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                            group_by=group_by, now=now, service=service, scan_date=finding_scan_date, sync=False)
+                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False)
                 # Since I dont want to wait until the task is done right now, save the id
                 # So I can check on the task later
                 results_list += [result]
@@ -358,15 +325,15 @@ class DojoDefaultImporter(object):
             new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                             verified, minimum_severity=minimum_severity,
                                                             endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                            group_by=group_by, now=now, service=service, scan_date=finding_scan_date, sync=True)
+                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True)
 
         closed_findings = []
         if close_old_findings:
             logger.debug('IMPORT_SCAN: Closing findings no longer present in scan report')
-            closed_findings = self.close_old_findings(test, scan_date_time, user=user, push_to_jira=push_to_jira)
+            closed_findings = self.close_old_findings(test, scan_date, user=user, push_to_jira=push_to_jira, service=service)
 
         logger.debug('IMPORT_SCAN: Updating test/engagement timestamps')
-        importer_utils.update_timestamps(test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time)
+        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
 
         if settings.TRACK_IMPORT_HISTORY:
             logger.debug('IMPORT_SCAN: Updating Import History')

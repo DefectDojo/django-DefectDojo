@@ -424,7 +424,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
-                                product_name=None, product=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None, scan_date=None):
+                                product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
+                                scan_date=None, service=None):
         payload = {
                 "minimum_severity": minimum_severity,
                 "active": active,
@@ -440,9 +441,6 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if engagement_name:
             payload['engagement_name'] = engagement_name
-
-        if product:
-            payload['product'] = product
 
         if product_name:
             payload['product_name'] = product_name
@@ -471,13 +469,15 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if scan_date is not None:
             payload['scan_date'] = scan_date
 
+        if service is not None:
+            payload['service'] = service
+
         return self.import_scan(payload, expected_http_status_code)
 
     def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None,
-                                  tags=None, close_old_findings=True, group_by=None, engagement_name=None,
-                                  product_name=None, product=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
+                                  tags=None, close_old_findings=True, group_by=None, engagement_name=None, scan_date=None,
+                                  product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
         payload = {
-                "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
@@ -495,9 +495,6 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if engagement_name:
             payload['engagement_name'] = engagement_name
-
-        if product:
-            payload['product'] = product
 
         if product_name:
             payload['product_name'] = product_name
@@ -519,6 +516,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if test_title is not None:
             payload['test_title'] = test_title
+
+        if scan_date is not None:
+            payload['scan_date'] = scan_date
 
         return self.reimport_scan(payload, expected_http_status_code=expected_http_status_code)
 
@@ -683,14 +683,18 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return response.data
 
     def log_finding_summary_json_api(self, findings_content_json=None):
-        # print('summary')
-        # print(findings_content_json)
-        # print(findings_content_json['count'])
+        print('summary')
+        print(findings_content_json)
+        print(findings_content_json['count'])
 
         if not findings_content_json or findings_content_json['count'] == 0:
             logger.debug('no findings')
         else:
             for finding in findings_content_json['results']:
+                print(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified']) +
+                        ': is_mitigated: ' + str(finding['is_mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
+                        ": endpoints: " + str(finding['endpoints']))
+
                 logger.debug(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified']) +
                         ': is_mitigated: ' + str(finding['is_mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
                         ": endpoints: " + str(finding['endpoints']))

@@ -1,6 +1,5 @@
-import datetime
 from unittest.mock import patch
-
+import uuid
 from .dojo_test_case import DojoTestCase, get_unit_tests_path
 from django.test.utils import override_settings
 from django.utils import timezone
@@ -78,7 +77,7 @@ class TestDojoDefaultImporter(DojoTestCase):
         minimum_severity = "Info"
         active = True
         verified = True
-        scan_date = timezone.localtime(timezone.now()).date()
+        scan_date = None
         new_findings = importer.process_parsed_findings(
             test,
             parsed_findings,
@@ -115,7 +114,7 @@ class TestDojoDefaultImporter(DojoTestCase):
         )
 
         importer = Importer()
-        scan_date = timezone.make_aware(datetime.datetime(2021, 9, 1), timezone.get_default_timezone())
+        scan_date = None
         test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
                     active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
@@ -147,7 +146,7 @@ class TestDojoDefaultImporter(DojoTestCase):
         )
 
         importer = Importer()
-        scan_date = timezone.make_aware(datetime.datetime(2021, 9, 1), timezone.get_default_timezone())
+        scan_date = None
         test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
                     active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
@@ -267,41 +266,66 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             import0 = self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product=None, product_name=PRODUCT_NAME_NEW, expected_http_status_code=400)
 
     def test_import_with_invalid_parameters(self):
+        with self.subTest('scan_date in the future'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, product_type_name=PRODUCT_TYPE_NAME_NEW, auto_create_context=True, scan_date='2222-01-01',
+                expected_http_status_code=400)
+
         with self.subTest('no parameters'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, expected_http_status_code=400)
+            self.assertEqual(import0, ['product_name parameter missing'])
 
         with self.subTest('no product data'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, engagement_name='what the bleep', expected_http_status_code=400)
+            self.assertEqual(import0, ['product_name parameter missing'])
+
+        with self.subTest('engagement_name missing'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement=None, product_name='67283', expected_http_status_code=400)
+            self.assertEqual(import0, ['engagement_name parameter missing'])
+
+        with self.subTest('invalid product type'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement=None, product_type_name='valentijn', product_name='67283', engagement_name='valentijn', expected_http_status_code=400)
+            self.assertEqual(import0, ["Product Type 'valentijn' doesn't exist"])
 
         with self.subTest('invalid product'):
+            # random product type to avoid collision with other tests
+            another_product_type_name = str(uuid.uuid4())
+            Product_Type.objects.create(name=another_product_type_name)
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
-                engagement=None, product=67283, expected_http_status_code=400)
+                engagement=None, product_type_name=another_product_type_name, product_name=PRODUCT_NAME_DEFAULT, engagement_name='valentijn', expected_http_status_code=400)
+            self.assertEqual(import0, ["Product '%s' doesn't exist in Product_Type '%s'" % (PRODUCT_NAME_DEFAULT, another_product_type_name)])
 
         with self.subTest('invalid engagement'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=1254235, expected_http_status_code=400)
+            self.assertEqual(import0, ["Engagement '1254235' doesn''t exist"])
 
         with self.subTest('invalid engagement, but exists in another product'):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
-                engagement_name=ENGAGEMENT_NAME_DEFAULT, product_name='blabla', expected_http_status_code=400)
+            # random product to avoid collision with other tests
+            another_product_name = str(uuid.uuid4())
+            self.product = self.create_product(another_product_name)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=None,
+                engagement_name=ENGAGEMENT_NAME_DEFAULT, product_name=another_product_name, expected_http_status_code=400)
+            self.assertEqual(import0, ["Engagement 'Engagement 1' doesn't exist in Product '%s'" % another_product_name])
 
         with self.subTest('invalid engagement not id'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement='bla bla', expected_http_status_code=400)
-
-        with self.subTest('invalid product not id'):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
-                product='bla bla', expected_http_status_code=400)
+            self.assertEqual(import0, ['engagement must be an integer'])
 
         with self.subTest('autocreate product but no product type name'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True, expected_http_status_code=400)
+            self.assertEqual(import0, ["Product '%s' doesn't exist and no product_type_name provided to create the new product in" % PRODUCT_NAME_NEW])
 
         with self.subTest('autocreate engagement but no product_name'):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=None,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True, expected_http_status_code=400)
+            self.assertEqual(import0, ['product_name parameter missing'])
 
 
 @override_settings(TRACK_IMPORT_HISTORY=True)
@@ -445,42 +469,69 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
         mock.assert_not_called()
 
     def test_reimport_with_invalid_parameters(self):
+        with self.subTest('scan_date in the future'):
+            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, product_type_name=PRODUCT_TYPE_NAME_NEW, auto_create_context=True, scan_date='2222-01-01',
+                expected_http_status_code=400)
+
         with self.subTest('no parameters'):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, expected_http_status_code=400)
+            self.assertEqual(import0, ['product_name parameter missing'])
 
         with self.subTest('no product data'):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, engagement_name='what the bleep', expected_http_status_code=400)
+            self.assertEqual(import0, ['product_name parameter missing'])
+
+        with self.subTest('non engagement_name'):
+            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement=None, product_name='67283', expected_http_status_code=400)
+            self.assertEqual(import0, ['engagement_name parameter missing'])
+
+        with self.subTest('invalid product type'):
+            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement=None, product_type_name='valentijn', product_name='67283', engagement_name='valentijn', expected_http_status_code=400)
+            self.assertEqual(import0, ["Product Type 'valentijn' doesn't exist"])
 
         with self.subTest('invalid product'):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
-                engagement=None, product=67283, expected_http_status_code=400)
+                engagement=None, product_name='67283', engagement_name='valentijn', expected_http_status_code=400)
+            self.assertEqual(import0, ["Product '67283' doesn't exist"])
+
+        with self.subTest('valid product, but other product type'):
+            # random product type to avoid collision with other tests
+            another_product_type_name = str(uuid.uuid4())
+            Product_Type.objects.create(name=another_product_type_name)
+
+            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement=None, product_type_name=another_product_type_name, product_name=PRODUCT_NAME_DEFAULT, engagement_name='valentijn', expected_http_status_code=400)
+            self.assertEqual(import0, ["Product '%s' doesn't exist in Product_Type '%s'" % (PRODUCT_NAME_DEFAULT, another_product_type_name)])
 
         with self.subTest('invalid engagement'):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=1254235, expected_http_status_code=400)
+            self.assertEqual(import0, ['product_name parameter missing'])
 
         with self.subTest('invalid engagement, but exists in another product'):
+            # random product to avoid collision with other tests
+            another_product_name = str(uuid.uuid4())
+            self.product = self.create_product(another_product_name)
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
-                engagement_name=ENGAGEMENT_NAME_DEFAULT, product_name='blabla', expected_http_status_code=400)
+                engagement_name=ENGAGEMENT_NAME_DEFAULT, product_name=another_product_name, expected_http_status_code=400)
+            self.assertEqual(import0, ["Engagement 'Engagement 1' doesn't exist in Product '%s'" % another_product_name])
 
         with self.subTest('invalid engagement not id'):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement='bla bla', expected_http_status_code=400)
-
-        with self.subTest('invalid product not id'):
-            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
-                product='bla bla', expected_http_status_code=400)
+            self.assertEqual(import0, ['engagement must be an integer'])
 
         with self.subTest('autocreate product but no product type name'):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 product_name=PRODUCT_NAME_NEW, engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True, expected_http_status_code=400)
+            self.assertEqual(import0, ["Product '%s' doesn't exist and no product_type_name provided to create the new product in" % PRODUCT_NAME_NEW])
 
         with self.subTest('autocreate engagement but no product_name'):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True, expected_http_status_code=400)
-
-
-# TODO update docs and docstrings
-# TODO optimize getting of targets?
+            self.assertEqual(import0, ['product_name parameter missing'])

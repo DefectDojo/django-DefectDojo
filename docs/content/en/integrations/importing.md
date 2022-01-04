@@ -50,7 +50,6 @@ An import can be performed by specifying the names of these entities in the API 
 
 ```JSON
 {
-    "scan_date": '2020-06-04',
     "minimum_severity": 'Info',
     "active": True,
     "verified": Trued,
@@ -69,7 +68,6 @@ A classic way of importing a scan is by specifying the ID of the engagement inst
 
 ```JSON
 {
-    "scan_date": '2020-06-04',
     "minimum_severity": 'Info',
     "active": True,
     "verified": Trued,
@@ -88,7 +86,6 @@ An reimport can be performed by specifying the names of these entities in the AP
 
 ```JSON
 {
-    "scan_date": '2020-06-04',
     "minimum_severity": 'Info',
     "active": True,
     "verified": Trued,
@@ -111,7 +108,6 @@ A classic way of reimporting a scan is by specifying the ID of the test instead:
 
 ```JSON
 {
-    "scan_date": '2020-06-04',
     "minimum_severity": 'Info',
     "active": True,
     "verified": Trued,
@@ -122,11 +118,11 @@ A classic way of reimporting a scan is by specifying the ID of the test instead:
 
 ## Using the Scan Completion Date (API: `scan_date`) field
 
-DefectDojo offers a plethora of supported scanner reports, but not all of them contain the 
+DefectDojo offers a plethora of supported scanner reports, but not all of them contain the
 information most important to a user. The `scan_date` field is a flexible smart feature that
 allows users to set the completion date of the a given scan report, and have it propagate
-down to all the findings imported. This field is **not** mandatory, but the default value for 
-this field is the date of import (whenever the request is processed and a successful response is returned). 
+down to all the findings imported. This field is **not** mandatory, but the default value for
+this field is the date of import (whenever the request is processed and a successful response is returned).
 
 Here are the following use cases for using this field:
 

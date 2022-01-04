@@ -28,7 +28,7 @@ from dojo.forms import NoteForm, TestForm, \
 from dojo.models import Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Test_Import, Product_API_Scan_Configuration
 
-from dojo.tools.factory import get_choices_sorted
+from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
     Product_Tab, is_scan_file_too_large, get_words_for_field
 from dojo.notifications.helper import create_notification
@@ -685,5 +685,5 @@ def re_import_scan_results(request, tid):
                    'eid': engagement.id,
                    'additional_message': additional_message,
                    'jform': jform,
-                   'scan_types': get_choices_sorted(),
+                   'scan_types': get_scan_types_sorted(),
                    })

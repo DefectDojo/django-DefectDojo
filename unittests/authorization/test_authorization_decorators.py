@@ -6,7 +6,7 @@ from ..dojo_test_case import DojoTestCase
 from unittest.mock import patch, Mock
 from dojo.models import Product_Type
 from django.test import RequestFactory
-from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
 
 
@@ -72,3 +72,29 @@ class TestAuthorizationDecorators(DojoTestCase):
 
         mock_shortcuts_get.assert_called_once()
         mock_user_has_permission.assert_called_with(self.user, self.product_type, Permissions.Product_Type_View)
+
+
+class TestConfigurationAuthorizationDecorators(DojoTestCase):
+
+    def setUp(self):
+        self.request = RequestFactory().get('/dummy')
+        self.user = User()
+        self.request.user = self.user
+        self.decorated_func = user_is_configuration_authorized('test', 'testLegacy', Mock())
+
+    @patch('dojo.authorization.authorization_decorators.user_has_configuration_permission')
+    def test_authorization_user_has_configuration_permission_ok(self, mock):
+        mock.return_value = True
+
+        self.decorated_func(self.request)
+
+        mock.assert_called_with(self.user, 'test', 'testLegacy')
+
+    @patch('dojo.authorization.authorization_decorators.user_has_configuration_permission')
+    def test_authorization_user_has_configuration_permission_denied(self, mock):
+        mock.return_value = False
+
+        with self.assertRaises(PermissionDenied):
+            self.decorated_func(self.request)
+
+        mock.assert_called_with(self.user, 'test', 'testLegacy')
