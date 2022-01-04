@@ -61,6 +61,13 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.6.x.
+
+There are no special instruction for upgrading to 2.6.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.6.0) for the contents of the release.
+
+Please consult the security advisories [GHSA-f82x-m585-gj24](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-f82x-m585-gj24) (moderate) and [GHSA-v7fv-g69g-x7p2](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-v7fv-g69g-x7p2) (high) to see what security issues were fixed in this release. These will be published and become visible at January 18th, 2022.
+
+
 ## Upgrading to DefectDojo Version 2.5.x.
 
 Legacy authorization has been completely removed with version 2.5.0. This includes removal of the migration of users
