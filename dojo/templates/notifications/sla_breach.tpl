@@ -31,7 +31,7 @@
                 <br/></br>
                 Kind regards,
                 </br></br>
-                {% if system_settings.team_name and system_settings.team_name %}
+                {% if system_settings.team_name %}
                     {{ system_settings.team_name }}
                 {% else %}
                     Defect Dojo

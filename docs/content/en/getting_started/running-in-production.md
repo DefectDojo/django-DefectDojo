@@ -87,6 +87,8 @@ and see what is in effect.
 
 ###### Asynchronous Imports
 
+This is an experimental features that has some [concerns](https://github.com/DefectDojo/django-DefectDojo/pull/5553#issuecomment-989679555) that need to be addressed before it can be used reliably.
+
 Import and Re-Import can also be configured to handle uploads asynchronously to aid in 
 importing especially large files. It works by batching Findings and Endpoints by a 
 configurable amount. Each batch will be be processed in seperate celery tasks.

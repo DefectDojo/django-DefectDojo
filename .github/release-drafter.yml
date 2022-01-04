@@ -39,6 +39,8 @@ categories:
     labels:
       - 'dependencies'
       - 'maintenance'
+  - title: '🖌 Updates in UI'
+    label: 'ui'
 exclude-labels:
   - 'skip-changelog'      
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
