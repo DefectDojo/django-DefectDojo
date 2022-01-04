@@ -980,10 +980,14 @@ class JiraIssuesTest(BaseClass.RESTEndpointTest):
             "jira_id": "JIRA 1",
             "jira_key": "SOME KEY",
             "finding": 2,
-            "engagement": 2,
         }
-        self.update_fields = {'finding': 2}
-        self.object_permission = False
+        self.update_fields = {'jira_change': '2022-01-02T13:47:38.021481Z'}
+        self.object_permission = True
+        self.permission_check_class = Finding
+        self.permission_check_id = 5
+        self.permission_create = Permissions.Finding_Edit
+        self.permission_update = Permissions.Finding_Edit
+        self.permission_delete = Permissions.Finding_Edit
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1005,7 +1009,12 @@ class JiraProjectTest(BaseClass.RESTEndpointTest):
             "jira_instance": 2,
         }
         self.update_fields = {'jira_instance': 3}
-        self.object_permission = False
+        self.object_permission = True
+        self.permission_check_class = Product
+        self.permission_check_id = 1
+        self.permission_create = Permissions.Product_Edit
+        self.permission_update = Permissions.Product_Edit
+        self.permission_delete = Permissions.Product_Edit
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1195,9 +1204,15 @@ class ToolProductSettingsTest(BaseClass.RESTEndpointTest):
             "description": "test tool product setting",
             "tool_project_id": "1",
             "tool_configuration": 3,
+            "product": 2,
         }
         self.update_fields = {'tool_project_id': '2'}
-        self.object_permission = False
+        self.object_permission = True
+        self.permission_check_class = Product
+        self.permission_check_id = 1
+        self.permission_create = Permissions.Product_Edit
+        self.permission_update = Permissions.Product_Edit
+        self.permission_delete = Permissions.Product_Edit
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

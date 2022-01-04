@@ -54,21 +54,25 @@
                           <i class="fa fa-list-alt"></i> View API Scan Configurations
                       </a>
                   </li>
-                  {% if system_settings.enable_product_tracking_files %}
+                {% endif %}
+                {% if system_settings.enable_product_tracking_files %}
                   <li role="separator" class="divider"></li>
+                  {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
                   <li role="presentation">
                     <a class="" href="{% url 'new_object' prod.id %}">
                         <i class="fa fa-plus"></i> Add Product Tracking Files
                     </a>
                   </li>
+                  {% endif %}
+                  {% if prod|has_object_permission:"Product_Tracking_Files_View" %}
                   <li role="presentation">
                     <a href="{% url 'view_objects' prod.id %}">
                         <i class="fa fa-list-alt"></i> View Product Tracking Files
                     </a>
                   </li>
                   {% endif %}
-                  <li role="separator" class="divider"></li>
                 {% endif %}
+                <li role="separator" class="divider"></li>
                 <li role="presentation">
                   <a href="{% url 'product_report' prod.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
                       <i class="fa fa-file-text-o"></i> Product Report
