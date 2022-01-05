@@ -91,7 +91,7 @@ USER root
 RUN \
     # Set a known user and group with a higher number uid/git
     addgroup --gid ${gid} ${appuser} && \
-    adduser --no-create-home --disabled-password --shell /usr/sbin/nologin \
+    adduser --no-create-home --disabled-password \
             --gecos 'DefectDojo' --uid ${uid} --gid ${gid} ${appuser} && \
     chown -R root:root /app && \
     chmod -R u+rwX,go+rX,go-w /app && \
