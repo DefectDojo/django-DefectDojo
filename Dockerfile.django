@@ -144,4 +144,5 @@ ENV \
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
 FROM django as django-unittests
+USER root
 COPY unittests/ ./unittests/
