@@ -20,9 +20,6 @@ def get_authorized_cred_mappings(permission, queryset=None):
     if user.is_superuser:
         return cred_mappings
 
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return cred_mappings
-
     if user_has_global_permission(user, permission):
         return cred_mappings
 
