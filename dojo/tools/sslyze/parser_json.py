@@ -147,7 +147,7 @@ def get_heartbleed(node, test, endpoint):
                     title = 'Heartbleed'
                     description = get_url(endpoint) + ' is vulnerable to heartbleed'
                     cve = 'CVE-2014-0160'
-                    return get_finding(title, description, cve, None, test, endpoint)  
+                    return get_finding(title, description, cve, None, test, endpoint)
     return None
 
 
