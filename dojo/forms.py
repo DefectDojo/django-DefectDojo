@@ -3158,11 +3158,13 @@ class ConfigurationPermissionsForm(forms.Form):
         super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
 
         permission_fields_1 = [
+            Permission_Helper(name='cred user', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='permission', app='auth', change=True),
             Permission_Helper(name='development environment', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='group', app='auth', view=True, add=True),
             Permission_Helper(name='language type', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='bannerconf', app='dojo', change=True),
             Permission_Helper(name='product type', app='dojo', add=True),
         ]
 
@@ -3176,6 +3178,7 @@ class ConfigurationPermissionsForm(forms.Form):
 
         permission_fields_2 = [
             Permission_Helper(name='test type', app='dojo', view=True, add=True, change=True),
+            Permission_Helper(name='tool configuration', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='user', app='auth', view=True),
         ]
@@ -3227,9 +3230,13 @@ class Permission_Helper:
         self.delete = kwargs.pop('delete', False)
 
     def display_name(self):
-        if self.name == 'engagement survey':
+        if self.name == 'bannerconf':
+            return 'Login Banner'
+        elif self.name == 'cred user':
+            return 'Credentials'
+        elif self.name == 'engagement survey':
             return 'Questionnaires'
-        if self.name == 'permission':
+        elif self.name == 'permission':
             return 'Configuration Permissions'
         else:
             return self.name.title() + 's'

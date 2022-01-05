@@ -368,16 +368,18 @@
                                         <span>Configuration</span>
                                     </a>
                                     <ul class="nav nav-second-level">
-                                        {% if request.user.is_superuser %}
-                                        {% if system_settings.enable_credentials %}
+                                        {% if system_settings.enable_credentials and "dojo.view_cred_user"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'cred' %}">Credential Manager </a></li>
                                         {% endif %}
+                                        {% if request.user.is_superuser %}
                                         {% if system_settings.enable_jira %}
                                         <li><a href="{% url 'jira' %}">JIRA </a></li>
                                         {% endif %}
                                         {% if system_settings.enable_github %}
                                         <li><a href="{% url 'github' %}">GitHub </a></li>
                                         {% endif %}
+                                        {% endif %}
+                                        {% if "dojo.view_tool_configuration"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'tool_config' %}">Tool Configuration </a></li>
                                         {% endif %}
                                         {% if "dojo.view_tool_type"|has_configuration_permission:"superuser" %}
@@ -391,6 +393,8 @@
                                         <li><a href="{% url 'system_settings' %}">System Settings </a></li>
                                         <li><a href="{% url 'note_type' %}">Note Types </a></li>
                                         <li><a href="{% url 'configure_google_sheets' %}">Google Sheets Sync</a></li>
+                                        {% endif %}
+                                        {% if "dojo.change_bannerconf"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'configure_banner' %}">Login banner</a></li>
                                         {% endif %}
                                         <li><a href="{% url 'notifications' %}">Notifications</a></li>
