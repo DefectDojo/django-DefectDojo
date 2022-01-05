@@ -213,7 +213,13 @@ class DojoDefaultReImporter(object):
                     finding.save(push_to_jira=push_to_jira)
 
         to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
-        untouched = set(unchanged_items) - set(to_mitigate)
+        # due to #3958 we can have duplicates inside the same report
+        # this could mean that a new finding is created and right after
+        # that it is detected as the 'matched existing finding' for a
+        # following finding in the same report
+        # this means untouched can have this finding inside it,
+        # while it is in fact a new finding. So we substract new_items
+        untouched = set(unchanged_items) - set(to_mitigate) - set(new_items)
 
         if settings.FEATURE_FINDING_GROUPS and push_to_jira:
             for finding_group in set([finding.finding_group for finding in reactivated_items + unchanged_items + new_items if finding.finding_group is not None]):
@@ -342,11 +348,12 @@ class DojoDefaultReImporter(object):
         logger.debug('REIMPORT_SCAN: Updating test/engagement timestamps')
         importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
 
+        test_import = None
         if settings.TRACK_IMPORT_HISTORY:
             logger.debug('REIMPORT_SCAN: Updating Import History')
-            importer_utils.update_import_history(Test_Import.REIMPORT_TYPE, active, verified, tags, minimum_severity, endpoints_to_add,
-                                                 version, branch_tag, build_id, commit_hash, push_to_jira, close_old_findings,
-                                                 test, new_findings, closed_findings, reactivated_findings)
+            test_import = importer_utils.update_import_history(Test_Import.REIMPORT_TYPE, active, verified, tags, minimum_severity, endpoints_to_add,
+                                                                version, branch_tag, build_id, commit_hash, push_to_jira, close_old_findings,
+                                                                test, new_findings, closed_findings, reactivated_findings, untouched_findings)
 
         logger.debug('REIMPORT_SCAN: Generating notifications')
 
@@ -357,4 +364,4 @@ class DojoDefaultReImporter(object):
 
         logger.debug('REIMPORT_SCAN: Done')
 
-        return test, updated_count, len(new_findings), len(closed_findings), len(reactivated_findings), len(untouched_findings)
+        return test, updated_count, len(new_findings), len(closed_findings), len(reactivated_findings), len(untouched_findings), test_import
