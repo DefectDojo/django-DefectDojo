@@ -103,7 +103,7 @@ RUN \
     chmod g+x /entrypoint-* && \
     mkdir /var/run/${appuser} && \
     chown ${appuser}:${appuser} /var/run/${appuser} && \
-    mkdir -p media/threat && chown -R ${uid}:${gid} media
+    mkdir -p media/threat && chown -R ${appuser}:${appuser} media
 USER ${uid}
 ENV \
   DD_ADMIN_USER=admin \
