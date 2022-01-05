@@ -1516,7 +1516,7 @@ class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
     serializer_class = serializers.DevelopmentEnvironmentSerializer
     queryset = Development_Environment.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
 # Authorization: object-based
@@ -1684,7 +1684,7 @@ class TestTypesViewSet(mixins.ListModelMixin,
     queryset = Test_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('name',)
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
 @extend_schema_view(
