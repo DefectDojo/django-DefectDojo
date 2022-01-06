@@ -90,14 +90,12 @@ USER root
 RUN \
     adduser --system --no-create-home --disabled-password --gecos '' \
         --uid ${uid} ${appuser} && \
-    chown -R ${appuser} /app && \
-    chmod 0700 /app && \
-    chmod 0750 -R /app/* && \
-	chmod g=u /app && \
-	chmod -R g=u /app/* && \
+    chown -R root:root /app && \
+    chmod -R u+rwX,go+rX,go-w /app && \
     mkdir /var/run/${appuser} && \
     chown ${appuser} /var/run/${appuser} && \
-	chmod g=u /var/run/${appuser}
+	  chmod g=u /var/run/${appuser} && \
+    mkdir -p media/threat && chown -R ${uid} media
 USER ${uid}
 ENV \
   DD_ADMIN_USER=admin \
@@ -135,7 +133,6 @@ ENV \
   DD_UWSGI_NUM_OF_THREADS="2" \
   DD_TRACK_MIGRATIONS="True" \
   DD_DJANGO_METRICS_ENABLED="False"
-RUN mkdir -p media && mkdir -p media/threat && chown -R ${uid} media
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
 FROM django as django-unittests

@@ -1,5 +1,4 @@
 import base64
-import datetime
 import logging
 
 import dojo.finding.helper as finding_helper
@@ -13,7 +12,7 @@ from django.core import serializers
 from django.core.files.base import ContentFile
 from django.utils import timezone
 from dojo.importers import utils as importer_utils
-from dojo.models import (BurpRawRequestResponse, Finding,
+from dojo.models import (BurpRawRequestResponse, FileUpload, Finding,
                          Notes, Test_Import)
 from dojo.tools.factory import get_parser
 from dojo.utils import get_current_user
@@ -27,7 +26,7 @@ class DojoDefaultReImporter(object):
     @dojo_async_task
     @app.task(ignore_result=False)
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, **kwargs):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None, **kwargs):
 
         items = parsed_findings
         original_items = list(test.finding_set.all())
@@ -140,6 +139,11 @@ class DojoDefaultReImporter(object):
                 item.last_reviewed_by = user
                 item.verified = verified
                 item.active = active
+
+                # if scan_date was provided, override value from parser
+                if scan_date:
+                    item.date = scan_date
+
                 # Save it. Don't dedupe before endpoints are added.
                 item.save(dedupe_option=False)
                 logger.debug('%i: reimport created new finding as no existing finding match: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
@@ -190,12 +194,12 @@ class DojoDefaultReImporter(object):
                     for unsaved_file in item.unsaved_files:
                         data = base64.b64decode(unsaved_file.get('data'))
                         title = unsaved_file.get('title', '<No title>')
-                        file_upload = FileUpload(
+                        file_upload, file_upload_created = FileUpload.objects.get_or_create(
                             title=title,
-                            file=ContentFile(data, name=title)
                         )
+                        file_upload.file.save(title, ContentFile(data))
                         file_upload.save()
-                        item.files.add(file_upload)
+                        finding.files.add(file_upload)
 
                 # existing findings may be from before we had component_name/version fields
                 finding.component_name = finding.component_name if finding.component_name else component_name
@@ -272,10 +276,6 @@ class DojoDefaultReImporter(object):
         user = user or get_current_user()
 
         now = timezone.now()
-        # retain weird existing logic to use current time for provided scan date
-        scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
-        if settings.USE_TZ:
-            scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
 
         if api_scan_configuration:
             if api_scan_configuration.product != test.engagement.product:
@@ -311,7 +311,7 @@ class DojoDefaultReImporter(object):
             for findings_list in chunk_list:
                 result = self.process_parsed_findings(test, findings_list, scan_type, user, active, verified,
                                                       minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
-                                                      push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, sync=False)
+                                                      push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False)
                 # Since I dont want to wait until the task is done right now, save the id
                 # So I can check on the task later
                 results_list += [result]
@@ -332,15 +332,15 @@ class DojoDefaultReImporter(object):
             new_findings, reactivated_findings, findings_to_mitigate, untouched_findings = \
                 self.process_parsed_findings(test, parsed_findings, scan_type, user, active, verified,
                                              minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
-                                             push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, sync=True)
+                                             push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True)
 
         closed_findings = []
         if close_old_findings:
             logger.debug('REIMPORT_SCAN: Closing findings no longer present in scan report')
-            closed_findings = self.close_old_findings(test, findings_to_mitigate, scan_date_time, user=user, push_to_jira=push_to_jira)
+            closed_findings = self.close_old_findings(test, findings_to_mitigate, scan_date, user=user, push_to_jira=push_to_jira)
 
         logger.debug('REIMPORT_SCAN: Updating test/engagement timestamps')
-        importer_utils.update_timestamps(test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time)
+        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
 
         if settings.TRACK_IMPORT_HISTORY:
             logger.debug('REIMPORT_SCAN: Updating Import History')

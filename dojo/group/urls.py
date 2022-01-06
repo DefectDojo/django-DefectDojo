@@ -20,5 +20,7 @@ urlpatterns = [
     url(r'group/member/(?P<mid>\d+)/edit_group_member', views.edit_group_member,
         name='edit_group_member'),
     url(r'group/member/(?P<mid>\d+)/delete_group_member', views.delete_group_member,
-        name='delete_group_member')
+        name='delete_group_member'),
+    url(r'^group/(?P<gid>\d+)/edit_permissions$', views.edit_permissions,
+        name='edit_group_permissions')
 ]

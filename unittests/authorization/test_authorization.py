@@ -8,7 +8,7 @@ from dojo.models import Dojo_User, Product_Type, Product_Type_Member, Product, P
     Languages, App_Analysis, Stub_Finding
 import dojo.authorization.authorization
 from dojo.authorization.authorization import role_has_permission, get_roles_for_permission, user_has_global_permission, \
-    user_has_permission_or_403, user_has_permission, \
+    user_has_permission_or_403, user_has_permission, user_has_configuration_permission, \
     RoleDoesNotExistError, PermissionDoesNotExistError
 from dojo.authorization.roles_permissions import Permissions, Roles
 
@@ -616,3 +616,34 @@ class TestAuthorization(DojoTestCase):
 
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(user=self.user)
+
+    @override_settings(FEATURE_CONFIGURATION_AUTHORIZATION=False)
+    def test_configuration_permission_legacy_staff(self):
+        self.user.is_staff = True
+        self.assertTrue(user_has_configuration_permission(self.user, None, 'staff'))
+        self.user.is_staff = False
+
+    @override_settings(FEATURE_CONFIGURATION_AUTHORIZATION=False)
+    def test_configuration_permission_legacy_superuser(self):
+        self.user.is_superuser = True
+        self.assertTrue(user_has_configuration_permission(self.user, None, 'superuser'))
+        self.user.is_superuser = False
+
+    @override_settings(FEATURE_CONFIGURATION_AUTHORIZATION=False)
+    def test_configuration_permission_legacy_exception(self):
+        with self.assertRaisesMessage(Exception, 'test is not allowed for parameter legacy'):
+            user_has_configuration_permission(self.user, None, 'test')
+
+    @override_settings(FEATURE_CONFIGURATION_AUTHORIZATION=True)
+    @patch('django.contrib.auth.models.User.has_perm')
+    def test_configuration_permission_true(self, mock):
+        mock.return_value = True
+        self.assertTrue(user_has_configuration_permission(self.user, 'test', 'test'))
+        mock.assert_called_with('test')
+
+    @override_settings(FEATURE_CONFIGURATION_AUTHORIZATION=True)
+    @patch('django.contrib.auth.models.User.has_perm')
+    def test_configuration_permission_false(self, mock):
+        mock.return_value = False
+        self.assertFalse(user_has_configuration_permission(self.user, 'test', 'test'))
+        mock.assert_called_with('test')
