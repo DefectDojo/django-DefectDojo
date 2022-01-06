@@ -1,6 +1,5 @@
 from crum import get_current_user
 from django.db.models import Exists, OuterRef
-from django.conf import settings
 from dojo.models import Dojo_Group, Dojo_Group_Member, Product_Group, Product_Type_Group, Role
 from dojo.authorization.authorization import get_roles_for_permission
 from dojo.authorization.roles_permissions import Permissions
