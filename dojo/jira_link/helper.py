@@ -507,7 +507,7 @@ def jira_summary(obj):
     if type(obj) == Finding_Group:
         summary = obj.name
 
-    return summary.replace('\r', '').replace('\n', '')
+    return summary.replace('\r', '').replace('\n', '')[:255]
 
 
 def jira_description(obj):

@@ -29,6 +29,7 @@ RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 FROM base as django
 WORKDIR /app
 ARG uid=1001
+ARG gid=1337
 ARG appuser=defectdojo
 ENV appuser ${appuser}
 RUN \
@@ -88,16 +89,18 @@ RUN \
   true
 USER root
 RUN \
+    addgroup --gid ${gid} ${appuser} && \
     adduser --system --no-create-home --disabled-password --gecos '' \
-        --uid ${uid} ${appuser} && \
-    chown -R ${appuser} /app && \
-    chmod 0700 /app && \
-    chmod 0750 -R /app/* && \
-	chmod g=u /app && \
-	chmod -R g=u /app/* && \
+        --uid ${uid} --gid ${gid} ${appuser} && \
+    chown -R root:root /app && \
+    chmod -R u+rwX,go+rX,go-w /app && \
+    # Allow for bind mounting local_settings.py and other setting overrides
+    chown -R root:${appuser} /app/dojo/settings && \
+    chmod -R 775 /app/dojo/settings && \
     mkdir /var/run/${appuser} && \
     chown ${appuser} /var/run/${appuser} && \
-	chmod g=u /var/run/${appuser}
+	  chmod g=u /var/run/${appuser} && \
+    mkdir -p media/threat && chown -R ${uid} media
 USER ${uid}
 ENV \
   DD_ADMIN_USER=admin \
@@ -135,7 +138,6 @@ ENV \
   DD_UWSGI_NUM_OF_THREADS="2" \
   DD_TRACK_MIGRATIONS="True" \
   DD_DJANGO_METRICS_ENABLED="False"
-RUN mkdir -p media && mkdir -p media/threat && chown -R ${uid} media
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
 FROM django as django-unittests

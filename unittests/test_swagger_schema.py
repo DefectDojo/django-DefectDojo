@@ -522,8 +522,7 @@ class JiraFindingMappingsTest(BaseClass.SchemaTest):
         self.model = JIRA_Issue
         self.serializer = JIRAIssueSerializer
         self.field_transformers = {
-            "finding": lambda v: 2,
-            "engagement": lambda v: 2
+            "finding": lambda v: 3,
         }
 
 

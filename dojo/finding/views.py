@@ -8,7 +8,6 @@ from django.db import models
 from django.db.models.functions import Length
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core import serializers
 from django.urls import reverse
@@ -25,15 +24,14 @@ from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
-
 from dojo.filters import TemplateFindingFilter, SimilarFindingFilter, FindingFilter, AcceptedFindingFilter
 from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
-from dojo.models import Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
+from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, Endpoint_Status, \
-    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
+    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, Test_Import_Finding_Action, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, \
     redirect_to_return_url_or_else, get_return_url, add_external_issue, update_external_issue, \
@@ -42,11 +40,12 @@ from dojo.notifications.helper import create_notification
 
 from django.template.defaultfilters import pluralize
 from django.db.models import Q, QuerySet, Count
+from django.db.models.query import Prefetch
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
 
@@ -206,7 +205,10 @@ def prefetch_for_findings(findings, prefetch_type='all'):
             prefetched_findings = prefetched_findings.prefetch_related('original_finding')
             prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
 
-        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
+        # filter out noop reimport actions from finding status history
+        prefetched_findings = prefetched_findings.prefetch_related(Prefetch('test_import_finding_action_set',
+                                                                            queryset=Test_Import_Finding_Action.objects.exclude(action=IMPORT_UNTOUCHED_FINDING)))
+
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
@@ -237,7 +239,10 @@ def prefetch_for_similar_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
         prefetched_findings = prefetched_findings.prefetch_related('original_finding')
         prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
-        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
+        # filter out noop reimport actions from finding status history
+        prefetched_findings = prefetched_findings.prefetch_related(Prefetch('test_import_finding_action_set',
+                                                                            queryset=Test_Import_Finding_Action.objects.exclude(action=IMPORT_UNTOUCHED_FINDING)))
+
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
@@ -289,6 +294,7 @@ def view_finding(request, fid):
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
     if request.method == 'POST':
+        user_has_permission_or_403(request.user, finding, Permissions.Note_Add)
         if note_type_activation:
             form = TypedNoteForm(request.POST, available_note_types=available_note_types)
         else:
@@ -1011,7 +1017,7 @@ def clear_finding_review(request, fid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_finding_template', 'staff')
 def mktemplate(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     templates = Finding_Template.objects.filter(title=finding.title)
@@ -1047,7 +1053,8 @@ def mktemplate(request, fid):
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
 def find_template_to_apply(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
@@ -1086,7 +1093,7 @@ def find_template_to_apply(request, fid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
@@ -1104,7 +1111,7 @@ def choose_finding_template_options(request, tid, fid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def apply_template_to_finding(request, fid, tid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
@@ -1342,7 +1349,7 @@ def promote_to_finding(request, fid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
 def templates(request):
     templates = Finding_Template.objects.all().order_by('cwe')
     templates = TemplateFindingFilter(request.GET, queryset=templates)
@@ -1360,7 +1367,7 @@ def templates(request):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize('json', Finding_Template.objects.all())
     return HttpResponse(leads_as_json, content_type='json')
@@ -1411,7 +1418,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
     return count
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_finding_template', 'staff')
 def add_template(request):
     form = FindingTemplateForm()
     if request.method == 'POST':
@@ -1445,7 +1452,7 @@ def add_template(request):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.change_finding_template', 'staff')
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = FindingTemplateForm(instance=template)
@@ -1487,7 +1494,7 @@ def edit_template(request, tid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.delete_finding_template', 'staff')
 def delete_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
 

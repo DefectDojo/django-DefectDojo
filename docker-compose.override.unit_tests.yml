@@ -2,7 +2,7 @@
 version: '3.7'
 services:
   nginx:
-    image: busybox:1.34.1-musl
+    image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'nginx']
     volumes:
       - defectdojo_media_unittest:/usr/share/nginx/html/media
@@ -25,13 +25,13 @@ services:
       DD_CELERY_BROKER_PATH: '/dojo.celerydb.sqlite'
       DD_CELERY_BROKER_PARAMS: ''
   celerybeat:
-    image: busybox:1.34.1-musl
+    image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'celery beat']
   celeryworker:
-    image: busybox:1.34.1-musl
+    image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'celery worker']
   initializer:
-    image: busybox:1.34.1-musl
+    image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'initializer']
   mysql:
     ports:
@@ -44,7 +44,7 @@ services:
     volumes:
        - defectdojo_data_unittest:/var/lib/mysql
   rabbitmq:
-    image: busybox:1.34.0-musl
+    image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'rabbitmq']
 volumes:
   defectdojo_data_unittest: {}

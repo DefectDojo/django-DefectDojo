@@ -39,10 +39,10 @@ Navigate to <http://localhost:8080>.
 
 ## Documentation
 
-- [Official docs](https://defectdojo.github.io/django-DefectDojo/) ([latest](https://defectdojo.github.io/django-DefectDojo/) | [dev](https://defectdojo.github.io/django-DefectDojo/dev))
+- [Official Docs](https://defectdojo.github.io/django-DefectDojo/) ([latest](https://defectdojo.github.io/django-DefectDojo/) | [dev](https://defectdojo.github.io/django-DefectDojo/dev))
 - [REST APIs](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/)
 - [Client APIs and Wrappers](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/#clients--api-wrappers)
-- [Authentication options](readme-docs/AVAILABLE-PLUGINS.md)
+- [Authentication Options](readme-docs/AVAILABLE-PLUGINS.md)
 
 ## Supported Installation Options
 
@@ -78,19 +78,16 @@ DefectDojo is maintained by:
 
 Core Moderators can help you with pull requests or feedback on dev ideas:
 * Valentijn Scholten ([@valentijnscholten](https://github.com/valentijnscholten) | [sponsor](https://github.com/sponsors/valentijnscholten) | [linkedin](https://www.linkedin.com/in/valentijn-scholten/))
-* Fred Blaise ([@madchap](https://github.com/madchap) | [linkedin](https://www.linkedin.com/in/fredblaise/))
 * Cody Maffucci ([@Maffooch](https://github.com/maffooch) | [linkedin](https://www.linkedin.com/in/cody-maffucci))
 
 Moderators can help you with pull requests or feedback on dev ideas:
 * Damien Carol ([@damnielcarol](https://github.com/damiencarol) | [linkedin](https://www.linkedin.com/in/damien-carol/))
 * Stefan Fleckenstein ([@StefanFl](https://github.com/stefanfl) | ([linkedin](https://www.linkedin.com/in/stefan-fleckenstein-6a456a30/))
 * Jannik Jürgens ([@alles-klar](https://github.com/alles-klar))
-* Pascal Trovatelli ([@ptrovatelli](https://github.com/ptrovatelli) | [Sopra Steria](https://www.soprasteria.com/))
-* Alex Dracea ([linkedin](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/))
 
 
 ## Hall of Fame
-
+* Fred Blaise ([@madchap](https://github.com/madchap) | [linkedin](https://www.linkedin.com/in/fredblaise/)) - Fred served as a core moderator during a critical time for DefectDojo. He contributed code, helped the team stay organized, and architected important policies and procedures.
 * Charles Neill ([@ccneill](https://twitter.com/ccneill)) – Charles served as a
     DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
 * Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo

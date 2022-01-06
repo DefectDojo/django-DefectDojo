@@ -941,6 +941,7 @@ def import_history(finding, autoescape=True):
     else:
         esc = lambda x: x
 
+    # prefetched, so no filtering here
     status_changes = finding.test_import_finding_action_set.all()
 
     if not status_changes or len(status_changes) < 2:

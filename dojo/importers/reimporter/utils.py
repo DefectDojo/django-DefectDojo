@@ -118,7 +118,7 @@ def get_target_product_if_exists(product_name=None, product_type_name=None):
         if product:
             # product type name must match if provided
             if product_type_name:
-                if product.product_type.name == product_type_name:
+                if product.prod_type.name == product_type_name:
                     return product
             else:
                 return product
@@ -177,45 +177,49 @@ def get_target_test_if_exists(test_id=None, test_title=None, scan_type=None, eng
 
 
 def get_or_create_product(product_name=None, product_type_name=None, auto_create_context=None):
+    # try to find the product (withing the provided product_type)
     product = get_target_product_if_exists(product_name, product_type_name)
     if product:
         return product
 
+    # not found .... create it
     if not auto_create_context:
         raise ValueError('auto_create_context not True, unable to create non-existing product')
+    else:
+        product_type, created = Product_Type.objects.get_or_create(name=product_type_name)
+        if created:
+            member = Product_Type_Member()
+            member.user = get_current_user()
+            member.product_type = product_type
+            member.role = Role.objects.get(is_owner=True)
+            member.save()
 
-    product_type, created = Product_Type.objects.get_or_create(name=product_type_name)
-    if created:
-        member = Product_Type_Member()
+        product = Product.objects.create(name=product_name, prod_type=product_type)
+        member = Product_Member()
         member.user = get_current_user()
-        member.product_type = product_type
+        member.product = product
         member.role = Role.objects.get(is_owner=True)
         member.save()
 
-    product = Product.objects.create(name=product_name, prod_type=product_type)
-    member = Product_Member()
-    member.user = get_current_user()
-    member.product = product
-    member.role = Role.objects.get(is_owner=True)
-    member.save()
-
-    return product
+        return product
 
 
 def get_or_create_engagement(engagement_id=None, engagement_name=None, product_name=None, product_type_name=None, auto_create_context=None):
+    # try to find the engagement (and product)
     product = get_target_product_if_exists(product_name, product_type_name)
     engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
     if engagement:
         return engagement
 
-    product = get_or_create_product(product_name, product_type_name, auto_create_context)
-
+    # not found .... create it
     if not auto_create_context:
         raise ValueError('auto_create_context not True, unable to create non-existing engagement')
+    else:
+        product = get_or_create_product(product_name, product_type_name, auto_create_context)
 
-    if not product:
-        raise ValueError('no product, unable to create engagement')
+        if not product:
+            raise ValueError('no product, unable to create engagement')
 
-    engagement = Engagement.objects.create(engagement_type="CI/CD", name=engagement_name, product=product, lead=get_current_user(), target_start=timezone.now().date(), target_end=(timezone.now() + timedelta(days=365)).date())
+        engagement = Engagement.objects.create(engagement_type="CI/CD", name=engagement_name, product=product, lead=get_current_user(), target_start=timezone.now().date(), target_end=(timezone.now() + timedelta(days=365)).date())
 
-    return engagement
+        return engagement

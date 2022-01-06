@@ -395,7 +395,9 @@ class ImportScanForm(forms.Form):
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
     api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
-    service = forms.CharField(max_length=200, required=False, help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
+    service = forms.CharField(max_length=200, required=False,
+        help_text="A service is a self-contained piece of functionality within a Product. "
+                  "This is an optional field which is used in deduplication and closing of old findings when set.")
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
@@ -403,7 +405,8 @@ class ImportScanForm(forms.Form):
         label="Choose report file",
         required=False)
 
-    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing."
+    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
+                                                        "If service has been set, only the findings for this service will be closed. "
                                                         "This affects the whole engagement/product depending on your deduplication scope.",
                                             required=False, initial=False)
 
@@ -443,11 +446,8 @@ class ImportScanForm(forms.Form):
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
-        date = self.cleaned_data['scan_date']
-        # scan_date is no longer deafulted to "today" at import time, so set it here if necessary
-        if not date:
-            return None
-        if date.date() > datetime.today().date():
+        date = self.cleaned_data.get('scan_date', None)
+        if date and date.date() > datetime.today().date():
             raise forms.ValidationError("The date cannot be in the future!")
         return date
 
@@ -458,10 +458,9 @@ class ImportScanForm(forms.Form):
 
 class ReImportScanForm(forms.Form):
     scan_date = forms.DateTimeField(
-        required=True,
+        required=False,
         label="Scan Completion Date",
         help_text="Scan completion date will be used on all findings.",
-        initial=datetime.now().strftime("%m/%d/%Y"),
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
@@ -515,8 +514,8 @@ class ReImportScanForm(forms.Form):
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
-        date = self.cleaned_data['scan_date']
-        if date.date() > timezone.localtime(timezone.now()).date():
+        date = self.cleaned_data.get('scan_date', None)
+        if date and date.date() > timezone.localtime(timezone.now()).date():
             raise forms.ValidationError("The date cannot be in the future!")
         return date
 
@@ -1824,7 +1823,7 @@ class Delete_Product_Type_GroupForm(Edit_Product_Type_Group_Form):
 class DojoUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DojoUserForm, self).__init__(*args, **kwargs)
-        if not get_current_user().is_superuser and not settings.USER_PROFILE_EDITABLE:
+        if not get_current_user().is_superuser and not get_system_setting('enable_user_profile_editable'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -1912,7 +1911,7 @@ class UserContactInfoForm(forms.ModelForm):
         current_user = get_current_user()
         if not current_user.is_superuser:
             del self.fields['force_password_reset']
-            if not settings.USER_PROFILE_EDITABLE:
+            if not get_system_setting('enable_user_profile_editable'):
                 for field in self.fields:
                     self.fields[field].disabled = True
 
@@ -3170,12 +3169,27 @@ class ConfigurationPermissionsForm(forms.Form):
         self.group = kwargs.pop('group', None)
         super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
 
-        self.permission_fields = [
+        if get_system_setting('enable_questionnaires'):
+            questionnaire_permissions = [
+                Permission_Helper(name='engagement survey', app='dojo', view=True, add=True, change=True, delete=True),
+                Permission_Helper(name='question', app='dojo', view=True, add=True, change=True),
+            ]
+        else:
+            questionnaire_permissions = []
+
+        permission_fields_1 = [
+            Permission_Helper(name='development environment', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='group', app='auth', view=True, add=True),
-            Permission_Helper(name='permission', app='auth', change=True),
+            Permission_Helper(name='permission', app='auth', change=True)
+        ]
+        permission_fields_2 = [
+            Permission_Helper(name='test type', app='dojo', view=True, add=True, change=True),
             Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
         ]
+
+        self.permission_fields = permission_fields_1 + questionnaire_permissions + permission_fields_2
 
         for permission_field in self.permission_fields:
             for codename in permission_field.codenames():
@@ -3220,6 +3234,12 @@ class Permission_Helper:
         self.add = kwargs.pop('add', False)
         self.change = kwargs.pop('change', False)
         self.delete = kwargs.pop('delete', False)
+
+    def display_name(self):
+        if self.name == 'engagement survey':
+            return 'Questionnaire'
+        else:
+            return self.name.title()
 
     def view_codename(self):
         if self.view:

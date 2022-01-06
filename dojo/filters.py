@@ -1904,7 +1904,7 @@ class ReportFindingFilter(FindingFilterWithTags):
         model = Finding
         # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references', 'test', 'sonarqube_issue'
+                   'endpoint', 'references', 'test', 'sonarqube_issue',
                    'thread_id', 'notes', 'endpoints', 'endpoint_status',
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
@@ -1967,12 +1967,6 @@ class UserFilter(DojoFilter):
     last_name = CharFilter(lookup_expr='icontains')
     username = CharFilter(lookup_expr='icontains')
     email = CharFilter(lookup_expr='icontains')
-    product_type = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.all(),
-        label="Authorized Product Type")
-    product = ModelMultipleChoiceFilter(
-        queryset=Product.objects.all(),
-        label="Authorized Product")
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1984,6 +1978,7 @@ class UserFilter(DojoFilter):
             ('is_active', 'is_active'),
             ('is_staff', 'is_staff'),
             ('is_superuser', 'is_superuser'),
+            ('last_login', 'last_login'),
         ),
         field_labels={
             'username': 'User Name',
@@ -2036,35 +2031,6 @@ class TestImportFilter(DojoFilter):
     class Meta:
         model = Test_Import
         fields = []
-
-
-class EngineerFilter(DojoFilter):
-    o = OrderingFilter(
-        # tuple-mapping retains order
-        fields=(
-            ('username', 'username'),
-            ('last_name', 'last_name'),
-            ('first_name', 'first_name'),
-            ('email', 'email'),
-            ('is_active', 'is_active'),
-            ('is_staff', 'is_staff'),
-            ('is_superuser', 'is_superuser'),
-        ),
-        field_labels={
-            'username': 'User Name',
-            'is_active': 'Active',
-            'is_staff': 'Staff',
-            'is_superuser': 'Superuser',
-        }
-
-    )
-
-    class Meta:
-        model = Dojo_User
-        fields = ['is_staff', 'is_superuser', 'is_active', 'username', 'email',
-                  'last_name', 'first_name']
-        exclude = ['password', 'last_login', 'groups', 'user_permissions',
-                   'date_joined']
 
 
 class LogEntryFilter(DojoFilter):
