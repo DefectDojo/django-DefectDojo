@@ -65,20 +65,36 @@ COPY dojo/ ./dojo/
 
 RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
 
-FROM nginx:1.21.5-alpine@sha256:eb05700fe7baa6890b74278e39b66b2ed1326831f9ec3ed4bdc6361a4ac2f333
-ARG uid=1001
+FROM nginx:1.21.4-alpine@sha256:12aa12ec4a8ca049537dd486044b966b0ba6cd8890c4c900ccb5e7e630e03df0
+
+# Setup defectdojo user & group
+ARG uid=1337
+ARG gid=1337
 ARG appuser=defectdojo
+ENV appuser ${appuser}
+
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
-COPY docker/entrypoint-nginx.sh /
+COPY docker/entrypoint-nginx.sh /entrypoint-nginx.sh
+
+# Setup container user and file permissions
 RUN \
+  adduser -H -D -g 'DefectDojo' -u ${uid} -g ${appuser} ${appuser} && \
+  chown root:${appuser} /entrypoint-* && \
+  chmod 0755 /entrypoint* && \
   apk add --no-cache openssl && \
-  chmod -R g=u /var/cache/nginx && \
+  chmod -R g+x /var/cache/nginx && \
   mkdir /var/run/defectdojo && \
-  chmod -R g=u /var/run/defectdojo && \
+  chown -R root:${appuser} /var/run/defectdojo && \
+  chmod -R g+wx /var/run/defectdojo && \
   mkdir -p /etc/nginx/ssl && \
-  chmod -R g=u /etc/nginx && \
+  chown -R root:${appuser} /etc/nginx/ssl && \
+  chmod -R g+wx /etc/nginx && \
+  chown -R root:${appuser} /var/cache/nginx && \
+  chmod -R g+wx /var/cache/nginx && \
+  mkdir -p /etc/nginx/ssl && \
   true
+
 ENV \
   DD_UWSGI_PASS="uwsgi_server" \
   DD_UWSGI_HOST="uwsgi" \
@@ -88,6 +104,9 @@ ENV \
   NGINX_METRICS_ENABLED="false" \
   METRICS_HTTP_AUTH_USER="" \
   METRICS_HTTP_AUTH_PASSWORD=""
+
 USER ${uid}
+
 EXPOSE 8080
+
 ENTRYPOINT ["/entrypoint-nginx.sh"]

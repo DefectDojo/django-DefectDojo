@@ -27,11 +27,15 @@ COPY requirements.txt ./
 RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM base as django
+
 WORKDIR /app
+
+# Setup defectdojo user and group with 1337 UID/GID
 ARG uid=1337
 ARG gid=1337
 ARG appuser=defectdojo
 ENV appuser ${appuser}
+
 RUN \
   apt-get -y update && \
   # ugly fix to install postgresql-client without errors
@@ -53,6 +57,8 @@ RUN \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
+
+# Python installs from build for requirements.txt
 COPY --from=build /tmp/wheels /tmp/wheels
 COPY requirements.txt ./
 RUN pip3 install \
@@ -61,33 +67,34 @@ RUN pip3 install \
   --find-links=/tmp/wheels \
   -r ./requirements.txt
 
-COPY \
-  docker/entrypoint-celery-beat.sh \
-  docker/entrypoint-celery-worker.sh \
-  docker/entrypoint-initializer.sh \
-  docker/entrypoint-uwsgi.sh \
-  docker/entrypoint-uwsgi-dev.sh \
-  docker/entrypoint-unit-tests.sh \
-  docker/entrypoint-unit-tests-devDocker.sh \
-  docker/wait-for-it.sh \
-  docker/certs/* \
-  /
-COPY wsgi.py manage.py docker/unit-tests.sh ./
-COPY dojo/ ./dojo/
-
+# Copy over needed files from source code
+COPY docker/entrypoint-celery-beat.sh /
+COPY docker/entrypoint-celery-worker.sh /
+COPY docker/entrypoint-initializer.sh /
+COPY docker/entrypoint-uwsgi.sh /
+COPY docker/entrypoint-uwsgi-dev.sh /
+COPY docker/entrypoint-unit-tests.sh /
+COPY docker/entrypoint-unit-tests-devDocker.sh /
+COPY docker/wait-for-it.sh /
+COPY docker/certs/* /
+COPY wsgi.py manage.py docker/unit-tests.sh /app/
+COPY dojo/ /app/dojo/
 # Add extra fixtures to docker image which are loaded by the initializer
 COPY docker/extra_fixtures/* /app/dojo/fixtures/
-
+# Copy over tests
 COPY tests/ ./tests/
+
 RUN \
   # Remove placeholder copied from docker/certs
   rm -f /readme.txt && \
   # Remove placeholder copied from docker/extra_fixtures
   rm -f dojo/fixtures/readme.txt && \
   mkdir -p dojo/migrations && \
-  chmod g=u dojo/migrations && \
+  chmod g+x dojo/migrations && \
   true
+
 USER root
+
 RUN \
     # Set a known user and group with a higher number uid/git
     addgroup --gid ${gid} ${appuser} && \
@@ -97,6 +104,7 @@ RUN \
     chmod -R u+rwX,go+rX,go-w /app && \
     # Allow for bind mounting local_settings.py and other setting overrides
     chown root:${appuser} /app/dojo/settings && \
+    chown root:${appuser} /app/dojo/migrations && \
     chmod 775 /app/dojo/settings && \
     # Allow ${appuser} to run entrypoint scripts
     chown root:defectdojo /entrypoint-* && \
@@ -104,7 +112,9 @@ RUN \
     mkdir /var/run/${appuser} && \
     chown ${appuser}:${appuser} /var/run/${appuser} && \
     mkdir -p media/threat && chown -R ${appuser}:${appuser} media
+
 USER ${uid}
+
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \
@@ -141,8 +151,11 @@ ENV \
   DD_UWSGI_NUM_OF_THREADS="2" \
   DD_TRACK_MIGRATIONS="True" \
   DD_DJANGO_METRICS_ENABLED="False"
+
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
 FROM django as django-unittests
+
 USER root
+
 COPY unittests/ ./unittests/
