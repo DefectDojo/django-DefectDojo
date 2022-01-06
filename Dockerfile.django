@@ -28,8 +28,7 @@ RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM base as django
 WORKDIR /app
-ARG uid=1337
-ARG gid=1337
+ARG uid=1001
 ARG appuser=defectdojo
 ENV appuser ${appuser}
 RUN \
@@ -89,21 +88,14 @@ RUN \
   true
 USER root
 RUN \
-    # Set a known user and group with a higher number uid/git
-    addgroup --gid ${gid} ${appuser} && \
-    adduser --no-create-home --disabled-password \
-            --gecos 'DefectDojo' --uid ${uid} --gid ${gid} ${appuser} && \
+    adduser --system --no-create-home --disabled-password --gecos '' \
+        --uid ${uid} ${appuser} && \
     chown -R root:root /app && \
     chmod -R u+rwX,go+rX,go-w /app && \
-    # Allow for bind mounting local_settings.py and other setting overrides
-    chown root:${appuser} /app/dojo/settings && \
-    chmod 775 /app/dojo/settings && \
-    # Allow ${appuser} to run entrypoint scripts
-    chown root:defectdojo /entrypoint-* && \
-    chmod g+x /entrypoint-* && \
     mkdir /var/run/${appuser} && \
-    chown ${appuser}:${appuser} /var/run/${appuser} && \
-    mkdir -p media/threat && chown -R ${appuser}:${appuser} media
+    chown ${appuser} /var/run/${appuser} && \
+	  chmod g=u /var/run/${appuser} && \
+    mkdir -p media/threat && chown -R ${uid} media
 USER ${uid}
 ENV \
   DD_ADMIN_USER=admin \
@@ -144,5 +136,4 @@ ENV \
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
 FROM django as django-unittests
-USER root
 COPY unittests/ ./unittests/
