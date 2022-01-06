@@ -6,12 +6,13 @@ services:
       context: ./
       dockerfile: Dockerfile.integration-tests
     image: "defectdojo/defectdojo-integration-tests:${INTEGRATION_TESTS_VERSION:-latest}"
+    user: defectdojo # Make user explicit as integration test won't be run in prod
     depends_on:
       - nginx
       - uwsgi
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/app/docker/entrypoint-integration-tests.sh']
+    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-integration-tests.sh']
     volumes:
-      - '.:/app:z'
+      - '.:/app:z' # :z means a shared volume
       - "defectdojo_media_integration_test:${DD_MEDIA_ROOT:-/app/media}"
     environment:
       DD_BASE_URL: 'http://nginx:8080/'
