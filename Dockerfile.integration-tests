@@ -37,18 +37,35 @@ RUN \
   chmod -R 0755 .
 WORKDIR /app
 
-COPY docker/wait-for-it.sh \
-  docker/entrypoint-integration-tests.sh \
-  /
-
+# Copy over runtime scripts and tests
+COPY docker/wait-for-it.sh /
+COPY docker/entrypoint-integration-tests.sh /app/docker/
 COPY tests/ ./tests/
 
-RUN chmod -R 0777 /app
+# Setup defectdojo user & group
+ARG uid=1337
+ARG gid=1337
+ARG appuser=defectdojo
+ENV appuser ${appuser}
 
-ARG uid=1001
-USER ${uid}
+# Setup container user and file permissions
+RUN \
+  addgroup --gid ${gid} ${appuser} && \
+  adduser --no-create-home --disabled-password \
+          --gecos 'DefectDojo' --uid ${uid} --gid ${gid} ${appuser} && \
+  chown -R root:${appuser} /app && \
+  chmod -R 0775 /app && \
+  chown root:${appuser} /app/docker/entrypoint-* && \
+  chmod 0775 /app/docker/entrypoint* && \
+  chown root:${appuser} /wait-for-it.sh && \
+  cp -a /app/docker/entrypoint-integration-tests.sh /entrypoint-integration-tests.sh && \
+  chmod 0755 /wait-for-it.sh
+
+USER ${appuser}
+
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_PASSWORD='' \
   DD_BASE_URL="http://localhost:8080/"
+
 CMD ["/entrypoint-integration-tests.sh"]
