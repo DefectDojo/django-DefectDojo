@@ -1,5 +1,4 @@
 from crum import get_current_user
-from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Test, Product_Member, Product_Type_Member, Test_Import, \
     Product_Group, Product_Type_Group
@@ -18,9 +17,6 @@ def get_authorized_tests(permission, product=None):
 
     if user.is_superuser:
         return tests
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Test.objects.all()
 
     if user_has_global_permission(user, permission):
         return Test.objects.all()
@@ -66,9 +62,6 @@ def get_authorized_test_imports(permission):
         return Test_Import.objects.none()
 
     if user.is_superuser:
-        return Test_Import.objects.all()
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Test_Import.objects.all()
 
     if user_has_global_permission(user, permission):

@@ -1,5 +1,4 @@
 from crum import get_current_user
-from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Product, Product_Member, Product_Type_Member, App_Analysis, \
     DojoMeta, Product_Group, Product_Type_Group, Languages, Engagement_Presets, \
@@ -20,9 +19,6 @@ def get_authorized_products(permission, user=None):
         return Product.objects.none()
 
     if user.is_superuser:
-        return Product.objects.all().order_by('name')
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Product.objects.all().order_by('name')
 
     if user_has_global_permission(user, permission):
@@ -85,9 +81,6 @@ def get_authorized_product_members(permission):
     if user.is_superuser:
         return Product_Member.objects.all().select_related('role')
 
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Product_Member.objects.all().select_related('role')
-
     if user_has_global_permission(user, permission):
         return Product_Member.objects.all().select_related('role')
 
@@ -102,9 +95,6 @@ def get_authorized_product_members_for_user(user, permission):
         return Product_Member.objects.none()
 
     if request_user.is_superuser:
-        return Product_Member.objects.filter(user=user).select_related('role', 'product')
-
-    if request_user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Product_Member.objects.filter(user=user).select_related('role', 'product')
 
     if hasattr(request_user, 'global_role') and request_user.global_role.role is not None and role_has_permission(request_user.global_role.role.id, permission):
@@ -123,9 +113,6 @@ def get_authorized_product_groups(permission):
     if user.is_superuser:
         return Product_Group.objects.all().select_related('role')
 
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Product_Group.objects.all()
-
     products = get_authorized_products(permission)
     return Product_Group.objects.filter(product__in=products).select_related('role')
 
@@ -137,9 +124,6 @@ def get_authorized_app_analysis(permission):
         return App_Analysis.objects.none()
 
     if user.is_superuser:
-        return App_Analysis.objects.all().order_by('name')
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return App_Analysis.objects.all().order_by('name')
 
     if user_has_global_permission(user, permission):
@@ -181,9 +165,6 @@ def get_authorized_dojo_meta(permission):
         return DojoMeta.objects.none()
 
     if user.is_superuser:
-        return DojoMeta.objects.all().order_by('name')
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return DojoMeta.objects.all().order_by('name')
 
     if user_has_global_permission(user, permission):
@@ -278,9 +259,6 @@ def get_authorized_languages(permission):
     if user.is_superuser:
         return Languages.objects.all().order_by('language')
 
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Languages.objects.all().order_by('language')
-
     if user_has_global_permission(user, permission):
         return Languages.objects.all().order_by('language')
 
@@ -322,9 +300,6 @@ def get_authorized_engagement_presets(permission):
     if user.is_superuser:
         return Engagement_Presets.objects.all().order_by('title')
 
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Engagement_Presets.objects.all().order_by('title')
-
     if user_has_global_permission(user, permission):
         return Engagement_Presets.objects.all().order_by('title')
 
@@ -364,9 +339,6 @@ def get_authorized_product_api_scan_configurations(permission):
         return Product_API_Scan_Configuration.objects.none()
 
     if user.is_superuser:
-        return Product_API_Scan_Configuration.objects.all()
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Product_API_Scan_Configuration.objects.all()
 
     if user_has_global_permission(user, permission):

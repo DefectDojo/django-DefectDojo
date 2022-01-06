@@ -15,9 +15,6 @@ def get_authorized_groups(permission):
     if user.is_superuser:
         return Dojo_Group.objects.all().order_by('name')
 
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Dojo_Group.objects.all().order_by('name')
-
     roles = get_roles_for_permission(permission)
     authorized_roles = Dojo_Group_Member.objects.filter(group=OuterRef('pk'),
         user=user,
@@ -33,9 +30,6 @@ def get_authorized_group_members(permission):
         return Dojo_Group_Member.objects.none()
 
     if user.is_superuser:
-        return Dojo_Group_Member.objects.all().select_related('role')
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Dojo_Group_Member.objects.all().select_related('role')
 
     groups = get_authorized_groups(permission)
