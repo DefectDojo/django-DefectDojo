@@ -7,10 +7,6 @@ updates:
   open-pull-requests-limit: 10
   target-branch: dev
   ignore:
-  - dependency-name: celery
-    versions:
-    - ">= 5.a"
-    - "< 6"
   - dependency-name: whitenoise
     versions:
     - ">= 5.a"
