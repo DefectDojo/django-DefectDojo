@@ -12,7 +12,6 @@ RUN \
   apt-get -y update && \
   apt-get -y install --no-install-recommends \
     build-essential \
-    python-dev \
     dnsutils \
     default-mysql-client \
     libmariadb-dev-compat \
@@ -25,7 +24,6 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 install --upgrade pip
 RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM base as django
