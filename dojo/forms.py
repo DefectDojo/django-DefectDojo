@@ -3189,6 +3189,7 @@ class ConfigurationPermissionsForm(forms.Form):
             Permission_Helper(name='group', app='auth', view=True, add=True),
             Permission_Helper(name='language type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='bannerconf', app='dojo', change=True),
+            Permission_Helper(name='note type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='product type', app='dojo', add=True),
         ]
 
@@ -3200,6 +3201,10 @@ class ConfigurationPermissionsForm(forms.Form):
         else:
             questionnaire_permissions = []
 
+        permission_fields_3 = [
+            Permission_Helper(name='regulation', app='dojo', add=True, change=True, delete=True),
+        ]
+
         if get_system_setting('enable_rules_framework'):
             rules_permissions = [
                 Permission_Helper(name='rule', app='auth', view=True, add=True, change=True, delete=True),
@@ -3207,7 +3212,7 @@ class ConfigurationPermissionsForm(forms.Form):
         else:
             rules_permissions = []
 
-        permission_fields_3 = [
+        permission_fields_4 = [
             Permission_Helper(name='test type', app='dojo', add=True, change=True),
             Permission_Helper(name='tool configuration', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
@@ -3215,7 +3220,8 @@ class ConfigurationPermissionsForm(forms.Form):
         ]
 
         self.permission_fields = permission_fields_1 + google_sheet_permission + permission_fields_2 + \
-                                 questionnaire_permissions + rules_permissions + permission_fields_3
+                                 questionnaire_permissions + permission_fields_3 + rules_permissions + \
+                                 permission_fields_4
 
         for permission_field in self.permission_fields:
             for codename in permission_field.codenames():

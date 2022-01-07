@@ -524,14 +524,6 @@ def check_auto_create_permission(user, product, product_name, engagement, engage
     raise ValidationError(error_message)
 
 
-class UserHasUserPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.method == 'GET':
-            return user_has_configuration_permission(request.user, 'auth.view_user', 'staff')
-        else:
-            return request.user and request.user.is_superuser
-
-
 class UserHasConfigurationPermissionStaff(permissions.DjangoModelPermissions):
 
     # Override map to also provide 'view' permissions

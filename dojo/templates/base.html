@@ -387,6 +387,8 @@
                                         <li><a href="{% url 'regulations' %}">Regulations </a></li>
                                         {% if request.user.is_superuser %}
                                         <li><a href="{% url 'system_settings' %}">System Settings </a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_note_type"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'note_type' %}">Note Types </a></li>
                                         {% endif %}
                                         {% if system_settings.enable_google_sheets and "dojo.change_google_sheet"|has_configuration_permission:"superuser" %}

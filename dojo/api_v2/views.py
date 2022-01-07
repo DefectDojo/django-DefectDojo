@@ -11,7 +11,7 @@ from drf_yasg.inspectors.query import CoreAPICompatInspector
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from django.db import IntegrityError
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated, IsAdminUser
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
@@ -1506,7 +1506,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
             return serializers.StubFindingSerializer
 
 
-# Authorization: configuration
+# Authorization: authenticated, configuration
 class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
                                     mixins.RetrieveModelMixin,
                                     mixins.CreateModelMixin,
@@ -1674,7 +1674,7 @@ class TestsViewSet(mixins.ListModelMixin,
         return Response(serialized_files.data, status=status.HTTP_200_OK)
 
 
-# Authorization: configuration
+# Authorization: authenticated, configuration
 class TestTypesViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.UpdateModelMixin,
@@ -1791,10 +1791,10 @@ class ToolTypesViewSet(mixins.ListModelMixin,
     queryset = Tool_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'description')
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
+    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
-# Authorization: authenticated users
+# Authorization: authenticated, configuration
 class RegulationsViewSet(mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
                          mixins.CreateModelMixin,
@@ -1819,7 +1819,7 @@ class UsersViewSet(mixins.CreateModelMixin,
     queryset = User.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'username', 'first_name', 'last_name', 'email')
-    permission_classes = (permissions.UserHasUserPermission, )
+    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -2023,7 +2023,7 @@ class ImportLanguagesView(mixins.CreateModelMixin,
         return get_authorized_products(Permissions.Language_Add)
 
 
-# Authorization: authenticated users, DjangoModelPermissions
+# Authorization: object-based
 class ReImportScanView(mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     """
@@ -2075,7 +2075,7 @@ class ReImportScanView(mixins.CreateModelMixin,
         serializer.save(push_to_jira=push_to_jira)
 
 
-# Authorization: staff
+# Authorization: configuration
 class NoteTypeViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.DestroyModelMixin,
@@ -2086,7 +2086,7 @@ class NoteTypeViewSet(mixins.ListModelMixin,
     queryset = Note_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'description', 'is_single', 'is_active', 'is_mandatory')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
 # Authorization: superuser
