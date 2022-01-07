@@ -1881,6 +1881,13 @@ class AddDojoUserForm(forms.ModelForm):
         exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
                     'authorized_products', 'authorized_product_types']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_user = get_current_user()
+        if not current_user.is_superuser:
+            self.fields['is_staff'].disabled = True
+            self.fields['is_superuser'].disabled = True
+
 
 class EditDojoUserForm(forms.ModelForm):
 
@@ -1890,6 +1897,13 @@ class EditDojoUserForm(forms.ModelForm):
                   'is_staff', 'is_superuser']
         exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
                     'authorized_products', 'authorized_product_types']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_user = get_current_user()
+        if not current_user.is_superuser:
+            self.fields['is_staff'].disabled = True
+            self.fields['is_superuser'].disabled = True
 
 
 class DeleteUserForm(forms.ModelForm):
@@ -3160,8 +3174,18 @@ class ConfigurationPermissionsForm(forms.Form):
         permission_fields_1 = [
             Permission_Helper(name='cred user', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='permission', app='auth', change=True),
-            Permission_Helper(name='development environment', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='development environment', app='dojo', add=True, change=True, delete=True),
             Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
+        ]
+
+        if get_system_setting('enable_google_sheets'):
+            google_sheet_permission = [
+                Permission_Helper(name='google sheet', app='auth', change=True),
+            ]
+        else:
+            google_sheet_permission = []
+
+        permission_fields_2 = [
             Permission_Helper(name='group', app='auth', view=True, add=True),
             Permission_Helper(name='language type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='bannerconf', app='dojo', change=True),
@@ -3176,14 +3200,22 @@ class ConfigurationPermissionsForm(forms.Form):
         else:
             questionnaire_permissions = []
 
-        permission_fields_2 = [
-            Permission_Helper(name='test type', app='dojo', view=True, add=True, change=True),
+        if get_system_setting('enable_rules_framework'):
+            rules_permissions = [
+                Permission_Helper(name='rule', app='auth', view=True, add=True, change=True, delete=True),
+            ]
+        else:
+            rules_permissions = []
+
+        permission_fields_3 = [
+            Permission_Helper(name='test type', app='dojo', add=True, change=True),
             Permission_Helper(name='tool configuration', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
-            Permission_Helper(name='user', app='auth', view=True),
+            Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
         ]
 
-        self.permission_fields = permission_fields_1 + questionnaire_permissions + permission_fields_2
+        self.permission_fields = permission_fields_1 + google_sheet_permission + permission_fields_2 + \
+                                 questionnaire_permissions + rules_permissions + permission_fields_3
 
         for permission_field in self.permission_fields:
             for codename in permission_field.codenames():

@@ -1,6 +1,7 @@
 # # test types
 import logging
 
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -20,7 +21,7 @@ Test Type views
 """
 
 
-@user_is_configuration_authorized('dojo.view_test_type', 'staff')
+@login_required
 def test_type(request):
     initial_queryset = Test_Type.objects.all().order_by('name')
     name_words = initial_queryset.values_list('name', flat=True)

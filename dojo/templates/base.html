@@ -224,12 +224,8 @@
                                     <li><a href="{% url 'active_engagements' %}">Active Engagements</a></li>
                                     <li><a href="{% url 'all_engagements' %}">All Engagements</a></li>
                                     <li><a href="{% url 'engagements_all' %}">Engagements by Product</a></li>
-                                    {% if "dojo.view_test_type"|has_configuration_permission:"staff" %}
-                                        <li><a href="{% url 'test_type' %}">Test Types</a></li>
-                                    {% endif %}
-                                    {% if "dojo.view_development_environment"|has_configuration_permission:"staff" %}
-                                        <li><a href="{% url 'dev_env' %}">Environments</a></li>
-                                    {% endif %}
+                                    <li><a href="{% url 'test_type' %}">Test Types</a></li>
+                                    <li><a href="{% url 'dev_env' %}">Environments</a></li>
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
@@ -385,13 +381,15 @@
                                         {% if "dojo.view_tool_type"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'tool_type' %}">Tool Type </a></li>
                                         {% endif %}
-                                        {% if request.user.is_superuser %}
+                                        {% if system_settings.enable_rules_framework and "dojo.view_rule"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'rules' %}">Rules Framework </a></li>
                                         {% endif %}
                                         <li><a href="{% url 'regulations' %}">Regulations </a></li>
                                         {% if request.user.is_superuser %}
                                         <li><a href="{% url 'system_settings' %}">System Settings </a></li>
                                         <li><a href="{% url 'note_type' %}">Note Types </a></li>
+                                        {% endif %}
+                                        {% if system_settings.enable_google_sheets and "dojo.change_google_sheet"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'configure_google_sheets' %}">Google Sheets Sync</a></li>
                                         {% endif %}
                                         {% if "dojo.change_bannerconf"|has_configuration_permission:"superuser" %}
