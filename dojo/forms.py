@@ -18,6 +18,7 @@ from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
+from requests.api import delete
 import tagulous
 
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
@@ -3178,15 +3179,32 @@ class ConfigurationPermissionsForm(forms.Form):
             Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
         ]
 
+        if get_system_setting('enable_github'):
+            github_permission = [
+                Permission_Helper(name='github conf', app='dojo', view=True, add=True, delete=True),
+            ]
+        else:
+            github_permission = []
+
         if get_system_setting('enable_google_sheets'):
             google_sheet_permission = [
-                Permission_Helper(name='google sheet', app='auth', change=True),
+                Permission_Helper(name='google sheet', app='dojo', change=True),
             ]
         else:
             google_sheet_permission = []
 
         permission_fields_2 = [
             Permission_Helper(name='group', app='auth', view=True, add=True),
+        ]
+
+        if get_system_setting('enable_jira'):
+            jira_permissions = [
+                Permission_Helper(name='jira instance', app='dojo', view=True, add=True, change=True, delete=True),
+            ]
+        else:
+            jira_permissions = []
+
+        permission_fields_3 = [
             Permission_Helper(name='language type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='bannerconf', app='dojo', change=True),
             Permission_Helper(name='note type', app='dojo', view=True, add=True, change=True, delete=True),
@@ -3201,7 +3219,7 @@ class ConfigurationPermissionsForm(forms.Form):
         else:
             questionnaire_permissions = []
 
-        permission_fields_3 = [
+        permission_fields_4 = [
             Permission_Helper(name='regulation', app='dojo', add=True, change=True, delete=True),
         ]
 
@@ -3212,16 +3230,17 @@ class ConfigurationPermissionsForm(forms.Form):
         else:
             rules_permissions = []
 
-        permission_fields_4 = [
+        permission_fields_5 = [
             Permission_Helper(name='test type', app='dojo', add=True, change=True),
             Permission_Helper(name='tool configuration', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
         ]
 
-        self.permission_fields = permission_fields_1 + google_sheet_permission + permission_fields_2 + \
-                                 questionnaire_permissions + permission_fields_3 + rules_permissions + \
-                                 permission_fields_4
+        self.permission_fields = permission_fields_1 + github_permission + google_sheet_permission + \
+                                 permission_fields_2 + jira_permissions + permission_fields_3 + \
+                                 questionnaire_permissions + permission_fields_4 + rules_permissions + \
+                                 permission_fields_5
 
         for permission_field in self.permission_fields:
             for codename in permission_field.codenames():
@@ -3272,6 +3291,8 @@ class Permission_Helper:
             return 'Login Banner'
         elif self.name == 'cred user':
             return 'Credentials'
+        elif self.name == 'github conf':
+            return 'GitHub Configurations'
         elif self.name == 'engagement survey':
             return 'Questionnaires'
         elif self.name == 'permission':

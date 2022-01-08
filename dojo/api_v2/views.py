@@ -1003,7 +1003,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         return Response({"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Authorization: superuser
+# Authorization: configuration
 class JiraInstanceViewSet(mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin,
                                 mixins.DestroyModelMixin,
@@ -1014,7 +1014,7 @@ class JiraInstanceViewSet(mixins.ListModelMixin,
     queryset = JIRA_Instance.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'url')
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
 # Authorization: object-based
