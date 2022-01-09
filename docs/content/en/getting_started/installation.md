@@ -5,11 +5,17 @@ draft: false
 weight: 2
 ---
 
-## Docker Compose install (recommended)
+## Recommended Options
+
+### Docker Compose
 
 See instructions in [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md>)
 
-## Kubernetes install
+### AWS AMI (Supports the Project)
+
+[Marketplace link](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk) complete [walkthrough](https://www.10security.com/defectdojo-aws-launch-guide)
+
+### Kubernetes
 
 See instructions in [KUBERNETES.md](<https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/KUBERNETES.md>)
 
