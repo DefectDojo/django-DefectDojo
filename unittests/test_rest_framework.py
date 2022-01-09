@@ -980,10 +980,14 @@ class JiraIssuesTest(BaseClass.RESTEndpointTest):
             "jira_id": "JIRA 1",
             "jira_key": "SOME KEY",
             "finding": 2,
-            "engagement": 2,
         }
-        self.update_fields = {'finding': 2}
-        self.object_permission = False
+        self.update_fields = {'jira_change': '2022-01-02T13:47:38.021481Z'}
+        self.object_permission = True
+        self.permission_check_class = Finding
+        self.permission_check_id = 5
+        self.permission_create = Permissions.Finding_Edit
+        self.permission_update = Permissions.Finding_Edit
+        self.permission_delete = Permissions.Finding_Edit
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1005,7 +1009,12 @@ class JiraProjectTest(BaseClass.RESTEndpointTest):
             "jira_instance": 2,
         }
         self.update_fields = {'jira_instance': 3}
-        self.object_permission = False
+        self.object_permission = True
+        self.permission_check_class = Product
+        self.permission_check_id = 1
+        self.permission_create = Permissions.Product_Edit
+        self.permission_update = Permissions.Product_Edit
+        self.permission_delete = Permissions.Product_Edit
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1195,9 +1204,15 @@ class ToolProductSettingsTest(BaseClass.RESTEndpointTest):
             "description": "test tool product setting",
             "tool_project_id": "1",
             "tool_configuration": 3,
+            "product": 2,
         }
         self.update_fields = {'tool_project_id': '2'}
-        self.object_permission = False
+        self.object_permission = True
+        self.permission_check_class = Product
+        self.permission_check_id = 1
+        self.permission_create = Permissions.Product_Edit
+        self.permission_update = Permissions.Product_Edit
+        self.permission_delete = Permissions.Product_Edit
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1326,7 +1341,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         self.viewname = 'importscan'
         self.viewset = ImportScanView
         self.payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1350,7 +1364,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1380,7 +1393,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1411,7 +1423,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1443,7 +1454,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1477,7 +1487,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1513,7 +1522,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1545,7 +1553,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1589,7 +1596,6 @@ class ReimportScanTest(DojoAPITestCase):
         length = Test.objects.all().count()
         response = self.client.post(
             reverse('reimportscan-list'), {
-                "scan_date": '2017-12-30',
                 "minimum_severity": 'Low',
                 "active": True,
                 "verified": True,
@@ -1613,7 +1619,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1643,7 +1648,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1676,7 +1680,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1712,7 +1715,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1744,7 +1746,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1775,7 +1776,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-                "scan_date": '2017-12-30',
                 "minimum_severity": 'Low',
                 "active": True,
                 "verified": True,
@@ -1803,7 +1803,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1834,7 +1833,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1866,7 +1864,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1897,7 +1894,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -1925,7 +1921,6 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.return_value = None, 0, 0, 0, 0, 0
 
         payload = {
-            "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
@@ -2006,6 +2001,20 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
         self.permission_update = Permissions.Group_Edit
         self.permission_delete = Permissions.Group_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_list_not_authorized(self):
+        self.setUp_not_authorized()
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_detail_not_authorized(self):
+        self.setUp_not_authorized()
+
+        current_objects = self.endpoint_model.objects.all()
+        relative_url = self.url + '%s/' % current_objects[0].id
+        response = self.client.get(relative_url)
+        self.assertEqual(403, response.status_code, response.content[:1000])
 
     def test_create_not_authorized(self):
         self.setUp_not_authorized()

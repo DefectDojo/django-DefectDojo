@@ -224,8 +224,10 @@
                                     <li><a href="{% url 'active_engagements' %}">Active Engagements</a></li>
                                     <li><a href="{% url 'all_engagements' %}">All Engagements</a></li>
                                     <li><a href="{% url 'engagements_all' %}">Engagements by Product</a></li>
-                                    {% if request.user.is_staff %}
+                                    {% if "dojo.view_test_type"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'test_type' %}">Test Types</a></li>
+                                    {% endif %}
+                                    {% if "dojo.view_development_environment"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'dev_env' %}">Environments</a></li>
                                     {% endif %}
                                 </ul>
@@ -250,7 +252,7 @@
                                         <li>
                                             <a href="{% url 'accepted_findings' %}">Risk Accepted Findings</a>
                                         </li>
-                                        {% if request.user.is_staff %}
+                                        {% if "dojo.view_finding_template"|has_configuration_permission:"staff" %}
                                         <li>
                                             <a href="{% url 'templates' %}">Finding Templates</a>
                                         </li>
@@ -315,14 +317,11 @@
                                     <li><a href="{% url 'metrics_product_type' %}"> Product Type Metrics </a></li>
                                     <li><a href="{% url 'product_type_counts' %}"> Product Type Counts </a></li>
                                     <li><a href="{% url 'simple_metrics' %}"> Simple Metrics </a></li>
-                                    {% if user.is_staff %}
-                                        <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
-                                        <li><a href="{% url 'research_metrics' %}"> Security Research Metrics </a></li>
-                                    {% endif %}
+                                    <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% if request.user.is_staff %}
+                            {% if "auth.view_user"|has_configuration_permission:"staff" or "auth.view_group"|has_configuration_permission:"staff" %}
                                 <li>
                                     <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users">
                                         <i class="fa fa-user fa-fw"></i>
@@ -330,8 +329,12 @@
                                         <span class="glyphicon arrow"></span>
                                     </a>
                                     <ul class="nav nav-second-level">
+                                        {% if "auth.view_user"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'users' %}"> Users </a></li>
+                                        {% endif %}
+                                        {% if "auth.view_group"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'groups' %}"> Groups </a></li>
+                                        {% endif %}
                                     </ul>
                                 </li>
                             {% endif %}
@@ -341,17 +344,23 @@
                                         <span>Calendar</span>
                                     </a>
                                 </li>
-                            {% if request.user.is_staff and system_settings.enable_questionnaires %}
+                            {% if system_settings.enable_questionnaires %}
+                            {% if "dojo.view_engagement_survey"|has_configuration_permission:"staff" or "dojo.view_question"|has_configuration_permission:"staff" %}
                                 <li>
                                     <a href="#"><i class="fa fa-hospital-o fa-fw"> </i> <span>Questionnaires</span><span
                                             class="glyphicon arrow"></span></a>
                                     <ul class="nav nav-second-level">
+                                        {% if "dojo.view_engagement_survey"|has_configuration_permission:"staff"  %}
                                         <li><a href="{% url 'questionnaire' %}">All Questionnaires </a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_question"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'questions' %}">All Questions </a></li>
+                                        {% endif %}
 
                                     </ul>
                                     <!-- /.nav-second-level -->
                                 </li>
+                            {% endif %}
                             {% endif %}
                                 <li id="menu_configuration">
 				                    <a href="#" aria-expanded="false" aria-label="Configuration">
@@ -370,7 +379,11 @@
                                         <li><a href="{% url 'github' %}">GitHub </a></li>
                                         {% endif %}
                                         <li><a href="{% url 'tool_config' %}">Tool Configuration </a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_tool_type"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'tool_type' %}">Tool Type </a></li>
+                                        {% endif %}
+                                        {% if request.user.is_superuser %}
                                         <li><a href="{% url 'rules' %}">Rules Framework </a></li>
                                         {% endif %}
                                         <li><a href="{% url 'regulations' %}">Regulations </a></li>
@@ -535,6 +548,7 @@
                                 <i class="fa fa-list-alt"></i> View API Scan Configurations
                             </a>
                         </li>
+                        {% if system_settings.enable_product_tracking_files %}
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
                             <a class="" href="{% url 'new_object' product_tab.product.id %}">
@@ -546,6 +560,7 @@
                                 <i class="fa fa-list-alt"></i> View Product Tracking Files
                             </a>
                         </li>
+                        {% endif %}
                         {% if system_settings.enable_credentials %}
                         <li role="separator" class="divider"></li>
                         <li role="presentation">

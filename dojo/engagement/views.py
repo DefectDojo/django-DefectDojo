@@ -33,7 +33,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
     Cred_Mapping, Dojo_User, System_Settings, Note_Type, Product_API_Scan_Configuration
-from dojo.tools.factory import get_choices_sorted
+from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
     get_system_setting, redirect_to_return_url_or_else, get_return_url
@@ -453,6 +453,8 @@ def add_tests(request, eid):
             engagement=eng).order_by('cred_id')
         if form.is_valid():
             new_test = form.save(commit=False)
+            # set default scan_type as it's used in reimport
+            new_test.scan_type = new_test.test_type.name
             new_test.engagement = eng
             try:
                 new_test.lead = User.objects.get(id=form['lead'].value())
@@ -669,7 +671,7 @@ def import_scan_results(request, eid=None, pid=None):
          'title': title,
          'cred_form': cred_form,
          'jform': jform,
-         'scan_types': get_choices_sorted(),
+         'scan_types': get_scan_types_sorted(),
          })
 
 
