@@ -1,0 +1,37 @@
+{
+    "metadata": {
+        "rubocop_version": "1.13.0",
+        "ruby_engine": "ruby",
+        "ruby_version": "3.0.3",
+        "ruby_patchlevel": "157",
+        "ruby_platform": "x86_64-linux"
+    },
+    "files": [
+        {
+            "path": "fake_app_unsecure/app/main.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                }
+            ]
+        }
+    ],
+    "summary": {
+        "offense_count": 1,
+        "target_file_count": 1,
+        "inspected_file_count": 1
+    }
+}
