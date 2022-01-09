@@ -1,6 +1,5 @@
 import os
 import re
-from crum import get_current_user
 from datetime import datetime, date
 import pickle
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
