@@ -1,5 +1,6 @@
 import os
 import re
+from crum import get_current_user
 from datetime import datetime, date
 import pickle
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
@@ -3173,7 +3174,6 @@ class ConfigurationPermissionsForm(forms.Form):
 
         permission_fields_1 = [
             Permission_Helper(name='cred user', app='dojo', view=True, add=True, change=True, delete=True),
-            Permission_Helper(name='permission', app='auth', change=True),
             Permission_Helper(name='development environment', app='dojo', add=True, change=True, delete=True),
             Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
         ]
@@ -3253,9 +3253,10 @@ class ConfigurationPermissionsForm(forms.Form):
             self.permissions[permission.codename] = permission
 
     def save(self):
-        for permission_field in self.permission_fields:
-            for codename in permission_field.codenames():
-                self.set_permission(codename)
+        if get_current_user().is_superuser:
+            for permission_field in self.permission_fields:
+                for codename in permission_field.codenames():
+                    self.set_permission(codename)
 
     def set_permission(self, codename):
         if self.cleaned_data[codename]:
