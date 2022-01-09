@@ -561,4 +561,4 @@ class UserHasConfigurationPermissionSuperuser(permissions.DjangoModelPermissions
         if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
             return super().has_permission(request, view)
         else:
-            return request.user.superuser
+            return request.user.is_superuser
