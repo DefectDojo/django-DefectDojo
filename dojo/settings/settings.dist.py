@@ -301,6 +301,8 @@ else:
         }
     }
 
+# https://docs.djangoproject.com/en/4.0/ref/settings/#std:setting-CONN_MAX_AGE
+DATABASES['default']['CONN_MAX_AGE'] = 60
 # Track migrations through source control rather than making migrations locally
 if env('DD_TRACK_MIGRATIONS'):
     MIGRATION_MODULES = {'dojo': 'dojo.db_migrations'}
@@ -1346,3 +1348,4 @@ ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")
 ASYNC_FINDING_IMPORT_CHUNK_SIZE = env("DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE")
 # Feature toggle for new authorization for configurations
 FEATURE_CONFIGURATION_AUTHORIZATION = env("DD_FEATURE_CONFIGURATION_AUTHORIZATION")
+

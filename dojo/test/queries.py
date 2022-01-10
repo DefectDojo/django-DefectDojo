@@ -5,14 +5,17 @@ from dojo.models import Test, Product_Member, Product_Type_Member, Test_Import, 
     Product_Group, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 
-
-def get_authorized_tests(permission, product=None):
+def get_authorized_tests(permission, product=None, testID=None):
     user = get_current_user()
 
     if user is None:
         return Test.objects.none()
 
-    tests = Test.objects.all()
+    if testID is None:
+        tests = Test.objects.all()
+    else:
+        tests = Test.objects.get(pk=testID)
+
     if product:
         tests = tests.filter(engagement__product=product)
 
@@ -20,10 +23,10 @@ def get_authorized_tests(permission, product=None):
         return tests
 
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Test.objects.all()
+        return tests
 
     if user_has_global_permission(user, permission):
-        return Test.objects.all()
+        return tests
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(

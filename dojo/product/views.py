@@ -876,7 +876,6 @@ def edit_product(request, pid):
 @user_is_authorized(Product, Permissions.Product_Delete, 'pid')
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
-    form = DeleteProductForm(instance=product)
 
     if request.method == 'POST':
         logger.debug('delete_product: POST')
@@ -900,6 +899,8 @@ def delete_product(request, pid):
             else:
                 logger.debug('delete_product: POST INVALID FORM')
                 logger.error(form.errors)
+
+    form = DeleteProductForm(instance=product)
 
     logger.debug('delete_product: GET')
 
@@ -1039,7 +1040,6 @@ def new_tech_for_prod(request, pid):
 @user_is_authorized(App_Analysis, Permissions.Technology_Edit, 'tid')
 def edit_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
-    form = AppAnalysisForm(instance=technology)
     if request.method == 'POST':
         form = AppAnalysisForm(request.POST)
         if form.is_valid():
@@ -1052,7 +1052,11 @@ def edit_technology(request, tid):
                                  'Technology changed successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_product', args=(technology.product.id,)))
+        else:
+            logger.debug('delete_product: POST INVALID FORM')
+            logger.error(form.errors)
 
+    form = AppAnalysisForm(instance=technology)
     product_tab = Product_Tab(technology.product.id, title="Edit Technology", tab="settings")
     return render(request, 'dojo/edit_technology.html',
                   {'form': form,
@@ -1063,7 +1067,6 @@ def edit_technology(request, tid):
 @user_is_authorized(App_Analysis, Permissions.Technology_Delete, 'tid')
 def delete_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
-    form = DeleteAppAnalysisForm(instance=technology)
     if request.method == 'POST':
         form = Delete_Product_MemberForm(request.POST, instance=technology)
         technology = form.instance
@@ -1074,6 +1077,7 @@ def delete_technology(request, tid):
                             extra_tags='alert-success')
         return HttpResponseRedirect(reverse('view_product', args=(technology.product.id,)))
 
+    form = DeleteAppAnalysisForm(instance=technology)
     product_tab = Product_Tab(technology.product.id, title="Delete Technology", tab="settings")
     return render(request, 'dojo/delete_technology.html', {
         'technology': technology,
@@ -1367,7 +1371,6 @@ def add_engagement_presets(request, pid):
 def delete_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
-    form = DeleteEngagementPresetsForm(instance=preset)
 
     if request.method == 'POST':
         if 'id' in request.POST:
@@ -1379,6 +1382,11 @@ def delete_engagement_presets(request, pid, eid):
                                      'Engagement presets and engagement relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('engagement_presets', args=(pid,)))
+            else:
+                logger.debug('delete_product: POST INVALID FORM')
+                logger.error(form.errors)
+
+    form = DeleteEngagementPresetsForm(instance=preset)
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([preset])
@@ -1485,7 +1493,6 @@ def edit_product_member(request, memberid):
 @user_is_authorized(Product_Member, Permissions.Product_Member_Delete, 'memberid')
 def delete_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
-    memberform = Delete_Product_MemberForm(instance=member)
     if request.method == 'POST':
         memberform = Delete_Product_MemberForm(request.POST, instance=member)
         member = memberform.instance
@@ -1502,6 +1509,7 @@ def delete_product_member(request, memberid):
                 return HttpResponseRedirect(reverse('product'))
             else:
                 return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+    memberform = Delete_Product_MemberForm(instance=member)
     product_tab = Product_Tab(member.product.id, title="Delete Product Member", tab="settings")
     return render(request, 'dojo/delete_product_member.html', {
         'memberid': memberid,
@@ -1647,7 +1655,6 @@ def delete_api_scan_configuration(request, pid, pascid):
 def edit_product_group(request, groupid):
     logger.exception(groupid)
     group = get_object_or_404(Product_Group, pk=groupid)
-    groupform = Edit_Product_Group_Form(instance=group)
 
     if request.method == 'POST':
         groupform = Edit_Product_Group_Form(request.POST, instance=group)
@@ -1667,7 +1674,11 @@ def edit_product_group(request, groupid):
                     return HttpResponseRedirect(reverse('view_group', args=(group.group.id, )))
                 else:
                     return HttpResponseRedirect(reverse('view_product', args=(group.product.id, )))
+        else:
+            logger.debug('delete_product: POST INVALID FORM')
+            logger.error(form.errors)
 
+    groupform = Edit_Product_Group_Form(instance=group)
     product_tab = Product_Tab(group.product.id, title="Edit Product Group", tab="settings")
     return render(request, 'dojo/edit_product_group.html', {
         'groupid': groupid,
@@ -1679,7 +1690,6 @@ def edit_product_group(request, groupid):
 @user_is_authorized(Product_Group, Permissions.Product_Group_Delete, 'groupid')
 def delete_product_group(request, groupid):
     group = get_object_or_404(Product_Group, pk=groupid)
-    groupform = Delete_Product_GroupForm(instance=group)
 
     if request.method == 'POST':
         groupform = Delete_Product_GroupForm(request.POST, instance=group)
@@ -1696,6 +1706,8 @@ def delete_product_group(request, groupid):
             #  page
             return HttpResponseRedirect(reverse('view_product', args=(group.product.id, )))
 
+    groupform = Delete_Product_GroupForm(instance=group)
+
     product_tab = Product_Tab(group.product.id, title="Delete Product Group", tab="settings")
     return render(request, 'dojo/delete_product_group.html', {
         'groupid': groupid,
@@ -1707,7 +1719,6 @@ def delete_product_group(request, groupid):
 @user_is_authorized(Product, Permissions.Product_Group_Add, 'pid')
 def add_product_group(request, pid):
     product = get_object_or_404(Product, pk=pid)
-    group_form = Add_Product_GroupForm(initial={'product': product.id})
 
     if request.method == 'POST':
         group_form = Add_Product_GroupForm(request.POST, initial={'product': product.id})
@@ -1732,6 +1743,8 @@ def add_product_group(request, pid):
                                          'Product groups added successfully.',
                                          extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_product', args=(pid, )))
+
+    group_form = Add_Product_GroupForm(initial={'product': product.id})
     product_tab = Product_Tab(pid, title="Edit Product Group", tab="settings")
     return render(request, 'dojo/new_product_group.html', {
         'product': product,

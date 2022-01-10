@@ -5,21 +5,22 @@ from dojo.models import Engagement, Product_Member, Product_Type_Member, \
     Product_Group, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 
-
 def get_authorized_engagements(permission):
     user = get_current_user()
 
     if user is None:
         return Engagement.objects.none()
 
+    engagements = Engagement.objects.all()
+
     if user.is_superuser:
-        return Engagement.objects.all()
+        return engagements
 
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Engagement.objects.all()
+        return engagements
 
     if user_has_global_permission(user, permission):
-        return Engagement.objects.all()
+        return engagements
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -38,7 +39,7 @@ def get_authorized_engagements(permission):
         product=OuterRef('product_id'),
         group__users=user,
         role__in=roles)
-    engagements = Engagement.objects.annotate(
+    engagements = engagements.annotate(
         product__prod_type__member=Exists(authorized_product_type_roles),
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),

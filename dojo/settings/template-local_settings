@@ -58,3 +58,10 @@ DEBUG_TOOLBAR_PANELS = [
 
 import debug_toolbar
 EXTRA_URL_PATTERNS = [url(r"^__debug__/", include(debug_toolbar.urls))]
+
+# debug toolbar doesn't work without this enabled for local dev
+if DEBUG:
+    import os  # only if you haven't already imported this
+    import socket  # only if you haven't already imported this
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[:-1] + '1' for ip in ips] + ['127.0.0.1', '10.0.2.2']

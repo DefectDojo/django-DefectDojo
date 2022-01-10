@@ -69,7 +69,8 @@ def view_test(request, tid):
         available_note_types = find_available_notetypes(notes)
     files = test.files.all()
     person = request.user.username
-    findings = Finding.objects.filter(test=test).order_by('numerical_severity')
+    findings = Finding.objects.filter(test_id=tid).order_by('numerical_severity')\
+        .defer('url', 'description', 'impact', 'steps_to_reproduce', 'severity_justification', 'references', 'payload', 'line', 'file_path','files')
     findings = FindingFilter(request.GET, queryset=findings)
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
@@ -218,22 +219,9 @@ def prefetch_for_findings(findings):
     return prefetched_findings
 
 
-# def prefetch_for_test_imports(test_imports):
-#     prefetched_test_imports = test_imports
-#     if isinstance(test_imports, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-#         #could we make this dynamic, i.e for action_type in IMPORT_ACTIONS: prefetch
-#         prefetched_test_imports = prefetched_test_imports.annotate(created_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CREATED_FINDING)))
-#         prefetched_test_imports = prefetched_test_imports.annotate(closed_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CLOSED_FINDING)))
-#         prefetched_test_imports = prefetched_test_imports.annotate(reactivated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_REACTIVATED_FINDING)))
-#         prefetched_test_imports = prefetched_test_imports.annotate(updated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_UPDATED_FINDING)))
-
-#     return prefetch_for_test_imports
-
-
 @user_is_authorized(Test, Permissions.Test_Edit, 'tid')
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
-    form = TestForm(instance=test)
     if request.method == 'POST':
         form = TestForm(request.POST, instance=test)
         if form.is_valid():
@@ -243,7 +231,7 @@ def edit_test(request, tid):
                                  'Test saved.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_engagement', args=(test.engagement.id,)))
-
+    form = TestForm(instance=test)
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
     form.initial['description'] = test.description
@@ -261,8 +249,8 @@ def edit_test(request, tid):
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     eng = test.engagement
-    form = DeleteTestForm(instance=test)
 
+    # if these if's fail just reload the form with the requisite test ID
     if request.method == 'POST':
         if 'id' in request.POST and str(test.id) == request.POST['id']:
             form = DeleteTestForm(request.POST, instance=test)
@@ -281,6 +269,8 @@ def delete_test(request, tid):
                                     recipients=[test.engagement.lead],
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
+
+    form = DeleteTestForm(instance=test)
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([test])

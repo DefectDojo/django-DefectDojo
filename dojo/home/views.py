@@ -23,28 +23,26 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 def dashboard(request: HttpRequest) -> HttpResponse:
+    # No one wants a slow dashboard
     engagements = get_authorized_engagements(Permissions.Engagement_View).distinct()
-    findings = get_authorized_findings(Permissions.Finding_View).distinct()
-
-    findings = findings.filter(duplicate=False)
+    findings = get_authorized_findings(Permissions.Finding_View).filter(duplicate=False).distinct()\
+        .only('severity', 'id', 'created', 'mitigated').prefetch_related('risk_acceptance_set')
 
     engagement_count = engagements.filter(active=True).count()
 
     today = timezone.now().date()
+    beginning_date = today-timedelta(days=6)
 
-    date_range = [today - timedelta(days=6), today]  # 7 days (6 days plus today)
-    finding_count = findings\
-        .filter(created__date__range=date_range)\
-        .count()
-    mitigated_count = findings\
-        .filter(mitigated__date__range=date_range)\
-        .count()
-    accepted_count = findings\
-        .filter(risk_acceptance__created__date__range=date_range)\
-        .count()
+    finding_count = findings.filter(created__gte=beginning_date, created__lte=today).order_by().count()
+
+    mitigated_count = findings.filter(mitigated__gte=beginning_date, mitigated__lte=today).only('id').order_by().count()
+
+    accepted_count = findings.filter(risk_acceptance__created__gte=beginning_date, risk_acceptance__created__lte=today).only('id').order_by().count()
 
     severity_count_all = get_severities_all(findings)
+
     severity_count_by_month = get_severities_by_month(findings, today)
+
     punchcard, ticks = get_punchcard_data(findings, today - relativedelta(weeks=26), 26)
 
     if user_has_configuration_permission(request.user, 'dojo.view_engagement_survey', 'staff'):

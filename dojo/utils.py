@@ -663,8 +663,12 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
                                         .values('date') \
                                         .annotate(count=Count('id')) \
                                         .order_by('date')
+        else:
+            raise ValueError("view parameter only supports values 'Finding' or 'Endpoint'")
+
         # return empty stuff if no findings to be statted
-        if severities_by_day.count() <= 0:
+        # don't make an additional sql query, use len()
+        if len(severities_by_day) <= 0:
             return None, None
 
         # day of the week numbers:
@@ -746,7 +750,7 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
         return punchcard, ticks
 
     except Exception as e:
-        logger.exception('Not showing punchcard graph due to exception gathering data', e)
+        logger.exception('Not showing punchcard graph due to exception gathering data', e, e.__traceback__.tb_lineno)
         return None, None
 
 
@@ -1505,20 +1509,16 @@ class Product_Tab():
         self.product = Product.objects.get(id=product_id)
         self.title = title
         self.tab = tab
-        self.engagement_count = Engagement.objects.filter(
-            product=self.product, active=True).count()
-        self.open_findings_count = Finding.objects.filter(test__engagement__product=self.product,
+        self.engagement_count = Engagement.objects.filter(product=self.product, active=True).count()
+        self.open_findings_count = Finding.objects.filter(test__engagement__product=product_id,
                                                           false_p=False,
                                                           duplicate=False,
                                                           out_of_scope=False,
                                                           active=True,
                                                           mitigated__isnull=True).count()
-        self.endpoints_count = Endpoint.objects.filter(
-            product=self.product).count()
-        self.endpoint_hosts_count = Endpoint.objects.filter(
-            product=self.product).values('host').distinct().count()
-        self.benchmark_type = Benchmark_Type.objects.filter(
-            enabled=True).order_by('name')
+        self.endpoints_count = Endpoint.objects.filter(product=self.product).count()
+        self.endpoint_hosts_count = Endpoint.objects.filter(product=self.product).values('host').distinct().count()
+        self.benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
         self.engagement = None
 
     def setTab(self, tab):

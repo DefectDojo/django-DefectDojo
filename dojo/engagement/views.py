@@ -281,8 +281,6 @@ def edit_engagement(request, eid):
 @user_is_authorized(Engagement, Permissions.Engagement_Delete, 'eid')
 def delete_engagement(request, eid):
     engagement = get_object_or_404(Engagement, pk=eid)
-    product = engagement.product
-    form = DeleteEngagementForm(instance=engagement)
 
     if request.method == 'POST':
         if 'id' in request.POST and str(engagement.id) == request.POST['id']:
@@ -304,6 +302,9 @@ def delete_engagement(request, eid):
                                     icon="exclamation-triangle")
 
                 return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
+
+    product = engagement.product
+    form = DeleteEngagementForm(instance=engagement)
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([engagement])
