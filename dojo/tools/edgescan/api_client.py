@@ -53,14 +53,8 @@ class EdgescanAPI(object):
             headers=self.get_headers(),
             proxies=self.get_proxies(),
         )
-
-        if response.ok:
-            return response.json()
-        raise Exception(
-            "Unable to get asset findings due to {} - {}".format(
-                response.status_code, response.content.decode("utf-8")
-            )
-        )
+        response.raise_for_status()
+        return response.json()
 
     def get_headers(self):
         headers = {

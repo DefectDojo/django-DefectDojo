@@ -4,8 +4,8 @@ from dojo.models import Endpoint, Finding
 from dojo.tools.edgescan.importer import EdgescanImporter
 
 ES_SEVERITIES = {1: "Info", 2: "Low", 3: "Medium", 4: "High", 5: "Critical"}
-SCAN_EDGESCAN_API = 'Edgescan API Scan'
-SCAN_EDGESCAN = 'Edgescan Scan'
+SCANTYPE_EDGESCAN_API = 'Edgescan API Scan'
+SCANTYPE_EDGESCAN = 'Edgescan Scan'
 
 
 class EdgescanParser(object):
@@ -14,21 +14,21 @@ class EdgescanParser(object):
     """
 
     def get_scan_types(self):
-        return [SCAN_EDGESCAN, SCAN_EDGESCAN_API]
+        return [SCANTYPE_EDGESCAN, SCANTYPE_EDGESCAN_API]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type
 
     def get_description_for_scan_types(self, scan_type):
-        if scan_type == SCAN_EDGESCAN_API:
+        if scan_type == SCANTYPE_EDGESCAN_API:
             return "Edgescan findings can be imported by API."
         return "Edgescan findings can be imported in JSON format."
 
     def requires_file(self, scan_type):
-        return False if scan_type == SCAN_EDGESCAN_API else True
+        return False if scan_type == SCANTYPE_EDGESCAN_API else True
 
     def requires_tool_type(self, scan_type):
-        return 'Edgescan' if scan_type == SCAN_EDGESCAN_API else None
+        return 'Edgescan' if scan_type == SCANTYPE_EDGESCAN_API else None
 
     def get_findings(self, file, test):
         try:
@@ -64,8 +64,6 @@ class EdgescanParser(object):
         if vulnerability["cvss_version"] == 3:
             if vulnerability["cvss_vector"]:
                 finding.cvssv3 = vulnerability["cvss_vector"][9:]
-            if vulnerability["cvss_score"]:
-                finding.cvssv3_score = vulnerability["cvss_score"]
         finding.url = vulnerability["location"]
         finding.severity = ES_SEVERITIES[vulnerability["severity"]]
         finding.description = vulnerability["description"]
