@@ -57,17 +57,22 @@ class EdgescanParser(object):
         finding = Finding(test=test)
         finding.title = vulnerability["name"]
         finding.date = vulnerability["date_opened"][:10]
-        if vulnerability["cwes"] : finding.cwe = int(vulnerability["cwes"][0][4:]) 
-        if vulnerability["cves"] : finding.cve = vulnerability["cves"][0]
+        if vulnerability["cwes"]:
+            finding.cwe = int(vulnerability["cwes"][0][4:])
+        if vulnerability["cves"]:
+            finding.cve = vulnerability["cves"][0]
         if vulnerability["cvss_version"] == 3:
-            if vulnerability["cvss_vector"] : finding.cvssv3 = vulnerability["cvss_vector"][9:]
-            if vulnerability["cvss_score"] : finding.cvssv3_score = vulnerability["cvss_score"]
+            if vulnerability["cvss_vector"]:
+                finding.cvssv3 = vulnerability["cvss_vector"][9:]
+            if vulnerability["cvss_score"]:
+                finding.cvssv3_score = vulnerability["cvss_score"]
         finding.url = vulnerability["location"]
         finding.severity = ES_SEVERITIES[vulnerability["severity"]]
         finding.description = vulnerability["description"]
         finding.mitigation = vulnerability["remediation"]
         finding.active = True if vulnerability["status"] == "open" else False
-        if vulnerability["asset_tags"] : finding.tags = vulnerability["asset_tags"].split(",")
+        if vulnerability["asset_tags"]:
+            finding.tags = vulnerability["asset_tags"].split(",")
         finding.unique_id_from_tool = vulnerability["id"]
 
         finding.unsaved_endpoints = [Endpoint.from_uri(vulnerability["location"])]
