@@ -467,6 +467,11 @@ class System_Settings(models.Model):
         blank=True,
         help_text="New users will be assigned to their default group with this role.",
         on_delete=models.RESTRICT)
+    default_group_email_pattern = models.CharField(
+        max_length=200,
+        default='',
+        blank=True,
+        help_text="New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition.")
     staff_user_email_pattern = models.CharField(
         max_length=200,
         default='',
