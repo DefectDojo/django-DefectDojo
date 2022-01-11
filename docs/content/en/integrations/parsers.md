@@ -309,11 +309,6 @@ To generate the OSA report using Checkmarx CLI:
 That will generate three files, two of which are needed for defectdojo. Build the file for defectdojo with the jq utility:
 `jq -s . CxOSAVulnerabilities.json CxOSALibraries.json`
 
-
-### Choctaw Hog parser
-
-From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
-
 ### Cloudsploit (AquaSecurity)
 
 From: https://github.com/aquasecurity/cloudsploit . Import the JSON output.
@@ -926,6 +921,15 @@ report as follows
     the \"companies\" field.
 -   Removing both fields will allow retrieval of all findings in the
     Risk Recon instance.
+
+### Rusty Hog parser
+
+From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
+Rusty Hog is a secret scanner built in Rust for performance, and based on TruffleHog which is written in Python.
+
+DefectDojo currently supports the parsing of the following Rusty Hog JSON outputs:
+- Choctaw Hog: Scans for secrets in a Git repository.
+- Gottingen Hog: Scans for secrets in a JIRA issue.
 
 ### SARIF
 
