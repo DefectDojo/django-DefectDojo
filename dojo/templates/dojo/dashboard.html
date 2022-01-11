@@ -11,222 +11,242 @@
 
 {% block content %}
     {{ block.super }}
-    <div class="row status">
-        <div class="col-lg-3 col-md-6">
-            <div class="panel secondary-color">
-                <div class="panel-heading">
-                    <div class="row">
-                        <div class="col-xs-3">
-                            <i class="fa fa-bullseye fa-5x"></i>
+    {% block finding_stats_tiles %}
+        <div class="row status">
+            {% block active_engagements %}
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel secondary-color">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-bullseye fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">{{ engagement_count }}</div>
+                                    <div>Active Engagements</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-xs-9 text-right">
-                            <div class="huge">{{ engagement_count }}</div>
-                            <div>Active Engagements</div>
-                        </div>
+                        <a href="{% url 'engagement' %}">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Engagement Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
                     </div>
                 </div>
-                <a href="{% url 'engagement' %}">
-                    <div class="panel-footer">
-                        <span class="pull-left">View Engagement Details</span>
-                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                        <div class="clearfix"></div>
+            {% endblock %}
+            {% block last_seven_days %}
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-red">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-bug fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">{{ finding_count }}</div>
+                                    <div>Last Seven Days</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="{% url 'all_findings' %}?duplicate=2&date=2&o=-date">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Finding Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
                     </div>
-                </a>
-            </div>
+                </div>
+            {% endblock %}
+            {% block closed_last_seven_days %}
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-green">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-fire-extinguisher fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">{{ mitigated_count }}</div>
+                                    <div>Closed In Last Seven Days</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="{% url 'closed_findings' %}?duplicate=2&mitigated=2">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Finding Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endblock %}
+            {% block risk_accepted_last_seven_days %}
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-yellow">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-check fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">{{ accepted_count }}</div>
+                                    <div>Risk Accepted In Last Seven Days</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="{% url 'accepted_findings' %}?duplicate=2&risk_acceptance__created__date=2">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Finding Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endblock %}
         </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="panel panel-red">
-                <div class="panel-heading">
-                    <div class="row">
-                        <div class="col-xs-3">
-                            <i class="fa fa-bug fa-5x"></i>
+    {% endblock %}
+    {% block graph_row %}
+        <div class="row">
+            {% block historical_finding_severity %}
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Historical Finding Severity
                         </div>
-                        <div class="col-xs-9 text-right">
-                            <div class="huge">{{ finding_count }}</div>
-                            <div>Last Seven Days</div>
-                        </div>
-                    </div>
-                </div>
-                <a href="{% url 'all_findings' %}?duplicate=2&date=2&o=-date">
-                    <div class="panel-footer">
-                        <span class="pull-left">View Finding Details</span>
-                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                        <div class="clearfix"></div>
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="panel panel-green">
-                <div class="panel-heading">
-                    <div class="row">
-                        <div class="col-xs-3">
-                            <i class="fa fa-fire-extinguisher fa-5x"></i>
-                        </div>
-                        <div class="col-xs-9 text-right">
-                            <div class="huge">{{ mitigated_count }}</div>
-                            <div>Closed In Last Seven Days</div>
-                        </div>
-                    </div>
-                </div>
-                <a href="{% url 'closed_findings' %}?duplicate=2&mitigated=2">
-                    <div class="panel-footer">
-                        <span class="pull-left">View Finding Details</span>
-                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                        <div class="clearfix"></div>
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="panel panel-yellow">
-                <div class="panel-heading">
-                    <div class="row">
-                        <div class="col-xs-3">
-                            <i class="fa fa-check fa-5x"></i>
-                        </div>
-                        <div class="col-xs-9 text-right">
-                            <div class="huge">{{ accepted_count }}</div>
-                            <div>Risk Accepted In Last Seven Days</div>
-                        </div>
-                    </div>
-                </div>
-                <a href="{% url 'accepted_findings' %}?duplicate=2&risk_acceptance__created__date=2">
-                    <div class="panel-footer">
-                        <span class="pull-left">View Finding Details</span>
-                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                        <div class="clearfix"></div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Historical Finding Severity
-                </div>
-                <!-- /.panel-heading -->
-                <div class="panel-body">
-                    <div class="chart" id="homepage_pie_chart"></div>
-                </div>
-                <!-- /.panel-body -->
-            </div>
-            <!-- /.panel -->
-        </div>
-        <div class="col-lg-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Reported Finding Severity by Month
-                </div>
-                <!-- /.panel-heading -->
-                <div class="panel-body">
-                    <div class="chart" id="homepage_severity_plot"></div>
-                </div>
-                <!-- /.panel-body -->
-            </div>
-            <!-- /.panel -->
-        </div>
-        <!-- /.col-lg-6 -->
-    </div>
-    {% if system_settings.enable_questionnaires and "dojo.view_engagement_survey"|has_configuration_permission:"staff"  %}
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Unassigned Answered Engagement Questionnaires
-                </div>
-                <div class="panel-body">
-                    {% if surveys %}
-                        <table id="surveys" class="tablesorter-bootstrap table table-condensed table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Product</th>
-                                    <th>Engagement</th>
-                                    <th>Responder</th>
-                                    <th>Status</th>
-                                    <th>Completion Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            {% for survey in surveys %}
-                                <tr>
-                                    <td>
-                                        {% if survey.engagement %}
-                                            <a href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a>
-                                        {% else %}
-                                            <a href="/empty_questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a>
-                                        {% endif %}
-                                    </td> 
-                                    <td><a href="/product/{{ survey.engagement.product_id }}">{{ survey.engagement.product.name }}</a></td>
-                                    <td>
-                                        <a href="/engagement/{{ survey.engagement.id }}">{{ survey.engagement.name }}</a> 
-                                    </td> 
-                                    <td>
-                                        {% if survey.responder %}
-                                            {{ survey.responder }}
-                                        {% else %}
-                                            Anonymous
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if survey.completed %}
-                                            <span class="pass_fail Pass">Completed</span>
-                                        {% else %}
-                                            <span class="pass_fail">Unanswered</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ survey.answered_on }}</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            {% if survey.engagement %}
-                                                <a class="btn btn-sm btn-secondary"
-                                                href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}"> View Responses </a>
-                                                <a class="btn btn-sm btn-info"
-                                                href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign"> Assign User </a>
-                                            {% else %}
-                                                <a class="btn btn-sm btn-secondary"
-                                                href="/empty_questionnaire/{{ survey.id }}"> View Responses </a>
-                                                <a class="btn btn-sm btn-success" href="empty_questionnaire/{{ survey.id }}/new_engagement">Create Engagement</a>
-                                                <button class="btn btn-sm btn-info" disabled
-                                                href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign"> Assign User </button>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </table>
-                    {% else %}
+                        <!-- /.panel-heading -->
                         <div class="panel-body">
-                            <p>No questionnaires found.</p>
+                            <div class="chart" id="homepage_pie_chart"></div>
                         </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    <div class="row">
-        {% if punchcard %}
-            <div class="col-lg-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Weekly activity, displayed by day, of findings you reported.*
+                        <!-- /.panel-body -->
                     </div>
-                    <div class="panel-body">
-                        <div class="chart" id="punchcard"></div>
-                        <p class="text-center text-muted small">Week begins on date displayed.</p>
-                        <p>
-                            <br/>
-                            <span class="text-muted small">* Weeks are only displayed if findings are available.</span>
-                        </p>
+                    <!-- /.panel -->
+                </div>
+            {% endblock %}
+            {% block reported_finding_severity_by_month %}
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Reported Finding Severity by Month
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div class="chart" id="homepage_severity_plot"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            {% endblock %}
+            <!-- /.col-lg-6 -->
+        </div>
+    {% endblock %}
+    {% block surveys %}
+        {% if system_settings.enable_questionnaires and "dojo.view_engagement_survey"|has_configuration_permission:"staff"  %}
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Unassigned Answered Engagement Questionnaires
+                        </div>
+                        <div class="panel-body">
+                            {% if surveys %}
+                                <table id="surveys" class="tablesorter-bootstrap table table-condensed table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Product</th>
+                                            <th>Engagement</th>
+                                            <th>Responder</th>
+                                            <th>Status</th>
+                                            <th>Completion Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    {% for survey in surveys %}
+                                        <tr>
+                                            <td>
+                                                {% if survey.engagement %}
+                                                    <a href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a>
+                                                {% else %}
+                                                    <a href="/empty_questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a>
+                                                {% endif %}
+                                            </td> 
+                                            <td><a href="/product/{{ survey.engagement.product_id }}">{{ survey.engagement.product.name }}</a></td>
+                                            <td>
+                                                <a href="/engagement/{{ survey.engagement.id }}">{{ survey.engagement.name }}</a> 
+                                            </td> 
+                                            <td>
+                                                {% if survey.responder %}
+                                                    {{ survey.responder }}
+                                                {% else %}
+                                                    Anonymous
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if survey.completed %}
+                                                    <span class="pass_fail Pass">Completed</span>
+                                                {% else %}
+                                                    <span class="pass_fail">Unanswered</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ survey.answered_on }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    {% if survey.engagement %}
+                                                        <a class="btn btn-sm btn-secondary"
+                                                        href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}"> View Responses </a>
+                                                        <a class="btn btn-sm btn-info"
+                                                        href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign"> Assign User </a>
+                                                    {% else %}
+                                                        <a class="btn btn-sm btn-secondary"
+                                                        href="/empty_questionnaire/{{ survey.id }}"> View Responses </a>
+                                                        <a class="btn btn-sm btn-success" href="empty_questionnaire/{{ survey.id }}/new_engagement">Create Engagement</a>
+                                                        <button class="btn btn-sm btn-info" disabled
+                                                        href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign"> Assign User </button>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            {% else %}
+                                <div class="panel-body">
+                                    <p>No questionnaires found.</p>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
         {% endif %}
-    </div>
+    {% endblock %}    
+    {% block punchcard %}
+        <div class="row">
+            {% if punchcard %}
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Weekly activity, displayed by day, of findings you reported.*
+                        </div>
+                        <div class="panel-body">
+                            <div class="chart" id="punchcard"></div>
+                            <p class="text-center text-muted small">Week begins on date displayed.</p>
+                            <p>
+                                <br/>
+                                <span class="text-muted small">* Weeks are only displayed if findings are available.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% endblock %}
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
