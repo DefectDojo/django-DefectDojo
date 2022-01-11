@@ -231,14 +231,36 @@ Follow along below.
     button on the login page.
 
 ## Keycloak
-1. go to your keycloak realm and add a new client <CLIENT_ID>
+1. go to your keycloak realm, add a new client of type openid-connect (use client id for DD_SOCIAL_AUTH_KEYCLOAK_KEY)
 2. in the client settings:
    1. set access type to confidential
    2. under valid Redirect URIs, add '<YOUR_SITE>/*'
    3. under web origins, add the same (or '+')
-   4. fine grained openID connect configuration > User info signed response alogrith: set to RS256
-   5. fine grained openID connect configuration > request object signature algorithm: set to RS256
-3. 
+   4. fine grained openID connect configuration -> user info signed response alogrith: set to RS256
+   5. fine grained openID connect configuration -> request object signature algorithm: set to RS256
+3. Under Scope -> Full Scope Allowed -> Disable
+4. under mappers -> add custom mapper
+   * name: aud
+   * Mapper type: audience
+   * included audience: select your client/client-id here
+   * add ID to token: off
+   * add access to token: on
+5. under credentials: copy secret (use as DD_SOCIAL_AUTH_KEYCLOAK_SECRET below)
+6. in your realm settings -> keys: copy the "Public key" (signing key) (use for DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY below)
+7. in your realm settings -> general -> endpoints look into openId endpoint configuration
+   and look up your authorization and token endpoint
+8. add to extraConfigs in chart:
+```
+DD_SESSION_COOKIE_SECURE: 'True'
+DD_CSRF_COOKIE_SECURE: 'True'
+DD_SECURE_SSL_REDIRECT: 'True'
+DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED: 'True'
+DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: 'MIIBWGn....zwIDAQAB'
+DD_SOCIAL_AUTH_KEYCLOAK_KEY: '<CLIENT_ID>'
+DD_SOCIAL_AUTH_KEYCLOAK_SECRET: '<your keycloak client credentials secret>'
+DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL: '<your authorization endpoint'
+DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL: '<your token endpoint>'
+```
 
 ## SAML 2.0
 In a similar direction to OAuth, this SAML addition provides a more secure
