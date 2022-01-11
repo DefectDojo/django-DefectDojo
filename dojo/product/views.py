@@ -28,7 +28,7 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, T
                         Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
                         Product_Group, Product_API_Scan_Configuration
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
-                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs
+                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, get_enabled_notifications_list
 
 from dojo.notifications.helper import create_notification
 from django.db.models import Prefetch, F, OuterRef, Subquery
@@ -204,7 +204,8 @@ def view_product(request, pid):
         'product_type_members': product_type_members,
         'product_groups': product_groups,
         'product_type_groups': product_type_groups,
-        'personal_notifications_form': personal_notifications_form})
+        'personal_notifications_form': personal_notifications_form,
+        'enabled_notifications': get_enabled_notifications_list()})
 
 
 @user_is_authorized(Product, Permissions.Component_View, 'pid')
