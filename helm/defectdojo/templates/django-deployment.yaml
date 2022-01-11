@@ -89,7 +89,7 @@ spec:
         {{- if eq .Values.database "postgresql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
         {{- else if eq .Values.database "mysql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.master.service.port }}"
         {{- end }}
         {{- if .Values.cloudsql.enable_iam_login }}
         - "-enable_iam_login"
@@ -156,8 +156,23 @@ spec:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
+            {{- if eq .Values.celery.broker "rabbitmq" }}
+            {{- if .Values.rabbitmq.enabled }}
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
+            {{- else }}
+              name: {{ .Values.rabbitmq.existingPasswordSecret }}
+              key: {{ .Values.rabbitmq.secretPasswordKey }}  
+            {{- end }}            
+            {{- else if eq .Values.celery.broker "redis" }}
+            {{- if .Values.redis.enabled }}
+              name: defectdojo-{{ .Values.celery.broker }}-specific
+              key: {{ .Values.celery.broker }}-password
+            {{- else }}
+              name: {{ .Values.redis.existingSecret }}
+              key: {{ .Values.redis.secretKey }}
+            {{- end }}  
+            {{- end }}
         {{- if .Values.django.uwsgi.enable_debug }}
         - name: DD_DEBUG
           value: 'True'
@@ -169,8 +184,8 @@ spec:
               name: {{ .Values.postgresql.existingSecret }}
               key: {{ .Values.postgresql.secretKey }}
               {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.existingSecret }}
-              key: {{ .Values.mysql.secretKey }}
+              name: {{ .Values.mysql.auth.existingSecret }}
+              key: {{ .Values.mysql.auth.secretKey }}
               {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:

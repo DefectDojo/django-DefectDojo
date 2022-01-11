@@ -5,21 +5,6 @@ draft: false
 weight: 5
 ---
 
-{{% alert title="Deprecation notice" color="warning" %}}
-Legacy authorization will be removed with version 2.5.0 / beginning of December 2021.
-If you have set `FEATURE_AUTHORIZATION_V2` to `False` in your local configuration,
-remove this local setting and start using the new authorization as described
-in [Permissions]({{< ref "/usage/permissions" >}}).
-
-Users have been migrated to the new authorization with release 2.0.0 but you can
-run the migration again with
-
-`./manage.py migrate_authorization_v2`
-
-See [Authorization](https://defectdojo.github.io/django-DefectDojo/getting_started/upgrading/#authorization)
-for more details about the migration.
-{{% /alert %}}
-
 Docker-compose
 --------------
 
@@ -71,13 +56,49 @@ update the source code first)
 
 Replace the first step above with this one: `docker-compose build`
 
+godojo installations
+--------------------
+
+If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
+
+## Upgrading to DefectDojo Version 2.7.x.
+
+This release is a breaking change regarding the Choctaw Hog parser. As the maintainers of this project unified multiple parsers under the RustyHog parser, we now support the parsing of Choctaw Hog JSON output files through the Rusty Hog parser. Furthermore, we also support Gottingen Hog JSON output files with the RustyHog parser.
+
+## Upgrading to DefectDojo Version 2.6.x.
+
+There are no special instruction for upgrading to 2.6.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.6.0) for the contents of the release.
+
+Please consult the security advisories [GHSA-f82x-m585-gj24](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-f82x-m585-gj24) (moderate) and [GHSA-v7fv-g69g-x7p2](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-v7fv-g69g-x7p2) (high) to see what security issues were fixed in this release. These will be published and become visible at January 18th, 2022.
+
+## Upgrading to DefectDojo Version 2.5.x.
+
+Legacy authorization has been completely removed with version 2.5.0. This includes removal of the migration of users
+to the new authorization as described in https://defectdojo.github.io/django-DefectDojo/getting_started/upgrading/#authorization.
+If you are still using the legacy authorization, you should run the migration with ``./manage.py migrate_authorization_v2``
+before upgrading to version 2.5.0
+
+This release introduces the "Forgot password" functionality (`DD_FORGOT_PASSWORD`: default `True`). The function
+allows sending an e-mail with the reset password link. Missing configuration or misconfiguration of SMTP
+(`DD_EMAIL_URL`) could raise an error (HTTP-500). Check and test (for example by resetting your own password) if you
+configured SMTP correctly. If you want to avoid HTTP-500 and you don't want to set up SMTP, you can just simply switch
+off the "Forgot password" functionality (`DD_FORGOT_PASSWORD=False`).
+
+Release renamed system setting `mail_notifications_from` to `email_from`. This value will not be used only for sending
+notifications but also for sending the reset password emails. It is highly recommended to check the content of this
+value if you are satisfied. If you installed DefectDojo earlier, you can expect `"from@example.com"` there. A fresh
+installation will use `"no-reply@example.com"`
+
+This release [updates](https://github.com/DefectDojo/django-DefectDojo/pull/5450) our helm dependencies. There is a breaking change if you are using the mysql database from the helm chart because we replaced the deprecated chart from the stable repo with a chart from bitnami. If you have persistance enabled, ensure to backup your data before upgrading. All data get lost when replacing the mysql chart during the upgrade. For data migration take a look at the mysql backup and restore process.
+
+Furthermore we updated our kubernetes version. Current tests run on 1.18.16 and 1.22.0.
 
 ## Upgrading to DefectDojo Version 2.4.x. (Security Release)
 
 This releases fixes a High severity vulnerability for which the details will be disclosed on November 16th in [GHSA-fwg9-752c-qh8w](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-fwg9-752c-qh8w)
 
 There is a breaking change in the API for importing and re-importings scans with SonarQube API and Cobalt.io API. The [scan configurations
-have been unified](https://github.com/DefectDojo/django-DefectDojo/pull/5289) and are set now with the attribute `api_scan_configuration`. 
+have been unified](https://github.com/DefectDojo/django-DefectDojo/pull/5289) and are set now with the attribute `api_scan_configuration`.
 The existing configurations for SonarQube API and Cobalt.io API have been migrated.
 
 At the request of pyup.io, we had to remove the parser for Safety scans.
@@ -85,7 +106,7 @@ At the request of pyup.io, we had to remove the parser for Safety scans.
 
 ## Upgrading to DefectDojo Version 2.3.x.
 
-There are no special instruction for upgrading to 2.3.0. 
+There are no special instruction for upgrading to 2.3.0.
 In 2.3.0 we [changed the default password hashing algorithm to Argon2 (from PBKDF2)](https://github.com/DefectDojo/django-DefectDojo/pull/5205).
 When logging in, exising hashes get replaced by an Argon2 hash. If you want to rehash password without users having to login,
 please see the [Django password management docs](https://docs.djangoproject.com/en/3.2/topics/auth/passwords/).
@@ -126,11 +147,11 @@ We decided to name this version 2.0.0 because we did some big cleanups in this r
 - Refactor EndPoint handling/formatting ([#4473](https://github.com/DefectDojo/django-DefectDojo/pull/4473))
 - Upgrade to Django 3.x ([#3632](https://github.com/DefectDojo/django-DefectDojo/pull/3632))
 - PDF Reports removed ([#4418](https://github.com/DefectDojo/django-DefectDojo/pull/4418))
-- Hashcode calculation logic has changed. To update existing findings run: 
-  
+- Hashcode calculation logic has changed. To update existing findings run:
+
   `./manage.py dedupe --hash_code_only`.
 
-If you're using docker: 
+If you're using docker:
 
 `docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`.
 
@@ -231,7 +252,7 @@ This can take a while depeneding on your instance size. It might possible that n
 
 -   See release notes:
     <https://github.com/DefectDojo/django-DefectDojo/releases>
--   Defect Dojo now provides a `settings.py` file
+-   DefectDojo now provides a `settings.py` file
     out-of-the-box. Custom settings need to go into
     `local\_settings.py`. See
     <https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.py>

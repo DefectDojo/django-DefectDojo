@@ -18,30 +18,30 @@ class ProductMemberTest(BaseTestCase):
         # Navigate to User Management page
         driver.get(self.base_url + "user")
         # Select and click on the particular user to view
-        driver.find_element_by_link_text("propersahm").click()
+        driver.find_element(By.LINK_TEXT, "propersahm").click()
         # Only execute test case when authorization v2 is activated
         if self.is_element_by_id_present('dropdownMenuAddProductMember'):
             # Open the menu to add users and click the 'Add' button
-            driver.find_element_by_id("dropdownMenuAddProductMember").click()
-            driver.find_element_by_id("addProductMember").click()
+            driver.find_element(By.ID, "dropdownMenuAddProductMember").click()
+            driver.find_element(By.ID, "addProductMember").click()
             # Select the product 'QA Test'
             try:
                 WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_products')))
             except TimeoutException:
                 self.fail('Timed out waiting for products dropdown to initialize ')
             driver.execute_script("document.getElementsByName('products')[0].style.display = 'inline'")
-            element = driver.find_element_by_xpath("//select[@name='products']")
-            product_option = element.find_elements_by_tag_name('option')[0]
+            element = driver.find_element(By.XPATH, "//select[@name='products']")
+            product_option = element.find_elements(By.TAG_NAME, 'option')[0]
             Select(element).select_by_value(product_option.get_attribute("value"))
             # Select the role 'Reader'
-            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Reader")
+            Select(driver.find_element(By.ID, "id_role")).select_by_visible_text("Reader")
             # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-primary").click()
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # Assert the message to determine success status
             self.assertTrue(self.is_success_message_present(text='Product members added successfully.'))
             # Query the site to determine if the member has been added
-            self.assertEqual(driver.find_elements_by_name("member_product")[0].text, "QA Test")
-            self.assertEqual(driver.find_elements_by_name("member_product_role")[0].text, "Reader")
+            self.assertEqual(driver.find_elements(By.NAME, "member_product")[0].text, "QA Test")
+            self.assertEqual(driver.find_elements(By.NAME, "member_product_role")[0].text, "Reader")
         else:
             print('--------------------------------')
             print('test_user_add_product_member: Not executed because legacy authorization is active')
@@ -54,21 +54,21 @@ class ProductMemberTest(BaseTestCase):
         # Navigate to User Management page
         driver.get(self.base_url + "user")
         # Select and click on the particular user to view
-        driver.find_element_by_link_text("propersahm").click()
+        driver.find_element(By.LINK_TEXT, "propersahm").click()
         # Only execute test case when authorization v2 is activated
         if self.is_element_by_id_present('dropdownMenuAddProductMember'):
             # Open the menu to manage members and click the 'Edit' button
-            driver.find_elements_by_name("dropdownManageProductMember")[0].click()
-            driver.find_elements_by_name("editProductMember")[0].click()
+            driver.find_elements(By.NAME, "dropdownManageProductMember")[0].click()
+            driver.find_elements(By.NAME, "editProductMember")[0].click()
             # Select the role 'Maintainer'
-            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Maintainer")
+            Select(driver.find_element(By.ID, "id_role")).select_by_visible_text("Maintainer")
             # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-primary").click()
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # Assert the message to determine success status
             self.assertTrue(self.is_success_message_present(text='Product member updated successfully.'))
             # Query the site to determine if the member has been edited
-            self.assertEqual(driver.find_elements_by_name("member_product")[0].text, "QA Test")
-            self.assertEqual(driver.find_elements_by_name("member_product_role")[0].text, "Maintainer")
+            self.assertEqual(driver.find_elements(By.NAME, "member_product")[0].text, "QA Test")
+            self.assertEqual(driver.find_elements(By.NAME, "member_product_role")[0].text, "Maintainer")
         else:
             print('--------------------------------')
             print('test_edit_add_product_member: Not executed because legacy authorization is active')
@@ -81,18 +81,18 @@ class ProductMemberTest(BaseTestCase):
         # Navigate to User Management page
         driver.get(self.base_url + "user")
         # Select and click on the particular user to view
-        driver.find_element_by_link_text("propersahm").click()
+        driver.find_element(By.LINK_TEXT, "propersahm").click()
         # Only execute test case when authorization v2 is activated
         if self.is_element_by_id_present('dropdownMenuAddProductMember'):
             # Open the menu to manage members and click the 'Delete' button
-            driver.find_elements_by_name("dropdownManageProductMember")[0].click()
-            driver.find_elements_by_name("deleteProductMember")[0].click()
+            driver.find_elements(By.NAME, "dropdownManageProductMember")[0].click()
+            driver.find_elements(By.NAME, "deleteProductMember")[0].click()
             # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-danger").click()
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
             # Assert the message to determine success status
             self.assertTrue(self.is_success_message_present(text='Product member deleted successfully.'))
             # Query the site to determine if the member has been deleted
-            self.assertFalse(driver.find_elements_by_name("member_product"))
+            self.assertFalse(driver.find_elements(By.NAME, "member_product"))
         else:
             print('--------------------------------')
             print('test_user_delete_product_member: Not executed because legacy authorization is active')
@@ -105,29 +105,29 @@ class ProductMemberTest(BaseTestCase):
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
-        driver.find_element_by_link_text("QA Test").click()
+        driver.find_element(By.LINK_TEXT, "QA Test").click()
         if self.is_element_by_id_present('dropdownMenuAddProductMember'):
             # Open the menu to add users and click the 'Add User' button
-            driver.find_element_by_id("dropdownMenuAddProductMember").click()
-            driver.find_element_by_id("addProductMember").click()
+            driver.find_element(By.ID, "dropdownMenuAddProductMember").click()
+            driver.find_element(By.ID, "addProductMember").click()
             # Select the user 'propersahm'
             try:
                 WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_users')))
             except TimeoutException:
                 self.fail('Timed out waiting for users dropdown to initialize ')
             driver.execute_script("document.getElementsByName('users')[0].style.display = 'inline'")
-            element = driver.find_element_by_xpath("//select[@name='users']")
-            user_option = element.find_elements_by_tag_name('option')[0]
+            element = driver.find_element(By.XPATH, "//select[@name='users']")
+            user_option = element.find_elements(By.TAG_NAME, 'option')[0]
             Select(element).select_by_value(user_option.get_attribute("value"))
             # Select the role 'Reader'
-            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Reader")
+            Select(driver.find_element(By.ID, "id_role")).select_by_visible_text("Reader")
             # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-primary").click()
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # Assert the message to determine success status
             self.assertTrue(self.is_success_message_present(text='Product members added successfully.'))
             # Query the site to determine if the member has been added
-            self.assertEqual(driver.find_elements_by_name("member_user")[0].text, "Proper Samuel (propersahm)")
-            self.assertEqual(driver.find_elements_by_name("member_role")[0].text, "Reader")
+            self.assertEqual(driver.find_elements(By.NAME, "member_user")[0].text, "Proper Samuel (propersahm)")
+            self.assertEqual(driver.find_elements(By.NAME, "member_role")[0].text, "Reader")
         else:
             print('--------------------------------')
             print('test_product_add_product_member: Not executed because legacy authorization is active')
@@ -140,21 +140,21 @@ class ProductMemberTest(BaseTestCase):
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
-        driver.find_element_by_link_text("QA Test").click()
+        driver.find_element(By.LINK_TEXT, "QA Test").click()
         # Only execute test case when authorization v2 is activated
         if self.is_element_by_id_present('dropdownMenuAddProductMember'):
             # Open the menu to manage members and click the 'Edit' button
-            driver.find_elements_by_name("dropdownManageProductMember")[0].click()
-            driver.find_elements_by_name("editProductMember")[0].click()
+            driver.find_elements(By.NAME, "dropdownManageProductMember")[0].click()
+            driver.find_elements(By.NAME, "editProductMember")[0].click()
             # Select the role 'Maintainer'
-            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Maintainer")
+            Select(driver.find_element(By.ID, "id_role")).select_by_visible_text("Maintainer")
             # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-primary").click()
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # Assert the message to determine success status
             self.assertTrue(self.is_success_message_present(text='Product member updated successfully.'))
             # Query the site to determine if the member has been edited
-            self.assertEqual(driver.find_elements_by_name("member_user")[0].text, "Proper Samuel (propersahm)")
-            self.assertEqual(driver.find_elements_by_name("member_role")[0].text, "Maintainer")
+            self.assertEqual(driver.find_elements(By.NAME, "member_user")[0].text, "Proper Samuel (propersahm)")
+            self.assertEqual(driver.find_elements(By.NAME, "member_role")[0].text, "Maintainer")
         else:
             print('--------------------------------')
             print('test_product_edit_product_member: Not executed because legacy authorization is active')
@@ -167,18 +167,18 @@ class ProductMemberTest(BaseTestCase):
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
-        driver.find_element_by_link_text("QA Test").click()
+        driver.find_element(By.LINK_TEXT, "QA Test").click()
         # Only execute test case when authorization v2 is activated
         if self.is_element_by_id_present('dropdownMenuAddProductMember'):
             # Open the menu to manage members and click the 'Delete' button
-            driver.find_elements_by_name("dropdownManageProductMember")[0].click()
-            driver.find_elements_by_name("deleteProductMember")[0].click()
+            driver.find_elements(By.NAME, "dropdownManageProductMember")[0].click()
+            driver.find_elements(By.NAME, "deleteProductMember")[0].click()
             # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-danger").click()
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
             # Assert the message to determine success status
             self.assertTrue(self.is_success_message_present(text='Product member deleted successfully.'))
             # Query the site to determine if the member has been deleted
-            self.assertFalse(driver.find_elements_by_name("member_user"))
+            self.assertFalse(driver.find_elements(By.NAME, "member_user"))
         else:
             print('--------------------------------')
             print('test_product_delete_product_member: Not executed because legacy authorization is active')

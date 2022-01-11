@@ -1,6 +1,7 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import Group
 from django.db.models.deletion import RestrictedError
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -13,16 +14,18 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.filters import GroupFilter
 from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, \
     Add_Product_Type_Group_GroupForm, Add_Group_MemberForm, Edit_Group_MemberForm, \
-    Delete_Group_MemberForm, GlobalRoleForm
-from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, Role
+    Delete_Group_MemberForm, GlobalRoleForm, ConfigurationPermissionsForm
+from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.group.queries import get_authorized_groups, get_product_groups_for_group, \
     get_product_type_groups_for_group, get_group_members_for_group
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.group.utils import get_auth_group_name
 
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('auth.view_group', 'staff')
 def group(request):
     groups = get_authorized_groups(Permissions.Group_View)
     groups = GroupFilter(request.GET, queryset=groups)
@@ -35,6 +38,9 @@ def group(request):
     })
 
 
+# Users need to be authorized to view groups in general and only the groups they are a member of
+# because with the group they can see user information that might be considered as confidential
+@user_is_configuration_authorized('auth.view_group', 'staff')
 @user_is_authorized(Dojo_Group, Permissions.Group_View, 'gid')
 def view_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
@@ -42,12 +48,24 @@ def view_group(request, gid):
     product_types = get_product_type_groups_for_group(group)
     group_members = get_group_members_for_group(group)
 
+    # Create authorization group if it doesn't exist and add product members
+    if not group.auth_group:
+        auth_group = Group(name=get_auth_group_name(group))
+        auth_group.save()
+        group.auth_group = auth_group
+        members = group.users.all()
+        for member in members:
+            auth_group.user_set.add(member)
+        group.save()
+    configuration_permission_form = ConfigurationPermissionsForm(group=group)
+
     add_breadcrumb(title="View Group", top_level=False, request=request)
     return render(request, 'dojo/view_group.html', {
         'group': group,
         'products': products,
         'product_types': product_types,
-        'group_members': group_members
+        'group_members': group_members,
+        'configuration_permission_form': configuration_permission_form,
     })
 
 
@@ -133,7 +151,7 @@ def delete_group(request, gid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('auth.add_group', 'staff')
 def add_group(request):
     form = DojoGroupForm
     global_role_form = GlobalRoleForm()
@@ -148,16 +166,11 @@ def add_group(request):
                                     'Only superusers are allowed to set global role.',
                                     extra_tags='alert-warning')
             else:
-                group = form.save(commit=False)
-                group.save()
+                group = form.save()
                 global_role = global_role_form.save(commit=False)
                 global_role.group = group
                 global_role.save()
-                member = Dojo_Group_Member()
-                member.user = request.user
-                member.group = group
-                member.role = Role.objects.get(is_owner=True)
-                member.save()
+
                 messages.add_message(request,
                                     messages.SUCCESS,
                                     'Group was added successfully.',
@@ -198,7 +211,7 @@ def add_group_member(request, gid):
                             group_member.user = user
                             group_member.role = groupform.cleaned_data['role']
                             group_member.save()
-                messages.add_message(request,
+                            messages.add_message(request,
                                      messages.SUCCESS,
                                      'Group members added successfully.',
                                      extra_tags='alert-success')
@@ -334,7 +347,7 @@ def add_product_type_group(request, gid):
         if group_form.is_valid():
             if 'product_types' in group_form.cleaned_data and len(group_form.cleaned_data['product_types']) > 0:
                 for product_type in group_form.cleaned_data['product_types']:
-                    existing_groups = Product_Type_Group.objects.filter(product_type=product_type)
+                    existing_groups = Product_Type_Group.objects.filter(product_type=product_type, group=group)
                     if existing_groups.count() == 0:
                         product_type_group = Product_Type_Group()
                         product_type_group.product_type = product_type
@@ -352,3 +365,17 @@ def add_product_type_group(request, gid):
         'group': group,
         'form': group_form,
     })
+
+
+@user_is_configuration_authorized('auth.change_permission', 'superuser')
+def edit_permissions(request, gid):
+    group = get_object_or_404(Dojo_Group, id=gid)
+    if request.method == 'POST':
+        form = ConfigurationPermissionsForm(request.POST, group=group)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Permissions updated.',
+                                 extra_tags='alert-success')
+    return HttpResponseRedirect(reverse('view_group', args=(gid,)))
