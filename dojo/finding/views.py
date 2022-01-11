@@ -1749,10 +1749,7 @@ def finding_bulk_update_all(request, pid=None):
         if request.POST.get('delete_bulk_findings'):
             if form.is_valid() and finding_to_update:
 
-                if pid is None:
-                    if not request.user.is_staff:
-                        raise PermissionDenied
-                else:
+                if pid is not None:
                     product = get_object_or_404(Product, id=pid)
                     user_has_permission_or_403(request.user, product, Permissions.Finding_Delete)
 
@@ -1778,10 +1775,7 @@ def finding_bulk_update_all(request, pid=None):
         else:
             if form.is_valid() and finding_to_update:
 
-                if pid is None:
-                    if not request.user.is_staff:
-                        raise PermissionDenied
-                else:
+                if pid is not None:
                     product = get_object_or_404(Product, id=pid)
                     user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
