@@ -3171,29 +3171,19 @@ class ConfigurationPermissionsForm(forms.Form):
         self.group = kwargs.pop('group', None)
         super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
 
-        permission_fields_1 = [
-            Permission_Helper(name='cred user', app='dojo', view=True, add=True, change=True, delete=True),
-            Permission_Helper(name='development environment', app='dojo', add=True, change=True, delete=True),
-            Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
-        ]
-
         if get_system_setting('enable_github'):
-            github_permission = [
+            github_permissions = [
                 Permission_Helper(name='github conf', app='dojo', view=True, add=True, delete=True),
             ]
         else:
-            github_permission = []
+            github_permissions = []
 
         if get_system_setting('enable_google_sheets'):
-            google_sheet_permission = [
+            google_sheet_permissions = [
                 Permission_Helper(name='google sheet', app='dojo', change=True),
             ]
         else:
-            google_sheet_permission = []
-
-        permission_fields_2 = [
-            Permission_Helper(name='group', app='auth', view=True, add=True),
-        ]
+            google_sheet_permissions = []
 
         if get_system_setting('enable_jira'):
             jira_permissions = [
@@ -3201,13 +3191,6 @@ class ConfigurationPermissionsForm(forms.Form):
             ]
         else:
             jira_permissions = []
-
-        permission_fields_3 = [
-            Permission_Helper(name='language type', app='dojo', view=True, add=True, change=True, delete=True),
-            Permission_Helper(name='bannerconf', app='dojo', change=True),
-            Permission_Helper(name='note type', app='dojo', view=True, add=True, change=True, delete=True),
-            Permission_Helper(name='product type', app='dojo', add=True),
-        ]
 
         if get_system_setting('enable_questionnaires'):
             questionnaire_permissions = [
@@ -3217,10 +3200,6 @@ class ConfigurationPermissionsForm(forms.Form):
         else:
             questionnaire_permissions = []
 
-        permission_fields_4 = [
-            Permission_Helper(name='regulation', app='dojo', add=True, change=True, delete=True),
-        ]
-
         if get_system_setting('enable_rules_framework'):
             rules_permissions = [
                 Permission_Helper(name='rule', app='auth', view=True, add=True, change=True, delete=True),
@@ -3228,17 +3207,26 @@ class ConfigurationPermissionsForm(forms.Form):
         else:
             rules_permissions = []
 
-        permission_fields_5 = [
+        self.permission_fields = [
+            Permission_Helper(name='cred user', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='development environment', app='dojo', add=True, change=True, delete=True),
+            Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True)] + \
+            github_permissions + \
+            google_sheet_permissions + [
+            Permission_Helper(name='group', app='auth', view=True, add=True)] + \
+            jira_permissions + [
+            Permission_Helper(name='language type', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='bannerconf', app='dojo', change=True),
+            Permission_Helper(name='note type', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='product type', app='dojo', add=True)] + \
+            questionnaire_permissions + [
+            Permission_Helper(name='regulation', app='dojo', add=True, change=True, delete=True)] + \
+            rules_permissions + [
             Permission_Helper(name='test type', app='dojo', add=True, change=True),
             Permission_Helper(name='tool configuration', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
         ]
-
-        self.permission_fields = permission_fields_1 + github_permission + google_sheet_permission + \
-                                 permission_fields_2 + jira_permissions + permission_fields_3 + \
-                                 questionnaire_permissions + permission_fields_4 + rules_permissions + \
-                                 permission_fields_5
 
         for permission_field in self.permission_fields:
             for codename in permission_field.codenames():
