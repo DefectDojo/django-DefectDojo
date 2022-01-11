@@ -142,7 +142,7 @@ class DojoDefaultReImporter(object):
 
                 # if scan_date was provided, override value from parser
                 if scan_date:
-                    item.date = scan_date
+                    item.date = scan_date.date()
 
                 # Save it. Don't dedupe before endpoints are added.
                 item.save(dedupe_option=False)
