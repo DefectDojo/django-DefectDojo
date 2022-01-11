@@ -262,6 +262,8 @@ DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL: '<your authorization endpoint'
 DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL: '<your token endpoint>'
 ```
 
+Optionally, you can set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` to customize the login button's text caption. 
+
 ## SAML 2.0
 In a similar direction to OAuth, this SAML addition provides a more secure
 perogative to SSO. For definitions of terms used and more information,
