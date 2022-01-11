@@ -4,6 +4,9 @@ from django.conf import settings
 from django.db import migrations, models, IntegrityError, transaction
 import uuid
 import django.db.models.deletion
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def move_images_to_files(apps, schema_editor):
@@ -20,10 +23,21 @@ def move_images_to_files(apps, schema_editor):
                         file=image.image
                     )
             except IntegrityError:
-                passed = True
-                pass
+                logger.info('retrying migrate migration for image %s with caption %s by uuid', image.image.name, image.caption)
+                try:
+                    with transaction.atomic():
+                        file = FileUpload_model.objects.create(
+                            title=image.caption[:50] + '-' + caption_uuid,
+                            file=image.image
+                        )
+                except IntegrityError:
+                    passed = True
+                    pass
+
             if not passed:
                 finding.files.add(file)
+            else:
+                logger.warn('unable to migrate image %s with caption %s', image.image.name, image.caption)
 
 
 class Migration(migrations.Migration):

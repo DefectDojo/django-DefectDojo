@@ -1,1 +1,0 @@
-Defectdojo can be accessed through a Swagger REST API. Please see [the API documentation](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/) or the in-app Swagger documentation.

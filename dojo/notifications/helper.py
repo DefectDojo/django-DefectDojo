@@ -70,7 +70,7 @@ def create_notification(event=None, **kwargs):
                 queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
                 to_attr="applicable_notifications"
             )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
-                .filter((Q(applicable_notifications_count__gt=0) | Q(is_superuser=True) | Q(is_staff=True)))
+                .filter((Q(applicable_notifications_count__gt=0) | Q(is_superuser=True)))
 
             # only send to authorized users or admin/superusers
             if product:
@@ -82,7 +82,7 @@ def create_notification(event=None, **kwargs):
                 # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
                 # kwargs.update({'user': user})
                 applicable_notifications = user.applicable_notifications
-                if user.is_staff or user.is_superuser:
+                if user.is_superuser:
                     # admin users get all system notifications
                     applicable_notifications.append(system_notifications)
 
@@ -260,9 +260,9 @@ def send_mail_notification(event, user=None, *args, **kwargs):
         email = EmailMessage(
             subject,
             create_notification_message(event, user, 'mail', *args, **kwargs),
-            get_system_setting('mail_notifications_from'),
+            get_system_setting('email_from'),
             [address],
-            headers={"From": "{}".format(get_system_setting('mail_notifications_from'))}
+            headers={"From": "{}".format(get_system_setting('email_from'))}
         )
         email.content_subtype = 'html'
         logger.debug('sending email alert')
@@ -305,8 +305,8 @@ def get_slack_user_id(user_email):
 
     res = requests.request(
         method='POST',
-        url='https://slack.com/api/users.list',
-        data={'token': get_system_setting('slack_token')})
+        url='https://slack.com/api/users.lookupByEmail',
+        data={'token': get_system_setting('slack_token'), 'email': user_email})
 
     users = json.loads(res.text)
 
@@ -337,7 +337,7 @@ def get_slack_user_id(user_email):
 def log_alert(e, notification_type=None, *args, **kwargs):
     # no try catch here, if this fails we need to show an error
 
-    users = Dojo_User.objects.filter((Q(is_superuser=True) | Q(is_staff=True)))
+    users = Dojo_User.objects.filter(is_superuser=True)
     for user in users:
         alert = Alerts(
             user_id=user,

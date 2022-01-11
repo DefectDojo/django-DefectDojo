@@ -12,22 +12,25 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.utils import NestedObjects
-from django.contrib.auth.views import LoginView
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.views import LoginView, PasswordResetView
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.utils.http import urlencode
 from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
 
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, ChangePasswordForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
-    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm
-from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member
-from dojo.utils import get_page_items, add_breadcrumb
+    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm, ConfigurationPermissionsForm
+from dojo.models import Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.group.queries import get_authorized_group_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.authorization.roles_permissions import Permissions
 from dojo.decorators import dojo_ratelimit
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+
+import hyperlink
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +83,7 @@ def login_view(request):
         settings.GITLAB_OAUTH2_ENABLED,
         settings.AUTH0_OAUTH2_ENABLED,
         settings.SAML2_ENABLED
-    ]) == 1:
+    ]) == 1 and not ('force_login_form' in request.GET):
         if settings.GOOGLE_OAUTH_ENABLED:
             social_auth = 'google-oauth2'
         elif settings.OKTA_OAUTH_ENABLED:
@@ -243,7 +246,7 @@ def change_password(request):
         'form': form})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('auth.view_user', 'staff')
 def user(request):
     users = Dojo_User.objects.all() \
         .select_related('usercontactinfo', 'global_role') \
@@ -259,7 +262,7 @@ def user(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.add_user', 'superuser')
 def add_user(request):
     form = AddDojoUserForm()
     if not request.user.is_superuser:
@@ -289,20 +292,11 @@ def add_user(request):
             global_role = global_role_form.save(commit=False)
             global_role.user = user
             global_role.save()
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
-                    for p in form.cleaned_data['authorized_products']:
-                        p.authorized_users.add(user)
-                        p.save()
-                if 'authorized_product_types' in form.cleaned_data and len(form.cleaned_data['authorized_product_types']) > 0:
-                    for pt in form.cleaned_data['authorized_product_types']:
-                        pt.authorized_users.add(user)
-                        pt.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'User added successfully, you may edit if necessary.',
+                                 'User added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('edit_user', args=(user.id,)))
+            return HttpResponseRedirect(reverse('view_user', args=(user.id,)))
         else:
             messages.add_message(request,
                                  messages.ERROR,
@@ -317,34 +311,27 @@ def add_user(request):
         'to_add': True})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('auth.view_user', 'staff')
 def view_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
-    authorized_products = Product.objects.filter(authorized_users__in=[user])
-    authorized_product_types = Product_Type.objects.filter(authorized_users__in=[user])
     product_members = get_authorized_product_members_for_user(user, Permissions.Product_View)
     product_type_members = get_authorized_product_type_members_for_user(user, Permissions.Product_Type_View)
     group_members = get_authorized_group_members_for_user(user)
+    configuration_permission_form = ConfigurationPermissionsForm(user=user)
 
     add_breadcrumb(title="View User", top_level=False, request=request)
     return render(request, 'dojo/view_user.html', {
         'user': user,
-        'authorized_products': authorized_products,
-        'authorized_product_types': authorized_product_types,
         'product_members': product_members,
         'product_type_members': product_type_members,
-        'group_members': group_members})
+        'group_members': group_members,
+        'configuration_permission_form': configuration_permission_form})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.change_user', 'superuser')
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
-    authed_products = Product.objects.filter(authorized_users__in=[user])
-    authed_product_types = Product_Type.objects.filter(authorized_users__in=[user])
-    form = EditDojoUserForm(instance=user, initial={
-        'authorized_products': authed_products,
-        'authorized_product_types': authed_product_types
-    })
+    form = EditDojoUserForm(instance=user)
     if not request.user.is_superuser:
         form.fields['is_staff'].widget.attrs['disabled'] = True
         form.fields['is_superuser'].widget.attrs['disabled'] = True
@@ -376,21 +363,6 @@ def edit_user(request, uid):
 
         if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
             form.save()
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                for init_auth_prods in authed_products:
-                    init_auth_prods.authorized_users.remove(user)
-                    init_auth_prods.save()
-                for init_auth_prod_types in authed_product_types:
-                    init_auth_prod_types.authorized_users.remove(user)
-                    init_auth_prod_types.save()
-                if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
-                    for p in form.cleaned_data['authorized_products']:
-                        p.authorized_users.add(user)
-                        p.save()
-                if 'authorized_product_types' in form.cleaned_data and len(form.cleaned_data['authorized_product_types']) > 0:
-                    for pt in form.cleaned_data['authorized_product_types']:
-                        pt.authorized_users.add(user)
-                        pt.save()
             contact = contact_form.save(commit=False)
             contact.user = user
             contact.save()
@@ -415,7 +387,7 @@ def edit_user(request, uid):
         'to_edit': user})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.delete_user', 'superuser')
 def delete_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = DeleteUserForm(instance=user)
@@ -456,7 +428,7 @@ def delete_user(request, uid):
                    })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.change_user', 'superuser')
 def add_product_type_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Type_Member_UserForm(initial={'user': user.id})
@@ -484,7 +456,7 @@ def add_product_type_member(request, uid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.change_user', 'superuser')
 def add_product_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Member_UserForm(initial={'user': user.id})
@@ -512,7 +484,7 @@ def add_product_member(request, uid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('auth.change_user', 'superuser')
 def add_group_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Group_Member_UserForm(initial={'user': user.id})
@@ -540,3 +512,36 @@ def add_group_member(request, uid):
         'user': user,
         'form': memberform
     })
+
+
+@user_is_configuration_authorized('auth.change_permission', 'superuser')
+def edit_permissions(request, uid):
+    user = get_object_or_404(Dojo_User, id=uid)
+    if request.method == 'POST':
+        form = ConfigurationPermissionsForm(request.POST, user=user)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Permissions updated.',
+                                 extra_tags='alert-success')
+    return HttpResponseRedirect(reverse('view_user', args=(uid,)))
+
+
+class DojoPasswordResetForm(PasswordResetForm):
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+
+        from_email = get_system_setting('email_from')
+
+        url = hyperlink.parse(settings.SITE_URL)
+        context['site_name'] = url.host
+        context['protocol'] = url.scheme
+        context['domain'] = settings.SITE_URL[len(url.scheme + '://'):]
+
+        super().send_mail(subject_template_name, email_template_name,
+                          context, from_email, to_email, html_email_template_name)
+
+
+class DojoPasswordResetView(PasswordResetView):
+    form_class = DojoPasswordResetForm

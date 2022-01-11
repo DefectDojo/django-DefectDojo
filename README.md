@@ -11,14 +11,14 @@ vulnerability management platform.
 DefectDojo allows you to manage your application security program, maintain
 product and application information, triage vulnerabilities and
 push findings to systems like JIRA and Slack. DefectDojo enriches and
-refines vulnerability data using a number of heuristic algrothims that
+refines vulnerability data using a number of heuristic algorithms that
 improve with the more you use the platform.
 
 ## Demo
 
 Try out the demo sever at [demo.defectdojo.org](https://demo.defectdojo.org)
 
-Log in with `admin / 1Defectdojo@demo#appsec`. Please note that the demo is pubicly accessable and regularly reset. Do not put sensitive data in the demo.
+Log in with `admin / 1Defectdojo@demo#appsec`. Please note that the demo is publicly accessable and regularly reset. Do not put sensitive data in the demo.
 
 ## Quick Start
 
@@ -39,21 +39,10 @@ Navigate to <http://localhost:8080>.
 
 ## Documentation
 
-### [Official docs](https://defectdojo.github.io/django-DefectDojo/)
-
-### [Getting Started](readme-docs/GETTING-STARTED.md)
-
-### [REST APIs](readme-docs/REST-APIs.md)
-
-### [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND_WRAPPERS.md)
-
-### [Release and Branch Model](readme-docs/RELEASE-AND-BRANCH-MODEL.md)
-
-### [Contributing](readme-docs/CONTRIBUTING.md)
-
-### [Roadmap](readme-docs/ROADMAP.md)
-
-### [Wishlist](readme-docs/WISHLIST.md)
+- [Official Docs](https://defectdojo.github.io/django-DefectDojo/) ([latest](https://defectdojo.github.io/django-DefectDojo/) | [dev](https://defectdojo.github.io/django-DefectDojo/dev))
+- [REST APIs](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/)
+- [Client APIs and Wrappers](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/#clients--api-wrappers)
+- [Authentication Options](readme-docs/AVAILABLE-PLUGINS.md)
 
 ## Supported Installation Options
 
@@ -71,6 +60,9 @@ Navigate to <http://localhost:8080>.
 [Join the slack community](https://owasp-slack.herokuapp.com/) and discussion! Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 Follow DefectDojo on [Twitter](https://twitter.com/defectdojo), [Linkedin](https://www.linkedin.com/company/defectdojo), and [YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) for project updates!
 
+## Contributing
+See our [Contributing guidelines](readme-docs/CONTRIBUTING.md)
+
 ## Commercial Support and Training
 Commercial support and training is availaible through [10Security](https://10security.com).
 
@@ -80,28 +72,22 @@ For information please email info@10security.com or visit our [site](https://10s
 ## About Us
 
 DefectDojo is maintained by:
+* Greg Anderson ([@devGregA](https://github.com/devgrega) | [linkedin](https://www.linkedin.com/in/g-anderson/))
+* Aaron Weaver ([@aaronweaver](https://github.com/aaronweaver)| [linkedin](https://www.linkedin.com/in/aweaver/) | [@weavera](https://twitter.com/weavera))
+* Matt Tesauro ([@mtesauro](https://github.com/mtesauro) | [linkedin](https://www.linkedin.com/in/matttesauro/) | [@matt_tesauro](https://twitter.com/matt_tesauro))
 
-* [Greg Anderson](https://www.linkedin.com/in/g-anderson/)
-* [Aaron Weaver](https://www.linkedin.com/in/aweaver/) ([@weavera](https://twitter.com/weavera))
-* [Matt Tesauro](https://www.linkedin.com/in/matttesauro/) ([@matt_tesauro](https://twitter.com/matt_tesauro))
+Core Moderators can help you with pull requests or feedback on dev ideas:
+* Valentijn Scholten ([@valentijnscholten](https://github.com/valentijnscholten) | [sponsor](https://github.com/sponsors/valentijnscholten) | [linkedin](https://www.linkedin.com/in/valentijn-scholten/))
+* Cody Maffucci ([@Maffooch](https://github.com/maffooch) | [linkedin](https://www.linkedin.com/in/cody-maffucci))
 
-
-## Project Moderators
-
-Project Moderators can help you with pull requests or feedback on dev ideas.
-
-* [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
-* [Valentijn Scholten](https://github.com/valentijnscholten) ([sponsor](https://github.com/sponsors/valentijnscholten) | [linkedin](https://www.linkedin.com/in/valentijn-scholten/))
-* Jannik Jürgens
-* [Fred Blaise](https://www.linkedin.com/in/fredblaise/)
-* [Cody Maffucci](https://www.linkedin.com/in/cody-maffucci)
-* Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
-* [Damien Carol](https://www.linkedin.com/in/damien-carol/)
-* [Stefan Fleckenstein](https://www.linkedin.com/in/stefan-fleckenstein-6a456a30/)
+Moderators can help you with pull requests or feedback on dev ideas:
+* Damien Carol ([@damnielcarol](https://github.com/damiencarol) | [linkedin](https://www.linkedin.com/in/damien-carol/))
+* Stefan Fleckenstein ([@StefanFl](https://github.com/stefanfl) | ([linkedin](https://www.linkedin.com/in/stefan-fleckenstein-6a456a30/))
+* Jannik Jürgens ([@alles-klar](https://github.com/alles-klar))
 
 
 ## Hall of Fame
-
+* Fred Blaise ([@madchap](https://github.com/madchap) | [linkedin](https://www.linkedin.com/in/fredblaise/)) - Fred served as a core moderator during a critical time for DefectDojo. He contributed code, helped the team stay organized, and architected important policies and procedures.
 * Charles Neill ([@ccneill](https://twitter.com/ccneill)) – Charles served as a
     DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
 * Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo
@@ -116,6 +102,10 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/arrival.png" github-user="ansidorov" alt="ARRIVAL" height="65" />](https://arrival.com)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png" github-user="mtesauro" alt="WeHackPurle" height="120" />](https://wehackpurple.com/)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png" github-user="StefanFl" alt="MiabornWolff" height="120" />]((https://www.maibornwolff.de/en))
+
+## Security
+
+Please report Security issues via our [disclosure policy](readme-docs/SECURITY.md).
 
 ## License
 

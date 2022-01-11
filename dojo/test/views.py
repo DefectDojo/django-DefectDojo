@@ -1,4 +1,5 @@
 # #  tests
+from django.db.models.query import Prefetch
 from dojo.importers.utils import construct_imported_message
 import logging
 import operator
@@ -10,7 +11,7 @@ import googleapiclient.discovery
 from google.oauth2 import service_account
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.db.models import Q, QuerySet, Count
 from django.http import HttpResponseRedirect, HttpResponse
@@ -25,10 +26,10 @@ from dojo.forms import NoteForm, TestForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
-from dojo.models import Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Test_Import, Product_API_Scan_Configuration
+from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
+    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
 
-from dojo.tools.factory import get_choices_sorted
+from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
     Product_Tab, is_scan_file_too_large, get_words_for_field
 from dojo.notifications.helper import create_notification
@@ -51,7 +52,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 @sensitive_variables('service_account_info', 'credentials')
-@user_is_authorized(Test, Permissions.Test_View, 'tid', 'view')
+@user_is_authorized(Test, Permissions.Test_View, 'tid')
 def view_test(request, tid):
     test_prefetched = get_authorized_tests(Permissions.Test_View)
     test_prefetched = test_prefetched.annotate(total_reimport_count=Count('test_import__id', distinct=True))
@@ -76,11 +77,7 @@ def view_test(request, tid):
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
     system_settings = get_object_or_404(System_Settings, id=1)
     if request.method == 'POST':
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, test, Permissions.Note_Add)
-        else:
-            if not request.user.is_staff:
-                raise PermissionDenied
+        user_has_permission_or_403(request.user, test, Permissions.Note_Add)
         if note_type_activation:
             form = TypedNoteForm(request.POST, available_note_types=available_note_types)
         else:
@@ -207,14 +204,15 @@ def prefetch_for_findings(findings):
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
-        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
+        # filter out noop reimport actions from finding status history
+        prefetched_findings = prefetched_findings.prefetch_related(Prefetch('test_import_finding_action_set',
+                                                                            queryset=Test_Import_Finding_Action.objects.exclude(action=IMPORT_UNTOUCHED_FINDING)))
+
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
         prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
         prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
-        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
-        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set__jira_issue')
         prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
 
@@ -231,12 +229,12 @@ def prefetch_for_findings(findings):
 #         prefetched_test_imports = prefetched_test_imports.annotate(created_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CREATED_FINDING)))
 #         prefetched_test_imports = prefetched_test_imports.annotate(closed_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CLOSED_FINDING)))
 #         prefetched_test_imports = prefetched_test_imports.annotate(reactivated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_REACTIVATED_FINDING)))
-#         prefetched_test_imports = prefetched_test_imports.annotate(updated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_UPDATED_FINDING)))
+#         prefetched_test_imports = prefetched_test_imports.annotate(updated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_UNTOUCHED_FINDING)))
 
 #     return prefetch_for_test_imports
 
 
-@user_is_authorized(Test, Permissions.Test_Edit, 'tid', 'change')
+@user_is_authorized(Test, Permissions.Test_Edit, 'tid')
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     form = TestForm(instance=test)
@@ -263,7 +261,7 @@ def edit_test(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_Delete, 'tid', 'delete')
+@user_is_authorized(Test, Permissions.Test_Delete, 'tid')
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     eng = test.engagement
@@ -327,7 +325,7 @@ def test_calendar(request):
         'users': Dojo_User.objects.all()})
 
 
-@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Test_View, 'tid')
 def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
@@ -347,7 +345,7 @@ def test_ics(request, tid):
     return response
 
 
-@user_is_authorized(Test, Permissions.Finding_Add, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid')
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
@@ -469,7 +467,7 @@ def add_findings(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Finding_Add, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid')
 def add_temp_finding(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)
@@ -575,7 +573,7 @@ def add_temp_finding(request, tid, fid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Test_View, 'tid')
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
     templates = Finding_Template.objects.all()
@@ -594,7 +592,7 @@ def search(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid')
 def re_import_scan_results(request, tid):
     additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
@@ -657,7 +655,7 @@ def re_import_scan_results(request, tid):
             finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = 0, 0, 0, 0, 0
             reimporter = ReImporter()
             try:
-                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
+                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, _ = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
                                                 tags=None, minimum_severity=minimum_severity,
                                                 endpoints_to_add=endpoints_to_add, scan_date=scan_date,
@@ -691,5 +689,5 @@ def re_import_scan_results(request, tid):
                    'eid': engagement.id,
                    'additional_message': additional_message,
                    'jform': jform,
-                   'scan_types': get_choices_sorted(),
+                   'scan_types': get_scan_types_sorted(),
                    })

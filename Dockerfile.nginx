@@ -32,7 +32,7 @@ ENV \
   node="nodejs"
 RUN \
   apt-get -y update && \
-  apt-get -y install apt-transport-https ca-certificates curl wget && \
+  apt-get -y install --no-install-recommends apt-transport-https ca-certificates curl wget && \
   curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add --no-tty - && \
   echo 'deb https://deb.nodesource.com/node_14.x buster main' > /etc/apt/sources.list.d/nodesource.list && \
   echo 'deb-src https://deb.nodesource.com/node_14.x buster main' >> /etc/apt/sources.list.d/nodesource.list && \
@@ -42,7 +42,7 @@ RUN \
   wget https://github.com/yarnpkg/yarn/releases/download/v1.22.10/yarn_1.22.10_all.deb && \
   dpkg -i yarn_1.22.10_all.deb && \
   echo "$(yarn --version)" && \
-  apt-get -y install nodejs && \
+  apt-get -y install --no-install-recommends nodejs && \
   echo "$(node --version)" && \
   apt-get clean && \
   rm yarn_1.22.10_all.deb && \
@@ -65,7 +65,7 @@ COPY dojo/ ./dojo/
 
 RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
 
-FROM nginx:1.21.3-alpine@sha256:1ff1364a1c4332341fc0a854820f1d50e90e11bb0b93eb53b47dc5e10c680116
+FROM nginx:1.21.5-alpine@sha256:eb05700fe7baa6890b74278e39b66b2ed1326831f9ec3ed4bdc6361a4ac2f333
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
