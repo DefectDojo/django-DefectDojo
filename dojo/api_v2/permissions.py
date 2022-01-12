@@ -48,7 +48,7 @@ class UserHasDojoGroupPermission(permissions.BasePermission):
         if request.method == 'GET':
             return user_has_configuration_permission(request.user, 'auth.view_group', 'staff')
         elif request.method == 'POST':
-            return user_has_configuration_permission(request.user, 'auth.create_group', 'staff')
+            return user_has_configuration_permission(request.user, 'auth.add_group', 'staff')
         else:
             return True
 
