@@ -8,7 +8,7 @@ draft: false
 ## System-wide permissions
 
 * Administrators (aka super users) have no limitations in the system. They can change all settings, manage users  and have read and write access to all data.
-* Staff users can add Product Types, and have access to data according to their role in a Product or Product Type. There is the parameter `AUTHORIZATION_STAFF_OVERRIDE` in the settings to give all staff users full access to all Products and Product Types.
+* Staff users can add Product Types, and have access to data according to their role in a Product or Product Type.
 * Regular users have limited functionality available. They cannot add Product Types but have access to data according to their role in a Product or Product Type
 
 ## Product and Product Type permissions
