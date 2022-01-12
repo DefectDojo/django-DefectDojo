@@ -88,7 +88,7 @@ class TestWpscanParser(DojoTestCase):
         self.assertEqual(datetime.datetime(2021, 3, 17, 12, 21, 6), finding.date)
 
     def test_parse_file_with_multiple_vuln_in_version(self):
-        testfile = open("dojo/unittests/scans/wpscan/wordpress_vuln_version.json")
+        testfile = open("unittests/scans/wpscan/wordpress_vuln_version.json")
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
         for finding in findings:
