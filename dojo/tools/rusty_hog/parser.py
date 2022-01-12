@@ -19,7 +19,7 @@ class RustyhogParser(object):
         return self.get_items(tree, test)
 
     def parse_json(self, json_output):
-        tree = json.loads(json_output)
+        tree = json.loads(json_output.read())
         return tree
 
     def get_items(self, json_output, scanner, test):
