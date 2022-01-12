@@ -94,5 +94,6 @@ class Command(BaseCommand):
         auth_group.permissions.add(permissions['change_test_type'])
         auth_group.permissions.add(permissions['delete_test_type'])
         auth_group.permissions.add(permissions['view_user'])
+        auth_group.permissions.add(permissions['add_product_type'])
 
         logger.info(f'Migrated {len(staff_users)} staff users')
