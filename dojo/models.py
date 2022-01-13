@@ -3,18 +3,21 @@ import hashlib
 import logging
 import os
 import re
+import copy
 from typing import Dict, Set, Optional
 from uuid import uuid4
 from django.conf import settings
-
 from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from django.db.models.expressions import Case, When
 from django.urls import reverse
 from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, Count
+from django.db.models.functions import Lower
 from django_extensions.db.models import TimeStampedModel
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
@@ -35,23 +38,62 @@ from cvss import CVSS3
 from dojo.settings.settings import SLA_BUSINESS_DAYS
 from numpy import busday_count
 
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 
+SEVERITIES = [s[0] for s in SEVERITY_CHOICES]
+
+# fields returned in statistics, typically all status fields
+STATS_FIELDS = ['active', 'verified', 'duplicate', 'false_p', 'out_of_scope', 'is_mitigated', 'risk_accepted', 'total']
+# default template with all values set to 0
+DEFAULT_STATS = {sev.lower(): {stat_field: 0 for stat_field in STATS_FIELDS} for sev in SEVERITIES}
+
 IMPORT_CREATED_FINDING = 'N'
 IMPORT_CLOSED_FINDING = 'C'
 IMPORT_REACTIVATED_FINDING = 'R'
-IMPORT_UPDATED_FINDING = 'U'
+IMPORT_UNTOUCHED_FINDING = 'U'
 
 IMPORT_ACTIONS = [
     (IMPORT_CREATED_FINDING, 'created'),
     (IMPORT_CLOSED_FINDING, 'closed'),
     (IMPORT_REACTIVATED_FINDING, 'reactivated'),
-    (IMPORT_UPDATED_FINDING, 'updated'),
+    (IMPORT_UNTOUCHED_FINDING, 'left untouched'),
 ]
+
+
+def _get_annotations_for_statistics():
+    annotations = {stats_field.lower(): Count(Case(When(**{stats_field: True}, then=1))) for stats_field in STATS_FIELDS if stats_field != 'total'}
+    # add total
+    annotations['total'] = Count('id')
+    return annotations
+
+
+def _get_statistics_for_queryset(qs, annotation_factory):
+    # order by to get rid of default ordering that would mess with group_by
+    # group by severity (lowercase)
+    values = qs.annotate(sev=Lower('severity')).values('sev').order_by()
+    # add annotation for each status field
+    values = values.annotate(**annotation_factory())
+    # make sure sev and total are included
+    stat_fields = ['sev', 'total'] + STATS_FIELDS
+    # go for it
+    values = values.values(*stat_fields)
+
+    # not sure if there's a smarter way to convert a list of dicts into a dict of dicts
+    # need to copy the DEFAULT_STATS otherwise it gets overwritten
+    stats = copy.copy(DEFAULT_STATS)
+    for row in values:
+        sev = row.pop('sev')
+        stats[sev] = row
+
+    values_total = qs.values()
+    values_total = values_total.aggregate(**annotation_factory())
+    stats['total'] = values_total
+    return stats
 
 
 @deconstructible
@@ -181,6 +223,7 @@ class Dojo_Group(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
+    auth_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -224,6 +267,8 @@ class System_Settings(models.Model):
                                               "issue reaches the maximum "
                                               "number of duplicates, the "
                                               "oldest will be deleted. Duplicate will not be deleted when left empty. A value of 0 will remove all duplicates.")
+
+    email_from = models.CharField(max_length=200, default='no-reply@example.com', blank=True)
 
     enable_jira = models.BooleanField(default=False,
                                       verbose_name='Enable JIRA integration',
@@ -278,9 +323,6 @@ class System_Settings(models.Model):
                                     help_text='The full URL of the '
                                               'incoming webhook')
     enable_mail_notifications = models.BooleanField(default=False, blank=False)
-    mail_notifications_from = models.CharField(max_length=200,
-                                               default='from@example.com',
-                                               blank=True)
     mail_notifications_to = models.CharField(max_length=200, default='',
                                              blank=True)
     false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive. Not needed when using deduplication, advised to not combine these two.")
@@ -369,7 +411,6 @@ class System_Settings(models.Model):
                                   help_text="Include this custom disclaimer on all notifications and generated reports")
     column_widths = models.TextField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
-    enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
     email_address = models.EmailField(max_length=100, blank=True)
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text="Default expiry period for risk acceptance form.")
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
@@ -389,17 +430,42 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name='Enable checklists',
         help_text="With this setting turned off, checklists will be disabled in the user interface.")
+    enable_endpoint_metadata_import = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable Endpoint Metadata Import',
+        help_text="With this setting turned off, endpoint metadata import will be disabled in the user interface.")
+    enable_google_sheets = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name='Enable Google Sheets Integration',
+        help_text="With this setting turned off, the Google sheets integration will be disabled in the user interface.")
+    enable_rules_framework = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name='Enable Rules Framework',
+        help_text="With this setting turned off, the rules framwork will be disabled in the user interface.")
+    enable_user_profile_editable = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable user profile for writing',
+        help_text="When turned on users can edit their profiles")
+    enable_product_tracking_files = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable Product Tracking Files',
+        help_text="With this setting turned off, the product tracking files will be disabled in the user interface.")
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
         blank=True,
-        help_text="New users created by OAuth2 will be assigned to this group.",
+        help_text="New users will be assigned to this group.",
         on_delete=models.RESTRICT)
     default_group_role = models.ForeignKey(
         Role,
         null=True,
         blank=True,
-        help_text="New users created by OAuth2 will be assigned to their default group with this role.",
+        help_text="New users will be assigned to their default group with this role.",
         on_delete=models.RESTRICT)
     staff_user_email_pattern = models.CharField(
         max_length=200,
@@ -514,7 +580,6 @@ class Product_Type(models.Model):
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
-    authorized_users = models.ManyToManyField(User, blank=True)
     members = models.ManyToManyField(Dojo_User, through='Product_Type_Member', related_name='prod_type_members', blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Type_Group', related_name='product_type_groups', blank=True)
 
@@ -717,7 +782,6 @@ class Product(models.Model):
                                   null=False, blank=False, on_delete=models.CASCADE)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
-    authorized_users = models.ManyToManyField(User, blank=True)
     members = models.ManyToManyField(Dojo_User, through='Product_Member', related_name='product_members', blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Group', related_name='product_groups', blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
@@ -1090,7 +1154,7 @@ class Engagement(models.Model):
         return False
 
     def __str__(self):
-        return "Engagement: %s (%s)" % (self.name if self.name else '',
+        return "Engagement %i: %s (%s)" % (self.id if id else 0, self.name if self.name else '',
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
 
@@ -1474,7 +1538,7 @@ class Test(models.Model):
                                    editable=False)
     files = models.ManyToManyField(FileUpload, blank=True, editable=False)
     environment = models.ForeignKey(Development_Environment, null=True,
-                                    blank=False, on_delete=models.CASCADE)
+                                    blank=False, on_delete=models.RESTRICT)
 
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
@@ -1539,6 +1603,11 @@ class Test(models.Model):
         super().delete(*args, **kwargs)
         calculate_grade(self.engagement.product)
 
+    @property
+    def statistics(self):
+        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        return _get_statistics_for_queryset(Finding.objects.filter(test=self), _get_annotations_for_statistics)
+
 
 class Test_Import(TimeStampedModel):
 
@@ -1564,7 +1633,7 @@ class Test_Import(TimeStampedModel):
         super_query = super_query.annotate(created_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CREATED_FINDING)))
         super_query = super_query.annotate(closed_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CLOSED_FINDING)))
         super_query = super_query.annotate(reactivated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_REACTIVATED_FINDING)))
-        super_query = super_query.annotate(updated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_UPDATED_FINDING)))
+        super_query = super_query.annotate(untouched_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_UNTOUCHED_FINDING)))
         return super_query
 
     class Meta:
@@ -1576,6 +1645,14 @@ class Test_Import(TimeStampedModel):
     def __str__(self):
         return self.created.strftime("%Y-%m-%d %H:%M:%S")
 
+    @property
+    def statistics(self):
+        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        stats = {}
+        for action in IMPORT_ACTIONS:
+            stats[action[1].lower()] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=action[0]), _get_annotations_for_statistics)
+        return stats
+
 
 class Test_Import_Finding_Action(TimeStampedModel):
     test_import = models.ForeignKey(Test_Import, editable=False, null=False, blank=False, on_delete=models.CASCADE)
@@ -1583,6 +1660,9 @@ class Test_Import_Finding_Action(TimeStampedModel):
     action = models.CharField(max_length=100, null=True, blank=True, choices=IMPORT_ACTIONS)
 
     class Meta:
+        indexes = [
+            models.Index(fields=['finding', 'action', 'test_import']),
+        ]
         unique_together = (('test_import', 'finding'))
         ordering = ('test_import', 'action', 'finding')
 
@@ -1937,6 +2017,7 @@ class Finding(models.Model):
         self.unsaved_request = None
         self.unsaved_response = None
         self.unsaved_tags = None
+        self.unsaved_files = None
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -3120,7 +3201,7 @@ class Cred_User(models.Model):
                                            null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
     url = models.URLField(max_length=2000, null=False)
-    environment = models.ForeignKey(Development_Environment, null=False, on_delete=models.CASCADE)
+    environment = models.ForeignKey(Development_Environment, null=False, on_delete=models.RESTRICT)
     login_regex = models.CharField(max_length=200, null=True, blank=True)
     logout_regex = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
@@ -3230,27 +3311,6 @@ class Objects_Product(models.Model):
             name = self.artifact
 
         return name
-
-
-class Objects_Engagement(models.Model):
-    engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE)
-    object_id = models.ForeignKey(Objects_Product, on_delete=models.CASCADE)
-    build_id = models.CharField(max_length=150, null=True, blank=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    full_url = models.URLField(max_length=400, null=True, blank=True)
-    type = models.CharField(max_length=30, null=True, blank=True)
-    percentUnchanged = models.CharField(max_length=10, null=True, blank=True)
-
-    def __str__(self):
-        data = ""
-        if self.object_id.path:
-            data = self.object_id.path
-        elif self.object_id.folder:
-            data = self.object_id.folder
-        elif self.object_id.artifact:
-            data = self.object_id.artifact
-
-        return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
 
 
 class Testing_Guide_Category(models.Model):
@@ -3667,7 +3727,6 @@ admin.site.register(Engagement_Presets)
 admin.site.register(Network_Locations)
 admin.site.register(Objects_Product)
 admin.site.register(Objects_Review)
-admin.site.register(Objects_Engagement)
 admin.site.register(Languages)
 admin.site.register(Language_Type)
 admin.site.register(App_Analysis)
@@ -3700,7 +3759,9 @@ admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
 admin.site.register(CWE)
 admin.site.register(Regulation)
-admin.site.register(Notifications)
+admin.site.register(Global_Role)
+admin.site.register(Role)
+admin.site.register(Dojo_Group)
 
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)

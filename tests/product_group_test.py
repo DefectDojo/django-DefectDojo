@@ -14,53 +14,53 @@ class ProductGroupTest(BaseTestCase):
     def test_group_add_product_group(self):
         driver = self.navigate_to_group_view()
         # Open the menu to add product groups and click the 'Add' button
-        driver.find_element_by_id("dropdownMenuAddProductGroup").click()
-        driver.find_element_by_id("addProductGroup").click()
+        driver.find_element(By.ID, "dropdownMenuAddProductGroup").click()
+        driver.find_element(By.ID, "addProductGroup").click()
         # Select the product 'Research and Development'
         try:
             WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_products')))
         except TimeoutException:
             self.fail('Timed out waiting for products dropdown to initialize ')
         driver.execute_script("document.getElementsByName('products')[0].style.display = 'inline'")
-        element = driver.find_element_by_xpath("//select[@name='products']")
-        product_option = element.find_elements_by_tag_name('option')[0]
+        element = driver.find_element(By.XPATH, "//select[@name='products']")
+        product_option = element.find_elements(By.TAG_NAME, 'option')[0]
         Select(element).select_by_value(product_option.get_attribute("value"))
         # Select the role 'Reader'
-        Select(driver.find_element_by_id("id_role")).select_by_visible_text("Reader")
+        Select(driver.find_element(By.ID, "id_role")).select_by_visible_text("Reader")
         # "Click" the submit button to complete the transaction
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
         self.assertTrue(self.is_success_message_present(text='Product groups added successfully.'))
         # Query the site to determine if the member has been added
-        self.assertEqual(driver.find_elements_by_name("member_product")[0].text, "QA Test")
-        self.assertEqual(driver.find_elements_by_name("member_product_role")[0].text, "Reader")
+        self.assertEqual(driver.find_elements(By.NAME, "member_product")[0].text, "QA Test")
+        self.assertEqual(driver.find_elements(By.NAME, "member_product_role")[0].text, "Reader")
 
     def test_group_edit_product_group(self):
         driver = self.navigate_to_group_view()
         # Open the menu to manage members and click the 'Edit' button
-        driver.find_elements_by_name("dropdownManageProductGroup")[0].click()
-        driver.find_elements_by_name("editProductGroup")[0].click()
+        driver.find_elements(By.NAME, "dropdownManageProductGroup")[0].click()
+        driver.find_elements(By.NAME, "editProductGroup")[0].click()
         # Select the role 'Owner'
-        Select(driver.find_element_by_id("id_role")).select_by_visible_text("Owner")
+        Select(driver.find_element(By.ID, "id_role")).select_by_visible_text("Owner")
         # "Click" the submit button to complete the transaction
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
         self.assertTrue(self.is_success_message_present(text='Product group updated successfully.'))
         # Query the site to determine if the member has been edited
-        self.assertEqual(driver.find_elements_by_name("member_product")[0].text, "QA Test")
-        self.assertEqual(driver.find_elements_by_name("member_product_role")[0].text, "Owner")
+        self.assertEqual(driver.find_elements(By.NAME, "member_product")[0].text, "QA Test")
+        self.assertEqual(driver.find_elements(By.NAME, "member_product_role")[0].text, "Owner")
 
     def test_group_delete_product_group(self):
         driver = self.navigate_to_group_view()
         # Open the menu to manage members and click the 'Delete' button
-        driver.find_elements_by_name("dropdownManageProductGroup")[0].click()
-        driver.find_elements_by_name("deleteProductGroup")[0].click()
+        driver.find_elements(By.NAME, "dropdownManageProductGroup")[0].click()
+        driver.find_elements(By.NAME, "deleteProductGroup")[0].click()
         # "Click" the submit button to complete the transaction
-        driver.find_element_by_css_selector("input.btn.btn-danger").click()
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
         # Assert the message to determine success status
         self.assertTrue(self.is_success_message_present(text='Product group deleted successfully.'))
         # Query the site to determine if the member has been deleted
-        self.assertFalse(driver.find_elements_by_name("member_product"))
+        self.assertFalse(driver.find_elements(By.NAME, "member_product"))
 
     def test_product_add_product_group(self):
         # Login to the site. Password will have to be modified
@@ -69,28 +69,28 @@ class ProductGroupTest(BaseTestCase):
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to view
-        driver.find_element_by_link_text("QA Test").click()
+        driver.find_element(By.LINK_TEXT, "QA Test").click()
         # Open the menu to add groups and click the 'Add' button
-        driver.find_element_by_id("dropdownMenuAddProductGroup").click()
-        driver.find_element_by_id("addProductGroup").click()
+        driver.find_element(By.ID, "dropdownMenuAddProductGroup").click()
+        driver.find_element(By.ID, "addProductGroup").click()
         # Select the group 'Group Name'
         try:
             WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_groups')))
         except TimeoutException:
             self.fail('Timed out waiting for groups dropdown to initialize ')
         driver.execute_script("document.getElementsByName('groups')[0].style.display = 'inline'")
-        element = driver.find_element_by_xpath("//select[@name='groups']")
-        group_option = element.find_elements_by_tag_name('option')[0]
+        element = driver.find_element(By.XPATH, "//select[@name='groups']")
+        group_option = element.find_elements(By.TAG_NAME, 'option')[0]
         Select(element).select_by_value(group_option.get_attribute("value"))
         # Select the role 'Reader'
-        Select(driver.find_element_by_id("id_role")).select_by_visible_text("Reader")
+        Select(driver.find_element(By.ID, "id_role")).select_by_visible_text("Reader")
         # "Click" the submit button to complete the transaction
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
         self.assertTrue(self.is_success_message_present(text='Product groups added successfully.'))
         # Query the site to determine if the member has been added
-        self.assertEqual(driver.find_elements_by_name("group_name")[0].text, "Group Name")
-        self.assertEqual(driver.find_elements_by_name("group_role")[0].text, "Reader")
+        self.assertEqual(driver.find_elements(By.NAME, "group_name")[0].text, "Group Name")
+        self.assertEqual(driver.find_elements(By.NAME, "group_role")[0].text, "Reader")
 
     def test_product_edit_product_group(self):
         # Login to the site. Password will have to be modified
@@ -99,20 +99,20 @@ class ProductGroupTest(BaseTestCase):
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to view
-        driver.find_element_by_link_text("QA Test").click()
+        driver.find_element(By.LINK_TEXT, "QA Test").click()
         # Open the menu to manage members and click the 'Edit' button
         # The first group is the group we are looking for
-        driver.find_elements_by_name("dropdownManageProductGroup")[0].click()
-        driver.find_elements_by_name("editProductGroup")[0].click()
+        driver.find_elements(By.NAME, "dropdownManageProductGroup")[0].click()
+        driver.find_elements(By.NAME, "editProductGroup")[0].click()
         # Select the role 'Maintainer'
-        Select(driver.find_element_by_id("id_role")).select_by_visible_text("Maintainer")
+        Select(driver.find_element(By.ID, "id_role")).select_by_visible_text("Maintainer")
         # "Click" the submit button to complete the transaction
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Assert the message to determine success status
         self.assertTrue(self.is_success_message_present(text='Product group updated successfully.'))
         # Query the site to determine if the member has been edited
-        self.assertEqual(driver.find_elements_by_name("group_name")[0].text, "Group Name")
-        self.assertEqual(driver.find_elements_by_name("group_role")[0].text, "Maintainer")
+        self.assertEqual(driver.find_elements(By.NAME, "group_name")[0].text, "Group Name")
+        self.assertEqual(driver.find_elements(By.NAME, "group_role")[0].text, "Maintainer")
 
     def test_product_delete_product_group(self):
         # Login to the site. Password will have to be modified
@@ -121,17 +121,17 @@ class ProductGroupTest(BaseTestCase):
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to view
-        driver.find_element_by_link_text("QA Test").click()
+        driver.find_element(By.LINK_TEXT, "QA Test").click()
         # Open the menu to manage members and click the 'Delete' button
         # The first group is the group we are looking for
-        driver.find_elements_by_name("dropdownManageProductGroup")[0].click()
-        driver.find_elements_by_name("deleteProductGroup")[0].click()
+        driver.find_elements(By.NAME, "dropdownManageProductGroup")[0].click()
+        driver.find_elements(By.NAME, "deleteProductGroup")[0].click()
         # "Click" the submit button to complete the transaction
-        driver.find_element_by_css_selector("input.btn.btn-danger").click()
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
         # Assert the message to determine success status
         self.assertTrue(self.is_success_message_present(text='Product group deleted successfully.'))
         # Query the site to determine if the member has been deleted
-        self.assertFalse(driver.find_elements_by_name("group_name"))
+        self.assertFalse(driver.find_elements(By.NAME, "group_name"))
 
     def navigate_to_group_view(self):
         # Login to the site. Password will have to be modified
@@ -142,15 +142,15 @@ class ProductGroupTest(BaseTestCase):
         # Select the previously created group to edit
         # The name is not clickable
         # so we would have to select specific group by filtering list of groups
-        driver.find_element_by_id("show-filters").click()
+        driver.find_element(By.ID, "show-filters").click()
         # Insert name to filter by into name box
-        driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("Group Name")
+        driver.find_element(By.ID, "id_name").clear()
+        driver.find_element(By.ID, "id_name").send_keys("Group Name")
         # click on 'apply filter' button
-        driver.find_element_by_css_selector("button.btn.btn-sm.btn-secondary").click()
+        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
         # only the needed group is now available, proceed with opening the context menu and clicking 'Edit' button
-        driver.find_element_by_id("dropdownMenuGroup").click()
-        driver.find_element_by_id("viewGroup").click()
+        driver.find_element(By.ID, "dropdownMenuGroup").click()
+        driver.find_element(By.ID, "viewGroup").click()
 
         return driver
 

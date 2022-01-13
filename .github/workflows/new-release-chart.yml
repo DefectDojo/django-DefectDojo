@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: master
+          ref: ${{ github.event.inputs.release_number }}
           fetch-depth: 0
       - name: Get upload URL
         id: get-upload-url
@@ -35,7 +35,6 @@ jobs:
           version: v3.4.0
       - name: Configure HELM repos
         run: |-
-             helm repo add stable https://charts.helm.sh/stable
              helm repo add bitnami https://charts.bitnami.com/bitnami
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo

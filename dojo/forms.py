@@ -6,10 +6,10 @@ from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from django.db.models import Count, Q
-
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.models import Permission
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
@@ -35,7 +35,6 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Product_API_Scan_Configuration
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
-from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 from tagulous.forms import TagField
 import logging
@@ -148,25 +147,10 @@ class MonthYearWidget(Widget):
 class Product_TypeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False)
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_users = forms.ModelMultipleChoiceField(
-            queryset=None,
-            required=False, label="Authorized Users")
-
-    def __init__(self, *args, **kwargs):
-        non_staff = Dojo_User.objects.exclude(is_staff=True) \
-            .exclude(is_active=False).order_by('first_name', 'last_name')
-        super(Product_TypeForm, self).__init__(*args, **kwargs)
-
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            self.fields['authorized_users'].queryset = non_staff
 
     class Meta:
         model = Product_Type
-        if settings.FEATURE_AUTHORIZATION_V2:
-            fields = ['name', 'description', 'critical_product', 'key_product']
-        else:
-            fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
+        fields = ['name', 'description', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
@@ -255,33 +239,19 @@ class ProductForm(forms.ModelForm):
                                        queryset=Product_Type.objects.none(),
                                        required=True)
 
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_users = forms.ModelMultipleChoiceField(
-            queryset=None,
-            required=False, label="Authorized Users")
-
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     team_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
 
     def __init__(self, *args, **kwargs):
-        non_staff = Dojo_User.objects.exclude(is_staff=True) \
-            .exclude(is_active=False).order_by('first_name', 'last_name')
         super(ProductForm, self).__init__(*args, **kwargs)
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            self.fields['authorized_users'].queryset = non_staff
         self.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
 
     class Meta:
         model = Product
-        if settings.FEATURE_AUTHORIZATION_V2:
-            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
-                    'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                    'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
-        else:
-            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
-                    'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                    'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
+        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
+                'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
+                'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
 
 class DeleteProductForm(forms.ModelForm):
@@ -403,10 +373,9 @@ class DojoMetaDataForm(forms.ModelForm):
 
 class ImportScanForm(forms.Form):
     scan_date = forms.DateTimeField(
-        required=True,
+        required=False,
         label="Scan Completion Date",
         help_text="Scan completion date will be used on all findings.",
-        initial=datetime.now().strftime("%Y-%m-%d"),
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
@@ -426,7 +395,9 @@ class ImportScanForm(forms.Form):
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
     api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
-    service = forms.CharField(max_length=200, required=False, help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
+    service = forms.CharField(max_length=200, required=False,
+        help_text="A service is a self-contained piece of functionality within a Product. "
+                  "This is an optional field which is used in deduplication and closing of old findings when set.")
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
@@ -434,7 +405,8 @@ class ImportScanForm(forms.Form):
         label="Choose report file",
         required=False)
 
-    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get mitigated when importing."
+    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
+                                                        "If service has been set, only the findings for this service will be closed. "
                                                         "This affects the whole engagement/product depending on your deduplication scope.",
                                             required=False, initial=False)
 
@@ -474,8 +446,8 @@ class ImportScanForm(forms.Form):
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
-        date = self.cleaned_data['scan_date']
-        if date.date() > datetime.today().date():
+        date = self.cleaned_data.get('scan_date', None)
+        if date and date.date() > datetime.today().date():
             raise forms.ValidationError("The date cannot be in the future!")
         return date
 
@@ -486,10 +458,9 @@ class ImportScanForm(forms.Form):
 
 class ReImportScanForm(forms.Form):
     scan_date = forms.DateTimeField(
-        required=True,
+        required=False,
         label="Scan Completion Date",
         help_text="Scan completion date will be used on all findings.",
-        initial=datetime.now().strftime("%m/%d/%Y"),
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
@@ -503,7 +474,7 @@ class ReImportScanForm(forms.Form):
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx, .txt, .sarif"}),
         label="Choose report file",
         required=False)
-    close_old_findings = forms.BooleanField(help_text="Select if old findings get mitigated when importing.",
+    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing.",
                                             required=False, initial=True)
     version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
@@ -536,17 +507,42 @@ class ReImportScanForm(forms.Form):
         tool_type = requires_tool_type(self.scan_type)
         if tool_type:
             api_scan_configuration = cleaned_data.get('api_scan_configuration')
-            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+            if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
                 raise forms.ValidationError(f'API scan configuration must be of tool type {tool_type}')
 
         return cleaned_data
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
-        date = self.cleaned_data['scan_date']
-        if date.date() > datetime.today().date():
+        date = self.cleaned_data.get('scan_date', None)
+        if date and date.date() > timezone.localtime(timezone.now()).date():
             raise forms.ValidationError("The date cannot be in the future!")
         return date
+
+
+class ImportEndpointMetaForm(forms.Form):
+    file = forms.FileField(widget=forms.widgets.FileInput(
+        attrs={"accept": ".csv"}),
+        label="Choose meta file",
+        required=True)  # Could not get required=True to actually accept the file as present
+    create_endpoints = forms.BooleanField(
+        label="Create nonexisting Endpoint",
+        initial=True,
+        required=False,
+        help_text="Create endpoints that do not already exist",)
+    create_tags = forms.BooleanField(
+        label="Add Tags",
+        initial=True,
+        required=False,
+        help_text="Add meta from file as tags in the format key:value",)
+    create_dojo_meta = forms.BooleanField(
+        label="Add Meta",
+        initial=False,
+        required=False,
+        help_text="Add data from file as Metadata. Metadata is used for displaying custom fields",)
+
+    def __init__(self, *args, **kwargs):
+        super(ImportEndpointMetaForm, self).__init__(*args, **kwargs)
 
 
 class DoneForm(forms.Form):
@@ -754,13 +750,9 @@ class EngForm(forms.ModelForm):
 
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
-                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
-            else:
-                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
+            self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View).filter(is_active=True)
         else:
-            self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
+            self.fields['lead'].queryset = User.objects.filter(is_active=True)
 
         self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add)
 
@@ -834,14 +826,10 @@ class TestForm(forms.ModelForm):
 
         if obj:
             product = get_product(obj)
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
-                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
-            else:
-                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
+            self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View).filter(is_active=True)
             self.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=product)
         else:
-            self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
+            self.fields['lead'].queryset = User.objects.filter(is_active=True)
 
     class Meta:
         model = Test
@@ -1565,7 +1553,7 @@ class ClearFindingReviewForm(forms.ModelForm):
 
 
 class ReviewFindingForm(forms.Form):
-    reviewers = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.filter(is_staff=True, is_active=True),
+    reviewers = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.filter(is_active=True),
                                                help_text="Select all users who can review Finding.")
     entry = forms.CharField(
         required=True, max_length=2400,
@@ -1582,7 +1570,7 @@ class ReviewFindingForm(forms.Form):
 
         super(ReviewFindingForm, self).__init__(*args, **kwargs)
 
-        if finding is not None and settings.FEATURE_AUTHORIZATION_V2:
+        if finding is not None:
             self.fields['reviewers'].queryset = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
 
     class Meta:
@@ -1835,7 +1823,7 @@ class Delete_Product_Type_GroupForm(Edit_Product_Type_Group_Form):
 class DojoUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DojoUserForm, self).__init__(*args, **kwargs)
-        if not get_current_user().is_superuser and not settings.USER_PROFILE_EDITABLE:
+        if not get_current_user().is_superuser and not get_system_setting('enable_user_profile_editable'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -1885,43 +1873,23 @@ class AddDojoUserForm(forms.ModelForm):
         required=False, validators=[validate_password],
         help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
                    and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?). Leave blank to set an unusable password for this user.')  # noqa W605
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_products = forms.ModelMultipleChoiceField(
-            queryset=Product.objects.all(), required=False,
-            help_text='Select the products this user should have access to.')
-        authorized_product_types = forms.ModelMultipleChoiceField(
-            queryset=Product_Type.objects.all(), required=False,
-            help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User
         fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active',
                   'is_staff', 'is_superuser']
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions']
-        else:
-            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
-                       'authorized_products', 'authorized_product_types']
+        exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
+                    'authorized_products', 'authorized_product_types']
 
 
 class EditDojoUserForm(forms.ModelForm):
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        authorized_products = forms.ModelMultipleChoiceField(
-            queryset=Product.objects.all(), required=False,
-            help_text='Select the products this user should have access to.')
-        authorized_product_types = forms.ModelMultipleChoiceField(
-            queryset=Product_Type.objects.all(), required=False,
-            help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User
         fields = ['username', 'first_name', 'last_name', 'email', 'is_active',
                   'is_staff', 'is_superuser']
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions']
-        else:
-            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
-                       'authorized_products', 'authorized_product_types']
+        exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
+                    'authorized_products', 'authorized_product_types']
 
 
 class DeleteUserForm(forms.ModelForm):
@@ -1943,7 +1911,7 @@ class UserContactInfoForm(forms.ModelForm):
         current_user = get_current_user()
         if not current_user.is_superuser:
             del self.fields['force_password_reset']
-            if not settings.USER_PROFILE_EDITABLE:
+            if not get_system_setting('enable_user_profile_editable'):
                 for field in self.fields:
                     self.fields[field].disabled = True
 
@@ -2398,7 +2366,7 @@ class SystemSettingsForm(forms.ModelForm):
 
     class Meta:
         model = System_Settings
-        exclude = ['product_grade', 'credentials', 'column_widths', 'drive_folder_ID', 'enable_google_sheets']
+        exclude = ['product_grade', 'credentials', 'column_widths', 'drive_folder_ID']
 
 
 class BenchmarkForm(forms.ModelForm):
@@ -3192,3 +3160,119 @@ class AddEngagementForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(AddEngagementForm, self).__init__(*args, **kwargs)
         self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add)
+
+
+class ConfigurationPermissionsForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        self.group = kwargs.pop('group', None)
+        super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
+
+        if get_system_setting('enable_questionnaires'):
+            questionnaire_permissions = [
+                Permission_Helper(name='engagement survey', app='dojo', view=True, add=True, change=True, delete=True),
+                Permission_Helper(name='question', app='dojo', view=True, add=True, change=True),
+            ]
+        else:
+            questionnaire_permissions = []
+
+        permission_fields_1 = [
+            Permission_Helper(name='development environment', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='group', app='auth', view=True, add=True),
+            Permission_Helper(name='permission', app='auth', change=True)
+        ]
+        permission_fields_2 = [
+            Permission_Helper(name='test type', app='dojo', view=True, add=True, change=True),
+            Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
+        ]
+
+        self.permission_fields = permission_fields_1 + questionnaire_permissions + permission_fields_2
+
+        for permission_field in self.permission_fields:
+            for codename in permission_field.codenames():
+                self.fields[codename] = forms.BooleanField(required=False)
+                if not get_current_user().has_perm('auth.change_permission'):
+                    self.fields[codename].disabled = True
+
+        permissions_list = Permission.objects.all()
+        self.permissions = {}
+        for permission in permissions_list:
+            self.permissions[permission.codename] = permission
+
+    def save(self):
+        for permission_field in self.permission_fields:
+            for codename in permission_field.codenames():
+                self.set_permission(codename)
+
+    def set_permission(self, codename):
+        if self.cleaned_data[codename]:
+            # Checkbox is set
+            if self.user:
+                self.user.user_permissions.add(self.permissions[codename])
+            elif self.group:
+                self.group.auth_group.permissions.add(self.permissions[codename])
+            else:
+                raise Exception('Neither user or group are set')
+        else:
+            # Checkbox is unset
+            if self.user:
+                self.user.user_permissions.remove(self.permissions[codename])
+            elif self.group:
+                self.group.auth_group.permissions.remove(self.permissions[codename])
+            else:
+                raise Exception('Neither user or group are set')
+
+
+class Permission_Helper:
+    def __init__(self, *args, **kwargs):
+        self.name = kwargs.pop('name')
+        self.app = kwargs.pop('app')
+        self.view = kwargs.pop('view', False)
+        self.add = kwargs.pop('add', False)
+        self.change = kwargs.pop('change', False)
+        self.delete = kwargs.pop('delete', False)
+
+    def display_name(self):
+        if self.name == 'engagement survey':
+            return 'Questionnaire'
+        else:
+            return self.name.title()
+
+    def view_codename(self):
+        if self.view:
+            return f'view_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def add_codename(self):
+        if self.add:
+            return f'add_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def change_codename(self):
+        if self.change:
+            return f'change_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def delete_codename(self):
+        if self.delete:
+            return f'delete_{self.name.replace(" ", "_")}'
+        else:
+            return None
+
+    def codenames(self):
+        codenames = []
+        if self.view:
+            codenames.append(self.view_codename())
+        if self.add:
+            codenames.append(self.add_codename())
+        if self.change:
+            codenames.append(self.change_codename())
+        if self.delete:
+            codenames.append(self.delete_codename())
+        return codenames
