@@ -59,7 +59,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             target_end=timezone.now(),
         )
         lead, _ = User.objects.get_or_create(username="admin")
-        environment = None
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
 
         # boot
         importer = Importer()
