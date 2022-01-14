@@ -7,9 +7,22 @@ We have two types of releases:
 
 The release process will then:
 
-1. Create a PR to merge that release branch into `master`
-2. Tag the release, Build the dockers images and Push them to Docker Hub
-3. Merge the changes in `master` "back into dev" to make sure `dev` is in sync again with `master`
+- Create a PR to merge that release branch into `master`
+- Tag the release, Build the dockers images and Push them to Docker Hub
+- Merge the changes in `master` "back into dev" to make sure `dev` is in sync again with `master`
+
+# Prerequisites
+
+### Feature release
+- Make sure the `dev` branch contains exactly that what you want to release. 
+
+### Bugfix release
+- Create a new branch from `master` that will contain the contents of the release, i.e. `release/x.y.z`.
+- Create bugfix PRs against the new release branch
+- Merge the PRs
+
+### Always
+- Make sure there's a section in [upgrading.md](./docs/content/en/getting_started/upgrading.md) about any specific instructions when upgrading to this new release.
 
 # Feature release
 
