@@ -1,4 +1,4 @@
-name: "Release: 2. tag, release, docker push"
+name: "Release-2: tag, release, docker push"
 
 env:
   GIT_USERNAME: "DefectDojo release bot"
