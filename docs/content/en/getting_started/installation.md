@@ -17,8 +17,8 @@ See instructions in [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo
 [Marketplace link](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk), and complete [walkthrough](https://www.10security.com/defectdojo-aws-launch-guide)
 
 ---
-## Options for the Brave
-
+## **Options for the Brave**
+--
 ### Kubernetes
 
 See instructions in [KUBERNETES.md](<https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/KUBERNETES.md>)
@@ -30,6 +30,6 @@ in the godojo repository
 
 ---
 
-## Customizing of settings
+## **Customizing of settings**
 
 See [Configuration](../configuration)
