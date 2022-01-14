@@ -4,9 +4,8 @@ description: "DefectDojo supports various installation options."
 draft: false
 weight: 2
 ---
-<u>
-## Recommended Options
-</u>
+
+## **Recommended Options**
 ---
 
 ### Docker Compose
