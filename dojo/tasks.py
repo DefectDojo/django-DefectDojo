@@ -168,6 +168,7 @@ def fix_loop_duplicates_task(*args, **kwargs):
     from dojo.finding.helper import fix_loop_duplicates
     return fix_loop_duplicates()
 
+
 # helpers to delete engagements, tests, and products which can take a long while
 # and cause timeouts on gateways like cloudflare
 @app.task
