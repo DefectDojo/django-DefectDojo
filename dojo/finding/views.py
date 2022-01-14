@@ -633,10 +633,10 @@ def delete_finding(request, fid):
             finding.delete()
             calculate_grade(product)
             messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Finding deleted successfully.',
-                extra_tags='alert-success')
+                    request,
+                    messages.SUCCESS,
+                    'Finding deleted successfully.',
+                    extra_tags='alert-success')
             create_notification(event='other',
                                 title='Deletion of %s' % finding.title,
                                 description='The finding "%s" was deleted by %s' % (finding.title, request.user),

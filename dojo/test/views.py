@@ -43,6 +43,8 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.test.queries import get_authorized_tests
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
+from dojo.celery import app
+import dojo.tasks
 
 
 logger = logging.getLogger(__name__)
@@ -268,12 +270,15 @@ def delete_test(request, tid):
             form = DeleteTestForm(request.POST, instance=test)
             if form.is_valid():
                 product = test.engagement.product
-                test.delete()
-                messages.add_message(request,
+                if form.cleaned_data['asynchronous_delete']:
+                    dojo.tasks.asynch_delete.delay(Test, test.id)
+                else:
+                    test.delete()
+                    messages.add_message(request,
                                      messages.SUCCESS,
                                      'Test and relationships removed.',
                                      extra_tags='alert-success')
-                create_notification(event='other',
+                    create_notification(event='other',
                                     title='Deletion of %s' % test.title,
                                     product=product,
                                     description='The test "%s" was deleted by %s' % (test.title, request.user),

@@ -15,12 +15,10 @@ from dojo.notifications.helper import create_notification
 logger = get_task_logger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
-
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_generic_alert(source, title, description):
     create_notification(event='other', title=title, description=description,
                         icon='bullseye', source=source)
-
 
 @app.task(bind=True)
 def add_alerts(self, runinterval):
@@ -167,3 +165,28 @@ def jira_status_reconciliation_task(*args, **kwargs):
 def fix_loop_duplicates_task(*args, **kwargs):
     from dojo.finding.helper import fix_loop_duplicates
     return fix_loop_duplicates()
+
+# helpers to delete engagements, tests, and products which can take a long while
+# and cause timeouts on gateways like cloudflare
+@app.task
+def asynch_delete(object_type, id_value):
+    from django.shortcuts import render, get_object_or_404
+    alert_title = "%s %d Scheduled Deletion" % (object_type.__name__, id_value)
+    alert_desc = "Received asynch request to delete %s ID %d (includes all dependent objects)" % (object_type.__name__, id_value)
+    logger.info(alert_desc)
+    log_generic_alert(source='asynch_delete', title=alert_title, description=alert_desc)
+    delete_me = get_object_or_404(object_type, pk=id_value)
+    delete_me.delete()
+    # see finding/views.py DeleteForm actions
+    # probably should be refactored into overloading the delete method of the model
+    # this code branch is not used right now (finding deletion is "different")
+    #if object_type.__name__ == 'Finding':
+    #    product = delete_me.test.engagement.product
+    #    delete_me.delete()
+    #    calculate_grade(product)
+    #else:
+    #    delete_me.delete()
+    alert_title = "%s %d Deleted" % (object_type.__name__, id_value)
+    alert_desc = "%s ID %d deleted (includes all dependent objects)" % (object_type.__name__, id_value)
+    logger.info(alert_desc)
+    log_generic_alert(source='asynch_delete', title=alert_title, description=alert_desc)

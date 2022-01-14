@@ -44,6 +44,8 @@ from dojo.product.queries import get_authorized_products, get_authorized_members
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
 from dojo.tool_config.factory import create_API
 import dojo.finding.helper as finding_helper
+from dojo.celery import app
+import dojo.tasks
 
 logger = logging.getLogger(__name__)
 
@@ -884,12 +886,15 @@ def delete_product(request, pid):
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
                 product_type = product.prod_type
-                product.delete()
-                messages.add_message(request,
+                if form.cleaned_data['asynchronous_delete']:
+                    dojo.tasks.asynch_delete.delay(Product, product.id)
+                else:
+                    product.delete()
+                    messages.add_message(request,
                                      messages.SUCCESS,
                                      'Product and relationships removed.',
                                      extra_tags='alert-success')
-                create_notification(event='other',
+                    create_notification(event='other',
                                     title='Deletion of %s' % product.name,
                                     product_type=product_type,
                                     description='The product "%s" was deleted by %s' % (product.name, request.user),

@@ -257,6 +257,9 @@ class ProductForm(forms.ModelForm):
 class DeleteProductForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
+    asynchronous_delete = forms.BooleanField(required=False,
+        label="Asynchronous Delete",
+        help_text="Delete this data asynchronously in the background. Alert notifications will notify you when task is finished.")
 
     class Meta:
         model = Product
@@ -791,6 +794,9 @@ class EngForm(forms.ModelForm):
 class DeleteEngagementForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
+    asynchronous_delete = forms.BooleanField(required=False,
+        label="Asynchronous Delete",
+        help_text="Delete this data asynchronously in the background. Alert notifications will notify you when task is finished.")
 
     class Meta:
         model = Engagement
@@ -841,6 +847,9 @@ class TestForm(forms.ModelForm):
 class DeleteTestForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
+    asynchronous_delete = forms.BooleanField(required=False,
+        label="Asynchronous Delete",
+        help_text="Delete this data asynchronously in the background. Alert notifications will notify you when task is finished.")
 
     class Meta:
         model = Test
@@ -1976,7 +1985,7 @@ class CustomReportOptionsForm(forms.Form):
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
     report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
-
+# this form does not appear to ever be rendered
 class DeleteFindingForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())

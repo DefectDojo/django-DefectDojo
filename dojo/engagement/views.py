@@ -54,6 +54,8 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 import dojo.notifications.helper as notifications_helper
 from dojo.endpoint.utils import save_endpoints_to_add
+from dojo.celery import app
+import dojo.tasks
 
 
 logger = logging.getLogger(__name__)
@@ -289,13 +291,16 @@ def delete_engagement(request, eid):
             form = DeleteEngagementForm(request.POST, instance=engagement)
             if form.is_valid():
                 product = engagement.product
-                engagement.delete()
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'Engagement and relationships removed.',
-                    extra_tags='alert-success')
-                create_notification(event='other',
+                if form.cleaned_data['asynchronous_delete']:
+                    dojo.tasks.asynch_delete.delay(Engagement, engagement.id)
+                else:
+                    engagement.delete()
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Engagement and relationships removed.',
+                        extra_tags='alert-success')
+                    create_notification(event='other',
                                     title='Deletion of %s' % engagement.name,
                                     product=product,
                                     description='The engagement "%s" was deleted by %s' % (engagement.name, request.user),
