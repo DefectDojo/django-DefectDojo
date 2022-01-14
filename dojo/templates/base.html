@@ -110,9 +110,9 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="{% url 'home' %}">
-		    {% block header_logo %}
-			<img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
-        	    {% endblock %}
+                {% block header_logo %}
+                    <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
+                {% endblock %}
                 </a>
 
             </div>
@@ -665,18 +665,17 @@
         <!-- /.container-fluid -->
     </div>
     <!-- /#page-wrapper -->
+    {% block footer %}
     <footer class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center text-">
                     <p>
                         <a href="{% url 'home' %}">
-			    {% block footer_logo %}
-				<img class="logo" src="{% static "dojo/img/chop.png" %}" alt="DefectDojo Chop" height="45"/>
-			    {% endblock %}
-			</a>
-			<br/>
-			<br/>
+                            <img class="logo" src="{% static "dojo/img/chop.png" %}" alt="DefectDojo Chop" height="45"/>
+                        </a>
+                        <br/>
+                        <br/>
                         {% dojo_version %} ( {% dojo_current_hash %} )
                     </p>
                     <p>
@@ -697,6 +696,7 @@
         <p id="alert_refresh" class="hidden">{{ 'ALERT_REFRESH'|setting_enabled }}</p>
         <p id="disable_count" class="hidden">{{ 'DISABLE_ALERT_COUNTER'|setting_enabled }}</p>
     </footer>
+    {% endblock %}
 </div>
 
 <!-- /#wrapper -->
