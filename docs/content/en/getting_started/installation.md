@@ -5,7 +5,7 @@ draft: false
 weight: 2
 ---
 
-## Recommended Options
+<u> ## Recommended Options</u>
 ---
 
 ### Docker Compose
