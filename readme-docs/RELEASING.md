@@ -4,8 +4,8 @@
 
 We have two types of releases:
 
-1. Feature releases - These are taking the new commits from dev into a new release branch, i.e. `release/x.y.z`. 
-2. Bugfix releases - These are creating a branch from `master` and bugfixes will be added to that branch, i.e. `release/x.y.z`. 
+1. **Feature releases** - These are taking the new commits from dev into a new release branch, i.e. `release/x.y.z`. 
+2. **Bugfix releases** - These are creating a branch from `master` and bugfixes will be added to that branch, i.e. `release/x.y.z`. 
 
 The release process will then:
 
