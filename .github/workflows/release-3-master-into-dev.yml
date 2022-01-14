@@ -1,4 +1,4 @@
-name: "Release-3: pr for merging master into dev"
+name: "Release-3: PR for merging master into dev"
 
 env:
   GIT_USERNAME: "DefectDojo release bot"
