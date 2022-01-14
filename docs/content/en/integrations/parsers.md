@@ -227,11 +227,6 @@ Example GraphQL query to get issue details:
 
 Import JSON output of cargo-audit scan report <https://crates.io/crates/cargo-audit>
 
-### CCVS Report
-
-Import JSON reports from \[CCVS
-API\](<https://github.com/William-Hill-Online/CCVS-API>)
-
 ### Checkov Report
 
 Import JSON reports of Infrastructure as Code vulnerabilities.
@@ -268,9 +263,12 @@ Follow these steps to setup API importing:
     must also select which Cobalt.io API Scan Configuratio to use.
 
 ### CodeQL
+
 CodeQL can be used to generate a SARIF report, that can be imported into Defect Dojo:
 
-`codeql database analyze db python-security-and-quality.qls --sarif-add-snippets --format=sarif-latest --output=security-extended.sarif`
+```shell
+codeql database analyze db python-security-and-quality.qls --sarif-add-snippets --format=sarif-latest --output=security-extended.sarif
+```
 
 The same can be achieved by running the CodeQL GitHub action with the `add-snippet` property set to true.
 
