@@ -1,5 +1,4 @@
 from crum import get_current_user
-from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Engagement, Product_Member, Product_Type_Member, \
     Product_Group, Product_Type_Group

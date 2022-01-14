@@ -6,7 +6,7 @@ from dojo.celery import app
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.utils import max_safe
 from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, \
-    IMPORT_REACTIVATED_FINDING, Test_Import, Test_Import_Finding_Action, \
+    IMPORT_REACTIVATED_FINDING, IMPORT_UNTOUCHED_FINDING, Test_Import, Test_Import_Finding_Action, \
     Endpoint_Status
 import logging
 
@@ -44,8 +44,8 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
 
 def update_import_history(type, active, verified, tags, minimum_severity, endpoints_to_add, version, branch_tag,
                             build_id, commit_hash, push_to_jira, close_old_findings, test,
-                            new_findings=[], closed_findings=[], reactivated_findings=[]):
-    logger.debug("new: %d closed: %d reactivated: %d", len(new_findings), len(closed_findings), len(reactivated_findings))
+                            new_findings=[], closed_findings=[], reactivated_findings=[], untouched_findings=[]):
+    logger.debug("new: %d closed: %d reactivated: %d untouched: %d", len(new_findings), len(closed_findings), len(reactivated_findings), len(untouched_findings))
     # json field
     import_settings = {}
     import_settings['active'] = active
@@ -64,16 +64,21 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
 
     test_import_finding_action_list = []
     for finding in closed_findings:
-        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+        logger.debug('preparing Test_Import_Finding_Action for closed finding: %i', finding.id)
         test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
     for finding in new_findings:
-        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+        logger.debug('preparing Test_Import_Finding_Action for created finding: %i', finding.id)
         test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
     for finding in reactivated_findings:
-        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+        logger.debug('preparing Test_Import_Finding_Action for reactivated finding: %i', finding.id)
         test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_REACTIVATED_FINDING))
+    for finding in untouched_findings:
+        logger.debug('preparing Test_Import_Finding_Action for untouched finding: %i', finding.id)
+        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_UNTOUCHED_FINDING))
 
     Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
+
+    return test_import
 
 
 def construct_imported_message(scan_type, finding_count=0, new_finding_count=0, closed_finding_count=0, reactivated_finding_count=0, untouched_finding_count=0):

@@ -258,7 +258,7 @@
                                     {% regroup test_import.test_import_finding_action_set.all by get_action_display as finding_action_list %}
                                     <a href="{% url 'engagement_all_findings' test.engagement.id %}?test={{test.id}}&test_import_finding_action__test_import={{ test_import.id }}">
                                         {% for action in finding_action_list %}
-                                        {{ action.grouper }} {{ action.list|length }} finding{{ action.list|pluralize }}{% if not forloop.last %},{% endif %}
+                                        {{ action.list|length }} {{ action.grouper }}{% if not forloop.last %},{% endif %}
                                         {% endfor %}
                                     </a>
                                 </td>
@@ -502,7 +502,7 @@
             {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
         </div>
 
-        {% if user.is_staff or test|has_object_permission:"Finding_Edit" %}
+        {% if test|has_object_permission:"Finding_Edit" or test|has_object_permission:"Finding_Delete" %}
         <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
             {% if test|has_object_permission:"Finding_Edit" %}
                 <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
