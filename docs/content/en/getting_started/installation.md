@@ -5,17 +5,19 @@ draft: false
 weight: 2
 ---
 
-## Recommended Options
+# Recommended Options
 
-### Docker Compose
+## Docker Compose
 
 See instructions in [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md>)
 
-### AWS AMI (Supports the Project)
+## AWS AMI (Supports the Project)
 
 [Marketplace link](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk), and complete [walkthrough](https://www.10security.com/defectdojo-aws-launch-guide)
 
-### Kubernetes
+# Options for the Brave
+
+## Kubernetes
 
 See instructions in [KUBERNETES.md](<https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/KUBERNETES.md>)
 
