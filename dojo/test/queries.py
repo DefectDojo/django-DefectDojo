@@ -22,9 +22,6 @@ def get_authorized_tests(permission, product=None, testID=None):
     if user.is_superuser:
         return tests
 
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return tests
-
     if user_has_global_permission(user, permission):
         return tests
 

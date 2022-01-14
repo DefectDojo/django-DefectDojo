@@ -16,9 +16,6 @@ def get_authorized_engagements(permission):
     if user.is_superuser:
         return engagements
 
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return engagements
-
     if user_has_global_permission(user, permission):
         return engagements
 
