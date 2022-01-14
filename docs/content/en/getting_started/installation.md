@@ -18,7 +18,7 @@ See instructions in [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo
 
 ---
 ## **Options for the Brave**
---
+---
 ### Kubernetes
 
 See instructions in [KUBERNETES.md](<https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/KUBERNETES.md>)
