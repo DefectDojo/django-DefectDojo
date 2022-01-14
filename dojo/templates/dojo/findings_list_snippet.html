@@ -46,9 +46,9 @@
                 <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
                 </div>
-            {% if user.is_staff or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
             <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
-                {% if user.is_staff or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                     <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Bulk Edit
@@ -63,7 +63,7 @@
                       </a>
                     </button>
                     {% endif %}
-                    {% if user.is_staff or product_tab and product_tab.product|has_object_permission:"Finding_Delete" %}
+                    {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Delete" %}
                     <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                       <a class="white-color delete-bulk" href="#" alt="Delete Findings">
                         <i class="fa fa-trash"></i>
@@ -159,7 +159,7 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
-                          {% if user.is_staff or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+                          {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                           <th class="hidden-sm centered" title="Select all visible findings.">
                               <div class="dropdown">
                                   <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -217,7 +217,7 @@
                         <tbody>
                         {% for finding in findings %}
                             <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
-                                {% if user.is_staff or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+                                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                                   <td class="hidden-sm centered">
                                     <form action="#">
                                         <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"

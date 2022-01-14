@@ -722,7 +722,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         else:
             return Response({"error": "('note_id') parameter missing"},
                 status=status.HTTP_400_BAD_REQUEST)
-        if note.author.username == request.user.username or request.user.is_staff:
+        if note.author.username == request.user.username or request.user.is_superuser:
             finding.notes.remove(note)
             note.delete()
         else:
@@ -1516,7 +1516,7 @@ class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
     serializer_class = serializers.DevelopmentEnvironmentSerializer
     queryset = Development_Environment.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
 # Authorization: object-based
@@ -1684,7 +1684,7 @@ class TestTypesViewSet(mixins.ListModelMixin,
     queryset = Test_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('name',)
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
 @extend_schema_view(

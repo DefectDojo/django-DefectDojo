@@ -28,9 +28,6 @@ def user_has_permission(user, obj, permission):
     if user.is_superuser:
         return True
 
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return True
-
     if isinstance(obj, Product_Type) or isinstance(obj, Product):
         # Global roles are only relevant for product types, products and their dependent objects
         if user_has_global_permission(user, permission):
@@ -114,9 +111,6 @@ def user_has_global_permission(user, permission):
         return False
 
     if user.is_superuser:
-        return True
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return True
 
     if user.is_staff and permission == Permissions.Product_Type_Add:
