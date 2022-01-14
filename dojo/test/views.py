@@ -71,7 +71,7 @@ def view_test(request, tid):
     files = test.files.all()
     person = request.user.username
     findings = Finding.objects.filter(test_id=tid).order_by('numerical_severity')\
-        .defer('url', 'description', 'impact', 'steps_to_reproduce', 'severity_justification', 'references', 'payload', 'line', 'file_path','files')
+        .defer('url', 'description', 'impact', 'steps_to_reproduce', 'severity_justification', 'references', 'payload', 'line', 'file_path', 'files')
     findings = FindingFilter(request.GET, queryset=findings)
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')

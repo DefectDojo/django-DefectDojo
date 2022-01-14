@@ -31,7 +31,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     engagement_count = engagements.filter(active=True).count()
 
     today = timezone.now().date()
-    beginning_date = today-timedelta(days=6)
+    beginning_date = today-timedelta(days = 6)
 
     finding_count = findings.filter(created__gte=beginning_date, created__lte=today).order_by().count()
 

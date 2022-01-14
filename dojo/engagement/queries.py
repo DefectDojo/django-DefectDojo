@@ -4,6 +4,7 @@ from dojo.models import Engagement, Product_Member, Product_Type_Member, \
     Product_Group, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 
+
 def get_authorized_engagements(permission):
     user = get_current_user()
 

@@ -4,6 +4,7 @@ from dojo.models import Test, Product_Member, Product_Type_Member, Test_Import, 
     Product_Group, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 
+
 def get_authorized_tests(permission, product=None, testID=None):
     user = get_current_user()
 
