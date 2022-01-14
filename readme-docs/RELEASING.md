@@ -57,3 +57,35 @@ Merge into `master` by *creating a merge commit*. Do NOT squash the commits!
 
 ![image](https://user-images.githubusercontent.com/4426050/149577269-d51fe1ee-ba0d-4a9b-94e7-ec286954b5e2.png)
 
+Go to [GitHub Actions](https://github.com/DefectDojo/django-DefectDojo/actions) and pray for them to become green.
+
+# Make the release and push docker images
+
+Run the `Release-2: Tag, Release, Push` action:
+
+![image](https://user-images.githubusercontent.com/4426050/149578985-879118e1-c9d2-4767-a366-f417041debab.png)
+
+This action will:
+
+- Tag the HEAD of the `master` branch as the new release, i.e. 2.7.0 in the screenshot.
+- Create a new release based on this tag
+- Generate the helm chart for this release and upload it as a release asset
+- Update the `helm` repository stored in the `helm-charts` branch
+- Build the `django` and `nginx` docker images and push them to [Docker Hub](https://hub.docker.com/orgs/defectdojo/repositories)
+
+Observe the output of the action to make sure there are no errors.
+
+Verify the results:
+- Go to [Release](https://github.com/DefectDojo/django-DefectDojo/releases) to check the new release
+
+TODO
+- Check if the new release has a helm chart attached:
+
+TODO
+- Check [Docker Hub](https://hub.docker.com/orgs/defectdojo/repositories) to see if the docker images have been uploaded
+
+# Bring `dev` in sync with `master`
+
+To avoid merge conflicts and drigts between branches, we have to get `dev` back into sync with `master`. This step also bumps the version numbers if needed.
+
+TODO
