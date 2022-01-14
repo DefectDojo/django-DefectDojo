@@ -2,7 +2,7 @@
 title: "Installation"
 description: "DefectDojo supports various installation options."
 draft: false
-weight: 2
+weight: 3
 ---
 
 ## **Recommended Options**
@@ -30,6 +30,6 @@ in the godojo repository
 
 ---
 
-## **Customizing of settings**
+## Customizing of settings
 
 See [Configuration](../configuration)
