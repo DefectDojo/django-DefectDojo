@@ -1985,6 +1985,7 @@ class CustomReportOptionsForm(forms.Form):
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
     report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
+
 # this form does not appear to ever be rendered
 class DeleteFindingForm(forms.ModelForm):
     id = forms.IntegerField(required=True,

@@ -43,7 +43,6 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.test.queries import get_authorized_tests
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
-from dojo.celery import app
 import dojo.tasks
 
 

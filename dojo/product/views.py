@@ -44,7 +44,6 @@ from dojo.product.queries import get_authorized_products, get_authorized_members
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
 from dojo.tool_config.factory import create_API
 import dojo.finding.helper as finding_helper
-from dojo.celery import app
 import dojo.tasks
 
 logger = logging.getLogger(__name__)
