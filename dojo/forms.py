@@ -1876,10 +1876,10 @@ class AddDojoUserForm(forms.ModelForm):
 
     class Meta:
         model = Dojo_User
-        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active',
-                  'is_staff', 'is_superuser']
-        exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
-                    'authorized_products', 'authorized_product_types']
+        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+            fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
+        else:
+            fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_staff', 'is_superuser']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1893,10 +1893,10 @@ class EditDojoUserForm(forms.ModelForm):
 
     class Meta:
         model = Dojo_User
-        fields = ['username', 'first_name', 'last_name', 'email', 'is_active',
-                  'is_staff', 'is_superuser']
-        exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
-                    'authorized_products', 'authorized_product_types']
+        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+            fields = ['username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
+        else:
+            fields = ['username', 'first_name', 'last_name', 'email', 'is_active', 'is_staff', 'is_superuser']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
