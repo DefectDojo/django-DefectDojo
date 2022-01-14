@@ -27,6 +27,8 @@ See instructions in [KUBERNETES.md](<https://github.com/DefectDojo/django-Defect
 See instructions in [README.md](<https://github.com/DefectDojo/godojo/blob/master/README.md>)
 in the godojo repository
 
+---
+
 ## Customizing of settings
 
 See [Configuration](../configuration)
