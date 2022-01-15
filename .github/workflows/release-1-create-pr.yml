@@ -48,11 +48,7 @@ jobs:
           sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
           sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number }}\"/" components/package.json
 
-          echo "1"
-          grep -q "\-dev" helm/defectdojo/Chart.yaml"
-          echo "2"
-          if [ $? -eq 0 ]
-          then
+          if [ grep "\-dev" helm/defectdojo/Chart.yaml" ] then
               echo "x.y.z-dev found in Chart.yaml, probably releasing a new minor version"
               echo "removing the -dev suffix"
               sed -e "s/\-dev//" -i helm/defectdojo/Chart.yaml
