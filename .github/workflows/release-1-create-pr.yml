@@ -55,7 +55,7 @@ jobs:
               echo "removing the -dev suffix"
               sed -e "s/\-dev//" -i helm/defectdojo/Chart.yaml
           else
-              echo "x.y.z with '-dev' found in Chart.yaml, probably releasing a new bug fix version"
+              echo "x.y.z without '-dev' found in Chart.yaml, probably releasing a new bug fix version"
               echo "bumping the chart version"
               CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml)
               sed -ri "s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')/" helm/defectdojo/Chart.yaml
