@@ -117,7 +117,7 @@ Release 2.7.0 contains a beta functionality to make permissions for the configur
 
 ![Configuration permissions](../../images/configuration_permissions.png)
 
-Three configurations can still only be changed by superusers:
+3 configurations can still only be changed by superusers:
 * System settings
 * Notifications on system level
 * Configuration permissions for users and groups
