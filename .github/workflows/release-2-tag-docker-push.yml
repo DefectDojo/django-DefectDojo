@@ -54,7 +54,7 @@ jobs:
           tag_name: ${{ github.event.inputs.release_number }}  # this does not create a tag
           release_name: Release ${{ github.event.inputs.release_number }}
           body: |
-            Fill in with release drafter information manually for now, then publish.
+            Run the release drafter to populate the release notes.
           draft: true
           prerelease: false
       - name: Upload Release Asset
