@@ -172,3 +172,7 @@ All should be good now, including the release notes. So let's publish!
 - Publish: 
 
 ![image](https://user-images.githubusercontent.com/4426050/149619971-262104a7-55e6-4dc7-80f8-988c28d1b3ad.png)
+
+# Shout on social media
+
+@madchap has created an automation pipeline that will post the new release on the #defectdojo Slack channel, on the Defect Dojo twitter and on LinkedIn.
