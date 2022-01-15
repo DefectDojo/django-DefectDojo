@@ -23,6 +23,8 @@ The steps are identical for both release types, unless specified otherwise below
 
 ![image](https://user-images.githubusercontent.com/4426050/149572033-49a6c2a7-6c5b-4272-84e5-040c661598b4.png)
 
+<kbd><img srce="https://user-images.githubusercontent.com/4426050/149572033-49a6c2a7-6c5b-4272-84e5-040c661598b4.png"/></kbd>
+
 ### Bugfix release
 - Create a new branch from `master` which will receive the bugfix PRs for the release, i.e. `release/x.y.z`.
 
