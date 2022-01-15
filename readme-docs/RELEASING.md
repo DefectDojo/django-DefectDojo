@@ -13,6 +13,8 @@ The release process will then:
 - Tag the release, Build the dockers images and Push them to Docker Hub
 - Merge the changes in `master` "back into dev" to make sure `dev` is in sync again with `master`
 
+The steps are identical for both release types, unless specified otherwise below.
+
 # Creating and preparing the release branch
 
 ### Feature release
