@@ -133,23 +133,40 @@ Because we have merged the release PR into master, the release draft has been tr
 ### Bugfix releases
 For bugfix releases the release drafter generates the correct release notes. These will contain the merged PRs since the previous release.
 
-### Feature releases
-For features releases the release drafter will mess up if the *previous* release was a bugfix release. The release drafter does not look at releases or tags or branches. It just looks as the _date_ of the previous release and it will list all PRs merged since that date. So it will list all PRs merged since for example 2.6.2. This might miss PRs that have been merged _into dev_ between the release date of 2.6.0 and 2.6.2. To correct that, we have a fork of the release drafter that allows you to specify which release to use as the previous release. In this case we want all PRs listed that have been merged since 2.6.0.
+![image](https://user-images.githubusercontent.com/4426050/149619779-1d065baf-be09-41b7-a54c-b2676948a6cb.png)
 
-TODO
+
+### Feature releases
+For features releases the release drafter will mess up if the **previous release was a bugfix release**. If the previous release was a feature release (x.y.0), the release notes will be generated correctly.
+
+For when the previous release was a bugfix release, i.e. 2.6.2:
+
+The release drafter does not look at releases or tags or branches. It just looks as the _date_ of the previous release and it will list all PRs merged since that date. So it will list all PRs merged since for example 2.6.2. This might miss PRs that have been merged _into dev_ between the release date of 2.6.0 and 2.6.2. To correct that, we have a fork of the release drafter that allows you to specify which release to use as the previous release. In this case we want all PRs listed that have been merged since 2.6.0.
+
+Run the `Release Drafter Valentijn` and specify the desired previous (feature) release to use:
+
+![image](https://user-images.githubusercontent.com/4426050/149619852-dc1dad77-b7b6-479d-8d9f-4ac1571ea92c.png)
+
+Output:
+
+![image](https://user-images.githubusercontent.com/4426050/149619893-3f8ce398-aec2-467e-bb66-e8efc8dc66d6.png)
+
+Release notes:
+
+![image](https://user-images.githubusercontent.com/4426050/149619906-f80b805a-67b2-4b3b-9ffb-8edfcf4b7e16.png)
 
 A tiny downside of this is that it will also lists PRs releases in 2.6.1 and 2.6.2, but I think that is acceptable.
 
-TODO
+As a finishing touch make sure the emoji in the release name is present. We have special emoji for security releases, see a previous security release:
 
+![image](https://user-images.githubusercontent.com/4426050/149619999-0d601ec7-7f91-4399-b396-5f11ebab3b55.png)
 
-### Publis release
+![image](https://user-images.githubusercontent.com/4426050/149620011-b2a26d88-0c1c-49c9-9b3c-17d876532d8a.png)
 
+### Publish release
 
-# FAQ
+All should be good now, including the release notes. So let's publish!
 
-## Version numbers
-
-## Release drafter
-
-
+- Head over to [Release](https://github.com/DefectDojo/django-DefectDojo/releases)
+- Click on the 'edit' icon for the release you just created
+- Publish: ![image](https://user-images.githubusercontent.com/4426050/149619971-262104a7-55e6-4dc7-80f8-988c28d1b3ad.png)
