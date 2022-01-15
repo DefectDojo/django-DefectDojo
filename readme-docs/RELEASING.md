@@ -88,7 +88,6 @@ Verify the results:
 
 ![image](https://user-images.githubusercontent.com/4426050/149618481-51f4fa73-8611-4477-9ac4-3a6013778ab6.png)
 
-
 ![image](https://user-images.githubusercontent.com/4426050/149618495-97dd7452-492e-49a8-a8a3-dd93ee4505cf.png)
 
 # Bring `dev` in sync with `master`
@@ -103,15 +102,16 @@ Check the PR and versio number updates. For a fix version problably the version 
 
 ![image](https://user-images.githubusercontent.com/4426050/149618605-fd94b6a8-d348-4fc5-8eaf-92f23b1b54b7.png)
 
-Wait for the tests to complete, while we work on the release notes.
+Wait for the tests to complete. 
 
-# Publish the release with release notes
-
-# Merge PR into `dev`
+You can work on the release notes in the next step while waiting.
 
 Merge the `Release: Merge back x.y.z into dev from: master-into-dev/x.y.z-a.b.c-dev` PR by using a *Merge Commit*. Do NOT squash the commits.
 
 ![image](https://user-images.githubusercontent.com/4426050/149618642-276fffca-7e6f-4c51-bd9b-52bb5628cb7b.png)
+
+# Publish the release with release notes
+
 
 
 # FAQ
