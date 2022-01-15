@@ -175,4 +175,4 @@ All should be good now, including the release notes. So let's publish!
 
 # Shout on social media
 
-[@madchap] has created an automation pipeline that will post the new release on the #defectdojo Slack channel, on the Defect Dojo twitter and on LinkedIn.
+[@madchap](https://github.com/madchap) has created an automation pipeline that will post the new release on the #defectdojo Slack channel, on the Defect Dojo twitter and on LinkedIn.
