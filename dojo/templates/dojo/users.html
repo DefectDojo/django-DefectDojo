@@ -42,9 +42,7 @@
                     <table id="users"
                         class="tablesorter-bootstrap table table-condensed table-striped">
                         <tr>
-                            {% if request.user.is_staff %}
                             <th></th>
-                            {% endif %}
                             <th class="nowrap">{% dojo_sort request 'First Name' 'first_name' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Last Name' 'last_name' %}</th>
                             <th class="nowrap">{% dojo_sort request 'User Name' 'username' 'asc' %}</th>
@@ -58,7 +56,6 @@
                         </tr>
                         {% for u in users %}
                             <tr>
-                                {% if request.user.is_staff %}
                                 <td>
                                     <ul>
                                         <li class="dropdown" style="list-style:none;position:absolute">
@@ -91,7 +88,6 @@
                                         </li>
                                     </ul>
                                 </td>
-                                {% endif %}
                                 <td><a href="{% url 'view_user' u.id %}">{{ u.first_name }}</a></td>
                                 <td><a href="{% url 'view_user' u.id %}">{{ u.last_name }}</a></td>
                                 <td><a href="{% url 'view_user' u.id %}">{{ u.username }}</a></td>
