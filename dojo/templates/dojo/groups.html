@@ -40,9 +40,7 @@
                 <div class="panel panel-default table-responsive">
                     <table id="groups" class="tablesorter-bootstrap table table-condensed table-striped">
                         <tr>
-                            {% if request.user.is_staff %}
                             <th></th>
-                            {% endif %}
                             <th class="nowrap">{% dojo_sort request 'Group Name' 'name' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Group Description' 'description' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Number of Users' 'users|length' %}</th>

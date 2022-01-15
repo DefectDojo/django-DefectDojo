@@ -113,8 +113,13 @@ def user_has_global_permission(user, permission):
     if user.is_superuser:
         return True
 
-    if user.is_staff and permission == Permissions.Product_Type_Add:
-        return True
+    if permission == Permissions.Product_Type_Add:
+        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+            if user_has_configuration_permission(user, 'dojo.add_product_type'):
+                return True
+        else:
+            if user.is_staff:
+                return True
 
     if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_global_permission(user.global_role.role.id, permission):
         return True

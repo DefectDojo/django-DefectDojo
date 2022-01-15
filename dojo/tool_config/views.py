@@ -2,7 +2,6 @@
 import logging
 
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -11,10 +10,12 @@ from dojo.utils import dojo_crypto_encrypt, prepare_for_view
 from dojo.utils import add_breadcrumb
 from dojo.forms import ToolConfigForm
 from dojo.tool_config.factory import create_API
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.add_tool_configuration', 'superuser')
 def new_tool_config(request):
     if request.method == 'POST':
         tform = ToolConfigForm(request.POST)
@@ -47,7 +48,7 @@ def new_tool_config(request):
                   {'tform': tform})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.change_tool_configuration', 'superuser')
 def edit_tool_config(request, ttid):
     tool_config = Tool_Configuration.objects.get(pk=ttid)
     if request.method == 'POST':
@@ -89,7 +90,7 @@ def edit_tool_config(request, ttid):
                   })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.view_tool_configuration', 'superuser')
 def tool_config(request):
     confs = Tool_Configuration.objects.all().order_by('name')
     add_breadcrumb(title="Tool Configuration List", top_level=not len(request.GET), request=request)

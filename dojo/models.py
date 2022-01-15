@@ -3212,10 +3212,6 @@ class Cred_User(models.Model):
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     is_valid = models.BooleanField(default=True, verbose_name="Login is valid")
 
-    # selenium_script = models.CharField(max_length=1000, default='none',
-    #    editable=False, blank=True, null=True,
-    #    verbose_name="Selenium Script File")
-
     class Meta:
         ordering = ['name']
 
