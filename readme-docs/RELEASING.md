@@ -24,7 +24,7 @@ The release process will then:
 ### Bugfix release
 - Create a new branch from `master` which will receive the bugfix PRs for the release, i.e. `release/x.y.z`.
 
-![image](https://user-images.githubusercontent.com/4426050/149572118-cd62bab3-7daf-4c23-829e-0aa2c595376f.png)
+![image](https://user-images.githubusercontent.com/4426050/149616927-d26b3812-f5ce-4bd3-a196-a72293dd9377.png)
 
 - Create bugfix PRs against the new release branch:
 - Merge the PRs
