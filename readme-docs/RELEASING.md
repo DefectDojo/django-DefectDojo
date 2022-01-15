@@ -34,6 +34,15 @@ The steps are identical for both release types, unless specified otherwise below
 ### Always
 - Make sure there's a section in [upgrading.md](./docs/content/en/getting_started/upgrading.md) about any specific instructions when upgrading to this new release.
 
+Due to the release drafter being a non-perfect match for our git flow based release process, we have to delete any draft that has already been created by the release drafter if it has the same versio number.
+
+- Go to [Releases]() and delete any draft release that has the same version number as the release you are planning to release today.
+
+![image](https://user-images.githubusercontent.com/4426050/149619158-a467170d-5c5a-4311-a0db-31a825e8d5dd.png)
+
+If you want you can copy the contents of the release somewhere for later use. This is not really needed as in the final step below we will use the release drafter to generate the correct contents and assign it to the correct release.
+If you do not delete any existing draft release, you will end up with multiple draft releases with the same version. One will have release notes and the other will have the helm chart. So it's safer to just start with a clean sheet and follow the steps below.
+
 # Creating the PR to merge into `master`
 
 Run the `Release-1: Create PR for master` action:
@@ -112,6 +121,9 @@ Merge the `Release: Merge back x.y.z into dev from: master-into-dev/x.y.z-a.b.c-
 
 # Publish the release with release notes
 
+### Generate release notes
+
+### Publich release
 
 
 # FAQ
