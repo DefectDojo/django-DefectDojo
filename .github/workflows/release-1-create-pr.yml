@@ -11,9 +11,11 @@ on:
       from_branch:
         description: "Select branch to release from ('release/x.y.z'. If `dev` is entered, a new release branch will be created from `dev`)"
         required: true
+        default: 'release/2.6.3'
       release_number:
         description: "Release version (x.y.z format)"
         required: true
+        default: '2.6.3'
 
 jobs:
   create_pr:
@@ -45,26 +47,27 @@ jobs:
       - name: Update version numbers in key files
         run: |
           sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number }}'/" dojo/__init__.py
-          sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
           sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number }}\"/" components/package.json
+          sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
 
-          if [ grep "\-dev" helm/defectdojo/Chart.yaml" ] then
+          if grep "\-dev" helm/defectdojo/Chart.yaml; then
               echo "x.y.z-dev found in Chart.yaml, probably releasing a new minor version"
               echo "removing the -dev suffix"
               sed -e "s/\-dev//" -i helm/defectdojo/Chart.yaml
           else
               echo "x.y.z without -dev found in Chart.yaml, probably releasing a new bug fix version"
-              echo "bumping the chart version"
               CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml)
-              sed -ri "s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')/" helm/defectdojo/Chart.yaml
+              NEW_CHART_VERSION=$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')
+              echo "bumping the chart version from $CURRENT_CHART_VERSION to $NEW_CHART_VERSION"
+              sed -ri "s/version: \S+/$NEW_CHART_VERSION/" helm/defectdojo/Chart.yaml
           fi
 
-      - name: Check numbers
+      - name: Check version numbers
         run: |
-          grep version dojo/__init__.py
-          grep appVersion helm/defectdojo/Chart.yaml
-          grep version components/package.json
-          grep version helm/defectdojo/Chart.yaml
+          grep -H version dojo/__init__.py
+          grep -H version components/package.json
+          grep -H appVersion helm/defectdojo/Chart.yaml
+          grep -H version helm/defectdojo/Chart.yaml
 
       - name: Push version changes
         uses: stefanzweifel/git-auto-commit-action@v4.12.0
