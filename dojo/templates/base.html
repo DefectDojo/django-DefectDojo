@@ -168,9 +168,6 @@
                             <li><a href="https://defectdojo.github.io/django-DefectDojo" target="_blank">
                                 <i class="fa fa-question-circle fa-fw"></i> Documentation</a>
                             </li>
-                            {% if user.is_staff and system_settings.enable_questionnaires %}
-                                <li><a href="{% url 'questionnaire' %}"> <i class="fa fa-hospital-o fa-fw"> </i> Questionnaires </a></li>
-                            {% endif %}
                         {% endblock %}
                         {% if request.user.is_authenticated %}
                             {% if SAML2_LOGOUT_URL != '' %}
@@ -286,7 +283,7 @@
                                         <li>
                                             <a href="{% url 'vulnerable_endpoint_hosts' %}">Vulnerable Hosts</a>
                                         </li>
-                                        {% if request.user.is_staff %}
+                                        {% if request.user.is_superuser %}
                                             <li>
                                                 <a href="{% url 'endpoint_migrate' %}">Migrate Endpoints</a>
                                             </li>
