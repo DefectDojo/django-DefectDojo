@@ -55,7 +55,7 @@ jobs:
               echo "removing the -dev suffix"
               sed -e "s/\-dev//" -i helm/defectdojo/Chart.yaml
           else
-              echo "x.y.z without -dev found in Chart.yaml, probably releasing a new bug fix version"
+              echo "hoi"
           fi
 
       - name: Check numbers
