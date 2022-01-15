@@ -79,15 +79,45 @@ Observe the output of the action to make sure there are no errors.
 
 Verify the results:
 - Go to [Release](https://github.com/DefectDojo/django-DefectDojo/releases) to check the new release
+- Check if the helm chart is attached:
 
-TODO
-- Check if the new release has a helm chart attached:
+![image](https://user-images.githubusercontent.com/4426050/149618426-9d2c145f-89f4-4d22-9cb6-b020e7bd2fc2.png)
 
-TODO
+- We will populate the release notes in a later step
 - Check [Docker Hub](https://hub.docker.com/orgs/defectdojo/repositories) to see if the docker images have been uploaded
+
+![image](https://user-images.githubusercontent.com/4426050/149618481-51f4fa73-8611-4477-9ac4-3a6013778ab6.png)
+
+
+![image](https://user-images.githubusercontent.com/4426050/149618495-97dd7452-492e-49a8-a8a3-dd93ee4505cf.png)
 
 # Bring `dev` in sync with `master`
 
 To avoid merge conflicts and drigts between branches, we have to get `dev` back into sync with `master`. This step also bumps the version numbers if needed.
 
-TODO
+Run the `Release-3: PR for merging master into dev` action.
+
+![image](https://user-images.githubusercontent.com/4426050/149618563-05707161-7111-4ba9-ad18-6239f66c3aa5.png)
+
+Check the PR and versio number updates. For a fix version problably the version numbers are already correct on `dev`.
+
+![image](https://user-images.githubusercontent.com/4426050/149618605-fd94b6a8-d348-4fc5-8eaf-92f23b1b54b7.png)
+
+Wait for the tests to complete, while we work on the release notes.
+
+# Publish the release with release notes
+
+# Merge PR into `dev`
+
+Merge the `Release: Merge back x.y.z into dev from: master-into-dev/x.y.z-a.b.c-dev` PR by using a *Merge Commit*. Do NOT squash the commits.
+
+![image](https://user-images.githubusercontent.com/4426050/149618642-276fffca-7e6f-4c51-bd9b-52bb5628cb7b.png)
+
+
+# FAQ
+
+## Version numbers
+
+## Release drafter
+
+
