@@ -48,14 +48,19 @@ jobs:
           sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
           sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number }}\"/" components/package.json
 
-          grep -q "\-dev" helm/defectdojo/Chart.yaml
+          echo "1"
+          grep -q "\-dev" helm/defectdojo/Chart.yaml"
+          echo "2"
           if [ $? -eq 0 ]
           then
               echo "x.y.z-dev found in Chart.yaml, probably releasing a new minor version"
               echo "removing the -dev suffix"
               sed -e "s/\-dev//" -i helm/defectdojo/Chart.yaml
           else
-              echo "hoi"
+              echo "x.y.z without -dev found in Chart.yaml, probably releasing a new bug fix version"
+              echo "bumping the chart version"
+              CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml)
+              sed -ri "s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')/" helm/defectdojo/Chart.yaml
           fi
 
       - name: Check numbers
