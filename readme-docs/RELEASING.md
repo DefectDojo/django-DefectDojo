@@ -124,8 +124,26 @@ Merge the `Release: Merge back x.y.z into dev from: master-into-dev/x.y.z-a.b.c-
 # Publish the release with release notes
 
 ### Generate release notes
+Because we have merged the release PR into master, the release draft has been triggered. Check the output to see if it has created a new, or updated an existing, x.y.z draft release.
 
-### Publich release
+![image](https://user-images.githubusercontent.com/4426050/149619597-4cc655a6-0476-40d2-a1b5-34eebdf9f64f.png)
+
+![image](https://user-images.githubusercontent.com/4426050/149619614-728736a4-e58f-4792-9b27-ead24ec07fc4.png)
+
+### Bugfix releases
+For bugfix releases the release drafter generates the correct release notes. These will contain the merged PRs since the previous release.
+
+### Feature releases
+For features releases the release drafter will mess up if the *previous* release was a bugfix release. The release drafter does not look at releases or tags or branches. It just looks as the _date_ of the previous release and it will list all PRs merged since that date. So it will list all PRs merged since for example 2.6.2. This might miss PRs that have been merged _into dev_ between the release date of 2.6.0 and 2.6.2. To correct that, we have a fork of the release drafter that allows you to specify which release to use as the previous release. In this case we want all PRs listed that have been merged since 2.6.0.
+
+TODO
+
+A tiny downside of this is that it will also lists PRs releases in 2.6.1 and 2.6.2, but I think that is acceptable.
+
+TODO
+
+
+### Publis release
 
 
 # FAQ
