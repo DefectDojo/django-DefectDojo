@@ -11,11 +11,9 @@ on:
       from_branch:
         description: "Select branch to release from ('release/x.y.z'. If `dev` is entered, a new release branch will be created from `dev`)"
         required: true
-        default: 'release/2.6.3'
       release_number:
         description: "Release version (x.y.z format)"
         required: true
-        default: '2.6.3'
 
 jobs:
   create_pr:
