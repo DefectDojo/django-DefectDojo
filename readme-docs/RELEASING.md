@@ -34,7 +34,8 @@ The steps are identical for both release types, unless specified otherwise below
 ### Always
 - Make sure there's a section in [upgrading.md](./docs/content/en/getting_started/upgrading.md) about any specific instructions when upgrading to this new release.
 
-Due to the release drafter being a non-perfect match for our git flow based release process, we have to delete any draft that has already been created by the release drafter if it has the same versio number.
+- Remove existing draft releases with the same version number
+Due to the release drafter being a non-perfect match for our git flow based release process, we have to delete any draft that has already been created by the release drafter if it has the same versio number. This is probably not needed if you're doing a bugfix release.
 
 - Go to [Releases](https://github.com/DefectDojo/django-DefectDojo/releases) and delete any draft release that has the same version number as the release you are planning to release today.
 
