@@ -170,4 +170,5 @@ All should be good now, including the release notes. So let's publish!
 - Head over to [Release](https://github.com/DefectDojo/django-DefectDojo/releases)
 - Click on the 'edit' icon for the release you just created
 - Publish: 
+
 ![image](https://user-images.githubusercontent.com/4426050/149619971-262104a7-55e6-4dc7-80f8-988c28d1b3ad.png)
