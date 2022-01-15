@@ -46,62 +46,36 @@ class DependencyCheckParser(object):
         try:
             identifiers_node = dependency.find(namespace + 'identifiers')
             if identifiers_node:
-                # <identifiers>
-                #     <identifier type="cpe" confidence="HIGHEST">
-                #         <name>cpe:/a:apache:xalan-java:2.7.1</name>
-                #         <url>https://web.nvd.nist.gov/view/vuln/search-results?adv_search=true&amp;cves=on&amp;cpe_version=cpe%3A%2Fa%3Aapache%3Axalan-java%3A2.7.1</url>
-                #     </identifier>
-                #     <identifier type="maven" confidence="HIGHEST">
-                #         <name>xalan:serializer:2.7.1</name>
-                #         <url>https://search.maven.org/remotecontent?filepath=xalan/serializer/2.7.1/serializer-2.7.1.jar</url>
-                #     </identifier>
-                # </identifiers>
-
-                # newly found in v6.0.0
-                # <identifiers>
-                #     <package confidence="HIGH">
-                #         <id>pkg:maven/nl.company.client.offerservice/client-offer-service-codegen@1.0-SNAPSHOT</id>
-                #         <url>https://ossindex.sonatype.org/component/pkg:maven/nl.company.client.offerservice/client-offer-service-codegen@1.0-SNAPSHOT</url>
-                #     </package>
-                # </identifiers>
-
-                # <identifiers>
-                #     <package confidence="HIGHEST">
-                #         <id>pkg:npm/yargs-parser@5.0.0</id>
-                #         <url>https://ossindex.sonatype.org/component/pkg:npm/yargs-parser@5.0.0</url>
-                #     </package>
-                # </identifiers>
-
+                # analyzing identifier from the more generic to
                 package_node = identifiers_node.find('.//' + namespace + 'package')
                 if package_node:
-                    logger.debug('package string: ' + self.get_field_value(package_node, 'id', namespace))
                     id = self.get_field_value(package_node, 'id', namespace)
-
                     purl = PackageURL.from_string(id)
                     purl_parts = purl.to_dict()
                     component_name = purl_parts['namespace'] + ':' if purl_parts['namespace'] and len(purl_parts['namespace']) > 0 else ''
                     component_name += purl_parts['name'] if purl_parts['name'] and len(purl_parts['name']) > 0 else ''
                     component_name = component_name if component_name else None
-
                     component_version = purl_parts['version'] if purl_parts['version'] and len(purl_parts['version']) > 0 else ''
                     return component_name, component_version
 
+                # vulnerabilityIds_node = identifiers_node.find('.//' + namespace + 'vulnerabilityIds')
+                # if vulnerabilityIds_node:
+                #     id = self.get_field_value(vulnerabilityIds_node, 'id', namespace)
+                #     cpe = CPE(id)
+                #     component_name = cpe.get_vendor()[0] + ':' if len(cpe.get_vendor()) > 0 else ''
+                #     component_name += cpe.get_product()[0] if len(cpe.get_product()) > 0 else ''
+                #     component_name = component_name if component_name else None
+                #     component_version = cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
+                #     return component_name, component_version
+
                 cpe_node = identifiers_node.find('.//' + namespace + 'identifier[@type="cpe"]')
                 if cpe_node:
-                    # logger.debug('cpe string: ' + self.get_field_value(cpe_node, 'name'))
-                    cpe = CPE(self.get_field_value(cpe_node, 'name'))
+                    id = self.get_field_value(cpe_node, 'name', namespace)
+                    cpe = CPE(id)
                     component_name = cpe.get_vendor()[0] + ':' if len(cpe.get_vendor()) > 0 else ''
                     component_name += cpe.get_product()[0] if len(cpe.get_product()) > 0 else ''
                     component_name = component_name if component_name else None
                     component_version = cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
-                    # logger.debug('get_edition: ' + str(cpe.get_edition()))
-                    # logger.debug('get_language: ' + str(cpe.get_language()))
-                    # logger.debug('get_part: ' + str(cpe.get_part()))
-                    # logger.debug('get_software_edition: ' + str(cpe.get_software_edition()))
-                    # logger.debug('get_target_hardware: ' + str(cpe.get_target_hardware()))
-                    # logger.debug('get_target_software: ' + str(cpe.get_target_software()))
-                    # logger.debug('get_vendor: ' + str(cpe.get_vendor()))
-                    # logger.debug('get_update: ' + str(cpe.get_update()))
                     return component_name, component_version
 
                 maven_node = identifiers_node.find('.//' + namespace + 'identifier[@type="maven"]')
@@ -113,18 +87,6 @@ class DependencyCheckParser(object):
                         component_name = maven_parts[0] + ':' + maven_parts[1]
                         component_version = maven_parts[2]
                         return component_name, component_version
-
-                        # TODO
-                        # include identifiers in description?
-                        # <identifiers>
-                        #     <package confidence="HIGH">
-                        #         <id>pkg:maven/org.dom4j/dom4j@2.1.1.redhat-00001</id>
-                        #         <url>https://ossindex.sonatype.org/component/pkg:maven/org.dom4j/dom4j@2.1.1.redhat-00001</url>
-                        #     </package>
-                        #     <vulnerabilityIds confidence="HIGHEST">
-                        #         <id>cpe:2.3:a:dom4j_project:dom4j:2.1.1.hat-00001:*:*:*:*:*:*:*</id>
-                        #         <url>https://nvd.nist.gov/vuln/search/results?form_type=Advanced&amp;results_type=overview&amp;search_type=all&amp;cpe_vendor=cpe%3A%2F%3Adom4j_project&amp;cpe_product=cpe%3A%2F%3Adom4j_project%3Adom4j&amp;cpe_version=cpe%3A%2F%3Adom4j_project%3Adom4j%3A2.1.1.hat-00001</url>
-                        #     </vulnerabilityIds>
 
             # TODO what happens when there multiple evidencecollectednodes with product or version as type?
             evidence_collected_node = dependency.find(namespace + 'evidenceCollected')
@@ -224,9 +186,7 @@ class DependencyCheckParser(object):
         if severity.lower() == 'moderate':
             severity = 'Medium'
 
-        if severity in SEVERITY:
-            severity = severity
-        else:
+        if severity not in SEVERITY:
             tag = "Severity is inaccurate : " + str(severity)
             title += " | " + tag
             logger.warn("Warning: Inaccurate severity detected. Setting it's severity to Medium level.\n" + "Title is :" + title)

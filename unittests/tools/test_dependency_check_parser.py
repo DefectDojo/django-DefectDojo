@@ -1,7 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from os import path
 
 from dojo.models import Test
 from dojo.tools.dependency_check.parser import DependencyCheckParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestFile(object):
@@ -900,185 +902,21 @@ class TestDependencyCheckParser(DojoTestCase):
                      '**This vulnerability is mitigated and/or suppressed:** This is our reason for not to upgrade it.\nUpdate jquery:3.1.1 to at least the version recommended in the description')
         self.assertEqual(items[10].tags, "suppressed")
 
-        # evidencecollected -> multiple product + multiple version
-        # TODO? Seems like since v6.0.0 there's always a packageurl
+    def test_parse_java_6_5_3(self):
+        """Test with version 6.5.3"""
+        with open(path.join(path.dirname(__file__), "../scans/dependency_check/version-6.5.3.xml")) as test_file:
+            parser = DependencyCheckParser()
+            findings = parser.get_findings(test_file, Test())
+            items = findings
+            self.assertEqual(1, len(items))
 
-
-# example with multiple evidencecollected
-# <evidenceCollected>
-#     <evidence type="vendor" confidence="MEDIUM">
-#         <source>pom</source>
-#         <name>parent-groupid</name>
-#         <value>org.jboss</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="LOW">
-#         <source>Manifest</source>
-#         <name>specification-vendor</name>
-#         <value>JBoss by Red Hat</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="LOW">
-#         <source>pom</source>
-#         <name>artifactid</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="HIGH">
-#         <source>file</source>
-#         <name>name</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="LOW">
-#         <source>Manifest</source>
-#         <name>os-arch</name>
-#         <value>amd64</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="MEDIUM">
-#         <source>Manifest</source>
-#         <name>os-name</name>
-#         <value>Linux</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="HIGH">
-#         <source>Manifest</source>
-#         <name>Implementation-Vendor</name>
-#         <value>JBoss by Red Hat</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="HIGH">
-#         <source>pom</source>
-#         <name>name</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="MEDIUM">
-#         <source>Manifest</source>
-#         <name>java-vendor</name>
-#         <value>Oracle Corporation</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="LOW">
-#         <source>pom</source>
-#         <name>parent-artifactid</name>
-#         <value>jboss-parent</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="HIGHEST">
-#         <source>jar</source>
-#         <name>package name</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="LOW">
-#         <source>Manifest</source>
-#         <name>implementation-url</name>
-#         <value>http://dom4j.github.io/</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="MEDIUM">
-#         <source>Manifest</source>
-#         <name>Implementation-Vendor-Id</name>
-#         <value>org.dom4j</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="HIGHEST">
-#         <source>pom</source>
-#         <name>groupid</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="HIGHEST">
-#         <source>hint analyzer</source>
-#         <name>vendor</name>
-#         <value>redhat</value>
-#     </evidence>
-#     <evidence type="vendor" confidence="HIGHEST">
-#         <source>pom</source>
-#         <name>url</name>
-#         <value>http://dom4j.github.io/</value>
-#     </evidence>
-#     <evidence type="product" confidence="MEDIUM">
-#         <source>pom</source>
-#         <name>parent-groupid</name>
-#         <value>org.jboss</value>
-#     </evidence>
-#     <evidence type="product" confidence="HIGH">
-#         <source>Manifest</source>
-#         <name>Implementation-Title</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="product" confidence="HIGH">
-#         <source>file</source>
-#         <name>name</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="product" confidence="LOW">
-#         <source>Manifest</source>
-#         <name>os-arch</name>
-#         <value>amd64</value>
-#     </evidence>
-#     <evidence type="product" confidence="MEDIUM">
-#         <source>Manifest</source>
-#         <name>os-name</name>
-#         <value>Linux</value>
-#     </evidence>
-#     <evidence type="product" confidence="HIGHEST">
-#         <source>pom</source>
-#         <name>artifactid</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="product" confidence="MEDIUM">
-#         <source>pom</source>
-#         <name>parent-artifactid</name>
-#         <value>jboss-parent</value>
-#     </evidence>
-#     <evidence type="product" confidence="HIGH">
-#         <source>pom</source>
-#         <name>name</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="product" confidence="HIGHEST">
-#         <source>jar</source>
-#         <name>package name</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="product" confidence="LOW">
-#         <source>Manifest</source>
-#         <name>implementation-url</name>
-#         <value>http://dom4j.github.io/</value>
-#     </evidence>
-#     <evidence type="product" confidence="HIGHEST">
-#         <source>jar</source>
-#         <name>package name</name>
-#         <value>io</value>
-#     </evidence>
-#     <evidence type="product" confidence="MEDIUM">
-#         <source>pom</source>
-#         <name>url</name>
-#         <value>http://dom4j.github.io/</value>
-#     </evidence>
-#     <evidence type="product" confidence="HIGHEST">
-#         <source>pom</source>
-#         <name>groupid</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="product" confidence="MEDIUM">
-#         <source>Manifest</source>
-#         <name>specification-title</name>
-#         <value>dom4j</value>
-#     </evidence>
-#     <evidence type="version" confidence="HIGHEST">
-#         <source>pom</source>
-#         <name>version</name>
-#         <value>2.1.1.redhat-00001</value>
-#     </evidence>
-#     <evidence type="version" confidence="HIGH">
-#         <source>Manifest</source>
-#         <name>Implementation-Version</name>
-#         <value>2.1.1.redhat-00001</value>
-#     </evidence>
-#     <evidence type="version" confidence="LOW">
-#         <source>pom</source>
-#         <name>parent-version</name>
-#         <value>2.1.1.redhat-00001</value>
-#     </evidence>
-# </evidenceCollected>
-# <identifiers>
-#     <package confidence="HIGH">
-#         <id>pkg:maven/org.dom4j/dom4j@2.1.1.redhat-00001</id>
-#         <url>https://ossindex.sonatype.org/component/pkg:maven/org.dom4j/dom4j@2.1.1.redhat-00001</url>
-#     </package>
-#     <vulnerabilityIds confidence="HIGHEST">
-#         <id>cpe:2.3:a:dom4j_project:dom4j:2.1.1.hat-00001:*:*:*:*:*:*:*</id>
-#         <url>https://nvd.nist.gov/vuln/search/results?form_type=Advanced&amp;results_type=overview&amp;search_type=all&amp;cpe_vendor=cpe%3A%2F%3Adom4j_project&amp;cpe_product=cpe%3A%2F%3Adom4j_project%3Adom4j&amp;cpe_version=cpe%3A%2F%3Adom4j_project%3Adom4j%3A2.1.1.hat-00001</url>
-#     </vulnerabilityIds>
-# </identifiers>
+            i = 0
+            with self.subTest(i=i):
+                self.assertEqual(items[i].component_name, "org.apache.logging.log4j:log4j-api")
+                self.assertEqual(items[i].component_version, "2.12.4")
+                self.assertIn(
+                    "Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.",
+                    items[i].description
+                )
+                self.assertEqual(items[i].severity, "Low")
+                self.assertEqual(items[i].file_path, "log4j-api-2.12.4.jar")
