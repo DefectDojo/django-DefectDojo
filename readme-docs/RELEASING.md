@@ -36,7 +36,7 @@ The steps are identical for both release types, unless specified otherwise below
 
 Due to the release drafter being a non-perfect match for our git flow based release process, we have to delete any draft that has already been created by the release drafter if it has the same versio number.
 
-- Go to [Releases]() and delete any draft release that has the same version number as the release you are planning to release today.
+- Go to [Releases](https://github.com/DefectDojo/django-DefectDojo/releases) and delete any draft release that has the same version number as the release you are planning to release today.
 
 ![image](https://user-images.githubusercontent.com/4426050/149619158-a467170d-5c5a-4311-a0db-31a825e8d5dd.png)
 
