@@ -366,6 +366,15 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def validate(self, data):
+
+        if self.instance is not None:
+            instance_is_superuser = self.instance.is_superuser
+        else:
+            instance_is_superuser = False
+        data_is_superuser = data.get('is_superuser', False)
+        if not self.context['request'].user.is_superuser and (instance_is_superuser or data_is_superuser):
+            raise ValidationError('Only superusers are allowed to add or edit superusers.')
+
         if self.context['request'].method in ['PATCH', 'PUT'] and 'password' in data:
             raise ValidationError('Update of password though API is not allowed')
         else:

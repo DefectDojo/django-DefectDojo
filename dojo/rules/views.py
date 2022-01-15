@@ -4,7 +4,6 @@ import logging
 
 # Third party imports
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -17,6 +16,7 @@ from dojo.models import Rule,\
     Product, Product_Type, Child_Rule
 from dojo.forms import RuleFormSet, DeleteRuleForm, RuleForm
 from dojo.utils import add_breadcrumb
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ field_dictionary['Product'] = product_fields
 field_dictionary['Product Type'] = product_type_fields
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.view_rule', 'superuser')
 def rules(request):
     initial_queryset = Rule.objects.all().order_by('name')
     add_breadcrumb(title="Rules", top_level=True, request=request)
@@ -48,7 +48,7 @@ def rules(request):
         'rules': initial_queryset})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.add_rule', 'superuser')
 def new_rule(request):
     if request.method == 'POST':
         form = RuleForm(request.POST)
@@ -73,7 +73,7 @@ def new_rule(request):
                    'field_dictionary': json.dumps(field_dictionary)})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.add_rule', 'superuser')
 def add_child(request, pid):
     rule = get_object_or_404(Rule, pk=pid)
     if request.method == 'POST':
@@ -101,7 +101,7 @@ def add_child(request, pid):
                    'field_dictionary': json.dumps(field_dictionary)})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.change_rule', 'superuser')
 def edit_rule(request, pid):
     pt = get_object_or_404(Rule, pk=pid)
     children = Rule.objects.filter(parent_rule=pt)
@@ -128,7 +128,7 @@ def edit_rule(request, pid):
         'pt': pt, })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.delete_rule', 'superuser')
 def delete_rule(request, tid):
     rule = get_object_or_404(Rule, pk=tid)
     form = DeleteRuleForm(instance=rule)

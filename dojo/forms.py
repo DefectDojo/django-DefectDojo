@@ -27,7 +27,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
-    Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
+    App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
@@ -1881,6 +1881,13 @@ class AddDojoUserForm(forms.ModelForm):
         exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
                     'authorized_products', 'authorized_product_types']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_user = get_current_user()
+        if not current_user.is_superuser:
+            self.fields['is_staff'].disabled = True
+            self.fields['is_superuser'].disabled = True
+
 
 class EditDojoUserForm(forms.ModelForm):
 
@@ -1890,6 +1897,13 @@ class EditDojoUserForm(forms.ModelForm):
                   'is_staff', 'is_superuser']
         exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
                     'authorized_products', 'authorized_product_types']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_user = get_current_user()
+        if not current_user.is_superuser:
+            self.fields['is_staff'].disabled = True
+            self.fields['is_superuser'].disabled = True
 
 
 class DeleteUserForm(forms.ModelForm):
@@ -2192,18 +2206,6 @@ class ToolTypeForm(forms.ModelForm):
 class RegulationForm(forms.ModelForm):
     class Meta:
         model = Regulation
-        exclude = ['product']
-
-
-class LanguagesTypeForm(forms.ModelForm):
-    class Meta:
-        model = Languages
-        exclude = ['product']
-
-
-class Languages_TypeTypeForm(forms.ModelForm):
-    class Meta:
-        model = Language_Type
         exclude = ['product']
 
 
@@ -3171,6 +3173,27 @@ class ConfigurationPermissionsForm(forms.Form):
         self.group = kwargs.pop('group', None)
         super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
 
+        if get_system_setting('enable_github'):
+            github_permissions = [
+                Permission_Helper(name='github conf', app='dojo', view=True, add=True, delete=True),
+            ]
+        else:
+            github_permissions = []
+
+        if get_system_setting('enable_google_sheets'):
+            google_sheet_permissions = [
+                Permission_Helper(name='google sheet', app='dojo', change=True),
+            ]
+        else:
+            google_sheet_permissions = []
+
+        if get_system_setting('enable_jira'):
+            jira_permissions = [
+                Permission_Helper(name='jira instance', app='dojo', view=True, add=True, change=True, delete=True),
+            ]
+        else:
+            jira_permissions = []
+
         if get_system_setting('enable_questionnaires'):
             questionnaire_permissions = [
                 Permission_Helper(name='engagement survey', app='dojo', view=True, add=True, change=True, delete=True),
@@ -3179,19 +3202,33 @@ class ConfigurationPermissionsForm(forms.Form):
         else:
             questionnaire_permissions = []
 
-        permission_fields_1 = [
-            Permission_Helper(name='development environment', app='dojo', view=True, add=True, change=True, delete=True),
-            Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True),
-            Permission_Helper(name='group', app='auth', view=True, add=True),
-            Permission_Helper(name='permission', app='auth', change=True)
-        ]
-        permission_fields_2 = [
-            Permission_Helper(name='test type', app='dojo', view=True, add=True, change=True),
+        if get_system_setting('enable_rules_framework'):
+            rules_permissions = [
+                Permission_Helper(name='rule', app='auth', view=True, add=True, change=True, delete=True),
+            ]
+        else:
+            rules_permissions = []
+
+        self.permission_fields = [
+            Permission_Helper(name='cred user', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='development environment', app='dojo', add=True, change=True, delete=True),
+            Permission_Helper(name='finding template', app='dojo', view=True, add=True, change=True, delete=True)] + \
+            github_permissions + \
+            google_sheet_permissions + [
+            Permission_Helper(name='group', app='auth', view=True, add=True)] + \
+            jira_permissions + [
+            Permission_Helper(name='language type', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='bannerconf', app='dojo', change=True),
+            Permission_Helper(name='note type', app='dojo', view=True, add=True, change=True, delete=True),
+            Permission_Helper(name='product type', app='dojo', add=True)] + \
+            questionnaire_permissions + [
+            Permission_Helper(name='regulation', app='dojo', add=True, change=True, delete=True)] + \
+            rules_permissions + [
+            Permission_Helper(name='test type', app='dojo', add=True, change=True),
+            Permission_Helper(name='tool configuration', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
         ]
-
-        self.permission_fields = permission_fields_1 + questionnaire_permissions + permission_fields_2
 
         for permission_field in self.permission_fields:
             for codename in permission_field.codenames():
@@ -3205,9 +3242,10 @@ class ConfigurationPermissionsForm(forms.Form):
             self.permissions[permission.codename] = permission
 
     def save(self):
-        for permission_field in self.permission_fields:
-            for codename in permission_field.codenames():
-                self.set_permission(codename)
+        if get_current_user().is_superuser:
+            for permission_field in self.permission_fields:
+                for codename in permission_field.codenames():
+                    self.set_permission(codename)
 
     def set_permission(self, codename):
         if self.cleaned_data[codename]:
@@ -3238,10 +3276,18 @@ class Permission_Helper:
         self.delete = kwargs.pop('delete', False)
 
     def display_name(self):
-        if self.name == 'engagement survey':
-            return 'Questionnaire'
+        if self.name == 'bannerconf':
+            return 'Login Banner'
+        elif self.name == 'cred user':
+            return 'Credentials'
+        elif self.name == 'github conf':
+            return 'GitHub Configurations'
+        elif self.name == 'engagement survey':
+            return 'Questionnaires'
+        elif self.name == 'permission':
+            return 'Configuration Permissions'
         else:
-            return self.name.title()
+            return self.name.title() + 's'
 
     def view_codename(self):
         if self.view:
