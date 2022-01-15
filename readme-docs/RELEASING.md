@@ -47,7 +47,7 @@ Verify the PR is created, and check if the commits in it make sense:
 
 # Merge the PR into master
 
-Go to the bottom of the lists of commits, click on the `Update versions in application files` commit and check the version numbers in `dojo/__init__.py`, `components/package.json` and `helm/defectdojo/Chart.yaml`.
+Go to the bottom of the lists of commits, click on the `Update versions in application files` commit and check the version number updates.
 
 ![image](https://user-images.githubusercontent.com/4426050/149577123-572cc6dd-7bf3-44ad-af58-ab6e46905558.png)
 
