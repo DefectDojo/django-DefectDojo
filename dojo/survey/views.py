@@ -694,14 +694,13 @@ def answer_empty_survey(request, esid):
     settings = System_Settings.objects.all()[0]
 
     if not settings.allow_anonymous_survey_repsonse:
-        auth = request.user.is_staff
-        if not auth:
+        if not request.user.is_authenticated:
             messages.add_message(request,
                                  messages.ERROR,
                                  'You must be logged in to answer questionnaire. Otherwise, enable anonymous response in system settings.',
                                  extra_tags='alert-danger')
             # will render 403
-            raise PermissionDenied
+            raise PermissionDenied()
 
     questions = [q.get_form()(prefix=str(q.id),
                               engagement_survey=engagement_survey,

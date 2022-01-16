@@ -205,16 +205,6 @@ class TestAuthorization(DojoTestCase):
 
         self.user.is_superuser = False
 
-    @override_settings(AUTHORIZATION_STAFF_OVERRIDE=True)
-    def test_user_has_permission_staff_override(self):
-        self.user.is_staff = True
-
-        result = user_has_permission(self.user, self.product_type, Permissions.Product_Type_Delete)
-
-        self.assertTrue(result)
-
-        self.user.is_staff = False
-
     @patch('dojo.models.Product_Type_Member.objects')
     def test_user_has_permission_product_type_success(self, mock_foo):
         mock_foo.select_related.return_value = mock_foo

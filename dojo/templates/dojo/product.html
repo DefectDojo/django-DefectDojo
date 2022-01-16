@@ -19,7 +19,7 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                {% if user.is_staff %}
+                                {% if request.user|can_add_product %}
                                     <li role="presentation">
                                         <a href="{% url 'new_product' %}">
                                             <i class="fa fa-plus"></i> Add Product

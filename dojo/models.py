@@ -467,6 +467,11 @@ class System_Settings(models.Model):
         blank=True,
         help_text="New users will be assigned to their default group with this role.",
         on_delete=models.RESTRICT)
+    default_group_email_pattern = models.CharField(
+        max_length=200,
+        default='',
+        blank=True,
+        help_text="New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition.")
     staff_user_email_pattern = models.CharField(
         max_length=200,
         default='',
@@ -3206,10 +3211,6 @@ class Cred_User(models.Model):
     logout_regex = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     is_valid = models.BooleanField(default=True, verbose_name="Login is valid")
-
-    # selenium_script = models.CharField(max_length=1000, default='none',
-    #    editable=False, blank=True, null=True,
-    #    verbose_name="Selenium Script File")
 
     class Meta:
         ordering = ['name']

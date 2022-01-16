@@ -61,12 +61,19 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.7.x.
+
+This release is a breaking change regarding the Choctaw Hog parser. As the maintainers of this project unified multiple parsers under the RustyHog parser, we now support the parsing of Choctaw Hog JSON output files through the Rusty Hog parser. Furthermore, we also support Gottingen Hog JSON output files with the RustyHog parser.
+
+The functionality using the flag `AUTHORIZATION_STAFF_OVERRIDE` has been removed. The same result can be achieved with giving the staff users
+a global Owner role. To make that easier you can run a migration script with ``./manage.py migrate staff_users``. This script creates a group
+for all staff users and sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to True.
+
 ## Upgrading to DefectDojo Version 2.6.x.
 
 There are no special instruction for upgrading to 2.6.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.6.0) for the contents of the release.
 
 Please consult the security advisories [GHSA-f82x-m585-gj24](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-f82x-m585-gj24) (moderate) and [GHSA-v7fv-g69g-x7p2](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-v7fv-g69g-x7p2) (high) to see what security issues were fixed in this release. These will be published and become visible at January 18th, 2022.
-
 
 ## Upgrading to DefectDojo Version 2.5.x.
 
