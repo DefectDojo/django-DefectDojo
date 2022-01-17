@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="engagement",
             name="lead",
-            field=models.ForeignKey(editable=True, null=True, blank=True, on_delete=models.SET_NULL, to='dojo.Dojo_User'),
+            field=models.ForeignKey(editable=True, null=True, blank=True, on_delete=models.SET_NULL, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
             model_name="test",
             name="lead",
-            field=models.ForeignKey(editable=True, null=True, blank=True, on_delete=models.SET_NULL, to='dojo.Dojo_User'),
+            field=models.ForeignKey(editable=True, null=True, blank=True, on_delete=models.SET_NULL, to=settings.AUTH_USER_MODEL),
         ),
     ]
