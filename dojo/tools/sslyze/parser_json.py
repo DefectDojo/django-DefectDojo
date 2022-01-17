@@ -97,7 +97,40 @@ class SSLyzeJSONParser(object):
 
         for node in tree['server_scan_results']:
             endpoint = get_endpoint(node)
-            if 'scan_result' in node:
+            if 'scan_commands_results' in node:
+                scr_node = node['scan_commands_results']
+                item = get_heartbleed(scr_node, test, endpoint)
+                if item:
+                    items.append(item)
+                item = get_ccs(scr_node, test, endpoint)
+                if item:
+                    items.append(item)
+                item = get_renegotiation(scr_node, test, endpoint)
+                if item:
+                    items.append(item)
+                item = get_weak_protocol('ssl_2_0_cipher_suites', 'SSL 2.0', scr_node, test, endpoint)
+                if item:
+                    items.append(item)
+                item = get_weak_protocol('ssl_3_0_cipher_suites', 'SSL 3.0', scr_node, test, endpoint)
+                if item:
+                    items.append(item)
+                item = get_weak_protocol('tls_1_0_cipher_suites', 'TLS 1.0', scr_node, test, endpoint)
+                if item:
+                    items.append(item)
+                item = get_weak_protocol('tls_1_1_cipher_suites', 'TLS 1.1', scr_node, test, endpoint)
+                if item:
+                    items.append(item)
+                item = get_strong_protocol('tls_1_2_cipher_suites', 'TLS 1.2', TLS12_RECOMMENDED_CIPHERS, scr_node, test, endpoint)
+                if item:
+                    items.append(item)
+                item = get_strong_protocol('tls_1_3_cipher_suites', 'TLS 1.3', TLS13_RECOMMENDED_CIPHERS, scr_node, test, endpoint)
+                if item:
+                    items.append(item)
+                item = get_certificate_information(scr_node, test, endpoint)
+                if item:
+                    items.append(item)
+
+            elif 'scan_result' in node:
                 scr_node = node['scan_result']
                 item = get_heartbleed(scr_node, test, endpoint)
                 if item:
@@ -139,7 +172,15 @@ def get_heartbleed(node, test, endpoint):
         if heartbleed['status'] == 'NOT_SCHEDULED':
             return None
         vulnerable = False
-        if 'result' in heartbleed:
+        if 'is_vulnerable_to_heartbleed' in heartbleed:
+            vulnerable = heartbleed['is_vulnerable_to_heartbleed']
+            if vulnerable:
+                title = 'Heartbleed'
+                description = get_url(endpoint) + ' is vulnerable to heartbleed'
+                cve = 'CVE-2014-0160'
+                return get_finding(title, description, cve, None, test, endpoint)
+
+        elif 'result' in heartbleed:
             hb_result = heartbleed['result']
             if 'is_vulnerable_to_heartbleed' in hb_result:
                 vulnerable = hb_result['is_vulnerable_to_heartbleed']
@@ -148,6 +189,7 @@ def get_heartbleed(node, test, endpoint):
                     description = get_url(endpoint) + ' is vulnerable to heartbleed'
                     cve = 'CVE-2014-0160'
                     return get_finding(title, description, cve, None, test, endpoint)
+        return None
     return None
 
 
@@ -157,7 +199,15 @@ def get_ccs(node, test, endpoint):
         vulnerable = False
         if ccs_injection['status'] == 'NOT_SCHEDULED':
             return None
-        if 'result' in ccs_injection:
+        if 'is_vulnerable_to_ccs_injection' in ccs_injection:
+                vulnerable = ccs_injection['is_vulnerable_to_ccs_injection']
+                if vulnerable:
+                    title = 'CCS injection'
+                    description = get_url(endpoint) + ' is vulnerable to OpenSSL CCS injection'
+                    cve = 'CVE-2014-0224'
+                    return get_finding(title, description, cve, None, test, endpoint)
+
+        elif 'result' in ccs_injection:
             ccs_result = ccs_injection['result']
             if 'is_vulnerable_to_ccs_injection' in ccs_result:
                 vulnerable = ccs_result['is_vulnerable_to_ccs_injection']
@@ -166,6 +216,7 @@ def get_ccs(node, test, endpoint):
                     description = get_url(endpoint) + ' is vulnerable to OpenSSL CCS injection'
                     cve = 'CVE-2014-0224'
                     return get_finding(title, description, cve, None, test, endpoint)
+        return None
     return None
 
 
@@ -174,7 +225,22 @@ def get_renegotiation(node, test, endpoint):
         renegotiation = node['session_renegotiation']
         if renegotiation['status'] == 'NOT_SCHEDULED':
             return None
-        if 'result' in renegotiation:
+        if 'accepts_client_renegotiation' in renegotiation and 'supports_secure_renegotiation' in renegotiation:
+            vulnerable = False
+            title = 'Session renegotiation'
+            description = get_url(endpoint) + ' has problems with session renegotiation:'
+            vulnerable_cr = 'accepts_client_renegotiation' in renegotiation and renegotiation['accepts_client_renegotiation']
+            if vulnerable_cr:
+                vulnerable = True
+                description += '\n - Client renegotiation is accepted'
+            vulnerable_sr = 'supports_secure_renegotiation' in renegotiation and not renegotiation['supports_secure_renegotiation']
+            if vulnerable_sr:
+                vulnerable = True
+                description += '\n - Secure session renegotiation is not supported'
+            if vulnerable:
+                return get_finding(title, description, None, None, test, endpoint)
+
+        elif 'result' in renegotiation:
             reneg_result = renegotiation['result']
             if 'is_vulnerable_to_client_renegotiation_dos' in reneg_result:
                 reneg_dos = reneg_result['is_vulnerable_to_client_renegotiation_dos']
@@ -197,7 +263,12 @@ def get_weak_protocol(cipher, text, node, test, endpoint):
         weak_node = node[cipher]
         if weak_node['status'] == 'NOT_SCHEDULED':
             return None
-        if 'result' in weak_node:
+        if 'accepted_cipher_suites' in weak_node and len(weak_node['accepted_cipher_suites']) > 0:
+            title = text + ' not recommended'
+            description = get_url(endpoint) + ' accepts ' + text + ' connections'
+            return get_finding(title, description, None, REFERENCES, test, endpoint)
+
+        elif 'result' in weak_node:
             weak_node_result = weak_node['result']
             if 'accepted_cipher_suites' in weak_node_result and len(weak_node_result['accepted_cipher_suites']) > 0:
                 title = text + ' not recommended'
@@ -212,7 +283,21 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
         strong_node = node[cipher]
         if strong_node['status'] == 'NOT_SCHEDULED':
             return None
-        if 'result' in strong_node:
+
+        if 'accepted_cipher_suites' in strong_node and len(strong_node['accepted_cipher_suites']) > 0:
+            unrecommended_cipher_found = False
+            title = 'Unrecommended cipher suites for ' + text
+            description = get_url(endpoint) + ' accepts unrecommended cipher suites for ' + text + ':'
+            for cipher_node in strong_node['accepted_cipher_suites']:
+                if 'cipher_suite' in cipher_node:
+                    cs_node = cipher_node['cipher_suite']
+                    if 'name' in cs_node and not cs_node['name'] in suites:
+                        unrecommended_cipher_found = True
+                        description += '\n - ' + cs_node['name']
+            if unrecommended_cipher_found:
+                return get_finding(title, description, None, REFERENCES, test, endpoint)
+
+        elif 'result' in strong_node:
             strong_node_result = strong_node['result']
             unrecommended_cipher_found = False
             if 'accepted_cipher_suites' in strong_node_result and len(strong_node_result['accepted_cipher_suites']) > 0:
@@ -226,6 +311,7 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
                             description += '\n - ' + cs_node['name']
                 if unrecommended_cipher_found:
                     return get_finding(title, description, None, REFERENCES, test, endpoint)
+        return None
     return None
 
 
@@ -234,7 +320,35 @@ def get_certificate_information(node, test, endpoint):
         ci_node = node['certificate_info']
         if ci_node['status'] == 'NOT_SCHEDULED':
             return None
-        if 'result' in ci_node:
+        if 'certificate_deployments' in ci_node:
+            for cd_node in ci_node['certificate_deployments']:
+                title = 'Problems in certificate deployments'
+                description = get_url(endpoint) + ' has problems in certificate deployments:'
+                vulnerable = False
+                if 'leaf_certificate_subject_matches_hostname' in cd_node:
+                    if not cd_node['leaf_certificate_subject_matches_hostname']:
+                        vulnerable = True
+                        description += '\n - Certificate subject does not match hostname'
+                for pvr_node in cd_node['path_validation_results']:
+                    if 'openssl_error_string' in pvr_node and pvr_node['openssl_error_string'] is not None:
+                        vulnerable = True
+                        name = None
+                        version = None
+                        if 'trust_store' in pvr_node:
+                            ts_node = pvr_node['trust_store']
+                            if 'name' in ts_node:
+                                name = ts_node['name']
+                            if 'version' in ts_node:
+                                version = ts_node['version']
+                        description += '\n - ' + pvr_node['openssl_error_string']
+                        if name is not None:
+                            description += ' for trust store ' + name
+                        if version is not None:
+                            description += ', version ' + version
+                if vulnerable:
+                    return get_finding(title, description, None, None, test, endpoint)
+
+        elif 'result' in ci_node:
             ci_node_result = ci_node['result']
             if 'certificate_deployments' in ci_node_result:
                 for cd_node in ci_node_result['certificate_deployments']:
@@ -263,6 +377,7 @@ def get_certificate_information(node, test, endpoint):
                                 description += ', version ' + version
                     if vulnerable:
                         return get_finding(title, description, None, None, test, endpoint)
+        return None
     return None
 
 
@@ -296,7 +411,16 @@ def get_url(endpoint):
 
 def get_endpoint(node):
     hostname = None
-    if 'server_location' in node:
+    if 'server_info' in node:
+        si_node = node['server_info']
+        if 'server_location' in si_node:
+            sl_node = si_node['server_location']
+            if 'hostname' in sl_node:
+                hostname = sl_node['hostname']
+            if 'port' in sl_node:
+                port = sl_node['port']
+
+    elif 'server_location' in node:
         si_node = node['server_location']
         if 'hostname' in si_node:
             hostname = si_node['hostname']
