@@ -36,4 +36,6 @@ urlpatterns = [
         name='endpoints_status_bulk'),
     url(r'^endpoint/migrate$', views.migrate_endpoints_view,
         name='endpoint_migrate'),
+    url(r'^endpoint/(?P<pid>\d+)/import_endpoint_meta$', views.import_endpoint_meta,
+        name='import_endpoint_meta'),
 ]

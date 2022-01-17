@@ -15,7 +15,6 @@ from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
-from django.conf import settings
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_has_global_permission, user_is_authorized
@@ -57,7 +56,6 @@ def prefetch_for_product_type(prod_types):
         active_findings_query = Q(prod_type__engagement__test__finding__active=True)
         active_verified_findings_query = Q(prod_type__engagement__test__finding__active=True,
                                 prod_type__engagement__test__finding__verified=True)
-        prefetch_prod_types = prefetch_prod_types.prefetch_related('authorized_users')
         prefetch_prod_types = prefetch_prod_types.annotate(
             active_findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))
         prefetch_prod_types = prefetch_prod_types.annotate(
@@ -76,12 +74,11 @@ def add_product_type(request):
         form = Product_TypeForm(request.POST)
         if form.is_valid():
             product_type = form.save()
-            if settings.FEATURE_AUTHORIZATION_V2:
-                member = Product_Type_Member()
-                member.user = request.user
-                member.product_type = product_type
-                member.role = Role.objects.get(is_owner=True)
-                member.save()
+            member = Product_Type_Member()
+            member.user = request.user
+            member.product_type = product_type
+            member.role = Role.objects.get(is_owner=True)
+            member.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product type added successfully.',
@@ -149,14 +146,11 @@ def delete_product_type(request, ptid):
 @user_is_authorized(Product_Type, Permissions.Product_Type_Edit, 'ptid')
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
-    authed_users = pt.authorized_users.all()
     members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_Manage_Members)
-    pt_form = Product_TypeForm(instance=pt, initial={'authorized_users': authed_users})
+    pt_form = Product_TypeForm(instance=pt)
     if request.method == "POST" and request.POST.get('edit_product_type'):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
             pt = pt_form.save()
             messages.add_message(
                 request,

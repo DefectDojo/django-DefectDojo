@@ -110,9 +110,9 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="{% url 'home' %}">
-		    {% block header_logo %}
-			<img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
-        	    {% endblock %}
+                {% block header_logo %}
+                    <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
+                {% endblock %}
                 </a>
 
             </div>
@@ -204,7 +204,7 @@
                                 </a>
                                 <ul class="nav nav-second-level">
                                     <li><a href="{% url 'product' %}"> All Products</a></li>
-                                    {% if request.user.is_staff %}
+                                    {% if request.user|can_add_product %}
                                         <li><a href="{% url 'new_product' %}"> Add Product</a></li>
                                     {% endif %}
                                     <li><a href="{% url 'product_type' %}">All Product Types</a></li>
@@ -224,10 +224,8 @@
                                     <li><a href="{% url 'active_engagements' %}">Active Engagements</a></li>
                                     <li><a href="{% url 'all_engagements' %}">All Engagements</a></li>
                                     <li><a href="{% url 'engagements_all' %}">Engagements by Product</a></li>
-                                    {% if request.user.is_staff %}
-                                        <li><a href="{% url 'test_type' %}">Test Types</a></li>
-                                        <li><a href="{% url 'dev_env' %}">Environments</a></li>
-                                    {% endif %}
+                                    <li><a href="{% url 'test_type' %}">Test Types</a></li>
+                                    <li><a href="{% url 'dev_env' %}">Environments</a></li>
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
@@ -250,7 +248,7 @@
                                         <li>
                                             <a href="{% url 'accepted_findings' %}">Risk Accepted Findings</a>
                                         </li>
-                                        {% if request.user.is_staff %}
+                                        {% if "dojo.view_finding_template"|has_configuration_permission:"staff" %}
                                         <li>
                                             <a href="{% url 'templates' %}">Finding Templates</a>
                                         </li>
@@ -315,14 +313,11 @@
                                     <li><a href="{% url 'metrics_product_type' %}"> Product Type Metrics </a></li>
                                     <li><a href="{% url 'product_type_counts' %}"> Product Type Counts </a></li>
                                     <li><a href="{% url 'simple_metrics' %}"> Simple Metrics </a></li>
-                                    {% if user.is_staff %}
-                                        <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
-                                        <li><a href="{% url 'research_metrics' %}"> Security Research Metrics </a></li>
-                                    {% endif %}
+                                    <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% if request.user.is_staff %}
+                            {% if "auth.view_user"|has_configuration_permission:"staff" or "auth.view_group"|has_configuration_permission:"staff" %}
                                 <li>
                                     <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users">
                                         <i class="fa fa-user fa-fw"></i>
@@ -330,8 +325,12 @@
                                         <span class="glyphicon arrow"></span>
                                     </a>
                                     <ul class="nav nav-second-level">
+                                        {% if "auth.view_user"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'users' %}"> Users </a></li>
+                                        {% endif %}
+                                        {% if "auth.view_group"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'groups' %}"> Groups </a></li>
+                                        {% endif %}
                                     </ul>
                                 </li>
                             {% endif %}
@@ -341,17 +340,23 @@
                                         <span>Calendar</span>
                                     </a>
                                 </li>
-                            {% if request.user.is_staff and system_settings.enable_questionnaires %}
+                            {% if system_settings.enable_questionnaires %}
+                            {% if "dojo.view_engagement_survey"|has_configuration_permission:"staff" or "dojo.view_question"|has_configuration_permission:"staff" %}
                                 <li>
                                     <a href="#"><i class="fa fa-hospital-o fa-fw"> </i> <span>Questionnaires</span><span
                                             class="glyphicon arrow"></span></a>
                                     <ul class="nav nav-second-level">
+                                        {% if "dojo.view_engagement_survey"|has_configuration_permission:"staff"  %}
                                         <li><a href="{% url 'questionnaire' %}">All Questionnaires </a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_question"|has_configuration_permission:"staff" %}
                                         <li><a href="{% url 'questions' %}">All Questions </a></li>
+                                        {% endif %}
 
                                     </ul>
                                     <!-- /.nav-second-level -->
                                 </li>
+                            {% endif %}
                             {% endif %}
                                 <li id="menu_configuration">
 				                    <a href="#" aria-expanded="false" aria-label="Configuration">
@@ -359,28 +364,38 @@
                                         <span>Configuration</span>
                                     </a>
                                     <ul class="nav nav-second-level">
-                                        {% if request.user.is_superuser %}
-                                        {% if system_settings.enable_credentials %}
+                                        {% if system_settings.enable_credentials and "dojo.view_cred_user"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'cred' %}">Credential Manager </a></li>
                                         {% endif %}
-                                        {% if system_settings.enable_jira %}
-                                        <li><a href="{% url 'jira' %}">JIRA </a></li>
-                                        {% endif %}
-                                        {% if system_settings.enable_github %}
+                                        {% if system_settings.enable_github  and "dojo.view_github_conf"|has_configuration_permission:"superuser"%}
                                         <li><a href="{% url 'github' %}">GitHub </a></li>
                                         {% endif %}
-                                        <li><a href="{% url 'tool_config' %}">Tool Configuration </a></li>
-                                        <li><a href="{% url 'tool_type' %}">Tool Type </a></li>
-                                        <li><a href="{% url 'rules' %}">Rules Framework </a></li>
-                                        {% endif %}
-                                        <li><a href="{% url 'regulations' %}">Regulations </a></li>
-                                        {% if request.user.is_superuser %}
-                                        <li><a href="{% url 'system_settings' %}">System Settings </a></li>
-                                        <li><a href="{% url 'note_type' %}">Note Types </a></li>
+                                        {% if system_settings.enable_google_sheets and "dojo.change_google_sheet"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'configure_google_sheets' %}">Google Sheets Sync</a></li>
+                                        {% endif %}
+                                        {% if system_settings.enable_jira and "dojo.view_jira_instance"|has_configuration_permission:"superuser" %}
+                                        <li><a href="{% url 'jira' %}">JIRA </a></li>
+                                        {% endif %}
+                                        {% if "dojo.change_bannerconf"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'configure_banner' %}">Login banner</a></li>
                                         {% endif %}
+                                        {% if "dojo.view_note_type"|has_configuration_permission:"superuser" %}
+                                        <li><a href="{% url 'note_type' %}">Note Types </a></li>
+                                        {% endif %}
                                         <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                                        <li><a href="{% url 'regulations' %}">Regulations </a></li>
+                                        {% if system_settings.enable_rules_framework and "dojo.view_rule"|has_configuration_permission:"superuser" %}
+                                        <li><a href="{% url 'rules' %}">Rules Framework </a></li>
+                                        {% endif %}
+                                        {% if request.user.is_superuser %}
+                                        <li><a href="{% url 'system_settings' %}">System Settings </a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_tool_configuration"|has_configuration_permission:"superuser" %}
+                                        <li><a href="{% url 'tool_config' %}">Tool Configuration </a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_tool_type"|has_configuration_permission:"superuser" %}
+                                        <li><a href="{% url 'tool_type' %}">Tool Type </a></li>
+                                        {% endif %}
                                     </ul>
                                 </li>
                         {% endblock %}
@@ -419,13 +434,7 @@
                         <sup><div class="tag-label {{ grade }}">{{ grade }}</div></sup>
                       {% endif %}
                     {% endwith %}
-                    {% if product_tab.product.tags %}
-                      <sup>
-                          {% for tag in product_tab.product.tags.all.all %}
-                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                          {% endfor %}
-                      </sup>
-                    {% endif %}
+                    {% include "dojo/snippets/tags.html" with tags=product_tab.product.tags.all.all %}
                 </h3>
                 <ul class="nav nav-tabs horizontal-bar in">
                   <li role="presentation"{% if product_tab.tab == 'overview' %} class="active"{% endif %}><a href="{% url 'view_product' product_tab.product.id %}"><span class="fa fa-globe" aria-hidden="true"></span><span class="hidden-xs"> Overview</span></a></li>
@@ -484,6 +493,9 @@
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'add_endpoint' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
                       {% endif %}
+                      {% if product_tab.product|has_object_permission:"Endpoint_Edit" and system_settings.enable_endpoint_metadata_import %}
+                      <li><a href="{% url 'import_endpoint_meta' product_tab.product.id %}"><i class="fa fa-upload"></i> Import Endpoint Meta</a></li>
+                      {% endif %}
                     </ul>
                   </li>
                   <!-- Benchmarks Tab -->
@@ -538,6 +550,7 @@
                                 <i class="fa fa-list-alt"></i> View API Scan Configurations
                             </a>
                         </li>
+                        {% if system_settings.enable_product_tracking_files %}
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
                             <a class="" href="{% url 'new_object' product_tab.product.id %}">
@@ -549,6 +562,7 @@
                                 <i class="fa fa-list-alt"></i> View Product Tracking Files
                             </a>
                         </li>
+                        {% endif %}
                         {% if system_settings.enable_credentials %}
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
@@ -653,18 +667,17 @@
         <!-- /.container-fluid -->
     </div>
     <!-- /#page-wrapper -->
+    {% block footer %}
     <footer class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center text-">
                     <p>
                         <a href="{% url 'home' %}">
-			    {% block footer_logo %}
-				<img class="logo" src="{% static "dojo/img/chop.png" %}" alt="DefectDojo Chop" height="45"/>
-			    {% endblock %}
-			</a>
-			<br/>
-			<br/>
+                            <img class="logo" src="{% static "dojo/img/chop.png" %}" alt="DefectDojo Chop" height="45"/>
+                        </a>
+                        <br/>
+                        <br/>
                         {% dojo_version %} ( {% dojo_current_hash %} )
                     </p>
                     <p>
@@ -685,6 +698,7 @@
         <p id="alert_refresh" class="hidden">{{ 'ALERT_REFRESH'|setting_enabled }}</p>
         <p id="disable_count" class="hidden">{{ 'DISABLE_ALERT_COUNTER'|setting_enabled }}</p>
     </footer>
+    {% endblock %}
 </div>
 
 <!-- /#wrapper -->

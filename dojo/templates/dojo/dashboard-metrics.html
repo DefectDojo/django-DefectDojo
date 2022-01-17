@@ -58,7 +58,7 @@
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <div id="chart_div" class="graph"></div>
+                    <div id="opened_per_month" class="graph"></div>
                 </div>
                 <!-- /.panel-body -->
             </div>
@@ -71,7 +71,7 @@
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <div id="chart_div2" class="graph"></div>
+                    <div id="accepted_per_month" class="graph"></div>
                 </div>
                 <!-- /.panel-body -->
             </div>
@@ -84,7 +84,7 @@
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <div id="chart_div3" class="graph"></div>
+                    <div id="opened_per_week" class="graph"></div>
                 </div>
                 <!-- /.panel-body -->
             </div>
@@ -97,7 +97,7 @@
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <div id="chart_div4" class="graph"></div>
+                    <div id="accepted_per_week" class="graph"></div>
                 </div>
                 <!-- /.panel-body -->
             </div>
@@ -196,6 +196,9 @@
         <script src="{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
         <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
     <script>
         $(function () {
             setInterval(function () {
@@ -216,429 +219,95 @@
 
             }, 20000);
 
+            var critical = [];
+            var high = [];
+            var medium = [];
+            var low = [];
+            {% for month in opened_per_month|slice:'1:' %}
+                critical.push([{{ month.0 }}, {{ month.2 }}]);
+                high.push([{{ month.0 }}, {{ month.3 }}]);
+                medium.push([{{ month.0 }}, {{ month.4 }}]);
+                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% endfor %}
+            opened_per_month(critical, high, medium, low);
 
-            var options = {
-                xaxes: [{
-                    mode: 'time',
-                    timeformat: "%m/%y"
-                }],
-                yaxes: [{
-                    min: 0
-                }],
-                series: {
-                    lines: {
-                        show: true
-                    },
-                    points: {
-                        show: true
-                    }
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            {% for month in accepted_per_month|slice:'1:' %}
+                critical.push([{{ month.0 }}, {{ month.2 }}]);
+                high.push([{{ month.0 }}, {{ month.3 }}]);
+                medium.push([{{ month.0 }}, {{ month.4 }}]);
+                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% endfor %}
+            accepted_per_month(critical, high, medium, low);
 
-                },
-                tooltip: false,
-            };
-            chart_div();
-            chart_div2();
-            chart_div3();
-            chart_div4();
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            {% for month in opened_per_week|slice:'1:' %}
+                critical.push([{{ month.0 }}, {{ month.2 }}]);
+                high.push([{{ month.0 }}, {{ month.3 }}]);
+                medium.push([{{ month.0 }}, {{ month.4 }}]);
+                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% endfor %}
+            opened_per_week(critical, high, medium, low);
+
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            {% for month in accepted_per_week|slice:'1:' %}
+                critical.push([{{ month.0 }}, {{ month.2 }}]);
+                high.push([{{ month.0 }}, {{ month.3 }}]);
+                medium.push([{{ month.0 }}, {{ month.4 }}]);
+                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% endfor %}
+            accepted_per_week(critical, high, medium, low);
+
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            var ticks = [];
+            {% for t in top_ten_products %}
+                ttp = {{forloop.counter}};
+                ticks.push([ttp, "{{t.name}}"]);
+                critical.push([ttp, {{t.critical|default_if_none:0}}]);
+                high.push([ttp, {{t.high|default_if_none:0}}]);
+                medium.push([ttp, {{t.medium|default_if_none:0}}]);
+                low.push([ttp, {{t.low|default_if_none:0}}]);
+            {% endfor %}
             {% if top_ten_products %}
-                top_ten_products();
+                top_ten_products(critical, high, medium, low, ticks);
             {% endif %}
-            severity_pie();
-            total_accepted_pie();
-            total_closed_pie();
 
+            critical = "{{in_period_counts.Critical|default_if_none:0}}";
+            high = "{{in_period_counts.High|default_if_none:0}}";
+            medium = "{{in_period_counts.Medium|default_if_none:0}}";
+            low = "{{in_period_counts.Low|default_if_none:0}}";
+            severity_pie(critical, high, medium, low);
 
-            function chart_div() {
-                var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
+            critical = "{{accepted_in_period_counts.critical|default_if_none:0}}";
+            high = "{{accepted_in_period_counts.high|default_if_none:0}}";
+            medium = "{{accepted_in_period_counts.medium|default_if_none:0}}";
+            low = "{{accepted_in_period_counts.low|default_if_none:0}}";
+            total_accepted_pie(critical, high, medium, low);
 
-                {% for month in opened_per_month|slice:'1:' %}
-                    critical.push([{{ month.0 }}, {{ month.2 }}]);
-                    high.push([{{ month.0 }}, {{ month.3 }}]);
-                    medium.push([{{ month.0 }}, {{ month.4 }}]);
-                    low.push([{{ month.0 }}, {{ month.5 }}]);
-                {% endfor %}
-
-
-                $.plot($("#chart_div"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-                        }],
-                        options);
-            };
-
-            function chart_div2() {
-                var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
-
-                {% for month in accepted_per_month|slice:'1:' %}
-                    critical.push([{{ month.0 }}, {{ month.2 }}]);
-                    high.push([{{ month.0 }}, {{ month.3 }}]);
-                    medium.push([{{ month.0 }}, {{ month.4 }}]);
-                    low.push([{{ month.0 }}, {{ month.5 }}]);
-                {% endfor %}
-
-
-                $.plot($("#chart_div2"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-                        }],
-                        options);
-            };
-
-            function chart_div3() {
-                var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
-
-                {% for month in opened_per_week|slice:'1:' %}
-                    critical.push([{{ month.0 }}, {{ month.2 }}]);
-                    high.push([{{ month.0 }}, {{ month.3 }}]);
-                    medium.push([{{ month.0 }}, {{ month.4 }}]);
-                    low.push([{{ month.0 }}, {{ month.5 }}]);
-                {% endfor %}
-                var options = {
-                    xaxes: [{
-                        mode: 'time',
-                        timeformat: "%m/%d/%Y"
-                    }],
-                    yaxes: [{
-                        min: 0
-                    }],
-                    series: {
-                        lines: {
-                            show: true
-                        },
-                        points: {
-                            show: true
-                        }
-                    },
-                    grid: {
-                        hoverable: true,
-                        borderWidth: 1,
-                        borderColor: '#e7e7e7',
-
-                    },
-                    tooltip: true,
-                };
-
-
-                var plotObj = $.plot($("#chart_div3"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-                        }],
-                        options);
-            }
-
-            function chart_div4() {
-                var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
-
-                {% for month in accepted_per_week|slice:'1:' %}
-                    critical.push([{{ month.0 }}, {{ month.2 }}]);
-                    high.push([{{ month.0 }}, {{ month.3 }}]);
-                    medium.push([{{ month.0 }}, {{ month.4 }}]);
-                    low.push([{{ month.0 }}, {{ month.5 }}]);
-                {% endfor %}
-                var options = {
-                    xaxes: [{
-                        mode: 'time',
-                        timeformat: "%m/%d/%Y"
-                    }],
-                    yaxes: [{
-                        min: 0
-                    }],
-                    series: {
-                        lines: {
-                            show: true
-                        },
-                        points: {
-                            show: true
-                        }
-                    },
-                    grid: {
-                        hoverable: false,
-                        borderWidth: 1,
-                        borderColor: '#e7e7e7',
-
-                    },
-                    tooltip: false,
-                };
-
-
-                var plotObj = $.plot($("#chart_div4"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-                        }],
-                        options);
-            }
-
-            function top_ten_products() {
-                var critical = [];
-                var high = [];
-                var medium = [];
-                var low = [];
-                var ticks = []
-                {% for t in top_ten_products %}
-                    ttp = {{forloop.counter}};
-                    ticks.push([ttp, "{{t.name}}"]);
-                    critical.push([ttp, {{t.critical|default_if_none:0}}]);
-                    high.push([ttp, {{t.high|default_if_none:0}}]);
-                    medium.push([ttp, {{t.medium|default_if_none:0}}]);
-                    low.push([ttp, {{t.low|default_if_none:0}}]);
-                {% endfor %}
-
-                data1 = [
-                    {
-                        data: critical,
-                        color: "#d9534f",
-                        bars: {fill: 1},
-                        label: 'Critical',
-                    },
-                    {
-                        data: high,
-                        color: "#f0ad4e",
-                        bars: {fill: 1},
-                        label: 'High',
-
-                    },
-                    {
-                        data: medium,
-                        color: "#f0de28",
-                        bars: {fill: 1},
-                        label: 'Medium',
-                    },
-                    {
-                        data: low,
-                        color: "#337ab7",
-                        bars: {fill: 1},
-                        label: 'Low',
-                    },
-                ];
-
-                $.plot("#top-ten", data1, {
-                    series: {
-                        stack: true,
-                        bars: {
-                            show: true,
-                            barWidth: .9,
-                            'align': "center",
-                        },
-
-                    },
-                    grid: {
-                        hoverable: false,
-                        borderWidth: 1,
-                        borderColor: '#e7e7e7',
-
-                    },
-                    tooltip: false,
-                    legend: {
-                        position: "ne"
-                    },
-                    xaxis: {
-                        ticks: ticks,
-                    },
-                });
-            }
-
-            function severity_pie() {
-                var data = [{
-                    label: "Critical",
-                    color: "#d9534f",
-                    data: {{in_period_counts.Critical|default_if_none:0}}
-                }, {
-                    label: "High",
-                    color: "#f0ad4e",
-                    data: {{in_period_counts.High|default_if_none:0}}
-                }, {
-                    label: "Medium",
-                    color: "#f0de28",
-                    data: {{in_period_counts.Medium|default_if_none:0}}
-                }, {
-                    label: "Low",
-                    color: "#337ab7",
-                    data: {{in_period_counts.Low|default_if_none:0}}
-                }];
-
-                var plotObj = $.plot($("#opened_in_period"), data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            radius: 1,
-                            label: {
-                                show: true,
-                                radius: 2 / 3,
-                                formatter: function (label, series) {
-                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:black;z-index:9999;">' + label + '<br/>' + series.data[0][1] + '</div>';
-
-                                },
-
-                            }
-                        }
-                    },
-                    grid: {
-                        hoverable: false
-                    },
-                });
-            }
-
-            function total_accepted_pie() {
-                var data = [{
-                    label: "Critical",
-                    color: "#d9534f",
-                    data: {{accepted_in_period_counts.critical|default_if_none:0}}
-                }, {
-                    label: "High",
-                    color: "#f0ad4e",
-                    data: {{accepted_in_period_counts.high|default_if_none:0}}
-                }, {
-                    label: "Medium",
-                    color: "#f0de28",
-                    data: {{accepted_in_period_counts.medium|default_if_none:0}}
-                }, {
-                    label: "Low",
-                    color: "#337ab7",
-                    data: {{accepted_in_period_counts.low|default_if_none:0}}
-                }];
-
-                var plotObj = $.plot($("#total_accepted_in_period"), data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            radius: 1,
-                            label: {
-                                show: true,
-                                radius: 2 / 3,
-                                formatter: function (label, series) {
-                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:black;z-index:9999;">' + label + '<br/>' + series.data[0][1] + '</div>';
-
-                                },
-
-                            }
-                        }
-                    },
-                    grid: {
-                        hoverable: false
-                    },
-                });
-            }
-
-            function total_closed_pie() {
-                var data = [{
-                    label: "Critical",
-                    color: "#d9534f",
-                    data: {{closed_in_period_counts.Critical}}
-                }, {
-                    label: "High",
-                    color: "#f0ad4e",
-                    data: {{closed_in_period_counts.High}}
-                }, {
-                    label: "Medium",
-                    color: "#f0de28",
-                    data: {{closed_in_period_counts.Medium}}
-                }, {
-                    label: "Low",
-                    color: "#337ab7",
-                    data: {{closed_in_period_counts.Low}}
-                }];
-
-                var plotObj = $.plot($("#total_closed_in_period"), data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            radius: 1,
-                            label: {
-                                show: true,
-                                radius: 2 / 3,
-                                formatter: function (label, series) {
-                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:black;z-index:9999;">' + label + '<br/>' + series.data[0][1] + '</div>';
-
-                                },
-
-                            }
-                        }
-                    },
-                    grid: {
-                        hoverable: false
-                    },
-                });
-
-
-            }
+            critical = "{{closed_in_period_counts.Critical}}";
+            high = "{{closed_in_period_counts.High}}";
+            medium = "{{closed_in_period_counts.Medium}}";
+            low = "{{closed_in_period_counts.Low}}";
+            total_closed_pie(critical, high, medium, low);
 
             {%  if punchcard %}
 
                 punchcard("#punchcard", {{ punchcard|safe }}, {{ ticks|safe }});
 
             {%  endif %}
-
-
-
+            
         })
     </script>
 {% endblock %}

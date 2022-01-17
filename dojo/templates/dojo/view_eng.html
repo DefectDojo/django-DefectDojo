@@ -54,11 +54,6 @@
                                     </a>
                                 </li>
                                 <li role="presentation">
-                                    <a href="{% url 'view_object_eng' eng.id %}">
-                                    <i class="fa fa-file-text-o"></i> View Files for this Build
-                                    </a>
-                                </li>
-                                <li role="presentation">
                                     <a href="{% url 'action_history' eng|content_type eng.id %}">
                                     <i class="fa fa-history"></i> View History
                                     </a>
@@ -314,13 +309,7 @@
                                                     {{ test.version }}</a>
                                                     </sup>
                                                 {% endif %}
-                                                {% if test.tags %}
-                                                    <sup>
-                                                    {% for tag in test.tags.all %}
-                                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=test-tag:{{ tag }}">{{ tag }}</a>
-                                                    {% endfor %}
-                                                    </sup>
-                                                {% endif %}
+                                                {% include "dojo/snippets/tags.html" with tags=test.tags.all %}
                                             </td>
                                             <td>{{ test.target_start|date }} - {{ test.target_end|date }}</td>
                                             <td>
@@ -717,13 +706,7 @@
                             {{ eng.version }}</a>
                             </sup>
                         {% endif %}
-                        {% if eng.tags %}
-                            <sup>
-                            {% for tag in eng.tags.all %}
-                                <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
-                            {% endfor %}
-                            </sup>
-                        {% endif %}
+                        {% include "dojo/snippets/tags.html" with tags=eng.tags.all %}
                     </h3>
                 </div>
                 <div class="table-responsive">

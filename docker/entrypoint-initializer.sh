@@ -1,11 +1,16 @@
 #!/bin/sh
 
-# Test types shall be initialized every time by the initializer, to make sure test types are complete
-# when new parsers have been implemented
-initialize_test_types()
+initialize_data()
 {
+    # Test types shall be initialized every time by the initializer, to make sure test types are complete
+    # when new parsers have been implemented
     echo "Initialization of test_types"
     python3 manage.py initialize_test_types
+
+    # Non-standard permissions cannot be created with a database migration, because the content type will only
+    # be available after the dojo migrations
+    echo "Creation of non-standard permissions"
+    python3 manage.py initialize_permissions
 }
 
 # Allow for bind-mount setting.py overrides
@@ -65,7 +70,7 @@ then
     echo "Admin password: Initialization detected that the admin user ${DD_ADMIN_USER} already exists in your database."
     echo "If you don't remember the ${DD_ADMIN_USER} password, you can create a new superuser with:"
     echo "$ docker-compose exec uwsgi /bin/bash -c 'python manage.py createsuperuser'"
-    initialize_test_types
+    initialize_data
     exit
 fi
 
@@ -118,6 +123,6 @@ EOD
   echo "Migration of textquestions for surveys"
   python3 manage.py migrate_textquestions
 
-  initialize_test_types
+  initialize_data
 
 fi

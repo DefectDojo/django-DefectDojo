@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load authorization_tags %}
 {% load static %}
 
 {% block content %}
@@ -9,7 +10,9 @@
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <button class="btn btn-primary" type="submit" name="submit"  id="submit" value="Submit">Update</button>
-                <button class="btn btn-primary" type="submit" name="delete" id="delete" value="Delete">Delete</button>
+                {% if "dojo.delete_regulation"|has_configuration_permission:"superuser" %}
+                <button class="btn btn-danger" type="submit" name="delete" id="delete" value="Delete">Delete</button>
+                {% endif %}
             </div>
                 </div>
     </form>
