@@ -200,12 +200,12 @@ def get_ccs(node, test, endpoint):
         if ccs_injection['status'] == 'NOT_SCHEDULED':
             return None
         if 'is_vulnerable_to_ccs_injection' in ccs_injection:
-                vulnerable = ccs_injection['is_vulnerable_to_ccs_injection']
-                if vulnerable:
-                    title = 'CCS injection'
-                    description = get_url(endpoint) + ' is vulnerable to OpenSSL CCS injection'
-                    cve = 'CVE-2014-0224'
-                    return get_finding(title, description, cve, None, test, endpoint)
+            vulnerable = ccs_injection['is_vulnerable_to_ccs_injection']
+            if vulnerable:
+                title = 'CCS injection'
+                description = get_url(endpoint) + ' is vulnerable to OpenSSL CCS injection'
+                cve = 'CVE-2014-0224'
+                return get_finding(title, description, cve, None, test, endpoint)
 
         elif 'result' in ccs_injection:
             ccs_result = ccs_injection['result']
