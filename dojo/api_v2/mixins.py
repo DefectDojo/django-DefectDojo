@@ -29,7 +29,14 @@ class DeletePreviewModelMixin:
             else:
                 return [elem]
 
-        rels = [{"model": type(x).__name__, "id": x.id, "name": str(x)} for x in flatten(rels)]
+        rels = [
+            {
+                "model": type(x).__name__,
+                "id": x.id if hasattr(x, 'id') else -1,  # Because of "'Token' object has no attribute 'id'" and None is not Int
+                "name": str(x)
+            }
+            for x in flatten(rels)
+        ]
 
         return Response(rels,
                         status=status.HTTP_200_OK)
