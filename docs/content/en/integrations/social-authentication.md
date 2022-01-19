@@ -326,8 +326,6 @@ DD_SOCIAL_LOGIN_AUTO_REDIRECT: "true"
 DD_SOCIAL_AUTH_SHOW_LOGIN_FORM: "false"
 ```
 
-These values can also be adjust in `dojo/settings/settings.dist.py`
-
 ### Login form fallback
 
 If you are using "login speed-up", it can be useful to be able to login by the standard way, for example when an admin
