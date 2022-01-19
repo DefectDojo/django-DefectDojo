@@ -63,7 +63,7 @@ class TestRustyhogParser(DojoTestCase):
         self.assertIn("**JIRA url:** https://jira.com/browse/TEST-123", findings[0].description)
 
     def test_parse_file_with_no_vuln_has_no_finding_essexhog(self):
-        testfile = open("unittests/scans/rusty_hog/essex_no_vuln.json")
+        testfile = open("unittests/scans/rusty_hog/essexhog_no_vuln.json")
         parser = RustyhogParser()
         findings = parser.get_items(testfile, "Rusty Hog", Test())  # The outputfile is empty. A subscanner can't be classified
         self.assertEqual(0, len(findings))
