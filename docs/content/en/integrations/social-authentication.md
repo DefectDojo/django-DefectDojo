@@ -319,7 +319,7 @@ Newly created users are neither staff nor superuser by default. The `is_staff` f
 
 ## Login speed-up
 
-You can bypass the login form if you are only using SSO/Social Auth for logging in by enabling the two environment variables:
+You can bypass the login form if you are only using SSO/Social authentication for login in by enabling these two environment variables:
 
 ```
 DD_SOCIAL_LOGIN_AUTO_REDIRECT: "true"
