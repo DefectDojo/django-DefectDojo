@@ -2138,9 +2138,7 @@ class JIRAFormOAUTH(forms.ModelForm):
     access_token_secret = forms.CharField(required=True)
     class Meta:
         model = JIRA_Instance
-        exclude = ['product', 'info_mapping_severity',
-                    'low_mapping_severity', 'medium_mapping_severity',
-                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text', 'use_oauth', 'username', 'password', 'cert_data']
+        exclude = ['product', 'info_mapping_severity', 'finding_text', 'use_oauth', 'username', 'password', 'cert_data']
 
 
     def clean(self):
