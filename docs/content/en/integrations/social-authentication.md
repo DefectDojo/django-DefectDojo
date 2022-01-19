@@ -262,6 +262,8 @@ homepage](https://github.com/IdentityPython/djangosaml2).
 
 NOTE: *DD_SAML2_ATTRIBUTES_MAP* in k8s can be referenced as extraConfig (e.g. `DD_SAML2_ATTRIBUTES_MAP: 'Email'='email', 'Username'='username'...`)
 
+NOTE: *DD_SITE_URL* might also need to be set depending on the choices you make with the metadata.xml provider. (File versus URL).
+
 4.  Checkout the SAML section in dojo/`dojo/settings/settings.dist.py` and verfiy if it fits your requirement. If you need help, take a look at the [plugin
 documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
 
@@ -315,20 +317,20 @@ Newly created users are neither staff nor superuser by default. The `is_staff` f
 
 `.*@example.com` will make `alice@example.com` a staff user, while `bob@partner.example.com` or `chris@example.org` will be non-staff users.
 
-
 ## Login speed-up
 
-If you are using only one Social authentication and you are not using the standard login mechanism (`SHOW_LOGIN_FORM` is
-set to `False`), showing login page could be useless because every time user clicks on the only existing button on the
-page like "Login with SAML" (or another similar button). If you set `SOCIAL_LOGIN_AUTO_REDIRECT` to `True`, the login
-page is skipped and the user is automatically redirected to the identity provider's page.
+You can bypass the login form if you are only using SSO/Social authentication for login in by enabling these two environment variables:
+
+```
+DD_SOCIAL_LOGIN_AUTO_REDIRECT: "true"
+DD_SOCIAL_AUTH_SHOW_LOGIN_FORM: "false"
+```
 
 ### Login form fallback
 
 If you are using "login speed-up", it can be useful to be able to login by the standard way, for example when an admin
-user needs to log in because of a change of some settings or permissions. Accessing
-[`<DD_HOST>/login?force_login_form`](https://<DD_HOST>/login?force_login_form) shows login form even "login speed-up" is
-enabled.
+user needs to log in because of a change of some settings or permissions. This feature is accessible by a visiting the URL
+`<DD_HOST>/login?force_login_form`.
 
 
 ## Other Providers
