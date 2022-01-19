@@ -15,7 +15,7 @@ def rename_sslyze_parser(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0145_system_settings_default_group_email_pattern'),
+        ('dojo', '0146_lead_optional'),
     ]
 
     operations = [
