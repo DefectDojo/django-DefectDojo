@@ -85,7 +85,7 @@ class TestRustyhogParser(DojoTestCase):
         parser = RustyhogParser()
         findings = parser.get_items(testfile, "Essex Hog", Test())
         self.assertEqual(findings[0].title, "SSH (EC) private key found in Confluence Page ID 12345")
-        self.assertIn("**This string was found:** -----BEGIN EC PRIVATE KEY-----", findings[0].description)
+        self.assertIn("-----BEGIN EC PRIVATE KEY-----", findings[0].description)
         self.assertIn("**Confluence URL:** https://confluence.com/pages/viewpage.action?pageId=12345", findings[0].description)
         self.assertIn("**Confluence Page ID:** 12345", findings[0].description)
         self.assertIn("Please ensure no secret material nor confidential information is kept in clear within Confluence Pages.", findings[0].mitigation)
