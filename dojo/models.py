@@ -1092,7 +1092,7 @@ class Engagement(models.Model):
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
-    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     requester = models.ForeignKey(Contact, null=True, blank=True, on_delete=models.CASCADE)
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
@@ -1528,7 +1528,7 @@ class Sonarqube_Issue_Transition(models.Model):
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
-    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
     scan_type = models.TextField(null=True)
     title = models.CharField(max_length=255, null=True, blank=True)
