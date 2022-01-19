@@ -78,7 +78,7 @@ class TestRustyhogParser(DojoTestCase):
         testfile = open("unittests/scans/rusty_hog/essexhog_many_vulns.json")
         parser = RustyhogParser()
         findings = parser.get_items(testfile, "Essex Hog", Test())
-        self.assertEqual(10, len(findings))
+        self.assertEqual(3, len(findings))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding_essexhog_content(self):
         testfile = open("unittests/scans/rusty_hog/essexhog_many_vulns.json")
