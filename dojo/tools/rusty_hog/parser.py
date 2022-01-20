@@ -48,6 +48,9 @@ class RustyhogParser(object):
             if 'issue_id' in node or 'location' in node or 'url' in node:
                 parsername = "Gottingen Hog"
                 break
+            if 'page_id' in node:
+                parsername = "Essex Hog"
+                break
         test = ParserTest(
             name=parsername,
             type=parsername,
@@ -94,6 +97,11 @@ class RustyhogParser(object):
                     description += "\n**JIRA location:** {}".format(vulnerability.get('location'))
                 if vulnerability.get('url') is not None:
                     description += "\n**JIRA url:** {}".format(vulnerability.get('url'))
+            elif scanner == "Essex Hog":
+                description = "**This string was found:** {}".format(vulnerability.get('stringsFound'))
+                if vulnerability.get('page_id') is not None:
+                    description += "\n**Confluence URL:** {}".format(vulnerability.get('url'))
+                    description += "\n**Confluence Page ID:** {}".format(vulnerability.get('page_id'))
             """General - for all Rusty Hogs"""
             file_path = vulnerability.get('path')
             if vulnerability.get('date') is not None:
@@ -109,6 +117,10 @@ class RustyhogParser(object):
                         vulnerability.get('reason'),
                         vulnerability.get('issue_id'),
                         vulnerability.get('location'))
+            elif scanner == "Essex Hog":
+                title = "{} found in Confluence Page ID {}".format(
+                        vulnerability.get('reason'),
+                        vulnerability.get('page_id'))
             # create the finding object
             finding = Finding(
                 title=title,
@@ -125,5 +137,7 @@ class RustyhogParser(object):
                 finding.mitigation = "Please ensure no secret material nor confidential information is kept in clear within git repositories."
             elif scanner == "Gottingen Hog":
                 finding.mitigation = "Please ensure no secret material nor confidential information is kept in clear within JIRA Tickets."
+            elif scanner == "Essex Hog":
+                finding.mitigation = "Please ensure no secret material nor confidential information is kept in clear within Confluence Pages."
             findings.append(finding)
         return findings
