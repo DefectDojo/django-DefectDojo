@@ -63,7 +63,7 @@ If you have installed DefectDojo on "iron" and wish to upgrade the installation,
 
 ## Upgrading to DefectDojo Version 2.7.x.
 
-This release is a breaking change regarding the Choctaw Hog parser. As the maintainers of this project unified multiple parsers under the RustyHog parser, we now support the parsing of Choctaw Hog JSON output files through the Rusty Hog parser. Furthermore, we also support Gottingen Hog JSON output files with the RustyHog parser.
+This release is a breaking change regarding the Choctaw Hog parser. As the maintainers of this project unified multiple parsers under the RustyHog parser, we now support the parsing of Choctaw Hog JSON output files through the Rusty Hog parser. Furthermore, we also support Gottingen Hog and Essex Hog JSON output files with the RustyHog parser.
 
 The functionality using the flag `AUTHORIZATION_STAFF_OVERRIDE` has been removed. The same result can be achieved with giving the staff users
 a global Owner role. To make that easier you can run a migration script with ``./manage.py migrate staff_users``. This script creates a group
