@@ -928,6 +928,7 @@ Rusty Hog is a secret scanner built in Rust for performance, and based on Truffl
 DefectDojo currently supports the parsing of the following Rusty Hog JSON outputs:
 - Choctaw Hog: Scans for secrets in a Git repository.
 - Gottingen Hog: Scans for secrets in a JIRA issue.
+- Essex Hog: Scans for secrets in a Confluence page.
 
 ### SARIF
 
