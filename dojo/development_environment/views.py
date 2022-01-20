@@ -1,6 +1,7 @@
 # #dev envs
 import logging
 
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -17,7 +18,7 @@ from dojo.authorization.authorization_decorators import user_is_configuration_au
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('dojo.view_development_environment', 'staff')
+@login_required
 def dev_env(request):
     initial_queryset = Development_Environment.objects.all().order_by('name')
     name_words = [de.name for de in

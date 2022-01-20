@@ -467,6 +467,11 @@ class System_Settings(models.Model):
         blank=True,
         help_text="New users will be assigned to their default group with this role.",
         on_delete=models.RESTRICT)
+    default_group_email_pattern = models.CharField(
+        max_length=200,
+        default='',
+        blank=True,
+        help_text="New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition.")
     staff_user_email_pattern = models.CharField(
         max_length=200,
         default='',
@@ -1087,7 +1092,7 @@ class Engagement(models.Model):
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
-    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     requester = models.ForeignKey(Contact, null=True, blank=True, on_delete=models.CASCADE)
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
@@ -1523,7 +1528,7 @@ class Sonarqube_Issue_Transition(models.Model):
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
-    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
     scan_type = models.TextField(null=True)
     title = models.CharField(max_length=255, null=True, blank=True)
@@ -2273,7 +2278,7 @@ class Finding(models.Model):
         from dojo.utils import get_system_setting
         sla_age = get_system_setting('sla_' + self.severity.lower())
         if sla_age:
-            sla_calculation = sla_age - self.age
+            sla_calculation = sla_age - self.sla_age
         return sla_calculation
 
     def sla_deadline(self):
@@ -3206,10 +3211,6 @@ class Cred_User(models.Model):
     logout_regex = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     is_valid = models.BooleanField(default=True, verbose_name="Login is valid")
-
-    # selenium_script = models.CharField(max_length=1000, default='none',
-    #    editable=False, blank=True, null=True,
-    #    verbose_name="Selenium Script File")
 
     class Meta:
         ordering = ['name']

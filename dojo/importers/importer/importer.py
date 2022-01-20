@@ -50,13 +50,10 @@ class DojoDefaultImporter(object):
             build_id=build_id,
             commit_hash=commit_hash,
             api_scan_configuration=api_scan_configuration,
-            tags=tags)
-        try:
-            # TODO What is going on here?
-            test.full_clean()
-        except ValidationError:
-            pass
+            tags=tags,
+        )
 
+        test.full_clean()
         test.save()
         return test
 
