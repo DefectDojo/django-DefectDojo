@@ -140,7 +140,6 @@ class CycloneDXParser(object):
         references = ""
         for adv in vulnerability.findall("v:advisories/v:advisory", namespaces=ns):
             references += f"{adv.text}\n"
-
         finding = Finding(
                 title=vuln_id,
                 description=description,
@@ -153,7 +152,11 @@ class CycloneDXParser(object):
         )
         if report_date:
             finding.date = report_date
-
+        mitigation = ""
+        for recommend in vulnerability.findall("v:recommendations/v:recommendation", namespaces=ns):
+            mitigation += f"{recommend.text}\n"
+        if mitigation != "":
+            finding.mitigation = mitigation
         # manage if the ID is a CVE
         if re.fullmatch("CVE-[0-9]+-[0-9]+", vuln_id):
             finding.cve = vuln_id
