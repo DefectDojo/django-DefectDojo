@@ -350,7 +350,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser', 'password')
+        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+            fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_superuser', 'password')
+        else:
+            fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser', 'password')
 
     def create(self, validated_data):
         if 'password' in validated_data:
