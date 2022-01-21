@@ -1091,12 +1091,8 @@ div.custom-search-form {
     body.max #min-menu i:before {
         content: "\f0a8" !important;
     }
-
-    /* .min .announcement-banner {
-        margin: 0px -15px;
-    } */
     
-    .max .announcement-banner {
+    .announcement-banner {
         margin: 0px -30px;
     }
 
