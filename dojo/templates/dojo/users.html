@@ -50,7 +50,9 @@
                             <th class="nowrap">Title</th>
                             <th class="nowrap">Phone Number(s)</th>
                             <th class="nowrap, text-center">{% dojo_sort request 'Active' 'is_active' %}</th>
+                            {% if not 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
                             <th class="nowrap, text-center">{% dojo_sort request 'Staff' 'is_staff' %}</th>
+                            {% endif %}
                             <th class="nowrap, text-center">{% dojo_sort request 'Superuser' 'is_superuser' %}</th>
                             <th class="nowrap">Global Role</th>
                         </tr>
@@ -101,9 +103,11 @@
                                 <td class="text-center">{% if u.is_active %}
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
+                                {% if not 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
                                 <td class="text-center">{% if u.is_staff %}
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
+                                {% endif %}
                                 <td class="text-center">{% if u.is_superuser %}
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
