@@ -72,7 +72,7 @@
                     </div>
                 </div>
                 {% if products %}
-                    <div class="clearfix" style="margin-left: 10px; margin-right: 10px;">
+                    <div class="clearfix pagination-in-panel">
                         {% include "dojo/paging_snippet.html" with page=products page_size=True %}
                     </div>
                     <div class="table-responsive">
@@ -116,7 +116,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="clearfix" style="margin-left: 10px; margin-right: 10px;">
+                    <div class="clearfix pagination-in-panel">
                         {% include "dojo/paging_snippet.html" with page=products page_size=True %}
                     </div>
                 {% else %}
