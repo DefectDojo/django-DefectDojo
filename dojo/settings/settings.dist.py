@@ -667,6 +667,7 @@ TEMPLATES = [
                 'dojo.context_processors.globalize_oauth_vars',
                 'dojo.context_processors.bind_system_settings',
                 'dojo.context_processors.bind_alert_count',
+                'dojo.context_processors.bind_announcement_banner',
             ],
         },
     },

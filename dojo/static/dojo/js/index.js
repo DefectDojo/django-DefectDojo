@@ -1,4 +1,5 @@
 $(function () {
+    announcement();
     $('body').append('<a id="toTop" title="Back to Top" class="btn btn-primary btn-circle"><i class="fa fa-fw fa-arrow-up"></i></a>');
     $(window).scroll(function () {
         if ($(this).scrollTop() > 300) {
@@ -25,7 +26,7 @@ $(function () {
     })
 
     setTimeout(function () {
-        $('.alert-dismissible').slideUp('slow')
+        $('.alert-dismissible').not('.announcement-banner').slideUp('slow')
     }, 20000);
 
     $('#side-menu').metisMenu();
@@ -42,6 +43,10 @@ $(function () {
         }, 500);
         return false;
     });
+
+    $('.announcement-banner').children('.close').on('click', function() {
+        $.cookie('dojo-announcement-dismissed', $('.announcement-banner').text())
+    })
 
 });
 
@@ -62,6 +67,13 @@ $.fn.serializeObject = function()
     return o;
 };
 
+//TODO: This is too slow, maybe just pull from DB with a new model and call it a day
+function announcement() { // Ensures announcement is shown if not dismissed
+    var announcement = $('.announcement-banner');
+    if(announcement && $.cookie('dojo-announcement-dismissed') == announcement.text()) {
+        announcement.switchClass('show', 'hide');
+    }
+}
 
 function sidebar() {  // minimize side nav bar
     var action = 'min';

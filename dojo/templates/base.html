@@ -361,6 +361,9 @@
                                         <span>Configuration</span>
                                     </a>
                                     <ul class="nav nav-second-level">
+                                        {% if "dojo.change_announcementbanner"|has_configuration_permission:"superuser" %}
+                                        <li><a href="{% url 'configure_announcement_banner' %}">Announcement Banner</a></li>
+                                        {% endif %}
                                         {% if system_settings.enable_credentials and "dojo.view_cred_user"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'cred' %}">Credential Manager </a></li>
                                         {% endif %}
@@ -374,7 +377,7 @@
                                         <li><a href="{% url 'jira' %}">JIRA </a></li>
                                         {% endif %}
                                         {% if "dojo.change_bannerconf"|has_configuration_permission:"superuser" %}
-                                        <li><a href="{% url 'configure_banner' %}">Login banner</a></li>
+                                        <li><a href="{% url 'configure_banner' %}">Login Banner</a></li>
                                         {% endif %}
                                         {% if "dojo.view_note_type"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'note_type' %}">Note Types </a></li>
@@ -413,6 +416,17 @@
     {% endblock %}
     <!-- Page Content -->
     <div id="page-wrapper">
+        <!--TODO: Add dismissability-->
+        {% if request.user.is_authenticated and announcement_banner and announcement_banner.enable %}
+            <div role="alert" class="announcement-banner alert alert-{{ announcement_banner.style }} {% if announcement_banner.dismissable %}alert-dismissible{% endif %} show">
+            {{ announcement_banner.message }}
+            {% if announcement_banner.dismissable %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            {% endif %}
+            </div>
+        {% endif %}
         <div class="container-fluid">
             <!-- start of tabs -->
             {% if product_tab.tab %}

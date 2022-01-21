@@ -57,6 +57,7 @@ from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.regulations.urls import urlpatterns as regulations
+from dojo.announcement_banner.urls import urlpatterns as announcement_banner_urls
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 import logging
@@ -147,6 +148,7 @@ ur += google_sheets_urls
 ur += banner_urls
 ur += component_urls
 ur += regulations
+ur += announcement_banner_urls
 
 schema_view = get_schema_view(
     openapi.Info(

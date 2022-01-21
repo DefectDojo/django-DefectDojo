@@ -22,7 +22,7 @@ import tagulous
 
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
     validate_endpoints_to_add
-from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
+from dojo.models import AnnouncementBanner, Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
@@ -2784,6 +2784,22 @@ class LoginBanner(forms.Form):
         cleaned_data = super().clean()
         return cleaned_data
 
+class AnnouncementBannerForm(forms.ModelForm):
+    enable = forms.BooleanField(
+        label="Enable announcement",
+        initial=False,
+        required=False,
+        help_text='Ticking this box displays the announcement banner on all pages for authenticated users'
+    )
+    dismissable = forms.BooleanField(
+        label="Dismissable?",
+        initial=False,
+        required=False,
+        help_text='Ticking this box allows users to dismiss the current announcement banner'
+    )
+    class Meta:
+        model = AnnouncementBanner
+        fields = ['message', 'style']
 
 # ==============================
 # Defect Dojo Engaegment Surveys
@@ -3219,6 +3235,7 @@ class ConfigurationPermissionsForm(forms.Form):
             jira_permissions + [
             Permission_Helper(name='language type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='bannerconf', app='dojo', change=True),
+            Permission_Helper(name='announcementbanner', app='dojo', change=True),
             Permission_Helper(name='note type', app='dojo', view=True, add=True, change=True, delete=True),
             Permission_Helper(name='product type', app='dojo', add=True)] + \
             questionnaire_permissions + [
