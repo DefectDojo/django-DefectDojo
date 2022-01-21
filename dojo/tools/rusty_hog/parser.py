@@ -19,14 +19,7 @@ class RustyhogParser(object):
         return self.get_items(tree, test)
 
     def parse_json(self, json_output):
-        try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
+        tree = json.load(json_output)
         return tree
 
     def get_items(self, json_output, scanner, test):
