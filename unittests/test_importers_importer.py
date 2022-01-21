@@ -58,8 +58,8 @@ class TestDojoDefaultImporter(DojoTestCase):
             target_start=timezone.now(),
             target_end=timezone.now(),
         )
-        lead = None
-        environment = None
+        lead, _ = User.objects.get_or_create(username="admin")
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
 
         # boot
         importer = Importer()
@@ -111,10 +111,10 @@ class TestDojoDefaultImporter(DojoTestCase):
             target_start=timezone.now(),
             target_end=timezone.now(),
         )
-
         importer = Importer()
         scan_date = None
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
@@ -146,7 +146,8 @@ class TestDojoDefaultImporter(DojoTestCase):
 
         importer = Importer()
         scan_date = None
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)

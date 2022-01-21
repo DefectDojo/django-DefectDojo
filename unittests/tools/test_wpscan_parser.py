@@ -86,3 +86,17 @@ class TestWpscanParser(DojoTestCase):
         self.assertEqual("Info", finding.severity)  # it is not a vulnerability so severity should be 'Info'
         self.assertEqual("Interesting finding: WordPress readme found: http://example/readme.html", finding.title)
         self.assertEqual(datetime.datetime(2021, 3, 17, 12, 21, 6), finding.date)
+
+    def test_parse_file_with_multiple_vuln_in_version(self):
+        testfile = open("unittests/scans/wpscan/wordpress_vuln_version.json")
+        parser = WpscanParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(11, len(findings))
+        finding = findings[2]
+        self.assertEqual("d40374cf-ee95-40b7-9dd5-dbb160b877b1", finding.unique_id_from_tool)
+        self.assertNotEqual("Info", finding.severity)  # it is a vulnerability so not 'Info'
+        self.assertEqual("WordPress 2.8.1-4.7.2 - Control Characters in Redirect URL Validation", finding.title)
+        self.assertEqual("fixed in : 4.6.4", finding.mitigation)

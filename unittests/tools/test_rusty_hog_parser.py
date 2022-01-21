@@ -61,3 +61,31 @@ class TestRustyhogParser(DojoTestCase):
         self.assertIn("**JIRA Issue ID:** TEST-123", findings[0].description)
         self.assertIn("**JIRA location:** Issue Description", findings[0].description)
         self.assertIn("**JIRA url:** https://jira.com/browse/TEST-123", findings[0].description)
+
+    def test_parse_file_with_no_vuln_has_no_finding_essexhog(self):
+        testfile = open("unittests/scans/rusty_hog/essexhog_no_vuln.json")
+        parser = RustyhogParser()
+        findings = parser.get_items(testfile, "Rusty Hog", Test())  # The outputfile is empty. A subscanner can't be classified
+        self.assertEqual(0, len(findings))
+
+    def test_parse_file_with_one_vuln_has_one_finding_essexhog(self):
+        testfile = open("unittests/scans/rusty_hog/essexhog_one_vuln.json")
+        parser = RustyhogParser()
+        findings = parser.get_items(testfile, "Essex Hog", Test())
+        self.assertEqual(1, len(findings))
+
+    def test_parse_file_with_multiple_vuln_has_multiple_finding_essexhog(self):
+        testfile = open("unittests/scans/rusty_hog/essexhog_many_vulns.json")
+        parser = RustyhogParser()
+        findings = parser.get_items(testfile, "Essex Hog", Test())
+        self.assertEqual(3, len(findings))
+
+    def test_parse_file_with_multiple_vuln_has_multiple_finding_essexhog_content(self):
+        testfile = open("unittests/scans/rusty_hog/essexhog_many_vulns.json")
+        parser = RustyhogParser()
+        findings = parser.get_items(testfile, "Essex Hog", Test())
+        self.assertEqual(findings[0].title, "SSH (EC) private key found in Confluence Page ID 12345")
+        self.assertIn("-----BEGIN EC PRIVATE KEY-----", findings[0].description)
+        self.assertIn("**Confluence URL:** https://confluence.com/pages/viewpage.action?pageId=12345", findings[0].description)
+        self.assertIn("**Confluence Page ID:** 12345", findings[0].description)
+        self.assertIn("Please ensure no secret material nor confidential information is kept in clear within Confluence Pages.", findings[0].mitigation)
