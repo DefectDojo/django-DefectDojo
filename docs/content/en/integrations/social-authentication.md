@@ -231,38 +231,66 @@ Follow along below.
     button on the login page.
 
 ## Keycloak
-1. go to your keycloak realm, add a new client of type openid-connect (use client id for DD_SOCIAL_AUTH_KEYCLOAK_KEY)
-2. in the client settings:
-   1. set access type to confidential
-   2. under valid Redirect URIs, add '<YOUR_SITE>/*'
-   3. under web origins, add the same (or '+')
-   4. fine grained openID connect configuration -> user info signed response alogrith: set to RS256
-   5. fine grained openID connect configuration -> request object signature algorithm: set to RS256
-3. Under Scope -> Full Scope Allowed -> Disable
-4. under mappers -> add custom mapper
-   * name: aud
-   * Mapper type: audience
-   * included audience: select your client/client-id here
-   * add ID to token: off
-   * add access to token: on
-5. under credentials: copy secret (use as DD_SOCIAL_AUTH_KEYCLOAK_SECRET below)
-6. in your realm settings -> keys: copy the "Public key" (signing key) (use for DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY below)
-7. in your realm settings -> general -> endpoints look into openId endpoint configuration
-   and look up your authorization and token endpoint
-8. add to extraConfigs in chart:
+There is also an option to use Keycloak as OAuth2 provider in order to authenticate users to Defect Dojo, also by using
+the social-auth plugin.
+
+Here are suggestion on how to configure Keycloak and DefectDojo: 
+
+### Configure Keycloak
+(assuming you already have an existing realm, otherwise create one)
+1. Navigate to your keycloak realm and add a new client of type openid-connect. Choose a name for the client id and use this value below for DD_SOCIAL_AUTH_KEYCLOAK_KEY).
+2. In the client settings:
+   * Set `access type` to `confidential`
+   * Under `valid Redirect URIs`, add the URI to your defect dojo installation, e.g. 'https://<YOUR_DD_HOST>/*'
+   * Under `web origins`, add the same (or '+')
+   * Under `Fine grained openID connect configuration` -> `user info signed response algorithm`: set to `RS256`
+   * Under `Fine grained openID connect configuration` -> `request object signature algorithm`: set to `RS256`
+   * -> save these settings in keycloak (hit save button)
+3. Under `Scope` -> `Full Scope Allowed` set to `off`
+4. Under `mappers` -> add a custom mapper here: 
+   * Name: `aud`
+   * Mapper type: `audience`
+   * Included audience: select your client/client-id here
+   * Add ID to token: `off`
+   * Add access to token: `on`
+5. Under `credentials`: copy the secret (and use as DD_SOCIAL_AUTH_KEYCLOAK_SECRET below)
+6. In your realm settings -> keys: copy the "Public key" (signing key) (use for DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY below)
+7. In your realm settings -> general -> endpoints: look into openId endpoint configuration
+   and look up your authorization and token endpoint (use them below)
+
+### Configure Defect Dojo
+Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+   information:
+
+   {{< highlight python >}}
+   DD_SESSION_COOKIE_SECURE=True,
+   DD_CSRF_COOKIE_SECURE=True,
+   DD_SECURE_SSL_REDIRECT=True,
+   DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=True,
+   DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY=(str, '<your realm public key>'),
+   DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, '<your client id>'), 
+   DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, '<your keycloak client credentials secret>'), 
+   DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL=(str, '<your authorization endpoint>'),
+   DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL=(str, '<your token endpoint>')         
+   {{< /highlight >}}
+ 
+or, alternatively, for helm configuration, add this to the `extraConfig` section: 
+
 ```
 DD_SESSION_COOKIE_SECURE: 'True'
 DD_CSRF_COOKIE_SECURE: 'True'
 DD_SECURE_SSL_REDIRECT: 'True'
 DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED: 'True'
-DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: 'MIIBWGn....zwIDAQAB'
-DD_SOCIAL_AUTH_KEYCLOAK_KEY: '<CLIENT_ID>'
+DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: '<your realm public key>'
+DD_SOCIAL_AUTH_KEYCLOAK_KEY: '<your client id>'
 DD_SOCIAL_AUTH_KEYCLOAK_SECRET: '<your keycloak client credentials secret>'
-DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL: '<your authorization endpoint'
+DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL: '<your authorization endpoint>'
 DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL: '<your token endpoint>'
 ```
 
-Optionally, you can set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` to customize the login button's text caption. 
+Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order to customize the login button's text caption. 
+
+
 
 ## SAML 2.0
 In a similar direction to OAuth, this SAML addition provides a more secure
