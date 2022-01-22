@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import re
+import dateutil
 
 from cpe import CPE
 from defusedxml import ElementTree
@@ -20,129 +21,116 @@ class DependencyCheckParser(object):
     }
 
     def add_finding(self, finding, dupes):
-        if finding is not None:
-            key_str = '{}|{}|{}'.format(finding.cve,
-                                            finding.cwe,
-                                            finding.file_path.lower())
-            key = hashlib.sha256(key_str.encode('utf-8')).hexdigest()
-
-            if key not in dupes:
-                dupes[key] = finding
-
-    def get_field_value(self, parent_node, field_name, namespace):
-        field_node = parent_node.find(namespace + field_name)
-        field_value = '' if field_node is None else field_node.text
-        return field_value
+        key_str = '|'.join([
+            str(finding.cve),
+            str(finding.cwe),
+            str(finding.file_path).lower()
+        ])
+        key = hashlib.sha256(key_str.encode('utf-8')).hexdigest()
+        if key not in dupes:
+            dupes[key] = finding
 
     def get_filename_and_path_from_dependency(self, dependency, related_dependency, namespace):
         if related_dependency:
-            if self.get_field_value(related_dependency, 'fileName', namespace):
-                return self.get_field_value(related_dependency, 'fileName', namespace), self.get_field_value(related_dependency, 'filePath', namespace)
+            if related_dependency.findtext(namespace + 'fileName'):
+                return related_dependency.findtext(namespace + 'fileName'), related_dependency.findtext(namespace + 'filePath')
             else:
                 # without filename, it would be just a duplicate finding so we have to skip it. filename is only present for relateddependencies since v6.0.0
                 # logger.debug('related_dependency: %s', ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
                 return None, None
         else:
-            return self.get_field_value(dependency, 'fileName', namespace), self.get_field_value(dependency, 'filePath', namespace)
+            return dependency.findtext(namespace + 'fileName'), dependency.findtext(namespace + 'filePath')
 
     def get_component_name_and_version_from_dependency(self, dependency, related_dependency, namespace):
-        component_name, component_version = None, None
-        # big try catch to avoid crashint the parser on some unexpected stuff
-        try:
-            identifiers_node = dependency.find(namespace + 'identifiers')
-            if identifiers_node:
-                # analyzing identifier from the more generic to
-                package_node = identifiers_node.find('.//' + namespace + 'package')
-                if package_node:
-                    id = self.get_field_value(package_node, 'id', namespace)
-                    purl = PackageURL.from_string(id)
-                    purl_parts = purl.to_dict()
-                    component_name = purl_parts['namespace'] + ':' if purl_parts['namespace'] and len(purl_parts['namespace']) > 0 else ''
-                    component_name += purl_parts['name'] if purl_parts['name'] and len(purl_parts['name']) > 0 else ''
-                    component_name = component_name if component_name else None
-                    component_version = purl_parts['version'] if purl_parts['version'] and len(purl_parts['version']) > 0 else ''
+        identifiers_node = dependency.find(namespace + 'identifiers')
+        if identifiers_node:
+            # analyzing identifier from the more generic to
+            package_node = identifiers_node.find('.//' + namespace + 'package')
+            if package_node:
+                id = package_node.findtext(f'{namespace}id')
+                purl = PackageURL.from_string(id)
+                purl_parts = purl.to_dict()
+                component_name = purl_parts['namespace'] + ':' if purl_parts['namespace'] and len(purl_parts['namespace']) > 0 else ''
+                component_name += purl_parts['name'] if purl_parts['name'] and len(purl_parts['name']) > 0 else ''
+                component_name = component_name if component_name else None
+                component_version = purl_parts['version'] if purl_parts['version'] and len(purl_parts['version']) > 0 else ''
+                return component_name, component_version
+
+            # vulnerabilityIds_node = identifiers_node.find('.//' + namespace + 'vulnerabilityIds')
+            # if vulnerabilityIds_node:
+            #     id = vulnerabilityIds_node.findtext(f'{namespace}id')
+            #     cpe = CPE(id)
+            #     component_name = cpe.get_vendor()[0] + ':' if len(cpe.get_vendor()) > 0 else ''
+            #     component_name += cpe.get_product()[0] if len(cpe.get_product()) > 0 else ''
+            #     component_name = component_name if component_name else None
+            #     component_version = cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
+            #     return component_name, component_version
+
+            cpe_node = identifiers_node.find('.//' + namespace + 'identifier[@type="cpe"]')
+            if cpe_node:
+                id = cpe_node.findtext(f'{namespace}name')
+                cpe = CPE(id)
+                component_name = cpe.get_vendor()[0] + ':' if len(cpe.get_vendor()) > 0 else ''
+                component_name += cpe.get_product()[0] if len(cpe.get_product()) > 0 else ''
+                component_name = component_name if component_name else None
+                component_version = cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
+                return component_name, component_version
+
+            maven_node = identifiers_node.find('.//' + namespace + 'identifier[@type="maven"]')
+            if maven_node:
+                maven_parts = maven_node.findtext(f'{namespace}name').split(':')
+                # logger.debug('maven_parts:' + str(maven_parts))
+                if len(maven_parts) == 3:
+                    component_name = maven_parts[0] + ':' + maven_parts[1]
+                    component_version = maven_parts[2]
                     return component_name, component_version
 
-                # vulnerabilityIds_node = identifiers_node.find('.//' + namespace + 'vulnerabilityIds')
-                # if vulnerabilityIds_node:
-                #     id = self.get_field_value(vulnerabilityIds_node, 'id', namespace)
-                #     cpe = CPE(id)
-                #     component_name = cpe.get_vendor()[0] + ':' if len(cpe.get_vendor()) > 0 else ''
-                #     component_name += cpe.get_product()[0] if len(cpe.get_product()) > 0 else ''
-                #     component_name = component_name if component_name else None
-                #     component_version = cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
-                #     return component_name, component_version
+        # TODO what happens when there multiple evidencecollectednodes with product or version as type?
+        evidence_collected_node = dependency.find(namespace + 'evidenceCollected')
+        if evidence_collected_node:
+            # <evidenceCollected>
+            # <evidence type="product" confidence="HIGH">
+            #     <source>file</source>
+            #     <name>name</name>
+            #     <value>jquery</value>
+            # </evidence>
+            # <evidence type="version" confidence="HIGH">
+            #     <source>file</source>
+            #     <name>version</name>
+            #     <value>3.1.1</value>
+            # </evidence>'
+            # will find the first product and version node. if there are multiple it may not pick the best
+            # since 6.0.0 howoever it seems like there's always a packageurl above so not sure if we need the effort to
+            # implement more logic here
+            product_node = evidence_collected_node.find('.//' + namespace + 'evidence[@type="product"]')
+            if product_node:
+                component_name = product_node.findtext(f'{namespace}value')
+                version_node = evidence_collected_node.find('.//' + namespace + 'evidence[@type="version"]')
+                if version_node:
+                    component_version = version_node.findtext(f'{namespace}value')
 
-                cpe_node = identifiers_node.find('.//' + namespace + 'identifier[@type="cpe"]')
-                if cpe_node:
-                    id = self.get_field_value(cpe_node, 'name', namespace)
-                    cpe = CPE(id)
-                    component_name = cpe.get_vendor()[0] + ':' if len(cpe.get_vendor()) > 0 else ''
-                    component_name += cpe.get_product()[0] if len(cpe.get_product()) > 0 else ''
-                    component_name = component_name if component_name else None
-                    component_version = cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
-                    return component_name, component_version
+                return component_name, component_version
 
-                maven_node = identifiers_node.find('.//' + namespace + 'identifier[@type="maven"]')
-                if maven_node:
-                    # logger.debug('maven_string: ' + self.get_field_value(maven_node, 'name'))
-                    maven_parts = self.get_field_value(maven_node, 'name', namespace).split(':')
-                    # logger.debug('maven_parts:' + str(maven_parts))
-                    if len(maven_parts) == 3:
-                        component_name = maven_parts[0] + ':' + maven_parts[1]
-                        component_version = maven_parts[2]
-                        return component_name, component_version
-
-            # TODO what happens when there multiple evidencecollectednodes with product or version as type?
-            evidence_collected_node = dependency.find(namespace + 'evidenceCollected')
-            if evidence_collected_node:
-                # <evidenceCollected>
-                # <evidence type="product" confidence="HIGH">
-                #     <source>file</source>
-                #     <name>name</name>
-                #     <value>jquery</value>
-                # </evidence>
-                # <evidence type="version" confidence="HIGH">
-                #     <source>file</source>
-                #     <name>version</name>
-                #     <value>3.1.1</value>
-                # </evidence>'
-                # will find the first product and version node. if there are multiple it may not pick the best
-                # since 6.0.0 howoever it seems like there's always a packageurl above so not sure if we need the effort to
-                # implement more logic here
-                product_node = evidence_collected_node.find('.//' + namespace + 'evidence[@type="product"]')
-                if product_node:
-                    component_name = self.get_field_value(product_node, 'value', namespace)
-                    version_node = evidence_collected_node.find('.//' + namespace + 'evidence[@type="version"]')
-                    if version_node:
-                        component_version = self.get_field_value(version_node, 'value', namespace)
-
-                    return component_name, component_version
-
-        except:
-            logger.exception('error parsing component_name and component_version')
-            logger.debug('dependency: %s', ElementTree.tostring(dependency, encoding='utf8', method='xml'))
-
-        return component_name, component_version
+        return None, None
 
     def get_finding_from_vulnerability(self, dependency, related_dependency, vulnerability, test, namespace):
         dependency_filename, dependency_filepath = self.get_filename_and_path_from_dependency(dependency, related_dependency, namespace)
         # logger.debug('dependency_filename: %s', dependency_filename)
 
-        tags = []
-
         if dependency_filename is None:
             return None
 
-        name = self.get_field_value(vulnerability, 'name', namespace)
-        cwes_node = vulnerability.find(namespace + 'cwes')
-        if cwes_node is not None:
-            cwe_field = self.get_field_value(cwes_node, 'cwe', namespace)
+        tags = []
+        name = vulnerability.findtext(f'{namespace}name')
+        cwes_node = vulnerability.find(f'{namespace}cwes')
+        if vulnerability.find(f'{namespace}cwes'):
+            cwe_field = vulnerability.find(f'{namespace}cwes').findtext(f'{namespace}cwe')
         else:
-            cwe_field = self.get_field_value(vulnerability, 'cwe', namespace)
-        description = self.get_field_value(vulnerability, 'description', namespace)
+            cwe_field = vulnerability.findtext(f'{namespace}cwe')
+
+        description = vulnerability.findtext(f'{namespace}description')
         # I need the notes field since this is how the suppression is documented.
-        notes = self.get_field_value(vulnerability, 'notes', namespace)
+        notes = vulnerability.findtext(f'.//{namespace}notes')
 
         cve = name[:28]
         if cve and not cve.startswith('CVE'):
@@ -176,12 +164,12 @@ class DependencyCheckParser(object):
 
         cvssv2_node = vulnerability.find(namespace + 'cvssV2')
         cvssv3_node = vulnerability.find(namespace + 'cvssV3')
-        severity = self.get_field_value(vulnerability, 'severity', namespace).lower().capitalize()
+        severity = vulnerability.findtext(f'{namespace}severity')
         if not severity:
             if cvssv3_node is not None:
-                severity = self.get_field_value(cvssv3_node, 'baseSeverity', namespace).lower().capitalize()
+                severity = cvssv3_node.findtext(f'{namespace}baseSeverity').lower().capitalize()
             elif cvssv2_node is not None:
-                severity = self.get_field_value(cvssv2_node, 'severity', namespace).lower().capitalize()
+                severity = cvssv2_node.findtext(f'{namespace}severity').lower().capitalize()
 
         # handle if the severity have something not in the mapping
         # default to 'Medium' and produce warnings in logs
@@ -198,9 +186,9 @@ class DependencyCheckParser(object):
             reference_detail = ''
             for reference_node in references_node.findall(namespace +
                                                           'reference'):
-                name = self.get_field_value(reference_node, 'name', namespace)
-                source = self.get_field_value(reference_node, 'source', namespace)
-                url = self.get_field_value(reference_node, 'url', namespace)
+                name = reference_node.findtext(f"{namespace}name")
+                source = reference_node.findtext(f"{namespace}source")
+                url = reference_node.findtext(f"{namespace}url")
                 reference_detail += 'name: {0}\n' \
                                      'source: {1}\n' \
                                      'url: {2}\n\n'.format(name, source, url)
@@ -209,7 +197,7 @@ class DependencyCheckParser(object):
             tags.append("related")
 
         if vulnerability.tag == "{}suppressedVulnerability".format(namespace):
-            if notes == "":
+            if notes is None:
                 notes = "Document on why we are suppressing this vulnerability is missing!"
                 tags.append("no_suppression_document")
             mitigation = '**This vulnerability is mitigated and/or suppressed:** {}\n'.format(notes)
@@ -263,26 +251,37 @@ class DependencyCheckParser(object):
             namespace = ""
 
         dependencies = scan.find(namespace + 'dependencies')
+        scan_date = None
+        if scan.find(f"{namespace}projectInfo"):
+            projectInfo_node = scan.find(f"{namespace}projectInfo")
+            if projectInfo_node.findtext(f"{namespace}reportDate"):
+                scan_date = dateutil.parser.parse(projectInfo_node.findtext(f"{namespace}reportDate"))
 
         if dependencies:
             for dependency in dependencies.findall(namespace + 'dependency'):
-                logger.debug('parsing dependency: %s', self.get_field_value(dependency, 'fileName', namespace))
                 vulnerabilities = dependency.find(namespace + 'vulnerabilities')
                 if vulnerabilities is not None:
                     for vulnerability in vulnerabilities.findall(namespace + 'vulnerability'):
                         if vulnerability:
                             finding = self.get_finding_from_vulnerability(dependency, None, vulnerability, test, namespace)
+                            if scan_date:
+                                finding.date = scan_date
                             self.add_finding(finding, dupes)
 
                     for suppressedVulnerability in vulnerabilities.findall(namespace + 'suppressedVulnerability'):
                         if suppressedVulnerability:
                             finding = self.get_finding_from_vulnerability(dependency, None, suppressedVulnerability, test, namespace)
+                            if scan_date:
+                                finding.date = scan_date
                             self.add_finding(finding, dupes)
 
                     relatedDependencies = dependency.find(namespace + 'relatedDependencies')
                     if relatedDependencies:
                         for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
                             finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
-                            self.add_finding(finding, dupes)
+                            if finding:  # could be None
+                                if scan_date:
+                                    finding.date = scan_date
+                                self.add_finding(finding, dupes)
 
         return list(dupes.values())

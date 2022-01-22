@@ -1,5 +1,7 @@
+from datetime import datetime, timezone
 from os import path
 
+from dateutil.tz import tzoffset
 from dojo.models import Test
 from dojo.tools.dependency_check.parser import DependencyCheckParser
 
@@ -182,13 +184,17 @@ class TestDependencyCheckParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         items = findings
         self.assertEqual(1, len(items))
-        self.assertEqual(items[0].title, "org.owasp:library:6.7.8 | Reference for a bad vulnerability")
-        self.assertEqual(items[0].severity, "Medium")
-        self.assertEqual(items[0].component_name, "org.owasp:library")
-        self.assertEqual(items[0].component_version, "6.7.8")
-        self.assertEqual(
-            items[0].mitigation, "Update org.owasp:library:6.7.8 to at least the version recommended in the description"
-        )
+        i = 0
+        with self.subTest(i=i):
+            self.assertEqual(items[i].title, "org.owasp:library:6.7.8 | Reference for a bad vulnerability")
+            self.assertEqual(items[i].severity, "Medium")
+            self.assertEqual(items[i].component_name, "org.owasp:library")
+            self.assertEqual(items[i].component_version, "6.7.8")
+            self.assertEqual(
+                items[i].mitigation,
+                "Update org.owasp:library:6.7.8 to at least the version recommended in the description",
+            )
+            self.assertEqual(items[i].date, datetime(2016, 11, 5, 14, 52, 15, 748000, tzinfo=tzoffset(None, -14400)))
 
     def test_parse_file_with_single_dependency_with_related_no_vulnerability(self):
         content = """<?xml version="1.0"?>
@@ -777,6 +783,9 @@ class TestDependencyCheckParser(DojoTestCase):
                 items[0].mitigation,
                 "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description",
             )
+            self.assertEqual(
+                items[0].date, datetime(2016, 11, 5, 14, 52, 15, 748000, tzinfo=tzoffset(None, -14400))
+            )  # 2016-11-05T14:52:15.748-0400
 
         with self.subTest(i=1):
             self.assertEqual(items[1].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
@@ -929,3 +938,6 @@ class TestDependencyCheckParser(DojoTestCase):
                 )
                 self.assertEqual(items[i].severity, "Low")
                 self.assertEqual(items[i].file_path, "log4j-api-2.12.4.jar")
+                self.assertEqual(
+                    items[i].date, datetime(2022, 1, 15, 14, 31, 13, 42600, tzinfo=timezone.utc)
+                )  # 2022-01-15T14:31:13.042600508Z
