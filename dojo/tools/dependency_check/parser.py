@@ -189,9 +189,9 @@ class DependencyCheckParser(object):
                 name = reference_node.findtext(f"{namespace}name")
                 source = reference_node.findtext(f"{namespace}source")
                 url = reference_node.findtext(f"{namespace}url")
-                reference_detail += 'name: {0}\n' \
-                                     'source: {1}\n' \
-                                     'url: {2}\n\n'.format(name, source, url)
+                reference_detail += '**name**: {0}\n' \
+                                     '**source**: {1}\n' \
+                                     '**url**: {2}\n\n'.format(name, source, url)
 
         if related_dependency is not None:
             tags.append("related")
@@ -208,7 +208,7 @@ class DependencyCheckParser(object):
 
         else:
             mitigation = 'Update {}:{} to at least the version recommended in the description'.format(component_name, component_version)
-            description += '\nFilepath: ' + str(dependency_filepath)
+            description += '\n**Filepath**: ' + str(dependency_filepath)
             active = True
 
         return Finding(
@@ -222,6 +222,7 @@ class DependencyCheckParser(object):
             mitigation=mitigation,
             tags=tags,
             active=active,
+            dynamic_finding=False,
             static_finding=True,
             references=reference_detail,
             component_name=component_name,
