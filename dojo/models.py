@@ -2523,10 +2523,15 @@ class Finding(models.Model):
         if self.references is None:
             return None
         matches = re.findall(r'([\(|\[]?(https?):((//)|(\\\\))+([\w\d:#@%/;$~_?\+-=\\\.&](#!)?)*[\)|\]]?)', self.references)
+
+        processed_matches = []
         for match in matches:
             # Check if match isn't already a markdown link
-            if not (match[0].startswith('[') or match[0].startswith('(')):
+            # Only replace the same matches one time, otherwise the links will be corrupted
+            if not (match[0].startswith('[') or match[0].startswith('(')) and not match[0] in processed_matches:
                 self.references = self.references.replace(match[0], create_bleached_link(match[0], match[0]), 1)
+                processed_matches.append(match[0])
+
         return self.references
 
 
