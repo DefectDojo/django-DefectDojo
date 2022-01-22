@@ -16,7 +16,6 @@ class TestFile(object):
 
 
 class TestDependencyCheckParser(DojoTestCase):
-
     def test_parse_file_with_no_vulnerabilities_has_no_findings(self):
         content = """<?xml version="1.0"?>
 <analysis xmlns="https://jeremylong.github.io/DependencyCheck/dependency-check.1.3.xsd">
@@ -183,13 +182,12 @@ class TestDependencyCheckParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         items = findings
         self.assertEqual(1, len(items))
-        self.assertEqual(items[0].title, "library:6.7.8 | Description of a bad vulnerability.(in component2.dll)")
+        self.assertEqual(items[0].title, "org.owasp:library:6.7.8 | Reference for a bad vulnerability")
         self.assertEqual(items[0].severity, "Medium")
         self.assertEqual(items[0].component_name, "org.owasp:library")
         self.assertEqual(items[0].component_version, "6.7.8")
         self.assertEqual(
-            items[0].mitigation,
-            "Update org.owasp:library:6.7.8 to at least the version recommended in the description"
+            items[0].mitigation, "Update org.owasp:library:6.7.8 to at least the version recommended in the description"
         )
 
     def test_parse_file_with_single_dependency_with_related_no_vulnerability(self):
@@ -764,143 +762,154 @@ class TestDependencyCheckParser(DojoTestCase):
         self.assertEqual(11, len(items))
         # test also different component_name formats
 
-        # identifier -> package url java + 2 relateddependencies
-        self.assertEqual(
-            items[0].title, "dom4j:2.1.1.redhat-00001 | Description of a bad vulnerability.(in adapter-ear1.ear: dom4j-2.1.1.jar)"
-        )
-        self.assertEqual(items[0].component_name, "org.dom4j:dom4j")
-        self.assertEqual(items[0].component_version, "2.1.1.redhat-00001")
-        self.assertEqual(items[0].description, "Description of a bad vulnerability.\nFilepath: /var/lib/adapter-ear1.ear/dom4j-2.1.1.jar")
-        self.assertEqual(items[0].severity, "High")
-        self.assertEqual(items[0].file_path, "adapter-ear1.ear: dom4j-2.1.1.jar")
-        self.assertEqual(
-            items[0].mitigation,
-            "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description"
-        )
+        with self.subTest(i=0):
+            # identifier -> package url java + 2 relateddependencies
+            self.assertEqual(items[0].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
+            self.assertEqual(items[0].component_name, "org.dom4j:dom4j")
+            self.assertEqual(items[0].component_version, "2.1.1.redhat-00001")
+            self.assertEqual(
+                items[0].description,
+                "Description of a bad vulnerability.\nFilepath: /var/lib/adapter-ear1.ear/dom4j-2.1.1.jar",
+            )
+            self.assertEqual(items[0].severity, "High")
+            self.assertEqual(items[0].file_path, "adapter-ear1.ear: dom4j-2.1.1.jar")
+            self.assertEqual(
+                items[0].mitigation,
+                "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description",
+            )
 
-        self.assertEqual(
-            items[1].title, "dom4j:2.1.1.redhat-00001 | Description of a bad vulnerability.(in adapter-ear8.ear: dom4j-2.1.1.jar)"
-        )
-        self.assertEqual(items[1].component_name, "org.dom4j:dom4j")
-        self.assertEqual(items[1].component_version, "2.1.1.redhat-00001")
-        self.assertEqual(items[1].description, "Description of a bad vulnerability.\nFilepath: /var/lib/adapter-ear8.ear/dom4j-2.1.1.jar")
-        self.assertEqual(items[1].severity, "High")
-        self.assertEqual(items[1].file_path, "adapter-ear8.ear: dom4j-2.1.1.jar")
-        self.assertEqual(
-            items[1].mitigation,
-            "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description"
-        )
-        self.assertEqual(items[1].tags, "related")
+        with self.subTest(i=1):
+            self.assertEqual(items[1].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
+            self.assertEqual(items[1].component_name, "org.dom4j:dom4j")
+            self.assertEqual(items[1].component_version, "2.1.1.redhat-00001")
+            self.assertEqual(
+                items[1].description,
+                "Description of a bad vulnerability.\nFilepath: /var/lib/adapter-ear8.ear/dom4j-2.1.1.jar",
+            )
+            self.assertEqual(items[1].severity, "High")
+            self.assertEqual(items[1].file_path, "adapter-ear8.ear: dom4j-2.1.1.jar")
+            self.assertEqual(
+                items[1].mitigation,
+                "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description",
+            )
+            self.assertEqual(items[1].tags, "related")
 
-        self.assertEqual(
-            items[2].title,
-            "dom4j:2.1.1.redhat-00001 | Description of a bad vulnerability.(in adapter-ear1.ear: dom4j-extensions-2.1.1.jar)",
-        )
-        self.assertEqual(items[2].component_name, "org.dom4j:dom4j")
-        self.assertEqual(items[2].component_version, "2.1.1.redhat-00001")
-        self.assertEqual(items[2].description, "Description of a bad vulnerability.\nFilepath: /var/lib/adapter-ear1.ear/dom4j-extensions-2.1.1.jar")
-        self.assertEqual(items[2].severity, "High")
-        self.assertEqual(
-            items[2].file_path, "adapter-ear1.ear: dom4j-extensions-2.1.1.jar"
-        )
-        self.assertEqual(
-            items[2].mitigation,
-            "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description"
-        )
+        with self.subTest(i=2):
+            self.assertEqual(items[2].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
+            self.assertEqual(items[2].component_name, "org.dom4j:dom4j")
+            self.assertEqual(items[2].component_version, "2.1.1.redhat-00001")
+            self.assertEqual(
+                items[2].description,
+                "Description of a bad vulnerability.\nFilepath: /var/lib/adapter-ear1.ear/dom4j-extensions-2.1.1.jar",
+            )
+            self.assertEqual(items[2].severity, "High")
+            self.assertEqual(items[2].file_path, "adapter-ear1.ear: dom4j-extensions-2.1.1.jar")
+            self.assertEqual(
+                items[2].mitigation,
+                "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description",
+            )
 
-        # identifier -> package url javascript, no vulnerabilitids, 3 vulnerabilities, relateddependencies without filename (pre v6.0.0)
-        self.assertEqual(items[3].title, "yargs-parser:5.0.0 | 1500 Affected versions of `yargs-parser` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.Parsing the argument `--foo.__proto__.bar baz'` adds a `bar` property with value `baz` to all objects. This is only exploitable if attackers have control over the arguments being passed to `yargs-parser`.(in yargs-parser:5.0.0)")
-        self.assertEqual(items[3].component_name, "yargs-parser")
-        self.assertEqual(items[3].component_version, "5.0.0")
-        # assert fails due to special characters, not too important
-        # self.assertEqual(items[1].description, "Affected versions of `yargs-parser` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.Parsing the argument `--foo.__proto__.bar baz&apos;` adds a `bar` property with value `baz` to all objects. This is only exploitable if attackers have control over the arguments being passed to `yargs-parser`.")
-        self.assertEqual(items[3].severity, "Low")
-        self.assertEqual(items[3].file_path, "yargs-parser:5.0.0")
-        self.assertEqual(
-            items[3].mitigation,
-            "Update yargs-parser:5.0.0 to at least the version recommended in the description"
-        )
+        with self.subTest(i=3):
+            # identifier -> package url javascript, no vulnerabilitids, 3 vulnerabilities, relateddependencies without filename (pre v6.0.0)
+            self.assertEqual(
+                items[3].title, "yargs-parser:5.0.0 | - [Snyk Report](https://snyk.io/vuln/SNYK-JS-YARGSPARSER-560381)"
+            )
+            self.assertEqual(items[3].component_name, "yargs-parser")
+            self.assertEqual(items[3].component_version, "5.0.0")
+            # assert fails due to special characters, not too important
+            # self.assertEqual(items[1].description, "Affected versions of `yargs-parser` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.Parsing the argument `--foo.__proto__.bar baz&apos;` adds a `bar` property with value `baz` to all objects. This is only exploitable if attackers have control over the arguments being passed to `yargs-parser`.")
+            self.assertEqual(items[3].severity, "Low")
+            self.assertEqual(items[3].file_path, "yargs-parser:5.0.0")
+            self.assertEqual(
+                items[3].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description"
+            )
 
-        self.assertEqual(items[4].title, 'yargs-parser:5.0.0 | yargs-parser could be tricked into adding or modifying properties of Object.prototype using a "__proto__" payload.(in yargs-parser:5.0.0)')
-        self.assertEqual(items[4].component_name, "yargs-parser")
-        self.assertEqual(items[4].component_version, "5.0.0")
-        self.assertEqual(
-            items[4].description,
-            'yargs-parser could be tricked into adding or modifying properties of Object.prototype using a "__proto__" payload.\nFilepath: /var/lib/jenkins/workspace/nl-selfservice_-_metrics_develop/package-lock.json?yargs-parser',
-        )
-        self.assertEqual(items[4].severity, "High")
-        self.assertEqual(items[4].file_path, "yargs-parser:5.0.0")
-        self.assertEqual(
-            items[4].mitigation,
-            "Update yargs-parser:5.0.0 to at least the version recommended in the description"
-        )
+        with self.subTest(i=4):
+            self.assertEqual(
+                items[4].title,
+                "yargs-parser:5.0.0 | [CVE-2020-7608] yargs-parser could be tricked into adding or modifying properties of Object.prot...",
+            )
+            self.assertEqual(items[4].component_name, "yargs-parser")
+            self.assertEqual(items[4].component_version, "5.0.0")
+            self.assertEqual(
+                items[4].description,
+                'yargs-parser could be tricked into adding or modifying properties of Object.prototype using a "__proto__" payload.\nFilepath: /var/lib/jenkins/workspace/nl-selfservice_-_metrics_develop/package-lock.json?yargs-parser',
+            )
+            self.assertEqual(items[4].severity, "High")
+            self.assertEqual(items[4].file_path, "yargs-parser:5.0.0")
+            self.assertEqual(
+                items[4].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description"
+            )
 
-        self.assertEqual(
-            items[5].title,
-            "yargs-parser:5.0.0 | Uncontrolled Resource Consumption ('Resource Exhaustion') (in yargs-parser:5.0.0)",
-        )
-        self.assertEqual(items[5].component_name, "yargs-parser")
-        self.assertEqual(items[5].component_version, "5.0.0")
-        self.assertEqual(
-            items[5].description,
-            "The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.\nFilepath: /var/lib/jenkins/workspace/nl-selfservice_-_metrics_develop/package-lock.json?yargs-parser",
-        )
-        self.assertEqual(items[5].severity, "High")
-        self.assertEqual(items[5].file_path, "yargs-parser:5.0.0")
-        self.assertEqual(
-            items[5].mitigation,
-            "Update yargs-parser:5.0.0 to at least the version recommended in the description"
-        )
+        with self.subTest(i=5):
+            self.assertEqual(
+                items[5].title,
+                "yargs-parser:5.0.0 | CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')",
+            )
+            self.assertEqual(items[5].component_name, "yargs-parser")
+            self.assertEqual(items[5].component_version, "5.0.0")
+            self.assertEqual(
+                items[5].description,
+                "The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.\nFilepath: /var/lib/jenkins/workspace/nl-selfservice_-_metrics_develop/package-lock.json?yargs-parser",
+            )
+            self.assertEqual(items[5].severity, "High")
+            self.assertEqual(items[5].file_path, "yargs-parser:5.0.0")
+            self.assertEqual(
+                items[5].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description"
+            )
 
-        # identifier -> cpe java
-        self.assertEqual(
-            items[6].title, "dom4j:2.1.1.redhat-00001 | Description of a bad vulnerability.(in adapter-ear2.ear: dom4j-2.1.1.jar)"
-        )
-        self.assertEqual(items[6].component_name, "org.dom4j:dom4j")
-        self.assertEqual(items[6].component_version, "2.1.1.redhat-00001")
-        self.assertEqual(items[6].severity, "High")
-        self.assertEqual(items[6].file_path, "adapter-ear2.ear: dom4j-2.1.1.jar")
-        self.assertEqual(
-            items[6].mitigation,
-            "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description"
-        )
+        with self.subTest(i=6):
+            # identifier -> cpe java
+            self.assertEqual(items[6].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
+            self.assertEqual(items[6].component_name, "org.dom4j:dom4j")
+            self.assertEqual(items[6].component_version, "2.1.1.redhat-00001")
+            self.assertEqual(items[6].severity, "High")
+            self.assertEqual(items[6].file_path, "adapter-ear2.ear: dom4j-2.1.1.jar")
+            self.assertEqual(
+                items[6].mitigation,
+                "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description",
+            )
 
-        # identifier -> maven java
-        self.assertEqual(
-            items[7].title, "dom4j:2.1.1 | Description of a bad vulnerability.(in adapter-ear3.ear: dom4j-2.1.1.jar)"
-        )
-        self.assertEqual(items[7].component_name, "dom4j")
-        self.assertEqual(items[7].component_version, "2.1.1")
-        self.assertEqual(items[7].severity, "High")
-        self.assertEqual(
-            items[7].mitigation,
-            "Update dom4j:2.1.1 to at least the version recommended in the description"
-        )
+        with self.subTest(i=7):
+            # identifier -> maven java
+            self.assertEqual(items[7].title, "dom4j:2.1.1 | Reference for a bad vulnerability")
+            self.assertEqual(items[7].component_name, "dom4j")
+            self.assertEqual(items[7].component_version, "2.1.1")
+            self.assertEqual(items[7].severity, "High")
+            self.assertEqual(
+                items[7].mitigation, "Update dom4j:2.1.1 to at least the version recommended in the description"
+            )
 
-        # evidencecollected -> single product + single verison javascript
-        self.assertEqual(
-            items[8].title,
-            "jquery:3.1.1 | Description of a bad vulnerability.(in adapter-ear4.ear: liquibase-core-3.5.3.jar: jquery.js)",
-        )
-        self.assertEqual(items[8].component_name, "jquery")
-        self.assertEqual(items[8].component_version, "3.1.1")
-        self.assertEqual(items[8].severity, "High")
-        self.assertEqual(
-            items[8].mitigation,
-            "Update jquery:3.1.1 to at least the version recommended in the description"
-        )
+        with self.subTest(i=8):
+            # evidencecollected -> single product + single verison javascript
+            self.assertEqual(
+                items[8].title,
+                "jquery:3.1.1 | Reference for a bad vulnerability",
+            )
+            self.assertEqual(items[8].component_name, "jquery")
+            self.assertEqual(items[8].component_version, "3.1.1")
+            self.assertEqual(items[8].severity, "High")
+            self.assertEqual(
+                items[8].mitigation, "Update jquery:3.1.1 to at least the version recommended in the description"
+            )
 
-        # Tests for two suppressed vulnerabilities,
-        # One for Suppressed with notes, the other is without.
-        self.assertEqual(items[9].active, False)
-        self.assertEqual(items[9].mitigation,
-                    '**This vulnerability is mitigated and/or suppressed:** Document on why we are suppressing this vulnerability is missing!\nUpdate jquery:3.1.1 to at least the version recommended in the description')
-        self.assertEqual(items[9].tags, ["suppressed", "no_suppression_document"])
+        with self.subTest(i=9):
+            # Tests for two suppressed vulnerabilities,
+            # One for Suppressed with notes, the other is without.
+            self.assertEqual(items[9].active, False)
+            self.assertEqual(
+                items[9].mitigation,
+                "**This vulnerability is mitigated and/or suppressed:** Document on why we are suppressing this vulnerability is missing!\nUpdate jquery:3.1.1 to at least the version recommended in the description",
+            )
+            self.assertEqual(items[9].tags, ["suppressed", "no_suppression_document"])
 
-        self.assertEqual(items[10].active, False)
-        self.assertEqual(items[10].mitigation,
-                     '**This vulnerability is mitigated and/or suppressed:** This is our reason for not to upgrade it.\nUpdate jquery:3.1.1 to at least the version recommended in the description')
-        self.assertEqual(items[10].tags, "suppressed")
+        with self.subTest(i=10):
+            self.assertEqual(items[10].active, False)
+            self.assertEqual(
+                items[10].mitigation,
+                "**This vulnerability is mitigated and/or suppressed:** This is our reason for not to upgrade it.\nUpdate jquery:3.1.1 to at least the version recommended in the description",
+            )
+            self.assertEqual(items[10].tags, "suppressed")
 
     def test_parse_java_6_5_3(self):
         """Test with version 6.5.3"""
@@ -916,7 +925,7 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[i].component_version, "2.12.4")
                 self.assertIn(
                     "Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.",
-                    items[i].description
+                    items[i].description,
                 )
                 self.assertEqual(items[i].severity, "Low")
                 self.assertEqual(items[i].file_path, "log4j-api-2.12.4.jar")

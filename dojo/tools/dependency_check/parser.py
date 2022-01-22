@@ -10,16 +10,21 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
-SEVERITY = ['Info', 'Low', 'Medium', 'High', 'Critical']
-
 
 class DependencyCheckParser(object):
+    SEVERITY_MAPPING = {
+        'info': 'Info',
+        'low': 'Low',
+        'moderate': 'Medium',
+        'high': 'High',
+    }
+
     def add_finding(self, finding, dupes):
         if finding is not None:
             key_str = '{}|{}|{}'.format(finding.cve,
                                             finding.cwe,
                                             finding.file_path.lower())
-            key = hashlib.md5(key_str.encode('utf-8')).hexdigest()
+            key = hashlib.sha256(key_str.encode('utf-8')).hexdigest()
 
             if key not in dupes:
                 dupes[key] = finding
@@ -166,10 +171,6 @@ class DependencyCheckParser(object):
             logger.warning("component_name was None for File: {}, using dependency file name instead.".format(dependency_filename))
             component_name = dependency_filename
 
-        title = '%s:%s | %s(in %s)' % (component_name.split(':')[-1], component_version,
-            (stripped_name + ' ' if stripped_name else '') + (description if len(stripped_name) < 25 else ''),
-            dependency_filename)
-
         # some changes in v6.0.0 around CVSS version information
         # https://github.com/jeremylong/DependencyCheck/pull/2781
 
@@ -182,15 +183,13 @@ class DependencyCheckParser(object):
             elif cvssv2_node is not None:
                 severity = self.get_field_value(cvssv2_node, 'severity', namespace).lower().capitalize()
 
-        # https://github.com/DefectDojo/django-DefectDojo/issues/4309
-        if severity.lower() == 'moderate':
-            severity = 'Medium'
-
-        if severity not in SEVERITY:
-            tag = "Severity is inaccurate : " + str(severity)
-            title += " | " + tag
-            logger.warn("Warning: Inaccurate severity detected. Setting it's severity to Medium level.\n" + "Title is :" + title)
+        # handle if the severity have something not in the mapping
+        # default to 'Medium' and produce warnings in logs
+        if severity.strip().lower() not in self.SEVERITY_MAPPING:
+            logger.warn(f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value")
             severity = "Medium"
+        else:
+            severity = self.SEVERITY_MAPPING[severity.strip().lower()]
 
         reference_detail = None
         references_node = vulnerability.find(namespace + 'references')
@@ -225,7 +224,7 @@ class DependencyCheckParser(object):
             active = True
 
         return Finding(
-            title=title,
+            title=f'{component_name}:{component_version} | {name}',
             file_path=dependency_filename,
             test=test,
             cwe=cwe,
@@ -238,7 +237,8 @@ class DependencyCheckParser(object):
             static_finding=True,
             references=reference_detail,
             component_name=component_name,
-            component_version=component_version)
+            component_version=component_version,
+        )
 
     def get_scan_types(self):
         return ["Dependency Check Scan"]
@@ -250,9 +250,6 @@ class DependencyCheckParser(object):
         return "OWASP Dependency Check output can be imported in Xml format."
 
     def get_findings(self, filename, test):
-        if filename is None:
-            return list()
-
         dupes = dict()
         namespace = ''
         content = filename.read()
@@ -289,23 +286,3 @@ class DependencyCheckParser(object):
                             self.add_finding(finding, dupes)
 
         return list(dupes.values())
-
-# future idea include vulnerablesoftware in description?
-# <vulnerableSoftware>
-#     <software>cpe:2.3:a:netapp:snapmanager:-:*:*:*:*:sap:*:*</software>
-#     <software versionStartIncluding="18.1.0.0" versionEndIncluding="18.8.19.0">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
-#     <software>cpe:2.3:a:oracle:rapid_planning:12.2:*:*:*:*:*:*:*</software>
-#     <software versionStartIncluding="19.12.0.0" versionEndIncluding="19.12.6.0">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
-#     <software>cpe:2.3:a:netapp:snapmanager:-:*:*:*:*:oracle:*:*</software>
-#     <software versionStartIncluding="16.1.0.0" versionEndIncluding="16.2.20.1">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
-#     <software>cpe:2.3:a:netapp:oncommand_workflow_automation:-:*:*:*:*:*:*:*</software>
-#     <software>cpe:2.3:a:oracle:retail_integration_bus:16.0:*:*:*:*:*:*:*</software>
-#     <software versionStartIncluding="2.0.0" versionEndExcluding="2.0.3">cpe:2.3:a:dom4j_project:dom4j:*:*:*:*:*:*:*:*</software>
-#     <software vulnerabilityIdMatched="true" versionStartIncluding="2.1.0" versionEndExcluding="2.1.3">cpe:2.3:a:dom4j_project:dom4j:*:*:*:*:*:*:*:*</software>
-#     <software>cpe:2.3:a:oracle:retail_integration_bus:15.0:*:*:*:*:*:*:*</software>
-#     <software>cpe:2.3:a:netapp:snapcenter:-:*:*:*:*:*:*:*</software>
-#     <software versionStartIncluding="17.1.0.0" versionEndIncluding="17.12.17.1">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
-#     <software>cpe:2.3:a:netapp:oncommand_api_services:-:*:*:*:*:*:*:*</software>
-#     <software>cpe:2.3:a:oracle:rapid_planning:12.1:*:*:*:*:*:*:*</software>
-#     <software>cpe:2.3:a:netapp:snap_creator_framework:-:*:*:*:*:*:*:*</software>
-# </vulnerableSoftware>
