@@ -18,6 +18,7 @@ class DependencyCheckParser(object):
         'low': 'Low',
         'moderate': 'Medium',
         'high': 'High',
+        'critical': 'Critical'
     }
 
     def add_finding(self, finding, dupes):
@@ -189,9 +190,9 @@ class DependencyCheckParser(object):
                 name = reference_node.findtext(f"{namespace}name")
                 source = reference_node.findtext(f"{namespace}source")
                 url = reference_node.findtext(f"{namespace}url")
-                reference_detail += '**name**: {0}\n' \
-                                     '**source**: {1}\n' \
-                                     '**url**: {2}\n\n'.format(name, source, url)
+                reference_detail += '**Name**: {0}\n' \
+                                     '**Source**: {1}\n' \
+                                     '**Url**: {2}\n\n'.format(name, source, url)
 
         if related_dependency is not None:
             tags.append("related")

@@ -714,9 +714,13 @@ class TestDependencyCheckParser(DojoTestCase):
             self.assertEqual(items[0].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
             self.assertEqual(items[0].component_name, "org.dom4j:dom4j")
             self.assertEqual(items[0].component_version, "2.1.1.redhat-00001")
-            self.assertEqual(
+            self.assertIn(
+                "Description of a bad vulnerability.",
                 items[0].description,
-                "Description of a bad vulnerability.\nFilepath: /var/lib/adapter-ear1.ear/dom4j-2.1.1.jar",
+            )
+            self.assertIn(
+                "/var/lib/adapter-ear1.ear/dom4j-2.1.1.jar",
+                items[0].description,
             )
             self.assertEqual(items[0].severity, "High")
             self.assertEqual(items[0].file_path, "adapter-ear1.ear: dom4j-2.1.1.jar")
@@ -732,9 +736,13 @@ class TestDependencyCheckParser(DojoTestCase):
             self.assertEqual(items[1].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
             self.assertEqual(items[1].component_name, "org.dom4j:dom4j")
             self.assertEqual(items[1].component_version, "2.1.1.redhat-00001")
-            self.assertEqual(
+            self.assertIn(
+                "Description of a bad vulnerability.",
                 items[1].description,
-                "Description of a bad vulnerability.\nFilepath: /var/lib/adapter-ear8.ear/dom4j-2.1.1.jar",
+            )
+            self.assertIn(
+                "/var/lib/adapter-ear8.ear/dom4j-2.1.1.jar",
+                items[1].description,
             )
             self.assertEqual(items[1].severity, "High")
             self.assertEqual(items[1].file_path, "adapter-ear8.ear: dom4j-2.1.1.jar")
@@ -748,9 +756,13 @@ class TestDependencyCheckParser(DojoTestCase):
             self.assertEqual(items[2].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
             self.assertEqual(items[2].component_name, "org.dom4j:dom4j")
             self.assertEqual(items[2].component_version, "2.1.1.redhat-00001")
-            self.assertEqual(
+            self.assertIn(
+                "Description of a bad vulnerability.",
                 items[2].description,
-                "Description of a bad vulnerability.\nFilepath: /var/lib/adapter-ear1.ear/dom4j-extensions-2.1.1.jar",
+            )
+            self.assertIn(
+                "/var/lib/adapter-ear1.ear/dom4j-extensions-2.1.1.jar",
+                items[2].description,
             )
             self.assertEqual(items[2].severity, "High")
             self.assertEqual(items[2].file_path, "adapter-ear1.ear: dom4j-extensions-2.1.1.jar")
@@ -781,9 +793,13 @@ class TestDependencyCheckParser(DojoTestCase):
             )
             self.assertEqual(items[4].component_name, "yargs-parser")
             self.assertEqual(items[4].component_version, "5.0.0")
-            self.assertEqual(
+            self.assertIn(
+                'yargs-parser could be tricked into adding or modifying properties of Object.prototype using a "__proto__" payload.',
                 items[4].description,
-                'yargs-parser could be tricked into adding or modifying properties of Object.prototype using a "__proto__" payload.\nFilepath: /var/lib/jenkins/workspace/nl-selfservice_-_metrics_develop/package-lock.json?yargs-parser',
+            )
+            self.assertIn(
+                "/var/lib/jenkins/workspace/nl-selfservice_-_metrics_develop/package-lock.json?yargs-parser",
+                items[4].description,
             )
             self.assertEqual(items[4].severity, "High")
             self.assertEqual(items[4].file_path, "yargs-parser:5.0.0")
@@ -798,9 +814,14 @@ class TestDependencyCheckParser(DojoTestCase):
             )
             self.assertEqual(items[5].component_name, "yargs-parser")
             self.assertEqual(items[5].component_version, "5.0.0")
-            self.assertEqual(
+            self.assertIn(
+                "The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.",
                 items[5].description,
-                "The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.\nFilepath: /var/lib/jenkins/workspace/nl-selfservice_-_metrics_develop/package-lock.json?yargs-parser",
+            )
+            # check that the filepath is in the description
+            self.assertIn(
+                "/var/lib/jenkins/workspace/nl-selfservice_-_metrics_develop/package-lock.json?yargs-parser",
+                items[5].description,
             )
             self.assertEqual(items[5].severity, "High")
             self.assertEqual(items[5].file_path, "yargs-parser:5.0.0")
@@ -852,6 +873,7 @@ class TestDependencyCheckParser(DojoTestCase):
                 "**This vulnerability is mitigated and/or suppressed:** Document on why we are suppressing this vulnerability is missing!\nUpdate jquery:3.1.1 to at least the version recommended in the description",
             )
             self.assertEqual(items[9].tags, ["suppressed", "no_suppression_document"])
+            self.assertEqual(items[10].severity, "Critical")
 
         with self.subTest(i=10):
             self.assertEqual(items[10].active, False)
@@ -860,6 +882,7 @@ class TestDependencyCheckParser(DojoTestCase):
                 "**This vulnerability is mitigated and/or suppressed:** This is our reason for not to upgrade it.\nUpdate jquery:3.1.1 to at least the version recommended in the description",
             )
             self.assertEqual(items[10].tags, "suppressed")
+            self.assertEqual(items[10].severity, "Critical")
 
     def test_parse_java_6_5_3(self):
         """Test with version 6.5.3"""
