@@ -123,13 +123,17 @@ class DependencyCheckParser(object):
 
         tags = []
         name = vulnerability.findtext(f'{namespace}name')
-        cwes_node = vulnerability.find(f'{namespace}cwes')
         if vulnerability.find(f'{namespace}cwes'):
             cwe_field = vulnerability.find(f'{namespace}cwes').findtext(f'{namespace}cwe')
         else:
             cwe_field = vulnerability.findtext(f'{namespace}cwe')
 
         description = vulnerability.findtext(f'{namespace}description')
+
+        source = vulnerability.get('source')
+        if source:
+            description += '\n**Source:** ' + str(source)
+
         # I need the notes field since this is how the suppression is documented.
         notes = vulnerability.findtext(f'.//{namespace}notes')
 
@@ -185,14 +189,17 @@ class DependencyCheckParser(object):
 
         if references_node is not None:
             reference_detail = ''
-            for reference_node in references_node.findall(namespace +
-                                                          'reference'):
-                name = reference_node.findtext(f"{namespace}name")
-                source = reference_node.findtext(f"{namespace}source")
-                url = reference_node.findtext(f"{namespace}url")
-                reference_detail += '**Name**: {0}\n' \
-                                     '**Source**: {1}\n' \
-                                     '**Url**: {2}\n\n'.format(name, source, url)
+            for reference_node in references_node.findall(namespace + 'reference'):
+                ref_source = reference_node.findtext(f"{namespace}source")
+                ref_url = reference_node.findtext(f"{namespace}url")
+                ref_name = reference_node.findtext(f"{namespace}name")
+                if ref_url == ref_name:
+                    reference_detail += f'**Source:** {ref_source}\n' \
+                                        f'**URL:** {ref_url}\n\n'
+                else:
+                    reference_detail += f'**Source:** {ref_source}\n' \
+                                        f'**URL:** {ref_url}\n' \
+                                        f'**Name:** {ref_name}\n\n'
 
         if related_dependency is not None:
             tags.append("related")
@@ -209,7 +216,7 @@ class DependencyCheckParser(object):
 
         else:
             mitigation = 'Update {}:{} to at least the version recommended in the description'.format(component_name, component_version)
-            description += '\n**Filepath**: ' + str(dependency_filepath)
+            description += '\n**Filepath:** ' + str(dependency_filepath)
             active = True
 
         return Finding(

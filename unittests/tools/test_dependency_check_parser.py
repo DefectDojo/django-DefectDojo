@@ -127,7 +127,7 @@ class TestDependencyCheckParser(DojoTestCase):
         self.assertEqual(1, len(items))
         i = 0
         with self.subTest(i=i):
-            self.assertEqual(items[i].title, "org.owasp:library:6.7.8 | Reference for a bad vulnerability")
+            self.assertEqual(items[i].title, "org.owasp:library:6.7.8 | CVE-0000-0001")
             self.assertEqual(items[i].severity, "Medium")
             self.assertEqual(items[i].component_name, "org.owasp:library")
             self.assertEqual(items[i].component_version, "6.7.8")
@@ -711,7 +711,7 @@ class TestDependencyCheckParser(DojoTestCase):
 
         with self.subTest(i=0):
             # identifier -> package url java + 2 relateddependencies
-            self.assertEqual(items[0].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
+            self.assertEqual(items[0].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
             self.assertEqual(items[0].component_name, "org.dom4j:dom4j")
             self.assertEqual(items[0].component_version, "2.1.1.redhat-00001")
             self.assertIn(
@@ -733,7 +733,7 @@ class TestDependencyCheckParser(DojoTestCase):
             )  # 2016-11-05T14:52:15.748-0400
 
         with self.subTest(i=1):
-            self.assertEqual(items[1].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
+            self.assertEqual(items[1].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
             self.assertEqual(items[1].component_name, "org.dom4j:dom4j")
             self.assertEqual(items[1].component_version, "2.1.1.redhat-00001")
             self.assertIn(
@@ -753,7 +753,7 @@ class TestDependencyCheckParser(DojoTestCase):
             self.assertEqual(items[1].tags, "related")
 
         with self.subTest(i=2):
-            self.assertEqual(items[2].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
+            self.assertEqual(items[2].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
             self.assertEqual(items[2].component_name, "org.dom4j:dom4j")
             self.assertEqual(items[2].component_version, "2.1.1.redhat-00001")
             self.assertIn(
@@ -774,7 +774,7 @@ class TestDependencyCheckParser(DojoTestCase):
         with self.subTest(i=3):
             # identifier -> package url javascript, no vulnerabilitids, 3 vulnerabilities, relateddependencies without filename (pre v6.0.0)
             self.assertEqual(
-                items[3].title, "yargs-parser:5.0.0 | - [Snyk Report](https://snyk.io/vuln/SNYK-JS-YARGSPARSER-560381)"
+                items[3].title, "yargs-parser:5.0.0 | 1500"
             )
             self.assertEqual(items[3].component_name, "yargs-parser")
             self.assertEqual(items[3].component_version, "5.0.0")
@@ -785,11 +785,15 @@ class TestDependencyCheckParser(DojoTestCase):
             self.assertEqual(
                 items[3].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description"
             )
+            self.assertIn(
+                "**Source:** NPM",
+                items[3].description,
+            )
 
         with self.subTest(i=4):
             self.assertEqual(
                 items[4].title,
-                "yargs-parser:5.0.0 | [CVE-2020-7608] yargs-parser could be tricked into adding or modifying properties of Object.prot...",
+                "yargs-parser:5.0.0 | CVE-2020-7608",
             )
             self.assertEqual(items[4].component_name, "yargs-parser")
             self.assertEqual(items[4].component_version, "5.0.0")
@@ -831,7 +835,7 @@ class TestDependencyCheckParser(DojoTestCase):
 
         with self.subTest(i=6):
             # identifier -> cpe java
-            self.assertEqual(items[6].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | Reference for a bad vulnerability")
+            self.assertEqual(items[6].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
             self.assertEqual(items[6].component_name, "org.dom4j:dom4j")
             self.assertEqual(items[6].component_version, "2.1.1.redhat-00001")
             self.assertEqual(items[6].severity, "High")
@@ -843,7 +847,7 @@ class TestDependencyCheckParser(DojoTestCase):
 
         with self.subTest(i=7):
             # identifier -> maven java
-            self.assertEqual(items[7].title, "dom4j:2.1.1 | Reference for a bad vulnerability")
+            self.assertEqual(items[7].title, "dom4j:2.1.1 | CVE-0000-0001")
             self.assertEqual(items[7].component_name, "dom4j")
             self.assertEqual(items[7].component_version, "2.1.1")
             self.assertEqual(items[7].severity, "High")
@@ -855,7 +859,7 @@ class TestDependencyCheckParser(DojoTestCase):
             # evidencecollected -> single product + single verison javascript
             self.assertEqual(
                 items[8].title,
-                "jquery:3.1.1 | Reference for a bad vulnerability",
+                "jquery:3.1.1 | CVE-0000-0001",
             )
             self.assertEqual(items[8].component_name, "jquery")
             self.assertEqual(items[8].component_version, "3.1.1")
