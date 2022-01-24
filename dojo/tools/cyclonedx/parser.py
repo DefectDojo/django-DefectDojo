@@ -6,7 +6,6 @@ import dateutil
 from cvss import CVSS3
 from defusedxml import ElementTree
 from dojo.models import Finding
-from packageurl import PackageURL
 
 LOGGER = logging.getLogger(__name__)
 
@@ -263,9 +262,9 @@ class CycloneDXParser(object):
                 reference = affect["ref"]  # required by the specification
                 component_name, component_version = self._get_component(components, reference)
                 finding = Finding(
-                    title=f"{component_name}:{component_version} | {vulnerability.get('id')}",
+                    title=vulnerability["description"],  # f"{component_name}:{component_version} | {vulnerability.get('id')}",
                     test=test,
-                    description=vulnerability["description"],
+                    description=vulnerability.get("detail", vulnerability.get("description")),  # + "\n" + vulnerability.get("details", ""),
                     severity="Medium",
                     mitigation=vulnerability.get("recommendation"),
                     component_name=component_name,
@@ -292,12 +291,6 @@ class CycloneDXParser(object):
 
     def _get_component(self, components, reference):
         if reference not in components:
-            LOGGER.warning(f"reference:{reference} not found in the BOM, trying to decode the reference as PURL")
-            try:
-                purl = PackageURL.from_string(reference)
-                return purl.name, purl.version
-            except:
-                LOGGER.exception(f"failed to parse the reference:{reference} as PURL")
-                return (None, None)
-        else:
-            return (components[reference]["name"], components[reference]["version"])
+            LOGGER.warning(f"reference:{reference} not found in the BOM")
+            return (None, None)
+        return (components[reference]["name"], components[reference]["version"])

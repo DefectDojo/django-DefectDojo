@@ -121,13 +121,13 @@ class TestParser(DojoTestCase):
                 self.assertEqual("Critical", finding.severity)
                 # self.assertEqual("redis", finding.component_name)
                 # self.assertEqual("3.5.3", finding.component_version)
-                self.assertEqual("CVE-2018-7489", finding.cve)
-                self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
+                # self.assertEqual("CVE-2018-7489", finding.cve)
+                # self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertIn(
                     "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",
                     finding.description,
                 )
-                self.assertEqual("CVE-2018-12453", finding.vuln_id_from_tool)
+                self.assertEqual("SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111", finding.vuln_id_from_tool)
 
     def test_cyclonedx_1_4_json(self):
         """ClyconeDX version 1.4 JSON format"""
@@ -142,11 +142,11 @@ class TestParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("jackson-databind", finding.component_name)
-                self.assertEqual("2.9.9", finding.component_version)
+                self.assertEqual("2.9.4", finding.component_version)
                 self.assertEqual("CVE-2018-7489", finding.cve)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertIn(
-                    "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",
+                    "No description given",
                     finding.description,
                 )
                 self.assertIn(
@@ -156,27 +156,49 @@ class TestParser(DojoTestCase):
                 self.assertEqual("SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111", finding.vuln_id_from_tool)
 
     def test_cyclonedx_1_4_jake_json(self):
-        """ClyconeDX version 1.4 JSON format produced by jake 1.4.0"""
-        with open("unittests/scans/cyclonedx/jake.json") as file:
+        """ClyconeDX version 1.4 JSON format produced by jake 1.4.1"""
+        with open("unittests/scans/cyclonedx/jake2.json") as file:
             parser = CycloneDXParser()
             findings = parser.get_findings(file, Test())
             for finding in findings:
                 self.assertIn(finding.severity, Finding.SEVERITIES)
                 finding.clean()
-            self.assertEqual(1, len(findings))
+            self.assertEqual(7, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual("Critical", finding.severity)
-                self.assertEqual("jackson-databind", finding.component_name)
-                self.assertEqual("2.9.9", finding.component_version)
-                self.assertEqual("CVE-2018-7489", finding.cve)
-                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("Django", finding.component_name)
+                self.assertEqual("2.0.1", finding.component_version)
+                # self.assertEqual("CVE-2018-7489", finding.cve)  # current Jake version is broken on this data
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N", finding.cvssv3)
                 self.assertIn(
-                    "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",
+                    "Django before 2.2.24, 3.x before 3.1.12, and 3.2.x before 3.2.4 has a potential directory traversal",
                     finding.description,
                 )
+                self.assertEqual("CVE-2021-33203", finding.vuln_id_from_tool)
+
+            with self.subTest(i=1):
+                finding = findings[1]
+                self.assertEqual("Medium", finding.severity)
+                self.assertEqual("Django", finding.component_name)
+                self.assertEqual("2.0.1", finding.component_version)
+                # self.assertEqual("CVE-2018-7489", finding.cve)  # current Jake version is broken on this data
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L", finding.cvssv3)
                 self.assertIn(
-                    "Upgrade com.fasterxml.jackson.core:jackson-databind to version 2.6.7.5, 2.8.11.1, 2.9.5 or higher.",
-                    finding.mitigation,
+                    "An issue was discovered in Django 2.0 before 2.0.3, 1.11 before 1.11.11, and 1.8 before 1.8.19.",
+                    finding.description,
                 )
-                self.assertEqual("SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111", finding.vuln_id_from_tool)
+                self.assertEqual("CVE-2018-7536", finding.vuln_id_from_tool)
+
+            with self.subTest(i=6):
+                finding = findings[6]
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("Django", finding.component_name)
+                self.assertEqual("2.0.1", finding.component_version)
+                # self.assertEqual("CVE-2018-7489", finding.cve)  # current Jake version is broken on this data
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N", finding.cvssv3)
+                self.assertIn(
+                    "django.contrib.auth.forms.AuthenticationForm in Django 2.0 before 2.0.2, and 1.11.8 and 1.11.9, allows remote attackers to obtain potentially sensitive information",
+                    finding.description,
+                )
+                self.assertEqual("CVE-2018-6188", finding.vuln_id_from_tool)
