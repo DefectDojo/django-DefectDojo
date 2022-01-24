@@ -35,13 +35,13 @@ services:
       target: django
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
-      - mysql
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi.sh']
+      - database
+    entrypoint: ['/wait-for-it.sh', 'database:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-uwsgi.sh']
     environment:
       DD_DEBUG: 'False'
       DD_DJANGO_METRICS_ENABLED: "${DD_DJANGO_METRICS_ENABLED:-False}"
       DD_ALLOWED_HOSTS: "${DD_ALLOWED_HOSTS:-*}"
-      DD_DATABASE_URL: "${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}"
+      DD_DATABASE_URL: ${DD_DATABASE_URL}
       DD_CELERY_BROKER_USER: "${DD_CELERY_BROKER_USER:-guest}"
       DD_CELERY_BROKER_PASSWORD: "${DD_CELERY_BROKER_USER:-guest}"
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
@@ -54,11 +54,11 @@ services:
   celerybeat:
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
-      - mysql
+      - database
       - rabbitmq
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-celery-beat.sh']
+    entrypoint: ['/wait-for-it.sh', 'database:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-celery-beat.sh']
     environment:
-      DD_DATABASE_URL: "${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}"
+      DD_DATABASE_URL: ${DD_DATABASE_URL}
       DD_CELERY_BROKER_USER: "${DD_CELERY_BROKER_USER:-guest}"
       DD_CELERY_BROKER_PASSWORD: "${DD_CELERY_BROKER_USER:-guest}"
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
@@ -70,11 +70,11 @@ services:
   celeryworker:
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
-      - mysql
+      - database
       - rabbitmq
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-celery-worker.sh']
+    entrypoint: ['/wait-for-it.sh', 'database:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-celery-worker.sh']
     environment:
-      DD_DATABASE_URL: "${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}"
+      DD_DATABASE_URL: ${DD_DATABASE_URL}
       DD_CELERY_BROKER_USER: "${DD_CELERY_BROKER_USER:-guest}"
       DD_CELERY_BROKER_PASSWORD: "${DD_CELERY_BROKER_USER:-guest}"
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
@@ -87,10 +87,10 @@ services:
   initializer:
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     depends_on:
-      - mysql
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '--', '/entrypoint-initializer.sh']
+      - database
+    entrypoint: ['/wait-for-it.sh', 'database:${DD_DATABASE_PORT}', '--', '/entrypoint-initializer.sh']
     environment:
-      DD_DATABASE_URL: "${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}"
+      DD_DATABASE_URL: ${DD_DATABASE_URL}
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_MAIL: "${DD_ADMIN_USER:-admin@defectdojo.local}"
       DD_ADMIN_FIRST_NAME: "${DD_ADMIN_FIRST_NAME:-Admin}"
@@ -102,17 +102,26 @@ services:
         - type: bind
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
-  mysql:
+  database:
+    # >>>>> Only needed when using MySQL >>>>>
     image: mysql:5.7.37@sha256:afc453de0d675083ac00d0538521f8a9a67d1cce180d70fab9925ebcc87a0eba
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
-      DD_DATABASE_URL: "${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}"
-      MYSQL_USER: "${DD_DATABASE_USER:-defectdojo}"
-      MYSQL_PASSWORD: "${DD_DATABASE_PASSWORD:-defectdojo}"
-      MYSQL_DATABASE: "${DD_DATABASE_NAME:-defectdojo}"
+      MYSQL_DATABASE: ${DD_DATABASE_NAME}
+      MYSQL_USER: ${DD_DATABASE_USER}
+      MYSQL_PASSWORD: ${DD_DATABASE_PASSWORD}
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    # <<<<< Only needed when using MySQL <<<<<
+
+    # >>>>> Only needed when using PostgreSQL >>>>>
+    # image: postgres:14.1
+    # environment:
+    #   POSTGRES_DB: ${DD_DATABASE_NAME}
+    #   POSTGRES_USER: ${DD_DATABASE_USER}
+    #   POSTGRES_PASSWORD: ${DD_DATABASE_PASSWORD}
+    # <<<<< Only needed when using PostgreSQL <<<<<
     volumes:
-       - defectdojo_data:/var/lib/mysql
+      - defectdojo_data:${DD_DATABASE_DATA_PATH}
   rabbitmq:
     image: rabbitmq:3.9.13@sha256:3d4c70ec5fc84c27efaeb56c50aafcac4fd8583b61398cc028e4876f84ae73d8
     volumes:

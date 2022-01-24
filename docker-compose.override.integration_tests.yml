@@ -9,7 +9,7 @@ services:
     depends_on:
       - nginx
       - uwsgi
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/app/docker/entrypoint-integration-tests.sh']
+    entrypoint: ['/wait-for-it.sh', 'database:${DD_DATABASE_PORT}', '-t', '30', '--', '/app/docker/entrypoint-integration-tests.sh']
     volumes:
       - '.:/app:z'
       - "defectdojo_media_integration_test:${DD_MEDIA_ROOT:-/app/media}"
@@ -22,39 +22,54 @@ services:
     volumes:
       - defectdojo_media_integration_test:/usr/share/nginx/html/media
   uwsgi:
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
+    entrypoint: ['/wait-for-it.sh', 'database:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
     volumes:
       - '.:/app:z'
       - defectdojo_media_integration_test:${DD_MEDIA_ROOT:-/app/media}
     environment:
       DD_DEBUG: 'True'
-      DD_DATABASE_URL: "${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}"
+      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
       DD_SECRET_KEY: "${DD_SECRET_KEY:-.}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
   celerybeat:
     environment:
-      DD_DATABASE_URL: "${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}"
+      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
   celeryworker:
     environment:
-      DD_DATABASE_URL: "${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}"
+      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
   initializer:
     environment:
       DD_INITIALIZE: 'true'
-      DD_DATABASE_URL: "${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}"
+      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-AdminsLoveIntegrationtests!}"
       DD_SECRET_KEY: "${DD_SECRET_KEY:-.}"
     volumes:
       - '.:/app:z'
-  mysql:
+  database:
     ports:
-      - target: 3306
-        published: 3306
+      - target: ${DD_DATABASE_PORT}
+        published: ${DD_DATABASE_PORT}
         protocol: tcp
         mode: host
     environment:
-      MYSQL_DATABASE: "${DD_TEST_DATABASE_NAME:-test_defectdojo}"
+      MYSQL_DATABASE: ${DD_TEST_DATABASE_NAME}
+      POSTGRES_DB: ${DD_TEST_DATABASE_NAME}
     volumes:
-       - defectdojo_data_integration_tests:/var/lib/mysql
+       - defectdojo_data_integration_tests:${DD_DATABASE_DATA_PATH}
+  # >>>>> Only needed when using PostgreSQL >>>>>
+  # pgadmin:
+  #   image: dpage/pgadmin4:6.4
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: pgadmin@defectdojo.org
+  #     PGADMIN_DEFAULT_PASSWORD: defectdojo
+  #   ports:
+  #     - target: 80
+  #       published: 8081
+  #       protocol: tcp
+  #       mode: host
+  #   volumes:
+  #     - defectdojo_pgadmin_unittest:/var/lib/pgadmin  
+  # <<<<< Only needed when using PostgreSQL <<<<<
   mailhog:
     image: mailhog/mailhog:v1.0.1@sha256:8d76a3d4ffa32a3661311944007a415332c4bb855657f4f6c57996405c009bea
     ports:
@@ -65,3 +80,6 @@ services:
 volumes:
   defectdojo_data_integration_tests: {}
   defectdojo_media_integration_test: {}
+  # >>>>> Only needed when using PostgreSQL >>>>>
+  # defectdojo_pgadmin_unittest: {}
+  # <<<<< Only needed when using PostgreSQL <<<<<

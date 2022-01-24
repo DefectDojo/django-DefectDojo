@@ -2,7 +2,7 @@
     version: '3.7'
     services:
       uwsgi:
-        entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
+        entrypoint: ['/wait-for-it.sh', 'mysql:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
         volumes:
           - '.:/app:z'
         environment:
@@ -29,10 +29,25 @@
       nginx:
         volumes:
           - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
-      mysql:
+      database:
         ports:
-          - target: 3306
-            published: 3306
+          - target: ${DD_DATABASE_PORT}
+            published: ${DD_DATABASE_PORT}
             protocol: tcp
             mode: host
-
+    # >>>>> Only needed when using PostgreSQL >>>>>
+    #   pgadmin:
+    #     image: dpage/pgadmin4:6.4
+    #     environment:
+    #       PGADMIN_DEFAULT_EMAIL: pgadmin@defectdojo.org
+    #       PGADMIN_DEFAULT_PASSWORD: defectdojo
+    #     ports:
+    #       - target: 80
+    #         published: 8081
+    #         protocol: tcp
+    #         mode: host
+    #     volumes:
+    #       - defectdojo_pgadmin_unittest:/var/lib/pgadmin  
+    # volumes:
+    #   defectdojo_pgadmin_unittest: {}
+    # <<<<< Only needed when using PostgreSQL <<<<<
