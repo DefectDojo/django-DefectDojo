@@ -476,14 +476,25 @@ def log_jira_message(text, finding):
 def get_labels(obj):
     # Update Label with system setttings label
     labels = []
+ 
+    # Put a branch tag in as a label.
+    if type(obj) == Finding and obj.test.branch_tag:
+        labels.append(obj.test.branch_tag.replace(" ", "_"))
+ 
     system_settings = System_Settings.objects.get()
     system_labels = system_settings.jira_labels
-    if system_labels:
+    if system_labels is None:
+        if len(labels) == 0:
+            return
+        else:
+            return labels
+    else:
         system_labels = system_labels.split()
+    if len(system_labels) > 0:
         for system_label in system_labels:
             labels.append(system_label)
-        # Update the label with the product name (underscore)
-        labels.append(prod_name(obj).replace(" ", "_"))
+    # Update the label with the product name (underscore)
+    labels.append(prod_name(obj).replace(" ", "_"))
     return labels
 
 
