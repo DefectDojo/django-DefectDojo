@@ -84,7 +84,7 @@ class WpscanParser(object):
                 dupes,
                 node,
                 plugin,
-                detection_confidence=tree["plugins"][plugin].get("confidence"),
+                detection_confidence=node.get("confidence"),
             )
 
         # manage Wordpress version findings
