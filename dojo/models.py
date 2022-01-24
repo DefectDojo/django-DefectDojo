@@ -2166,7 +2166,7 @@ class Finding(models.Model):
             return self.original_finding.all().order_by('title')
 
     def get_scanner_confidence_text(self):
-        if isinstance(self.scanner_confidence, int):
+        if self.scanner_confidence and isinstance(self.scanner_confidence, int):
             if self.scanner_confidence <= 2:
                 return "Certain"
             elif self.scanner_confidence >= 3 and self.scanner_confidence <= 5:
