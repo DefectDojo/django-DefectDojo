@@ -60,8 +60,8 @@ jobs:
         run: docker/setEnv.sh unit_tests_cicd
 
       # phased startup so we can use the exit code from unit test container
-      - name: Start MySQL
-        run: docker-compose up -d mysql
+      - name: Start Database
+        run: docker-compose up -d database
 
       # no celery or initializer needed for unit tests
       - name: Unit tests
