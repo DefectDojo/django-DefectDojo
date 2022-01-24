@@ -262,7 +262,6 @@ def edit_test(request, tid):
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     eng = test.engagement
-    form = DeleteTestForm(instance=test)
 
     if request.method == 'POST':
         if 'id' in request.POST and str(test.id) == request.POST['id']:
@@ -286,13 +285,50 @@ def delete_test(request, tid):
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
+    form = DeleteTestForm(instance=test)
+    product_tab = Product_Tab(test.engagement.product.id, title="Delete Test", tab="engagements")
+    product_tab.setEngagement(test.engagement)
+    return render(request, 'dojo/delete_test.html',
+                  {'test': test,
+                   'product_tab': product_tab,
+                   'form': form,
+                   })
+
+@user_is_authorized(Test, Permissions.Test_Delete, 'tid')
+def dangerzone_delete_test(request, tid):
+    test = get_object_or_404(Test, pk=tid)
+    eng = test.engagement
+
+    if request.method == 'POST':
+        if 'id' in request.POST and str(test.id) == request.POST['id']:
+            form = DeleteTestForm(request.POST, instance=test)
+            if form.is_valid():
+                product = test.engagement.product
+                if form.cleaned_data['asynchronous_delete']:
+                    dojo.tasks.asynch_delete.delay(Test, test.id)
+                else:
+                    test.delete()
+                    messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Test and relationships removed.',
+                                     extra_tags='alert-success')
+                    create_notification(event='other',
+                                    title='Deletion of %s' % test.title,
+                                    product=product,
+                                    description='The test "%s" was deleted by %s' % (test.title, request.user),
+                                    url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id, ))),
+                                    recipients=[test.engagement.lead],
+                                    icon="exclamation-triangle")
+                return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
+
+    form = DeleteTestForm(instance=test, initial={'ikwiad':True})
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([test])
     rels = collector.nested()
 
     product_tab = Product_Tab(test.engagement.product.id, title="Delete Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
-    return render(request, 'dojo/delete_test.html',
+    return render(request, 'dojo/dangerzone_delete_test.html',
                   {'test': test,
                    'product_tab': product_tab,
                    'form': form,

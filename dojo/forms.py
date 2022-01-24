@@ -258,8 +258,11 @@ class DeleteProductForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
     asynchronous_delete = forms.BooleanField(required=False,
-        label="Asynchronous Delete",
-        help_text="Delete this data asynchronously in the background. Alert notifications will notify you when task is finished.")
+        label="Asynchronous (Background) Delete")
+
+    # i know what i am doing
+    ikwiad = forms.BooleanField(required=True,
+        label="Acknowledge Deleting Related Objects")
 
     class Meta:
         model = Product
@@ -795,8 +798,11 @@ class DeleteEngagementForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
     asynchronous_delete = forms.BooleanField(required=False,
-        label="Asynchronous Delete",
-        help_text="Delete this data asynchronously in the background. Alert notifications will notify you when task is finished.")
+        label="Asynchronous (Background) Delete")
+
+    # i know what i am doing
+    ikwiad = forms.BooleanField(required=True,
+        label="Acknowledge Deleting Related Objects")
 
     class Meta:
         model = Engagement
@@ -848,8 +854,11 @@ class DeleteTestForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
     asynchronous_delete = forms.BooleanField(required=False,
-        label="Asynchronous Delete",
-        help_text="Delete this data asynchronously in the background. Alert notifications will notify you when task is finished.")
+        label="Asynchronous (Background) Delete")
+
+    # i know what i am doing
+    ikwiad = forms.BooleanField(required=True,
+        label="Acknowledge Deleting Related Objects")
 
     class Meta:
         model = Test

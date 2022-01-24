@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+    {{ block.super }}
+    <h3> Delete Product {{ product }}</h3>
+    <p>
+        Deleting this Product will remove any related objects associated
+        with it. These relationships are listed below:
+    </p>
+    <div class="danger-zone panel panel-danger">
+        <div class="panel-heading">
+            <h3>Danger Zone<span class="pull-right"><a name="collapsible" role="button" data-toggle="collapse" href="#loggins" aria-controls="loggins" aria-expanded="true">
+              <i class="glyphicon glyphicon-chevron-up"></i></a></span>
+            </h3>
+        </div>
+        <div id="kenny" class="panel-body">
+        {% if rels|length > 1 %}
+            <ul id="loggins" class="collapse in left">{{ rels|unordered_list }}</ul>
+        {% else %}
+            <p id="loggins" class="collapse in left text-center">No relationships found.</p>
+        {% endif %}
+        </div>
+    </div>
+    <form class="form-horizontal" method="post">
+        {% csrf_token %}
+        <table>
+        {{ form.as_table }}
+        </table>
+        <div class="form-group">
+            <button class="btn btn-danger" type="submit" name="delete_name" value="delete_test">Delete Product</button>
+        </div>
+    </form>
+    <br/>
+    <br/>
+<script type="text/javascript">
+    $(function () {
+                    $("a[data-toggle='collapse']").on('click', function () {
+                var i = $($(this).find('i').get(0));
+                i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
+            });
+    });
+</script>
+{% endblock %}

@@ -4,26 +4,18 @@
     <h3> Delete Product {{ product }}</h3>
     <p>
         Deleting this Product will remove any related objects associated
-        with it. These relationships are listed below:
+        with it.<BR>
+        <a class="text-danger" href="/product/{{product.id}}/dangerzone_delete">Click Here To See Related Objects Before Deleting</a>
     </p>
-    <div class="danger-zone panel panel-danger">
-        <div class="panel-heading">
-            <h3>Danger Zone</h3>
+    <form class="form-horizontal" method="post">
+        {% csrf_token %}
+        <table>
+        {{ form.as_table }}
+        </table>
+        <div class="form-group">
+            <button class="btn btn-danger" type="submit" name="delete_name" value="delete_test">Delete Product</button>
         </div>
-        {% if rels|length > 1 %}
-            <ul class="left">{{ rels|unordered_list }}</ul>
-        {% else %}
-            <p class="text-center">No relationships found.</p>
-        {% endif %}
-        <form class="form-horizontal" method="post">
-            {% csrf_token %}
-            {{ form }}
-
-            <div class="form-group">
-                <button class="btn btn-danger" type="submit" name="delete_name" value="delete_test">Delete Product</button>
-            </div>
-        </form>
-    </div>
+    </form>
     <br/>
     <br/>
 {% endblock %}

@@ -877,7 +877,6 @@ def edit_product(request, pid):
 @user_is_authorized(Product, Permissions.Product_Delete, 'pid')
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
-    form = DeleteProductForm(instance=product)
 
     if request.method == 'POST':
         logger.debug('delete_product: POST')
@@ -905,11 +904,9 @@ def delete_product(request, pid):
                 logger.debug('delete_product: POST INVALID FORM')
                 logger.error(form.errors)
 
-    logger.debug('delete_product: GET')
+    form = DeleteProductForm(instance=product)
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([product])
-    rels = collector.nested()
+    logger.debug('delete_product: GET')
 
     product_tab = Product_Tab(pid, title="Product", tab="settings")
 
@@ -919,8 +916,53 @@ def delete_product(request, pid):
                   {'product': product,
                    'form': form,
                    'product_tab': product_tab,
+                   })
+
+@user_is_authorized(Product, Permissions.Product_Delete, 'pid')
+def dangerzone_delete_product(request, pid):
+    product = get_object_or_404(Product, pk=pid)
+
+    if request.method == 'POST':
+        logger.debug('delete_product: POST')
+        if 'id' in request.POST and str(product.id) == request.POST['id']:
+            form = DeleteProductForm(request.POST, instance=product)
+            if form.is_valid():
+                product_type = product.prod_type
+                if form.cleaned_data['asynchronous_delete']:
+                    dojo.tasks.asynch_delete.delay(Product, product.id)
+                else:
+                    product.delete()
+                    messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Product and relationships removed.',
+                                     extra_tags='alert-success')
+                    create_notification(event='other',
+                                    title='Deletion of %s' % product.name,
+                                    product_type=product_type,
+                                    description='The product "%s" was deleted by %s' % (product.name, request.user),
+                                    url=request.build_absolute_uri(reverse('product')),
+                                    icon="exclamation-triangle")
+                logger.debug('delete_product: POST RETURN')
+                return HttpResponseRedirect(reverse('product'))
+            else:
+                logger.debug('delete_product: POST INVALID FORM')
+                logger.error(form.errors)
+
+    form = DeleteProductForm(instance=product, initial={'ikwiad':True})
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([product])
+    rels = collector.nested()
+
+    product_tab = Product_Tab(pid, title="Product", tab="settings")
+
+    return render(request, 'dojo/dangerzone_delete_product.html',
+                  {'product': product,
+                   'form': form,
+                   'product_tab': product_tab,
                    'rels': rels,
                    })
+
 
 
 @user_is_authorized(Product, Permissions.Engagement_Add, 'pid')

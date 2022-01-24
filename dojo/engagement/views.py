@@ -283,13 +283,11 @@ def edit_engagement(request, eid):
 def delete_engagement(request, eid):
     engagement = get_object_or_404(Engagement, pk=eid)
     product = engagement.product
-    form = DeleteEngagementForm(instance=engagement)
 
     if request.method == 'POST':
         if 'id' in request.POST and str(engagement.id) == request.POST['id']:
             form = DeleteEngagementForm(request.POST, instance=engagement)
             if form.is_valid():
-                product = engagement.product
                 if form.cleaned_data['asynchronous_delete']:
                     dojo.tasks.asynch_delete.delay(Engagement, engagement.id)
                 else:
@@ -309,19 +307,58 @@ def delete_engagement(request, eid):
 
                 return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([engagement])
-    rels = collector.nested()
-
+    form = DeleteEngagementForm(instance=engagement)
     product_tab = Product_Tab(product.id, title="Delete Engagement", tab="engagements")
     product_tab.setEngagement(engagement)
     return render(request, 'dojo/delete_engagement.html', {
         'product_tab': product_tab,
         'engagement': engagement,
         'form': form,
-        'rels': rels,
     })
 
+@user_is_authorized(Engagement, Permissions.Engagement_Delete, 'eid')
+def dangerzone_delete_engagement(request, eid):
+    engagement = get_object_or_404(Engagement, pk=eid)
+    product = engagement.product
+
+    if request.method == 'POST':
+        if 'id' in request.POST and str(engagement.id) == request.POST['id']:
+            form = DeleteEngagementForm(request.POST, instance=engagement)
+            if form.is_valid():
+                if form.cleaned_data['asynchronous_delete']:
+                    dojo.tasks.asynch_delete.delay(Engagement, engagement.id)
+                else:
+                    engagement.delete()
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Engagement and relationships removed.',
+                        extra_tags='alert-success')
+                    create_notification(event='other',
+                                    title='Deletion of %s' % engagement.name,
+                                    product=product,
+                                    description='The engagement "%s" was deleted by %s' % (engagement.name, request.user),
+                                    url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
+                                    recipients=[engagement.lead],
+                                    icon="exclamation-triangle")
+
+                return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
+
+    # user has been displayed the dangerzone
+    form = DeleteEngagementForm(instance=engagement, initial={'ikwiad':True})
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([engagement])
+    rels = collector.nested()
+
+    product_tab = Product_Tab(product.id, title="Delete Engagement", tab="engagements")
+    product_tab.setEngagement(engagement)
+    return render(request, 'dojo/dangerzone_delete_engagement.html', {
+        'product_tab': product_tab,
+        'engagement': engagement,
+        'form': form,
+        'rels': rels,
+    })
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def view_engagement(request, eid):

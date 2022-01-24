@@ -13,6 +13,8 @@ urlpatterns = [
         name='edit_test'),
     url(r'^test/(?P<tid>\d+)/delete$', views.delete_test,
         name='delete_test'),
+    url(r'^test/(?P<tid>\d+)/dangerzone_delete$', views.dangerzone_delete_test,
+        name='dangerzone_delete_test'),
     url(r'^test/(?P<tid>\d+)/add_findings$', views.add_findings,
         name='add_findings'),
     url(r'^test/(?P<tid>\d+)/add_findings/(?P<fid>\d+)$',
