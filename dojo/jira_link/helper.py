@@ -476,11 +476,11 @@ def log_jira_message(text, finding):
 def get_labels(obj):
     # Update Label with system setttings label
     labels = []
- 
+
     # Put a branch tag in as a label.
     if type(obj) == Finding and obj.test.branch_tag:
         labels.append(obj.test.branch_tag.replace(" ", "_"))
- 
+
     system_settings = System_Settings.objects.get()
     system_labels = system_settings.jira_labels
     if system_labels is None:
