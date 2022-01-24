@@ -918,6 +918,7 @@ def delete_product(request, pid):
                    'product_tab': product_tab,
                    })
 
+
 @user_is_authorized(Product, Permissions.Product_Delete, 'pid')
 def dangerzone_delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
@@ -948,7 +949,7 @@ def dangerzone_delete_product(request, pid):
                 logger.debug('delete_product: POST INVALID FORM')
                 logger.error(form.errors)
 
-    form = DeleteProductForm(instance=product, initial={'ikwiad':True})
+    form = DeleteProductForm(instance=product, initial={'ikwiad': True})
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([product])
@@ -962,7 +963,6 @@ def dangerzone_delete_product(request, pid):
                    'product_tab': product_tab,
                    'rels': rels,
                    })
-
 
 
 @user_is_authorized(Product, Permissions.Engagement_Add, 'pid')

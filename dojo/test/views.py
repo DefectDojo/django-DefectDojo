@@ -294,6 +294,7 @@ def delete_test(request, tid):
                    'form': form,
                    })
 
+
 @user_is_authorized(Test, Permissions.Test_Delete, 'tid')
 def dangerzone_delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
@@ -321,7 +322,7 @@ def dangerzone_delete_test(request, tid):
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
-    form = DeleteTestForm(instance=test, initial={'ikwiad':True})
+    form = DeleteTestForm(instance=test, initial={'ikwiad': True})
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([test])
     rels = collector.nested()

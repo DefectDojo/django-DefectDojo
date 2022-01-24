@@ -316,6 +316,7 @@ def delete_engagement(request, eid):
         'form': form,
     })
 
+
 @user_is_authorized(Engagement, Permissions.Engagement_Delete, 'eid')
 def dangerzone_delete_engagement(request, eid):
     engagement = get_object_or_404(Engagement, pk=eid)
@@ -345,7 +346,7 @@ def dangerzone_delete_engagement(request, eid):
                 return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
     # user has been displayed the dangerzone
-    form = DeleteEngagementForm(instance=engagement, initial={'ikwiad':True})
+    form = DeleteEngagementForm(instance=engagement, initial={'ikwiad': True})
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([engagement])
@@ -359,6 +360,7 @@ def dangerzone_delete_engagement(request, eid):
         'form': form,
         'rels': rels,
     })
+
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def view_engagement(request, eid):
