@@ -1651,7 +1651,13 @@ def user_post_save(sender, instance, created, **kwargs):
     # authentication backends
     if created:
         logger.info('creating default set of notifications for: ' + str(instance))
-        notifications = Notifications(user=instance)
+        notifications = Notifications.objects.get(template=True)
+        try:
+            notifications.pk = None
+            notifications.template = False
+            notifications.user = instance
+        except:
+            notifications=Notifications(user = instance)
         notifications.save()
 
         system_settings = System_Settings.objects.get()

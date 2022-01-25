@@ -44,9 +44,9 @@ def personal_notifications(request):
 @user_passes_test(lambda u: u.is_superuser)
 def system_notifications(request):
     try:
-        notifications_obj = Notifications.objects.get(user=None, product__isnull=True)
+        notifications_obj = Notifications.objects.get(user=None, product__isnull=True, template=False)
     except:
-        notifications_obj = Notifications(user=None)
+        notifications_obj = Notifications(user=None, template=False)
 
     form = NotificationsForm(instance=notifications_obj)
     if request.method == 'POST':
@@ -68,9 +68,10 @@ def system_notifications(request):
 @user_passes_test(lambda u: u.is_superuser)
 def template_notifications(request):
     try:
-        notifications_obj = Notifications.objects.get(user=None, product__isnull=True)
-    except:
-        notifications_obj = Notifications(user=None)
+        notifications_obj = Notifications.objects.get(template=True)
+    except Exception as err:
+        print(err)
+        notifications_obj = Notifications(user=None, template=True)
 
     form = NotificationsForm(instance=notifications_obj)
     if request.method == 'POST':

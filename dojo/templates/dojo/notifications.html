@@ -29,7 +29,6 @@
             {% else %}
                 <p class="amber-color-with-padding">These template <u>template</u></p>
             {% endif %}
-            {% if 'template' not in scope %}
             {% for u in not_users %}
                 <p>{{ u.username }} {{ u.applicable_notifications_count }}</p>
                 {% for n in u.applicable_notifications %}
@@ -73,6 +72,11 @@
                         <td class="centered">
                             <input type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/>
                         </td>
+                    {% elif  scope == 'template' and c in enabled_notifications and c != 'msteams' %}
+                        <td class="centered">
+                            <input type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/>
+                        </td>
+                    {% else %}
                     {% endif %}
                     {% endfor %}
                     </tr>
@@ -85,9 +89,6 @@
                 <input class="btn btn-primary" type="submit" name="edit_notifications" value="Submit"/>
             </div>
             </div>
-        {% else %}
-            Do something for template
-        {% endif %}
     </form>
 {% endblock %}
 {% block postscript %}

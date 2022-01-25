@@ -3106,7 +3106,7 @@ class Notifications(models.Model):
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
-    template = models.CharField(max_length=100, default=None, null=True, editable=True)
+    template = models.BooleanField(default=False)
     sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
         verbose_name="SLA breach",
         help_text="Get notified of (upcoming) SLA breaches")
@@ -3116,10 +3116,10 @@ class Notifications(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['user', 'product', 'template'], name="notifications_user_product_template")
+            models.UniqueConstraint(fields=['user', 'product'], name="notifications_user_product")
         ]
         indexes = [
-            models.Index(fields=['user', 'product', 'template']),
+            models.Index(fields=['user', 'product']),
         ]
 
     @classmethod
