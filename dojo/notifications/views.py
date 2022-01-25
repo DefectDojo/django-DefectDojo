@@ -69,8 +69,7 @@ def system_notifications(request):
 def template_notifications(request):
     try:
         notifications_obj = Notifications.objects.get(template=True)
-    except Exception as err:
-        print(err)
+    except:
         notifications_obj = Notifications(user=None, template=True)
 
     form = NotificationsForm(instance=notifications_obj)
