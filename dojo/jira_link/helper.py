@@ -685,7 +685,9 @@ def add_jira_issue(obj, *args, **kwargs):
         if epic_name_field in meta['projects'][0]['issuetypes'][0]['fields']:
             # epic name is present in this issuetype
             # epic name is always mandatory in jira, so we populate it
-            fields[epic_name_field] = fields['summary']
+            # but only parent issue linking is not enabled
+            if not jira_project.enable_parent_issue_linking:
+                fields[epic_name_field] = fields['summary']
 
         if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
             fields['priority'] = {
