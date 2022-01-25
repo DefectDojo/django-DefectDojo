@@ -56,9 +56,9 @@ services:
       POSTGRES_DB: ${DD_TEST_DATABASE_NAME}
     volumes:
        - defectdojo_data_integration_tests:${DD_DATABASE_DATA_PATH}
-  # >>>>> Only needed when using PostgreSQL >>>>>
+  # >>>>> PostgreSQL admin UI, only useful when using PostgreSQL >>>>>
   # pgadmin:
-  #   image: dpage/pgadmin4:6.4
+  #   image: dpage/pgadmin4:6.4@sha256:e379d900081261dce78482e9a66bdc6f4c0dbe5924133cf7a3cd0c424ae6014f
   #   environment:
   #     PGADMIN_DEFAULT_EMAIL: pgadmin@defectdojo.org
   #     PGADMIN_DEFAULT_PASSWORD: defectdojo
@@ -69,7 +69,7 @@ services:
   #       mode: host
   #   volumes:
   #     - defectdojo_pgadmin_unittest:/var/lib/pgadmin  
-  # <<<<< Only needed when using PostgreSQL <<<<<
+  # <<<<< PostgreSQL admin UI, only useful when using PostgreSQL <<<<<
   mailhog:
     image: mailhog/mailhog:v1.0.1@sha256:8d76a3d4ffa32a3661311944007a415332c4bb855657f4f6c57996405c009bea
     ports:
@@ -80,6 +80,6 @@ services:
 volumes:
   defectdojo_data_integration_tests: {}
   defectdojo_media_integration_test: {}
-  # >>>>> Only needed when using PostgreSQL >>>>>
+  # >>>>> PostgreSQL admin UI, only useful when using PostgreSQL >>>>>
   # defectdojo_pgadmin_unittest: {}
-  # <<<<< Only needed when using PostgreSQL <<<<<
+  # <<<<< PostgreSQL admin UI, only useful when using PostgreSQL <<<<<

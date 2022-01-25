@@ -20,6 +20,8 @@ services:
       DD_DATABASE_ENGINE: ${DD_DATABASE_ENGINE}
       DD_DATABASE_HOST: ${DD_DATABASE_HOST}
       DD_DATABASE_PORT: ${DD_DATABASE_PORT}
+      DD_DATABASE_USER: ${DD_DATABASE_USER}
+      DD_DATABASE_PASSWORD: ${DD_DATABASE_PASSWORD}
       DD_CELERY_BROKER_SCHEME: 'sqla+sqlite'
       DD_CELERY_BROKER_USER: ''
       DD_CELERY_BROKER_PASSWORD: ''
@@ -47,9 +49,9 @@ services:
       POSTGRES_DB: ${DD_TEST_DATABASE_NAME}
     volumes:
       - defectdojo_data_unittest:${DD_DATABASE_DATA_PATH}
-  # >>><< Only needed when using PostgreSQL >>>>>
+  # >>>>> PostgreSQL admin UI, only useful when using PostgreSQL >>>>>
   # pgadmin:
-  #   image: dpage/pgadmin4:6.4
+  #   image: dpage/pgadmin4:6.4@sha256:e379d900081261dce78482e9a66bdc6f4c0dbe5924133cf7a3cd0c424ae6014f
   #   environment:
   #     PGADMIN_DEFAULT_EMAIL: pgadmin@defectdojo.org
   #     PGADMIN_DEFAULT_PASSWORD: defectdojo
@@ -60,13 +62,13 @@ services:
   #       mode: host
   #   volumes:
   #     - defectdojo_pgadmin_unittest:/var/lib/pgadmin  
-  # <<<<< Only needed when using PostgreSQL <<<<<
+  # <<<<< PostgreSQL admin UI, only useful when using PostgreSQL <<<<<
   rabbitmq:
     image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'rabbitmq']
 volumes:
   defectdojo_data_unittest: {}
   defectdojo_media_unittest: {}
-  # >>>>> Only needed when using PostgreSQL >>>>>
+  # >>>>> PostgreSQL admin UI, only useful when using PostgreSQL >>>>>
   # defectdojo_pgadmin_unittest: {}
-  # <<<<< Only needed when using PostgreSQL <<<<<
+  # <<<<< PostgreSQL admin UI, only useful when using PostgreSQL <<<<<

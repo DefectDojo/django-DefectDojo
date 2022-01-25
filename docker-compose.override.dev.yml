@@ -43,9 +43,9 @@ services:
         published: 8025
         protocol: tcp
         mode: host
-# >>>>> Only needed when using PostgreSQL >>>>>
+# >>>>> PostgreSQL admin UI, only useful when using PostgreSQL >>>>>
 #   pgadmin:
-#     image: dpage/pgadmin4:6.4
+#     image: dpage/pgadmin4:6.4@sha256:e379d900081261dce78482e9a66bdc6f4c0dbe5924133cf7a3cd0c424ae6014f
 #     environment:
 #       PGADMIN_DEFAULT_EMAIL: pgadmin@defectdojo.org
 #       PGADMIN_DEFAULT_PASSWORD: defectdojo
@@ -58,4 +58,4 @@ services:
 #       - defectdojo_pgadmin:/var/lib/pgadmin  
 # volumes:
 #   defectdojo_pgadmin: {}
-# <<<<< Only needed when using PostgreSQL <<<<<
+# <<<<< PostgreSQL admin UI, only useful when using PostgreSQL <<<<<

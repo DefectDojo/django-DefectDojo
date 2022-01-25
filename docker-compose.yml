@@ -114,7 +114,7 @@ services:
     # <<<<< Only needed when using MySQL <<<<<
 
     # >>>>> Only needed when using PostgreSQL >>>>>
-    # image: postgres:14.1
+    # image: postgres:14.1@sha256:92876ceccfd7bec0d5c4f3c0ab7e13e7e2bb7368e7430f8b8ba52548f1e47abf
     # environment:
     #   POSTGRES_DB: ${DD_DATABASE_NAME}
     #   POSTGRES_USER: ${DD_DATABASE_USER}
