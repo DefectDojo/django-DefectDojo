@@ -65,6 +65,7 @@ def system_notifications(request):
                    'enabled_notifications': get_enabled_notifications_list(),
                    'admin': request.user.is_superuser})
 
+
 @user_passes_test(lambda u: u.is_superuser)
 def template_notifications(request):
     try:

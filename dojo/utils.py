@@ -1657,7 +1657,7 @@ def user_post_save(sender, instance, created, **kwargs):
             notifications.template = False
             notifications.user = instance
         except:
-            notifications=Notifications(user = instance)
+            notifications = Notifications(user=instance)
         notifications.save()
 
         system_settings = System_Settings.objects.get()
