@@ -484,10 +484,7 @@ def get_labels(obj):
     system_settings = System_Settings.objects.get()
     system_labels = system_settings.jira_labels
     if system_labels is None:
-        if len(labels) == 0:
-            return
-        else:
-            return labels
+        return labels
     else:
         system_labels = system_labels.split()
     if len(system_labels) > 0:
