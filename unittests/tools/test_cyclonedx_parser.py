@@ -119,9 +119,9 @@ class TestParser(DojoTestCase):
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Critical", finding.severity)
-                # self.assertEqual("redis", finding.component_name)
-                # self.assertEqual("3.5.3", finding.component_version)
-                # self.assertEqual("CVE-2018-7489", finding.cve)
+                self.assertEqual("jackson-databind", finding.component_name)
+                self.assertEqual("2.9.4", finding.component_version)
+                self.assertEqual("CVE-2018-7489", finding.cve)
                 # self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertIn(
                     "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",

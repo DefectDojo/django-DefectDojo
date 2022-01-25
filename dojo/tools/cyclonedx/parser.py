@@ -188,21 +188,24 @@ class CycloneDXParser(object):
         for adv in vulnerability.findall("b:advisories/b:advisory", namespaces=ns):
             references += f"{adv.text}\n"
 
+        cve = None
+        for reference in vulnerability.findall("b:references/b:reference", namespaces=ns):
+            if "NVD" == reference.findtext("b:source/b:name", namespaces=ns):
+                cve = reference.findtext("b:id", namespaces=ns)
+
         # for all component affected
         findings = []
         for target in vulnerability.findall("b:affects/b:target", namespaces=ns):
-            print("1")
-            ref = target.find("b:ref")
-            print(target)
-            print(f"{ns['b']}ref")
-            component_name, component_version = self._get_component(bom_refs, ref)
+            ref = target.find("b:ref", namespaces=ns)
+            component_name, component_version = self._get_component(bom_refs, ref.text)
 
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
                 description=description,
                 severity=severity,
-                mitigation=target.findtext("b:recommendation"),
+                mitigation=target.findtext("b:recommendation", namespaces=ns),
                 references=references,
+                cve=cve,
                 component_name=component_name,
                 component_version=component_version,
                 vuln_id_from_tool=vuln_id,
@@ -210,9 +213,6 @@ class CycloneDXParser(object):
             )
             if report_date:
                 finding.date = report_date
-            # manage if the ID is a CVE
-            if re.fullmatch("CVE-[0-9]+-[0-9]+", vuln_id):
-                finding.cve = vuln_id
 
             # manage CVSS
             for rating in vulnerability.findall("v:ratings/v:rating", namespaces=ns):
@@ -291,6 +291,7 @@ class CycloneDXParser(object):
 
     def _get_component(self, components, reference):
         if reference not in components:
+            raise ValueError(f"reference:{reference} not found in the BOM")
             LOGGER.warning(f"reference:{reference} not found in the BOM")
             return (None, None)
         return (components[reference]["name"], components[reference]["version"])
