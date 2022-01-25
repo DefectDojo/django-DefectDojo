@@ -190,7 +190,7 @@ class CycloneDXParser(object):
 
         cve = None
         for reference in vulnerability.findall("b:references/b:reference", namespaces=ns):
-            if "NVD" == reference.findtext("b:source/b:name", namespaces=ns):
+            if re.fullmatch("CVE-[0-9]+-[0-9]+", str(reference.findtext("b:id", namespaces=ns))):
                 cve = reference.findtext("b:id", namespaces=ns)
 
         # for all component affected
@@ -284,7 +284,7 @@ class CycloneDXParser(object):
                             finding.severity = cvssv3.severities()[0]
                 # check references to see if we have the CVE reference
                 for reference in vulnerability.get("references", []):
-                    if "NVD" == reference.get("source", {}).get("name"):
+                    if re.fullmatch("CVE-[0-9]+-[0-9]+", reference.get("id", "")):
                         finding.cve = reference.get("id")
                 findings.append(finding)
         return findings
