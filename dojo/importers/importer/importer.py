@@ -50,13 +50,10 @@ class DojoDefaultImporter(object):
             build_id=build_id,
             commit_hash=commit_hash,
             api_scan_configuration=api_scan_configuration,
-            tags=tags)
-        try:
-            # TODO What is going on here?
-            test.full_clean()
-        except ValidationError:
-            pass
+            tags=tags,
+        )
 
+        test.full_clean()
         test.save()
         return test
 
@@ -104,7 +101,7 @@ class DojoDefaultImporter(object):
 
             # if scan_date was provided, override value from parser
             if scan_date:
-                item.date = scan_date
+                item.date = scan_date.date()
 
             item.service = service
 
@@ -335,11 +332,12 @@ class DojoDefaultImporter(object):
         logger.debug('IMPORT_SCAN: Updating test/engagement timestamps')
         importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
 
+        test_import = None
         if settings.TRACK_IMPORT_HISTORY:
             logger.debug('IMPORT_SCAN: Updating Import History')
-            importer_utils.update_import_history(Test_Import.IMPORT_TYPE, active, verified, tags, minimum_severity,
-                                                    endpoints_to_add, version, branch_tag, build_id, commit_hash,
-                                                    push_to_jira, close_old_findings, test, new_findings, closed_findings)
+            test_import = importer_utils.update_import_history(Test_Import.IMPORT_TYPE, active, verified, tags, minimum_severity,
+                                                                endpoints_to_add, version, branch_tag, build_id, commit_hash,
+                                                                push_to_jira, close_old_findings, test, new_findings, closed_findings)
 
         logger.debug('IMPORT_SCAN: Generating notifications')
         notifications_helper.notify_test_created(test)
@@ -349,4 +347,4 @@ class DojoDefaultImporter(object):
 
         logger.debug('IMPORT_SCAN: Done')
 
-        return test, len(new_findings), len(closed_findings)
+        return test, len(new_findings), len(closed_findings), test_import

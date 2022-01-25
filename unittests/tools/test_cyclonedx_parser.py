@@ -49,6 +49,7 @@ class TestParser(DojoTestCase):
                 self.assertEqual("jackson-databind", finding.component_name)
                 self.assertEqual("2.9.9", finding.component_version)
                 self.assertEqual("CVE-2018-7489", finding.vuln_id_from_tool)
+                self.assertEqual("Upgrade\n", finding.mitigation)
 
     def test_cyclonedx_bom_report(self):
         with open("unittests/scans/cyclonedx/cyclonedx_bom.xml") as file:

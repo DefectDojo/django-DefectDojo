@@ -11,7 +11,7 @@ from drf_yasg.inspectors.query import CoreAPICompatInspector
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from django.db import IntegrityError
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated, IsAdminUser
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
@@ -56,6 +56,8 @@ from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
 from dojo.group.queries import get_authorized_groups, get_authorized_group_members
+from dojo.jira_link.queries import get_authorized_jira_projects, get_authorized_jira_issues
+from dojo.tool_product.queries import get_authorized_tool_product_settings
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from dojo.authorization.roles_permissions import Permissions
 
@@ -720,7 +722,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         else:
             return Response({"error": "('note_id') parameter missing"},
                 status=status.HTTP_400_BAD_REQUEST)
-        if note.author.username == request.user.username or request.user.is_staff:
+        if note.author.username == request.user.username or request.user.is_superuser:
             finding.notes.remove(note)
             note.delete()
         else:
@@ -1001,7 +1003,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         return Response({"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Authorization: superuser
+# Authorization: configuration
 class JiraInstanceViewSet(mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin,
                                 mixins.DestroyModelMixin,
@@ -1012,10 +1014,10 @@ class JiraInstanceViewSet(mixins.ListModelMixin,
     queryset = JIRA_Instance.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'url')
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
-# Authorization: staff
+# Authorization: object-based
 class JiraIssuesViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.DestroyModelMixin,
@@ -1023,13 +1025,16 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
                         mixins.UpdateModelMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.JIRAIssueSerializer
-    queryset = JIRA_Issue.objects.all()
+    queryset = JIRA_Issue.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'jira_id', 'jira_key', 'finding_id')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    filter_fields = ('id', 'jira_id', 'jira_key', 'finding', 'engagement', 'finding_group')
+    permission_classes = (IsAuthenticated, permissions.UserHasJiraIssuePermission)
+
+    def get_queryset(self):
+        return get_authorized_jira_issues(Permissions.Product_View)
 
 
-# Authorization: staff
+# Authorization: object-based
 class JiraProjectViewSet(mixins.ListModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.DestroyModelMixin,
@@ -1037,12 +1042,15 @@ class JiraProjectViewSet(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
     serializer_class = serializers.JIRAProjectSerializer
-    queryset = JIRA_Project.objects.all()
+    queryset = JIRA_Project.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'jira_instance', 'product', 'component', 'project_key',
+    filter_fields = ('id', 'jira_instance', 'product', 'engagement', 'component', 'project_key',
                      'push_all_issues', 'enable_engagement_epic_mapping',
                      'push_notes')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, permissions.UserHasJiraProductPermission)
+
+    def get_queryset(self):
+        return get_authorized_jira_projects(Permissions.Product_View)
 
 
 # Authorization: superuser
@@ -1498,7 +1506,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
             return serializers.StubFindingSerializer
 
 
-# Authorization: configuration
+# Authorization: authenticated, configuration
 class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
                                     mixins.RetrieveModelMixin,
                                     mixins.CreateModelMixin,
@@ -1508,7 +1516,7 @@ class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
     serializer_class = serializers.DevelopmentEnvironmentSerializer
     queryset = Development_Environment.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
 # Authorization: object-based
@@ -1666,7 +1674,7 @@ class TestsViewSet(mixins.ListModelMixin,
         return Response(serialized_files.data, status=status.HTTP_200_OK)
 
 
-# Authorization: configuration
+# Authorization: authenticated, configuration
 class TestTypesViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.UpdateModelMixin,
@@ -1676,7 +1684,7 @@ class TestTypesViewSet(mixins.ListModelMixin,
     queryset = Test_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('name',)
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
 @extend_schema_view(
@@ -1740,7 +1748,7 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
                                         'test__engagement__product__prod_type')
 
 
-# Authorization: superuser
+# Authorization: configurations
 class ToolConfigurationsViewSet(mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin,
                                 mixins.CreateModelMixin,
@@ -1751,10 +1759,10 @@ class ToolConfigurationsViewSet(mixins.ListModelMixin,
     queryset = Tool_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'tool_type', 'url', 'authentication_type')
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
-# Authorization: staff
+# Authorization: object-based
 class ToolProductSettingsViewSet(mixins.ListModelMixin,
                                  mixins.RetrieveModelMixin,
                                  mixins.DestroyModelMixin,
@@ -1762,11 +1770,14 @@ class ToolProductSettingsViewSet(mixins.ListModelMixin,
                                  mixins.UpdateModelMixin,
                                  viewsets.GenericViewSet):
     serializer_class = serializers.ToolProductSettingsSerializer
-    queryset = Tool_Product_Settings.objects.all()
+    queryset = Tool_Product_Settings.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'product', 'tool_configuration',
                      'tool_project_id', 'url')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, permissions.UserHasToolProductSettingsPermission)
+
+    def get_queryset(self):
+        return get_authorized_tool_product_settings(Permissions.Product_View)
 
 
 # Authorization: configuration
@@ -1780,10 +1791,10 @@ class ToolTypesViewSet(mixins.ListModelMixin,
     queryset = Tool_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'description')
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
+    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
-# Authorization: authenticated users
+# Authorization: authenticated, configuration
 class RegulationsViewSet(mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
                          mixins.CreateModelMixin,
@@ -1808,7 +1819,7 @@ class UsersViewSet(mixins.CreateModelMixin,
     queryset = User.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'username', 'first_name', 'last_name', 'email')
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
+    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -1953,7 +1964,7 @@ class EndpointMetaImporterView(mixins.CreateModelMixin,
         return get_authorized_products(Permissions.Endpoint_Edit)
 
 
-# Authorization: staff users
+# Authorization: configuration
 class LanguageTypeViewSet(mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
                           mixins.CreateModelMixin,
@@ -1964,7 +1975,7 @@ class LanguageTypeViewSet(mixins.ListModelMixin,
     queryset = Language_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'language', 'color')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
 
 
 # Authorization: object-based
@@ -2012,7 +2023,7 @@ class ImportLanguagesView(mixins.CreateModelMixin,
         return get_authorized_products(Permissions.Language_Add)
 
 
-# Authorization: authenticated users, DjangoModelPermissions
+# Authorization: object-based
 class ReImportScanView(mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     """
@@ -2064,7 +2075,7 @@ class ReImportScanView(mixins.CreateModelMixin,
         serializer.save(push_to_jira=push_to_jira)
 
 
-# Authorization: staff
+# Authorization: configuration
 class NoteTypeViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.DestroyModelMixin,
@@ -2075,10 +2086,10 @@ class NoteTypeViewSet(mixins.ListModelMixin,
     queryset = Note_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'description', 'is_single', 'is_active', 'is_mandatory')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
-# Authorization: staff
+# Authorization: superuser
 class NotesViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin,
@@ -2089,7 +2100,7 @@ class NotesViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'entry', 'author',
                     'private', 'date', 'edited',
                     'edit_time', 'editor')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
 def report_generate(request, obj, options):

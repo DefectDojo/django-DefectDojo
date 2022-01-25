@@ -524,13 +524,6 @@ class ProductTest(BaseTestCase):
         # Navigate to the product page
         driver.get(self.base_url + "metrics/engineer")
 
-    def test_security_research_metrics(self):
-        # Test To Edit Product Tracking Files
-        # login to site, password set to fetch from environ
-        driver = self.driver
-        # Navigate to the product page
-        driver.get(self.base_url + "metrics/research")
-
     def test_metrics_dashboard(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
@@ -568,7 +561,6 @@ def add_product_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(ProductTest('test_product_type_counts_metrics'))
     suite.addTest(ProductTest('test_simple_metrics'))
     suite.addTest(ProductTest('test_engineer_metrics'))
-    suite.addTest(ProductTest('test_security_research_metrics'))
     suite.addTest(ProductTest('test_metrics_dashboard'))
 
     suite.addTest(ProductTest('test_delete_product'))

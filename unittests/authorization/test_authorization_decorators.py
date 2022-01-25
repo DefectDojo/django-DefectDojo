@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.test.utils import override_settings
 from ..dojo_test_case import DojoTestCase
 from unittest.mock import patch, Mock
 from dojo.models import Product_Type
@@ -45,17 +44,6 @@ class TestAuthorizationDecorators(DojoTestCase):
         mock_shortcuts_get.return_value = self.product_type
 
         self.user.is_superuser = True
-
-        self.decorated_func(self.request, 1)
-
-        mock_shortcuts_get.assert_called_once()
-
-    @patch('dojo.authorization.authorization_decorators.get_object_or_404')
-    @override_settings(AUTHORIZATION_STAFF_OVERRIDE=True)
-    def test_authorization_staff_override(self, mock_shortcuts_get):
-        mock_shortcuts_get.return_value = self.product_type
-
-        self.user.is_staff = True
 
         self.decorated_func(self.request, 1)
 

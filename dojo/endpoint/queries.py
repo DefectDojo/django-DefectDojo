@@ -1,5 +1,4 @@
 from crum import get_current_user
-from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Endpoint, Endpoint_Status, Product_Member, Product_Type_Member, \
     Product_Group, Product_Type_Group
@@ -20,9 +19,6 @@ def get_authorized_endpoints(permission, queryset=None, user=None):
         endpoints = queryset
 
     if user.is_superuser:
-        return endpoints
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return endpoints
 
     if user_has_global_permission(user, permission):
@@ -71,9 +67,6 @@ def get_authorized_endpoint_status(permission, queryset=None, user=None):
         endpoint_status = queryset
 
     if user.is_superuser:
-        return endpoint_status
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return endpoint_status
 
     if user_has_global_permission(user, permission):

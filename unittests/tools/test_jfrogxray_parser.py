@@ -30,15 +30,32 @@ class TestJfrogJFrogXrayParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(2, len(findings))
+
         item = findings[0]
-        self.assertEquals("pip", item.component_name)
-        self.assertEquals("9.0.1", item.component_version)
+        self.assertEqual("No CVE - pip:9.0.1", item.title)
+        description = '''pip PyPI (Python Packaging Index) PipXmlrpcTransport._download_http_url() Function Content-Disposition Header Path Traversal Arbitrary File Write Weakness
+**Provider:** JFrog'''
+        self.assertEqual(description, item.description)
+        self.assertEqual("High", item.severity)
+        self.assertEqual("pip", item.component_name)
+        self.assertEqual("9.0.1", item.component_version)
+        self.assertIsNone(item.cve)
+        self.assertIsNone(item.cwe)
+        self.assertEqual("CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H", item.cvssv3)
+
         item = findings[1]
-        self.assertEquals("ubuntu:bionic:linux", item.component_name)
-        self.assertEquals("4.15.0-88.88", item.component_version)
-        self.assertEquals("CVE-2020-14386", item.cve)
-        self.assertEquals(787, item.cwe)
-        self.assertEquals("AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", item.cvssv3)
+        self.assertEqual("CVE-2020-14386 - ubuntu:bionic:linux:4.15.0-88.88", item.title)
+        description = '''A flaw was found in the Linux kernel before 5.9-rc4. Memory corruption can be exploited to gain root privileges from unprivileged processes. The highest threat from this vulnerability is to data confidentiality and integrity.
+**Versions that are vulnerable:**
+< 4.15.0-117.118
+**Provider:** JFrog'''
+        self.assertEqual(description, item.description)
+        self.assertEqual("High", item.severity)
+        self.assertEqual("ubuntu:bionic:linux", item.component_name)
+        self.assertEqual("4.15.0-88.88", item.component_version)
+        self.assertEqual("CVE-2020-14386", item.cve)
+        self.assertEqual(787, item.cwe)
+        self.assertEqual("CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", item.cvssv3)
 
     def test_decode_cwe_number(self):
         with self.subTest(val="CWE-1234"):

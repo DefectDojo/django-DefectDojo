@@ -1,7 +1,6 @@
 from unittest.mock import patch
 import uuid
 from .dojo_test_case import DojoTestCase, get_unit_tests_path
-from django.test.utils import override_settings
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -59,8 +58,8 @@ class TestDojoDefaultImporter(DojoTestCase):
             target_start=timezone.now(),
             target_end=timezone.now(),
         )
-        lead = None
-        environment = None
+        lead, _ = User.objects.get_or_create(username="admin")
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
 
         # boot
         importer = Importer()
@@ -112,10 +111,10 @@ class TestDojoDefaultImporter(DojoTestCase):
             target_start=timezone.now(),
             target_end=timezone.now(),
         )
-
         importer = Importer()
         scan_date = None
-        test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
@@ -147,7 +146,8 @@ class TestDojoDefaultImporter(DojoTestCase):
 
         importer = Importer()
         scan_date = None
-        test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
@@ -157,7 +157,6 @@ class TestDojoDefaultImporter(DojoTestCase):
         self.assertEqual(0, len_closed_findings)
 
 
-@override_settings(TRACK_IMPORT_HISTORY=True)
 class FlexibleImportTestAPI(DojoAPITestCase):
     def __init__(self, *args, **kwargs):
         # TODO remove __init__ if it does nothing...
@@ -328,7 +327,6 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.assertEqual(import0, ['product_name parameter missing'])
 
 
-@override_settings(TRACK_IMPORT_HISTORY=True)
 class FlexibleReimportTestAPI(DojoAPITestCase):
     def __init__(self, *args, **kwargs):
         # TODO remove __init__ if it does nothing...

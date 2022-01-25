@@ -3,19 +3,21 @@ import hashlib
 import logging
 import os
 import re
+import copy
 from typing import Dict, Set, Optional
 from uuid import uuid4
 from django.conf import settings
-
 from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.db.models.expressions import Case, When
 from django.urls import reverse
 from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, Count
+from django.db.models.functions import Lower
 from django_extensions.db.models import TimeStampedModel
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
@@ -36,23 +38,62 @@ from cvss import CVSS3
 from dojo.settings.settings import SLA_BUSINESS_DAYS
 from numpy import busday_count
 
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 
+SEVERITIES = [s[0] for s in SEVERITY_CHOICES]
+
+# fields returned in statistics, typically all status fields
+STATS_FIELDS = ['active', 'verified', 'duplicate', 'false_p', 'out_of_scope', 'is_mitigated', 'risk_accepted', 'total']
+# default template with all values set to 0
+DEFAULT_STATS = {sev.lower(): {stat_field: 0 for stat_field in STATS_FIELDS} for sev in SEVERITIES}
+
 IMPORT_CREATED_FINDING = 'N'
 IMPORT_CLOSED_FINDING = 'C'
 IMPORT_REACTIVATED_FINDING = 'R'
-IMPORT_UPDATED_FINDING = 'U'
+IMPORT_UNTOUCHED_FINDING = 'U'
 
 IMPORT_ACTIONS = [
     (IMPORT_CREATED_FINDING, 'created'),
     (IMPORT_CLOSED_FINDING, 'closed'),
     (IMPORT_REACTIVATED_FINDING, 'reactivated'),
-    (IMPORT_UPDATED_FINDING, 'updated'),
+    (IMPORT_UNTOUCHED_FINDING, 'left untouched'),
 ]
+
+
+def _get_annotations_for_statistics():
+    annotations = {stats_field.lower(): Count(Case(When(**{stats_field: True}, then=1))) for stats_field in STATS_FIELDS if stats_field != 'total'}
+    # add total
+    annotations['total'] = Count('id')
+    return annotations
+
+
+def _get_statistics_for_queryset(qs, annotation_factory):
+    # order by to get rid of default ordering that would mess with group_by
+    # group by severity (lowercase)
+    values = qs.annotate(sev=Lower('severity')).values('sev').order_by()
+    # add annotation for each status field
+    values = values.annotate(**annotation_factory())
+    # make sure sev and total are included
+    stat_fields = ['sev', 'total'] + STATS_FIELDS
+    # go for it
+    values = values.values(*stat_fields)
+
+    # not sure if there's a smarter way to convert a list of dicts into a dict of dicts
+    # need to copy the DEFAULT_STATS otherwise it gets overwritten
+    stats = copy.copy(DEFAULT_STATS)
+    for row in values:
+        sev = row.pop('sev')
+        stats[sev] = row
+
+    values_total = qs.values()
+    values_total = values_total.aggregate(**annotation_factory())
+    stats['total'] = values_total
+    return stats
 
 
 @deconstructible
@@ -426,6 +467,11 @@ class System_Settings(models.Model):
         blank=True,
         help_text="New users will be assigned to their default group with this role.",
         on_delete=models.RESTRICT)
+    default_group_email_pattern = models.CharField(
+        max_length=200,
+        default='',
+        blank=True,
+        help_text="New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition.")
     staff_user_email_pattern = models.CharField(
         max_length=200,
         default='',
@@ -1046,7 +1092,7 @@ class Engagement(models.Model):
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
-    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     requester = models.ForeignKey(Contact, null=True, blank=True, on_delete=models.CASCADE)
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
@@ -1482,7 +1528,7 @@ class Sonarqube_Issue_Transition(models.Model):
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
-    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
     scan_type = models.TextField(null=True)
     title = models.CharField(max_length=255, null=True, blank=True)
@@ -1562,6 +1608,11 @@ class Test(models.Model):
         super().delete(*args, **kwargs)
         calculate_grade(self.engagement.product)
 
+    @property
+    def statistics(self):
+        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        return _get_statistics_for_queryset(Finding.objects.filter(test=self), _get_annotations_for_statistics)
+
 
 class Test_Import(TimeStampedModel):
 
@@ -1587,7 +1638,7 @@ class Test_Import(TimeStampedModel):
         super_query = super_query.annotate(created_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CREATED_FINDING)))
         super_query = super_query.annotate(closed_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CLOSED_FINDING)))
         super_query = super_query.annotate(reactivated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_REACTIVATED_FINDING)))
-        super_query = super_query.annotate(updated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_UPDATED_FINDING)))
+        super_query = super_query.annotate(untouched_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_UNTOUCHED_FINDING)))
         return super_query
 
     class Meta:
@@ -1599,6 +1650,14 @@ class Test_Import(TimeStampedModel):
     def __str__(self):
         return self.created.strftime("%Y-%m-%d %H:%M:%S")
 
+    @property
+    def statistics(self):
+        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        stats = {}
+        for action in IMPORT_ACTIONS:
+            stats[action[1].lower()] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=action[0]), _get_annotations_for_statistics)
+        return stats
+
 
 class Test_Import_Finding_Action(TimeStampedModel):
     test_import = models.ForeignKey(Test_Import, editable=False, null=False, blank=False, on_delete=models.CASCADE)
@@ -1606,6 +1665,9 @@ class Test_Import_Finding_Action(TimeStampedModel):
     action = models.CharField(max_length=100, null=True, blank=True, choices=IMPORT_ACTIONS)
 
     class Meta:
+        indexes = [
+            models.Index(fields=['finding', 'action', 'test_import']),
+        ]
         unique_together = (('test_import', 'finding'))
         ordering = ('test_import', 'action', 'finding')
 
@@ -2216,7 +2278,7 @@ class Finding(models.Model):
         from dojo.utils import get_system_setting
         sla_age = get_system_setting('sla_' + self.severity.lower())
         if sla_age:
-            sla_calculation = sla_age - self.age
+            sla_calculation = sla_age - self.sla_age
         return sla_calculation
 
     def sla_deadline(self):
@@ -2461,10 +2523,15 @@ class Finding(models.Model):
         if self.references is None:
             return None
         matches = re.findall(r'([\(|\[]?(https?):((//)|(\\\\))+([\w\d:#@%/;$~_?\+-=\\\.&](#!)?)*[\)|\]]?)', self.references)
+
+        processed_matches = []
         for match in matches:
             # Check if match isn't already a markdown link
-            if not (match[0].startswith('[') or match[0].startswith('(')):
+            # Only replace the same matches one time, otherwise the links will be corrupted
+            if not (match[0].startswith('[') or match[0].startswith('(')) and not match[0] in processed_matches:
                 self.references = self.references.replace(match[0], create_bleached_link(match[0], match[0]), 1)
+                processed_matches.append(match[0])
+
         return self.references
 
 
@@ -3149,10 +3216,6 @@ class Cred_User(models.Model):
     logout_regex = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     is_valid = models.BooleanField(default=True, verbose_name="Login is valid")
-
-    # selenium_script = models.CharField(max_length=1000, default='none',
-    #    editable=False, blank=True, null=True,
-    #    verbose_name="Selenium Script File")
 
     class Meta:
         ordering = ['name']

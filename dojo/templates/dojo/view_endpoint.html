@@ -249,9 +249,8 @@
         <div class="panel-heading">
             <h4>Active Verified Findings</h4>
         </div>
-    </div>
     {% if findings %}
-    <div class="clearfix">
+    <div class="clearfix pagination-in-panel">
         {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
     </div>
     <div class="table-responsive panel panel-default">
@@ -293,12 +292,13 @@
                 </tbody>
             </table>
         </div>
-    <div class="clearfix">
+    <div class="clearfix pagination-in-panel">
         {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
     </div>
     {% else %}
         <p class="text-center">No findings found.</p>
     {% endif %}
+    </div>
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
