@@ -38,10 +38,11 @@ class EdgescanAPI(object):
 
     @staticmethod
     def get_extra_options(tool_config):
-        try:
-            return json.loads(tool_config.extras)
-        except (JSONDecodeError, TypeError):
-            return {}
+        if tool_config.extras:
+            try:
+                return json.loads(tool_config.extras)
+            except (JSONDecodeError, TypeError):
+                raise ValueError('JSON not provided in Extras field.')
 
     def get_findings(self, asset_id):
         url = f"{self.url}/api/v1/vulnerabilities/export.json?c[asset_id]={asset_id}&c[status]=open"

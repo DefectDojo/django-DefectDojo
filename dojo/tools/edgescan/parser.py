@@ -25,10 +25,10 @@ class EdgescanParser(object):
         return "Edgescan findings can be imported in JSON format."
 
     def requires_file(self, scan_type):
-        return False if scan_type == SCANTYPE_EDGESCAN_API else True
+        return scan_type == SCANTYPE_EDGESCAN
 
     def requires_tool_type(self, scan_type):
-        return 'Edgescan' if scan_type == SCANTYPE_EDGESCAN_API else None
+        return scan_type == SCANTYPE_EDGESCAN_API
 
     def get_findings(self, file, test):
         try:
@@ -63,7 +63,7 @@ class EdgescanParser(object):
             finding.cve = vulnerability["cves"][0]
         if vulnerability["cvss_version"] == 3:
             if vulnerability["cvss_vector"]:
-                finding.cvssv3 = vulnerability["cvss_vector"][9:]
+                finding.cvssv3 = vulnerability["cvss_vector"]
         finding.url = vulnerability["location"]
         finding.severity = ES_SEVERITIES[vulnerability["severity"]]
         finding.description = vulnerability["description"]
