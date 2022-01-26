@@ -16,7 +16,7 @@ class TestEdgescanImporter(TestCase):
         cls.tool_configuration.tool_type = cls.tool_type
         cls.tool_configuration.authentication_type = 'API'
         cls.tool_configuration.api_key = 'API_KEY'
-        cls.tool_configuration.extras = 'EXTRAS'
+        cls.tool_configuration.extras = '{"extras": "EXTRAS"}'
 
         cls.product = Product()
         cls.product.name = 'Product'
