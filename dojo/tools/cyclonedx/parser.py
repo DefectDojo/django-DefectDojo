@@ -208,6 +208,8 @@ class CycloneDXParser(object):
                 cve=cve,
                 component_name=component_name,
                 component_version=component_version,
+                static_finding=True,
+                dynamic_finding=False,
                 vuln_id_from_tool=vuln_id,
                 nb_occurences=1,
             )
@@ -262,15 +264,20 @@ class CycloneDXParser(object):
                 reference = affect["ref"]  # required by the specification
                 component_name, component_version = self._get_component(components, reference)
                 finding = Finding(
-                    title=vulnerability["description"],  # f"{component_name}:{component_version} | {vulnerability.get('id')}",
+                    title=f"{component_name}:{component_version} | {vulnerability.get('id')}",
                     test=test,
-                    description=vulnerability.get("detail", vulnerability.get("description")),  # + "\n" + vulnerability.get("details", ""),
+                    description=vulnerability.get("description"),
                     severity="Medium",
                     mitigation=vulnerability.get("recommendation"),
                     component_name=component_name,
                     component_version=component_version,
+                    static_finding=True,
+                    dynamic_finding=False,
                     vuln_id_from_tool=vulnerability.get("id"),
                 )
+                # if we have details
+                if len(vulnerability.get('detail', "").strip()) > 0:
+                    finding.description += "\n\n" + vulnerability.get("detail")
                 # if we have ratings we keep the first one
                 # better than always 'Medium'
                 if len(vulnerability.get("ratings", [])) > 0:
@@ -291,7 +298,6 @@ class CycloneDXParser(object):
 
     def _get_component(self, components, reference):
         if reference not in components:
-            raise ValueError(f"reference:{reference} not found in the BOM")
             LOGGER.warning(f"reference:{reference} not found in the BOM")
             return (None, None)
         return (components[reference]["name"], components[reference]["version"])

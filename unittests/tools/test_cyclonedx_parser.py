@@ -140,13 +140,14 @@ class TestParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
+                self.assertEqual("jackson-databind:2.9.4 | SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111", finding.title)
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("jackson-databind", finding.component_name)
                 self.assertEqual("2.9.4", finding.component_version)
                 self.assertEqual("CVE-2018-7489", finding.cve)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertIn(
-                    "No description given",
+                    "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",
                     finding.description,
                 )
                 self.assertIn(
@@ -166,6 +167,7 @@ class TestParser(DojoTestCase):
             self.assertEqual(7, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
+                self.assertEqual("Django:2.0.1 | CVE-2021-33203", finding.title)
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("Django", finding.component_name)
                 self.assertEqual("2.0.1", finding.component_version)
@@ -179,6 +181,7 @@ class TestParser(DojoTestCase):
 
             with self.subTest(i=1):
                 finding = findings[1]
+                self.assertEqual("Django:2.0.1 | CVE-2018-7536", finding.title)
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("Django", finding.component_name)
                 self.assertEqual("2.0.1", finding.component_version)
