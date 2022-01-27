@@ -22,7 +22,10 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+# CPUCOUNT=1 is needed, otherwise the wheel for uwsgi will sometimes not built
+# https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
+RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+
 
 FROM build AS collectstatic
 
