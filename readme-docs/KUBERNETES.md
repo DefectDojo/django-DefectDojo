@@ -118,6 +118,12 @@ Note that you need only one of:
 - postgresql or mysql
 - rabbitmq or redis
 
+You will  need to add bitnami repo's (or alter the dependency requirements) if building charts locally:
+```
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm dependency update ./helm/defectdojo
+```
+
 It usually takes up to a minute for the services to startup and the
 status of the containers can be viewed by starting up ```minikube dashboard```.
 Note: If the containers are not cached locally the services will start once the
@@ -286,7 +292,7 @@ helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
-  --set host="defectdojo.${TLS_CERT_DOMAIN}" \
+  --set "hosts={defectdojo.${TLS_CERT_DOMAIN}}" \
   --set django.ingress.secretName="minikube-tls" \
   --set createSecret=true \
   --set createRabbitMqSecret=true \
@@ -299,7 +305,7 @@ helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
-  --set host="defectdojo.${TLS_CERT_DOMAIN}" \
+  --set "hosts={defectdojo.${TLS_CERT_DOMAIN}}" \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
   --set celery.replicas=3 \
@@ -316,7 +322,7 @@ helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
-  --set host="defectdojo.${TLS_CERT_DOMAIN}" \
+  --set "hosts={defectdojo.${TLS_CERT_DOMAIN}}" \
   --set django.replicas=3 \
   --set celery.replicas=3 \
   --set rabbitmq.replicas=3 \
@@ -370,6 +376,18 @@ It's possible to enable Nginx prometheus exporter by setting `--set monitoring.e
 
 ## Useful stuff
 
+### Multiple Hostnames
+Django requires a list of all hostnames that are valid for requests. You can add additional hostnames via helm or values file as an array. This helps if you have a local service submitting reports to defectDojo using the namespace name (say defectdojo.scans) instead of the TLD name used in a browser.
+
+In your helm install simply pass them as a defined arry, for example:
+
+`--set "hosts={defectdojo.default,localhost,defectdojo.example.com}"`
+
+This will also work with shell inserted variables:
+
+` --set "hosts={defectdojo.${TLS_CERT_DOMAIN},localhost}"`
+
+### kubectl commands
 ```zsh
 # View logs of a specific pod
 kubectl logs $(kubectl get pod --selector=defectdojo.org/component=${POD} \
