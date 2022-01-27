@@ -112,49 +112,45 @@ class TestParser(DojoTestCase):
         with open("unittests/scans/cyclonedx/valid-vulnerability-1.4.xml") as file:
             parser = CycloneDXParser()
             findings = parser.get_findings(file, Test())
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                finding.clean()
-            self.assertEqual(1, len(findings))
-            with self.subTest(i=0):
-                finding = findings[0]
-                self.assertEqual("Critical", finding.severity)
-                self.assertEqual("jackson-databind", finding.component_name)
-                self.assertEqual("2.9.4", finding.component_version)
-                self.assertEqual("CVE-2018-7489", finding.cve)
-                # self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
-                self.assertIn(
-                    "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",
-                    finding.description,
-                )
-                self.assertEqual("SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111", finding.vuln_id_from_tool)
+            self.check_valid_vulnerability_1_4(findings)
 
     def test_cyclonedx_1_4_json(self):
         """ClyconeDX version 1.4 JSON format"""
         with open("unittests/scans/cyclonedx/valid-vulnerability-1.4.json") as file:
             parser = CycloneDXParser()
             findings = parser.get_findings(file, Test())
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                finding.clean()
-            self.assertEqual(1, len(findings))
-            with self.subTest(i=0):
-                finding = findings[0]
-                self.assertEqual("jackson-databind:2.9.4 | SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111", finding.title)
-                self.assertEqual("Critical", finding.severity)
-                self.assertEqual("jackson-databind", finding.component_name)
-                self.assertEqual("2.9.4", finding.component_version)
-                self.assertEqual("CVE-2018-7489", finding.cve)
-                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
-                self.assertIn(
-                    "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",
-                    finding.description,
-                )
-                self.assertIn(
-                    "Upgrade com.fasterxml.jackson.core:jackson-databind to version 2.6.7.5, 2.8.11.1, 2.9.5 or higher.",
-                    finding.mitigation,
-                )
-                self.assertEqual("SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111", finding.vuln_id_from_tool)
+            self.check_valid_vulnerability_1_4(findings)
+
+    def check_valid_vulnerability_1_4(self, findings):
+        for finding in findings:
+            self.assertIn(finding.severity, Finding.SEVERITIES)
+            finding.clean()
+        self.assertEqual(1, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("jackson-databind:2.9.4 | SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111", finding.title)
+            self.assertEqual("Critical", finding.severity)
+            self.assertEqual("jackson-databind", finding.component_name)
+            self.assertEqual("2.9.4", finding.component_version)
+            self.assertEqual("CVE-2018-7489", finding.cve)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
+            self.assertIn(
+                "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",
+                finding.description,
+            )
+            self.assertEqual(
+                "Upgrade com.fasterxml.jackson.core:jackson-databind to version 2.6.7.5, 2.8.11.1, 2.9.5 or higher.",
+                finding.mitigation,
+            )
+            references = '''**Title:** GitHub Commit
+**URL:** https://github.com/FasterXML/jackson-databind/commit/6799f8f10cc78e9af6d443ed6982d00a13f2e7d2
+
+**Title:** GitHub Issue
+**URL:** https://github.com/FasterXML/jackson-databind/issues/1931
+
+'''
+            self.assertEqual(references, finding.references)
+            self.assertEqual("SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111", finding.vuln_id_from_tool)
 
     def test_cyclonedx_1_4_jake_json(self):
         """ClyconeDX version 1.4 JSON format produced by jake 1.4.1"""
