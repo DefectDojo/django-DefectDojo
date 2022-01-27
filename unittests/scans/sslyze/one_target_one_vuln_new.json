@@ -3003,97 +3003,7 @@
                 "error_reason": null,
                 "error_trace": null,
                 "result": {
-                    "accepted_cipher_suites": [{
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 256,
-                                "name": "TLS_RSA_WITH_AES_256_CBC_SHA",
-                                "openssl_name": "AES256-SHA"
-                            },
-                            "ephemeral_key": null
-                        },
-                        {
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 128,
-                                "name": "TLS_RSA_WITH_AES_128_CBC_SHA",
-                                "openssl_name": "AES128-SHA"
-                            },
-                            "ephemeral_key": null
-                        },
-                        {
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 256,
-                                "name": "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-                                "openssl_name": "ECDHE-RSA-AES256-SHA"
-                            },
-                            "ephemeral_key": {
-                                "curve_name": "prime256v1",
-                                "generator": null,
-                                "prime": null,
-                                "public_bytes": "BEL11+G3ZX0FawWZ1/JWsdkWWIQcE4TrTSRteEWEulJ2dPvJVy+cT2gc8ZYi81cVzqP4R40mmH72ftEWfIBBOms=",
-                                "size": 256,
-                                "type_name": "ECDH",
-                                "x": "QvXX4bdlfQVrBZnX8lax2RZYhBwThOtNJG14RYS6UnY=",
-                                "y": "dPvJVy+cT2gc8ZYi81cVzqP4R40mmH72ftEWfIBBOms="
-                            }
-                        },
-                        {
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 128,
-                                "name": "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
-                                "openssl_name": "ECDHE-RSA-AES128-SHA"
-                            },
-                            "ephemeral_key": {
-                                "curve_name": "prime256v1",
-                                "generator": null,
-                                "prime": null,
-                                "public_bytes": "BNB8+TMV4ipvP7QnaNC1Rzm03VW276DKdzE2cozl0S0Kd8D+OLjdNXY/PToSI2gUC0ab5PGFQNSeMzCbFv5klVQ=",
-                                "size": 256,
-                                "type_name": "ECDH",
-                                "x": "0Hz5MxXiKm8/tCdo0LVHObTdVbbvoMp3MTZyjOXRLQo=",
-                                "y": "d8D+OLjdNXY/PToSI2gUC0ab5PGFQNSeMzCbFv5klVQ="
-                            }
-                        },
-                        {
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 256,
-                                "name": "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
-                                "openssl_name": "DHE-RSA-AES256-SHA"
-                            },
-                            "ephemeral_key": {
-                                "curve_name": null,
-                                "generator": "Ag==",
-                                "prime": "unFHsDotZ2WwaUSECfeWuWRJCHhojNK7dWpZuah+IK7Pfzorw1SPHuPdlgbdigD7B6GLIhKYpbtLVYJckjUuxy8pdwm7JCFNqritELXVvZhZScceapie1+chapVazCfRFQHUSmmdD31wfx7Qofp5C/g6NjXu+9pLKwcFIS4JtD56zIJFTV607NdRJpzOK/KLHuYnXUqkKUyFYizy2t/NshST7hsaGEXoSD5lwPZ/xDZdLkYeUDXYNIGB4Df53YEW+xixnsclgk0czbE6+PIR7JhKw8acj5MjqEI4OgBQeNw3UmGT5kW53oxMwCUXHacDm8Ab+vye72Msbs26SYj9Qw==",
-                                "public_bytes": "ESa45fY/f6By6tNOfTZtgkjNv7niAbotc2NU4t6lkR8ArvGS9n5//mpmHqElqcAnmJhzvLQesQp8rIaYxYY8HW+VZFtc6PNZdO5tDzct8ruLsr30CPrf03s6YFo4YQVla0fUk2hl200+bxh9oWJQxMBSUZkXAP3xo6AHvSIRnEBqOYHVDQzsRTNl4q3z9r9VuZ6dbdhd4Rc0ETEq69x8BDybHM3tZirvEp65ucFnf07dMZV+UWMCsCIrsT8YWp+rUoubOmF/Rk7DdGQDKbNbh6xwJmh5yvy9R9sgJJzCCS3jY4qXtbUH8CIbZ7pva/prVOKh7ekoiW6Ioycx63ebwA==",
-                                "size": 2048,
-                                "type_name": "DH",
-                                "x": null,
-                                "y": null
-                            }
-                        },
-                        {
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 128,
-                                "name": "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-                                "openssl_name": "DHE-RSA-AES128-SHA"
-                            },
-                            "ephemeral_key": {
-                                "curve_name": null,
-                                "generator": "Ag==",
-                                "prime": "unFHsDotZ2WwaUSECfeWuWRJCHhojNK7dWpZuah+IK7Pfzorw1SPHuPdlgbdigD7B6GLIhKYpbtLVYJckjUuxy8pdwm7JCFNqritELXVvZhZScceapie1+chapVazCfRFQHUSmmdD31wfx7Qofp5C/g6NjXu+9pLKwcFIS4JtD56zIJFTV607NdRJpzOK/KLHuYnXUqkKUyFYizy2t/NshST7hsaGEXoSD5lwPZ/xDZdLkYeUDXYNIGB4Df53YEW+xixnsclgk0czbE6+PIR7JhKw8acj5MjqEI4OgBQeNw3UmGT5kW53oxMwCUXHacDm8Ab+vye72Msbs26SYj9Qw==",
-                                "public_bytes": "iJRiSoCVlFri0ameVVzCYR9isHRS6NDZrFxB1Oys3BH9tI6ExbDVq+xCHM/nQFytGdkKIDSDJSX/UD6WhLdwe+l+L/WZLX+aWiWMLxkoOPFOCZbm8XJilP4gbs3whQQ3d9u7+1viGiMueiDT8vi5qmvFrWaoKR5ia0RTZNaIFqyu/LahZasUN7zUHRbg0fF/W3p2zgs6myJcQ5pAyfbyoxCsALFcjsOYA0xcQypXpkWhXlcpoEirHa2gnr4vHyHHbryd3vrz064Pn8KvK3n5CpM9BVoFhqiQDU24ULo1ei4YjR+NML3SxkG9oPtol8uJsTRQFTOeQlua2bhhbCCt9g==",
-                                "size": 2048,
-                                "type_name": "DH",
-                                "x": null,
-                                "y": null
-                            }
-                        }
-                    ],
+                    "accepted_cipher_suites": [],
                     "is_tls_version_supported": true,
                     "rejected_cipher_suites": [{
                             "cipher_suite": {
@@ -3770,97 +3680,7 @@
                 "error_reason": null,
                 "error_trace": null,
                 "result": {
-                    "accepted_cipher_suites": [{
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 256,
-                                "name": "TLS_RSA_WITH_AES_256_CBC_SHA",
-                                "openssl_name": "AES256-SHA"
-                            },
-                            "ephemeral_key": null
-                        },
-                        {
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 128,
-                                "name": "TLS_RSA_WITH_AES_128_CBC_SHA",
-                                "openssl_name": "AES128-SHA"
-                            },
-                            "ephemeral_key": null
-                        },
-                        {
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 256,
-                                "name": "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-                                "openssl_name": "ECDHE-RSA-AES256-SHA"
-                            },
-                            "ephemeral_key": {
-                                "curve_name": "prime256v1",
-                                "generator": null,
-                                "prime": null,
-                                "public_bytes": "BNZWUcwY9LzSCSCRwZ4Q69wIaSdB0P4plBMT7lyvWAQ5nGr6OwFXuISQbLXrloL7l6quh8sM4Dl/d8odabWRcK8=",
-                                "size": 256,
-                                "type_name": "ECDH",
-                                "x": "1lZRzBj0vNIJIJHBnhDr3AhpJ0HQ/imUExPuXK9YBDk=",
-                                "y": "nGr6OwFXuISQbLXrloL7l6quh8sM4Dl/d8odabWRcK8="
-                            }
-                        },
-                        {
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 128,
-                                "name": "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
-                                "openssl_name": "ECDHE-RSA-AES128-SHA"
-                            },
-                            "ephemeral_key": {
-                                "curve_name": "prime256v1",
-                                "generator": null,
-                                "prime": null,
-                                "public_bytes": "BJlZfnLqiMp6NT+qfVvdZQFZG/1ibacz/rPBkMSp9Hof5Iz17hFXQ36ySCLlBwtGiHPxHUpBZ5wGnkH3tc+DnwU=",
-                                "size": 256,
-                                "type_name": "ECDH",
-                                "x": "mVl+cuqIyno1P6p9W91lAVkb/WJtpzP+s8GQxKn0eh8=",
-                                "y": "5Iz17hFXQ36ySCLlBwtGiHPxHUpBZ5wGnkH3tc+DnwU="
-                            }
-                        },
-                        {
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 256,
-                                "name": "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
-                                "openssl_name": "DHE-RSA-AES256-SHA"
-                            },
-                            "ephemeral_key": {
-                                "curve_name": null,
-                                "generator": "Ag==",
-                                "prime": "unFHsDotZ2WwaUSECfeWuWRJCHhojNK7dWpZuah+IK7Pfzorw1SPHuPdlgbdigD7B6GLIhKYpbtLVYJckjUuxy8pdwm7JCFNqritELXVvZhZScceapie1+chapVazCfRFQHUSmmdD31wfx7Qofp5C/g6NjXu+9pLKwcFIS4JtD56zIJFTV607NdRJpzOK/KLHuYnXUqkKUyFYizy2t/NshST7hsaGEXoSD5lwPZ/xDZdLkYeUDXYNIGB4Df53YEW+xixnsclgk0czbE6+PIR7JhKw8acj5MjqEI4OgBQeNw3UmGT5kW53oxMwCUXHacDm8Ab+vye72Msbs26SYj9Qw==",
-                                "public_bytes": "V81r8WkfKrOfHjWpXwbFkjtVI9Bq7/T9Y51H/vOYi4qtDvi11cfHelOnC5nGbr3rCrfpeOepO+In9iOzvI40NHg3iJLKoZjnTYqxc/cvPbAO176FZWeIbNfs0OYJ3JXjbT4ML0DGt3lUpPmqVgAgmZ7prSIYn4nEVJk4ntLbPEw9YAXTO2g98IZ6QHBcGKhsDokZxDLLf/9egNyA9rXDYorskVA1aK81d5kHBweulT5T41asQcvb9ek65I5iIcoHDtRAa8xtRj1W3Tv0ef4bmD0Co6cJRMU2yGveX9ZymEQfaWBOIdO2WC6Kvj/LTK1jiH1huHLf+9tD1guLXqZPeg==",
-                                "size": 2048,
-                                "type_name": "DH",
-                                "x": null,
-                                "y": null
-                            }
-                        },
-                        {
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 128,
-                                "name": "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-                                "openssl_name": "DHE-RSA-AES128-SHA"
-                            },
-                            "ephemeral_key": {
-                                "curve_name": null,
-                                "generator": "Ag==",
-                                "prime": "unFHsDotZ2WwaUSECfeWuWRJCHhojNK7dWpZuah+IK7Pfzorw1SPHuPdlgbdigD7B6GLIhKYpbtLVYJckjUuxy8pdwm7JCFNqritELXVvZhZScceapie1+chapVazCfRFQHUSmmdD31wfx7Qofp5C/g6NjXu+9pLKwcFIS4JtD56zIJFTV607NdRJpzOK/KLHuYnXUqkKUyFYizy2t/NshST7hsaGEXoSD5lwPZ/xDZdLkYeUDXYNIGB4Df53YEW+xixnsclgk0czbE6+PIR7JhKw8acj5MjqEI4OgBQeNw3UmGT5kW53oxMwCUXHacDm8Ab+vye72Msbs26SYj9Qw==",
-                                "public_bytes": "Q29/F1bcx0UNnxFAhvfJfhpzSjeKnxNbV9GP+iaPRu9fr4PavNUhNWoVEbohsHrpakc5TvnXWylkAiwVBOmAenXwOvXYsCp5OOWseH+fAtg5dcfFVAXO58WaHtqDdJZQDVUvVjthIoVgGK1RDJT5P6uAUBslD41VRjrmGIjAcgYH7SsetMlcG1JJ3JaL/XszChFHvG5dtjsZHZbOToPhBYtXGPNCLMR1vcADczwzMxwB4sQRLoG7lwR5XtB/b8BiGbYzD2FmPKhgATUavpEz2W0/Gsjx8waLTcEgb8nsxffJ1gTWf5FVUYC/YUu/WyGr4kAa8cRqy22HnwqsMV6g/A==",
-                                "size": 2048,
-                                "type_name": "DH",
-                                "x": null,
-                                "y": null
-                            }
-                        }
-                    ],
+                    "accepted_cipher_suites": [],
                     "is_tls_version_supported": true,
                     "rejected_cipher_suites": [{
                             "cipher_suite": {
@@ -6096,24 +5916,7 @@
                 "error_reason": null,
                 "error_trace": null,
                 "result": {
-                    "accepted_cipher_suites": [{
-                            "cipher_suite": {
-                                "is_anonymous": false,
-                                "key_size": 256,
-                                "name": "TLS_CHACHA20_POLY1305_SHA256",
-                                "openssl_name": "TLS_CHACHA20_POLY1305_SHA256"
-                            },
-                            "ephemeral_key": {
-                                "curve_name": "X25519",
-                                "generator": null,
-                                "prime": null,
-                                "public_bytes": "VCD46fbYU0LcWfNjSKYPg+oGXD93lj6dc1K6GVdtQR4=",
-                                "size": 253,
-                                "type_name": "ECDH",
-                                "x": null,
-                                "y": null
-                            }
-                        },
+                    "accepted_cipher_suites": [
                         {
                             "cipher_suite": {
                                 "is_anonymous": false,

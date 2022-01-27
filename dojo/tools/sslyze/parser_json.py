@@ -169,7 +169,7 @@ class SSLyzeJSONParser(object):
 def get_heartbleed(node, test, endpoint):
     if 'heartbleed' in node:
         heartbleed = node['heartbleed']
-        if heartbleed['status'] == 'NOT_SCHEDULED':
+        if heartbleed.get('status') == 'NOT_SCHEDULED':
             return None
         vulnerable = False
         if 'is_vulnerable_to_heartbleed' in heartbleed:
@@ -179,7 +179,6 @@ def get_heartbleed(node, test, endpoint):
                 description = get_url(endpoint) + ' is vulnerable to heartbleed'
                 cve = 'CVE-2014-0160'
                 return get_finding(title, description, cve, None, test, endpoint)
-
         elif 'result' in heartbleed:
             hb_result = heartbleed['result']
             if 'is_vulnerable_to_heartbleed' in hb_result:
@@ -197,7 +196,7 @@ def get_ccs(node, test, endpoint):
     if 'openssl_ccs_injection' in node:
         ccs_injection = node['openssl_ccs_injection']
         vulnerable = False
-        if ccs_injection['status'] == 'NOT_SCHEDULED':
+        if ccs_injection.get('status') == 'NOT_SCHEDULED':
             return None
         if 'is_vulnerable_to_ccs_injection' in ccs_injection:
             vulnerable = ccs_injection['is_vulnerable_to_ccs_injection']
@@ -223,7 +222,7 @@ def get_ccs(node, test, endpoint):
 def get_renegotiation(node, test, endpoint):
     if 'session_renegotiation' in node:
         renegotiation = node['session_renegotiation']
-        if renegotiation['status'] == 'NOT_SCHEDULED':
+        if renegotiation.get('status') == 'NOT_SCHEDULED':
             return None
         if 'accepts_client_renegotiation' in renegotiation and 'supports_secure_renegotiation' in renegotiation:
             vulnerable = False
@@ -261,13 +260,12 @@ def get_renegotiation(node, test, endpoint):
 def get_weak_protocol(cipher, text, node, test, endpoint):
     if cipher in node:
         weak_node = node[cipher]
-        if weak_node['status'] == 'NOT_SCHEDULED':
+        if weak_node.get('status') == 'NOT_SCHEDULED':
             return None
         if 'accepted_cipher_suites' in weak_node and len(weak_node['accepted_cipher_suites']) > 0:
             title = text + ' not recommended'
             description = get_url(endpoint) + ' accepts ' + text + ' connections'
             return get_finding(title, description, None, REFERENCES, test, endpoint)
-
         elif 'result' in weak_node:
             weak_node_result = weak_node['result']
             if 'accepted_cipher_suites' in weak_node_result and len(weak_node_result['accepted_cipher_suites']) > 0:
@@ -281,7 +279,7 @@ def get_weak_protocol(cipher, text, node, test, endpoint):
 def get_strong_protocol(cipher, text, suites, node, test, endpoint):
     if cipher in node:
         strong_node = node[cipher]
-        if strong_node['status'] == 'NOT_SCHEDULED':
+        if strong_node.get('status') == 'NOT_SCHEDULED':
             return None
 
         if 'accepted_cipher_suites' in strong_node and len(strong_node['accepted_cipher_suites']) > 0:
@@ -318,7 +316,7 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
 def get_certificate_information(node, test, endpoint):
     if 'certificate_info' in node:
         ci_node = node['certificate_info']
-        if ci_node['status'] == 'NOT_SCHEDULED':
+        if ci_node.get('status') == 'NOT_SCHEDULED':
             return None
         if 'certificate_deployments' in ci_node:
             for cd_node in ci_node['certificate_deployments']:
