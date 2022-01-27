@@ -1653,12 +1653,20 @@ def user_post_save(sender, instance, created, **kwargs):
 
         system_settings = System_Settings.objects.get()
         if system_settings.default_group and system_settings.default_group_role:
-            logger.info('setting default group for: ' + str(instance))
-            dojo_group_member = Dojo_Group_Member(
-                group=system_settings.default_group,
-                user=instance,
-                role=system_settings.default_group_role)
-            dojo_group_member.save()
+            if (system_settings.default_group_email_pattern and re.fullmatch(system_settings.default_group_email_pattern, instance.email)) or \
+               not system_settings.default_group_email_pattern:
+                logger.info('setting default group for: ' + str(instance))
+                dojo_group_member = Dojo_Group_Member(
+                    group=system_settings.default_group,
+                    user=instance,
+                    role=system_settings.default_group_role)
+                dojo_group_member.save()
+
+    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+        # Superusers shall always be staff
+        if instance.is_superuser and not instance.is_staff:
+            instance.is_staff = True
+            instance.save()
 
 
 @receiver(post_save, sender=Engagement)
