@@ -31,17 +31,10 @@ class EdgescanParser(object):
         return scan_type == SCANTYPE_EDGESCAN_API
 
     def get_findings(self, file, test):
-        try:
-            if file:
-                serialized_data = file.read()
-                try:
-                    data = json.loads(str(serialized_data, "utf-8"))
-                except:
-                    data = json.loads(serialized_data)
-            else:
-                data = EdgescanImporter().get_findings(test)
-        except:
-            raise Exception("Invalid details provided")
+        if file:
+            data = json.load(file)
+        else:
+            data = EdgescanImporter().get_findings(test)
 
         return self.process_vulnerabilities(test, data)
 
