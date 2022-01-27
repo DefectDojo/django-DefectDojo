@@ -2306,7 +2306,7 @@ def report_generate(request, obj, options):
                         if eng.test_set.all():
                             for t in eng.test_set.all():
                                 test_type_name = t.test_type.name
-                                if test.environment:
+                                if t.environment:
                                     test_environment_name = t.environment.name
                                 test_target_start = t.target_start
                                 if t.target_end:
