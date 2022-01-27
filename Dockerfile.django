@@ -11,6 +11,7 @@ WORKDIR /app
 RUN \
   apt-get -y update && \
   apt-get -y install --no-install-recommends \
+    gcc \
     build-essential \
     dnsutils \
     default-mysql-client \
