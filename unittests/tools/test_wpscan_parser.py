@@ -82,7 +82,7 @@ class TestWpscanParser(DojoTestCase):
             self.assertEqual("Contact Form 7 < 5.3.2 - Unrestricted File Upload", finding.title)
             self.assertEqual("CVE-2020-35489", finding.cve)
             self.assertEqual(datetime.datetime(2021, 3, 17, 12, 21, 6), finding.date)
-            self.assertEqual("Certain", finding.get_scanner_confidence_text())  # data are => 100%
+            self.assertEqual("", finding.get_scanner_confidence_text())  # data are => 100%
 
         with self.subTest(i=4):
             finding = findings[4]
@@ -90,8 +90,7 @@ class TestWpscanParser(DojoTestCase):
             self.assertEqual("Info", finding.severity)  # it is not a vulnerability so severity should be 'Info'
             self.assertEqual("Interesting finding: WordPress readme found: http://example/readme.html", finding.title)
             self.assertEqual(datetime.datetime(2021, 3, 17, 12, 21, 6), finding.date)
-            # self.assertEqual("Certain", finding.scanner_confidence)  # data are => "confidence": 100,
-            self.assertEqual("Certain", finding.get_scanner_confidence_text())  # data are => "confidence": 100,
+            self.assertEqual("", finding.get_scanner_confidence_text())  # data are => "confidence": 100,
 
     def test_parse_file_with_multiple_vuln_in_version(self):
         testfile = open("unittests/scans/wpscan/wordpress_vuln_version.json")
@@ -108,7 +107,7 @@ class TestWpscanParser(DojoTestCase):
             self.assertNotEqual("Info", finding.severity)  # it is a vulnerability so not 'Info'
             self.assertEqual("WordPress 2.8.1-4.7.2 - Control Characters in Redirect URL Validation", finding.title)
             self.assertEqual("fixed in : 4.6.4", finding.mitigation)
-            self.assertEqual("Certain", finding.get_scanner_confidence_text())  # data are => 100%
+            self.assertEqual("", finding.get_scanner_confidence_text())  # data are => 100%
 
     def test_parse_file_issue5774(self):
         testfile = open("unittests/scans/wpscan/issue5774.json")
