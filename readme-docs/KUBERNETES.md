@@ -118,12 +118,6 @@ Note that you need only one of:
 - postgresql or mysql
 - rabbitmq or redis
 
-You will  need to add bitnami repo's (or alter the dependency requirements) if building charts locally:
-```
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm dependency update ./helm/defectdojo
-```
-
 It usually takes up to a minute for the services to startup and the
 status of the containers can be viewed by starting up ```minikube dashboard```.
 Note: If the containers are not cached locally the services will start once the
