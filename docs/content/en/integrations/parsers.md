@@ -377,11 +377,7 @@ Import of JSON report from <https://github.com/Yelp/detect-secrets>
 
 ### Edgescan
 
-Import Edgescan vulnerabilities in JSON format.
-
-### Edgescan API Import
-
-Import findings from the Edgescan API - no file required.
+Import Edgescan vulnerabilities by JSON file or API - no file required.
 
 Follow these steps to setup API importing:
 
@@ -393,7 +389,7 @@ Follow these steps to setup API importing:
     previously added Edgescan Tool Configuration. Provide the ID
     of the asset from which to import findings in the field *Service key 1*.
 3.  After this is done, you can import the findings by selecting 
-    "Edgescan API Import" as the scan type. If you have more than one asset 
+    "Edgescan Scan" as the scan type. If you have more than one asset 
     configured, you must also select which Edgescan API Scan Configuration to 
     use.
 

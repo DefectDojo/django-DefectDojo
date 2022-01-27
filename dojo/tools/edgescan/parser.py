@@ -4,7 +4,6 @@ from dojo.models import Endpoint, Finding
 from dojo.tools.edgescan.importer import EdgescanImporter
 
 ES_SEVERITIES = {1: "Info", 2: "Low", 3: "Medium", 4: "High", 5: "Critical"}
-SCANTYPE_EDGESCAN_API = 'Edgescan API Scan'
 SCANTYPE_EDGESCAN = 'Edgescan Scan'
 
 
@@ -14,21 +13,16 @@ class EdgescanParser(object):
     """
 
     def get_scan_types(self):
-        return [SCANTYPE_EDGESCAN, SCANTYPE_EDGESCAN_API]
+        return [SCANTYPE_EDGESCAN]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type
 
     def get_description_for_scan_types(self, scan_type):
-        if scan_type == SCANTYPE_EDGESCAN_API:
-            return "Edgescan findings can be imported by API."
-        return "Edgescan findings can be imported in JSON format."
-
-    def requires_file(self, scan_type):
-        return scan_type == SCANTYPE_EDGESCAN
+        return "Edgescan findings can be imported by API or JSON file."
 
     def requires_tool_type(self, scan_type):
-        return scan_type == SCANTYPE_EDGESCAN_API
+        return "Edgescan"
 
     def get_findings(self, file, test):
         if file:
