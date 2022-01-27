@@ -38,7 +38,7 @@ class RustyhogParser(object):
             if 'commit' in node or 'commitHash' in node or 'parent_commit_hash' in node or 'old_file_id' in node or 'new_file_id' in node:
                 parsername = "Choctaw Hog"
                 break
-            if 'issue_id' in node or 'location' in node or 'url' in node:
+            if 'issue_id' in node or 'location' in node:
                 parsername = "Gottingen Hog"
                 break
             if 'page_id' in node:
