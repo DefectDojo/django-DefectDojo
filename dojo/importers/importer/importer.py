@@ -108,7 +108,7 @@ class DojoDefaultImporter(object):
             item.save(dedupe_option=False)
 
             if settings.FEATURE_FINDING_GROUPS and group_by:
-                finding_helper.add_finding_to_auto_group(item, group_by)
+                finding_helper.add_finding_to_auto_group(item, group_by, user=user)
 
             if (hasattr(item, 'unsaved_req_resp') and
                     len(item.unsaved_req_resp) > 0):
