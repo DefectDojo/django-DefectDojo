@@ -2,10 +2,10 @@
     "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
     "bomFormat": "CycloneDX",
     "specVersion": "1.4",
-    "serialNumber": "urn:uuid:53dfba9f-a51e-4d5b-adb9-96728290b149",
+    "serialNumber": "urn:uuid:cae44a0d-ea73-4f5e-babd-07003f849cbe",
     "version": 1,
     "metadata": {
-        "timestamp": "2022-01-24T17:52:24.111190+00:00",
+        "timestamp": "2022-01-28T07:05:16.397158+00:00",
         "tools": [
             {
                 "vendor": "CycloneDX",
@@ -51,7 +51,33 @@
     "components": [
         {
             "type": "library",
-            "bom-ref": "956f7196-f33f-49e2-8b60-0a446fe182fe",
+            "bom-ref": "9eb026b5-fde4-4ebf-979e-4dbeecfe3573",
+            "author": "Geoffrey Sneddon",
+            "name": "webencodings",
+            "version": "0.5.1",
+            "licenses": [
+                {
+                    "expression": "BSD"
+                }
+            ],
+            "purl": "pkg:pypi/webencodings@0.5.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "4e0f48be-f14b-463f-8635-aa6d70aacc9d",
+            "author": "Bernat Gabor",
+            "name": "virtualenv",
+            "version": "20.13.0",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/virtualenv@20.13.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "5b4048af-d4aa-4f66-8bcf-baf199726f33",
             "author": "Andrey Petrov",
             "name": "urllib3",
             "version": "1.26.8",
@@ -64,31 +90,57 @@
         },
         {
             "type": "library",
-            "bom-ref": "2507ab25-80cd-47fc-a273-3c6d5e1a0149",
+            "bom-ref": "0119ad87-9f3b-49ef-915a-931c940383da",
             "name": "types-toml",
-            "version": "0.10.1",
+            "version": "0.10.3",
             "licenses": [
                 {
                     "expression": "Apache-2.0 license"
                 }
             ],
-            "purl": "pkg:pypi/types-toml@0.10.1"
+            "purl": "pkg:pypi/types-toml@0.10.3"
         },
         {
             "type": "library",
-            "bom-ref": "87960383-50a6-40aa-9359-d6e1730fc5cd",
+            "bom-ref": "d088f0a8-923c-4b64-9676-71929b80c632",
             "name": "types-setuptools",
-            "version": "57.4.4",
+            "version": "57.4.7",
             "licenses": [
                 {
                     "expression": "Apache-2.0 license"
                 }
             ],
-            "purl": "pkg:pypi/types-setuptools@57.4.4"
+            "purl": "pkg:pypi/types-setuptools@57.4.7"
         },
         {
             "type": "library",
-            "bom-ref": "fec5222b-d242-43cc-a23a-cdac0e286f74",
+            "bom-ref": "e1bc3f9b-ee5f-4b9e-a738-bd2b4ffa3de4",
+            "author": "Holger Krekel, Oliver Bestwalter, Bern\u00e1t G\u00e1bor and others",
+            "name": "tox",
+            "version": "3.24.5",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/tox@3.24.5"
+        },
+        {
+            "type": "library",
+            "bom-ref": "9396b081-4b64-42a7-8370-f4b3a44666bd",
+            "author": "S\u00e9bastien Eustace",
+            "name": "tomlkit",
+            "version": "0.8.0",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/tomlkit@0.8.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "03b0aa74-14ab-489b-80ab-7140f2b75c94",
             "author": "William Pearson",
             "name": "toml",
             "version": "0.10.2",
@@ -101,7 +153,7 @@
         },
         {
             "type": "library",
-            "bom-ref": "e48b1462-3ca8-4f9f-b1ad-6f05451b3c04",
+            "bom-ref": "486a2360-b5e0-41a7-9314-36ddac52e546",
             "author": "Markus Siemens",
             "name": "tinydb",
             "version": "4.6.1",
@@ -114,7 +166,33 @@
         },
         {
             "type": "library",
-            "bom-ref": "d189629b-64a9-4578-9e39-1019641d62a8",
+            "bom-ref": "b0376dbf-ff8b-4178-91ff-a95798637497",
+            "author": "Benjamin Peterson",
+            "name": "six",
+            "version": "1.16.0",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/six@1.16.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "a910fba5-4464-4eb7-aa47-43b9c88256ee",
+            "author": "Tzu-ping Chung",
+            "name": "shellingham",
+            "version": "1.4.0",
+            "licenses": [
+                {
+                    "expression": "ISC License"
+                }
+            ],
+            "purl": "pkg:pypi/shellingham@1.4.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "ef0156df-cf43-45dc-8f42-a5ec8f290175",
             "author": "Python Packaging Authority",
             "name": "setuptools",
             "version": "58.1.0",
@@ -122,7 +200,20 @@
         },
         {
             "type": "library",
-            "bom-ref": "01daf0bd-5803-4dff-9a4e-e652374e16c3",
+            "bom-ref": "a782c7aa-144c-4159-ad8b-014c19a77b48",
+            "author": "Dmitry Shachnev",
+            "name": "SecretStorage",
+            "version": "3.3.1",
+            "licenses": [
+                {
+                    "expression": "BSD 3-Clause License"
+                }
+            ],
+            "purl": "pkg:pypi/secretstorage@3.3.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "db9324b5-a8ac-4b0c-ba1a-a8bdbad553e0",
             "author": "Will McGugan",
             "name": "rich",
             "version": "11.0.0",
@@ -135,7 +226,7 @@
         },
         {
             "type": "library",
-            "bom-ref": "84ba4fc0-f3ad-419c-aae4-f230b1dd8189",
+            "bom-ref": "af205bfe-cbed-46d2-a2eb-c3e01e308e5b",
             "author": "Kenneth Reitz",
             "name": "requests",
             "version": "2.27.1",
@@ -148,7 +239,20 @@
         },
         {
             "type": "library",
-            "bom-ref": "8bad96e1-eb6b-4a06-89f5-deabdcbc8be5",
+            "bom-ref": "a2f30b6d-791c-450a-9461-501e031dccb9",
+            "author": "Ian Cordasco, Cory Benfield",
+            "name": "requests-toolbelt",
+            "version": "0.9.1",
+            "licenses": [
+                {
+                    "expression": "Apache 2.0"
+                }
+            ],
+            "purl": "pkg:pypi/requests-toolbelt@0.9.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "26d71b8e-492d-4dae-83e6-058220d30710",
             "author": "Stuart Bishop",
             "name": "pytz",
             "version": "2021.3",
@@ -161,7 +265,41 @@
         },
         {
             "type": "library",
-            "bom-ref": "1dfb27d0-e5bc-48e3-be83-62bac5054a1f",
+            "bom-ref": "5882c271-4d1c-4d98-8dd9-fd6775cc9a34",
+            "author": "Holger Krekel, Bruno Oliveira, Ronny Pfannschmidt, Floris Bruynooghe, Brianna Laugher, Florian Bruhin and others",
+            "name": "pytest",
+            "version": "6.2.5",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/pytest@6.2.5"
+        },
+        {
+            "type": "library",
+            "bom-ref": "e4c9031c-e995-440e-ba30-590fa93e447b",
+            "author": "Paul McGuire",
+            "name": "pyparsing",
+            "version": "3.0.7",
+            "licenses": [
+                {
+                    "expression": "MIT License"
+                }
+            ],
+            "purl": "pkg:pypi/pyparsing@3.0.7"
+        },
+        {
+            "type": "library",
+            "bom-ref": "f5435686-c3c7-4671-bb9b-e586c862be53",
+            "author": "Daniel Lindsley",
+            "name": "pylev",
+            "version": "1.4.0",
+            "purl": "pkg:pypi/pylev@1.4.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "536f0092-034b-41bb-8732-546b42b76e0e",
             "author": "Georg Brandl",
             "name": "Pygments",
             "version": "2.11.2",
@@ -174,7 +312,7 @@
         },
         {
             "type": "library",
-            "bom-ref": "e4cfcc5e-81a8-452d-b3b1-580ba25d1aa9",
+            "bom-ref": "31b70fd9-1ed6-4aff-acff-e8e226a2caa1",
             "author": "A lot of people",
             "name": "pyflakes",
             "version": "2.4.0",
@@ -187,7 +325,7 @@
         },
         {
             "type": "library",
-            "bom-ref": "bd6739d2-dac4-453d-af41-302399cdb32b",
+            "bom-ref": "5e964e86-e7d0-4f32-bd0b-7a5ebcd90749",
             "author": "Peter Waller (Thanks to Christopher Jones and Stefano Rivera)",
             "name": "pyfiglet",
             "version": "0.8.post1",
@@ -200,7 +338,20 @@
         },
         {
             "type": "library",
-            "bom-ref": "e3e4407b-12f7-4f6c-a488-611f01b175d1",
+            "bom-ref": "b0266c5d-8fe8-4645-bde6-7acc0bf44d17",
+            "author": "Eli Bendersky",
+            "name": "pycparser",
+            "version": "2.21",
+            "licenses": [
+                {
+                    "expression": "BSD"
+                }
+            ],
+            "purl": "pkg:pypi/pycparser@2.21"
+        },
+        {
+            "type": "library",
+            "bom-ref": "77f12bf8-ad92-48d1-bf1e-04526e7a2519",
             "author": "Johann C. Rocholl",
             "name": "pycodestyle",
             "version": "2.8.0",
@@ -213,7 +364,28 @@
         },
         {
             "type": "library",
-            "bom-ref": "f07d16d8-faf8-40dd-be8b-f4b3c1fb9547",
+            "bom-ref": "c64d1d07-ce11-42d2-a89c-e4b1673435a8",
+            "author": "holger krekel, Ronny Pfannschmidt, Benjamin Peterson and others",
+            "name": "py",
+            "version": "1.11.0",
+            "licenses": [
+                {
+                    "expression": "MIT license"
+                }
+            ],
+            "purl": "pkg:pypi/py@1.11.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "aaa35070-3c9d-46ad-b3fe-f3aa3d02446c",
+            "author": "Thomas Kluyver",
+            "name": "ptyprocess",
+            "version": "0.7.0",
+            "purl": "pkg:pypi/ptyprocess@0.7.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "f0c72ae8-4302-4a16-b334-6df60314b43c",
             "author": "Donal Mee",
             "name": "polling2",
             "version": "0.5.0",
@@ -221,7 +393,71 @@
         },
         {
             "type": "library",
-            "bom-ref": "e1e7be72-8602-444e-8fca-de7842b36893",
+            "bom-ref": "b90f6d03-fbf9-48ed-94a2-a893072848ec",
+            "author": "S\u00e9bastien Eustace",
+            "name": "poetry",
+            "version": "1.1.12",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/poetry@1.1.12"
+        },
+        {
+            "type": "library",
+            "bom-ref": "5c6efd6e-605d-408f-8532-d1cacbd8e268",
+            "author": "S\u00e9bastien Eustace",
+            "name": "poetry-core",
+            "version": "1.0.7",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/poetry-core@1.0.7"
+        },
+        {
+            "type": "library",
+            "bom-ref": "15f1b267-0518-41a0-a13a-5109b7f87323",
+            "author": "Holger Krekel",
+            "name": "pluggy",
+            "version": "1.0.0",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/pluggy@1.0.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "4389bb59-95cc-4627-be1e-58ddbc3ef074",
+            "name": "platformdirs",
+            "version": "2.4.0",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/platformdirs@2.4.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "38e70333-d2aa-40af-8353-23045ab9cc00",
+            "author": "Tres Seaver, Agendaless Consulting",
+            "name": "pkginfo",
+            "version": "1.8.2",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/pkginfo@1.8.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "053aedd3-c017-41bb-93af-a73a9651c92a",
             "author": "The pip developers",
             "name": "pip",
             "version": "21.2.4",
@@ -234,7 +470,46 @@
         },
         {
             "type": "library",
-            "bom-ref": "0c7281b2-6cbf-4f9e-812d-b78d060cac11",
+            "bom-ref": "b0196394-0b5d-4246-b91c-5815dce68d7a",
+            "author": "Noah Spurrier; Thomas Kluyver; Jeff Quast",
+            "name": "pexpect",
+            "version": "4.8.0",
+            "licenses": [
+                {
+                    "expression": "ISC license"
+                }
+            ],
+            "purl": "pkg:pypi/pexpect@4.8.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "35038bae-2a82-40f0-8f36-72aa39f7d61c",
+            "author": "S\u00e9bastien Eustace",
+            "name": "pastel",
+            "version": "0.2.1",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/pastel@0.2.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "1aa8b959-197d-4a70-9586-2037f4bf9442",
+            "author": "Donald Stufft and individual contributors",
+            "name": "packaging",
+            "version": "21.3",
+            "licenses": [
+                {
+                    "expression": "BSD-2-Clause or Apache-2.0"
+                }
+            ],
+            "purl": "pkg:pypi/packaging@21.3"
+        },
+        {
+            "type": "library",
+            "bom-ref": "b167e4b1-1cba-427d-b9ce-8df31eca81a6",
             "author": "the purl authors",
             "name": "packageurl-python",
             "version": "0.9.6",
@@ -247,7 +522,7 @@
         },
         {
             "type": "library",
-            "bom-ref": "afa97caf-ee4d-45ea-aa6c-5ea7bf11c743",
+            "bom-ref": "22e0ae48-c358-4a46-86da-787d83cfad94",
             "author": "Paul Horton",
             "name": "ossindex-lib",
             "version": "0.2.1",
@@ -260,7 +535,20 @@
         },
         {
             "type": "library",
-            "bom-ref": "57b38307-7213-4ddf-9bd3-bbeab35f66a6",
+            "bom-ref": "e22436c8-7efa-4c33-946d-2283f42c8240",
+            "author": "Inada Naoki",
+            "name": "msgpack",
+            "version": "1.0.3",
+            "licenses": [
+                {
+                    "expression": "Apache 2.0"
+                }
+            ],
+            "purl": "pkg:pypi/msgpack@1.0.3"
+        },
+        {
+            "type": "library",
+            "bom-ref": "51dee689-67bd-4fa9-85cd-35e116bbbcf2",
             "author": "Ian Cordasco",
             "name": "mccabe",
             "version": "0.6.1",
@@ -273,20 +561,57 @@
         },
         {
             "type": "library",
-            "bom-ref": "89b29920-7173-4311-ad06-6daee80f0a14",
+            "bom-ref": "65d4933b-8267-42c2-8c47-9f796bdd278e",
+            "author": "OpenStack",
+            "name": "lockfile",
+            "version": "0.12.2",
+            "purl": "pkg:pypi/lockfile@0.12.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "6648bc59-a9fa-47a4-87dc-76e64f611f22",
+            "author": "Kang Zhang",
+            "name": "keyring",
+            "version": "21.8.0",
+            "purl": "pkg:pypi/keyring@21.8.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "e07ccc0b-2b90-475c-9dbc-48746c7dc8cb",
+            "author": "Thomas Kluyver",
+            "name": "jeepney",
+            "version": "0.7.1",
+            "purl": "pkg:pypi/jeepney@0.7.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "dd2523e8-36d6-4e44-a854-b897ae6fa36e",
             "author": "Sonatype Community",
             "name": "jake",
-            "version": "1.4.1",
+            "version": "1.4.2",
             "licenses": [
                 {
                     "expression": "Apache-2.0"
                 }
             ],
-            "purl": "pkg:pypi/jake@1.4.1"
+            "purl": "pkg:pypi/jake@1.4.2"
         },
         {
             "type": "library",
-            "bom-ref": "156c8805-ff5b-42f4-acae-033c6cfc2f83",
+            "bom-ref": "c220064e-e6fa-4d5e-bb33-2857b43385e8",
+            "author": "Ronny Pfannschmidt, Holger Krekel",
+            "name": "iniconfig",
+            "version": "1.1.1",
+            "licenses": [
+                {
+                    "expression": "MIT License"
+                }
+            ],
+            "purl": "pkg:pypi/iniconfig@1.1.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "d1a95f47-3d7f-4e8d-ba23-b460271940c1",
             "author": "Kim Davies",
             "name": "idna",
             "version": "3.3",
@@ -299,7 +624,19 @@
         },
         {
             "type": "library",
-            "bom-ref": "18c1e9cf-e31f-40ca-bdbb-425a1ebf8d14",
+            "bom-ref": "34e21471-05d5-4df0-b477-1cf6c5107ee2",
+            "name": "html5lib",
+            "version": "1.1",
+            "licenses": [
+                {
+                    "expression": "MIT License"
+                }
+            ],
+            "purl": "pkg:pypi/html5lib@1.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "72768a02-bea3-47d6-8c5e-478a07a74fd3",
             "author": "Tarek Ziade",
             "name": "flake8",
             "version": "4.0.1",
@@ -312,20 +649,46 @@
         },
         {
             "type": "library",
-            "bom-ref": "8320ff63-f852-4757-ab50-d06f0aabeec1",
+            "bom-ref": "1cc798a9-8135-4b2e-80a7-dbc0d82a86b9",
+            "author": "Benedikt Schmitt",
+            "name": "filelock",
+            "version": "3.4.1",
+            "licenses": [
+                {
+                    "expression": "Unlicense"
+                }
+            ],
+            "purl": "pkg:pypi/filelock@3.4.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "6290db55-8336-4d2b-9cec-2efdda9f1b28",
             "author": "Django Software Foundation",
             "name": "Django",
-            "version": "2.0.1",
+            "version": "2.0",
             "licenses": [
                 {
                     "expression": "BSD"
                 }
             ],
-            "purl": "pkg:pypi/django@2.0.1"
+            "purl": "pkg:pypi/django@2.0"
         },
         {
             "type": "library",
-            "bom-ref": "28ccf590-cef9-4ae7-ba6d-c695b0e120af",
+            "bom-ref": "d96f37eb-45b2-4d23-b5f5-42ce0c189af1",
+            "author": "Vinay Sajip",
+            "name": "distlib",
+            "version": "0.3.4",
+            "licenses": [
+                {
+                    "expression": "Python license"
+                }
+            ],
+            "purl": "pkg:pypi/distlib@0.3.4"
+        },
+        {
+            "type": "library",
+            "bom-ref": "f9dac4b6-795d-4e35-8a11-aeca2aa74353",
             "author": "Paul Horton",
             "name": "cyclonedx-python-lib",
             "version": "1.3.0",
@@ -338,7 +701,7 @@
         },
         {
             "type": "library",
-            "bom-ref": "ff8e15e6-bc77-4192-9290-2453734ada03",
+            "bom-ref": "755dd08c-ab74-4670-8800-7608d21d03cc",
             "author": "Steven Springett",
             "name": "cyclonedx-bom",
             "version": "2.0.1",
@@ -351,7 +714,46 @@
         },
         {
             "type": "library",
-            "bom-ref": "6cbe73d5-3f61-492d-a30b-e747d3ddbc96",
+            "bom-ref": "8a9d228a-db2e-4b6c-9f04-35b5a57c78d9",
+            "author": "The Python Cryptographic Authority and individual contributors",
+            "name": "cryptography",
+            "version": "36.0.1",
+            "licenses": [
+                {
+                    "expression": "BSD or Apache License, Version 2.0"
+                }
+            ],
+            "purl": "pkg:pypi/cryptography@36.0.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "696ea976-c649-459f-9195-a850c45ce906",
+            "author": "S\u00e9bastien Eustace",
+            "name": "crashtest",
+            "version": "0.3.1",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/crashtest@0.3.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "006a9533-54b4-4d49-9cfc-215062d45a19",
+            "author": "Ned Batchelder and 146 others",
+            "name": "coverage",
+            "version": "6.2",
+            "licenses": [
+                {
+                    "expression": "Apache 2.0"
+                }
+            ],
+            "purl": "pkg:pypi/coverage@6.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "22051db4-a5c1-43b7-bf6f-8fa3c1bf8f63",
             "author": "Bibek Kafle <bkafle662@gmail.com>, Roland Shoemaker <rolandshoemaker@gmail.com>",
             "name": "commonmark",
             "version": "0.9.1",
@@ -364,7 +766,7 @@
         },
         {
             "type": "library",
-            "bom-ref": "bc809244-90e6-4f29-950f-badb6939be02",
+            "bom-ref": "33f4b60f-cf7b-4d08-b709-e97f43357f4d",
             "author": "Jonathan Hartley",
             "name": "colorama",
             "version": "0.4.4",
@@ -377,7 +779,33 @@
         },
         {
             "type": "library",
-            "bom-ref": "85db0085-dd76-4b8f-bbe9-870e6274f2cf",
+            "bom-ref": "273cb428-5f13-4323-a132-f3ed957c5fc3",
+            "author": "S\u00e9bastien Eustace",
+            "name": "clikit",
+            "version": "0.6.2",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/clikit@0.6.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "516cc286-9470-4be2-9e48-35b61406d670",
+            "author": "S\u00e9bastien Eustace",
+            "name": "cleo",
+            "version": "0.8.1",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/cleo@0.8.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "7fafe824-2f3a-471c-a648-ee2b30acdc49",
             "author": "Ahmed TAHRI @Ousret",
             "name": "charset-normalizer",
             "version": "2.0.10",
@@ -390,7 +818,20 @@
         },
         {
             "type": "library",
-            "bom-ref": "661a69f7-16f0-4d1f-92cb-7e20a2e3c3fa",
+            "bom-ref": "6f547984-4c1c-453b-a38b-e56e4a1726e0",
+            "author": "Armin Rigo, Maciej Fijalkowski",
+            "name": "cffi",
+            "version": "1.15.0",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/cffi@1.15.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "8e4c0162-ca59-4d8a-a2d6-8b8381f78304",
             "author": "Kenneth Reitz",
             "name": "certifi",
             "version": "2021.10.8",
@@ -400,27 +841,63 @@
                 }
             ],
             "purl": "pkg:pypi/certifi@2021.10.8"
+        },
+        {
+            "type": "library",
+            "bom-ref": "fdd29662-6a83-4b59-ae38-4be8d915f8d1",
+            "author": "S\u00e9bastien Eustace",
+            "name": "cachy",
+            "version": "0.3.0",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/cachy@0.3.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "74437179-95fc-440b-8fc7-e1e529a405ae",
+            "author": "Eric Larson",
+            "name": "CacheControl",
+            "version": "0.12.10",
+            "purl": "pkg:pypi/cachecontrol@0.12.10"
+        },
+        {
+            "type": "library",
+            "bom-ref": "38d9f758-1477-4e0d-8c49-ef31610661a2",
+            "author": "Hynek Schlawack",
+            "name": "attrs",
+            "version": "21.4.0",
+            "licenses": [
+                {
+                    "expression": "MIT"
+                }
+            ],
+            "purl": "pkg:pypi/attrs@21.4.0"
         }
     ],
     "vulnerabilities": [
         {
             "bom-ref": "c7129ff8-08bc-4afe-82ec-7d97b9491741",
-            "id": "CVE-2021-33203",
+            "id": "c7129ff8-08bc-4afe-82ec-7d97b9491741",
             "source": {
-                "name": "Oss Index",
+                "name": "OSS Index",
                 "url": "https://ossindex.sonatype.org/vulnerability/c7129ff8-08bc-4afe-82ec-7d97b9491741?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
             },
             "references": [
                 {
+                    "id": "CVE-2021-33203",
                     "source": {
-                        "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-33203"
+                        "name": "OSS Index",
+                        "url": "https://ossindex.sonatype.org/vulnerability/c7129ff8-08bc-4afe-82ec-7d97b9491741?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     }
                 }
             ],
             "ratings": [
                 {
                     "source": {
-                        "name": "Oss Index",
+                        "name": "OSS Index",
                         "url": "https://ossindex.sonatype.org/vulnerability/c7129ff8-08bc-4afe-82ec-7d97b9491741?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     },
                     "score": 7.5,
@@ -431,12 +908,17 @@
             ],
             "description": "[CVE-2021-33203] Django before 2.2.24, 3.x before 3.1.12, and 3.2.x before 3.2.4 has a potential ...",
             "detail": "Django before 2.2.24, 3.x before 3.1.12, and 3.2.x before 3.2.4 has a potential directory traversal via django.contrib.admindocs. Staff members could use the TemplateDetailView view to check the existence of arbitrary files. Additionally, if (and only if) the default admindocs templates have been customized by application developers to also show file contents, then not only the existence but also the file contents would have been exposed. In other words, there is directory traversal outside of the template root directories.",
+            "advisories": [
+                {
+                    "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-33203"
+                }
+            ],
             "affects": [
                 {
-                    "ref": "8320ff63-f852-4757-ab50-d06f0aabeec1",
+                    "ref": "6290db55-8336-4d2b-9cec-2efdda9f1b28",
                     "versions": [
                         {
-                            "version": "2.0.1",
+                            "version": "2.0",
                             "status": "affected"
                         }
                     ]
@@ -445,27 +927,24 @@
         },
         {
             "bom-ref": "c9b6a6a5-01a4-4d4c-b480-b9d6825dc4d0",
-            "id": "CVE-2018-7536",
+            "id": "c9b6a6a5-01a4-4d4c-b480-b9d6825dc4d0",
             "source": {
-                "name": "Oss Index",
+                "name": "OSS Index",
                 "url": "https://ossindex.sonatype.org/vulnerability/c9b6a6a5-01a4-4d4c-b480-b9d6825dc4d0?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
             },
             "references": [
                 {
+                    "id": "CVE-2018-7536",
                     "source": {
-                        "url": "https://www.djangoproject.com/weblog/2018/mar/06/security-releases/"
-                    }
-                },
-                {
-                    "source": {
-                        "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-7536"
+                        "name": "OSS Index",
+                        "url": "https://ossindex.sonatype.org/vulnerability/c9b6a6a5-01a4-4d4c-b480-b9d6825dc4d0?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     }
                 }
             ],
             "ratings": [
                 {
                     "source": {
-                        "name": "Oss Index",
+                        "name": "OSS Index",
                         "url": "https://ossindex.sonatype.org/vulnerability/c9b6a6a5-01a4-4d4c-b480-b9d6825dc4d0?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     },
                     "score": 5.3,
@@ -476,12 +955,20 @@
             ],
             "description": "[CVE-2018-7536]  Incorrect Regular Expression",
             "detail": "An issue was discovered in Django 2.0 before 2.0.3, 1.11 before 1.11.11, and 1.8 before 1.8.19. The django.utils.html.urlize() function was extremely slow to evaluate certain inputs due to catastrophic backtracking vulnerabilities in two regular expressions (only one regular expression for Django 1.8.x). The urlize() function is used to implement the urlize and urlizetrunc template filters, which were thus vulnerable.",
+            "advisories": [
+                {
+                    "url": "https://www.djangoproject.com/weblog/2018/mar/06/security-releases/"
+                },
+                {
+                    "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-7536"
+                }
+            ],
             "affects": [
                 {
-                    "ref": "8320ff63-f852-4757-ab50-d06f0aabeec1",
+                    "ref": "6290db55-8336-4d2b-9cec-2efdda9f1b28",
                     "versions": [
                         {
-                            "version": "2.0.1",
+                            "version": "2.0",
                             "status": "affected"
                         }
                     ]
@@ -490,27 +977,24 @@
         },
         {
             "bom-ref": "40fb7665-767b-40f5-bb08-3d0ed295cfaf",
-            "id": "CVE-2018-7537",
+            "id": "40fb7665-767b-40f5-bb08-3d0ed295cfaf",
             "source": {
-                "name": "Oss Index",
+                "name": "OSS Index",
                 "url": "https://ossindex.sonatype.org/vulnerability/40fb7665-767b-40f5-bb08-3d0ed295cfaf?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
             },
             "references": [
                 {
+                    "id": "CVE-2018-7537",
                     "source": {
-                        "url": "https://www.djangoproject.com/weblog/2018/mar/06/security-releases/"
-                    }
-                },
-                {
-                    "source": {
-                        "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-7537"
+                        "name": "OSS Index",
+                        "url": "https://ossindex.sonatype.org/vulnerability/40fb7665-767b-40f5-bb08-3d0ed295cfaf?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     }
                 }
             ],
             "ratings": [
                 {
                     "source": {
-                        "name": "Oss Index",
+                        "name": "OSS Index",
                         "url": "https://ossindex.sonatype.org/vulnerability/40fb7665-767b-40f5-bb08-3d0ed295cfaf?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     },
                     "score": 5.3,
@@ -521,12 +1005,20 @@
             ],
             "description": "[CVE-2018-7537]  Incorrect Regular Expression",
             "detail": "An issue was discovered in Django 2.0 before 2.0.3, 1.11 before 1.11.11, and 1.8 before 1.8.19. If django.utils.text.Truncator's chars() and words() methods were passed the html=True argument, they were extremely slow to evaluate certain inputs due to a catastrophic backtracking vulnerability in a regular expression. The chars() and words() methods are used to implement the truncatechars_html and truncatewords_html template filters, which were thus vulnerable.",
+            "advisories": [
+                {
+                    "url": "https://www.djangoproject.com/weblog/2018/mar/06/security-releases/"
+                },
+                {
+                    "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-7537"
+                }
+            ],
             "affects": [
                 {
-                    "ref": "8320ff63-f852-4757-ab50-d06f0aabeec1",
+                    "ref": "6290db55-8336-4d2b-9cec-2efdda9f1b28",
                     "versions": [
                         {
-                            "version": "2.0.1",
+                            "version": "2.0",
                             "status": "affected"
                         }
                     ]
@@ -535,27 +1027,24 @@
         },
         {
             "bom-ref": "87a595e6-8e97-40a3-8677-13bd76364267",
-            "id": "CVE-2018-14574",
+            "id": "87a595e6-8e97-40a3-8677-13bd76364267",
             "source": {
-                "name": "Oss Index",
+                "name": "OSS Index",
                 "url": "https://ossindex.sonatype.org/vulnerability/87a595e6-8e97-40a3-8677-13bd76364267?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
             },
             "references": [
                 {
+                    "id": "CVE-2018-14574",
                     "source": {
-                        "url": "https://www.djangoproject.com/weblog/2018/aug/01/security-releases/"
-                    }
-                },
-                {
-                    "source": {
-                        "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-14574"
+                        "name": "OSS Index",
+                        "url": "https://ossindex.sonatype.org/vulnerability/87a595e6-8e97-40a3-8677-13bd76364267?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     }
                 }
             ],
             "ratings": [
                 {
                     "source": {
-                        "name": "Oss Index",
+                        "name": "OSS Index",
                         "url": "https://ossindex.sonatype.org/vulnerability/87a595e6-8e97-40a3-8677-13bd76364267?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     },
                     "score": 6.1,
@@ -566,12 +1055,20 @@
             ],
             "description": "[CVE-2018-14574]  URL Redirection to Untrusted Site (\"Open Redirect\")",
             "detail": "django.middleware.common.CommonMiddleware in Django 1.11.x before 1.11.15 and 2.0.x before 2.0.8 has an Open Redirect.",
+            "advisories": [
+                {
+                    "url": "https://www.djangoproject.com/weblog/2018/aug/01/security-releases/"
+                },
+                {
+                    "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-14574"
+                }
+            ],
             "affects": [
                 {
-                    "ref": "8320ff63-f852-4757-ab50-d06f0aabeec1",
+                    "ref": "6290db55-8336-4d2b-9cec-2efdda9f1b28",
                     "versions": [
                         {
-                            "version": "2.0.1",
+                            "version": "2.0",
                             "status": "affected"
                         }
                     ]
@@ -580,22 +1077,24 @@
         },
         {
             "bom-ref": "4fe076be-8570-4056-beec-dd93d99543bd",
-            "id": "CVE-2019-3498",
+            "id": "4fe076be-8570-4056-beec-dd93d99543bd",
             "source": {
-                "name": "Oss Index",
+                "name": "OSS Index",
                 "url": "https://ossindex.sonatype.org/vulnerability/4fe076be-8570-4056-beec-dd93d99543bd?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
             },
             "references": [
                 {
+                    "id": "CVE-2019-3498",
                     "source": {
-                        "url": "https://nvd.nist.gov/vuln/detail/CVE-2019-3498"
+                        "name": "OSS Index",
+                        "url": "https://ossindex.sonatype.org/vulnerability/4fe076be-8570-4056-beec-dd93d99543bd?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     }
                 }
             ],
             "ratings": [
                 {
                     "source": {
-                        "name": "Oss Index",
+                        "name": "OSS Index",
                         "url": "https://ossindex.sonatype.org/vulnerability/4fe076be-8570-4056-beec-dd93d99543bd?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     },
                     "score": 6.5,
@@ -606,12 +1105,17 @@
             ],
             "description": "[CVE-2019-3498]  Improper Input Validation",
             "detail": "In Django 1.11.x before 1.11.18, 2.0.x before 2.0.10, and 2.1.x before 2.1.5, an Improper Neutralization of Special Elements in Output Used by a Downstream Component issue exists in django.views.defaults.page_not_found(), leading to content spoofing (in a 404 error page) if a user fails to recognize that a crafted URL has malicious content.",
+            "advisories": [
+                {
+                    "url": "https://nvd.nist.gov/vuln/detail/CVE-2019-3498"
+                }
+            ],
             "affects": [
                 {
-                    "ref": "8320ff63-f852-4757-ab50-d06f0aabeec1",
+                    "ref": "6290db55-8336-4d2b-9cec-2efdda9f1b28",
                     "versions": [
                         {
-                            "version": "2.0.1",
+                            "version": "2.0",
                             "status": "affected"
                         }
                     ]
@@ -620,22 +1124,24 @@
         },
         {
             "bom-ref": "eeeaf73f-4e79-4d40-b6c1-75c75f5460a1",
-            "id": "CVE-2019-6975",
+            "id": "eeeaf73f-4e79-4d40-b6c1-75c75f5460a1",
             "source": {
-                "name": "Oss Index",
+                "name": "OSS Index",
                 "url": "https://ossindex.sonatype.org/vulnerability/eeeaf73f-4e79-4d40-b6c1-75c75f5460a1?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
             },
             "references": [
                 {
+                    "id": "CVE-2019-6975",
                     "source": {
-                        "url": "https://nvd.nist.gov/vuln/detail/CVE-2019-6975"
+                        "name": "OSS Index",
+                        "url": "https://ossindex.sonatype.org/vulnerability/eeeaf73f-4e79-4d40-b6c1-75c75f5460a1?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     }
                 }
             ],
             "ratings": [
                 {
                     "source": {
-                        "name": "Oss Index",
+                        "name": "OSS Index",
                         "url": "https://ossindex.sonatype.org/vulnerability/eeeaf73f-4e79-4d40-b6c1-75c75f5460a1?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     },
                     "score": 7.5,
@@ -646,12 +1152,17 @@
             ],
             "description": "[CVE-2019-6975]  Uncontrolled Resource Consumption (\"Resource Exhaustion\")",
             "detail": "Django 1.11.x before 1.11.19, 2.0.x before 2.0.11, and 2.1.x before 2.1.6 allows Uncontrolled Memory Consumption via a malicious attacker-supplied value to the django.utils.numberformat.format() function.",
+            "advisories": [
+                {
+                    "url": "https://nvd.nist.gov/vuln/detail/CVE-2019-6975"
+                }
+            ],
             "affects": [
                 {
-                    "ref": "8320ff63-f852-4757-ab50-d06f0aabeec1",
+                    "ref": "6290db55-8336-4d2b-9cec-2efdda9f1b28",
                     "versions": [
                         {
-                            "version": "2.0.1",
+                            "version": "2.0",
                             "status": "affected"
                         }
                     ]
@@ -660,27 +1171,24 @@
         },
         {
             "bom-ref": "90cfba6a-ddc9-4708-b131-5d875e8c558d",
-            "id": "CVE-2018-6188",
+            "id": "90cfba6a-ddc9-4708-b131-5d875e8c558d",
             "source": {
-                "name": "Oss Index",
+                "name": "OSS Index",
                 "url": "https://ossindex.sonatype.org/vulnerability/90cfba6a-ddc9-4708-b131-5d875e8c558d?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
             },
             "references": [
                 {
+                    "id": "CVE-2018-6188",
                     "source": {
-                        "url": "https://www.djangoproject.com/weblog/2018/feb/01/security-releases/"
-                    }
-                },
-                {
-                    "source": {
-                        "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-6188"
+                        "name": "OSS Index",
+                        "url": "https://ossindex.sonatype.org/vulnerability/90cfba6a-ddc9-4708-b131-5d875e8c558d?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     }
                 }
             ],
             "ratings": [
                 {
                     "source": {
-                        "name": "Oss Index",
+                        "name": "OSS Index",
                         "url": "https://ossindex.sonatype.org/vulnerability/90cfba6a-ddc9-4708-b131-5d875e8c558d?component-type=pypi&component-name=django&utm_source=python-oss-index-lib%400.2.1&utm_medium=integration"
                     },
                     "score": 7.5,
@@ -691,12 +1199,20 @@
             ],
             "description": "[CVE-2018-6188]  Information Exposure",
             "detail": "django.contrib.auth.forms.AuthenticationForm in Django 2.0 before 2.0.2, and 1.11.8 and 1.11.9, allows remote attackers to obtain potentially sensitive information by leveraging data exposure from the confirm_login_allowed() method, as demonstrated by discovering whether a user account is inactive.",
+            "advisories": [
+                {
+                    "url": "https://www.djangoproject.com/weblog/2018/feb/01/security-releases/"
+                },
+                {
+                    "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-6188"
+                }
+            ],
             "affects": [
                 {
-                    "ref": "8320ff63-f852-4757-ab50-d06f0aabeec1",
+                    "ref": "6290db55-8336-4d2b-9cec-2efdda9f1b28",
                     "versions": [
                         {
-                            "version": "2.0.1",
+                            "version": "2.0",
                             "status": "affected"
                         }
                     ]
