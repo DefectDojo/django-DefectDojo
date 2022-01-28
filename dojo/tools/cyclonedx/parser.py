@@ -332,11 +332,7 @@ class CycloneDXParser(object):
                 # check if the tool made the CVE as an id
                 if re.fullmatch("CVE-[0-9]+-[0-9]+", vulnerability.get("id", "")):
                     finding.cve = vulnerability.get("id")
-                if "advisories" in vulnerability and vulnerability["advisories"]:
-                    finding.references = ""
-                    for advisory in vulnerability["advisories"]:
-                        finding.references += f'**Source:** {advisory.get("title")}\n' \
-                                              f'**URL:** {advisory.get("url")}\n\n'
+
                 findings.append(finding)
         return findings
 
