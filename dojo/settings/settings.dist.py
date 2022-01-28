@@ -1056,6 +1056,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
     'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
     'pip-audit Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
+    'Edgescan Scan': ['unique_id_from_tool'],
     'Rubocop Scan': ['vuln_id_from_tool', 'file_path', 'line'],
     'JFrog Xray Scan': ['title', 'description', 'component_name', 'component_version'],
 }
@@ -1091,6 +1092,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Hadolint Dockerfile check': True,
     'Semgrep JSON Report': True,
     'Generic Findings Import': True,
+    'Edgescan Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1181,6 +1183,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Solar Appscreener Scan': DEDUPE_ALGO_HASH_CODE,
     'Gitleaks Scan': DEDUPE_ALGO_HASH_CODE,
     'pip-audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Edgescan Scan': DEDUPE_ALGO_HASH_CODE,
     'Rubocop Scan': DEDUPE_ALGO_HASH_CODE,
     'JFrog Xray Scan': DEDUPE_ALGO_HASH_CODE,
 }
