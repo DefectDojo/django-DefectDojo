@@ -2166,17 +2166,14 @@ class Finding(models.Model):
             return self.original_finding.all().order_by('title')
 
     def get_scanner_confidence_text(self):
-        scanner_confidence_text = ""
-        scanner_confidence = self.scanner_confidence
-        if scanner_confidence:
-            if scanner_confidence <= 2:
-                scanner_confidence_text = "Certain"
-            elif scanner_confidence >= 3 and scanner_confidence <= 5:
-                scanner_confidence_text = "Firm"
-            elif scanner_confidence >= 6:
-                scanner_confidence_text = "Tentative"
-
-        return scanner_confidence_text
+        if self.scanner_confidence and isinstance(self.scanner_confidence, int):
+            if self.scanner_confidence <= 2:
+                return "Certain"
+            elif self.scanner_confidence >= 3 and self.scanner_confidence <= 5:
+                return "Firm"
+            else:
+                return "Tentative"
+        return ""
 
     @staticmethod
     def get_numerical_severity(severity):
