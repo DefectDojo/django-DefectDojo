@@ -81,23 +81,68 @@ class TestSslyzeJSONParser(DojoTestCase):
  - TLS_DHE_RSA_WITH_AES_128_CBC_SHA'''
         self.assertEqual(description, finding.description)
         self.assertEqual('Medium', finding.severity)
+        self.assertEqual(
+            'TLS recommendations of German BSI: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10',
+            finding.references
+        )
 
         self.assertEqual(1, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual('example.com', endpoint.host)
         self.assertEqual(443, endpoint.port)
 
-    def test_parse_json_file_with_one_target_has_four_vuln_new(self):
+    def test_parse_json_file_with_one_target_has_three_vuln_new(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_many_vuln_new.json"))
         parser = SslyzeParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(4, len(findings))
+        self.assertEqual(3, len(findings))
 
     def test_parse_json_file_with_two_target_has_many_vuln_new(self):
-        testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/two_targets_two_vuln_new.json"))
+        testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/two_targets_many_vuln_new.json"))
         parser = SslyzeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(5, len(findings))
+
+        # We look at 2 examplary findings, the others are similar and don't give more test coverage
+        finding = findings[0]
+        self.assertEqual('Unrecommended cipher suites for TLS 1.2 (example.com:443)', finding.title)
+        description = '''example.com:443 accepts unrecommended cipher suites for TLS 1.2:
+ - TLS_RSA_WITH_AES_256_GCM_SHA384
+ - TLS_RSA_WITH_AES_256_CBC_SHA256
+ - TLS_RSA_WITH_AES_256_CBC_SHA
+ - TLS_RSA_WITH_AES_128_GCM_SHA256
+ - TLS_RSA_WITH_AES_128_CBC_SHA256
+ - TLS_RSA_WITH_AES_128_CBC_SHA
+ - TLS_RSA_WITH_3DES_EDE_CBC_SHA
+ - TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+ - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+ - TLS_DHE_RSA_WITH_AES_256_CBC_SHA
+ - TLS_DHE_RSA_WITH_AES_128_CBC_SHA'''
+        self.assertEqual(description, finding.description)
+        self.assertEqual('Medium', finding.severity)
+        self.assertEqual(
+            'TLS recommendations of German BSI: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10',
+            finding.references
+        )
+
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual('example.com', endpoint.host)
+        self.assertEqual(443, endpoint.port)
+
+        finding = findings[1]
+        self.assertEqual('TLS 1.0 not recommended (example2.com:443)', finding.title)
+        self.assertEqual('example2.com:443 accepts TLS 1.0 connections', finding.description)
+        self.assertEqual('Medium', finding.severity)
+        self.assertEqual(
+            'TLS recommendations of German BSI: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10',
+            finding.references
+        )
+
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual('example2.com', endpoint.host)
+        self.assertEqual(443, endpoint.port)
 
 
 class TestSSLyzeXMLParser(DojoTestCase):
