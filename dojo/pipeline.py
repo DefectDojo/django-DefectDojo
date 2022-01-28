@@ -8,6 +8,7 @@ from social_core.backends.google import GoogleOAuth2
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product.queries import get_authorized_products
 
+USER_FIELDS = ['username', 'email']
 
 def social_uid(backend, details, response, *args, **kwargs):
     if settings.AZUREAD_TENANT_OAUTH2_ENABLED and isinstance(backend, AzureADTenantOAuth2):
@@ -57,7 +58,8 @@ def social_uid(backend, details, response, *args, **kwargs):
 
 
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
-    if kwargs.get('is_new'):
+    # if user doesn't exist then user is None
+    if user is not None and kwargs.get('is_new'):
         system_settings = System_Settings.objects.get()
         if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
             if system_settings.staff_user_email_pattern is not None and \
@@ -110,3 +112,20 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
             if product_name not in project_names:
                 product = Product.objects.get(name=product_name)
                 Product_Member.objects.filter(product=product, user=user).delete()
+
+
+def create_user(strategy, details, backend, user=None, *args, **kwargs):
+    if not settings.SOCIAL_AUTH_CREATE_USER:
+        return
+    if user:
+        return {'is_new': False}
+
+    fields = {name: kwargs.get(name, details.get(name))
+        for name in backend.setting('USER_FIELDS', USER_FIELDS)}
+    if not fields:
+        return
+
+    return {
+        'is_new': True,
+        'user': strategy.create_user(**fields)
+    }
