@@ -1,0 +1,34 @@
+[
+    {
+        "id": 21581,
+        "asset_id": 60,
+        "name": "Cross-site scripting (reflected)",
+        "location": "http://test.example.com",
+        "location_specifier_id": 1904,
+        "asset_name": "test_asset",
+        "label": "",
+        "status": "open",
+        "pci_compliance_status": "fail",
+        "date_opened": "2014-12-05 14:53:43 UTC",
+        "date_closed": null,
+        "risk": 1,
+        "severity": 4,
+        "threat": 5,
+        "layer": "application",
+        "remediation": "Remediation Text",
+        "description": "Description Text",
+        "cwes": [
+            "CWE-75"
+        ],
+        "cves": [
+            "CVE-2021-5300"
+        ],
+        "pci_exception": "none",
+        "pci_exception_description": null,
+        "pci_exception_expiry": null,
+        "cvss_score": 3.7,
+        "cvss_vector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+        "cvss_version": 3,
+        "asset_tags": "APPROVED,Demo-Asset,ABC Corporate,test"
+    }
+]

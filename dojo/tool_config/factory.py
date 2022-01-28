@@ -1,8 +1,10 @@
 from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 from dojo.tools.cobalt_api.api_client import CobaltAPI
+from dojo.tools.edgescan.api_client import EdgescanAPI
 
 SCAN_APIS = {'SonarQube': SonarQubeAPI,
-             'Cobalt.io': CobaltAPI}
+             'Cobalt.io': CobaltAPI,
+             'Edgescan API': EdgescanAPI}
 
 
 def create_API(tool_configuration):
