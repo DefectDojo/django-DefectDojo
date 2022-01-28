@@ -10,6 +10,7 @@ from dojo.product.queries import get_authorized_products
 
 USER_FIELDS = ['username', 'email']
 
+
 def social_uid(backend, details, response, *args, **kwargs):
     if settings.AZUREAD_TENANT_OAUTH2_ENABLED and isinstance(backend, AzureADTenantOAuth2):
         """Return user details from Azure AD account"""
