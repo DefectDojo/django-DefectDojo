@@ -1244,7 +1244,7 @@ def handle_uploaded_selenium(f, cred):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def add_external_issue(find, external_issue_provider):
+def add_external_issue(find, external_issue_provider, **kwargs):
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
     logger.debug('adding external issue with provider: ' + external_issue_provider)
@@ -1257,7 +1257,7 @@ def add_external_issue(find, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def update_external_issue(find, old_status, external_issue_provider):
+def update_external_issue(find, old_status, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
@@ -1269,7 +1269,7 @@ def update_external_issue(find, old_status, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def close_external_issue(find, note, external_issue_provider):
+def close_external_issue(find, note, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
@@ -1281,7 +1281,7 @@ def close_external_issue(find, note, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def reopen_external_issue(find, note, external_issue_provider):
+def reopen_external_issue(find, note, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
