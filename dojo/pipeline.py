@@ -1,6 +1,7 @@
 import gitlab
 import re
 
+import social_core.pipeline.user
 from django.conf import settings
 from dojo.models import Product, Product_Member, Product_Type, System_Settings, Role
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
@@ -8,7 +9,7 @@ from social_core.backends.google import GoogleOAuth2
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product.queries import get_authorized_products
 
-USER_FIELDS = ['username', 'email']
+
 
 
 def social_uid(backend, details, response, *args, **kwargs):
@@ -118,15 +119,5 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if not settings.SOCIAL_AUTH_CREATE_USER:
         return
-    if user:
-        return {'is_new': False}
-
-    fields = {name: kwargs.get(name, details.get(name))
-        for name in backend.setting('USER_FIELDS', USER_FIELDS)}
-    if not fields:
-        return
-
-    return {
-        'is_new': True,
-        'user': strategy.create_user(**fields)
-    }
+    else:
+        return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)
