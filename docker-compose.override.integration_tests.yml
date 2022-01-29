@@ -56,20 +56,6 @@ services:
       POSTGRES_DB: ${DD_TEST_DATABASE_NAME}
     volumes:
        - defectdojo_data_integration_tests:${DD_DATABASE_DATA_PATH}
-  # >>>>> PostgreSQL admin UI, only useful when using PostgreSQL >>>>>
-  # pgadmin:
-  #   image: dpage/pgadmin4:6.4@sha256:e379d900081261dce78482e9a66bdc6f4c0dbe5924133cf7a3cd0c424ae6014f
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: pgadmin@defectdojo.org
-  #     PGADMIN_DEFAULT_PASSWORD: defectdojo
-  #   ports:
-  #     - target: 80
-  #       published: 8081
-  #       protocol: tcp
-  #       mode: host
-  #   volumes:
-  #     - defectdojo_pgadmin_unittest:/var/lib/pgadmin  
-  # <<<<< PostgreSQL admin UI, only useful when using PostgreSQL <<<<<
   mailhog:
     image: mailhog/mailhog:v1.0.1@sha256:8d76a3d4ffa32a3661311944007a415332c4bb855657f4f6c57996405c009bea
     ports:
@@ -77,9 +63,25 @@ services:
         published: 1025
         protocol: tcp
         mode: host
+  # Admin interface for PostgreSQL, can be started with 'docker compose --profile pgadmin up'
+  # Only useful when using PostgreSQL as database
+  pgadmin:
+    image: dpage/pgadmin4:6.4@sha256:e379d900081261dce78482e9a66bdc6f4c0dbe5924133cf7a3cd0c424ae6014f
+    profiles:
+      - pgadmin
+    depends_on:
+      - database
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin@defectdojo.org
+      PGADMIN_DEFAULT_PASSWORD: defectdojo
+    ports:
+      - target: 80
+        published: 8081
+        protocol: tcp
+        mode: host
+    volumes:
+      - defectdojo_pgadmin_integration_test:/var/lib/pgadmin  
 volumes:
   defectdojo_data_integration_tests: {}
   defectdojo_media_integration_test: {}
-  # >>>>> PostgreSQL admin UI, only useful when using PostgreSQL >>>>>
-  # defectdojo_pgadmin_unittest: {}
-  # <<<<< PostgreSQL admin UI, only useful when using PostgreSQL <<<<<
+  defectdojo_pgadmin_integration_test: {}
