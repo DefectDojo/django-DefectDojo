@@ -92,6 +92,9 @@ def do_false_positive_history(new_finding, *args, **kwargs):
         new_finding.false_p = True
         new_finding.active = False
         new_finding.verified = True
+        # Remove the async user kwarg because save() really does not like it
+        # Would rather not add anything to Finding.save()
+        kwargs.pop('async_user')
         super(Finding, new_finding).save(*args, **kwargs)
 
 
