@@ -5,6 +5,7 @@ from cvss import CVSS3
 
 from dojo.models import Finding
 
+
 class JFrogXrayApiSummaryArtifactParser(object):
     
     # This function return a list of all the scan_type supported by your parser. This identifiers are used internally. Your parser can support more than one scan_type. 
@@ -18,7 +19,7 @@ class JFrogXrayApiSummaryArtifactParser(object):
 
     # This function return a string used to provide some text in the UI (long description)
     def get_description_for_scan_types(self, scan_type):
-        return "Import Xray findings in JSON format. The file structure is in accordance to the responce from the JFrog Xray API Summary/Artifact JSON report (https://www.jfrog.com/confluence/display/JFROG/Xray+REST+API#XrayRESTAPI-ArtifactSummary)"
+        return "Import Xray findings in JSON format from the JFrog Xray API Summary/Artifact JSON response"
 
     # This function return a list of findings
     def get_findings(self, json_output, test):
@@ -26,41 +27,31 @@ class JFrogXrayApiSummaryArtifactParser(object):
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
-        items = {}
+        items = []
         if 'artifacts' in tree:
-            artifactTree = tree['artifacts']
+            artifact_tree = tree['artifacts']
+            for artifactNode in artifact_tree:
+                artifact_general = artifactNode['general']
+                artifact_issues = artifactNode['issues']
+                for node in artifact_issues:
+                    service = decode_service(artifact_general['name'])
+                    item = get_item(node, service, test)
+                    items.append(item)
 
-            for artifactNode in artifactTree:
-
-                artifactGeneral = artifactNode['general']
-                artifactIssues = artifactNode['issues']               
-
-                for node in artifactIssues:
-
-                    service=decode_service(artifactGeneral['name'])
-                    
-                    # Get the findings of the current artifact
-                    item = get_item(node, service, test) 
-
-                    unique_key = node.get('impact_path')
-                    items[unique_key] = item
-
-        return list(items.values())
+        return items
 
 
-# Retreive the findings 
+# Retrieve the findings
 def get_item(vulnerability, service, test):
-    
-    cve = None
+    cve = "No CVE"
     cwe = None
     cvssv3 = None
-    cvss_v3 = "No CVSS v3 score."
+    cvss_v3 = "No CVSS v3 score"
+    cvssv3_score = 0.0
     unique_id_from_tool = None
     impact_paths = None
-    impact_path = None
-    component_name = None
-    component_version = None
-    
+    impact_path = ImpactPath("", "", "")
+
     if 'severity' in vulnerability:
         if vulnerability['severity'] == 'Unknown':
             severity = "Informational"
@@ -74,50 +65,45 @@ def get_item(vulnerability, service, test):
     if len(cves) > 0:
         if 'cve' in cves[0]:
             cve = cves[0]['cve']
-        # take only the first one for now, limitation of DD model.
         if len(cves[0].get('cwe', [])) > 0:
             cwe = decode_cwe_number(cves[0].get('cwe', [])[0])
         if 'cvss_v3' in cves[0]:
             cvss_v3 = cves[0]['cvss_v3']
-            # this dedicated package will clean the vector
             cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector()
-            cvssv3_score = decode_cvssv3_score(cvss_v3)
+            cvssv3_score =CVSS3.from_rh_vector(cvss_v3).base_score
 
     impact_paths = vulnerability.get('impact_path', [])
     if len(impact_paths) > 0:
-        impact_path  = impact_paths[0]
-        component_name = decode_component_name(impact_path)
-        component_version = decode_component_version(impact_path)
-    
-    if vulnerability['issue_id']:
-        title = vulnerability['issue_id'] + " - " + str(cve) + " - " + component_name + component_version
+        impact_path = decode_impact_path(impact_paths[0])
+
+    if 'issue_id' in vulnerability:
+        title = vulnerability['issue_id'] + " - " + impact_path.name + ":" + impact_path.version
     elif cve:
-        title = str(cve) + " - " + component_name + ":" + component_version
+        title = str(cve) + " - " + impact_path.name + ":" + impact_path.version
     else:
-        title = "No CVE - " + component_name + ":" + component_version
+        title = "No CVE - " + impact_path.name + ":" + impact_path.version
 
     unique_id_from_tool = title
-    hash_code = decode_hash_code(impact_path)
-  
-    finding = Finding (
-        service = service,
-        title = title,
-        cwe = cwe,
-        cve = cve,
-        cvssv3 = cvssv3,
-        cvssv3_score = cvssv3_score,
-        severity = severity,
-        description = vulnerability['description'],
-        verified = False,
-        test = test,
-        hash_code = hash_code,
-        file_path = impact_path,
-        component_name = component_name,
-        component_version = component_version,
-        static_finding = True,
-        dynamic_finding = False,
-        unique_id_from_tool = unique_id_from_tool
-        )
+
+    finding = Finding(
+        service=service,
+        title=title,
+        cwe=cwe,
+        cve=cve,
+        cvssv3=cvssv3,
+        cvssv3_score=cvssv3_score,
+        severity=severity,
+        description=vulnerability['description'],
+        verified=False,
+        test=test,
+        hash_code=impact_path.sha,
+        file_path=impact_paths[0],
+        component_name=impact_path.name,
+        component_version=impact_path.version,
+        static_finding=True,
+        dynamic_finding=False,
+        unique_id_from_tool=unique_id_from_tool
+    )
 
     return finding
 
@@ -125,10 +111,11 @@ def get_item(vulnerability, service, test):
 # Regex helpers
 
 def decode_service(name):
-    match = re.match(r"/.*/(.*):", name, re.IGNORECASE)
+    match = re.match(r".*/(.*):", name, re.IGNORECASE)
     if match is None:
         return ''
-    return match[0]
+    return match[1]
+
 
 def decode_cwe_number(value):
     match = re.match(r"CWE-\d+", value, re.IGNORECASE)
@@ -136,26 +123,48 @@ def decode_cwe_number(value):
         return 0
     return int(match[0].rsplit('-')[1])
 
-def decode_component_name(impact_path):
-    match = re.match(r"[^/]*(?=[.][a-zA-Z]+$)", impact_path, re.IGNORECASE)
-    if match is None:
-        return ''
-    return match[0].rsplit('-')[0]
 
-def decode_component_version(impact_path):
-    match = re.match(r"[^/]*(?=[.][a-zA-Z]+$)", impact_path, re.IGNORECASE)
-    if match is None:
-        return ''
-    return match[0].rsplit('-')[1]
+def decode_impact_path(path):
+    impactPath = ImpactPath("", "", "")
 
-def decode_cvssv3_score(cvss_v3):
-    match = re.match(r"^.+?(?=\/)", cvss_v3, re.IGNORECASE)
+    match = re.match(r".*\/(.*)$", str(path), re.IGNORECASE)
     if match is None:
-        return 0
-    return float(match[0])
+        return impactPath
+    fullname = match[1]
 
-def decode_hash_code(impact_path):
-    match = re.match(r"(?<=sha256__)(.*)(?=cae)", impact_path, re.IGNORECASE)
-    if match is None:
-        return ''
-    return match[0]
+    match = re.match(r".*sha256__(.*).tar", path, re.IGNORECASE)
+    if match:
+        impactPath.sha = (match[1][:64]) if len(match[1]) > 64 else match[1]
+
+    if fullname.__contains__(".jar"):
+        match = re.match(r"(.*)-", fullname, re.IGNORECASE)
+        if match:
+            impactPath.name = match[1]
+        match = re.match(r".*-(.*).jar", fullname, re.IGNORECASE)
+        if match:
+            impactPath.version = match[1]
+    elif fullname.__contains__(":"):
+        match = re.match(r"(.*):", fullname, re.IGNORECASE)
+        if match:
+            impactPath.name = match[1]
+        match = re.match(r".*:(.*)", fullname, re.IGNORECASE)
+        if match:
+            impactPath.version = match[1]
+    elif fullname.__contains__(".js"):
+        match = re.match(r"(.*)-", fullname, re.IGNORECASE)
+        if match:
+            impactPath.name = match[1]
+        match = re.match(r".*-(.*).js", fullname, re.IGNORECASE)
+        if match:
+            impactPath.version = match[1]
+    else:
+        impactPath.name = fullname
+
+    return impactPath
+
+
+class ImpactPath:
+    def __init__(self, sha, name, version):
+        self.sha = sha
+        self.name = name
+        self.version = version
