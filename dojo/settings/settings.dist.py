@@ -1060,6 +1060,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Rubocop Scan': ['vuln_id_from_tool', 'file_path', 'line'],
     'JFrog Xray Scan': ['title', 'description', 'component_name', 'component_version'],
     'CycloneDX Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
+    'SSLyze Scan (JSON)': ['title', 'description'],
     'Rusty Hog Scan': ['title', 'description', 'cwe', 'severity'],
 }
 
@@ -1189,6 +1190,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Rubocop Scan': DEDUPE_ALGO_HASH_CODE,
     'JFrog Xray Scan': DEDUPE_ALGO_HASH_CODE,
     'CycloneDX Scan': DEDUPE_ALGO_HASH_CODE,
+    'SSLyze Scan (JSON)': DEDUPE_ALGO_HASH_CODE,
     'Rusty Hog Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
