@@ -152,7 +152,7 @@ def decode_cvssv3_score(cvss_v3):
     match = re.match(r"^.+?(?=\/)", cvss_v3, re.IGNORECASE)
     if match is None:
         return 0
-    return int(match[0])
+    return float(match[0])
 
 def decode_hash_code(impact_path):
     match = re.match(r"(?<=sha256__)(.*)(?=cae)", impact_path, re.IGNORECASE)
