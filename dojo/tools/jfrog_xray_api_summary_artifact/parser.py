@@ -55,9 +55,11 @@ def get_item(vulnerability, service, test):
     cwe = None
     cvssv3 = None
     cvss_v3 = "No CVSS v3 score."
-    mitigation = None
-    extra_desc = ""
     unique_id_from_tool = None
+    impact_paths = None
+    impact_path = None
+    component_name = None
+    component_version = None
     
     if 'severity' in vulnerability:
         if vulnerability['severity'] == 'Unknown':
@@ -81,9 +83,11 @@ def get_item(vulnerability, service, test):
             cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector()
             cvssv3_score = decode_cvssv3_score(cvss_v3)
 
-    impact_path  = vulnerability.get('impact_path')[0]
-    component_name = decode_component_name(impact_path)
-    component_version = decode_component_version(impact_path)
+    impact_paths = vulnerability.get('impact_path', [])
+    if len(impact_paths) > 0:
+        impact_path  = impact_paths[0]
+        component_name = decode_component_name(impact_path)
+        component_version = decode_component_version(impact_path)
     
     if vulnerability['issue_id']:
         title = vulnerability['issue_id'] + " - " + str(cve) + " - " + component_name + component_version
