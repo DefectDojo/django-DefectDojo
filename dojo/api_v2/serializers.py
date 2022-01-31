@@ -1288,7 +1288,7 @@ class ImportScanSerializer(serializers.Serializer):
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                          required=False,
                                                          default=None)
-    file = serializers.FileField(required=False)
+    file = serializers.FileField(allow_empty_file=True, required=False)
 
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
@@ -1427,7 +1427,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                           default=None,
                                                           required=False)
-    file = serializers.FileField(required=False)
+    file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
