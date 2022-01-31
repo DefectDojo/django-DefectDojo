@@ -87,6 +87,8 @@ class ImportReimportMixin(object):
         self.aws_prowler_file_name_plus_one = self.scans_path + 'aws_prowler/many_vuln_plus_one.json'
         self.scan_type_aws_prowler = 'AWS Prowler Scan'
 
+        self.nuclei_empty = self.scans_path + 'nuclei/empty.jsonl'
+
     # import zap scan, testing:
     # - import
     # - active/verifed = True
@@ -1316,6 +1318,22 @@ class ImportReimportMixin(object):
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
         self.assert_finding_count_json(0, findings)
+
+    def test_import_nuclei_emptyc(self):
+        """This test do a basic import of Nuclei report with no vulnerability
+
+        This test is useful because Nuclei use jsonl for his format so it can generate empty files.
+        It tests the condition limit of loading an empty file.
+        """
+
+        import0 = self.import_scan_with_params(self.nuclei_empty, scan_type="Nuclei Scan")
+
+        test_id = import0['test']
+
+        reimport0 = self.reimport_scan_with_params(test_id, self.nuclei_empty, scan_type="Nuclei Scan")
+
+        test_id2 = reimport0['test']
+        self.assertEqual(test_id, test_id2)
 
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
