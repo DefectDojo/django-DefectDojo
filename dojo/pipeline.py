@@ -10,8 +10,6 @@ from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product.queries import get_authorized_products
 
 
-
-
 def social_uid(backend, details, response, *args, **kwargs):
     if settings.AZUREAD_TENANT_OAUTH2_ENABLED and isinstance(backend, AzureADTenantOAuth2):
         """Return user details from Azure AD account"""
