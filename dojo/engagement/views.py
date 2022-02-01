@@ -533,8 +533,8 @@ def import_scan_results(request, eid=None, pid=None):
     elif pid:
         product = get_object_or_404(Product, id=pid)
         engagement_or_product = product
-    elif not user.is_staff:
-        raise PermissionDenied
+    else:
+        raise Exception('Either Engagement or Product has to be provided')
 
     user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
 
@@ -609,7 +609,7 @@ def import_scan_results(request, eid=None, pid=None):
 
             try:
                 importer = Importer()
-                test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
+                test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
                             minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
                             close_old_findings=close_old_findings, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service)

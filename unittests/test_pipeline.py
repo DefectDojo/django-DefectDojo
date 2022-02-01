@@ -1,3 +1,4 @@
+from django.test.utils import override_settings
 from .dojo_test_case import DojoTestCase
 from unittest.mock import patch
 from dojo.models import Dojo_User, System_Settings
@@ -15,6 +16,7 @@ class TestPipeline(DojoTestCase):
         cls.system_settings_email.staff_user_email_pattern = '.*@example.com'
 
     @patch('dojo.models.System_Settings.objects')
+    @override_settings(FEATURE_CONFIGURATION_AUTHORIZATION=False)
     def test_modify_permissions_user_is_staff(self, mock):
         mock.get.return_value = self.system_settings_email
 
@@ -25,6 +27,7 @@ class TestPipeline(DojoTestCase):
         self.assertTrue(self.user.is_staff)
 
     @patch('dojo.models.System_Settings.objects')
+    @override_settings(FEATURE_CONFIGURATION_AUTHORIZATION=False)
     def test_modify_permissions_user_not_staff(self, mock):
         mock.get.return_value = self.system_settings_email
 

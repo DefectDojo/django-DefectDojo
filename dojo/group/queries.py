@@ -1,6 +1,5 @@
 from crum import get_current_user
 from django.db.models import Exists, OuterRef
-from django.conf import settings
 from dojo.models import Dojo_Group, Dojo_Group_Member, Product_Group, Product_Type_Group, Role
 from dojo.authorization.authorization import get_roles_for_permission
 from dojo.authorization.roles_permissions import Permissions
@@ -13,9 +12,6 @@ def get_authorized_groups(permission):
         return Dojo_Group.objects.none()
 
     if user.is_superuser:
-        return Dojo_Group.objects.all().order_by('name')
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Dojo_Group.objects.all().order_by('name')
 
     roles = get_roles_for_permission(permission)
@@ -33,9 +29,6 @@ def get_authorized_group_members(permission):
         return Dojo_Group_Member.objects.none()
 
     if user.is_superuser:
-        return Dojo_Group_Member.objects.all().select_related('role')
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Dojo_Group_Member.objects.all().select_related('role')
 
     groups = get_authorized_groups(permission)

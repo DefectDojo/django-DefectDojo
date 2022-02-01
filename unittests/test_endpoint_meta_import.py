@@ -5,7 +5,6 @@ from rest_framework.test import APIClient
 from django.test.client import Client
 from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
 from .test_utils import assertImportModelsCreated
-from django.test import override_settings
 import logging
 
 
@@ -154,7 +153,6 @@ class EndpointMetaImportMixin(object):
         self.assertNotEqual(meta_value, meta_value_updated)
 
 
-@override_settings(TRACK_IMPORT_HISTORY=True)
 class EndpointMetaImportTestAPI(DojoAPITestCase, EndpointMetaImportMixin):
     fixtures = ['dojo_testdata.json']
 
@@ -173,7 +171,6 @@ class EndpointMetaImportTestAPI(DojoAPITestCase, EndpointMetaImportMixin):
         # self.url = reverse(self.viewname + '-list')
 
 
-@override_settings(TRACK_IMPORT_HISTORY=True)
 class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
     fixtures = ['dojo_testdata.json']
     client_ui = Client()
