@@ -827,8 +827,8 @@ def finding_related_action_title(related_action):
 
 
 @register.filter
-def product_findings(product):
-    return Finding.objects.filter(test__engagement__product=product)
+def product_findings(product, findings):
+    return findings.filter(test__engagement__product=product).order_by('numerical_severity')
 
 
 @register.filter

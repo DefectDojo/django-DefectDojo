@@ -26,3 +26,6 @@ ui:
   - dojo/static/**/*
   - dojo/templates/**/*
   - dojo/templatetags/**/*
+
+parser:
+  - dojo/tools/**/*
