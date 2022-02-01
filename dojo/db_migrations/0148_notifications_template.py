@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0146_lead_optional'),
+        ('dojo', '0147_rename_sslyze_parser'),
     ]
 
     operations = [
