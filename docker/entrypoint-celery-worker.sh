@@ -3,18 +3,10 @@ umask 0002
 
 id
 
-echo -n "Waiting for database to be reachable "
-until echo "select 1;" | python3 manage.py dbshell > /dev/null
-do
-  echo -n "."
-  sleep 1
-done
-echo
-
 # Allow for bind-mount multiple settings.py overrides
-FILES=$(ls -I README.md /app/docker/extra_settings)
+FILES=$(ls /app/docker/extra_settings/*.py)
 NUM_FILES=$(echo "$FILES" | wc -l)
-if [ "$NUM_FILES" -gt "1" ]; then
+if [ "$NUM_FILES" -gt "0" ]; then
     COMMA_LIST=$(echo $FILES | tr -s '[:blank:]' ', ')
     echo "============================================================"
     echo "     Overriding DefectDojo's local_settings.py with multiple"
@@ -22,6 +14,14 @@ if [ "$NUM_FILES" -gt "1" ]; then
     echo "============================================================"
     cp /app/docker/extra_settings/* /app/dojo/settings/
 fi
+
+echo -n "Waiting for database to be reachable "
+until echo "select 1;" | python3 manage.py dbshell > /dev/null
+do
+  echo -n "."
+  sleep 1
+done
+echo
 
 if [ "${DD_CELERY_WORKER_POOL_TYPE}" = "prefork" ]; then
   EXTRA_PARAMS="--autoscale=${DD_CELERY_WORKER_AUTOSCALE_MAX},${DD_CELERY_WORKER_AUTOSCALE_MIN}
@@ -37,4 +37,3 @@ exec celery --app=dojo \
   --pool="${DD_CELERY_WORKER_POOL_TYPE}" \
   --concurrency=${DD_CELERY_WORKER_CONCURRENCY:-1} \
   ${EXTRA_PARAMS}
-
