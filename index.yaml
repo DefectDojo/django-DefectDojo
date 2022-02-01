@@ -3,7 +3,7 @@ entries:
   defectdojo:
   - apiVersion: v1
     appVersion: 2.7.1
-    created: "2022-02-01T21:47:28.982052157Z"
+    created: "2022-02-01T21:59:34.899337005Z"
     dependencies:
     - condition: mysql.enabled
       name: mysql
@@ -22,7 +22,7 @@ entries:
       repository: '@bitnami'
       version: 15.5.4
     description: A Helm chart for Kubernetes to install DefectDojo
-    digest: e7652c8c081176af00e61666e13281cc73b84e88df334eccee5606ea98782c3e
+    digest: b313c5abe82a9343fc21d9b6634803047b46f283823eee14298519dd942759ac
     icon: https://www.defectdojo.org/img/favicon.ico
     maintainers:
     - email: defectdojo-project@owasp.org
@@ -466,4 +466,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2022-02-01T21:47:28.962625576Z"
+generated: "2022-02-01T21:59:34.879323646Z"
