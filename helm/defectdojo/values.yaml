@@ -147,6 +147,7 @@ django:
   affinity: {}
   ingress:
     enabled: true
+    ingressClassName: ""
     activateTLS: true
     secretName: defectdojo-tls
     annotations: {}

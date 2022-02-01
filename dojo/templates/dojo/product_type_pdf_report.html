@@ -120,10 +120,10 @@
         <div class="row">
             <div class="col-lg-12">
                 {% for prod in context.products %}
-                    {% if prod|product_findings %}
+                    {% if prod|product_findings:findings %}
                         <h3 id="findings">Findings in {{ prod.name}}</h3>
                     {% endif %}
-                    {% for finding in prod|product_findings %}
+                    {% for finding in prod|product_findings:findings %}
                         {% ifchanged finding.severity %}
                             <h4>{{ finding.severity|capfirst }}</h4>
                         {% endifchanged %}
