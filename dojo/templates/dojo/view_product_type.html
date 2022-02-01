@@ -72,6 +72,9 @@
                     </div>
                 </div>
                 {% if products %}
+                    <div class="clearfix pagination-in-panel">
+                        {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                    </div>
                     <div class="table-responsive">
                         <table class="tablesorter-bootstrap table table-condensed table-striped">
                             <thead>
@@ -112,6 +115,9 @@
                             {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+                    <div class="clearfix pagination-in-panel">
+                        {% include "dojo/paging_snippet.html" with page=products page_size=True %}
                     </div>
                 {% else %}
                     <div class="panel-body">

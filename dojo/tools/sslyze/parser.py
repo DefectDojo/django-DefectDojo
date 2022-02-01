@@ -3,17 +3,17 @@ from .parser_xml import SSLyzeXMLParser
 
 
 class SslyzeParser(object):
-    """SSLYze support JSON and XML"""
+    """SSLyze support JSON and XML"""
 
     def get_scan_types(self):
-        return ["SSLyze 3 Scan (JSON)", "Sslyze Scan"]
+        return ["SSLyze Scan (JSON)", "Sslyze Scan"]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
-        if scan_type == "SSLyze 3 Scan (JSON)":
-            return "Import JSON report of SSLyze version 3 scan."
+        if scan_type == "SSLyze Scan (JSON)":
+            return "Import JSON report of SSLyze version 3 and higher."
         return "Import XML report of SSLyze version 2 scan."
 
     def get_findings(self, filename, test):
