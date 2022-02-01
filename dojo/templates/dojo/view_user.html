@@ -341,6 +341,7 @@
                                 {% endif %}
                             </td>
                         </tr>
+                        {% if not 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
                         <tr>
                             <td style="width: 200px;"><strong>Staff</strong></td>
                             <td>
@@ -351,6 +352,7 @@
                                 {% endif %}
                             </td>
                         </tr>
+                        {% endif %}
                         <tr>
                             <td style="width: 200px;"><strong>Superuser</strong></td>
                             <td>
