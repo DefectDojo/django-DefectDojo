@@ -59,11 +59,12 @@ def social_uid(backend, details, response, *args, **kwargs):
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
     if kwargs.get('is_new'):
         system_settings = System_Settings.objects.get()
-        if system_settings.staff_user_email_pattern is not None and \
-           re.fullmatch(system_settings.staff_user_email_pattern, user.email) is not None:
-            user.is_staff = True
-        else:
-            user.is_staff = False
+        if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+            if system_settings.staff_user_email_pattern is not None and \
+               re.fullmatch(system_settings.staff_user_email_pattern, user.email) is not None:
+                user.is_staff = True
+            else:
+                user.is_staff = False
 
 
 def update_product_access(backend, uid, user=None, social=None, *args, **kwargs):

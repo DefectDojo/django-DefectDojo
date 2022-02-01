@@ -110,9 +110,9 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="{% url 'home' %}">
-		    {% block header_logo %}
-			<img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
-        	    {% endblock %}
+                {% block header_logo %}
+                    <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
+                {% endblock %}
                 </a>
 
             </div>
@@ -204,7 +204,7 @@
                                 </a>
                                 <ul class="nav nav-second-level">
                                     <li><a href="{% url 'product' %}"> All Products</a></li>
-                                    {% if request.user.is_staff %}
+                                    {% if request.user|can_add_product %}
                                         <li><a href="{% url 'new_product' %}"> Add Product</a></li>
                                     {% endif %}
                                     <li><a href="{% url 'product_type' %}">All Product Types</a></li>
@@ -224,12 +224,8 @@
                                     <li><a href="{% url 'active_engagements' %}">Active Engagements</a></li>
                                     <li><a href="{% url 'all_engagements' %}">All Engagements</a></li>
                                     <li><a href="{% url 'engagements_all' %}">Engagements by Product</a></li>
-                                    {% if "dojo.view_test_type"|has_configuration_permission:"staff" %}
-                                        <li><a href="{% url 'test_type' %}">Test Types</a></li>
-                                    {% endif %}
-                                    {% if "dojo.view_development_environment"|has_configuration_permission:"staff" %}
-                                        <li><a href="{% url 'dev_env' %}">Environments</a></li>
-                                    {% endif %}
+                                    <li><a href="{% url 'test_type' %}">Test Types</a></li>
+                                    <li><a href="{% url 'dev_env' %}">Environments</a></li>
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
@@ -368,32 +364,38 @@
                                         <span>Configuration</span>
                                     </a>
                                     <ul class="nav nav-second-level">
-                                        {% if request.user.is_superuser %}
-                                        {% if system_settings.enable_credentials %}
+                                        {% if system_settings.enable_credentials and "dojo.view_cred_user"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'cred' %}">Credential Manager </a></li>
                                         {% endif %}
-                                        {% if system_settings.enable_jira %}
-                                        <li><a href="{% url 'jira' %}">JIRA </a></li>
-                                        {% endif %}
-                                        {% if system_settings.enable_github %}
+                                        {% if system_settings.enable_github  and "dojo.view_github_conf"|has_configuration_permission:"superuser"%}
                                         <li><a href="{% url 'github' %}">GitHub </a></li>
                                         {% endif %}
+                                        {% if system_settings.enable_google_sheets and "dojo.change_google_sheet"|has_configuration_permission:"superuser" %}
+                                        <li><a href="{% url 'configure_google_sheets' %}">Google Sheets Sync</a></li>
+                                        {% endif %}
+                                        {% if system_settings.enable_jira and "dojo.view_jira_instance"|has_configuration_permission:"superuser" %}
+                                        <li><a href="{% url 'jira' %}">JIRA </a></li>
+                                        {% endif %}
+                                        {% if "dojo.change_bannerconf"|has_configuration_permission:"superuser" %}
+                                        <li><a href="{% url 'configure_banner' %}">Login banner</a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_note_type"|has_configuration_permission:"superuser" %}
+                                        <li><a href="{% url 'note_type' %}">Note Types </a></li>
+                                        {% endif %}
+                                        <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                                        <li><a href="{% url 'regulations' %}">Regulations </a></li>
+                                        {% if system_settings.enable_rules_framework and "dojo.view_rule"|has_configuration_permission:"superuser" %}
+                                        <li><a href="{% url 'rules' %}">Rules Framework </a></li>
+                                        {% endif %}
+                                        {% if request.user.is_superuser %}
+                                        <li><a href="{% url 'system_settings' %}">System Settings </a></li>
+                                        {% endif %}
+                                        {% if "dojo.view_tool_configuration"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'tool_config' %}">Tool Configuration </a></li>
                                         {% endif %}
                                         {% if "dojo.view_tool_type"|has_configuration_permission:"superuser" %}
                                         <li><a href="{% url 'tool_type' %}">Tool Type </a></li>
                                         {% endif %}
-                                        {% if request.user.is_superuser %}
-                                        <li><a href="{% url 'rules' %}">Rules Framework </a></li>
-                                        {% endif %}
-                                        <li><a href="{% url 'regulations' %}">Regulations </a></li>
-                                        {% if request.user.is_superuser %}
-                                        <li><a href="{% url 'system_settings' %}">System Settings </a></li>
-                                        <li><a href="{% url 'note_type' %}">Note Types </a></li>
-                                        <li><a href="{% url 'configure_google_sheets' %}">Google Sheets Sync</a></li>
-                                        <li><a href="{% url 'configure_banner' %}">Login banner</a></li>
-                                        {% endif %}
-                                        <li><a href="{% url 'notifications' %}">Notifications</a></li>
                                     </ul>
                                 </li>
                         {% endblock %}
@@ -665,18 +667,17 @@
         <!-- /.container-fluid -->
     </div>
     <!-- /#page-wrapper -->
+    {% block footer %}
     <footer class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center text-">
                     <p>
                         <a href="{% url 'home' %}">
-			    {% block footer_logo %}
-				<img class="logo" src="{% static "dojo/img/chop.png" %}" alt="DefectDojo Chop" height="45"/>
-			    {% endblock %}
-			</a>
-			<br/>
-			<br/>
+                            <img class="logo" src="{% static "dojo/img/chop.png" %}" alt="DefectDojo Chop" height="45"/>
+                        </a>
+                        <br/>
+                        <br/>
                         {% dojo_version %} ( {% dojo_current_hash %} )
                     </p>
                     <p>
@@ -697,6 +698,7 @@
         <p id="alert_refresh" class="hidden">{{ 'ALERT_REFRESH'|setting_enabled }}</p>
         <p id="disable_count" class="hidden">{{ 'DISABLE_ALERT_COUNTER'|setting_enabled }}</p>
     </footer>
+    {% endblock %}
 </div>
 
 <!-- /#wrapper -->
