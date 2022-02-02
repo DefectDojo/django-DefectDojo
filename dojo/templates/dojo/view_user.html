@@ -107,7 +107,7 @@
                     &nbsp;
                     <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
-                    {% if "auth.change_user"|has_configuration_permission:"superuser" %}
+                    {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddProductTypeMember"
                             data-toggle="dropdown" aria-expanded="true">
@@ -180,7 +180,7 @@
                     &nbsp;
                     <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
-                    {% if "auth.change_user"|has_configuration_permission:"superuser" %}
+                    {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button"  id="dropdownMenuAddProductMember"
                             data-toggle="dropdown" aria-expanded="true">
@@ -254,7 +254,7 @@
                     &nbsp;
                     <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/#groups" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
-                    {% if "auth.change_user"|has_configuration_permission:"superuser" %}
+                    {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
                                 data-toggle="dropdown" aria-expanded="true">
@@ -341,6 +341,7 @@
                                 {% endif %}
                             </td>
                         </tr>
+                        {% if not 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
                         <tr>
                             <td style="width: 200px;"><strong>Staff</strong></td>
                             <td>
@@ -351,6 +352,7 @@
                                 {% endif %}
                             </td>
                         </tr>
+                        {% endif %}
                         <tr>
                             <td style="width: 200px;"><strong>Superuser</strong></td>
                             <td>
@@ -401,7 +403,7 @@
                         <td class="centered">
                             {% if field.view_codename %}
                             <input id="id_{{ field.view_codename }}" 
-                                {% if not perms.auth.change_permission %}disabled{% endif %}
+                                {% if not request.user.is_superuser %}disabled{% endif %}
                                 name="{{ field.view_codename }}" 
                                 aria-label="{{ field.view_codename }}" 
                                 type="checkbox" 
@@ -411,7 +413,7 @@
                         <td class="centered">
                             {% if field.add_codename %}
                             <input id="id_{{ field.add_codename }}"
-                                {% if not perms.auth.change_permission %}disabled{% endif %}
+                                {% if not request.user.is_superuser %}disabled{% endif %}
                                 name="{{ field.add_codename }}"
                                 aria-label="{{ field.add_codename }}"
                                 type="checkbox"
@@ -421,7 +423,7 @@
                         <td class="centered">
                             {% if field.change_codename %}
                             <input id="id_{{ field.change_codename }}"
-                                {% if not perms.auth.change_permission %}disabled{% endif %}
+                                {% if not request.user.is_superuser %}disabled{% endif %}
                                 name="{{ field.change_codename }}"
                                 aria-label="{{ field.change_codename }}"
                                 type="checkbox"
@@ -431,7 +433,7 @@
                         <td class="centered">
                             {% if field.delete_codename %}
                             <input id="id_{{ field.delete_codename }}"
-                                {% if not perms.auth.change_permission %}disabled{% endif %}
+                                {% if not request.user.is_superuser %}disabled{% endif %}
                                 name="{{ field.delete_codename }}"
                                 aria-label="{{ field.delete_codename }}"
                                 type="checkbox"

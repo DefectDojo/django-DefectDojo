@@ -147,6 +147,7 @@ django:
   affinity: {}
   ingress:
     enabled: true
+    ingressClassName: ""
     activateTLS: true
     secretName: defectdojo-tls
     annotations: {}
@@ -291,12 +292,12 @@ postgresql:
   service:
     port: 5432
   securityContext:
-    # Default is tue for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+    # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
     enabled: true
     # fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
     fsGroup: 1001
   containerSecurityContext:
-    # Default is tue for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+    # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
     enabled: true
     # runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
     runAsUser: 1001

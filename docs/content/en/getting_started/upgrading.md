@@ -61,6 +61,28 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.7.x.
+
+This release is a breaking change regarding the Choctaw Hog parser. As the maintainers of this project unified multiple parsers under the RustyHog parser, we now support the parsing of Choctaw Hog JSON output files through the Rusty Hog parser. Furthermore, we also support Gottingen Hog and Essex Hog JSON output files with the RustyHog parser.
+
+There is another breaking change regarding the import of SSLyze scans. The parser has been renamed from `SSLyze 3 Scan (JSON)` to `SSLyze Scan (JSON)`. The data in the database is fixed by the initializer, but it may break scripted API calls.
+
+Release 2.7.0 contains a beta functionality to make permissions for the configuration of DefectDojo more flexible. When the settings parameter `FEATURE_CONFIGURATION_AUTHORIZATION` is set to `True`, many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their **Superuser** or **Staff** status, see [Configuration Permissions]({{< ref "../usage/permissions/#configuration-permissions" >}}).
+
+The functionality using the flag `AUTHORIZATION_STAFF_OVERRIDE` has been removed. The same result can be achieved with giving the staff users a global Owner role. 
+
+To support the transition for these 2 changes, you can run a migration script with ``./manage.py migrate staff_users``. This script:
+
+* creates a group for all staff users,
+* sets all configuration permissions that staff users had and
+* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to True.
+
+## Upgrading to DefectDojo Version 2.6.x.
+
+There are no special instruction for upgrading to 2.6.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.6.0) for the contents of the release.
+
+Please consult the security advisories [GHSA-f82x-m585-gj24](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-f82x-m585-gj24) (moderate) and [GHSA-v7fv-g69g-x7p2](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-v7fv-g69g-x7p2) (high) to see what security issues were fixed in this release. These will be published and become visible at January 18th, 2022.
+
 ## Upgrading to DefectDojo Version 2.5.x.
 
 Legacy authorization has been completely removed with version 2.5.0. This includes removal of the migration of users

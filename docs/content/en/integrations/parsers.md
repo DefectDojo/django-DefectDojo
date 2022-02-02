@@ -227,11 +227,6 @@ Example GraphQL query to get issue details:
 
 Import JSON output of cargo-audit scan report <https://crates.io/crates/cargo-audit>
 
-### CCVS Report
-
-Import JSON reports from \[CCVS
-API\](<https://github.com/William-Hill-Online/CCVS-API>)
-
 ### Checkov Report
 
 Import JSON reports of Infrastructure as Code vulnerabilities.
@@ -268,9 +263,12 @@ Follow these steps to setup API importing:
     must also select which Cobalt.io API Scan Configuratio to use.
 
 ### CodeQL
+
 CodeQL can be used to generate a SARIF report, that can be imported into Defect Dojo:
 
-`codeql database analyze db python-security-and-quality.qls --sarif-add-snippets --format=sarif-latest --output=security-extended.sarif`
+```shell
+codeql database analyze db python-security-and-quality.qls --sarif-add-snippets --format=sarif-latest --output=security-extended.sarif
+```
 
 The same can be achieved by running the CodeQL GitHub action with the `add-snippet` property set to true.
 
@@ -308,11 +306,6 @@ To generate the OSA report using Checkmarx CLI:
 
 That will generate three files, two of which are needed for defectdojo. Build the file for defectdojo with the jq utility:
 `jq -s . CxOSAVulnerabilities.json CxOSALibraries.json`
-
-
-### Choctaw Hog parser
-
-From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
 
 ### Cloudsploit (AquaSecurity)
 
@@ -381,6 +374,24 @@ Import JSON container image linter reports
 ### Detect-secrets
 
 Import of JSON report from <https://github.com/Yelp/detect-secrets>
+
+### Edgescan
+
+Import Edgescan vulnerabilities by JSON file or API - no file required.
+
+Follow these steps to setup API importing:
+
+1.  Configure the Edgescan Authentication details by navigating to
+    Configuration / Tool Configuration, selecting the Tool Type to "Edgescan",
+    and Authentication Type "API Key". Paste your Edgescan API key in the
+    "API Key" field.
+2.  In the Product settings select "Add API Scan Configuration" and select the
+    previously added Edgescan Tool Configuration. Provide the ID
+    of the asset from which to import findings in the field *Service key 1*.
+3.  After this is done, you can import the findings by selecting 
+    "Edgescan Scan" as the scan type. If you have more than one asset 
+    configured, you must also select which Edgescan API Scan Configuration to 
+    use.
 
 ### ESLint
 
@@ -926,6 +937,16 @@ report as follows
     the \"companies\" field.
 -   Removing both fields will allow retrieval of all findings in the
     Risk Recon instance.
+
+### Rusty Hog parser
+
+From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
+Rusty Hog is a secret scanner built in Rust for performance, and based on TruffleHog which is written in Python.
+
+DefectDojo currently supports the parsing of the following Rusty Hog JSON outputs:
+- Choctaw Hog: Scans for secrets in a Git repository.
+- Gottingen Hog: Scans for secrets in a JIRA issue.
+- Essex Hog: Scans for secrets in a Confluence page.
 
 ### SARIF
 

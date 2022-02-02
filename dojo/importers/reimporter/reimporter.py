@@ -142,7 +142,7 @@ class DojoDefaultReImporter(object):
 
                 # if scan_date was provided, override value from parser
                 if scan_date:
-                    item.date = scan_date
+                    item.date = scan_date.date()
 
                 # Save it. Don't dedupe before endpoints are added.
                 item.save(dedupe_option=False)
@@ -150,7 +150,7 @@ class DojoDefaultReImporter(object):
 
                 # only new items get auto grouped to avoid confusion around already existing items that are already grouped
                 if settings.FEATURE_FINDING_GROUPS and group_by:
-                    finding_helper.add_finding_to_auto_group(item, group_by)
+                    finding_helper.add_finding_to_auto_group(item, group_by, **kwargs)
 
                 finding_added_count += 1
                 new_items.append(item)

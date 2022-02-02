@@ -467,6 +467,11 @@ class System_Settings(models.Model):
         blank=True,
         help_text="New users will be assigned to their default group with this role.",
         on_delete=models.RESTRICT)
+    default_group_email_pattern = models.CharField(
+        max_length=200,
+        default='',
+        blank=True,
+        help_text="New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition.")
     staff_user_email_pattern = models.CharField(
         max_length=200,
         default='',
@@ -1087,7 +1092,7 @@ class Engagement(models.Model):
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
-    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     requester = models.ForeignKey(Contact, null=True, blank=True, on_delete=models.CASCADE)
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
@@ -1523,7 +1528,7 @@ class Sonarqube_Issue_Transition(models.Model):
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
-    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
     scan_type = models.TextField(null=True)
     title = models.CharField(max_length=255, null=True, blank=True)
@@ -2161,17 +2166,14 @@ class Finding(models.Model):
             return self.original_finding.all().order_by('title')
 
     def get_scanner_confidence_text(self):
-        scanner_confidence_text = ""
-        scanner_confidence = self.scanner_confidence
-        if scanner_confidence:
-            if scanner_confidence <= 2:
-                scanner_confidence_text = "Certain"
-            elif scanner_confidence >= 3 and scanner_confidence <= 5:
-                scanner_confidence_text = "Firm"
-            elif scanner_confidence >= 6:
-                scanner_confidence_text = "Tentative"
-
-        return scanner_confidence_text
+        if self.scanner_confidence and isinstance(self.scanner_confidence, int):
+            if self.scanner_confidence <= 2:
+                return "Certain"
+            elif self.scanner_confidence >= 3 and self.scanner_confidence <= 5:
+                return "Firm"
+            else:
+                return "Tentative"
+        return ""
 
     @staticmethod
     def get_numerical_severity(severity):
@@ -2273,7 +2275,7 @@ class Finding(models.Model):
         from dojo.utils import get_system_setting
         sla_age = get_system_setting('sla_' + self.severity.lower())
         if sla_age:
-            sla_calculation = sla_age - self.age
+            sla_calculation = sla_age - self.sla_age
         return sla_calculation
 
     def sla_deadline(self):
@@ -2518,10 +2520,15 @@ class Finding(models.Model):
         if self.references is None:
             return None
         matches = re.findall(r'([\(|\[]?(https?):((//)|(\\\\))+([\w\d:#@%/;$~_?\+-=\\\.&](#!)?)*[\)|\]]?)', self.references)
+
+        processed_matches = []
         for match in matches:
             # Check if match isn't already a markdown link
-            if not (match[0].startswith('[') or match[0].startswith('(')):
+            # Only replace the same matches one time, otherwise the links will be corrupted
+            if not (match[0].startswith('[') or match[0].startswith('(')) and not match[0] in processed_matches:
                 self.references = self.references.replace(match[0], create_bleached_link(match[0], match[0]), 1)
+                processed_matches.append(match[0])
+
         return self.references
 
 
@@ -3206,10 +3213,6 @@ class Cred_User(models.Model):
     logout_regex = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     is_valid = models.BooleanField(default=True, verbose_name="Login is valid")
-
-    # selenium_script = models.CharField(max_length=1000, default='none',
-    #    editable=False, blank=True, null=True,
-    #    verbose_name="Selenium Script File")
 
     class Meta:
         ordering = ['name']

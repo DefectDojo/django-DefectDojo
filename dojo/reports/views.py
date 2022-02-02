@@ -10,7 +10,6 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponseForbidden, HttpResponse, QueryDict
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -373,12 +372,14 @@ def generate_report(request, obj, host_view=False):
         user_has_permission_or_403(request.user, obj, Permissions.Test_View)
     elif type(obj).__name__ == "Endpoint":
         user_has_permission_or_403(request.user, obj, Permissions.Endpoint_View)
-    elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet":
+    elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet" or type(obj).__name__ == "TagulousCastTaggedQuerySet":
         # authorization taken care of by only selecting findings from product user is authed to see
         pass
     else:
-        if not request.user.is_staff:
-            raise PermissionDenied
+        if obj is None:
+            raise Exception('No object is given to generate report for')
+        else:
+            raise Exception(f'Report cannot be generated for object of type {type(obj).__name__}')
 
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))

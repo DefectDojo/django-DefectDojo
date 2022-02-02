@@ -350,7 +350,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser', 'password')
+        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+            fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_superuser', 'password')
+        else:
+            fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser', 'password')
 
     def create(self, validated_data):
         if 'password' in validated_data:
@@ -366,6 +369,15 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def validate(self, data):
+
+        if self.instance is not None:
+            instance_is_superuser = self.instance.is_superuser
+        else:
+            instance_is_superuser = False
+        data_is_superuser = data.get('is_superuser', False)
+        if not self.context['request'].user.is_superuser and (instance_is_superuser or data_is_superuser):
+            raise ValidationError('Only superusers are allowed to add or edit superusers.')
+
         if self.context['request'].method in ['PATCH', 'PUT'] and 'password' in data:
             raise ValidationError('Update of password though API is not allowed')
         else:
@@ -1276,7 +1288,7 @@ class ImportScanSerializer(serializers.Serializer):
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                          required=False,
                                                          default=None)
-    file = serializers.FileField(required=False)
+    file = serializers.FileField(allow_empty_file=True, required=False)
 
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
@@ -1415,7 +1427,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                           default=None,
                                                           required=False)
-    file = serializers.FileField(required=False)
+    file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
