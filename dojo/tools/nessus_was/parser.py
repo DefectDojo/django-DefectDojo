@@ -42,10 +42,10 @@ class NessusWASCSVParser(object):
             if not title:
                 continue
             # get description, mitigation, impact etc. from respective columns
-            description = row.get('Synopsis')
-            mitigation = str(row.get('Solution'))
-            impact = row.get('Description')
-            references = row.get('See Also')
+            description = row.get('Synopsis', '')
+            mitigation = str(row.get('Solution', ''))
+            impact = row.get('Description', '')
+            references = row.get('See Also', '')
             cvssv3 = row.get('CVSSv3', None)
             protocol = row.get('Protocol').lower() if 'Protocol' in row else None
             port = row.get('Port', None)
