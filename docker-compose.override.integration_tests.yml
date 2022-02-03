@@ -6,6 +6,9 @@ services:
       context: ./
       dockerfile: Dockerfile.integration-tests
     image: "defectdojo/defectdojo-integration-tests:${INTEGRATION_TESTS_VERSION:-latest}"
+    profiles: 
+      - mysql
+      - postgres
     depends_on:
       - nginx
       - uwsgi
