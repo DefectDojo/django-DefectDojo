@@ -126,7 +126,7 @@ jobs:
 
       - name: Start Dojo
         # implicity starts uwsgi and rabbitmq
-        run: docker-compose --profile mysql up -d mysql nginx celerybeat celeryworker mailhog
+        run: docker-compose --profile mysql up -d mysql nginx celerybeat celeryworker mailhog uwsgi rabbitmq
 
       - name: Initialize
         run: docker-compose --profile mysql up --exit-code-from initializer initializer
