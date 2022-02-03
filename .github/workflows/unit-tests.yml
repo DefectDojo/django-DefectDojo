@@ -65,7 +65,7 @@ jobs:
 
       # no celery or initializer needed for unit tests
       - name: Unit tests
-        run: docker-compose --profiles mysql up --no-deps --exit-code-from uwsgi uwsgi
+        run: docker-compose --profile mysql up --no-deps --exit-code-from uwsgi uwsgi
 
       - name: Logs
         if: failure()

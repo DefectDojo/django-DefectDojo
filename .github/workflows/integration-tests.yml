@@ -129,10 +129,10 @@ jobs:
         run: docker-compose up -d mysql nginx celerybeat celeryworker mailhog
 
       - name: Initialize
-        run: docker-compose --profiles mysql up --exit-code-from initializer initializer
+        run: docker-compose --profile mysql up --exit-code-from initializer initializer
 
       - name: Integration tests
-        run: docker-compose --profiles mysql up --exit-code-from integration-tests integration-tests
+        run: docker-compose --profile mysql up --exit-code-from integration-tests integration-tests
         env:
           DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
 
