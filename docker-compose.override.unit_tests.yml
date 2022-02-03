@@ -5,7 +5,7 @@ services:
     image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'nginx']
     volumes:
-      - defectdojo_media_unittest:/usr/share/nginx/html/media
+      - defectdojo_media_unit_tests:/usr/share/nginx/html/media
   uwsgi:
     build:
       target: django-unittests
