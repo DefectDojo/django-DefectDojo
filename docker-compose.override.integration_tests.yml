@@ -9,10 +9,10 @@ services:
     depends_on:
       - nginx
       - uwsgi
-    entrypoint: ['/wait-for-it.sh', 'database:${DD_DATABASE_PORT}', '-t', '30', '--', '/app/docker/entrypoint-integration-tests.sh']
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/app/docker/entrypoint-integration-tests.sh']
     volumes:
       - '.:/app:z'
-      - "defectdojo_media_integration_test:${DD_MEDIA_ROOT:-/app/media}"
+      - "defectdojo_media_integration_tests:${DD_MEDIA_ROOT:-/app/media}"
     environment:
       DD_BASE_URL: 'http://nginx:8080/'
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
@@ -20,12 +20,12 @@ services:
       DD_INTEGRATION_TEST_FILENAME: "${DD_INTEGRATION_TEST_FILENAME}"
   nginx:
     volumes:
-      - defectdojo_media_integration_test:/usr/share/nginx/html/media
+      - defectdojo_media_integration_tests:/usr/share/nginx/html/media
   uwsgi:
-    entrypoint: ['/wait-for-it.sh', 'database:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
     volumes:
       - '.:/app:z'
-      - defectdojo_media_integration_test:${DD_MEDIA_ROOT:-/app/media}
+      - defectdojo_media_integration_tests:${DD_MEDIA_ROOT:-/app/media}
     environment:
       DD_DEBUG: 'True'
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
@@ -45,7 +45,7 @@ services:
       DD_SECRET_KEY: "${DD_SECRET_KEY:-.}"
     volumes:
       - '.:/app:z'
-  database:
+  mysql:
     ports:
       - target: ${DD_DATABASE_PORT}
         published: ${DD_DATABASE_PORT}
@@ -53,9 +53,18 @@ services:
         mode: host
     environment:
       MYSQL_DATABASE: ${DD_TEST_DATABASE_NAME}
+    volumes:
+      - defectdojo_data_integration_tests:/var/lib/mysql
+  postgres:
+    ports:
+      - target: ${DD_DATABASE_PORT}
+        published: ${DD_DATABASE_PORT}
+        protocol: tcp
+        mode: host
+    environment:
       POSTGRES_DB: ${DD_TEST_DATABASE_NAME}
     volumes:
-       - defectdojo_data_integration_tests:${DD_DATABASE_DATA_PATH}
+      - defectdojo_postgres_integration_tests:/var/lib/postgresql/data
   mailhog:
     image: mailhog/mailhog:v1.0.1@sha256:8d76a3d4ffa32a3661311944007a415332c4bb855657f4f6c57996405c009bea
     ports:
@@ -70,7 +79,7 @@ services:
     profiles:
       - pgadmin
     depends_on:
-      - database
+      - postgres
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin@defectdojo.org
       PGADMIN_DEFAULT_PASSWORD: defectdojo
@@ -80,8 +89,9 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - defectdojo_pgadmin_integration_test:/var/lib/pgadmin  
+      - defectdojo_pgadmin_integration_tests:/var/lib/pgadmin  
 volumes:
   defectdojo_data_integration_tests: {}
-  defectdojo_media_integration_test: {}
-  defectdojo_pgadmin_integration_test: {}
+  defectdojo_postgres_integration_tests: {}
+  defectdojo_media_integration_tests: {}
+  defectdojo_pgadmin_integration_tests: {}

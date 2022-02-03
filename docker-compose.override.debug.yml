@@ -29,7 +29,13 @@
       nginx:
         volumes:
           - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
-      database:
+      mysql:
+        ports:
+          - target: ${DD_DATABASE_PORT}
+            published: ${DD_DATABASE_PORT}
+            protocol: tcp
+            mode: host
+      postgres:
         ports:
           - target: ${DD_DATABASE_PORT}
             published: ${DD_DATABASE_PORT}
@@ -42,7 +48,7 @@
         profiles:
           - pgadmin
         depends_on:
-          - database
+          - postgres
         environment:
           PGADMIN_DEFAULT_EMAIL: pgadmin@defectdojo.org
           PGADMIN_DEFAULT_PASSWORD: defectdojo

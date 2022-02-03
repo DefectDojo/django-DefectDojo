@@ -9,10 +9,10 @@ services:
   uwsgi:
     build:
       target: django-unittests
-    entrypoint: ['/wait-for-it.sh', 'database:${DD_DATABASE_PORT}', '-t', '30', '--', '/app/docker/entrypoint-unit-tests-devDocker.sh']
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/app/docker/entrypoint-unit-tests-devDocker.sh']
     volumes:
       - '.:/app:z'
-      - "defectdojo_media_unittest:${DD_MEDIA_ROOT:-/app/media}"
+      - "defectdojo_media_unit_tests:${DD_MEDIA_ROOT:-/app/media}"
     environment:
       DD_DEBUG: 'True'
       DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME}
@@ -38,7 +38,7 @@ services:
   initializer:
     image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'initializer']
-  database:
+  mysql:
     ports:
       - target: ${DD_DATABASE_PORT}
         published: ${DD_DATABASE_PORT}
@@ -46,9 +46,18 @@ services:
         mode: host
     environment:
       MYSQL_DATABASE: ${DD_TEST_DATABASE_NAME}
+    volumes:
+      - defectdojo_data_unit_tests:/var/lib/mysql
+  postgres:
+    ports:
+      - target: ${DD_DATABASE_PORT}
+        published: ${DD_DATABASE_PORT}
+        protocol: tcp
+        mode: host
+    environment:
       POSTGRES_DB: ${DD_TEST_DATABASE_NAME}
     volumes:
-      - defectdojo_data_unittest:${DD_DATABASE_DATA_PATH}
+      - defectdojo_postgres_unit_tests:/var/lib/postgresql/data
   # Admin interface for PostgreSQL, can be started with 'docker compose --profile pgadmin up'
   # Only useful when using PostgreSQL as database
   pgadmin:
@@ -56,7 +65,7 @@ services:
     profiles:
       - pgadmin
     depends_on:
-      - database
+      - postgres
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin@defectdojo.org
       PGADMIN_DEFAULT_PASSWORD: defectdojo
@@ -66,11 +75,12 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - defectdojo_pgadmin_unittest:/var/lib/pgadmin  
+      - defectdojo_pgadmin_unit_tests:/var/lib/pgadmin  
   rabbitmq:
     image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'rabbitmq']
 volumes:
-  defectdojo_data_unittest: {}
-  defectdojo_media_unittest: {}
-  defectdojo_pgadmin_unittest: {}
+  defectdojo_data_unit_tests: {}
+  defectdojo_postgres_unit_tests: {}
+  defectdojo_media_unit_tests: {}
+  defectdojo_pgadmin_unit_tests: {}
