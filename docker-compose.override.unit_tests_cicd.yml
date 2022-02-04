@@ -1,5 +1,5 @@
 ---
-version: '3.7'
+version: '3.8'
 services:
   nginx:
     image: busybox:1.35.0-musl
