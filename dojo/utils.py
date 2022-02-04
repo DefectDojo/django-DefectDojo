@@ -1657,10 +1657,9 @@ def user_post_save(sender, instance, created, **kwargs):
             notifications.user = instance
             logger.info('creating default set (from template) of notifications for: ' + str(instance))
         except Exception as err:
-            print(err)
             notifications = Notifications(user=instance)
-
             logger.info('creating default set of notifications for: ' + str(instance))
+
         notifications.save()
 
         system_settings = System_Settings.objects.get()

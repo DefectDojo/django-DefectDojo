@@ -37,6 +37,7 @@ class TestUtils(DojoTestCase):
         test_output = prepare_for_view(encrypt)
         self.assertEqual(test_input, test_output)
 
+
     @patch('dojo.models.System_Settings.objects')
     @patch('dojo.utils.Dojo_Group_Member')
     @patch('dojo.utils.Notifications')
@@ -56,8 +57,10 @@ class TestUtils(DojoTestCase):
         mock_settings.get.return_value = system_settings_group
         save_mock_member = Mock(return_value=Dojo_Group_Member())
         mock_member.return_value = save_mock_member
+
         save_mock_notifications = Mock(return_value=Notifications())
         mock_notifications.return_value = save_mock_notifications
+        mock_notifications.objects.get.side_effect = Exception("Mock no templates")
 
         user_post_save(None, user, True)
 
@@ -90,6 +93,7 @@ class TestUtils(DojoTestCase):
         mock_member.return_value = save_mock_member
         save_mock_notifications = Mock(return_value=Notifications())
         mock_notifications.return_value = save_mock_notifications
+        mock_notifications.objects.get.side_effect = Exception("Mock no templates")
 
         user_post_save(None, user, True)
 
@@ -115,6 +119,7 @@ class TestUtils(DojoTestCase):
         system_settings_group.default_group_email_pattern = '.*@example.com'
         save_mock_notifications = Mock(return_value=Notifications())
         mock_notifications.return_value = save_mock_notifications
+        mock_notifications.objects.get.side_effect = Exception("Mock no templates")
 
         mock_settings.get.return_value = system_settings_group
         save_mock_member = Mock(return_value=Dojo_Group_Member())
