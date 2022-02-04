@@ -9,8 +9,8 @@ fi
 if [ -z "$2" ]
 then
     echo "Starting docker compose with profile $1 in the foreground ..."
-    docker compose --profile $1 --env-file ./docker/environments/$1.env up
+    docker-compose --profile $1 --env-file ./docker/environments/$1.env up --no-deps
 else
     echo "Starting docker compose with profiles $1 and $2 in the foreground ..."
-    docker compose --profile $1 --env-file ./docker/environments/$1.env --profile $2 up
+    docker-compose --profile $1 --env-file ./docker/environments/$1.env --profile $2 up --no-deps
 fi

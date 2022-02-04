@@ -9,4 +9,4 @@ fi
 
 # The docker build doesn't supply any environment variables to the Dockerfile,
 # so we can use any profile.
-docker compose --profile mysql-rabbitmq --env-file ./docker/environments/mysql-rabbitmq.env build $1
+docker-compose --profile mysql-rabbitmq --env-file ./docker/environments/mysql-rabbitmq.env build $1
