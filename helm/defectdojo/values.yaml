@@ -26,7 +26,7 @@ host: defectdojo.default.minikube.local
 # optional list of alternative hostnames to use that gets appended to
 # DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match
 # the global hostname.
-#alternativeHosts:
+# alternativeHosts:
 #  - defectdojo.example.com
 imagePullPolicy: Always
 # Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
