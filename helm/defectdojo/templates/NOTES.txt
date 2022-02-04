@@ -24,3 +24,4 @@ To find out the password, run the following command:
       --namespace={{ .Release.Namespace }} \
       --output jsonpath='{.data.DD_ADMIN_PASSWORD}' \
       | base64 --decode)"
+{{end}}
