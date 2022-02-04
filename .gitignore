@@ -81,7 +81,7 @@ dojo/uploads/threat/*
 *.sqlite
 *.db
 celerybeat.pid
-# *.env*
+./*.env*
 
 weekly.txt
 Monthly.txt

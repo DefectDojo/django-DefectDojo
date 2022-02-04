@@ -152,7 +152,7 @@ services:
       POSTGRES_USER: ${DD_DATABASE_USER}
       POSTGRES_PASSWORD: ${DD_DATABASE_PASSWORD}
     volumes:
-      - defectdojo_postgresql:/var/lib/postgresql/data
+      - defectdojo_postgres:/var/lib/postgresql/data
   rabbitmq:
     image: rabbitmq:3.9.13-alpine
     profiles: 
@@ -169,7 +169,7 @@ services:
       - defectdojo_redis:/data
 volumes:
   defectdojo_data: {}
-  defectdojo_postgresql: {}
+  defectdojo_postgres: {}
   defectdojo_media: {}
   defectdojo_rabbitmq: {}
   defectdojo_redis: {}
