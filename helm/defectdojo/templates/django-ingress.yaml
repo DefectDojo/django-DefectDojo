@@ -1,6 +1,5 @@
 {{- if .Values.django.ingress.enabled -}}
 {{- $fullName := include "defectdojo.fullname" . -}}
-{{- $hostName := index .Values.hosts 0}}
 {{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
 apiVersion: networking.k8s.io/v1
 {{ else }}
@@ -37,13 +36,13 @@ spec:
 {{- if .Values.django.ingress.activateTLS }}
   tls:
   - hosts:
-    - {{ $hostName }}
+    - {{ .Values.host }}
   {{- if .Values.django.ingress.secretName }}
     secretName: {{ .Values.django.ingress.secretName }}
   {{- end }}
 {{- end }}
   rules:
-  - host: {{ $hostName }}
+  - host: {{ .Values.host }}
     http:
       paths:
         {{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}

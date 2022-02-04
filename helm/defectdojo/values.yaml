@@ -21,10 +21,13 @@ createPostgresqlSecret: false
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
 database: postgresql
 # List of allowed hosts, first entry is used for http header
-hosts:
-  - defectdojo.default.minikube.local
-  # - defectdojo.example.com
+host: defectdojo.default.minikube.local
 
+# optional list of alternative hostnames to use that gets appended to
+# DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match
+# the global hostname.
+#alternativeHosts:
+#  - defectdojo.example.com
 imagePullPolicy: Always
 # Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
 repositoryPrefix: defectdojo

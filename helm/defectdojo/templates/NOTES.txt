@@ -1,23 +1,21 @@
 {{- $fullName := include "defectdojo.fullname" . -}}
-{{- $hostName := index .Values.hosts 0}}
 DefectDojo has been installed.
 {{ if .Values.django.ingress.enabled }}
-To use it, go to <https://{{ $hostName }}>.
+To use it, go to <https://{{ .Values.host }}>.
 {{ else }}
 To be able to access it, set up an ingress or access the service directly by
 running the following command:
 
     kubectl port-forward --namespace={{ .Release.Namespace }} \
       service/{{ .Release.Name }}-django 8080:80
-{{ if ne "localhost" $hostName }}
-As you set your host value to {{ $hostName }}, make sure that it resolves to
+{{ if ne "localhost" .Values.host }}
+As you set your host value to {{ .Values.host }}, make sure that it resolves to
 the localhost IP address, e.g. by adding the following two lines to /etc/hosts:
 
-    ::1       {{ $hostName }}
-    127.0.0.1 {{ $hostName }}
+    ::1       {{ .Values.host }}
+    127.0.0.1 {{ .Values.host }}
 {{ end }}
-To access DefectDojo, go to <http://{{ $hostName }}:8080>.
-{{ end }}
+To access DefectDojo, go to <http://{{ .Values.host }}:8080>.
 Log in with username {{ .Values.admin.user}}.
 To find out the password, run the following command:
 

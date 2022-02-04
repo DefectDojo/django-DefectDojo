@@ -286,7 +286,7 @@ helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
-  --set "hosts={defectdojo.${TLS_CERT_DOMAIN}}" \
+  --set "host=defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set createSecret=true \
   --set createRabbitMqSecret=true \
@@ -299,7 +299,7 @@ helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
-  --set "hosts={defectdojo.${TLS_CERT_DOMAIN}}" \
+  --set "host=defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
   --set celery.replicas=3 \
@@ -316,7 +316,7 @@ helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
-  --set "hosts={defectdojo.${TLS_CERT_DOMAIN}}" \
+  --set "host=defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.replicas=3 \
   --set celery.replicas=3 \
   --set rabbitmq.replicas=3 \
@@ -371,15 +371,20 @@ It's possible to enable Nginx prometheus exporter by setting `--set monitoring.e
 ## Useful stuff
 
 ### Multiple Hostnames
-Django requires a list of all hostnames that are valid for requests. You can add additional hostnames via helm or values file as an array. This helps if you have a local service submitting reports to defectDojo using the namespace name (say defectdojo.scans) instead of the TLD name used in a browser.
+Django requires a list of all hostnames that are valid for requests.
+You can add additional hostnames via helm or values file as an array.
+This helps if you have a local service submitting reports to defectDojo using
+the namespace name (say defectdojo.scans) instead of the TLD name used in a browser.
 
-In your helm install simply pass them as a defined arry, for example:
+In your helm install simply pass them as a defined array, for example:
 
-`--set "hosts={defectdojo.default,localhost,defectdojo.example.com}"`
+`--set "alternativeHosts={defectdojo.default,localhost,defectdojo.example.com}"`
 
 This will also work with shell inserted variables:
 
-` --set "hosts={defectdojo.${TLS_CERT_DOMAIN},localhost}"`
+` --set "alternativeHosts={defectdojo.${TLS_CERT_DOMAIN},localhost}"`
+
+You will still need to set a host value as well.
 
 ### kubectl commands
 ```zsh

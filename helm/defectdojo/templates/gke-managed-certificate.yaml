@@ -1,11 +1,10 @@
 {{- if .Values.gke.useManagedCertificate }}
 {{- $fullName := include "defectdojo.fullname" . -}}
-{{- $hostName := index .Values.hosts 0}}
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
 metadata:
   name: {{ $fullName }}-django
 spec:
   domains:
-  - {{ $hostName }}
+  - {{ .Values.host }}
 {{- end }}

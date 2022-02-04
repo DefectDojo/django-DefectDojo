@@ -1,5 +1,4 @@
 {{- $fullName := include "defectdojo.fullname" . -}}
-{{- $hostName := index .Values.hosts 0}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -209,7 +208,7 @@ spec:
             port: http
             httpHeaders:
             - name: Host
-              value: {{ $hostName }}
+              value: {{ .Values.host }}
           failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold }}
           initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
@@ -266,7 +265,7 @@ spec:
             {{- end }}
             httpHeaders:
             - name: Host
-              value: {{ $hostName  }}
+              value: {{ .Values.host  }}
           initialDelaySeconds: 10
           periodSeconds: 10
           failureThreshold: 6
@@ -280,7 +279,7 @@ spec:
             {{- end }}
             httpHeaders:
             - name: Host
-              value: {{ $hostName }}
+              value: {{ .Values.host }}
           failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold }}
           initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
