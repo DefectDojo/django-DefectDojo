@@ -59,6 +59,9 @@ services:
   rabbitmq:
     image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'rabbitmq']
+  redis:
+    image: busybox:1.35.0-musl
+    entrypoint: ['echo', 'skipping', 'redis']
 volumes:
   defectdojo_data_unit_tests: {}
   defectdojo_postgres_unit_tests: {}
