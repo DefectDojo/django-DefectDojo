@@ -286,7 +286,7 @@ helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
-  --set "host=defectdojo.${TLS_CERT_DOMAIN}" \
+  --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set createSecret=true \
   --set createRabbitMqSecret=true \
@@ -299,7 +299,7 @@ helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
-  --set "host=defectdojo.${TLS_CERT_DOMAIN}" \
+  --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
   --set celery.replicas=3 \
@@ -316,7 +316,7 @@ helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
-  --set "host=defectdojo.${TLS_CERT_DOMAIN}" \
+  --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.replicas=3 \
   --set celery.replicas=3 \
   --set rabbitmq.replicas=3 \
