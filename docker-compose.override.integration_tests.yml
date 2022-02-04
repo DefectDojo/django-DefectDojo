@@ -7,8 +7,10 @@ services:
       dockerfile: Dockerfile.integration-tests
     image: "defectdojo/defectdojo-integration-tests:${INTEGRATION_TESTS_VERSION:-latest}"
     profiles: 
-      - mysql
-      - postgres
+      - mysql-rabbitmq
+      - mysql-redis
+      - postgres-rabbitmq
+      - postgres-redis
     depends_on:
       - nginx
       - uwsgi
