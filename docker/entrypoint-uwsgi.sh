@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # Allow for bind-mount multiple settings.py overrides
-FILES=$(ls -I README.md /app/docker/extra_settings)
+FILES=$(ls /app/docker/extra_settings/*.py)
 NUM_FILES=$(echo "$FILES" | wc -l)
-if [ "$NUM_FILES" -gt "1" ]; then
+if [ "$NUM_FILES" -gt "0" ]; then
     COMMA_LIST=$(echo $FILES | tr -s '[:blank:]' ', ')
     echo "============================================================"
     echo "     Overriding DefectDojo's local_settings.py with multiple"
@@ -27,4 +27,3 @@ exec uwsgi \
   --buffer-size="${DD_UWSGI_BUFFER_SIZE:-8192}" \
   --http 0.0.0.0:8081 --http-to ${DD_UWSGI_ENDPOINT}
   # HTTP endpoint is enabled for Kubernetes liveness checks. It should not be exposed as a serivce.
-

@@ -2,7 +2,7 @@
 asteval==0.9.26
 bleach==4.1.0
 celery==5.2.2
-coverage==6.2
+coverage==6.3
 defusedxml==0.7.1
 django_celery_results==2.2.0
 django-auditlog==1.0.0
@@ -16,13 +16,13 @@ django-crispy-forms==1.14.0
 django_extensions==3.1.5
 django-slack==5.17.6
 django-tagging==0.5.0
-django-watson==1.6.0
+django-watson==1.6.1
 django-prometheus==2.2.0
 Django==3.2.11
 djangorestframework==3.13.1
 gunicorn==20.1.0
 html2text==2020.1.16
-humanize==3.13.1
+humanize==3.14.0
 jira==3.0.1
 PyGithub==1.55
 lxml==4.7.1
@@ -35,7 +35,7 @@ psycopg2-binary==2.9.3
 cryptography==36.0.1
 python-dateutil==2.8.2
 pytz==2021.3
-redis==4.1.1
+redis==4.1.2
 requests==2.27.1
 sqlalchemy==1.4.31  # Required by Celery broker transport
 supervisor==4.2.4
@@ -49,9 +49,9 @@ social-auth-core==4.2.0
 Python-jose==3.3.0
 gitpython==3.1.26
 debugpy==1.5.1
-python-gitlab==2.10.1
+python-gitlab==3.1.1
 google-api-python-client==2.36.0
-google-auth==2.4.1
+google-auth==2.6.0
 google-auth-oauthlib==0.4.6
 drf_yasg==1.20.0
 cpe==1.2.1
@@ -71,6 +71,6 @@ hyperlink==21.0.0
 numpy==1.22.1
 django-test-migrations==1.2.0
 djangosaml2==1.3.5
-drf-spectacular==0.21.1
+drf-spectacular==0.21.2
 django-ratelimit==3.0.1
 argon2-cffi==21.3.0
