@@ -37,7 +37,6 @@ class TestUtils(DojoTestCase):
         test_output = prepare_for_view(encrypt)
         self.assertEqual(test_input, test_output)
 
-
     @patch('dojo.models.System_Settings.objects')
     @patch('dojo.utils.Dojo_Group_Member')
     @patch('dojo.utils.Notifications')
