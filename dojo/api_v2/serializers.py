@@ -1788,6 +1788,9 @@ class FindingNoteSerializer(serializers.Serializer):
 
 
 class NotificationsSerializer(serializers.ModelSerializer):
+
+    DEFAULT_NOTIFICATION = NOTIFICATION_CHOICES[-1]
+
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(),
                                                  required=False,
                                                  default=None,
@@ -1796,22 +1799,23 @@ class NotificationsSerializer(serializers.ModelSerializer):
                                                  required=False,
                                                  default=None,
                                                  allow_null=True)
-    product_type_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    product_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    engagement_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    test_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    scan_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    jira_update = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    upcoming_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    stale_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    auto_close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    user_mentioned = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    code_review = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    review_requested = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    other = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    sla_breach = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    risk_acceptance_expiration = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    product_type_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    product_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    engagement_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    test_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    scan_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    jira_update = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    upcoming_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    stale_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    auto_close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    user_mentioned = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    code_review = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    review_requested = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    other = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    sla_breach = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    risk_acceptance_expiration = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    template = serializers.BooleanField(default=False)
 
     class Meta:
         model = Notifications
@@ -1831,9 +1835,11 @@ class NotificationsSerializer(serializers.ModelSerializer):
             product = data.get('product')
 
         if self.instance is None or user != self.instance.user or product != self.instance.product:
-            notifications = Notifications.objects.filter(user=user, product=product).count()
+            notifications = Notifications.objects.filter(user=user, product=product, template=False).count()
             if notifications > 0:
                 raise ValidationError("Notification for user and product already exists")
+            if Notifications.objects.filter(template=True).count() > 0:
+                raise ValidationError("Notification template already exists")
 
         return data
 

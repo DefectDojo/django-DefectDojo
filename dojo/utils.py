@@ -1650,15 +1650,16 @@ def user_post_save(sender, instance, created, **kwargs):
     # This needs to be a signal to make it also work for users created via ldap, oauth and other
     # authentication backends
     if created:
-        logger.info('creating default set of notifications for: ' + str(instance))
         try:
             notifications = Notifications.objects.get(template=True)
             notifications.pk = None
             notifications.template = False
             notifications.user = instance
             logger.info('creating default set (from template) of notifications for: ' + str(instance))
-        except:
+        except Exception as err:
+            print(err)
             notifications = Notifications(user=instance)
+
             logger.info('creating default set of notifications for: ' + str(instance))
         notifications.save()
 
