@@ -69,8 +69,8 @@ jobs:
 
       - name: Logs
         if: failure()
-        run: docker-compose logs --tail="2500" uwsgi
+        run: docker-compose --profile mysql-redis --env-file ./docker/environments/mysql-redis.env logs --tail="2500" uwsgi
 
       - name: Shutdown
         if: always()
-        run: docker-compose down
+        run: docker-compose --profile mysql-redis --env-file ./docker/environments/mysql-redis.env down
