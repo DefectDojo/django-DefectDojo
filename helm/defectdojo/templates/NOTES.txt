@@ -16,6 +16,7 @@ the localhost IP address, e.g. by adding the following two lines to /etc/hosts:
     127.0.0.1 {{ .Values.host }}
 {{ end }}
 To access DefectDojo, go to <http://{{ .Values.host }}:8080>.
+{{ end }}
 Log in with username {{ .Values.admin.user}}.
 To find out the password, run the following command:
 
@@ -24,4 +25,3 @@ To find out the password, run the following command:
       --namespace={{ .Release.Namespace }} \
       --output jsonpath='{.data.DD_ADMIN_PASSWORD}' \
       | base64 --decode)"
-{{end}}
