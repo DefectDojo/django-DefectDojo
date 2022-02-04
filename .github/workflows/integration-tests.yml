@@ -126,13 +126,13 @@ jobs:
 
       - name: Start Dojo
         # implicity starts uwsgi and rabbitmq
-        run: docker-compose --profile mysql-redis up --no-deps -d mysql nginx celerybeat celeryworker mailhog uwsgi redis
+        run: docker-compose --profile mysql-redis up --env-file ./docker/environments/mysql-redis.env --no-deps -d mysql nginx celerybeat celeryworker mailhog uwsgi redis
 
       - name: Initialize
-        run: docker-compose --profile mysql-redis up --no-deps --exit-code-from initializer initializer
+        run: docker-compose --profile mysql-redis up --env-file ./docker/environments/mysql-redis.env --no-deps --exit-code-from initializer initializer
 
       - name: Integration tests
-        run: docker-compose --profile mysql-redis up --no-deps --exit-code-from integration-tests integration-tests
+        run: docker-compose --profile mysql-redis up --env-file ./docker/environments/mysql-redis.env --no-deps --exit-code-from integration-tests integration-tests
         env:
           DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
 
