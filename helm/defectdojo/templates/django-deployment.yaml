@@ -265,7 +265,7 @@ spec:
             {{- end }}
             httpHeaders:
             - name: Host
-              value: {{ .Values.host  }}
+              value: {{ .Values.host }}
           initialDelaySeconds: 10
           periodSeconds: 10
           failureThreshold: 6
