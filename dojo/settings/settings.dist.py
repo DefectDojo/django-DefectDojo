@@ -1379,3 +1379,7 @@ ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")
 ASYNC_FINDING_IMPORT_CHUNK_SIZE = env("DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE")
 # Feature toggle for new authorization for configurations
 FEATURE_CONFIGURATION_AUTHORIZATION = env("DD_FEATURE_CONFIGURATION_AUTHORIZATION")
+
+# django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
+# see https://github.com/laymonage/django-jsonfield-backport
+SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
