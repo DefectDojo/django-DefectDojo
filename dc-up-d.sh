@@ -1,16 +1,30 @@
 #/bin/bash
 
 if [ $# -eq 0 ]
-  then
-    echo "No profile supplied"
-    exit 1
+then
+    if [ -z $DD_PROFILE ]
+    then
+        echo "No profile supplied"
+        exit 1
+    else
+        FIRST_PROFILE=$DD_PROFILE
+    fi
+else
+    if [ -z $DD_PROFILE ]
+    then
+        FIRST_PROFILE=$1
+        SECOND_PROFILE=$2
+    else
+        FIRST_PROFILE=$DD_PROFILE
+        SECOND_PROFILE=$1
+    fi
 fi
 
-if [ -z "$2" ]
+if [ -z $SECOND_PROFILE ]
 then
-    echo "Starting docker compose with profile $1 in the background ..."
-    docker-compose --profile $1 --env-file ./docker/environments/$1.env up --no-deps -d
+    echo "Starting docker compose with profile $FIRST_PROFILE in the background ..."
+    docker-compose --profile $FIRST_PROFILE --env-file ./docker/environments/$FIRST_PROFILE.env up --no-deps -d
 else
-    echo "Starting docker compose with profiles $1 and $2 in the background ..."
-    docker-compose --profile $1 --env-file ./docker/environments/$1.env --profile $2 up --no-deps -d
+    echo "Starting docker compose with profiles $FIRST_PROFILE and $SECOND_PROFILE in the background ..."
+    docker-compose --profile $FIRST_PROFILE --env-file ./docker/environments/$FIRST_PROFILE.env --profile $SECOND_PROFILE up --no-deps -d
 fi
