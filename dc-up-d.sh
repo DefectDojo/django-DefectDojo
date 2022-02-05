@@ -1,5 +1,8 @@
 #/bin/bash
 
+unset FIRST_PROFILE
+unset SECOND_PROFILE
+
 if [ $# -eq 0 ]
 then
     if [ -z $DD_PROFILE ]
