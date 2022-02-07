@@ -13,7 +13,7 @@ data:
   DD_ADMIN_MAIL: {{ .Values.admin.Mail | default "admin@defectdojo.local" }}
   DD_ADMIN_FIRST_NAME: {{ .Values.admin.FirstName | default "Admin" }}
   DD_ADMIN_LAST_NAME: {{ .Values.admin.LastName | default "User" }}
-  DD_ALLOWED_HOSTS: {{ .Values.host }}
+  DD_ALLOWED_HOSTS: {{ include "django.allowed_hosts" . }}
   DD_CELERY_BROKER_SCHEME: {{ if eq .Values.celery.broker "rabbitmq" }}amqp{{ end }}{{ if eq .Values.celery.broker "redis" }}{{ template "redis.scheme" . }}{{ end }}
   DD_CELERY_BROKER_USER: '{{ if eq .Values.celery.broker "rabbitmq" }}user{{ end }}'
   DD_CELERY_BROKER_HOST: {{ if eq .Values.celery.broker "rabbitmq" }}{{ .Release.Name }}-rabbitmq{{ else if eq .Values.celery.broker "redis" }}{{ template "redis.hostname" . }}{{ end }}
