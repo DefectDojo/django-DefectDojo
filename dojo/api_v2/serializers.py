@@ -18,7 +18,7 @@ from dojo.models import IMPORT_ACTIONS, SEVERITIES, STATS_FIELDS, Dojo_User, Fin
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
-    Network_Locations, UserContactInfo, Product_API_Scan_Configuration
+    Network_Locations, UserContactInfo, Product_API_Scan_Configuration, DEFAULT_NOTIFICATION
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from dojo.utils import is_scan_file_too_large
@@ -1788,6 +1788,7 @@ class FindingNoteSerializer(serializers.Serializer):
 
 
 class NotificationsSerializer(serializers.ModelSerializer):
+
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(),
                                                  required=False,
                                                  default=None,
@@ -1796,22 +1797,22 @@ class NotificationsSerializer(serializers.ModelSerializer):
                                                  required=False,
                                                  default=None,
                                                  allow_null=True)
-    product_type_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    product_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    engagement_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    test_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    scan_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    jira_update = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    upcoming_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    stale_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    auto_close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    user_mentioned = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    code_review = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    review_requested = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    other = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    sla_breach = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    risk_acceptance_expiration = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    product_type_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    product_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    engagement_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    test_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    scan_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    jira_update = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    upcoming_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    stale_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    auto_close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    user_mentioned = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    code_review = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    review_requested = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    other = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    sla_breach = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    risk_acceptance_expiration = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
 
     class Meta:
         model = Notifications
