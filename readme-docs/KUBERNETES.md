@@ -370,6 +370,23 @@ It's possible to enable Nginx prometheus exporter by setting `--set monitoring.e
 
 ## Useful stuff
 
+### Multiple Hostnames
+Django requires a list of all hostnames that are valid for requests.
+You can add additional hostnames via helm or values file as an array.
+This helps if you have a local service submitting reports to defectDojo using
+the namespace name (say defectdojo.scans) instead of the TLD name used in a browser.
+
+In your helm install simply pass them as a defined array, for example:
+
+`--set "alternativeHosts={defectdojo.default,localhost,defectdojo.example.com}"`
+
+This will also work with shell inserted variables:
+
+` --set "alternativeHosts={defectdojo.${TLS_CERT_DOMAIN},localhost}"`
+
+You will still need to set a host value as well.
+
+### kubectl commands
 ```zsh
 # View logs of a specific pod
 kubectl logs $(kubectl get pod --selector=defectdojo.org/component=${POD} \
