@@ -53,7 +53,7 @@ Adding JIRA to Dojo
     
     For JIRA Cloud:
     
-    Enter _Email Address_ & [API token for Jira](https://id.atlassian.com/manage/api-tokens)
+    Enter _Email Address_ & [API token for Jira](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/)
 4.  To obtain the \'open status key\' and \'closed status key\'
     visit <https://>\<**YOUR JIRA
     URL**\>/rest/api/latest/issue/\<**ANY VALID ISSUE
