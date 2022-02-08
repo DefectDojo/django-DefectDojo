@@ -139,6 +139,8 @@ env = environ.Env(
         'Lastname': 'last_name'
     }),
     DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
+    # if somebody is using own documentation how to use DefectDojo in his own company
+    DD_DOCUMENTATION_URL=(str, 'https://defectdojo.github.io/django-DefectDojo'),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
@@ -491,6 +493,8 @@ SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = env('DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZAT
 SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = env('DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL')
 SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT = env('DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT')
 
+DOCUMENTATION_URL = env('DD_DOCUMENTATION_URL')
+
 # Setting SLA_NOTIFY_ACTIVE and SLA_NOTIFY_ACTIVE_VERIFIED to False will disable the feature
 # If you import thousands of Active findings through your pipeline everyday,
 # and make the choice of enabling SLA notifications for non-verified findings,
@@ -682,7 +686,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
-                'dojo.context_processors.globalize_oauth_vars',
+                'dojo.context_processors.globalize_vars',
                 'dojo.context_processors.bind_system_settings',
                 'dojo.context_processors.bind_alert_count',
             ],
@@ -1375,3 +1379,7 @@ ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")
 ASYNC_FINDING_IMPORT_CHUNK_SIZE = env("DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE")
 # Feature toggle for new authorization for configurations
 FEATURE_CONFIGURATION_AUTHORIZATION = env("DD_FEATURE_CONFIGURATION_AUTHORIZATION")
+
+# django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
+# see https://github.com/laymonage/django-jsonfield-backport
+SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]

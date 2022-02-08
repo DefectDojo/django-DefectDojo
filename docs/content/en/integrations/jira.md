@@ -47,11 +47,13 @@ Adding JIRA to Dojo
 
 1.  Click \'JIRA\' from the left hand menu.
 2.  Select \'Add Configuration\' from the drop-down.
-3.  If you use Jira Cloud, you will need to generate an [API token
-    for Jira](https://id.atlassian.com/manage/api-tokens) to use as
-    the password. If you use Jira Server, you will need to provide a
-    username and password for Defect Dojo to authenticate to Jira; a
-    username and Jira Personal Access Token will not necessarily work.
+3.  For JIRA Server: 
+    
+    Enter the _Username_ & _Password_. A _Username_ and JIRA _Personal Access Token_ will not necessarily work.
+    
+    For JIRA Cloud:
+    
+    Enter _Email Address_ & [API token for Jira](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/)
 4.  To obtain the \'open status key\' and \'closed status key\'
     visit <https://>\<**YOUR JIRA
     URL**\>/rest/api/latest/issue/\<**ANY VALID ISSUE
