@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0147_rename_sslyze_parser'),
+        ('dojo', '0148_default_notifications'),
     ]
 
     operations = [
