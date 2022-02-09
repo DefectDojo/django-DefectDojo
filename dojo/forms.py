@@ -1581,7 +1581,7 @@ class ReviewFindingForm(forms.Form):
     def _get_choices(queryset):
         l_choices = []
         for item in queryset:
-            l_choices.append((item.pk, Dojo_User.generate_full_name(item)))
+            l_choices.append((item.pk, item.get_full_name()))
         return l_choices
 
     class Meta:
