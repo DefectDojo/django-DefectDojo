@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.db.models import Q
 from dojo.models import Dojo_Group_Member, Product_Member, Product_Type_Member, \
     Product_Group, Product_Type_Group, Dojo_User
