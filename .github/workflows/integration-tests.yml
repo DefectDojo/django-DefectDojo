@@ -77,30 +77,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test-case: [
-          "tests/finding_test.py",
-          "tests/report_builder_test.py",
-          "tests/notes_test.py",
-          "tests/regulations_test.py",
-          "tests/product_type_test.py",
-          "tests/product_test.py",
-          "tests/endpoint_test.py",
-          "tests/engagement_test.py",
-          "tests/environment_test.py",
-          "tests/test_test.py",
-          "tests/user_test.py",
-          "tests/group_test.py",
-          "tests/product_group_test.py",
-          "tests/product_type_group_test.py",
-          "tests/product_member_test.py",
-          "tests/product_type_member_test.py",
-          "tests/ibm_appscan_test.py",
-          "tests/search_test.py",
-          "tests/file_test.py",
-          "tests/dedupe_test.py",
-          "tests/check_various_pages.py",
-          "tests/notifications_test.py",
-        ]
         profile: ["mysql-rabbitmq", "postgres-redis"]
       fail-fast: false
 
@@ -138,8 +114,6 @@ jobs:
 
       - name: Integration tests
         run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from integration-tests integration-tests
-        env:
-          DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
 
       - name: Logs
         if: always()
