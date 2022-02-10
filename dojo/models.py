@@ -1357,7 +1357,7 @@ class Endpoint(models.Model):
                 errors.append(ValidationError('Fragment "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.fragment == '':
                 self.fragment = None
-        
+
         if errors:
             raise ValidationError(errors)
 
