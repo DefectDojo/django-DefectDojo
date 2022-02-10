@@ -1,30 +1,15 @@
 #!/bin/sh
 
-# Allow for bind-mount setting.py overrides
-FILE=/app/docker/extra_settings/settings.dist.py
-if test -f "$FILE"; then
+# Allow for bind-mount multiple settings.py overrides
+FILES=$(ls /app/docker/extra_settings/*.py)
+NUM_FILES=$(echo "$FILES" | wc -l)
+if [ "$NUM_FILES" -gt "0" ]; then
+    COMMA_LIST=$(echo $FILES | tr -s '[:blank:]' ', ')
     echo "============================================================"
-    echo "     Overriding DefectDojo's settings.dist.py with $FILE."
+    echo "     Overriding DefectDojo's local_settings.py with multiple"
+    echo "     Files: $COMMA_LIST"
     echo "============================================================"
-    cp "$FILE" /app/dojo/settings/settings.dist.py
-fi
-
-# Allow for bind-mount setting.py overrides
-FILE=/app/docker/extra_settings/settings.py
-if test -f "$FILE"; then
-    echo "============================================================"
-    echo "     Overriding DefectDojo's settings.py with $FILE."
-    echo "============================================================"
-    cp "$FILE" /app/dojo/settings/settings.py
-fi
-
-# Allow for bind-mount setting.py overrides
-FILE=/app/docker/extra_settings/local_settings.py
-if test -f "$FILE"; then
-    echo "============================================================"
-    echo "     Overriding DefectDojo's local_settings.py with $FILE."
-    echo "============================================================"
-    cp "$FILE" /app/dojo/settings/local_settings.py
+    cp /app/docker/extra_settings/*.py /app/dojo/settings/
 fi
 
 umask 0002
@@ -42,4 +27,3 @@ exec uwsgi \
   --buffer-size="${DD_UWSGI_BUFFER_SIZE:-8192}" \
   --http 0.0.0.0:8081 --http-to ${DD_UWSGI_ENDPOINT}
   # HTTP endpoint is enabled for Kubernetes liveness checks. It should not be exposed as a serivce.
-

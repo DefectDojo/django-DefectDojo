@@ -19,14 +19,7 @@ class RustyhogParser(object):
         return self.get_items(tree, test)
 
     def parse_json(self, json_output):
-        try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
+        tree = json.load(json_output)
         return tree
 
     def get_items(self, json_output, scanner, test):
@@ -45,7 +38,7 @@ class RustyhogParser(object):
             if 'commit' in node or 'commitHash' in node or 'parent_commit_hash' in node or 'old_file_id' in node or 'new_file_id' in node:
                 parsername = "Choctaw Hog"
                 break
-            if 'issue_id' in node or 'location' in node or 'url' in node:
+            if 'issue_id' in node or 'location' in node:
                 parsername = "Gottingen Hog"
                 break
             if 'page_id' in node:

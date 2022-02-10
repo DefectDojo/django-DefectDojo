@@ -1,13 +1,17 @@
+
 # code: language=Dockerfile
 
 # The code for the build image should be identical with the code in
 # Dockerfile.django to use the caching mechanism of Docker.
 
-FROM python:3.8.12-slim-buster@sha256:7e732593f25983fa7d4b2d54444be4a785f2397c1cf2f815d2e3638337eee012 as build
+# Ref: https://devguide.python.org/#branchstatus
+FROM python:3.8.12-slim-bullseye@sha256:3d3edc52cfae3ed6fb8303559f10184f962a8069194b2dee93baaac66ebedeb5 as base
+FROM base as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
-  apt-get -y install \
+  apt-get -y install --no-install-recommends \
+    gcc \
     build-essential \
     dnsutils \
     default-mysql-client \
@@ -21,7 +25,10 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+# CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
+# https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
+RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+
 
 FROM build AS collectstatic
 
@@ -32,10 +39,10 @@ ENV \
   node="nodejs"
 RUN \
   apt-get -y update && \
-  apt-get -y install --no-install-recommends apt-transport-https ca-certificates curl wget && \
+  apt-get -y install --no-install-recommends apt-transport-https ca-certificates curl wget gnupg && \
   curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add --no-tty - && \
-  echo 'deb https://deb.nodesource.com/node_14.x buster main' > /etc/apt/sources.list.d/nodesource.list && \
-  echo 'deb-src https://deb.nodesource.com/node_14.x buster main' >> /etc/apt/sources.list.d/nodesource.list && \
+  echo 'deb https://deb.nodesource.com/node_14.x bullseye main' > /etc/apt/sources.list.d/nodesource.list && \
+  echo 'deb-src https://deb.nodesource.com/node_14.x bullseye main' >> /etc/apt/sources.list.d/nodesource.list && \
   apt-get update -y -o Dir::Etc::sourcelist="sources.list.d/nodesource.list" \
   -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0" && \
   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
@@ -65,7 +72,7 @@ COPY dojo/ ./dojo/
 
 RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
 
-FROM nginx:1.21.5-alpine@sha256:eb05700fe7baa6890b74278e39b66b2ed1326831f9ec3ed4bdc6361a4ac2f333
+FROM nginx:1.21.6-alpine@sha256:da9c94bec1da829ebd52431a84502ec471c8e548ffb2cedbf36260fd9bd1d4d3
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/

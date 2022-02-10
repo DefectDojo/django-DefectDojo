@@ -5,6 +5,12 @@ from dojo.models import Test
 
 class TestNucleiParser(DojoTestCase):
 
+    def test_parse_no_empty(self):
+        testfile = open("unittests/scans/nuclei/empty.jsonl")
+        parser = NucleiParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(0, len(findings))
+
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/nuclei/no_findings.json")
         parser = NucleiParser()

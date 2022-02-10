@@ -108,7 +108,7 @@ class DojoDefaultImporter(object):
             item.save(dedupe_option=False)
 
             if settings.FEATURE_FINDING_GROUPS and group_by:
-                finding_helper.add_finding_to_auto_group(item, group_by)
+                finding_helper.add_finding_to_auto_group(item, group_by, **kwargs)
 
             if (hasattr(item, 'unsaved_req_resp') and
                     len(item.unsaved_req_resp) > 0):
@@ -317,7 +317,6 @@ class DojoDefaultImporter(object):
             # Indicate that the test is not complete yet as endpoints will still be rolling in.
             test.percent_complete = 50
             test.save()
-            importer_utils.update_test_progress(test)
         else:
             new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                             verified, minimum_severity=minimum_severity,
@@ -344,6 +343,9 @@ class DojoDefaultImporter(object):
         updated_count = len(new_findings) + len(closed_findings)
         if updated_count > 0:
             notifications_helper.notify_scan_added(test, updated_count, new_findings=new_findings, findings_mitigated=closed_findings)
+
+        logger.debug('IMPORT_SCAN: Updating Test progress')
+        importer_utils.update_test_progress(test)
 
         logger.debug('IMPORT_SCAN: Done')
 

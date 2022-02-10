@@ -1,4 +1,4 @@
-name: "[OOB] Release helm chart"
+name: "release-X: Release helm chart"
 
 env:
   GIT_USERNAME: "DefectDojo release bot"

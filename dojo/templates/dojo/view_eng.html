@@ -229,9 +229,8 @@
                         <div id="the-filters" class="is-filters panel-body collapse {% if filter.form.has_changed %}in{% endif %}">
                             {% include "dojo/filter_snippet.html" with form=filter.form %}
                         </div>
-                    </div>
                     {% if tests %}
-                        <div class="clearfix">
+                        <div class="clearfix pagination-in-panel">
                             {% include "dojo/paging_snippet.html" with page=tests page_size=True %}
                         </div>
                         <div class="table-responsive">
@@ -343,14 +342,15 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="clearfix">
+                        <div class="clearfix pagination-in-panel">
                             {% include "dojo/paging_snippet.html" with page=tests page_size=True %}
                         </div>
                     {% else %}
                         <div class="panel-body">
-                            <small class="text-muted"><em>No tests found.</em></small>
+                            <small class="text-muted"><em>No Tests found.</em></small>
                         </div>
                     {% endif %}
+                    </div>
                 </div>
             </div>
             <div class="row">

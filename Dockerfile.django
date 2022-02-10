@@ -5,12 +5,13 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.8.12-slim-buster@sha256:7e732593f25983fa7d4b2d54444be4a785f2397c1cf2f815d2e3638337eee012 as base
+FROM python:3.8.12-slim-bullseye@sha256:3d3edc52cfae3ed6fb8303559f10184f962a8069194b2dee93baaac66ebedeb5 as base
 FROM base as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
   apt-get -y install --no-install-recommends \
+    gcc \
     build-essential \
     dnsutils \
     default-mysql-client \
@@ -24,7 +25,9 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+# CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
+# https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
+RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM base as django
 WORKDIR /app

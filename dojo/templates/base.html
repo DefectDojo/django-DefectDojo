@@ -166,7 +166,7 @@
                             <li>
                                 <a href="{% url 'swagger-ui_oa3' %}?docExpansion=none" target="_blank"><i class="fa fa-book fa-fw" title="OpenAPI v3 Docs"></i>{% trans "API v2 OpenAPI3 Docs" %}</a>
                             </li>
-                            <li><a href="https://defectdojo.github.io/django-DefectDojo" target="_blank">
+                            <li><a href="{{ DOCUMENTATION_URL }}" target="_blank">
                                 <i class="fa fa-question-circle fa-fw"></i>{% trans "Documentation" %}</a>
                             </li>
                         {% endblock %}

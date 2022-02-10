@@ -552,8 +552,16 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.delete(relative_url)
+
+            if self.endpoint_model == Endpoint_Status:
+                permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
+            elif self.endpoint_model == JIRA_Issue:
+                permission_object = Finding.objects.get(id=current_objects['results'][0]['finding'])
+            else:
+                permission_object = self.permission_check_class.objects.get(id=current_objects['results'][0]['id'])
+
             mock.assert_called_with(User.objects.get(username='admin'),
-                self.permission_check_class.objects.get(id=self.permission_check_id),
+                permission_object,
                 self.permission_delete)
 
         @skipIfNotSubclass(UpdateModelMixin)
@@ -567,16 +575,23 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
 
+            if self.endpoint_model == Endpoint_Status:
+                permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
+            elif self.endpoint_model == JIRA_Issue:
+                permission_object = Finding.objects.get(id=current_objects['results'][0]['finding'])
+            else:
+                permission_object = self.permission_check_class.objects.get(id=current_objects['results'][0]['id'])
+
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username='admin'),
-                self.permission_check_class.objects.get(id=self.permission_check_id),
+                permission_object,
                 self.permission_update)
 
             response = self.client.put(relative_url, self.payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username='admin'),
-                self.permission_check_class.objects.get(id=self.permission_check_id),
+                permission_object,
                 self.permission_update)
 
         @skipIfNotSubclass(ListModelMixin)
@@ -668,7 +683,7 @@ class BaseClass():
             response = self.client.put(relative_url, self.payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username='admin'),
-                self.permission_check_class.objects.get(id=self.permission_check_id),
+                self.permission_check_class.objects.get(id=current_objects['results'][0]['id']),
                 self.permission_update)
 
     class AuthenticatedViewTest(RESTEndpointTest):
@@ -720,7 +735,6 @@ class AppAnalysisTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'version': '9.0'}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
-        self.permission_check_id = 1
         self.permission_create = Permissions.Technology_Add
         self.permission_update = Permissions.Technology_Edit
         self.permission_delete = Permissions.Technology_Delete
@@ -747,7 +761,6 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'mitigated': True}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Endpoint
-        self.permission_check_id = 2
         self.permission_create = Permissions.Endpoint_Edit
         self.permission_update = Permissions.Endpoint_Edit
         self.permission_delete = Permissions.Endpoint_Edit
@@ -774,7 +787,6 @@ class EndpointTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'protocol': 'ftp', 'tags': ['one_new_tag']}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Endpoint
-        self.permission_check_id = 2
         self.permission_create = Permissions.Endpoint_Add
         self.permission_update = Permissions.Endpoint_Edit
         self.permission_delete = Permissions.Endpoint_Delete
@@ -805,7 +817,6 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'version': 'latest'}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Engagement
-        self.permission_check_id = 1
         self.permission_create = Permissions.Engagement_Add
         self.permission_update = Permissions.Engagement_Edit
         self.permission_delete = Permissions.Engagement_Delete
@@ -919,7 +930,6 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'duplicate': False, 'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Finding
-        self.permission_check_id = 3
         self.permission_create = Permissions.Finding_Add
         self.permission_update = Permissions.Finding_Edit
         self.permission_delete = Permissions.Finding_Delete
@@ -1080,7 +1090,6 @@ class JiraIssuesTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'jira_change': '2022-01-02T13:47:38.021481Z'}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Finding
-        self.permission_check_id = 5
         self.permission_create = Permissions.Finding_Edit
         self.permission_update = Permissions.Finding_Edit
         self.permission_delete = Permissions.Finding_Edit
@@ -1107,7 +1116,6 @@ class JiraProjectTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'jira_instance': 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Edit
         self.permission_update = Permissions.Product_Edit
         self.permission_delete = Permissions.Product_Edit
@@ -1167,7 +1175,6 @@ class Product_API_Scan_ConfigurationTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'tool_configuration': 2}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_API_Scan_Configuration
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_API_Scan_Configuration_Add
         self.permission_update = Permissions.Product_API_Scan_Configuration_Edit
         self.permission_delete = Permissions.Product_API_Scan_Configuration_Delete
@@ -1194,7 +1201,6 @@ class ProductTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'prod_type': 2}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Type_Add_Product
         self.permission_update = Permissions.Product_Edit
         self.permission_delete = Permissions.Product_Delete
@@ -1220,7 +1226,6 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'severity': 'LOW'}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Stub_Finding
-        self.permission_check_id = 2
         self.permission_create = Permissions.Finding_Add
         self.permission_update = Permissions.Finding_Edit
         self.permission_delete = Permissions.Finding_Delete
@@ -1254,7 +1259,6 @@ class TestsTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'percent_complete': 100}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Test
-        self.permission_check_id = 3
         self.permission_create = Permissions.Test_Add
         self.permission_update = Permissions.Test_Edit
         self.permission_delete = Permissions.Test_Delete
@@ -1305,7 +1309,6 @@ class ToolProductSettingsTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'tool_project_id': '2'}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Edit
         self.permission_update = Permissions.Product_Edit
         self.permission_delete = Permissions.Product_Edit
@@ -2054,7 +2057,6 @@ class ProductTypeTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'description': "changed"}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Type
-        self.permission_check_id = 1
         self.permission_update = Permissions.Product_Type_Edit
         self.permission_delete = Permissions.Product_Type_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -2093,7 +2095,6 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'description': "changed"}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Dojo_Group
-        self.permission_check_id = 1
         self.permission_update = Permissions.Group_Edit
         self.permission_delete = Permissions.Group_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -2135,7 +2136,6 @@ class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
         self.update_fields = {'role': 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Dojo_Group_Member
-        self.permission_check_id = 1
         self.permission_create = Permissions.Group_Manage_Members
         self.permission_update = Permissions.Group_Manage_Members
         self.permission_delete = Permissions.Group_Member_Delete
@@ -2187,7 +2187,6 @@ class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
         self.update_fields = {'role': 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Type_Member
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Type_Manage_Members
         self.permission_update = Permissions.Product_Type_Manage_Members
         self.permission_delete = Permissions.Product_Type_Member_Delete
@@ -2210,7 +2209,6 @@ class ProductMemberTest(BaseClass.MemberEndpointTest):
         self.update_fields = {'role': 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Member
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Manage_Members
         self.permission_update = Permissions.Product_Manage_Members
         self.permission_delete = Permissions.Product_Member_Delete
@@ -2233,7 +2231,6 @@ class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
         self.update_fields = {'role': 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Type_Group
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Type_Group_Add
         self.permission_update = Permissions.Product_Type_Group_Edit
         self.permission_delete = Permissions.Product_Type_Group_Delete
@@ -2256,7 +2253,6 @@ class ProductGroupTest(BaseClass.MemberEndpointTest):
         self.update_fields = {'role': 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Group
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Group_Add
         self.permission_update = Permissions.Product_Group_Edit
         self.permission_delete = Permissions.Product_Group_Delete
@@ -2302,7 +2298,6 @@ class LanguageTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'code': 10}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Languages
-        self.permission_check_id = 1
         self.permission_create = Permissions.Language_Add
         self.permission_update = Permissions.Language_Edit
         self.permission_delete = Permissions.Language_Delete

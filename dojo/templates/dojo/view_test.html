@@ -496,16 +496,14 @@
         <div id="the-filters" class="is-filters panel-body collapse">
             {% include "dojo/filter_snippet.html" with form=filtered.form %}
         </div>
-    </div>
-    {% if findings %}
-        <div class="clearfix">
+        {% if findings %}
+        <div class="clearfix pagination-in-panel">
             {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
         </div>
-
         {% if test|has_object_permission:"Finding_Edit" or test|has_object_permission:"Finding_Delete" %}
         <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
             {% if test|has_object_permission:"Finding_Edit" %}
-                <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
+                <button class="btn btn-info btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenu2"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     Bulk Edit
                     <span class="caret"></span>
@@ -513,14 +511,14 @@
             {% endif %}
             <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
                 {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
-                    <button type="button" id="merge_findings" class="btn btn-info btn-sm btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
+                    <button type="button" id="merge_findings" class="btn btn-info btn-sm btn-secondary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                         <a class="white-color merge" href="#" alt="Merge Findings">
                             <i class="fa fa-compress"></i>
                         </a>
                     </button>
                 {% endif %}
                 {% if test|has_object_permission:"Finding_Delete" %}
-                    <button type="button" class="btn btn-info btn-sm btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
+                    <button type="button" class="btn btn-info btn-sm btn-secondary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                         <a class="white-color delete-bulk" href="#" alt="Delete Findings">
                             <i class="fa fa-trash"></i>
                         </a>
@@ -613,15 +611,13 @@
                         {{ bulk_edit_form.media.css }}
                         {{ bulk_edit_form.media.js }}
                         {{ bulk_edit_form.tags }}
-                        <input type="submit" class="btn btn-sm btn-primary" value="Submit" title="sub-button"/>
+                        <input type="submit" class="btn btn-sm btn-secondary" value="Submit" title="sub-button"/>
                     </form>
                 </li>
             </ul>
         </div>
         {% endif %}
-    {% endif %}
-    <div class="panel panel-default table-responsive">
-        {% if findings %}
+        <div class="table-responsive">
             <table id="test_findings" class="table-striped tablesorter-bootstrap table table-condensed table-hover">
                 <thead>
                         <tr>
@@ -907,16 +903,16 @@
                 {% endfor %}
                 </tbody>
             </table>
+            <div class="clearfix pagination-in-panel">
+                {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
+            </div>
+        </div>
         {% else %}
             <div class="panel-body">
                 <p class="text-center">No findings found.</p>
             </div>
         {% endif %}
-        <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
-        </div>
-
-     </div>
+    </div>
 
      <div class="panel panel-default table-responsive potential-finding">
             <div class="panel-heading">

@@ -593,6 +593,11 @@ form ul#id_accepted_findings input {
   border-color: #546474;
 }
 
+.pagination-in-panel {
+    margin-left: 10px!important;
+    margin-right: 10px!important;
+}
+
 #risk_acceptance table form {
     margin: 0;
 }
