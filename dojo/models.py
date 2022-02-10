@@ -15,7 +15,7 @@ from django.db.models.expressions import Case, When
 from django.urls import reverse
 from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, connection
 from django.db.models import Q, Count
 from django.db.models.functions import Lower
 from django_extensions.db.models import TimeStampedModel
@@ -1281,6 +1281,8 @@ class Endpoint(models.Model):
 
     def clean(self):
         errors = []
+        null_char_list = ["0x00", "%00", "\x00"]
+        db_type = connection.vendor
         if self.protocol or self.protocol == '':
             if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.protocol):  # https://tools.ietf.org/html/rfc3986#section-3.1
                 errors.append(ValidationError('Protocol "{}" has invalid format'.format(self.protocol)))
@@ -1314,21 +1316,48 @@ class Endpoint(models.Model):
         if self.path or self.path == '':
             while len(self.path) > 0 and self.path[0] == "/":  # Endpoint store "root-less" path
                 self.path = self.path[1:]
+            if any([null_char in self.path for null_char in null_char_list]):
+                old_value = self.path
+                if 'mysql' in db_type:
+                    action_string = 'No action taken as MySQL allows for storing the NULL character'
+                if 'postgres' in db_type:
+                    action_string = 'Postgres does not accept NULL character. Attempting to remove...'
+                    for remove_str in null_char_list:
+                        self.path = self.path.replace(remove_str, '')
+                errors.append(ValidationError('Path "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.path == '':
                 self.path = None
 
         if self.query or self.query == '':
             if len(self.query) > 0 and self.query[0] == "?":
                 self.query = self.query[1:]
+            if any([null_char in self.query for null_char in null_char_list]):
+                old_value = self.query
+                if 'mysql' in db_type:
+                    action_string = 'No action taken as MySQL allows for storing the NULL character'
+                if 'postgres' in db_type:
+                    action_string = 'Postgres does not accept NULL character. Attempting to remove...'
+                    for remove_str in null_char_list:
+                        self.query = self.query.replace(remove_str, '')
+                errors.append(ValidationError('Query "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.query == '':
                 self.query = None
 
         if self.fragment or self.fragment == '':
             if len(self.fragment) > 0 and self.fragment[0] == "#":
                 self.fragment = self.fragment[1:]
+            if any([null_char in self.fragment for null_char in null_char_list]):
+                old_value = self.fragment
+                if 'mysql' in db_type:
+                    action_string = 'No action taken as MySQL allows for storing the NULL character'
+                if 'postgres' in db_type:
+                    action_string = 'Postgres does not accept NULL character. Attempting to remove...'
+                    for remove_str in null_char_list:
+                        self.fragment = self.fragment.replace(remove_str, '')
+                errors.append(ValidationError('Fragment "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.fragment == '':
                 self.fragment = None
-
+        
         if errors:
             raise ValidationError(errors)
 
