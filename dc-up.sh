@@ -1,7 +1,6 @@
 #/bin/bash
 
-unset FIRST_PROFILE
-unset SECOND_PROFILE
+unset PROFILE
 
 if [ $# -eq 0 ]
 then
@@ -10,24 +9,11 @@ then
         echo "No profile supplied"
         exit 1
     else
-        FIRST_PROFILE=$DD_PROFILE
+        PROFILE=$DD_PROFILE
     fi
 else
-    if [ -z $DD_PROFILE ]
-    then
-        FIRST_PROFILE=$1
-        SECOND_PROFILE=$2
-    else
-        FIRST_PROFILE=$DD_PROFILE
-        SECOND_PROFILE=$1
-    fi
+    PROFILE=$1
 fi
 
-if [ -z $SECOND_PROFILE ]
-then
-    echo "Starting docker compose with profile $FIRST_PROFILE in the foreground ..."
-    docker-compose --profile $FIRST_PROFILE --env-file ./docker/environments/$FIRST_PROFILE.env up --no-deps
-else
-    echo "Starting docker compose with profiles $FIRST_PROFILE and $SECOND_PROFILE in the foreground ..."
-    docker-compose --profile $FIRST_PROFILE --env-file ./docker/environments/$FIRST_PROFILE.env --profile $SECOND_PROFILE up --no-deps
-fi
+echo "Starting docker compose with profile $PROFILE in the background ..."
+docker-compose --profile $PROFILE --env-file ./docker/environments/$PROFILE.env up --no-deps

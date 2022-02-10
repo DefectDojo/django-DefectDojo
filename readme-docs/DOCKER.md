@@ -53,16 +53,12 @@ The environment variables needed for the different profiles are prepared in file
 5 shell scripts make life easier and avoid typing long commands:
 
 - `./dc-build.sh` - Build the docker images, it can take one additional parameter to be used in the build process.
-- `./dc-up.sh` - Start the docker containers in the foreground, it needs one of the profile names as a parameter, a second profile can be defined with a second parameter (see below about pgAdmin)
-- `./dc-up-d.sh` - Start the docker containers in the background, it needs one of the profile names as a parameter, a second profile can be defined with a second parameter (see below about pgAdmin)
+- `./dc-up.sh` - Start the docker containers in the foreground, it needs one of the profile names as a parameter
+- `./dc-up-d.sh` - Start the docker containers in the background, it needs one of the profile names as a parameter
 - `./dc-stop.sh` - Stop the docker containers, it can take one additional parameter to be used in the stop process.
 - `./dc-down.sh` - Stop and remove the docker containers, it can take one additional parameter to be used in the stop and remove process.
 
-A default profile can be set with the environment variable `DD_PROFILE`. If this environment variable is set when starting the containers, the first parameter of the start scripts need not to be given.
-
-## pgAdmin
-
-When using PostgreSQL, you can start [pgAdmin](https://www.pgadmin.org/) for database administration in all non-release settings, by giving `pgadmin` as a second parameter while starting the containers with `dc-up.sh` or `dc-up-d.sh`.
+A default profile can be set with the environment variable `DD_PROFILE`. If this environment variable is set when starting the containers, the parameter for the profile needs not to be given for the start scripts .
 
 # Setup via Docker Compose - Building and running the application
 
