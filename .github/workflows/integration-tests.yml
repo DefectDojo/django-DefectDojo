@@ -126,11 +126,11 @@ jobs:
       # phased startup so we can use the exit code from integrationtest container
 
       - name: Start Dojo MySQL + RabbitMQ
-        if: ${{ matrix.profile }} == 'mysql-rabbitmq'
+        if: matrix.profile == 'mysql-rabbitmq'
         run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d mysql nginx celerybeat celeryworker mailhog uwsgi rabbitmq
 
       - name: Start Dojo PostgreSQL + Redis
-        if: ${{ matrix.profile }} == 'postgres-redis'
+        if: matrix.profile == 'postgres-redis'
         run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
 
       - name: Initialize
