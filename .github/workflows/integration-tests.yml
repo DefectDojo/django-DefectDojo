@@ -72,7 +72,7 @@ jobs:
 
   integration_tests_mysql_rabbitmq:
     # run tests with docker-compose
-    name: integration tests with mysql and rabbitmq
+    name: int test mysql/rabbit
     needs: build
     runs-on: ubuntu-latest
     strategy:
@@ -145,7 +145,7 @@ jobs:
 
   integration_tests_postgresql_redis:
     # run tests with docker-compose
-    name: integration tests with postgresql and redis
+    name: int test postgres/redis
     needs: integration_tests_mysql_rabbitmq
     runs-on: ubuntu-latest
     strategy:
