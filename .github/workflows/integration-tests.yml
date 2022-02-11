@@ -146,7 +146,7 @@ jobs:
   integration_tests_postgresql_redis:
     # run tests with docker-compose
     name: integration tests with postgresql and redis
-    needs: build
+    needs: integration_tests_mysql_rabbitmq
     runs-on: ubuntu-latest
     strategy:
       matrix:
