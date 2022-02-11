@@ -1318,13 +1318,11 @@ class Endpoint(models.Model):
                 self.path = self.path[1:]
             if any([null_char in self.path for null_char in null_char_list]):
                 old_value = self.path
-                if 'mysql' in db_type:
-                    action_string = 'No action taken as MySQL allows for storing the NULL character'
                 if 'postgres' in db_type:
                     action_string = 'Postgres does not accept NULL character. Attempting to remove...'
                     for remove_str in null_char_list:
                         self.path = self.path.replace(remove_str, '')
-                errors.append(ValidationError('Path "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
+                    errors.append(ValidationError('Path "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.path == '':
                 self.path = None
 
@@ -1333,13 +1331,11 @@ class Endpoint(models.Model):
                 self.query = self.query[1:]
             if any([null_char in self.query for null_char in null_char_list]):
                 old_value = self.query
-                if 'mysql' in db_type:
-                    action_string = 'No action taken as MySQL allows for storing the NULL character'
                 if 'postgres' in db_type:
                     action_string = 'Postgres does not accept NULL character. Attempting to remove...'
                     for remove_str in null_char_list:
                         self.query = self.query.replace(remove_str, '')
-                errors.append(ValidationError('Query "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
+                    errors.append(ValidationError('Query "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.query == '':
                 self.query = None
 
@@ -1348,13 +1344,11 @@ class Endpoint(models.Model):
                 self.fragment = self.fragment[1:]
             if any([null_char in self.fragment for null_char in null_char_list]):
                 old_value = self.fragment
-                if 'mysql' in db_type:
-                    action_string = 'No action taken as MySQL allows for storing the NULL character'
                 if 'postgres' in db_type:
                     action_string = 'Postgres does not accept NULL character. Attempting to remove...'
                     for remove_str in null_char_list:
                         self.fragment = self.fragment.replace(remove_str, '')
-                errors.append(ValidationError('Fragment "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
+                    errors.append(ValidationError('Fragment "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.fragment == '':
                 self.fragment = None
 
