@@ -70,14 +70,37 @@ jobs:
           path: ${{ matrix.docker-image }}_img
           retention-days: 1
 
-  integration_tests:
+  integration_tests_mysql_rabbitmq:
     # run tests with docker-compose
-    name: integration tests
+    name: integration tests with mysql and rabbitmq
     needs: build
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        profile: ["mysql-rabbitmq", "postgres-redis"]
+        test-case: [
+          "tests/finding_test.py",
+          "tests/report_builder_test.py",
+          "tests/notes_test.py",
+          "tests/regulations_test.py",
+          "tests/product_type_test.py",
+          "tests/product_test.py",
+          "tests/endpoint_test.py",
+          "tests/engagement_test.py",
+          "tests/environment_test.py",
+          "tests/test_test.py",
+          "tests/user_test.py",
+          "tests/group_test.py",
+          "tests/product_group_test.py",
+          "tests/product_type_group_test.py",
+          "tests/product_member_test.py",
+          "tests/product_type_member_test.py",
+          "tests/ibm_appscan_test.py",
+          "tests/search_test.py",
+          "tests/file_test.py",
+          "tests/dedupe_test.py",
+          "tests/check_various_pages.py",
+          "tests/notifications_test.py",
+        ]
       fail-fast: false
 
     steps:
@@ -99,26 +122,96 @@ jobs:
       - name: Set integration-test mode
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
-      # phased startup so we can use the exit code from integrationtest container
+      # phased startup with MySQL and RabbitMQ so we can use the exit code from integrationtest container
 
       - name: Start Dojo MySQL + RabbitMQ
-        if: matrix.profile == 'mysql-rabbitmq'
-        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d mysql nginx celerybeat celeryworker mailhog uwsgi rabbitmq
-
-      - name: Start Dojo PostgreSQL + Redis
-        if: matrix.profile == 'postgres-redis'
-        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
+        run: docker-compose --profile mysql-rabbitmq --env-file ./docker/environments/mysql-rabbitmq.env up --no-deps -d mysql nginx celerybeat celeryworker mailhog uwsgi rabbitmq
 
       - name: Initialize
-        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from initializer initializer
+        run: docker-compose --profile mysql-rabbitmq --env-file ./docker/environments/mysql-rabbitmq.env up --no-deps --exit-code-from initializer initializer
 
       - name: Integration tests
-        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from integration-tests integration-tests
+        run: docker-compose --profile mysql-rabbitmq --env-file ./docker/environments/mysql-rabbitmq.env up --no-deps --exit-code-from integration-tests integration-tests
+        env:
+          DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
 
       - name: Logs
         if: always()
-        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env logs --tail="2500"
+        run: docker-compose --profile mysql-rabbitmq --env-file ./docker/environments/mysql-rabbitmq.env logs --tail="2500"
 
       - name: Shutdown
         if: always()
-        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env down
+        run: docker-compose --profile mysql-rabbitmq --env-file ./docker/environments/mysql-rabbitmq.env down
+
+  integration_tests_postgresql_redis:
+    # run tests with docker-compose
+    name: integration tests with postgresql and redis
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-case: [
+          "tests/finding_test.py",
+          "tests/report_builder_test.py",
+          "tests/notes_test.py",
+          "tests/regulations_test.py",
+          "tests/product_type_test.py",
+          "tests/product_test.py",
+          "tests/endpoint_test.py",
+          "tests/engagement_test.py",
+          "tests/environment_test.py",
+          "tests/test_test.py",
+          "tests/user_test.py",
+          "tests/group_test.py",
+          "tests/product_group_test.py",
+          "tests/product_type_group_test.py",
+          "tests/product_member_test.py",
+          "tests/product_type_member_test.py",
+          "tests/ibm_appscan_test.py",
+          "tests/search_test.py",
+          "tests/file_test.py",
+          "tests/dedupe_test.py",
+          "tests/check_various_pages.py",
+          "tests/notifications_test.py",
+        ]
+      fail-fast: false
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # load docker images from build jobs
+      - name: Load images from artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Load docker images
+        run: |-
+             docker load -i nginx/nginx_img
+             docker load -i django/django_img
+             docker load -i integration-tests/integration-tests_img
+             docker images
+
+      - name: Set integration-test mode
+        run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
+
+      # phased startup with PostgreSQL and Redis so we can use the exit code from integrationtest container
+
+      - name: Start Dojo PostgreSQL + Redis
+        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
+
+      - name: Initialize
+        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps --exit-code-from initializer initializer
+
+      - name: Integration tests
+        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps --exit-code-from integration-tests integration-tests
+        env:
+          DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
+
+      - name: Logs
+        if: always()
+        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env logs --tail="2500"
+
+      - name: Shutdown
+        if: always()
+        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env down
