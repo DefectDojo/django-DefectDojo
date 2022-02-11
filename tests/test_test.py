@@ -2,7 +2,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import unittest
 import sys
-from base_test_class import BaseTestCase
+from base_test_class import BaseTestCase, on_exception_html_source_logger
 from product_test import ProductTest, WaitForPageLoad
 from selenium.webdriver.common.by import By
 
