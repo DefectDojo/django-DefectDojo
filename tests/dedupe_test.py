@@ -87,9 +87,9 @@ class DedupeTest(BaseTestCase):
         except TimeoutException:
             self.fail('Confirmation dialogue not shown, cannot delete previous findings')
 
-        text = None
-        if self.element_exists_by_id("no_findings"):
-            text = driver.find_element(By.ID, "no_findings").text
+        logger.debug("page source when checking for no_findings element")
+        logger.debug(self.driver.page_source)
+        text = driver.find_element(By.ID, "no_findings").text
 
         self.assertIsNotNone(text)
         self.assertTrue('No findings found.' in text)
