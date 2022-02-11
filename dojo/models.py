@@ -1281,7 +1281,7 @@ class Endpoint(models.Model):
 
     def clean(self):
         errors = []
-        null_char_list = ["0x00", "%00", "\x00"]
+        null_char_list = ["0x00", "\x00"]
         db_type = connection.vendor
         if self.protocol or self.protocol == '':
             if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.protocol):  # https://tools.ietf.org/html/rfc3986#section-3.1
@@ -1319,9 +1319,9 @@ class Endpoint(models.Model):
             if any([null_char in self.path for null_char in null_char_list]):
                 old_value = self.path
                 if 'postgres' in db_type:
-                    action_string = 'Postgres does not accept NULL character. Attempting to remove...'
+                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
                     for remove_str in null_char_list:
-                        self.path = self.path.replace(remove_str, '')
+                        self.path = self.path.replace(remove_str, '%00')
                     errors.append(ValidationError('Path "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.path == '':
                 self.path = None
@@ -1332,9 +1332,9 @@ class Endpoint(models.Model):
             if any([null_char in self.query for null_char in null_char_list]):
                 old_value = self.query
                 if 'postgres' in db_type:
-                    action_string = 'Postgres does not accept NULL character. Attempting to remove...'
+                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
                     for remove_str in null_char_list:
-                        self.query = self.query.replace(remove_str, '')
+                        self.query = self.query.replace(remove_str, '%00')
                     errors.append(ValidationError('Query "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.query == '':
                 self.query = None
@@ -1345,9 +1345,9 @@ class Endpoint(models.Model):
             if any([null_char in self.fragment for null_char in null_char_list]):
                 old_value = self.fragment
                 if 'postgres' in db_type:
-                    action_string = 'Postgres does not accept NULL character. Attempting to remove...'
+                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
                     for remove_str in null_char_list:
-                        self.fragment = self.fragment.replace(remove_str, '')
+                        self.fragment = self.fragment.replace(remove_str, '%00')
                     errors.append(ValidationError('Fragment "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.fragment == '':
                 self.fragment = None
