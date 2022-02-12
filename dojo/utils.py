@@ -120,29 +120,18 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
     if enabled:
         deduplicationLogger.debug('dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
-        # TODO use test.dedupe_algo and case statement
-        if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
-            scan_type = new_finding.test.test_type.name
-            deduplicationLogger.debug('scan_type for this finding is :' + scan_type)
-            # Default algorithm
-            deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
-            # Check for an override for this scan_type in the deduplication configuration
-            if (scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
-                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[scan_type]
-            deduplicationLogger.debug('deduplication algorithm: ' + deduplicationAlgorithm)
-            if(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL):
-                deduplicate_unique_id_from_tool(new_finding)
-            elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_HASH_CODE):
-                deduplicate_hash_code(new_finding)
-            elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE):
-                deduplicate_uid_or_hash_code(new_finding)
-            else:
-                logger.debug('dedupe legacy start')
-                deduplicate_legacy(new_finding)
-                logger.debug('dedupe legacy start.done.')
+        deduplicationAlgorithm = new_finding.test.deduplication_algorithm
+        deduplicationLogger.debug('deduplication algorithm: ' + deduplicationAlgorithm)
+        if(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL):
+            deduplicate_unique_id_from_tool(new_finding)
+        elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_HASH_CODE):
+            deduplicate_hash_code(new_finding)
+        elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE):
+            deduplicate_uid_or_hash_code(new_finding)
         else:
-            deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
+            logger.debug('dedupe legacy start')
             deduplicate_legacy(new_finding)
+            logger.debug('dedupe legacy start.done.')
     else:
         deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
 

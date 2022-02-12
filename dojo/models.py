@@ -1611,14 +1611,14 @@ class Test(models.Model):
         self.engagement.risk_acceptance.add(*accepted_risks)
 
     @property
-    def dedupe_algo(self):
+    def deduplication_algorithm(self):
         deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
         if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
-            scan_type = self.test_type.name
-
-            # Check for an override for this scan_type in the deduplication configuration
-            if (scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
-                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[scan_type]
+            deduplicationLogger.debug(f'scan_type for this finding is : {self.scan_type}')
+            if (self.scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[self.scan_type]
+        else:
+            deduplicationLogger.debug('Section DEDUPLICATION_ALGORITHM_PER_PARSER not found in settings.dist.py')
 
         return deduplicationAlgorithm
 
@@ -2074,7 +2074,7 @@ class Finding(models.Model):
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Check for an override for this scan_type in the deduplication configuration
-            scan_type = self.test.test_type.name
+            scan_type = self.test.scan_type
             if (scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
                 hashcodeFieldsCandidate = settings.HASHCODE_FIELDS_PER_SCANNER[scan_type]
                 # check that the configuration is valid: all elements of HASHCODE_FIELDS_PER_SCANNER should be in HASHCODE_ALLOWED_FIELDS
