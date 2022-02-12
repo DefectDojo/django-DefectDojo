@@ -1613,13 +1613,18 @@ class Test(models.Model):
     @property
     def deduplication_algorithm(self):
         deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
+
         if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
-            deduplicationLogger.debug(f'scan_type for this finding is : {self.scan_type}')
-            if (self.scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+            if (self.test_type.name in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+                deduplicationLogger.debug(f'using DEDUPLICATION_ALGORITHM_PER_PARSER for test_type.name: {self.test_type.name}')
+                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[self.test_type.name]
+            elif (self.scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+                deduplicationLogger.debug(f'using DEDUPLICATION_ALGORITHM_PER_PARSER for scan_type: {self.scan_type}')
                 deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[self.scan_type]
         else:
             deduplicationLogger.debug('Section DEDUPLICATION_ALGORITHM_PER_PARSER not found in settings.dist.py')
 
+        deduplicationLogger.debug(f'DEDUPLICATION_ALGORITHM_PER_PARSER is: {deduplicationAlgorithm}')
         return deduplicationAlgorithm
 
     def get_absolute_url(self):
