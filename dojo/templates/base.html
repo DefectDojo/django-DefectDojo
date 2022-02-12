@@ -1,7 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
 {% load authorization_tags %}
-{% load i18n %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -767,13 +766,13 @@
                 });
 
                 if (data.length > 0) {
-                    $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "alerts" %}"><strong>{% trans "See All Alerts" %}</strong>' +
+                    $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "alerts" %}"><strong>See All Alerts</strong>' +
                                                  '<i class="fa fa-angle-right"></i></a></li>');
-                    $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>{% trans "Clear All Alerts" %} </strong>' +
+                    $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>Clear All Alerts</strong>' +
                                                '<i class="fa fa-angle-right"></i></a></li>');
                 }
                 else {
-                    $('.dropdown-alerts').append('<li class="text-center"><h3 style="padding: 15px;">{% trans "No alerts found" %}</h2></li>');
+                    $('.dropdown-alerts').append('<li class="text-center"><h3 style="padding: 15px;">No alerts found</h2></li>');
                 }
             });
             update_alertcount()
