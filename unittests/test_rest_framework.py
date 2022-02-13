@@ -446,17 +446,18 @@ class BaseClass():
             self.assertFalse('ssh' in response.data)
             self.assertFalse('api_key' in response.data)
 
-            self.assertIsInstance(response.data, list)
-            self.assertTrue(len(response.data) > 0, "Length: {}".format(len(response.data)))
+            self.assertIsInstance(response.data['results'], list)
+            self.assertTrue(len(response.data['results']) > 0, "Length: {}".format(len(response.data['results'])))
 
-            for obj in response.data:
+            for obj in response.data['results']:
                 self.assertIsInstance(obj, dict)
                 self.assertTrue(len(obj), 3)
                 self.assertIsInstance(obj['model'], str)
-                self.assertIsInstance(obj['id'], int)
+                if obj['id']:  # It needs to be None or int
+                    self.assertIsInstance(obj['id'], int)
                 self.assertIsInstance(obj['name'], str)
 
-            self.assertEqual(self.deleted_objects, len(response.data), response.content[:1000])
+            self.assertEqual(self.deleted_objects, len(response.data['results']), response.content[:1000])
 
         @skipIfNotSubclass(PrefetchRetrieveMixin)
         def test_detail_prefetch(self):
