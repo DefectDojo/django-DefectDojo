@@ -1,13 +1,12 @@
-from rest_framework.response import Response
 from django.db import DEFAULT_DB_ALIAS
 from django.contrib.admin.utils import NestedObjects
 from drf_spectacular.utils import extend_schema
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from dojo.api_v2 import serializers
 import itertools
-from rest_framework.authtoken.models import Token
 
 
 class DeletePreviewModelMixin:
@@ -42,13 +41,7 @@ class DeletePreviewModelMixin:
             for x in flatten(rels)
         ]
 
-        # next part is inspired by original implementation of ListModelMixin
         page = self.paginate_queryset(rels)
-        if page is not None:
-            serializer = serializers.DeletePreviewSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
 
-        serializer = serializers.DeletePreviewSerializer(queryset, many=True)
-
-        return Response(serializer.data,
-                        status=status.HTTP_200_OK)
+        serializer = serializers.DeletePreviewSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
