@@ -37,9 +37,9 @@ class DeletePreviewModelMixin:
             {
                 "model": type(x).__name__,
                 "id": x.id if hasattr(x, 'id') else None,
-                "name": str(x)
+                "name": str(x) if not isinstance(x, Token) else "<APITokenIsHidden>"
             }
-            for x in flatten(rels) if not isinstance(x, Token)
+            for x in flatten(rels)
         ]
 
         # next part is inspired by original implementation of ListModelMixin
