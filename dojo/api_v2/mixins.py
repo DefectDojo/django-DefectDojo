@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework import status
 from dojo.api_v2 import serializers
 import itertools
+from rest_framework.authtoken.models import Token
 
 
 class DeletePreviewModelMixin:
@@ -38,7 +39,7 @@ class DeletePreviewModelMixin:
                 "id": x.id if hasattr(x, 'id') else None,
                 "name": str(x)
             }
-            for x in flatten(rels)
+            for x in flatten(rels) if not isinstance(x, Token)
         ]
 
         # next part is inspired by original implementation of ListModelMixin
