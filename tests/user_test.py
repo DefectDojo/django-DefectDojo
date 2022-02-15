@@ -43,18 +43,6 @@ class UserTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='User added successfully.') or
             self.is_help_message_present(text='A user with that username already exists.'))
 
-    def login_standard_page(self):
-        driver = self.driver
-        driver.get(self.base_url + "login")
-        driver.find_element(By.ID, "id_username").clear()
-        driver.find_element(By.ID, "id_username").send_keys('propersahm')
-        driver.find_element(By.ID, "id_password").clear()
-        driver.find_element(By.ID, "id_password").send_keys('Def3ctD0jo&')
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
-
-        self.assertFalse(self.is_element_by_css_selector_present('.alert-danger', 'Please enter a correct username and password'))
-        return driver
-
     def enable_user_profile_writing(self):
         self.login_page()
         driver = self.driver
@@ -155,10 +143,10 @@ class UserTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "login")
         # Click on link on login screen
-        driver.find_element_by_id("reset-password").click()
+        driver.find_element(By.ID, "reset-password").click()
         # Submit "Forgot password" form
-        driver.find_element_by_id("id_email").send_keys("propersam@example.com")
-        driver.find_element_by_id("reset-password").click()
+        driver.find_element(By.ID, "id_email").send_keys("propersam@example.com")
+        driver.find_element(By.ID, "reset-password").click()
 
         self.assertTrue(self.is_text_present_on_page(text='We’ve emailed you instructions for setting your password'))
 
@@ -168,7 +156,7 @@ class UserTest(BaseTestCase):
         driver = self.driver
         self.login_standard_page()
         with self.assertRaises(NoSuchElementException):
-            driver.find_element_by_id('id_user_menu')
+            driver.find_element(By.ID, 'id_user_menu')
 
         # Login as superuser and activate view user configuration for standard user
         self.login_page()
@@ -188,10 +176,11 @@ class UserTest(BaseTestCase):
         driver.find_element(By.ID, "viewUser").click()
         # Select view user permission
         driver.find_element(By.ID, "id_view_user").click()
+        driver.find_element(By.ID, "id_view_group").click()
 
         # Login as standard user and check the user menu does exist now
         self.login_standard_page()
-        driver.find_element_by_id('id_user_menu')
+        driver.find_element(By.ID, 'id_user_menu')
         # Navigate to User Management page
         driver.get(self.base_url + "user")
         # Select the previously created user to edit
