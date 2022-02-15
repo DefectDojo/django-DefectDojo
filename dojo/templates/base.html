@@ -316,7 +316,7 @@
                             </li>
                             {% if "auth.view_user"|has_configuration_permission:"staff" or "auth.view_group"|has_configuration_permission:"staff" %}
                                 <li>
-                                    <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users">
+                                    <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users" id="id_user_menu">
                                         <i class="fa fa-user fa-fw"></i>
                                         <span>Users</span>
                                         <span class="glyphicon arrow"></span>

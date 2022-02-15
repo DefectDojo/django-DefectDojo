@@ -3,6 +3,7 @@ import sys
 
 from base_test_class import BaseTestCase
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 
 
 class UserTest(BaseTestCase):
@@ -92,9 +93,8 @@ class UserTest(BaseTestCase):
         # only the needed user is now available, proceed with opening the context menu and clicking 'Edit' button
         driver.find_element(By.ID, "dropdownMenuUser").click()
         driver.find_element(By.ID, "editUser").click()
-        # Select Superuser and Staff Permission
+        # Select Superuser Permission
         driver.find_element(By.NAME, "is_superuser").click()
-        driver.find_element(By.NAME, "is_staff").click()
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Query the site to determine if the User permission has been changed
@@ -162,6 +162,53 @@ class UserTest(BaseTestCase):
 
         self.assertTrue(self.is_text_present_on_page(text='We’ve emailed you instructions for setting your password'))
 
+    def test_user_edit_configuration(self):
+
+        # Login as standard user and check the user menu does not exist
+        driver = self.driver
+        self.login_standard_page()
+        with self.assertRaises(NoSuchElementException):
+            driver.find_element_by_id('id_user_menu')
+
+        # Login as superuser and activate view user configuration for standard user
+        self.login_page()
+        # Navigate to User Management page
+        driver.get(self.base_url + "user")
+        # Select the previously created user to edit
+        # The User name is not clickable
+        # so we would have to select specific user by filtering list of users
+        driver.find_element(By.ID, "show-filters").click()  # open d filters
+        # Insert username to filter by into user name box
+        driver.find_element(By.ID, "id_username").clear()
+        driver.find_element(By.ID, "id_username").send_keys("propersahm")
+        # click on 'apply filter' button
+        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        # only the needed user is now available, proceed with opening the context menu and clicking 'Edit' button
+        driver.find_element(By.ID, "dropdownMenuUser").click()
+        driver.find_element(By.ID, "viewUser").click()
+        # Select view user permission
+        driver.find_element(By.ID, "id_view_user").click()
+
+        # Login as standard user and check the user menu does exist now
+        self.login_standard_page()
+        driver.find_element_by_id('id_user_menu')
+        # Navigate to User Management page
+        driver.get(self.base_url + "user")
+        # Select the previously created user to edit
+        # The User name is not clickable
+        # so we would have to select specific user by filtering list of users
+        driver.find_element(By.ID, "show-filters").click()  # open d filters
+        # Insert username to filter by into user name box
+        driver.find_element(By.ID, "id_username").clear()
+        driver.find_element(By.ID, "id_username").send_keys("propersahm")
+        # click on 'apply filter' button
+        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        # only the needed user is now available, proceed with opening the context menu and clicking 'Edit' button
+        driver.find_element(By.ID, "dropdownMenuUser").click()
+        driver.find_element(By.ID, "viewUser").click()
+        # Check user cannot edit configuration permissions
+        self.assertFalse(self.driver.find_element(By.ID, 'id_add_development_environment').is_enabled())
+
 
 def suite():
     suite = unittest.TestSuite()
@@ -174,6 +221,7 @@ def suite():
     suite.addTest(UserTest('test_user_profile_form_disabled'))
     suite.addTest(UserTest('test_user_profile_form_enabled'))
     suite.addTest(UserTest('test_forgot_password'))
+    suite.addTest(UserTest('test_user_edit_configuration'))
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(UserTest('test_user_edit_permissions'))
     suite.addTest(UserTest('test_user_delete'))
