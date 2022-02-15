@@ -70,9 +70,9 @@ jobs:
           path: ${{ matrix.docker-image }}_img
           retention-days: 1
 
-  integration_tests_mysql_rabbitmq:
+  integration_tests:
     # run tests with docker-compose
-    name: mysql/rabbit
+    name: test
     needs: build
     runs-on: ubuntu-latest
     strategy:
