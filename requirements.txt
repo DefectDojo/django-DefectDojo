@@ -55,7 +55,7 @@ google-auth==2.6.0
 google-auth-oauthlib==0.4.6
 drf_yasg==1.20.0
 cpe==1.2.1
-packageurl-python==0.9.7
+packageurl-python==0.9.8.1
 django-crum==0.7.9
 JSON-log-formatter==0.5.1
 django-split-settings==1.1.0
