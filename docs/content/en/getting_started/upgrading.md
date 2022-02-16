@@ -61,6 +61,14 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.8.x.
+
+The flexible permissions for the configuration of DefectDojo are now active by default. With this, the flag **Staff** for users is not relevant and not visible anymore. The old behaviour can still be activated by setting the parameter `FEATURE_CONFIGURATION_AUTHORIZATION` to `False`. If you haven't done so with the previous release, you can still run a migration script with `./manage.py migrate staff_users`. This script:
+
+* creates a group for all staff users,
+* sets all configuration permissions that staff users had and
+* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to `True`.
+
 ## Upgrading to DefectDojo Version 2.7.x.
 
 This release is a breaking change regarding the Choctaw Hog parser. As the maintainers of this project unified multiple parsers under the RustyHog parser, we now support the parsing of Choctaw Hog JSON output files through the Rusty Hog parser. Furthermore, we also support Gottingen Hog and Essex Hog JSON output files with the RustyHog parser.
@@ -75,7 +83,7 @@ To support the transition for these 2 changes, you can run a migration script wi
 
 * creates a group for all staff users,
 * sets all configuration permissions that staff users had and
-* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to True.
+* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to `True`.
 
 ## Upgrading to DefectDojo Version 2.6.x.
 
