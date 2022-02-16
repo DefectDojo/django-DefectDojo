@@ -207,7 +207,7 @@ env = environ.Env(
     # The number fo findings to be processed per celeryworker
     DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE=(int, 100),
     # Feature toggle for new authorization for configurations
-    DD_FEATURE_CONFIGURATION_AUTHORIZATION=(bool, False),
+    DD_FEATURE_CONFIGURATION_AUTHORIZATION=(bool, True),
 )
 
 
