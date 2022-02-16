@@ -38,9 +38,9 @@ The generic upgrade method for docker-compose follows these steps:
     ```
 
 -   Go to the directory where your docker-compose.yml file lives
--   Stop DefectDojo: `docker-compose stop`
+-   Stop DefectDojo: `./dc-stop.sh`
 -   Re-start DefectDojo, allowing for container recreation:
-    `docker-compose up -d`
+    `./dc-up-d.sh`
 -   Database migrations will be run automatically by the initializer.
     Check the output via `docker-compose logs initializer` or relevant k8s command
 -   If you have the initializer disabled (or if you want to be on the
@@ -62,6 +62,8 @@ godojo installations
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
 ## Upgrading to DefectDojo Version 2.8.x.
+
+**Breaking change for Docker Compose:** Starting DefectDojo with Docker Compose now supports 2 databases (MySQL and PostgreSQL) and 2 celery brokers (RabbitMQ and Redis). To make this possible, docker-compose needs to be started with the parameters `--profile` and `--env-file`. You can get more information in [Setup via Docker Compose - Profiles](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md#setup-via-docker-compose---profiles). The profile `mysql-rabbitmq` provides the same configuration as in previous releases. With this the prerequisites have changed as well: Docker requires at least version 19.03.0 and Docker Compose 1.28.0.
 
 The flexible permissions for the configuration of DefectDojo are now active by default. With this, the flag **Staff** for users is not relevant and not visible anymore. The old behaviour can still be activated by setting the parameter `FEATURE_CONFIGURATION_AUTHORIZATION` to `False`. If you haven't done so with the previous release, you can still run a migration script with `./manage.py migrate staff_users`. This script:
 
