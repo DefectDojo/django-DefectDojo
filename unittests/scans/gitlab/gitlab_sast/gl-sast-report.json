@@ -1,0 +1,260 @@
+{
+  "version": "14.0.4",
+  "vulnerabilities": [
+    {
+      "id": "d33a2698948022ea33882499afb70ff4be3eafd1e9910c2b90951fc188b8afb4",
+      "category": "sast",
+      "message": "CPU requests should be set to ensure the sum of the resource requests of the scheduled Containers is less than the capacity of the node",
+      "description": "spec.template.spec.containers.name=appscan.resources doesn't have requests defined",
+      "cve": "",
+      "severity": "Medium",
+      "scanner": {
+        "id": "kics",
+        "name": "kics"
+      },
+      "location": {
+        "file": "deployment.yaml",
+        "start_line": 32
+      },
+      "identifiers": [
+        {
+          "type": "kics_id",
+          "name": "CPU Requests Not Set",
+          "value": "ca469dd4-c736-448f-8ac1-30a642705e0a",
+          "url": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#"
+        }
+      ]
+    },
+    {
+      "id": "820a86cc404f28d14106f28f20a46fec27adcd8ae547cdd46f3589fe6e8d77db",
+      "category": "sast",
+      "message": "Check if containers are running with low UID, which might cause conflicts with the host's user table.",
+      "description": "spec.template.spec.containers.securityContext.runAsUser is undefined",
+      "cve": "",
+      "severity": "Medium",
+      "scanner": {
+        "id": "kics",
+        "name": "kics"
+      },
+      "location": {
+        "file": "deployment.yaml",
+        "start_line": 47
+      },
+      "identifiers": [
+        {
+          "type": "kics_id",
+          "name": "Container Running With Low UID",
+          "value": "02323c00-cdc3-4fdc-a310-4f2b3e7a1660",
+          "url": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
+        }
+      ]
+    },
+    {
+      "id": "dc342ccf8780b673e694c6e08e11a7c53b0ab4e6ce063e1a9737ffb1e45d706e",
+      "category": "sast",
+      "message": "Check if containers are running with low UID, which might cause conflicts with the host's user table.",
+      "description": "spec.template.spec.securityContext.runAsUser is a low UID",
+      "cve": "",
+      "severity": "Medium",
+      "scanner": {
+        "id": "kics",
+        "name": "kics"
+      },
+      "location": {
+        "file": "deployment.yaml",
+        "start_line": 20
+      },
+      "identifiers": [
+        {
+          "type": "kics_id",
+          "name": "Container Running With Low UID",
+          "value": "02323c00-cdc3-4fdc-a310-4f2b3e7a1660",
+          "url": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
+        }
+      ]
+    },
+    {
+      "id": "d1d96aec043b51ba0e60e8c79b3bff33874eb9b43d1f7372f9ce8f94e40d107a",
+      "category": "sast",
+      "message": "Check if any resource does not configure Seccomp default profile properly",
+      "description": "'spec.template.metadata.annotations' is undefined",
+      "cve": "",
+      "severity": "Medium",
+      "scanner": {
+        "id": "kics",
+        "name": "kics"
+      },
+      "location": {
+        "file": "deployment.yaml",
+        "start_line": 15
+      },
+      "identifiers": [
+        {
+          "type": "kics_id",
+          "name": "Seccomp Profile Is Not Configured",
+          "value": "f377b83e-bd07-4f48-a591-60c82b14a78b",
+          "url": "https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp"
+        }
+      ]
+    },
+    {
+      "id": "2998949621781bec1b5b5c52d8d030252e6077b3dd5ad432ffdd61aaacd13f1a",
+      "category": "sast",
+      "message": "Namespaces like 'default', 'kube-system' or 'kube-public' should not be used",
+      "description": "metadata.namespace is undefined or null",
+      "cve": "",
+      "severity": "Medium",
+      "scanner": {
+        "id": "kics",
+        "name": "kics"
+      },
+      "location": {
+        "file": "deployment.yaml",
+        "start_line": 6
+      },
+      "identifiers": [
+        {
+          "type": "kics_id",
+          "name": "Using Unrecommended Namespace",
+          "value": "611ab018-c4aa-4ba2-b0f6-a448337509a6",
+          "url": "https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/"
+        }
+      ]
+    },
+    {
+      "id": "bf69747b8637569b6a26b008c29decc55ab981fe533a632e179a823a2c02cda5",
+      "category": "sast",
+      "message": "Namespaces like 'default', 'kube-system' or 'kube-public' should not be used",
+      "description": "metadata.namespace is undefined or null",
+      "cve": "",
+      "severity": "Medium",
+      "scanner": {
+        "id": "kics",
+        "name": "kics"
+      },
+      "location": {
+        "file": "service.yaml",
+        "start_line": 5
+      },
+      "identifiers": [
+        {
+          "type": "kics_id",
+          "name": "Using Unrecommended Namespace",
+          "value": "611ab018-c4aa-4ba2-b0f6-a448337509a6",
+          "url": "https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/"
+        }
+      ]
+    },
+    {
+      "id": "5d343882af8f052855fc0102479f7056863c674099b59428c8fc9d4408548eac",
+      "category": "sast",
+      "message": "Namespaces like 'default', 'kube-system' or 'kube-public' should not be used",
+      "description": "metadata.namespace is undefined or null",
+      "cve": "",
+      "severity": "Medium",
+      "scanner": {
+        "id": "kics",
+        "name": "kics"
+      },
+      "location": {
+        "file": "ingress.yaml",
+        "start_line": 6
+      },
+      "identifiers": [
+        {
+          "type": "kics_id",
+          "name": "Using Unrecommended Namespace",
+          "value": "611ab018-c4aa-4ba2-b0f6-a448337509a6",
+          "url": "https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/"
+        }
+      ]
+    },
+    {
+      "id": "92c69577945b4f6a7ea5266148419dfcb446b24d5b813eb2fba2254f013a45fb",
+      "category": "sast",
+      "message": "Sees if Kubernetes Drop Capabilities exists to ensure containers security context",
+      "description": "metadata.name={{appscan}}.spec.containers.name={{appscan}}.securityContext.capabilities is undefined",
+      "cve": "",
+      "severity": "Info",
+      "scanner": {
+        "id": "kics",
+        "name": "kics"
+      },
+      "location": {
+        "file": "deployment.yaml",
+        "start_line": 47
+      },
+      "identifiers": [
+        {
+          "type": "kics_id",
+          "name": "No Drop Capabilities for Containers",
+          "value": "268ca686-7fb7-4ae9-b129-955a2a89064e",
+          "url": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/"
+        }
+      ]
+    },
+    {
+      "id": "68f60cf99295a2d79c678e6227c0063f08070553c49e07e0f2732b9591cf8f2b",
+      "category": "sast",
+      "message": "Pod or Container should have a LimitRange associated",
+      "description": "metadata.name={{appscan}} does not have a 'LimitRange' associated",
+      "cve": "",
+      "severity": "Info",
+      "scanner": {
+        "id": "kics",
+        "name": "kics"
+      },
+      "location": {
+        "file": "deployment.yaml",
+        "start_line": 6
+      },
+      "identifiers": [
+        {
+          "type": "kics_id",
+          "name": "Pod or Container Without LimitRange",
+          "value": "4a20ebac-1060-4c81-95d1-1f7f620e983b",
+          "url": "https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/cpu-constraint-namespace/#create-a-limitrange-and-a-pod"
+        }
+      ]
+    },
+    {
+      "id": "b48a2fba9e88cd6f9d601ce45a7e8975fd660a4685c7e89f09b9a1e8a5ff63a4",
+      "category": "sast",
+      "message": "Pod or Container should have a ResourceQuota associated",
+      "description": "metadata.name={{appscan}} does not have a 'ResourceQuota' associated",
+      "cve": "",
+      "severity": "Info",
+      "scanner": {
+        "id": "kics",
+        "name": "kics"
+      },
+      "location": {
+        "file": "deployment.yaml",
+        "start_line": 6
+      },
+      "identifiers": [
+        {
+          "type": "kics_id",
+          "name": "Pod or Container Without ResourceQuota",
+          "value": "48a5beba-e4c0-4584-a2aa-e6894e4cf424",
+          "url": "https://kubernetes.io/docs/concepts/policy/resource-quotas/"
+        }
+      ]
+    }
+  ],
+  "scan": {
+    "scanner": {
+      "id": "kics",
+      "name": "kics",
+      "url": "https://github.com/Checkmarx/kics",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "v1.4.5"
+    },
+    "type": "sast",
+    "start_time": "2022-01-31T22:51:27",
+    "end_time": "2022-01-31T22:51:33",
+    "status": "success"
+  }
+}

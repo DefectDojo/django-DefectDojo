@@ -1,0 +1,32 @@
+{
+  "vulnerabilities": [
+    {
+      "category": "dependency_scanning",
+      "name": "Regular Expression Denial of Service",
+      "id": "123e4567-e89b-12d3-a456-426655440000",
+      "solution": "Upgrade to new versions.",
+      "scanner": {
+        "id": "gemnasium",
+        "name": "Gemnasium"
+      },
+      "identifiers": [
+        {
+          "type": "gemnasium",
+          "name": "Gemnasium-642735a5-1425-428d-8d4e-3c854885a3c9",
+          "value": "642735a5-1425-428d-8d4e-3c854885a3c9"
+        }
+      ]
+    }
+  ],
+  "remediations": [
+    {
+      "fixes": [
+        {
+          "id": "123e4567-e89b-12d3-a456-426655440000"
+        }
+      ],
+      "summary": "Upgrade to new version",
+      "diff": "ZGlmZiAtLWdpdCBhL3lhcm4ubG9jayBiL3lhcm4ubG9jawppbmRleCAwZWNjOTJmLi43ZmE0NTU0IDEwMDY0NAotLS0gYS95Y=="
+    }
+  ]
+}

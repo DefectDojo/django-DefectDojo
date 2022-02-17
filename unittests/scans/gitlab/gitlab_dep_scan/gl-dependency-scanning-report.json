@@ -1,0 +1,296 @@
+{
+  "version": "14.0.0",
+  "vulnerabilities": [
+    {
+      "id": "e8ae9b428ba889afe34eb57dd053099c30e948b87ea8e51ec57b42583cbc7605",
+      "category": "dependency_scanning",
+      "name": "Improper Input Validation",
+      "message": "Improper Input Validation in pip",
+      "description": "An issue was discovered in pip (all versions) because it installs the version with the highest version number, even if the user had intended to obtain a private package from a private index. This only affects use of the `--extra-index-url` option, and exploitation requires that the package does not already exist in the public index (and thus the attacker can put the package there with an arbitrary version number).",
+      "cve": "setup.py:pip:gemnasium:f42440cc-317f-449c-87c3-016bee39ecbe",
+      "severity": "High",
+      "solution": "Unfortunately, there is no solution available yet.",
+      "scanner": {
+        "id": "gemnasium",
+        "name": "Gemnasium"
+      },
+      "location": {
+        "file": "setup.py",
+        "dependency": {
+          "package": {
+            "name": "pip"
+          },
+          "version": "21.2.4"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "gemnasium",
+          "name": "Gemnasium-f42440cc-317f-449c-87c3-016bee39ecbe",
+          "value": "f42440cc-317f-449c-87c3-016bee39ecbe",
+          "url": "https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/pypi/pip/CVE-2018-20225.yml"
+        },
+        {
+          "type": "cve",
+          "name": "CVE-2018-20225",
+          "value": "CVE-2018-20225",
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-20225"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-20225"
+        },
+        {
+          "url": "https://pip.pypa.io/en/stable/news/"
+        }
+      ]
+    },
+    {
+      "id": "8ce39cc54d5fc0176e08995fc1e8bce26f0bc1e06a14ab0f035d7561accf54a7",
+      "category": "dependency_scanning",
+      "name": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",
+      "message": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection') in pipenv",
+      "description": "pipenv is a Python development workflow tool. Starting with and, a flaw in pipenv's parsing of requirements files allows an attacker to insert a specially crafted string inside a comment anywhere within a requirements.txt file, which will cause victims who use pipenv to install the requirements file to download dependencies from a package index server controlled by the attacker. By embedding malicious code in packages served from their malicious index server, the attacker can trigger arbitrary remote code execution (RCE) on the victims' systems. If an attacker is able to hide a malicious `--index-url` option in a requirements file that a victim installs with pipenv, the attacker can embed arbitrary malicious code in packages served from their malicious index server that will be executed on the victim's host during installation (remote code execution/RCE). When pip installs from a source distribution, any code in the setup.py is executed by the install process.",
+      "cve": "setup.py:pipenv:gemnasium:b2ab9838-0c2b-4fc8-8ecd-74fb2b7d81a3",
+      "severity": "Unknown",
+      "solution": "Upgrade to version 2022.1.8 or above.",
+      "scanner": {
+        "id": "gemnasium",
+        "name": "Gemnasium"
+      },
+      "location": {
+        "file": "setup.py",
+        "dependency": {
+          "package": {
+            "name": "pipenv"
+          },
+          "version": "2018.11.26"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "gemnasium",
+          "name": "Gemnasium-b2ab9838-0c2b-4fc8-8ecd-74fb2b7d81a3",
+          "value": "b2ab9838-0c2b-4fc8-8ecd-74fb2b7d81a3",
+          "url": "https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/pypi/pipenv/CVE-2022-21668.yml"
+        },
+        {
+          "type": "cve",
+          "name": "CVE-2022-21668",
+          "value": "CVE-2022-21668",
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-21668"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://github.com/advisories/GHSA-qc9x-gjcv-465w"
+        },
+        {
+          "url": "https://github.com/pypa/pipenv/commit/439782a8ae36c4762c88e43d5f0d8e563371b46f"
+        },
+        {
+          "url": "https://github.com/pypa/pipenv/releases/tag/v2022.1.8"
+        },
+        {
+          "url": "https://github.com/pypa/pipenv/security/advisories/GHSA-qc9x-gjcv-465w"
+        },
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2022-21668"
+        }
+      ]
+    }
+  ],
+  "remediations": [],
+  "dependency_files": [
+    {
+      "path": "setup.py",
+      "package_manager": "pip",
+      "dependencies": [
+        {
+          "package": {
+            "name": "appdirs"
+          },
+          "version": "1.4.3"
+        },
+        {
+          "package": {
+            "name": "attrs"
+          },
+          "version": "19.3.0"
+        },
+        {
+          "package": {
+            "name": "certifi"
+          },
+          "version": "2019.11.28"
+        },
+        {
+          "package": {
+            "name": "charset-normalizer"
+          },
+          "version": "2.0.11"
+        },
+        {
+          "package": {
+            "name": "click"
+          },
+          "version": "7.1.1"
+        },
+        {
+          "package": {
+            "name": "distlib"
+          },
+          "version": "0.3.0"
+        },
+        {
+          "package": {
+            "name": "filelock"
+          },
+          "version": "3.0.12"
+        },
+        {
+          "package": {
+            "name": "idna"
+          },
+          "version": "3.3"
+        },
+        {
+          "package": {
+            "name": "ijson"
+          },
+          "version": "2.5.1"
+        },
+        {
+          "package": {
+            "name": "importlib-metadata"
+          },
+          "version": "1.5.0"
+        },
+        {
+          "package": {
+            "name": "importlib-resources"
+          },
+          "version": "1.4.0"
+        },
+        {
+          "package": {
+            "name": "isort"
+          },
+          "version": "4.3.21"
+        },
+        {
+          "package": {
+            "name": "jsonschema"
+          },
+          "version": "3.1.1"
+        },
+        {
+          "package": {
+            "name": "packaging"
+          },
+          "version": "19.2"
+        },
+        {
+          "package": {
+            "name": "pip"
+          },
+          "version": "21.2.4"
+        },
+        {
+          "package": {
+            "name": "pipdeptree"
+          },
+          "version": "0.13.2"
+        },
+        {
+          "package": {
+            "name": "pipenv"
+          },
+          "version": "2018.11.26"
+        },
+        {
+          "package": {
+            "name": "pyparsing"
+          },
+          "version": "2.4.6"
+        },
+        {
+          "package": {
+            "name": "pyrsistent"
+          },
+          "version": "0.15.7"
+        },
+        {
+          "package": {
+            "name": "requests"
+          },
+          "version": "2.26.0"
+        },
+        {
+          "package": {
+            "name": "requests-toolbelt"
+          },
+          "version": "0.9.1"
+        },
+        {
+          "package": {
+            "name": "setuptools"
+          },
+          "version": "57.5.0"
+        },
+        {
+          "package": {
+            "name": "six"
+          },
+          "version": "1.14.0"
+        },
+        {
+          "package": {
+            "name": "urllib3"
+          },
+          "version": "1.26.8"
+        },
+        {
+          "package": {
+            "name": "virtualenv"
+          },
+          "version": "20.0.13"
+        },
+        {
+          "package": {
+            "name": "virtualenv-clone"
+          },
+          "version": "0.5.3"
+        },
+        {
+          "package": {
+            "name": "wheel"
+          },
+          "version": "0.37.0"
+        },
+        {
+          "package": {
+            "name": "zipp"
+          },
+          "version": "3.1.0"
+        }
+      ]
+    }
+  ],
+  "scan": {
+    "scanner": {
+      "id": "gemnasium-python",
+      "name": "gemnasium-python",
+      "url": "https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-python",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "2.19.3"
+    },
+    "type": "dependency_scanning",
+    "start_time": "2022-01-31T22:34:02",
+    "end_time": "2022-01-31T22:34:09",
+    "status": "success"
+  }
+}
