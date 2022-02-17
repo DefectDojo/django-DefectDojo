@@ -163,7 +163,7 @@ class ProductTest(BaseTestCase):
         # engagement target start and target end already have defaults
         # we can safely skip
         # Testing Lead: This can be the logged in user
-        Select(driver.find_element(By.ID, "id_lead")).select_by_visible_text('admin')
+        Select(driver.find_element(By.ID, "id_lead")).select_by_visible_text('Admin User (admin)')
         # engagement status
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
         # "Click" the Done button to Add the engagement
