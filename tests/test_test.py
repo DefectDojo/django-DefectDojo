@@ -2,7 +2,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import unittest
 import sys
-from base_test_class import BaseTestCase
+from base_test_class import BaseTestCase, on_exception_html_source_logger
 from product_test import ProductTest, WaitForPageLoad
 from selenium.webdriver.common.by import By
 
@@ -74,7 +74,7 @@ class TestUnitTest(BaseTestCase):
         # engagement target start and target end already have defaults
         # we can safely skip
         # Testing Lead: This can be the logged in user
-        Select(driver.find_element(By.ID, "id_lead")).select_by_visible_text('admin')
+        Select(driver.find_element(By.ID, "id_lead")).select_by_visible_text('Admin User (admin)')
         # engagement status
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
         # "Click" the 'Add Test' button to Add Test to engagement
@@ -224,6 +224,7 @@ class TestUnitTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Finding promoted successfully'))
 
+    @on_exception_html_source_logger
     def test_add_and_delete_stub_finding(self):
 
         self.test_add_stub_finding()
