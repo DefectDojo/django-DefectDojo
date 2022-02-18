@@ -100,7 +100,6 @@ class StackHawkParser(object):
             # Specifically, that the attributes accessed when parsing the finding will always exist.
             # See our documentation for more details on this data:
             # https://docs.stackhawk.com/workflow-integrations/webhook.html#scan-completed
-            # TODO - link to StackHawk docs in error message?
             raise Exception(" Unexpected JSON format provided. "
                             "Need help? "
                             "Check out the StackHawk Docs at "
