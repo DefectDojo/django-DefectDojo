@@ -54,7 +54,7 @@ class StackHawkParser(object):
 
     def __extract_finding(self, raw_finding, metadata: StackHawkScanMetadata, test) -> Finding:
 
-        steps_to_reproduce = 'Use a specific message link and click \'Validate\' to see the curl!\n\n'
+        steps_to_reproduce = "Use a specific message link and click 'Validate' to see the curl!\n\n"
 
         host = raw_finding['host']
         endpoints = []
@@ -89,13 +89,14 @@ class StackHawkParser(object):
 
     @staticmethod
     def __parse_json(json_output):
-        try:
-            report = json.load(json_output)
-        except:
-            raise Exception("Invalid format")
+        report = json.load(json_output)
 
         if not report['scanCompleted'] or report['service'] != 'StackHawk':
-            # TODO - link to StackHawk docs?
+            # By verifying the json data, we can now make certain assumptions.
+            # Specifically, that the attributes accessed when parsing the finding will always exist.
+            # See our documentation for more details on this data:
+            # https://docs.stackhawk.com/workflow-integrations/webhook.html#scan-completed
+            # TODO - link to StackHawk docs in error message?
             raise Exception("Unexpected JSON format provided.")
 
         return report['scanCompleted']
