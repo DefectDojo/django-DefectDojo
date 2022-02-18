@@ -1,12 +1,24 @@
 import datetime
 
-from django.test import TestCase
 from dojo.tools.stackhawk.parser import StackHawkParser
 from dojo.models import Test, Finding
+from unittests.dojo_test_case import DojoTestCase
 
 
-class TestStackHawkParser(TestCase):
+class TestStackHawkParser(DojoTestCase):
     __test_datetime = datetime.datetime(2022, 2, 16, 23, 7, 19, 575000, datetime.timezone.utc)
+
+    def test_invalid_json_format(self):
+        testfile = open("unittests/scans/stackhawk/invalid.json")
+        parser = StackHawkParser()
+        with self.assertRaises(Exception):
+            parser.get_findings(testfile, Test())
+
+    def test_parser_ensures_data_is_for_stackhawk_before_parsing(self):
+        testfile = open("unittests/scans/stackhawk/oddly_familiar_json_that_isnt_us.json")
+        parser = StackHawkParser()
+        with self.assertRaises(Exception):
+            parser.get_findings(testfile, Test())
 
     def test_stackhawk_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/stackhawk/stackhawk_zero_vul.json")
@@ -142,10 +154,10 @@ class TestStackHawkParser(TestCase):
         self.assertEqual(application_name, actual_finding.component_name)
         self.assertEqual(environment, actual_finding.component_version)
         self.assertEqual(severity, actual_finding.severity)
-        self.assertEqual(finding_url, actual_finding.description)
+        self.assertEqual("View this finding in the StackHawk platform at:\n"+finding_url, actual_finding.description)
         self.assertRegexpMatches(
             actual_finding.steps_to_reproduce,
-            "Click a specific message link and click 'Validate' to see the curl!.*"
+            "Use a specific message link and click 'Validate' to see the curl!.*"
         )
         self.assertTrue(actual_finding.active)
         self.assertTrue(actual_finding.verified)

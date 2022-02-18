@@ -54,7 +54,7 @@ class StackHawkParser(object):
 
     def __extract_finding(self, raw_finding, metadata: StackHawkScanMetadata, test) -> Finding:
 
-        steps_to_reproduce = 'Click a specific message link and click \'Validate\' to see the curl!\n\n'
+        steps_to_reproduce = 'Use a specific message link and click \'Validate\' to see the curl!\n\n'
 
         host = raw_finding['host']
         endpoints = []
@@ -69,7 +69,7 @@ class StackHawkParser(object):
             title=raw_finding['pluginName'],
             date=parse_datetime(metadata.date),
             severity=raw_finding['severity'],
-            description=raw_finding['findingURL'],
+            description="View this finding in the StackHawk platform at:\n" + raw_finding['findingURL'],
             steps_to_reproduce=steps_to_reproduce,
             active=metadata.active,
             verified=metadata.verified,
