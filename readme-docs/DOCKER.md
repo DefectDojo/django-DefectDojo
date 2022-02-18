@@ -57,6 +57,7 @@ The environment variables needed for the different profiles are prepared in file
 - `./dc-up-d.sh` - Start the docker containers in the background, it needs one of the profile names as a parameter
 - `./dc-stop.sh` - Stop the docker containers, it can take one additional parameter to be used in the stop process.
 - `./dc-down.sh` - Stop and remove the docker containers, it can take one additional parameter to be used in the stop and remove process.
+- `./dc-unittest.sh` - Utility script to aid in running a specific unit test class.  Requires a profile and test case as args.
 
 A default profile can be set with the environment variable `DD_PROFILE`. If this environment variable is set when starting the containers, the parameter for the profile needs not to be given for the start scripts .
 

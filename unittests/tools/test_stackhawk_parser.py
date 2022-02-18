@@ -136,6 +136,19 @@ class TestStackHawkParser(DojoTestCase):
             "12"
         )
 
+    def test_that_a_scan_import_updates_the_test_description(self):
+        testfile = open("unittests/scans/stackhawk/stackhawk_zero_vul.json")
+        parser = StackHawkParser()
+        test = Test()
+        parser.get_findings(testfile, test)
+        testfile.close()
+        self.assertEqual(
+            test.description,
+            'View scan details here: ' +
+            '[https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27]' +
+            '(https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27)'
+        )
+
     def __assertFindingEquals(
             self,
             actual_finding: Finding,
@@ -154,10 +167,11 @@ class TestStackHawkParser(DojoTestCase):
         self.assertEqual(application_name, actual_finding.component_name)
         self.assertEqual(environment, actual_finding.component_version)
         self.assertEqual(severity, actual_finding.severity)
-        self.assertEqual("View this finding in the StackHawk platform at:\n"+finding_url, actual_finding.description)
+        self.assertEqual("View this finding in the StackHawk platform at:\n["+finding_url+']('+finding_url+')',
+                         actual_finding.description)
         self.assertRegexpMatches(
             actual_finding.steps_to_reproduce,
-            "Use a specific message link and click 'Validate' to see the curl!.*"
+            "Use a specific message link and click 'Validate' to see the cURL!.*"
         )
         self.assertTrue(actual_finding.active)
         self.assertTrue(actual_finding.verified)

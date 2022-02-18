@@ -11,6 +11,8 @@ usage() {
   echo "  --profile -p {DOCKER_PROFILE_NAME}"
   echo "  --test-case -t {YOUR_FULLY_QUALIFIED_TEST_CASE}"
   echo
+  echo "  --help -h - prints this dialogue."
+  echo
   echo "Environment Variables:"
   echo "  DD_PROFILE={DOCKER_PROFILE_NAME}"
   echo
@@ -31,6 +33,10 @@ while [[ $# -gt 0 ]]; do
       TEST_CASE="$2"
       shift # past argument
       shift # past value
+      ;;
+    -h|--help)
+      usage
+      exit 0
       ;;
     -*|--*)
       echo "Unknown option $1"

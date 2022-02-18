@@ -22,10 +22,10 @@ class StackHawkParser(object):
     """
 
     def get_scan_types(self):
-        return ["StackHawk Scan"]
+        return ["StackHawk HawkScan"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "StackHawk Scan"
+        return "StackHawk HawkScan"
 
     def get_description_for_scan_types(self, scan_type):
         return "StackHawk webhook event can be imported in JSON format."
@@ -50,17 +50,20 @@ class StackHawkParser(object):
                     finding = self.__extract_finding(raw_finding, metadata, test)
                     findings[key] = finding
 
+        # Update the test description these scan results are linked to.
+        test.description = 'View scan details here: ' + self.__hyperlink(completed_scan['scan']['scanURL'])
+
         return list(findings.values())
 
     def __extract_finding(self, raw_finding, metadata: StackHawkScanMetadata, test) -> Finding:
 
-        steps_to_reproduce = "Use a specific message link and click 'Validate' to see the curl!\n\n"
+        steps_to_reproduce = "Use a specific message link and click 'Validate' to see the cURL!\n\n"
 
         host = raw_finding['host']
         endpoints = []
 
         for path in raw_finding['paths']:
-            steps_to_reproduce += path['pathURL'] + '\n'
+            steps_to_reproduce += '**' + path['path'] + '**\n' + self.__hyperlink(path['pathURL']) + '\n'
             endpoint = Endpoint.from_uri(host + path['path'])
             endpoints.append(endpoint)
 
@@ -69,7 +72,8 @@ class StackHawkParser(object):
             title=raw_finding['pluginName'],
             date=parse_datetime(metadata.date),
             severity=raw_finding['severity'],
-            description="View this finding in the StackHawk platform at:\n" + raw_finding['findingURL'],
+            description="View this finding in the StackHawk platform at:\n"
+                        + self.__hyperlink(raw_finding['findingURL']),
             steps_to_reproduce=steps_to_reproduce,
             active=metadata.active,
             verified=metadata.verified,
@@ -97,7 +101,11 @@ class StackHawkParser(object):
             # See our documentation for more details on this data:
             # https://docs.stackhawk.com/workflow-integrations/webhook.html#scan-completed
             # TODO - link to StackHawk docs in error message?
-            raise Exception("Unexpected JSON format provided.")
+            raise Exception(" Unexpected JSON format provided. "
+                            "Need help? "
+                            "Check out the StackHawk Docs at "
+                            "https://docs.stackhawk.com/workflow-integrations/defect-dojo.html"
+                            )
 
         return report['scanCompleted']
 
@@ -112,3 +120,7 @@ class StackHawkParser(object):
             return 1
         else:
             return 4
+
+    @staticmethod
+    def __hyperlink(link: str) -> str:
+        return '[' + link + '](' + link + ')'
