@@ -1,8 +1,8 @@
 import json
 
-from dojo.models import Finding
+from dojo.models import Finding, Endpoint
 from dojo.tools.parser_test import ParserTest
-
+from datetime import datetime
 
 class GitlabParser(object):
 
@@ -86,9 +86,10 @@ class GitlabParser(object):
     def get_item(self, vuln, scan):
 
         requested_category, sast_or_dast = self.scan_types[self.scan_type]
-        if requested_category != vuln.get('category'):
+        category = vuln.get('category')
+        if requested_category != category:
             # We are processing only if scan type which was defined in request is the same as it is in finding
-            return None
+            raise Exception(f'Incopatible scan type. Requested: {requested_category}, format in the file: {category}')
 
         # ID
         unique_id_from_tool = None
@@ -223,7 +224,7 @@ class GitlabParser(object):
         # ENDPOINT
         endpoint = None
         if "hostname" in loc:
-            endpoint = Endpoint.from_uri(host=loc['hostname'])
+            endpoint = Endpoint.from_uri(loc['hostname'])
             if "path" in loc:
                 endpoint.path = loc['path']
 
@@ -271,8 +272,7 @@ class GitlabParser(object):
         if "discovered_at" in vuln:
             finding.date = datetime.strptime(vuln["discovered_at"], "%Y-%m-%dT%H:%M:%S.%f")
         elif "end_time" in scan:
-            finding.date = datetime.strptime(scan["end_time"], "%Y-%m-%dT%H:%M:%S.%f")
-
+            finding.date = datetime.strptime(scan["end_time"], "%Y-%m-%dT%H:%M:%S")
 
         # TODO: documented fields but never used in examples:
         # vuln['details']
@@ -280,6 +280,8 @@ class GitlabParser(object):
         # vuln['flags']
         # vuln['evidence']
         # vuln['assets']
+
+        # TODO: add support for Req and Resp
 
         return finding
 
