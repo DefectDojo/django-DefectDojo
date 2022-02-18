@@ -167,7 +167,7 @@ class TestStackHawkParser(DojoTestCase):
         self.assertEqual(application_name, actual_finding.component_name)
         self.assertEqual(environment, actual_finding.component_version)
         self.assertEqual(severity, actual_finding.severity)
-        self.assertEqual("View this finding in the StackHawk platform at:\n["+finding_url+']('+finding_url+')',
+        self.assertEqual("View this finding in the StackHawk platform at:\n[" + finding_url + '](' + finding_url + ')',
                          actual_finding.description)
         self.assertRegexpMatches(
             actual_finding.steps_to_reproduce,

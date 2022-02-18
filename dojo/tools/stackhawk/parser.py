@@ -72,8 +72,8 @@ class StackHawkParser(object):
             title=raw_finding['pluginName'],
             date=parse_datetime(metadata.date),
             severity=raw_finding['severity'],
-            description="View this finding in the StackHawk platform at:\n"
-                        + self.__hyperlink(raw_finding['findingURL']),
+            description="View this finding in the StackHawk platform at:\n" +
+                        self.__hyperlink(raw_finding['findingURL']),
             steps_to_reproduce=steps_to_reproduce,
             active=metadata.active,
             verified=metadata.verified,
