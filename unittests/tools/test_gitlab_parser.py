@@ -4,6 +4,29 @@ from datetime import datetime
 from dojo.tools.gitlab.parser import GitlabParser
 
 
+class TestGitlabParser(DojoTestCase):
+
+    def test_gitlab_get_basics(self):
+        parser = GitlabParser()
+        scan_types = parser.get_scan_types()
+        self.assertEqual(8, len(scan_types))
+        self.assertEqual('GitLab SAST Report', parser.get_label_for_scan_types('GitLab SAST Report'))
+        self.assertEqual('Import GitLab SAST Report vulnerabilities in JSON format.',
+                         parser.get_description_for_scan_types('GitLab SAST Report'))
+
+    def test_gitlab_get_tests(self):
+        testfile = open("unittests/scans/gitlab/gitlab_sast/gl-sast-report-1-vuln.json")
+        parser = GitlabParser()
+        findings = parser.get_tests("GitLab SAST Report", testfile)
+        self.assertEqual(1, len(findings))
+
+    def test_gitlab_get_findings(self):
+        testfile = open("unittests/scans/gitlab/gitlab_sast/gl-sast-report-1-vuln.json")
+        parser = GitlabParser()
+        findings = parser.get_findings(testfile, Test(scan_type="GitLab SAST Report"))
+        self.assertEqual(1, len(findings))
+
+
 class TestGitlabAPIFuzzingParser(DojoTestCase):
     def test_gitlab_api_fuzzing_parser_with_no_vuln_has_no_findings(self):
         with open(

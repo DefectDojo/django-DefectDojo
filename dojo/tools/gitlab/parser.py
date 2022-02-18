@@ -20,7 +20,7 @@ class GitlabParser(object):
     findings = {}
 
     def get_scan_types(self):
-        return scan_types.keys()
+        return self.scan_types.keys()
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type
@@ -73,7 +73,7 @@ class GitlabParser(object):
 
         for vuln in tree.get('vulnerabilities', []):
             finding = self.get_item(vuln, scan)
-            if item:
+            if finding:
                 if finding.unique_id_from_tool in self.findings:
                     self.findings[finding.unique_id_from_tool].unsaved_endpoints.extend(finding.unsaved_endpoints)
                 else:
@@ -159,20 +159,15 @@ class GitlabParser(object):
         if 'raw_source_code_extract' in vuln and requested_category != 'secret_detection':
             description += 'Source code: {}\n'.format(vuln['raw_source_code_extract'])
 
-        # DATE
-        date = None
-        if "discovered_at" in vuln:
-            date = datetime.strptime(vuln["discovered_at"], "%Y-%m-%dT%H:%M:%S.%f")
-        elif "end_time" in scan:
-            date = datetime.strptime(scan["end_time"], "%Y-%m-%dT%H:%M:%S.%f")
-
         # location
         loc = vuln.get("location", {})
 
         # FILE_PATH/SAST_FILE_PATH
         file_path = loc.get("file")
 
-        # commit - not used
+        # commit
+        if "commit" in loc:
+            description += "Commit: {}\n".format(loc['commit'])
 
         # dependency
         dependency = loc.get("dependency", {})
@@ -180,7 +175,9 @@ class GitlabParser(object):
         component_version = dependency.get("version")
         # dependency[iid, direct, dependency_path] - not used
 
-        # operating_system - not used
+        # operating_system
+        if "operating_system" in loc:
+            description += "Operating system: {}\n".format(loc['operating_system'])
 
         # image
         if "image" in loc:
@@ -192,7 +189,20 @@ class GitlabParser(object):
 
         # kubernetes_resource
         if "kubernetes_resource" in loc:
-            description += "Kubernetes resource: {}\n".format(loc['kubernetes_resource'])
+            kubernetes_resource = loc['kubernetes_resource']
+            description += "Kubernetes resource:\n"
+            if "namespace" in kubernetes_resource:
+                description += "\tNamespace: {}\n".format(kubernetes_resource['namespace'])
+            if "kind" in kubernetes_resource:
+                description += "\tKind: {}\n".format(kubernetes_resource['kind'])
+            if "name" in kubernetes_resource:
+                description += "\tName: {}\n".format(kubernetes_resource['name'])
+            if "container_name" in kubernetes_resource:
+                description += "\tContainer name: {}\n".format(kubernetes_resource['container_name'])
+            if "agent_id" in kubernetes_resource:
+                description += "\tAgent id: {}\n".format(kubernetes_resource['agent_id'])
+            if "cluster_id" in kubernetes_resource:
+                description += "\tCluster id: {}\n".format(kubernetes_resource['cluster_id'])
 
         # LINE/SAST_SOURCE_LINE
         line = None
@@ -242,7 +252,6 @@ class GitlabParser(object):
                           references=references,
                           cwe=cwe,
                           cve=cve,
-                          date=date,
                           file_path=file_path,
                           component_name=component_name,
                           component_version=component_version,
@@ -257,6 +266,13 @@ class GitlabParser(object):
 
         if endpoint:
             finding.unsaved_endpoints = [endpoint]
+
+        # DATE
+        if "discovered_at" in vuln:
+            finding.date = datetime.strptime(vuln["discovered_at"], "%Y-%m-%dT%H:%M:%S.%f")
+        elif "end_time" in scan:
+            finding.date = datetime.strptime(scan["end_time"], "%Y-%m-%dT%H:%M:%S.%f")
+
 
         # TODO: documented fields but never used in examples:
         # vuln['details']
