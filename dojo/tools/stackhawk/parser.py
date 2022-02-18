@@ -1,7 +1,19 @@
-import hashlib
 import json
-from urllib.parse import urlparse
+
 from dojo.models import Endpoint, Finding
+from django.utils.dateparse import parse_datetime
+
+
+class StackHawkScanMetadata:
+    def __init__(self, completed_scan):
+        self.date = completed_scan['scan']['startedTimestamp']
+        self.component_name = completed_scan['scan']['application']
+        self.component_version = completed_scan['scan']['env']
+        self.active = True
+        self.verified = True
+        self.static_finding = False
+        self.dynamic_finding = True
+        self.service = completed_scan['scan']['application']
 
 
 class StackHawkParser(object):
@@ -16,86 +28,86 @@ class StackHawkParser(object):
         return "StackHawk Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "StackHawk report file can be imported in JSON format (option --json)."
+        return "StackHawk webhook event can be imported in JSON format."
 
-    def get_findings(self, file, test):
-        data = json.load(file)
+    def get_findings(self, json_output, test):
+        completed_scan = self.__parse_json(json_output)
 
-        dupes = dict()
-        for content in tree:
-            node = tree[content]
-            if not node['pass']:
-                title = node['name']
-                description = "**Score Description** : " + node['score_description'] + "\n\n" + \
-                            "**Result** : " + node['result'] + "\n\n" + \
-                            "**expectation** : " + node['expectation'] + "\n"
-                severity = self.get_severity(int(node['score_modifier']))
-                output = node['output']
-                try:
-                    url = output['destination']
-                    parsedUrl = urlparse(url)
-                    protocol = parsedUrl.scheme
-                    query = parsedUrl.query
-                    fragment = parsedUrl.fragment
-                    path = parsedUrl.path
-                    port = ""
-                    try:
-                        host, port = parsedUrl.netloc.split(':')
-                    except:
-                        host = parsedUrl.netloc
-                except:
-                    url = None
+        metadata = StackHawkScanMetadata(completed_scan)
+        findings = self.__extract_findings(completed_scan, metadata, test)
 
-                finding = Finding(
-                    title=title,
-                    test=test,
-                    description=description,
-                    severity=severity,
+        return findings
 
-                    static_finding=False,  
-                    dynamic_finding=True,)
+    def __extract_findings(self, completed_scan, metadata: StackHawkScanMetadata, test):
+        findings = {}
 
-                # some attribute are optional
-                if 'mitigationFromTheTool' in node:
-                    finding.mitigation = node['mitigationFromTheTool']
+        if 'findings' in completed_scan:
+            raw_findings = completed_scan['findings']
 
-                # take a look at all the attributes possible in the documentation
-                # some are very usefull like
-                #  - date (DATE / date when the finding was detected)
-                #  - component_name (STRING / if the finding is liked to an external component ex: 'log4j')
-                #  - component_version (STRING / if the finding is liked to an external component ex: '1.2.13')
-                #  - file_path (STRING / if the finding is liked to a specfic file ex: 'src/foo.c')
-                #  - line (INTEGER / if the finding is liked to an specific file ex: 23)
+            for raw_finding in raw_findings:
+                key = raw_finding['pluginId']
+                if key not in findings:
+                    finding = self.__extract_finding(raw_finding, metadata, test)
+                    findings[key] = finding
 
-                # manage endpoint
-                finding.unsaved_endpoints = list()
-                if url is not None:
-                    finding.unsaved_endpoints.append(Endpoint(
-                            host=host, port=port,
-                            path=path,
-                            protocol=protocol,
-                            query=query, fragment=fragment))
+        return list(findings.values())
 
-                # internal de-duplication
-                dupe_key = hashlib.sha256(str(description + title).encode('utf-8')).hexdigest()
-                if dupe_key in dupes:
-                    find = dupes[dupe_key]
-                    if finding.description:
-                        find.description += "\n" + finding.description
-                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
-                    dupes[dupe_key] = find
-                else:
-                    dupes[dupe_key] = finding
+    def __extract_finding(self, raw_finding, metadata: StackHawkScanMetadata, test) -> Finding:
 
-        return list(dupes.values())
+        steps_to_reproduce = 'Click a specific message link and click \'Validate\' to see the curl!\n\n'
 
-    def convert_severity(self, num_severity):
+        host = raw_finding['host']
+        endpoints = []
+
+        for path in raw_finding['paths']:
+            steps_to_reproduce += path['pathURL'] + '\n'
+            endpoint = Endpoint.from_uri(host + path['path'])
+            endpoints.append(endpoint)
+
+        finding = Finding(
+            test=test,
+            title=raw_finding['pluginName'],
+            date=parse_datetime(metadata.date),
+            severity=raw_finding['severity'],
+            description=raw_finding['findingURL'],
+            steps_to_reproduce=steps_to_reproduce,
+            active=metadata.active,
+            verified=metadata.verified,
+            numerical_severity=self.__convert_severity(raw_finding['severity']),
+            component_name=metadata.component_name,
+            component_version=metadata.component_version,
+            static_finding=metadata.static_finding,
+            dynamic_finding=metadata.dynamic_finding,
+            unique_id_from_tool=raw_finding['pluginId'],
+            vuln_id_from_tool=raw_finding['pluginId'],
+            nb_occurences=raw_finding['totalCount'],
+            service=metadata.service
+        )
+
+        finding.unsaved_endpoints.extend(endpoints)
+        return finding
+
+    @staticmethod
+    def __parse_json(json_output):
+        try:
+            report = json.load(json_output)
+        except:
+            raise Exception("Invalid format")
+
+        if not report['scanCompleted'] or report['service'] != 'StackHawk':
+            # TODO - link to StackHawk docs?
+            raise Exception("Unexpected JSON format provided.")
+
+        return report['scanCompleted']
+
+    @staticmethod
+    def __convert_severity(severity):
         """Convert severity value"""
-        if num_severity >= -10:
-            return "Low"
-        elif -11 >= num_severity > -26:
-            return "Medium"
-        elif num_severity <= -26:
-            return "High"
+        if severity == 'Low':
+            return 3
+        elif severity == 'Medium':
+            return 2
+        elif severity == 'High':
+            return 1
         else:
-            return "Info"
+            return 4
