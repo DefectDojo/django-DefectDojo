@@ -26,6 +26,13 @@ class TestGitlabParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test(scan_type="GitLab SAST Report"))
         self.assertEqual(1, len(findings))
 
+    def test_gitlab_scan_type_mismatch(self):
+        testfile = open("unittests/scans/gitlab/gitlab_sast/gl-sast-report-1-vuln.json")
+        parser = GitlabParser()
+        with self.assertRaises(Exception) as context:
+            parser.get_findings(testfile, Test(scan_type="GitLab DAST Report"))
+        self.assertTrue('Incopatible scan type. Requested: "dast", format in the file: "sast"' in str(context.exception))
+
 
 class TestGitlabAPIFuzzingParser(DojoTestCase):
     def test_gitlab_api_fuzzing_parser_with_no_vuln_has_no_findings(self):

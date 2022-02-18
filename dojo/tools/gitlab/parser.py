@@ -89,7 +89,7 @@ class GitlabParser(object):
         category = vuln.get('category')
         if requested_category != category:
             # We are processing only if scan type which was defined in request is the same as it is in finding
-            raise Exception(f'Incopatible scan type. Requested: {requested_category}, format in the file: {category}')
+            raise Exception(f'Incopatible scan type. Requested: "{requested_category}", format in the file: "{category}"')
 
         # ID
         unique_id_from_tool = None
