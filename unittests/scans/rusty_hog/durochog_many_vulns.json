@@ -1,0 +1,1530 @@
+[
+    {
+       "stringsFound":[
+          "password = retrievePassword()"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":68622,
+       "diff":"val password = retrievePassword()"
+    },
+    {
+       "stringsFound":[
+          "Password=attackerPassword&quot"
+       ],
+       "path":"/scan_folder/unittests/scans/acunetix/XML_http_example_co_id_.xml",
+       "reason":"Password (Password)",
+       "linenum":531,
+       "diff":"                <DetailedInformation><![CDATA[During a CSRF attack, the browser is tricked into sending HTTP requests to the web application as intended by the attacker. This could include submitting forms to alter various forms of data.<br/><br/>  Upon sending an HTTP request (legitimate or otherwise), the victim's browser will include the Cookie header. Cookies are typically used to store a user's session identifier in order to prevent the user from authenticating for each request, which would obviously be impractical.<br/><br/>  To such an extent, if the victim's authentication session is stored in a Cookie, and is still valid (a browser window/tab does not necessarily need to be open), if the application is vulnerable to CSRF, an attacker can leverage CSRF to launch any desired requests against the website, without the website being able to distinguish whether the requests are legitimate or not.<br/><br/>   <h5>CSRF in GET requests</h5> The following is a simple example of how CSRF can be abused in GET requests through the use of the <code>&lt;img&gt;</code> tag.<br/>  <pre> &lt;img src=&quot;http://example.com/changePassword/?newPassword=attackerPassword&quot;&gt; </pre><br/>   The above is a CSRF attack using an HTTP GET request. If a victim visits a web page controlled by an attacker with the following payload, the browser will send a request containing the Cookie to the attacker crafted URL.<br/><br/>   <h5>CSRF in GET requests</h5> GET requests, however are not the only HTTP method an attacker can abuse. POST requests are equally susceptible to CSRF, however, an attacker will need to make use of a little bit of JavaScript to submit the POST request.<br/><br/>  The following is a simple example of how CSRF can be abused POST requests through the use of an <code>&lt;iframe&gt;</code> tag. This code would be loaded in an iFrame which is made invisible to the victim.<br/><br/>  <strong>iFrame</strong> <pre> &lt;iframe src=&quot;http://attacker.com/csrfAttack&quot; style=&quot;width:0;height:0;border:0;border:none;&quot;&gt;&lt;/iframe&gt; </pre>  <strong>iFrame Contents</strong> <pre> &lt;body onload=&quot;document.getElementById('csrf').submit()&quot;&gt;   &lt;form id=&quot;csrf&quot; action=&quot;http://example.com/changePassword&quot; method=&quot;POST&quot;&gt;     &lt;input name=&quot;newPassword&quot; value=&quot;attackerPassword&quot; /&gt;   &lt;/form&gt; &lt;/body&gt; </pre>]]></DetailedInformation>\r"
+    },
+    {
+       "stringsFound":[
+          "password = getEncryptedPass()"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":7712,
+       "diff":"$password = getEncryptedPass();"
+    },
+    {
+       "stringsFound":[
+          "password=\" "
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-single-finding.html",
+       "reason":"password (Password)",
+       "linenum":3738,
+       "diff":"        \"user=\" + uname + \"&amp;password=\" + password);"
+    },
+    {
+       "stringsFound":[
+          "pass = '\" . $pass . \"'\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"pass (Password)",
+       "linenum":1052,
+       "diff":"    $query = \"SELECT * FROM users WHERE login = '\" . $login . \"' AND pass = '\" . $pass . \"'\"; // Unsafe"
+    },
+    {
+       "stringsFound":[
+          "password: \"\""
+       ],
+       "path":"/scan_folder/helm/defectdojo/values.yaml",
+       "reason":"password (Password)",
+       "linenum":274,
+       "diff":"    password: \"\""
+    },
+    {
+       "stringsFound":[
+          "pass = '\" "
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"pass (Password)",
+       "linenum":524,
+       "diff":"  String query = \"SELECT * FROM users WHERE user = '\" + user + \"' AND pass = '\" + pass + \"'\"; // Unsafe"
+    },
+    {
+       "stringsFound":[
+          "password = '",
+          "password = '"
+       ],
+       "path":"/scan_folder/dojo/fixtures/defect_dojo_sample_data.json",
+       "reason":"password (Password)",
+       "linenum":20014,
+       "diff":"        \"description\": \"**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.1 - Injection flaws - particularly SQL injection,OWASP Top 10 2013;A1-Injection\\n**Language:** Java\\n**Group:** Java High Risk\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=346](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=346)\\n\\n**Line Number:** 7\\n**Column:** 399\\n**Source Object:** \\\"\\\"password1\\\"\\\"\\n**Number:** 7\\n**Code:** String password1 = (String) request.getParameter(\\\"password1\\\");\\n-----\\n**Line Number:** 7\\n**Column:** 398\\n**Source Object:** getParameter\\n**Number:** 7\\n**Code:** String password1 = (String) request.getParameter(\\\"password1\\\");\\n-----\\n**Line Number:** 22\\n**Column:** 383\\n**Source Object:** password1\\n**Number:** 22\\n**Code:** } else if (password1 == null || password1.length() < 5) {\\n-----\\n**Line Number:** 25\\n**Column:** 362\\n**Source Object:** password1\\n**Number:** 25\\n**Code:** } else if (password1.equals(password2)) {\\n-----\\n**Line Number:** 30\\n**Column:** 450\\n**Source Object:** password1\\n**Number:** 30\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password1 + \\\"')\\\");\\n-----\\n**Line Number:** 30\\n**Column:** 375\\n**Source Object:** executeQuery\\n**Number:** 30\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password1 + \\\"')\\\");\\n-----\\n\",\r"
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":14289,
+       "diff":"                    \"text\" : \"    if request.method == 'POST':\\n\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        #email = request.form.get('password')\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password = '\" "
+       ],
+       "path":"/scan_folder/tests/dedupe_scans/multiple_findings_line_changed.xml",
+       "reason":"password (Password)",
+       "linenum":126,
+       "diff":"              <Code>        PreparedStatement statement = connection.prepareStatement(\"select password from \" + USERS_TABLE_NAME + \" where userid = '\" + username_login + \"' and password = '\" + password_login + \"'\");</Code>\r"
+    },
+    {
+       "stringsFound":[
+          "password=test&SUBMIT=Go!"
+       ],
+       "path":"/scan_folder/unittests/scans/contrast/contrast-node-goat.csv",
+       "reason":"password (Password)",
+       "linenum":26,
+       "diff":"\"XML External Entity Injection (XXE) from \"\"password\"\" Parameter on \"\"/WebGoat/attack\"\" page\",7EU2-8T42-AC29-9TYQ,Input Validation,xxe,High,Reported,8,1524500715122,1524516240000,WebgoatMaster,ef60f389-35c6-40b4-9cb9-fc2205963208,,http://cwe.mitre.org/data/definitions/611.html,POST,0,http,1.0,/WebGoat/attack,Screen=1329550039&menu=1900,password=test&SUBMIT=Go!"
+    },
+    {
+       "stringsFound":[
+          "Password=\" "
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-single-finding.html",
+       "reason":"Password (Password)",
+       "linenum":571,
+       "diff":"    ds.Filter = \"(&amp;(uid=\" + user + \")(userPassword=\" + pass + \"))\"; // Now safe"
+    },
+    {
+       "stringsFound":[
+          "password=None)"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":9315,
+       "diff":"                    \"text\" : \"\\n\\ndef keygen(username, password=None):\\n\\n    if password:\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "pass = request.getParameter(\"p"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-single-finding.html",
+       "reason":"pass (Password)",
+       "linenum":5011,
+       "diff":"  String pass = request.getParameter(\"pass\");"
+    },
+    {
+       "stringsFound":[
+          "password: 'POST'\","
+       ],
+       "path":"/scan_folder/unittests/scans/bandit/dd2.json",
+       "reason":"password (Password)",
+       "linenum":7810,
+       "diff":"      \"issue_text\": \"Possible hardcoded password: 'POST'\","
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":8266,
+       "diff":"                    \"text\" : \"    if request.method == 'POST':\\n\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        otp = request.form.get('otp')\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password: 'Pass'\","
+       ],
+       "path":"/scan_folder/unittests/scans/bandit/many_vulns.json",
+       "reason":"password (Password)",
+       "linenum":6809,
+       "diff":"      \"issue_text\": \"Possible hardcoded password: 'Pass'\","
+    },
+    {
+       "stringsFound":[
+          "pass = false"
+       ],
+       "path":"/scan_folder/unittests/scans/ibm_app/testfire.xml",
+       "reason":"pass (Password)",
+       "linenum":4423,
+       "diff":"      $pass = false;\r"
+    },
+    {
+       "stringsFound":[
+          "password = '\" "
+       ],
+       "path":"/scan_folder/tests/dedupe_scans/multiple_findings.xml",
+       "reason":"password (Password)",
+       "linenum":47,
+       "diff":"              <Code>        PreparedStatement statement = connection.prepareStatement(\"select password from \" + USERS_TABLE_NAME + \" where userid = '\" + username_login + \"' and password = '\" + password_login + \"'\");</Code>\r"
+    },
+    {
+       "stringsFound":[
+          "password=$"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"password (Password)",
+       "linenum":6784,
+       "diff":"val params = \"password=${retrievePassword()}\""
+    },
+    {
+       "stringsFound":[
+          "password = '"
+       ],
+       "path":"/scan_folder/dojo/fixtures/defect_dojo_sample_data.json",
+       "reason":"password (Password)",
+       "linenum":18452,
+       "diff":"        \"description\": \"**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=170](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=170)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=171](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=171)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=172](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=172)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=173](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=173)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=174](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=174)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=175](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=175)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=176](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=176)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=177](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=177)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=178](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=178)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=179](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=179)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=180](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=180)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=181](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=181)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=182](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=182)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=183](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=183)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=184](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=184)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=185](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=185)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=186](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=186)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=187](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=187)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=188](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=188)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=189](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=189)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=190](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=190)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=191](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=191)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=192](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=192)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=193](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=193)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=194](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=194)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=195](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=195)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=196](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=196)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=197](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=197)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=198](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=198)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=199](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=199)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=200](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=200)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=201](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=201)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=202](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=202)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=203](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=203)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=204](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=204)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=205](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=205)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=206](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=206)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=207](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=207)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=208](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=208)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=209](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=209)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=210](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=210)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=211](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=211)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=212](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=212)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=213](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=213)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=214](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=214)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=215](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=215)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=216](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=216)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=217](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=217)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=218](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=218)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=219](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=219)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=220](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=220)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=221](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=221)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=222](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=222)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=223](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=223)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=224](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=224)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=225](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=225)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=226](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=226)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=227](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=227)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=228](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=228)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=229](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=229)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=230](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=230)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=231](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=231)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=232](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=232)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=233](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=233)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=234](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=234)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=235](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=235)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=236](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=236)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=237](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=237)\\n\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=238](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=238)\\n\\n**Line Number:** 15\\n**Column:** 374\\n**Source Object:** executeQuery\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n\",\r"
+    },
+    {
+       "stringsFound":[
+          "-p /etc/nginx/ssl && "
+       ],
+       "path":"/scan_folder/Dockerfile.nginx",
+       "reason":"-p (Password)",
+       "linenum":86,
+       "diff":"  mkdir -p /etc/nginx/ssl && \\"
+    },
+    {
+       "stringsFound":[
+          "password: 'POST'\","
+       ],
+       "path":"/scan_folder/unittests/scans/bandit/many_vulns.json",
+       "reason":"password (Password)",
+       "linenum":6837,
+       "diff":"      \"issue_text\": \"Possible hardcoded password: 'POST'\","
+    },
+    {
+       "stringsFound":[
+          "password = forms.CharField(widget="
+       ],
+       "path":"/scan_folder/dojo/forms.py",
+       "reason":"password (Password)",
+       "linenum":2048,
+       "diff":"    password = forms.CharField(widget=forms.PasswordInput, required=True)"
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":12037,
+       "diff":"                    \"text\" : \"\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        otp = request.form.get('otp')\\n\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password = '"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":11700,
+       "diff":"                    \"text\" : \"    c = conn.cursor()\\n\\n    user = c.execute(\\\"SELECT * FROM users WHERE username = '{}' and password = '{}'\\\".format(username, password)).fetchone()\\n\\n    if user:\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password = '\" "
+       ],
+       "path":"/scan_folder/unittests/scans/checkmarx/multiple_findings_line_changed.xml",
+       "reason":"password (Password)",
+       "linenum":141,
+       "diff":"              <Code>        PreparedStatement statement = connection.prepareStatement(\"select password from \" + USERS_TABLE_NAME + \" where userid = '\" + username_login + \"' and password = '\" + password_login + \"'\");</Code>\r"
+    },
+    {
+       "stringsFound":[
+          "pass = $"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"pass (Password)",
+       "linenum":1081,
+       "diff":"    $pass = $_POST[ 'pass' ];"
+    },
+    {
+       "stringsFound":[
+          "password=$"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar.html",
+       "reason":"password (Password)",
+       "linenum":11087,
+       "diff":"val params = \"password=${retrievePassword()}\""
+    },
+    {
+       "stringsFound":[
+          "-p /path/to/program "
+       ],
+       "path":"/scan_folder/unittests/scans/jfrog_xray_unified/very_many_vulns.json",
+       "reason":"-p (Password)",
+       "linenum":454873,
+       "diff":"\t\"description\": \"DOCUMENTATION: It was discovered that when executing `ldd` on a malicious file, it is possible to execute code because of the way libraries are loaded into the process memory. An attacker may trick a victim user into running `ldd` on malicious files, thus executing code with their privileges.            STATEMENT: `ldd` is not intended to be executed on untrusted binaries, so a user should be very careful on what he runs `ldd` on.            MITIGATION: Use `objdump -p /path/to/program | grep NEEDED` instead of `ldd` when you want to get the library dependencies of an untrusted executable. However this just returns the direct dependencies of the program, so it should be manually run against all the needed libraries to get the entire dependency tree as `ldd` does.\","
+    },
+    {
+       "stringsFound":[
+          "password: pass, database"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":27633,
+       "diff":"const pgcon = new pg.Client({ host: host, user: user, password: pass, database: db });"
+    },
+    {
+       "stringsFound":[
+          "pass = true"
+       ],
+       "path":"/scan_folder/unittests/scans/ibm_app/testfire.xml",
+       "reason":"pass (Password)",
+       "linenum":4425,
+       "diff":"          $pass = true;\r"
+    },
+    {
+       "stringsFound":[
+          "password=ZAP&amp"
+       ],
+       "path":"/scan_folder/unittests/scans/zap/dvwa_baseline_dojo.xml",
+       "reason":"password (Password)",
+       "linenum":586,
+       "diff":"  <uri>http://172.17.0.2/vulnerabilities/brute/?Login=Login&amp;password=ZAP&amp;username=ZAP</uri>\r"
+    },
+    {
+       "stringsFound":[
+          "password | b64enc "
+       ],
+       "path":"/scan_folder/helm/defectdojo/templates/secret.yaml",
+       "reason":"password (Password)",
+       "linenum":19,
+       "diff":"  DD_ADMIN_PASSWORD: {{ .Values.admin.password | b64enc | quote }}"
+    },
+    {
+       "stringsFound":[
+          "password=123&"
+       ],
+       "path":"/scan_folder/unittests/scans/immuniweb/ImmuniWeb-multiple-vuln.xml",
+       "reason":"password (Password)",
+       "linenum":192,
+       "diff":"userName=nosuchusername&password=123&_csrf=]]></PoC>\r"
+    },
+    {
+       "stringsFound":[
+          "password = \"xxxx\" // Noncompliant"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"password (Password)",
+       "linenum":6779,
+       "diff":"val password = \"xxxx\" // Noncompliant"
+    },
+    {
+       "stringsFound":[
+          "password = '"
+       ],
+       "path":"/scan_folder/dojo/fixtures/defect_dojo_sample_data.json",
+       "reason":"password (Password)",
+       "linenum":3101,
+       "diff":"        \"changes\": \"{\\\"original_finding\\\": [\\\"None\\\", \\\"dojo.Finding.None\\\"], \\\"finding\\\": [\\\"None\\\", \\\"dojo.Cred_Mapping.None\\\"], \\\"title\\\": [\\\"None\\\", \\\"Improper Resource Access Authorization (login.jsp)\\\"], \\\"date\\\": [\\\"None\\\", \\\"2016-08-29\\\"], \\\"cwe\\\": [\\\"None\\\", \\\"285\\\"], \\\"url\\\": [\\\"None\\\", \\\"N/A\\\"], \\\"severity\\\": [\\\"None\\\", \\\"Low\\\"], \\\"description\\\": [\\\"None\\\", \\\"**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=170](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=170)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=171](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=171)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=172](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=172)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=173](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=173)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=174](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=174)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=175](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=175)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=176](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=176)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=177](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=177)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=178](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=178)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=179](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=179)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=180](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=180)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=181](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=181)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=182](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=182)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=183](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=183)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=184](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=184)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=185](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=185)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=186](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=186)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=187](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=187)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=188](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=188)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=189](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=189)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=190](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=190)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=191](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=191)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=192](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=192)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=193](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=193)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=194](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=194)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=195](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=195)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=196](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=196)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=197](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=197)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=198](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=198)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=199](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=199)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=200](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=200)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=201](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=201)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=202](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=202)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=203](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=203)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=204](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=204)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=205](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=205)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=206](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=206)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=207](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=207)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=208](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=208)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=209](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=209)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=210](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=210)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=211](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=211)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=212](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=212)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=213](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=213)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=214](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=214)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=215](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=215)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=216](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=216)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=217](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=217)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=218](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=218)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=219](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=219)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=220](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=220)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=221](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=221)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=222](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=222)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=223](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=223)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=224](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=224)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=225](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=225)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=226](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=226)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=227](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=227)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=228](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=228)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=229](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=229)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=230](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=230)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=231](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=231)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=232](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=232)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=233](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=233)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=234](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=234)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=235](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=235)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=236](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=236)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=237](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=237)\\\\n\\\\n**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.8 - Improper access control,OWASP Top 10 2013;A2-Broken Authentication and Session Management\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=238](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=238)\\\\n\\\\n**Line Number:** 15\\\\n**Column:** 374\\\\n**Source Object:** executeQuery\\\\n**Number:** 15\\\\n**Code:** rs = stmt.executeQuery(\\\\\\\"SELECT * FROM Users WHERE (name = '\\\\\\\" + username + \\\\\\\"' AND password = '\\\\\\\" + password + \\\\\\\"')\\\\\\\");\\\\n-----\\\\n\\\"], \\\"mitigation\\\": [\\\"None\\\", \\\"N/A\\\"], \\\"impact\\\": [\\\"None\\\", \\\"N/A\\\"], \\\"id\\\": [\\\"None\\\", \\\"118\\\"], \\\"references\\\": [\\\"None\\\", \\\"\\\"], \\\"finding_meta\\\": [\\\"None\\\", \\\"dojo.DojoMeta.None\\\"], \\\"test\\\": [\\\"None\\\", \\\"Checkmarx Scan\\\"], \\\"active\\\": [\\\"None\\\", \\\"False\\\"], \\\"verified\\\": [\\\"None\\\", \\\"False\\\"], \\\"false_p\\\": [\\\"None\\\", \\\"False\\\"], \\\"duplicate\\\": [\\\"None\\\", \\\"False\\\"], \\\"out_of_scope\\\": [\\\"None\\\", \\\"False\\\"], \\\"risk_accepted\\\": [\\\"None\\\", \\\"False\\\"], \\\"under_review\\\": [\\\"None\\\", \\\"False\\\"], \\\"under_defect_review\\\": [\\\"None\\\", \\\"False\\\"], \\\"is_mitigated\\\": [\\\"None\\\", \\\"False\\\"], \\\"thread_id\\\": [\\\"None\\\", \\\"0\\\"], \\\"reporter\\\": [\\\"None\\\", \\\"admin\\\"], \\\"numerical_severity\\\": [\\\"None\\\", \\\"S3\\\"], \\\"last_reviewed\\\": [\\\"None\\\", \\\"2018-08-16 16:39:41.730000\\\"], \\\"last_reviewed_by\\\": [\\\"None\\\", \\\"admin\\\"], \\\"hash_code\\\": [\\\"None\\\", \\\"70d68584520c7bc1b47ca45fc75b42460659a52957a10fe2a99858c32b329ae1\\\"], \\\"line\\\": [\\\"None\\\", \\\"15\\\"], \\\"file_path\\\": [\\\"None\\\", \\\"/root/login.jsp\\\"], \\\"static_finding\\\": [\\\"None\\\", \\\"True\\\"], \\\"dynamic_finding\\\": [\\\"None\\\", \\\"False\\\"], \\\"created\\\": [\\\"None\\\", \\\"2018-08-16 16:39:41.734000\\\"], \\\"status_finding\\\": [\\\"None\\\", \\\"dojo.Endpoint_Status.None\\\"]}\",\r"
+    },
+    {
+       "stringsFound":[
+          "password=secret),address=(host=my",
+          "password=secret)/db\")"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":29888,
+       "diff":"DriverManager.getConnection(\"jdbc:mysql://address=(host=myhost1)(port=1111)(key1=value1)(user=sandy)(password=secret),address=(host=myhost2)(port=2222)(key2=value2)(user=sandy)(password=secret)/db\");"
+    },
+    {
+       "stringsFound":[
+          "Password:&nbsp",
+          "Password: admin123456 --"
+       ],
+       "path":"/scan_folder/unittests/scans/acunetix360/acunetix360_many_findings.json",
+       "reason":"Password (Password)",
+       "linenum":66,
+       "diff":"        \"Content\": \"HTTP/1.1 200 OK\\r\\nSet-Cookie: PHPSESSID=e52a07f0fe53c0294ae211bc4481332d; path=/\\r\\nServer: Apache/2.2.8 (Win32) PHP/5.2.6\\r\\nContent-Length: 3061\\r\\nX-Powered-By: PHP/5.2.6\\r\\nPragma: no-cache\\r\\nExpires: Thu, 19 Nov 1981 08:52:00 GMT\\r\\nKeep-Alive: timeout=5, max=150\\r\\nConnection: Keep-Alive\\r\\nContent-Type: text/html\\r\\nDate: Thu, 24 Jun 2021 22:49:36 GMT\\r\\nCache-Control: no-store, must-revalidate, no-cache, post-check=0, pre-check=0\\r\\n\\r\\n\\n<!DOCTYPE html PUBLIC \\\"-//W3C//DTD XHTML 1.0 Strict//EN\\\" \\\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\\\">\\n<html xmlns=\\\"http://www.w3.org/1999/xhtml\\\">\\n<head>\\n<meta name=\\\"keywords\\\" content=\\\"\\\" />\\n<meta name=\\\"description\\\" content=\\\"\\\" />\\n<meta http-equiv=\\\"content-type\\\" content=\\\"text/html; charset=utf-8\\\" />\\n<title>Acunetix Test Web Site -  PHP</title>\\n<link href=\\\"style.css\\\" rel=\\\"stylesheet\\\" type=\\\"text/css\\\" media=\\\"screen\\\" />\\n</head><body>\\n<div id=\\\"wrapper\\\">\\n        \\n\\t<div id=\\\"menu\\\">\\n\\t\\t<ul>\\n\\t\\t\\t<li><a href=\\\"/process.php?file=Generics/index.nsp\\\">Home</a></li>\\n\\t\\t\\t<li><a href=\\\"/hello.php?name=Visitor\\\">Hello</a></li>\\n\\t\\t\\t<li><a href=\\\"/products.php?pro=url\\\">Products</a></li>\\n\\t\\t\\t<li><a href=\\\"/process.php?file=Generics/about.nsp\\\">About</a></li>\\n\\t\\t\\t<li><a href=\\\"/process.php?file=Generics/contact.nsp\\\">Contact</a></li>\\n\\t\\t\\t<li><a href=\\\"/auth/\\\">Login</a></li>\\n\\t\\t</ul>\\n\\t</div>\\n\\t<!-- end #menu -->\\n\\t<div id=\\\"header\\\">\\n\\n\\t</div>\\n\\t<!-- end #header -->\\t<div id=\\\"page\\\">\\n\\t<div id=\\\"page-bgtop\\\">\\n\\t<div id=\\\"page-bgbtm\\\">\\n\\t\\t<div id=\\\"content\\\">\\n\\t\\t\\t<div class=\\\"post\\\">\\n\\t\\t\\t\\t\\t\\t\\t\\t<h1 class=\\\"title\\\"><a href=\\\"#\\\">Login Area</a></h1>\\n\\t\\t\\t\\t\\t<p>\\n                    Enter your credentials (admin / admin123456)\\n    <br/>\\n    <form method=\\\"POST\\\" action=\\\"/auth/control.php\\\">\\n      Username: <input type=\\\"text\\\" name=\\\"username\\\"/>\\n      <br/>\\n      Password:&nbsp;&nbsp;<input type=\\\"password\\\" name=\\\"password\\\"/>\\n<!-- Test credentials -->\\n<!-- Password: admin123456 -->\\n      <br/>\\n\\t  <input type=\\\"hidden\\\" name=\\\"token\\\" value=\\\"1959\\\">\\n      <br/>\\n      <input type=\\\"submit\\\" value=\\\"SUBMIT\\\">\\n    </form>\\n                    </p>\\n\\n\\t\\t\\t\\t<div style=\\\"clear: both;\\\">&nbsp;</div>\\n\\t\\t\\t\\t<div class=\\\"entry\\\">\\n\\n\\n\\t\\t\\t\\t</div>\\n\\t\\t\\t</div>\\n\\t\\t<div style=\\\"clear: both;\\\">&nbsp;</div>\\n\\t\\t</div>\\n\\t\\t<!-- end #content -->\\n\\t        \\n\\t<div id=\\\"sidebar\\\">\\n\\t\\t\\t<ul>\\n\\t\\t\\t\\t<li>\\n\\t\\t\\t\\t\\t<div id=\\\"search\\\" >\\n\\t\\t\\t\\t\\t\\t<form method=\\\"get\\\" action=\\\"../artist.php\\\">\\n\\t\\t\\t\\t\\t\\t\\t<div>\\n\\t\\t\\t\\t\\t\\t\\t\\t<input type=\\\"text\\\" name=\\\"s\\\" id=\\\"search-text\\\" value=\\\"\\\" />\\n\\t\\t\\t\\t\\t\\t\\t\\t<input type=\\\"submit\\\" id=\\\"search-submit\\\" value=\\\"GO\\\" />\\n\\t\\t\\t\\t\\t\\t\\t</div>\\n\\t\\t\\t\\t\\t\\t</form>\\n\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t</div>\\n\\t\\t\\t\\t\\t<div style=\\\"clear: both;\\\">&nbsp;</div>\\n\\t\\t\\t\\t</li>\\n\\t\\t\\t\\t<li>\\n\\t\\t\\t\\t\\t<h2>Tags</h2>\\n\\t\\t\\t\\t\\t<p>Acunetix xss web-application-security false-positive-free automated-exploitation sql-injection local/remote-file-inclusion</p>\\n\\t\\t\\t\\t</li>\\n\\t\\t\\t\\t<li>\\n\\t\\t\\t\\t\\t<h2>Inner Pages</h2>\\n\\t\\t\\t\\t\\t<ul>\\n\\t\\t\\t\\t\\t\\t<li><a href=\\\"/artist.php?id=test\\\">Artist Search</a></li>\\n\\t\\t\\t\\t\\t\\t<li><a href=\\\"/nslookup.php\\\">Lookup Service</a></li>\\n\\t\\t\\t\\t\\t</ul>\\n\\t\\t\\t\\t</li>\\n\\t\\t\\t\\t<li>\\n\\t\\t\\t\\t\\t<h2>Links</h2>\\n\\t\\t\\t\\t\\t<ul>\\n\\t\\t\\t\\t\\t\\t<li><a href=\\\"http://aspnet.testsparker.com/\\\">Aspnet Testsparker</a></li>\\n\\t\\t\\t\\t\\t\\t<li><a href=\\\"http://aspnet.testsparker.com/administrator/\\\">Aspnet Testsparker Login</a></li>\\n\\t\\t\\t\\t\\t</ul>\\n\\t\\t\\t\\t</li>\\n\\t\\t\\t\\t<li>\\n\\n\\t\\t\\t</ul>\\n\\t\\t</div>\\t\\t<!-- end #sidebar -->\\n\\t\\t<div style=\\\"clear: both;\\\">&nbsp;</div>\\n\\t</div>\\n\\t</div>\\n\\t</div>\\n\\t<!-- end #page -->\\n</div>\\nv\\n<div id=\\\"footer\\\">\\n\\t\\t<p>Copyright (c) 2010 testsparker.com. All rights reserved. Design by <a href=\\\"http://www.freecsstemplates.org/\\\">Free CSS Templates</a>.</p>\\n\\t</div>\\t<!-- end #footer -->\\n</body>\\n</html>\\n\",\r"
+    },
+    {
+       "stringsFound":[
+          "pass = $"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"pass (Password)",
+       "linenum":3080,
+       "diff":"    $pass = $_POST[ 'pass' ];"
+    },
+    {
+       "stringsFound":[
+          "password = dojo"
+       ],
+       "path":"/scan_folder/dojo/cred/views.py",
+       "reason":"password (Password)",
+       "linenum":59,
+       "diff":"            form_copy.password = dojo_crypto_encrypt("
+    },
+    {
+       "stringsFound":[
+          "password = \"\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"password (Password)",
+       "linenum":4380,
+       "diff":"  $password = \"\";"
+    },
+    {
+       "stringsFound":[
+          "password = (String) request.getPar",
+          "password = (String) request.getPar",
+          "password = (String) request.getPar",
+          "password = '",
+          "password = '",
+          "password = '"
+       ],
+       "path":"/scan_folder/dojo/fixtures/defect_dojo_sample_data.json",
+       "reason":"password (Password)",
+       "linenum":21434,
+       "diff":"        \"description\": \"**Category:** \\n**Language:** Java\\n**Group:** Java Medium Threat\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=815](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=815)\\n\\n**Line Number:** 8\\n**Column:** 398\\n**Source Object:** \\\"\\\"password\\\"\\\"\\n**Number:** 8\\n**Code:** String password = (String) request.getParameter(\\\"password\\\");\\n-----\\n**Line Number:** 8\\n**Column:** 397\\n**Source Object:** getParameter\\n**Number:** 8\\n**Code:** String password = (String) request.getParameter(\\\"password\\\");\\n-----\\n**Line Number:** 8\\n**Column:** 357\\n**Source Object:** password\\n**Number:** 8\\n**Code:** String password = (String) request.getParameter(\\\"password\\\");\\n-----\\n**Line Number:** 15\\n**Column:** 449\\n**Source Object:** password\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 15\\n**Column:** 374\\n**Source Object:** executeQuery\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 15\\n**Column:** 352\\n**Source Object:** rs\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 16\\n**Column:** 356\\n**Source Object:** rs\\n**Number:** 16\\n**Code:** if (rs.next()) {\\n-----\\n**Line Number:** 21\\n**Column:** 374\\n**Source Object:** rs\\n**Number:** 21\\n**Code:** String userid = \\\"\\\" + rs.getInt(\\\"userid\\\");\\n-----\\n**Line Number:** 22\\n**Column:** 386\\n**Source Object:** rs\\n**Number:** 22\\n**Code:** session.setAttribute(\\\"username\\\", rs.getString(\\\"name\\\"));\\n-----\\n**Line Number:** 22\\n**Column:** 398\\n**Source Object:** getString\\n**Number:** 22\\n**Code:** session.setAttribute(\\\"username\\\", rs.getString(\\\"name\\\"));\\n-----\\n\",\r"
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":14038,
+       "diff":"              \"text\" : \"\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        otp = request.form.get('otp')\\n\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":14158,
+       "diff":"              \"text\" : \"    if request.method == 'POST':\\n\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        email = request.form.get('password')\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "pass = ?\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"pass (Password)",
+       "linenum":1083,
+       "diff":"    $query = \"SELECT * FROM users WHERE login = ? AND pass = ?\"; // Safe even if authenticate() method is still vulnerable to brute-force attack in this specific case"
+    },
+    {
+       "stringsFound":[
+          "password: \"mypassword\", // sensit"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar.html",
+       "reason":"password (Password)",
+       "linenum":57197,
+       "diff":"  password: \"mypassword\", // sensitive"
+    },
+    {
+       "stringsFound":[
+          "password: 'POST'\","
+       ],
+       "path":"/scan_folder/unittests/scans/horusec/horres3.json",
+       "reason":"password (Password)",
+       "linenum":5472,
+       "diff":"        \"details\": \"Possible hardcoded password: 'POST'\","
+    },
+    {
+       "stringsFound":[
+          "password:= \"supersecret\" // Sensi"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar.html",
+       "reason":"password (Password)",
+       "linenum":9908,
+       "diff":"  password:= \"supersecret\" // Sensitive"
+    },
+    {
+       "stringsFound":[
+          "password = (String) request.getPar",
+          "password = (String) request.getPar",
+          "password = (String) request.getPar",
+          "password = '",
+          "password = '",
+          "password = '"
+       ],
+       "path":"/scan_folder/dojo/fixtures/defect_dojo_sample_data.json",
+       "reason":"password (Password)",
+       "linenum":48420,
+       "diff":"        \"content\": \"Trust Boundary Violation (login.jsp) N/A Medium **Category:** \\n**Language:** Java\\n**Group:** Java Medium Threat\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=815](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=815)\\n\\n**Line Number:** 8\\n**Column:** 398\\n**Source Object:** \\\"\\\"password\\\"\\\"\\n**Number:** 8\\n**Code:** String password = (String) request.getParameter(\\\"password\\\");\\n-----\\n**Line Number:** 8\\n**Column:** 397\\n**Source Object:** getParameter\\n**Number:** 8\\n**Code:** String password = (String) request.getParameter(\\\"password\\\");\\n-----\\n**Line Number:** 8\\n**Column:** 357\\n**Source Object:** password\\n**Number:** 8\\n**Code:** String password = (String) request.getParameter(\\\"password\\\");\\n-----\\n**Line Number:** 15\\n**Column:** 449\\n**Source Object:** password\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 15\\n**Column:** 374\\n**Source Object:** executeQuery\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 15\\n**Column:** 352\\n**Source Object:** rs\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 16\\n**Column:** 356\\n**Source Object:** rs\\n**Number:** 16\\n**Code:** if (rs.next()) {\\n-----\\n**Line Number:** 21\\n**Column:** 374\\n**Source Object:** rs\\n**Number:** 21\\n**Code:** String userid = \\\"\\\" + rs.getInt(\\\"userid\\\");\\n-----\\n**Line Number:** 22\\n**Column:** 386\\n**Source Object:** rs\\n**Number:** 22\\n**Code:** session.setAttribute(\\\"username\\\", rs.getString(\\\"name\\\"));\\n-----\\n**Line Number:** 22\\n**Column:** 398\\n**Source Object:** getString\\n**Number:** 22\\n**Code:** session.setAttribute(\\\"username\\\", rs.getString(\\\"name\\\"));\\n-----\\n N/A N/A None None  S2 None None None None None 9ec4ce27f48767b96297ef3cb8eabba1814ea08a02801692a669540c5a7ce019 /root/login.jsp\",\r"
+    },
+    {
+       "stringsFound":[
+          "pw=="
+       ],
+       "path":"/scan_folder/components/yarn.lock",
+       "reason":"pw (Password)",
+       "linenum":199,
+       "diff":"  integrity sha512-eVdrZJ2U5ISdObkgsi0od5vIJdLwq1P1Xa/Vj/mgxkMZf14DlgobfB6nrlFi3kW4kkvKLsKk4NDqZj1MU1DCpw=="
+    },
+    {
+       "stringsFound":[
+          "Password=test&SUBMIT=Login"
+       ],
+       "path":"/scan_folder/unittests/scans/contrast/contrast-node-goat.csv",
+       "reason":"Password (Password)",
+       "linenum":36,
+       "diff":"\"Cross-Site Scripting from \"\"Password\"\" Parameter, \"\"Username\"\" Parameter on \"\"/WebGoat/attack\"\" page (lesson_content.jsp, line 37)\",L7LZ-PVF2-3NH5-XXF2,XSS,reflected-xss,High,Reported,8,1524497162004,1524497162004,WebgoatMaster,ef60f389-35c6-40b4-9cb9-fc2205963208,,http://cwe.mitre.org/data/definitions/79.html,POST,0,http,1.0,/WebGoat/attack,Screen=1036971378&menu=1200,Username=test&Password=test&SUBMIT=Login"
+    },
+    {
+       "stringsFound":[
+          "password = '\" "
+       ],
+       "path":"/scan_folder/unittests/scans/checkmarx/multiple_findings.xml",
+       "reason":"password (Password)",
+       "linenum":126,
+       "diff":"              <Code>        PreparedStatement statement = connection.prepareStatement(\"select password from \" + USERS_TABLE_NAME + \" where userid = '\" + username_login + \"' and password = '\" + password_login + \"'\");</Code>\r"
+    },
+    {
+       "stringsFound":[
+          "password=ZAP&amp"
+       ],
+       "path":"/scan_folder/unittests/scans/zap/dvwa_baseline_dojo.xml",
+       "reason":"password (Password)",
+       "linenum":515,
+       "diff":"  <uri>http://172.17.0.2/vulnerabilities/brute/?Login=Login&amp;password=ZAP&amp;username=ZAP</uri>\r"
+    },
+    {
+       "stringsFound":[
+          "password=&amp"
+       ],
+       "path":"/scan_folder/unittests/scans/nexpose/many_vulns.xml",
+       "reason":"password (Password)",
+       "linenum":7305,
+       "diff":"\t\t\t\t\t\t\t\t<test id=\"http-coldfusion-cfide-unprotected\" key=\"/CFIDE/wizards/common/utils.cfc?method=verifyldapserver&amp;vserver=localhost&amp;vport=22&amp;vstart=&amp;vusername=&amp;vpassword=&amp;returnformat=json\" status=\"not-vulnerable\">"
+    },
+    {
+       "stringsFound":[
+          "Password:&lt"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"Password (Password)",
+       "linenum":61382,
+       "diff":"    &lt;label for=\"password\"&gt;Password:&lt;/label&gt;  &lt;!-- Noncompliant --&gt;"
+    },
+    {
+       "stringsFound":[
+          "password=Password123\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"password (Password)",
+       "linenum":1472,
+       "diff":"Dim usernamePassword As String = \"user=admin&amp;password=Password123\""
+    },
+    {
+       "stringsFound":[
+          "password=\" "
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":23854,
+       "diff":"string usernamePassword2 = \"user=admin&amp;\" + \"password=\" + password; // Noncompliant"
+    },
+    {
+       "stringsFound":[
+          "password = '",
+          "password = '"
+       ],
+       "path":"/scan_folder/dojo/fixtures/defect_dojo_sample_data.json",
+       "reason":"password (Password)",
+       "linenum":4861,
+       "diff":"        \"changes\": \"{\\\"original_finding\\\": [\\\"None\\\", \\\"dojo.Finding.None\\\"], \\\"finding\\\": [\\\"None\\\", \\\"dojo.Cred_Mapping.None\\\"], \\\"title\\\": [\\\"None\\\", \\\"CGI Stored XSS (header.jsp)\\\"], \\\"date\\\": [\\\"None\\\", \\\"2016-08-29\\\"], \\\"cwe\\\": [\\\"None\\\", \\\"79\\\"], \\\"url\\\": [\\\"None\\\", \\\"N/A\\\"], \\\"severity\\\": [\\\"None\\\", \\\"Medium\\\"], \\\"description\\\": [\\\"None\\\", \\\"**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS)\\\\n**Language:** Java\\\\n**Group:** Java Medium Threat\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=753](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=753)\\\\n\\\\n**Line Number:** 15\\\\n**Column:** 374\\\\n**Source Object:** executeQuery\\\\n**Number:** 15\\\\n**Code:** rs = stmt.executeQuery(\\\\\\\"SELECT * FROM Users WHERE (name = '\\\\\\\" + username + \\\\\\\"' AND password = '\\\\\\\" + password + \\\\\\\"')\\\\\\\");\\\\n-----\\\\n**Line Number:** 15\\\\n**Column:** 352\\\\n**Source Object:** rs\\\\n**Number:** 15\\\\n**Code:** rs = stmt.executeQuery(\\\\\\\"SELECT * FROM Users WHERE (name = '\\\\\\\" + username + \\\\\\\"' AND password = '\\\\\\\" + password + \\\\\\\"')\\\\\\\");\\\\n-----\\\\n**Line Number:** 16\\\\n**Column:** 356\\\\n**Source Object:** rs\\\\n**Number:** 16\\\\n**Code:** if (rs.next()) {\\\\n-----\\\\n**Line Number:** 21\\\\n**Column:** 374\\\\n**Source Object:** rs\\\\n**Number:** 21\\\\n**Code:** String userid = \\\\\\\"\\\\\\\" + rs.getInt(\\\\\\\"userid\\\\\\\");\\\\n-----\\\\n**Line Number:** 22\\\\n**Column:** 386\\\\n**Source Object:** rs\\\\n**Number:** 22\\\\n**Code:** session.setAttribute(\\\\\\\"username\\\\\\\", rs.getString(\\\\\\\"name\\\\\\\"));\\\\n-----\\\\n**Line Number:** 22\\\\n**Column:** 398\\\\n**Source Object:** getString\\\\n**Number:** 22\\\\n**Code:** session.setAttribute(\\\\\\\"username\\\\\\\", rs.getString(\\\\\\\"name\\\\\\\"));\\\\n-----\\\\n**Line Number:** 14\\\\n**Column:** 38\\\\n**Source Object:** getAttribute\\\\n**Number:** 14\\\\n**Code:** String username = (String) session.getAttribute(\\\\\\\"username\\\\\\\");\\\\n-----\\\\n**Line Number:** 14\\\\n**Column:** 10\\\\n**Source Object:** username\\\\n**Number:** 14\\\\n**Code:** String username = (String) session.getAttribute(\\\\\\\"username\\\\\\\");\\\\n-----\\\\n**Line Number:** 29\\\\n**Column:** 52\\\\n**Source Object:** username\\\\n**Number:** 29\\\\n**Code:** out.println(\\\\\\\"User: <a href=\\\\\\\\\\\\\\\"password.jsp\\\\\\\\\\\\\\\">\\\\\\\" + username + \\\\\\\"</a>\\\\\\\");\\\\n-----\\\\n**Line Number:** 29\\\\n**Column:** 8\\\\n**Source Object:** println\\\\n**Number:** 29\\\\n**Code:** out.println(\\\\\\\"User: <a href=\\\\\\\\\\\\\\\"password.jsp\\\\\\\\\\\\\\\">\\\\\\\" + username + \\\\\\\"</a>\\\\\\\");\\\\n-----\\\\n\\\"], \\\"mitigation\\\": [\\\"None\\\", \\\"N/A\\\"], \\\"impact\\\": [\\\"None\\\", \\\"N/A\\\"], \\\"id\\\": [\\\"None\\\", \\\"228\\\"], \\\"references\\\": [\\\"None\\\", \\\"\\\"], \\\"finding_meta\\\": [\\\"None\\\", \\\"dojo.DojoMeta.None\\\"], \\\"test\\\": [\\\"None\\\", \\\"Checkmarx Scan\\\"], \\\"active\\\": [\\\"None\\\", \\\"True\\\"], \\\"verified\\\": [\\\"None\\\", \\\"True\\\"], \\\"false_p\\\": [\\\"None\\\", \\\"False\\\"], \\\"duplicate\\\": [\\\"None\\\", \\\"False\\\"], \\\"out_of_scope\\\": [\\\"None\\\", \\\"False\\\"], \\\"risk_accepted\\\": [\\\"None\\\", \\\"False\\\"], \\\"under_review\\\": [\\\"None\\\", \\\"False\\\"], \\\"under_defect_review\\\": [\\\"None\\\", \\\"False\\\"], \\\"is_mitigated\\\": [\\\"None\\\", \\\"False\\\"], \\\"thread_id\\\": [\\\"None\\\", \\\"0\\\"], \\\"reporter\\\": [\\\"None\\\", \\\"admin\\\"], \\\"numerical_severity\\\": [\\\"None\\\", \\\"S2\\\"], \\\"last_reviewed\\\": [\\\"None\\\", \\\"2018-08-16 16:41:32.910000\\\"], \\\"last_reviewed_by\\\": [\\\"None\\\", \\\"admin\\\"], \\\"hash_code\\\": [\\\"None\\\", \\\"d6251c8822044d55511b364098e264ca2113391d999c6aefe5c1cca3743e2f2d\\\"], \\\"line\\\": [\\\"None\\\", \\\"29\\\"], \\\"file_path\\\": [\\\"None\\\", \\\"/root/header.jsp\\\"], \\\"static_finding\\\": [\\\"None\\\", \\\"True\\\"], \\\"dynamic_finding\\\": [\\\"None\\\", \\\"False\\\"], \\\"created\\\": [\\\"None\\\", \\\"2018-08-16 16:41:32.913000\\\"], \\\"status_finding\\\": [\\\"None\\\", \\\"dojo.Endpoint_Status.None\\\"]}\",\r"
+    },
+    {
+       "stringsFound":[
+          "password: jeans'"
+       ],
+       "path":"/scan_folder/unittests/tools/test_rusty_hog_parser.py",
+       "reason":"password (Password)",
+       "linenum":61,
+       "diff":"        self.assertIn(\"**This string was found:** ['password: jeans']\", findings[0].description)"
+    },
+    {
+       "stringsFound":[
+          "pass = '...'"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"pass (Password)",
+       "linenum":1056,
+       "diff":"    // SELECT * FROM users WHERE user = 'foo' OR 1=1 --' AND pass = '...'"
+    },
+    {
+       "stringsFound":[
+          "pass:$"
+       ],
+       "path":"/scan_folder/readme-docs/KUBERNETES.md",
+       "reason":"pass (Password)",
+       "linenum":243,
+       "diff":"    -passin \"pass:${TLS_CERT_PASSWORD}\") \\"
+    },
+    {
+       "stringsFound":[
+          "password = '"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":11442,
+       "diff":"                    \"text\" : \"    c = conn.cursor()\\n\\n    user = c.execute(\\\"SELECT * FROM users WHERE username = '{}' and password = '{}'\\\".format(username, password)).fetchone()\\n\\n    if user:\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password = '"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":9390,
+       "diff":"                    \"text\" : \"    c = conn.cursor()\\n\\n    user = c.execute(\\\"SELECT * FROM users WHERE username = '{}' and password = '{}'\\\".format(username, password)).fetchone()\\n\\n    if user:\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password: admin\""
+       ],
+       "path":"/scan_folder/unittests/scans/rusty_hog/gottingenhog_many_vulns.json",
+       "reason":"password (Password)",
+       "linenum":40,
+       "diff":"      \"password: admin\"\r"
+    },
+    {
+       "stringsFound":[
+          "pw=,"
+       ],
+       "path":"/scan_folder/.git/objects/pack/pack-f56c6486989cb2055822c7a2da4548d616d494a1.pack",
+       "reason":"pw (Password)",
+       "linenum":105379,
+       "diff":"4\u00177\u0006]i,;Uw];_r\u001fKVR^\u0005\u001fa\u00074IN\u00158\u0005E\u0006t]+uW\u001d@Zl!Z5G}Q*_{b\u001e)@\u0004A(+~)Q\tj\u0010JX\u000e<vT\u001e\u0018@*rF~t0\u0002gF<+\u000f+t\u0015[\"`\u0002sq?Qs<AE\u0016?V\u0012x=T\u00063ts2A+\u001bu5yV7?\u0017n{o\u001f*\u000b\u00027Z(n?V-8jC&#n^pk\r[A\u0014{W\\W9\u0018]>{g\u0017ffTq}C^.$m{<uNv\u0010$\u0004i\fL\u0014pw=,rw\u0015t\u0001hnn\u0004r\u0003W\u0005IG[Q(\u0014d\u00012 \u0014B9\u00043a8\u0001($B\u0000*a\u0005\u001ab\u0011`,&pi\u0014z-\u0011){n~\u0006U\u0016N_z8\u001e{\b$~q[\u0013\u0011EVT{'@`\u001b,\u0010\u0007c\u000f(\u00184i`Pk\b._j,\u0018[a@`lOwN]Z2~{\u0002E\t]\u001fDEQyv(>"
+    },
+    {
+       "stringsFound":[
+          "-p /path/to/program "
+       ],
+       "path":"/scan_folder/unittests/scans/jfrog_xray_unified/very_many_vulns.json",
+       "reason":"-p (Password)",
+       "linenum":450552,
+       "diff":"\t\"description\": \"DOCUMENTATION: It was discovered that when executing `ldd` on a malicious file, it is possible to execute code because of the way libraries are loaded into the process memory. An attacker may trick a victim user into running `ldd` on malicious files, thus executing code with their privileges.            STATEMENT: `ldd` is not intended to be executed on untrusted binaries, so a user should be very careful on what he runs `ldd` on.            MITIGATION: Use `objdump -p /path/to/program | grep NEEDED` instead of `ldd` when you want to get the library dependencies of an untrusted executable. However this just returns the direct dependencies of the program, so it should be manually run against all the needed libraries to get the entire dependency tree as `ldd` does.\","
+    },
+    {
+       "stringsFound":[
+          "password = \"xxxx\" // Noncompliant"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":68612,
+       "diff":"val password = \"xxxx\" // Noncompliant"
+    },
+    {
+       "stringsFound":[
+          "-p or -n options of pydoc.\","
+       ],
+       "path":"/scan_folder/unittests/scans/jfrog_xray_unified/very_many_vulns.json",
+       "reason":"-p (Password)",
+       "linenum":60055,
+       "diff":"\t\"description\": \"DOCUMENTATION: There's a flaw in Python 3's pydoc. A local or adjacent attacker who discovers or is able to convince another local or adjacent user to start a pydoc server could access the server and use it to disclose sensitive information belonging to the other user that they would not normally be able to access. The highest risk of this flaw is to data confidentiality.            STATEMENT: Red Hat Quay from version 3.4 uses Python from Red Hat Enterprise Linux RPM repositories and therefore may receive an update for this issue in a future release. Earlier versions of Red Hat Quay will not receive an patch for this issue.Python 2.x.x as shipped in any Red Hat product is not affected. This flaw is out of support scope for python3 as shipped with Red Hat Enterprise Linux 7. For more information about Red Hat Enterprise Linux support scope, please see https://access.redhat.com/support/policy/updates/errata/ .            MITIGATION: Use the console (no argument needed) or HTML file (-w argument) output to generate docs rather than the HTTP server options. Put differently, do not use the -p or -n options of pydoc.\","
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":14182,
+       "diff":"              \"text\" : \"\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        email = request.form.get('password')\\n\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password: admin password &quot"
+       ],
+       "path":"/scan_folder/unittests/scans/nexpose/many_vulns.xml",
+       "reason":"password (Password)",
+       "linenum":12902,
+       "diff":"\t\t<vulnerability id=\"ssh-default-account-admin-password-admin\" title=\"Default SSH password: admin password &quot;admin&quot;\" severity=\"10\" pciSeverity=\"5\" cvssScore=\"10.0\" cvssVector=\"(AV:N/AC:L/Au:N/C:C/I:C/A:C)\" published=\"19700101T000000000\" added=\"20130115T000000000\" modified=\"20130115T000000000\">"
+    },
+    {
+       "stringsFound":[
+          "pass = 'password'"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"pass (Password)",
+       "linenum":1391,
+       "diff":"$ldappass = 'password';"
+    },
+    {
+       "stringsFound":[
+          "password == Digest"
+       ],
+       "path":"/scan_folder/unittests/scans/rubocop/one_finding.json",
+       "reason":"password (Password)",
+       "linenum":5051,
+       "diff":"                    \"message\": \"Use a guard clause (`raise \\\"Incorrect Password!\\\" unless user.password == Digest::MD5.hexdigest(password)`) instead of wrapping the code inside a conditional expression.\","
+    },
+    {
+       "stringsFound":[
+          "password = \"asdasd\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"password (Password)",
+       "linenum":6389,
+       "diff":"const password = \"asdasd\";"
+    },
+    {
+       "stringsFound":[
+          "password = models.CharField(max"
+       ],
+       "path":"/scan_folder/dojo/models.py",
+       "reason":"password (Password)",
+       "linenum":984,
+       "diff":"    password = models.CharField(max_length=600, null=True, blank=True)"
+    },
+    {
+       "stringsFound":[
+          "password: $(kubectl "
+       ],
+       "path":"/scan_folder/helm/defectdojo/templates/NOTES.txt",
+       "reason":"password (Password)",
+       "linenum":23,
+       "diff":"    echo \"DefectDojo {{ .Values.admin.user}} password: $(kubectl \\"
+    },
+    {
+       "stringsFound":[
+          "password: pass, database"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":27626,
+       "diff":"const mycon = mysql.createConnection({ host: host, user: user, password: pass, database: db });"
+    },
+    {
+       "stringsFound":[
+          "password=&amp"
+       ],
+       "path":"/scan_folder/unittests/scans/nexpose/many_vulns.xml",
+       "reason":"password (Password)",
+       "linenum":1539,
+       "diff":"\t\t\t\t\t\t\t\t<test id=\"http-coldfusion-cfide-unprotected\" key=\"/CFIDE/wizards/common/utils.cfc?method=verifyldapserver&amp;vserver=localhost&amp;vport=22&amp;vstart=&amp;vusername=&amp;vpassword=&amp;returnformat=json\" status=\"not-vulnerable\">"
+    },
+    {
+       "stringsFound":[
+          "pass=$pass"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"pass (Password)",
+       "linenum":5418,
+       "diff":"  String expression = \"/users/user[@name=$user and @pass=$pass]\";"
+    },
+    {
+       "stringsFound":[
+          "Password | b64enc "
+       ],
+       "path":"/scan_folder/helm/defectdojo/templates/secret-postgresql.yaml",
+       "reason":"Password (Password)",
+       "linenum":28,
+       "diff":"  postgresql-replication-password : {{ .Values.postgresql.postgresqlReplicationPassword | b64enc | quote }}"
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":6465,
+       "diff":"                    \"text\" : \"    if request.method == 'POST':\\n\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        otp = request.form.get('otp')\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password=hl2OAIXXZ60\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"password (Password)",
+       "linenum":6396,
+       "diff":"const url = \"https://example.com?password=hl2OAIXXZ60\";"
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":10930,
+       "diff":"                    \"text\" : \"\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        otp = request.form.get('otp')\\n\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password = 'thisisnotapassword' ",
+          "password: 'password123!'",
+          "password = 'thisisnotapassword' ",
+          "password: 'thisisnotapassword'"
+       ],
+       "path":"/scan_folder/unittests/scans/huskyci/huskyci_report_many_finding_two_tools.json",
+       "reason":"password (Password)",
+       "linenum":82,
+       "diff":"            \"cOutput\": \"{\\\"errors\\\":[],\\\"generated_at\\\":\\\"2020-06-25T15:49:29Z\\\",\\\"metrics\\\":{\\\"./main.py\\\":{\\\"CONFIDENCE.HIGH\\\":1,\\\"CONFIDENCE.LOW\\\":0,\\\"CONFIDENCE.MEDIUM\\\":2,\\\"CONFIDENCE.UNDEFINED\\\":0,\\\"SEVERITY.HIGH\\\":0,\\\"SEVERITY.LOW\\\":2,\\\"SEVERITY.MEDIUM\\\":1,\\\"SEVERITY.UNDEFINED\\\":0,\\\"loc\\\":5,\\\"nosec\\\":0},\\\"_totals\\\":{\\\"CONFIDENCE.HIGH\\\":1,\\\"CONFIDENCE.LOW\\\":0,\\\"CONFIDENCE.MEDIUM\\\":2,\\\"CONFIDENCE.UNDEFINED\\\":0,\\\"SEVERITY.HIGH\\\":0,\\\"SEVERITY.LOW\\\":2,\\\"SEVERITY.MEDIUM\\\":1,\\\"SEVERITY.UNDEFINED\\\":0,\\\"loc\\\":5,\\\"nosec\\\":0}},\\\"results\\\":[{\\\"code\\\":\\\"1 secret = 'password123!'\\\\n2 \\\\n3 password = 'thisisnotapassword' #nohusky\\\\n4 \\\\n\\\",\\\"filename\\\":\\\"./main.py\\\",\\\"issue_confidence\\\":\\\"MEDIUM\\\",\\\"issue_severity\\\":\\\"LOW\\\",\\\"issue_text\\\":\\\"Possible hardcoded password: 'password123!'\\\",\\\"line_number\\\":1,\\\"line_range\\\":[1,2],\\\"more_info\\\":\\\"https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html\\\",\\\"test_id\\\":\\\"B105\\\",\\\"test_name\\\":\\\"hardcoded_password_string\\\"},{\\\"code\\\":\\\"2 \\\\n3 password = 'thisisnotapassword' #nohusky\\\\n4 \\\\n5 command = 'print \\\\\\\"this command is not secure!!\\\\\\\"'\\\\n\\\",\\\"filename\\\":\\\"./main.py\\\",\\\"issue_confidence\\\":\\\"MEDIUM\\\",\\\"issue_severity\\\":\\\"LOW\\\",\\\"issue_text\\\":\\\"Possible hardcoded password: 'thisisnotapassword'\\\",\\\"line_number\\\":3,\\\"line_range\\\":[3,4],\\\"more_info\\\":\\\"https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html\\\",\\\"test_id\\\":\\\"B105\\\",\\\"test_name\\\":\\\"hardcoded_password_string\\\"},{\\\"code\\\":\\\"6 \\\\n7 exec(command)\\\\n8 \\\\n\\\",\\\"filename\\\":\\\"./main.py\\\",\\\"issue_confidence\\\":\\\"HIGH\\\",\\\"issue_severity\\\":\\\"MEDIUM\\\",\\\"issue_text\\\":\\\"Use of exec detected.\\\",\\\"line_number\\\":7,\\\"line_range\\\":[7],\\\"more_info\\\":\\\"https://bandit.readthedocs.io/en/latest/plugins/b102_exec_used.html\\\",\\\"test_id\\\":\\\"B102\\\",\\\"test_name\\\":\\\"exec_used\\\"}]}\","
+    },
+    {
+       "stringsFound":[
+          "password: pass, database"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar.html",
+       "reason":"password (Password)",
+       "linenum":32300,
+       "diff":"const pgcon = new pg.Client({ host: host, user: user, password: pass, database: db });"
+    },
+    {
+       "stringsFound":[
+          "password = auth"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":53931,
+       "diff":"username, login, password = auth"
+    },
+    {
+       "stringsFound":[
+          "password = loadCredentials()"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-single-finding.html",
+       "reason":"password (Password)",
+       "linenum":6349,
+       "diff":"const password = loadCredentials();"
+    },
+    {
+       "stringsFound":[
+          "password = '"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":13502,
+       "diff":"                    \"text\" : \"    c = conn.cursor()\\n\\n    user = c.execute(\\\"SELECT * FROM users WHERE username = '{}' and password = '{}'\\\".format(username, password)).fetchone()\\n\\n    if user:\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "Password=\" "
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"Password (Password)",
+       "linenum":622,
+       "diff":"    ds.Filter = \"(&amp;(uid=\" + user + \")(userPassword=\" + pass + \"))\"; // Now safe"
+    },
+    {
+       "stringsFound":[
+          "password = '\" "
+       ],
+       "path":"/scan_folder/tests/dedupe_scans/multiple_findings.xml",
+       "reason":"password (Password)",
+       "linenum":126,
+       "diff":"              <Code>        PreparedStatement statement = connection.prepareStatement(\"select password from \" + USERS_TABLE_NAME + \" where userid = '\" + username_login + \"' and password = '\" + password_login + \"'\");</Code>\r"
+    },
+    {
+       "stringsFound":[
+          "Password: &lt"
+       ],
+       "path":"/scan_folder/tests/ibm_appscan_xml_file.xml",
+       "reason":"Password (Password)",
+       "linenum":2221,
+       "diff":"      Password: &lt;input type=\"password\" name=\"lastname\" /&gt;\r"
+    },
+    {
+       "stringsFound":[
+          "password = '",
+          "password = '",
+          "password = '"
+       ],
+       "path":"/scan_folder/dojo/fixtures/defect_dojo_sample_data.json",
+       "reason":"password (Password)",
+       "linenum":19446,
+       "diff":"        \"description\": \"**Category:** \\n**Language:** Java\\n**Group:** Java Low Visibility\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=462](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=462)\\n\\n**Line Number:** 1\\n**Column:** 673\\n**Source Object:** conn\\n**Number:** 1\\n**Code:** <%@ page import=\\\"java.sql.*\\\" %>\\n-----\\n**Line Number:** 1\\n**Column:** 1593\\n**Source Object:** jspInit\\n**Number:** 1\\n**Code:** <%@ page import=\\\"java.sql.*\\\" %>\\n-----\\n**Line Number:** 26\\n**Column:** 369\\n**Source Object:** conn\\n**Number:** 26\\n**Code:** Statement stmt = conn.createStatement();\\n-----\\n**Line Number:** 26\\n**Column:** 389\\n**Source Object:** createStatement\\n**Number:** 26\\n**Code:** Statement stmt = conn.createStatement();\\n-----\\n**Line Number:** 26\\n**Column:** 362\\n**Source Object:** stmt\\n**Number:** 26\\n**Code:** Statement stmt = conn.createStatement();\\n-----\\n**Line Number:** 29\\n**Column:** 353\\n**Source Object:** stmt\\n**Number:** 29\\n**Code:** stmt.executeQuery(\\\"INSERT INTO Users (name, type, password) VALUES ('\\\" + username + \\\"', 'USER', '\\\" + password1 + \\\"')\\\");\\n-----\\n**Line Number:** 30\\n**Column:** 358\\n**Source Object:** stmt\\n**Number:** 30\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password1 + \\\"')\\\");\\n-----\\n**Line Number:** 30\\n**Column:** 375\\n**Source Object:** executeQuery\\n**Number:** 30\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password1 + \\\"')\\\");\\n-----\\n**Line Number:** 30\\n**Column:** 353\\n**Source Object:** rs\\n**Number:** 30\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password1 + \\\"')\\\");\\n-----\\n**Line Number:** 31\\n**Column:** 353\\n**Source Object:** rs\\n**Number:** 31\\n**Code:** rs.next();\\n-----\\n**Line Number:** 32\\n**Column:** 368\\n**Source Object:** rs\\n**Number:** 32\\n**Code:** userid =  \\\"\\\" + rs.getInt(\\\"userid\\\");\\n-----\\n**Line Number:** 32\\n**Column:** 377\\n**Source Object:** getInt\\n**Number:** 32\\n**Code:** userid =  \\\"\\\" + rs.getInt(\\\"userid\\\");\\n-----\\n**Line Number:** 32\\n**Column:** 353\\n**Source Object:** userid\\n**Number:** 32\\n**Code:** userid =  \\\"\\\" + rs.getInt(\\\"userid\\\");\\n-----\\n**Line Number:** 36\\n**Column:** 384\\n**Source Object:** userid\\n**Number:** 36\\n**Code:** session.setAttribute(\\\"userid\\\", userid);\\n-----\\n\",\r"
+    },
+    {
+       "stringsFound":[
+          "-p icmp --icmp-type timestamp-request -j DROP"
+       ],
+       "path":"/scan_folder/unittests/scans/nexpose/many_vulns.xml",
+       "reason":"-p (Password)",
+       "linenum":10804,
+       "diff":"\t\t\t\t\t\t\t\t<Paragraph preformat=\"true\">   ipchains -A input -p icmp --icmp-type timestamp-request -j DROP</Paragraph>"
+    },
+    {
+       "stringsFound":[
+          "password = \"\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar.html",
+       "reason":"password (Password)",
+       "linenum":20162,
+       "diff":"  $password = \"\";"
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":10955,
+       "diff":"                    \"text\" : \"\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        otp = request.form.get('otp')\\n\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "-p dojo/migrations && "
+       ],
+       "path":"/scan_folder/Dockerfile.django",
+       "reason":"-p (Password)",
+       "linenum":90,
+       "diff":"  mkdir -p dojo/migrations && \\"
+    },
+    {
+       "stringsFound":[
+          "pass = str"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"pass (Password)",
+       "linenum":1189,
+       "diff":"$pass = str_replace(\"'\", \"&amp;apos;\", $pass);"
+    },
+    {
+       "stringsFound":[
+          "password = '",
+          "password = '"
+       ],
+       "path":"/scan_folder/dojo/fixtures/defect_dojo_sample_data.json",
+       "reason":"password (Password)",
+       "linenum":2941,
+       "diff":"        \"changes\": \"{\\\"original_finding\\\": [\\\"None\\\", \\\"dojo.Finding.None\\\"], \\\"finding\\\": [\\\"None\\\", \\\"dojo.Cred_Mapping.None\\\"], \\\"title\\\": [\\\"None\\\", \\\"Blind SQL Injections (register.jsp)\\\"], \\\"date\\\": [\\\"None\\\", \\\"2016-08-29\\\"], \\\"cwe\\\": [\\\"None\\\", \\\"89\\\"], \\\"url\\\": [\\\"None\\\", \\\"N/A\\\"], \\\"severity\\\": [\\\"None\\\", \\\"Low\\\"], \\\"description\\\": [\\\"None\\\", \\\"**Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.1 - Injection flaws - particularly SQL injection,OWASP Top 10 2013;A1-Injection\\\\n**Language:** Java\\\\n**Group:** Java Low Visibility\\\\n**Status:** New\\\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=423](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=423)\\\\n\\\\n**Line Number:** 7\\\\n**Column:** 399\\\\n**Source Object:** \\\\\\\"\\\\\\\"password1\\\\\\\"\\\\\\\"\\\\n**Number:** 7\\\\n**Code:** String password1 = (String) request.getParameter(\\\\\\\"password1\\\\\\\");\\\\n-----\\\\n**Line Number:** 7\\\\n**Column:** 398\\\\n**Source Object:** getParameter\\\\n**Number:** 7\\\\n**Code:** String password1 = (String) request.getParameter(\\\\\\\"password1\\\\\\\");\\\\n-----\\\\n**Line Number:** 22\\\\n**Column:** 383\\\\n**Source Object:** password1\\\\n**Number:** 22\\\\n**Code:** } else if (password1 == null || password1.length() < 5) {\\\\n-----\\\\n**Line Number:** 25\\\\n**Column:** 362\\\\n**Source Object:** password1\\\\n**Number:** 25\\\\n**Code:** } else if (password1.equals(password2)) {\\\\n-----\\\\n**Line Number:** 30\\\\n**Column:** 450\\\\n**Source Object:** password1\\\\n**Number:** 30\\\\n**Code:** rs = stmt.executeQuery(\\\\\\\"SELECT * FROM Users WHERE (name = '\\\\\\\" + username + \\\\\\\"' AND password = '\\\\\\\" + password1 + \\\\\\\"')\\\\\\\");\\\\n-----\\\\n**Line Number:** 30\\\\n**Column:** 375\\\\n**Source Object:** executeQuery\\\\n**Number:** 30\\\\n**Code:** rs = stmt.executeQuery(\\\\\\\"SELECT * FROM Users WHERE (name = '\\\\\\\" + username + \\\\\\\"' AND password = '\\\\\\\" + password1 + \\\\\\\"')\\\\\\\");\\\\n-----\\\\n\\\"], \\\"mitigation\\\": [\\\"None\\\", \\\"N/A\\\"], \\\"impact\\\": [\\\"None\\\", \\\"N/A\\\"], \\\"id\\\": [\\\"None\\\", \\\"108\\\"], \\\"references\\\": [\\\"None\\\", \\\"\\\"], \\\"finding_meta\\\": [\\\"None\\\", \\\"dojo.DojoMeta.None\\\"], \\\"test\\\": [\\\"None\\\", \\\"Checkmarx Scan\\\"], \\\"active\\\": [\\\"None\\\", \\\"False\\\"], \\\"verified\\\": [\\\"None\\\", \\\"False\\\"], \\\"false_p\\\": [\\\"None\\\", \\\"False\\\"], \\\"duplicate\\\": [\\\"None\\\", \\\"False\\\"], \\\"out_of_scope\\\": [\\\"None\\\", \\\"False\\\"], \\\"risk_accepted\\\": [\\\"None\\\", \\\"False\\\"], \\\"under_review\\\": [\\\"None\\\", \\\"False\\\"], \\\"under_defect_review\\\": [\\\"None\\\", \\\"False\\\"], \\\"is_mitigated\\\": [\\\"None\\\", \\\"False\\\"], \\\"thread_id\\\": [\\\"None\\\", \\\"0\\\"], \\\"reporter\\\": [\\\"None\\\", \\\"admin\\\"], \\\"numerical_severity\\\": [\\\"None\\\", \\\"S3\\\"], \\\"last_reviewed\\\": [\\\"None\\\", \\\"2018-08-16 16:39:40.124000\\\"], \\\"last_reviewed_by\\\": [\\\"None\\\", \\\"admin\\\"], \\\"hash_code\\\": [\\\"None\\\", \\\"c3fb1583f06a0ce7bee2084607680b357d63dd8f9cc56d5d09f0601a3c62a336\\\"], \\\"line\\\": [\\\"None\\\", \\\"30\\\"], \\\"file_path\\\": [\\\"None\\\", \\\"/root/register.jsp\\\"], \\\"static_finding\\\": [\\\"None\\\", \\\"True\\\"], \\\"dynamic_finding\\\": [\\\"None\\\", \\\"False\\\"], \\\"created\\\": [\\\"None\\\", \\\"2018-08-16 16:39:40.129000\\\"], \\\"status_finding\\\": [\\\"None\\\", \\\"dojo.Endpoint_Status.None\\\"]}\",\r"
+    },
+    {
+       "stringsFound":[
+          "password = ..."
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"password (Password)",
+       "linenum":4422,
+       "diff":"$password = ..."
+    },
+    {
+       "stringsFound":[
+          "-p icmp --icmp-type address-mask-request -j DROP"
+       ],
+       "path":"/scan_folder/unittests/scans/nexpose/many_vulns.xml",
+       "reason":"-p (Password)",
+       "linenum":10644,
+       "diff":"\t\t\t\t\t\t\t\t<Paragraph preformat=\"true\">   ipchains -A input -p icmp --icmp-type address-mask-request -j DROP</Paragraph>"
+    },
+    {
+       "stringsFound":[
+          "password = \"blue\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"password (Password)",
+       "linenum":1301,
+       "diff":"$password = \"blue\";"
+    },
+    {
+       "stringsFound":[
+          "Password=\" "
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"Password (Password)",
+       "linenum":622,
+       "diff":"    ds.Filter = \"(&amp;(uid=\" + user + \")(userPassword=\" + pass + \"))\"; // Now safe"
+    },
+    {
+       "stringsFound":[
+          "password = getPassword()"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar.html",
+       "reason":"password (Password)",
+       "linenum":15788,
+       "diff":"$password = getPassword(); // Compliant"
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":13685,
+       "diff":"                    \"text\" : \"\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        email = request.form.get('password')\\n\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "Password = string.Format(\"user="
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"Password (Password)",
+       "linenum":2139,
+       "diff":"string usernamePassword = string.Format(\"user={0}&amp;password={1}\", GetEncryptedUsername(), GetEncryptedPassword());"
+    },
+    {
+       "stringsFound":[
+          "pass = $"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"pass (Password)",
+       "linenum":1182,
+       "diff":"$pass = $_GET[\"pass\"];"
+    },
+    {
+       "stringsFound":[
+          "Password:&nbsp",
+          "Password: admin123456 --"
+       ],
+       "path":"/scan_folder/unittests/scans/netsparker/netsparker_many_findings.json",
+       "reason":"Password (Password)",
+       "linenum":66,
+       "diff":"        \"Content\": \"HTTP/1.1 200 OK\\r\\nSet-Cookie: PHPSESSID=e52a07f0fe53c0294ae211bc4481332d; path=/\\r\\nServer: Apache/2.2.8 (Win32) PHP/5.2.6\\r\\nContent-Length: 3061\\r\\nX-Powered-By: PHP/5.2.6\\r\\nPragma: no-cache\\r\\nExpires: Thu, 19 Nov 1981 08:52:00 GMT\\r\\nKeep-Alive: timeout=5, max=150\\r\\nConnection: Keep-Alive\\r\\nContent-Type: text/html\\r\\nDate: Thu, 24 Jun 2021 22:49:36 GMT\\r\\nCache-Control: no-store, must-revalidate, no-cache, post-check=0, pre-check=0\\r\\n\\r\\n\\n<!DOCTYPE html PUBLIC \\\"-//W3C//DTD XHTML 1.0 Strict//EN\\\" \\\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\\\">\\n<html xmlns=\\\"http://www.w3.org/1999/xhtml\\\">\\n<head>\\n<meta name=\\\"keywords\\\" content=\\\"\\\" />\\n<meta name=\\\"description\\\" content=\\\"\\\" />\\n<meta http-equiv=\\\"content-type\\\" content=\\\"text/html; charset=utf-8\\\" />\\n<title>Netsparker Test Web Site -  PHP</title>\\n<link href=\\\"style.css\\\" rel=\\\"stylesheet\\\" type=\\\"text/css\\\" media=\\\"screen\\\" />\\n</head><body>\\n<div id=\\\"wrapper\\\">\\n        \\n\\t<div id=\\\"menu\\\">\\n\\t\\t<ul>\\n\\t\\t\\t<li><a href=\\\"/process.php?file=Generics/index.nsp\\\">Home</a></li>\\n\\t\\t\\t<li><a href=\\\"/hello.php?name=Visitor\\\">Hello</a></li>\\n\\t\\t\\t<li><a href=\\\"/products.php?pro=url\\\">Products</a></li>\\n\\t\\t\\t<li><a href=\\\"/process.php?file=Generics/about.nsp\\\">About</a></li>\\n\\t\\t\\t<li><a href=\\\"/process.php?file=Generics/contact.nsp\\\">Contact</a></li>\\n\\t\\t\\t<li><a href=\\\"/auth/\\\">Login</a></li>\\n\\t\\t</ul>\\n\\t</div>\\n\\t<!-- end #menu -->\\n\\t<div id=\\\"header\\\">\\n\\n\\t</div>\\n\\t<!-- end #header -->\\t<div id=\\\"page\\\">\\n\\t<div id=\\\"page-bgtop\\\">\\n\\t<div id=\\\"page-bgbtm\\\">\\n\\t\\t<div id=\\\"content\\\">\\n\\t\\t\\t<div class=\\\"post\\\">\\n\\t\\t\\t\\t\\t\\t\\t\\t<h1 class=\\\"title\\\"><a href=\\\"#\\\">Login Area</a></h1>\\n\\t\\t\\t\\t\\t<p>\\n                    Enter your credentials (admin / admin123456)\\n    <br/>\\n    <form method=\\\"POST\\\" action=\\\"/auth/control.php\\\">\\n      Username: <input type=\\\"text\\\" name=\\\"username\\\"/>\\n      <br/>\\n      Password:&nbsp;&nbsp;<input type=\\\"password\\\" name=\\\"password\\\"/>\\n<!-- Test credentials -->\\n<!-- Password: admin123456 -->\\n      <br/>\\n\\t  <input type=\\\"hidden\\\" name=\\\"token\\\" value=\\\"1959\\\">\\n      <br/>\\n      <input type=\\\"submit\\\" value=\\\"SUBMIT\\\">\\n    </form>\\n                    </p>\\n\\n\\t\\t\\t\\t<div style=\\\"clear: both;\\\">&nbsp;</div>\\n\\t\\t\\t\\t<div class=\\\"entry\\\">\\n\\n\\n\\t\\t\\t\\t</div>\\n\\t\\t\\t</div>\\n\\t\\t<div style=\\\"clear: both;\\\">&nbsp;</div>\\n\\t\\t</div>\\n\\t\\t<!-- end #content -->\\n\\t        \\n\\t<div id=\\\"sidebar\\\">\\n\\t\\t\\t<ul>\\n\\t\\t\\t\\t<li>\\n\\t\\t\\t\\t\\t<div id=\\\"search\\\" >\\n\\t\\t\\t\\t\\t\\t<form method=\\\"get\\\" action=\\\"../artist.php\\\">\\n\\t\\t\\t\\t\\t\\t\\t<div>\\n\\t\\t\\t\\t\\t\\t\\t\\t<input type=\\\"text\\\" name=\\\"s\\\" id=\\\"search-text\\\" value=\\\"\\\" />\\n\\t\\t\\t\\t\\t\\t\\t\\t<input type=\\\"submit\\\" id=\\\"search-submit\\\" value=\\\"GO\\\" />\\n\\t\\t\\t\\t\\t\\t\\t</div>\\n\\t\\t\\t\\t\\t\\t</form>\\n\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t</div>\\n\\t\\t\\t\\t\\t<div style=\\\"clear: both;\\\">&nbsp;</div>\\n\\t\\t\\t\\t</li>\\n\\t\\t\\t\\t<li>\\n\\t\\t\\t\\t\\t<h2>Tags</h2>\\n\\t\\t\\t\\t\\t<p>netsparker xss web-application-security false-positive-free automated-exploitation sql-injection local/remote-file-inclusion</p>\\n\\t\\t\\t\\t</li>\\n\\t\\t\\t\\t<li>\\n\\t\\t\\t\\t\\t<h2>Inner Pages</h2>\\n\\t\\t\\t\\t\\t<ul>\\n\\t\\t\\t\\t\\t\\t<li><a href=\\\"/artist.php?id=test\\\">Artist Search</a></li>\\n\\t\\t\\t\\t\\t\\t<li><a href=\\\"/nslookup.php\\\">Lookup Service</a></li>\\n\\t\\t\\t\\t\\t</ul>\\n\\t\\t\\t\\t</li>\\n\\t\\t\\t\\t<li>\\n\\t\\t\\t\\t\\t<h2>Links</h2>\\n\\t\\t\\t\\t\\t<ul>\\n\\t\\t\\t\\t\\t\\t<li><a href=\\\"http://aspnet.testsparker.com/\\\">Aspnet Testsparker</a></li>\\n\\t\\t\\t\\t\\t\\t<li><a href=\\\"http://aspnet.testsparker.com/administrator/\\\">Aspnet Testsparker Login</a></li>\\n\\t\\t\\t\\t\\t</ul>\\n\\t\\t\\t\\t</li>\\n\\t\\t\\t\\t<li>\\n\\n\\t\\t\\t</ul>\\n\\t\\t</div>\\t\\t<!-- end #sidebar -->\\n\\t\\t<div style=\\\"clear: both;\\\">&nbsp;</div>\\n\\t</div>\\n\\t</div>\\n\\t</div>\\n\\t<!-- end #page -->\\n</div>\\nv\\n<div id=\\\"footer\\\">\\n\\t\\t<p>Copyright (c) 2010 testsparker.com. All rights reserved. Design by <a href=\\\"http://www.freecsstemplates.org/\\\">Free CSS Templates</a>.</p>\\n\\t</div>\\t<!-- end #footer -->\\n</body>\\n</html>\\n\",\r"
+    },
+    {
+       "stringsFound":[
+          "pass = true"
+       ],
+       "path":"/scan_folder/unittests/scans/ibm_app/testfire.xml",
+       "reason":"pass (Password)",
+       "linenum":1919,
+       "diff":"          $pass = true;\r"
+    },
+    {
+       "stringsFound":[
+          "Password:&lt"
+       ],
+       "path":"/scan_folder/unittests/scans/qualys/Qualys_Sample_Report.xml",
+       "reason":"Password (Password)",
+       "linenum":6488,
+       "diff":"&lt;label&gt;Password:&lt;/label&gt;&lt;input type=&quot;password&quot; name=&quot;password&quot; /&gt;&lt;br/&gt;&lt;br /&gt;"
+    },
+    {
+       "stringsFound":[
+          "pass = request.getParameter(\"p"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-single-finding.html",
+       "reason":"pass (Password)",
+       "linenum":5351,
+       "diff":"  String pass = request.getParameter(\"pass\");"
+    },
+    {
+       "stringsFound":[
+          "pass = request.getParameter(\"p"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"pass (Password)",
+       "linenum":2521,
+       "diff":"  String pass = request.getParameter(\"pass\");"
+    },
+    {
+       "stringsFound":[
+          "password = forms.CharField(widget="
+       ],
+       "path":"/scan_folder/dojo/forms.py",
+       "reason":"password (Password)",
+       "linenum":1842,
+       "diff":"    new_password = forms.CharField(widget=forms.PasswordInput,"
+    },
+    {
+       "stringsFound":[
+          "password = '\" "
+       ],
+       "path":"/scan_folder/tests/dedupe_scans/multiple_findings_line_changed.xml",
+       "reason":"password (Password)",
+       "linenum":62,
+       "diff":"              <Code>        PreparedStatement statement = connection.prepareStatement(\"select password from \" + USERS_TABLE_NAME + \" where userid = '\" + username_login + \"' and password = '\" + password_login + \"'\");</Code>\r"
+    },
+    {
+       "stringsFound":[
+          "password=admin1&userName=admin"
+       ],
+       "path":"/scan_folder/unittests/scans/immuniweb/ImmuniWeb-multiple-vuln.xml",
+       "reason":"password (Password)",
+       "linenum":430,
+       "diff":"_csrf=&password=admin1&userName=admin[PAYLOAD]%27%22%3E%3CsCript%3Ealert%28%27ImmuniWeb%27%29%3C/sCript%3E%20%20[/PAYLOAD]]]></PoC>\r"
+    },
+    {
+       "stringsFound":[
+          "password = dojo"
+       ],
+       "path":"/scan_folder/dojo/cred/views.py",
+       "reason":"password (Password)",
+       "linenum":27,
+       "diff":"            form_copy.password = dojo_crypto_encrypt("
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":14622,
+       "diff":"                    \"text\" : \"    if request.method == 'POST':\\n\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        #email = request.form.get('password')\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password: suse-gm password &quot"
+       ],
+       "path":"/scan_folder/unittests/scans/nexpose/many_vulns.xml",
+       "reason":"password (Password)",
+       "linenum":14137,
+       "diff":"\t\t<vulnerability id=\"ssh-suse-default-account-suse-gm-password-123456\" title=\"Default SSH password: suse-gm password &quot;123456&quot;\" severity=\"10\" pciSeverity=\"5\" cvssScore=\"10.0\" cvssVector=\"(AV:N/AC:L/Au:N/C:C/I:C/A:C)\" published=\"20091104T000000000\" added=\"20091104T000000000\" modified=\"20120712T000000000\">"
+    },
+    {
+       "stringsFound":[
+          "pass = request.getParameter(\"p"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"pass (Password)",
+       "linenum":5402,
+       "diff":"  String pass = request.getParameter(\"pass\");"
+    },
+    {
+       "stringsFound":[
+          "password = jform.cleaned"
+       ],
+       "path":"/scan_folder/dojo/jira_link/views.py",
+       "reason":"password (Password)",
+       "linenum":319,
+       "diff":"            jira_password = jform.cleaned_data.get('password')"
+    },
+    {
+       "stringsFound":[
+          "password=jira"
+       ],
+       "path":"/scan_folder/dojo/jira_link/views.py",
+       "reason":"password (Password)",
+       "linenum":280,
+       "diff":"                                    password=jira_password,"
+    },
+    {
+       "stringsFound":[
+          "password:\""
+       ],
+       "path":"/scan_folder/README.md",
+       "reason":"password (Password)",
+       "linenum":34,
+       "diff":"docker-compose logs initializer | grep \"Admin password:\""
+    },
+    {
+       "stringsFound":[
+          "password = '"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":9748,
+       "diff":"                    \"text\" : \"    c = conn.cursor()\\n\\n    user = c.execute(\\\"SELECT * FROM users WHERE username = '{}' and password = '{}'\\\".format(username, password)).fetchone()\\n\\n    if user:\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password = dojo"
+       ],
+       "path":"/scan_folder/dojo/tool_config/views.py",
+       "reason":"password (Password)",
+       "linenum":58,
+       "diff":"            form_copy.password = dojo_crypto_encrypt(tform.cleaned_data['password'])"
+    },
+    {
+       "stringsFound":[
+          "-p /path/to/program "
+       ],
+       "path":"/scan_folder/unittests/scans/jfrog_xray_unified/very_many_vulns.json",
+       "reason":"-p (Password)",
+       "linenum":289035,
+       "diff":"\t\"description\": \"DOCUMENTATION: It was discovered that when executing `ldd` on a malicious file, it is possible to execute code because of the way libraries are loaded into the process memory. An attacker may trick a victim user into running `ldd` on malicious files, thus executing code with their privileges.            STATEMENT: `ldd` is not intended to be executed on untrusted binaries, so a user should be very careful on what he runs `ldd` on.            MITIGATION: Use `objdump -p /path/to/program | grep NEEDED` instead of `ldd` when you want to get the library dependencies of an untrusted executable. However this just returns the direct dependencies of the program, so it should be manually run against all the needed libraries to get the entire dependency tree as `ldd` does.\","
+    },
+    {
+       "stringsFound":[
+          "password=\" "
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-4-findings-3-to-aggregate.html",
+       "reason":"password (Password)",
+       "linenum":1064,
+       "diff":"        \"user=\" + uname + \"&amp;password=\" + password);"
+    },
+    {
+       "stringsFound":[
+          "Pass: '\","
+       ],
+       "path":"/scan_folder/unittests/scans/mobsf/ios.json",
+       "reason":"Pass (Password)",
+       "linenum":9105,
+       "diff":"      \"'return value of canAddPaymentPass: '\","
+    },
+    {
+       "stringsFound":[
+          "password=&userName="
+       ],
+       "path":"/scan_folder/unittests/scans/immuniweb/ImmuniWeb-multiple-vuln.xml",
+       "reason":"password (Password)",
+       "linenum":310,
+       "diff":"_csrf=&email=[PAYLOAD]%27%22%3E%3CsCript%3Ealert%28%27ImmuniWeb%27%29%3C/sCript%3E%20%20[/PAYLOAD]&firstName=1&lastName=1&password=&userName=[PAYLOAD]%27%22%3E%3CsCript%3Ealert%28%27ImmuniWeb%27%29%3C/sCript%3E%20%20[/PAYLOAD]&verify=]]></PoC>\r"
+    },
+    {
+       "stringsFound":[
+          "password = \"xxxx\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":59334,
+       "diff":"String password = \"xxxx\"; // Noncompliant"
+    },
+    {
+       "stringsFound":[
+          "password = '\" "
+       ],
+       "path":"/scan_folder/tests/dedupe_scans/multiple_findings.xml",
+       "reason":"password (Password)",
+       "linenum":62,
+       "diff":"              <Code>        PreparedStatement statement = connection.prepareStatement(\"select password from \" + USERS_TABLE_NAME + \" where userid = '\" + username_login + \"' and password = '\" + password_login + \"'\");</Code>\r"
+    },
+    {
+       "stringsFound":[
+          "password=\" &amp"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"password (Password)",
+       "linenum":1473,
+       "diff":"Dim usernamePassword2 As String = \"user=admin&amp;\" &amp; \"password=\" &amp; password"
+    },
+    {
+       "stringsFound":[
+          "password=\" "
+       ],
+       "path":"/scan_folder/unittests/tools/test_sonarqube_parser.py",
+       "reason":"password (Password)",
+       "linenum":118,
+       "diff":"            '        \"user=\" + uname + \"&amp;password=\" + password); // Noncompliant\\n'"
+    },
+    {
+       "stringsFound":[
+          "pass = 'password'"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar.html",
+       "reason":"pass (Password)",
+       "linenum":16388,
+       "diff":"$ldappass = 'password';"
+    },
+    {
+       "stringsFound":[
+          "pass = '\" "
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"pass (Password)",
+       "linenum":2523,
+       "diff":"  String query = \"SELECT * FROM users WHERE user = '\" + user + \"' AND pass = '\" + pass + \"'\"; // Unsafe"
+    },
+    {
+       "stringsFound":[
+          "password=blue\")"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-4-findings-3-to-aggregate.html",
+       "reason":"password (Password)",
+       "linenum":1049,
+       "diff":"        \"user=steve&amp;password=blue\"); // Noncompliant"
+    },
+    {
+       "stringsFound":[
+          "password=Password123\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"password (Password)",
+       "linenum":2132,
+       "diff":"string usernamePassword  = \"user=admin&amp;password=Password123\"; // Noncompliant"
+    },
+    {
+       "stringsFound":[
+          "-p PORT "
+       ],
+       "path":"/scan_folder/docker/wait-for-it.sh",
+       "reason":"-p (Password)",
+       "linenum":14,
+       "diff":"    -p PORT | --port=PORT       TCP port under test"
+    },
+    {
+       "stringsFound":[
+          "pass = request.getParameter(\"p"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"pass (Password)",
+       "linenum":5062,
+       "diff":"  String pass = request.getParameter(\"pass\");"
+    },
+    {
+       "stringsFound":[
+          "password=blue\")"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-single-finding.html",
+       "reason":"password (Password)",
+       "linenum":3723,
+       "diff":"        \"user=steve&amp;password=blue\"); // Noncompliant"
+    },
+    {
+       "stringsFound":[
+          "password = '\" "
+       ],
+       "path":"/scan_folder/unittests/scans/checkmarx/two_aggregated_findings_one_is_false_positive.xml",
+       "reason":"password (Password)",
+       "linenum":47,
+       "diff":"              <Code>        PreparedStatement statement = connection.prepareStatement(\"select password from \" + USERS_TABLE_NAME + \" where userid = '\" + username_login + \"' and password = '\" + password_login + \"'\");</Code>\r"
+    },
+    {
+       "stringsFound":[
+          "passwort = 12389127"
+       ],
+       "path":"/scan_folder/helm/defectdojo/Chart.yaml",
+       "reason":"passwort (Password)",
+       "linenum":5,
+       "diff":"passwort = 12389127"
+    },
+    {
+       "stringsFound":[
+          "password=\" . $password"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":37638,
+       "diff":"  $pgConnInfo = \"host=localhost port=5432 dbname=test user=\" . $username . \" password=\" . $password;"
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":12732,
+       "diff":"                    \"text\" : \"    if request.method == 'POST':\\n\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        email = request.form.get('password')\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password = '",
+          "password = '"
+       ],
+       "path":"/scan_folder/dojo/fixtures/defect_dojo_sample_data.json",
+       "reason":"password (Password)",
+       "linenum":47445,
+       "diff":"        \"content\": \"CGI Stored XSS (header.jsp) N/A Medium **Category:** PCI DSS v3.1;PCI DSS (3.1) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS)\\n**Language:** Java\\n**Group:** Java Medium Threat\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid;=44&pathid;=753](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid;=44&pathid;=753)\\n\\n**Line Number:** 15\\n**Column:** 374\\n**Source Object:** executeQuery\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 15\\n**Column:** 352\\n**Source Object:** rs\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 16\\n**Column:** 356\\n**Source Object:** rs\\n**Number:** 16\\n**Code:** if (rs.next()) {\\n-----\\n**Line Number:** 21\\n**Column:** 374\\n**Source Object:** rs\\n**Number:** 21\\n**Code:** String userid = \\\"\\\" + rs.getInt(\\\"userid\\\");\\n-----\\n**Line Number:** 22\\n**Column:** 386\\n**Source Object:** rs\\n**Number:** 22\\n**Code:** session.setAttribute(\\\"username\\\", rs.getString(\\\"name\\\"));\\n-----\\n**Line Number:** 22\\n**Column:** 398\\n**Source Object:** getString\\n**Number:** 22\\n**Code:** session.setAttribute(\\\"username\\\", rs.getString(\\\"name\\\"));\\n-----\\n**Line Number:** 14\\n**Column:** 38\\n**Source Object:** getAttribute\\n**Number:** 14\\n**Code:** String username = (String) session.getAttribute(\\\"username\\\");\\n-----\\n**Line Number:** 14\\n**Column:** 10\\n**Source Object:** username\\n**Number:** 14\\n**Code:** String username = (String) session.getAttribute(\\\"username\\\");\\n-----\\n**Line Number:** 29\\n**Column:** 52\\n**Source Object:** username\\n**Number:** 29\\n**Code:** out.println(\\\"User: \\\" + username + \\\"\\\");\\n-----\\n**Line Number:** 29\\n**Column:** 8\\n**Source Object:** println\\n**Number:** 29\\n**Code:** out.println(\\\"User: \\\" + username + \\\"\\\");\\n-----\\n N/A N/A None None  S2 None None None None None d6251c8822044d55511b364098e264ca2113391d999c6aefe5c1cca3743e2f2d /root/header.jsp\",\r"
+    },
+    {
+       "stringsFound":[
+          "password: 'Fail'\","
+       ],
+       "path":"/scan_folder/unittests/scans/gitlab_sast/gl-sast-report-many-vuln.json",
+       "reason":"password (Password)",
+       "linenum":4387,
+       "diff":"      \"message\": \"Possible hardcoded password: 'Fail'\","
+    },
+    {
+       "stringsFound":[
+          "password=secret),address=(host=my",
+          "password=secret)/db\")"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"password (Password)",
+       "linenum":2588,
+       "diff":"DriverManager.getConnection(\"jdbc:mysql://address=(host=myhost1)(port=1111)(key1=value1)(user=sandy)(password=secret),address=(host=myhost2)(port=2222)(key2=value2)(user=sandy)(password=secret)/db\");"
+    },
+    {
+       "stringsFound":[
+          "password = '"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":11288,
+       "diff":"                    \"text\" : \"    c = conn.cursor()\\n\\n    user = c.execute(\\\"SELECT * FROM users WHERE username = '{}' and password = '{}'\\\".format(username, password)).fetchone()\\n\\n    if user:\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password: $"
+       ],
+       "path":"/scan_folder/.github/workflows/k8s-testing.yml",
+       "reason":"password (Password)",
+       "linenum":133,
+       "diff":"#          password: ${{ secrets.DOCKERHUB_TOKEN }}"
+    },
+    {
+       "stringsFound":[
+          "password = '\" "
+       ],
+       "path":"/scan_folder/unittests/scans/checkmarx/multiple_findings_line_changed.xml",
+       "reason":"password (Password)",
+       "linenum":62,
+       "diff":"              <Code>        PreparedStatement statement = connection.prepareStatement(\"select password from \" + USERS_TABLE_NAME + \" where userid = '\" + username_login + \"' and password = '\" + password_login + \"'\");</Code>\r"
+    },
+    {
+       "stringsFound":[
+          "Password=...))"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-single-finding.html",
+       "reason":"Password (Password)",
+       "linenum":549,
+       "diff":"    // (|(uid=*)(userPassword=...))"
+    },
+    {
+       "stringsFound":[
+          "password = request.form.get('passw"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":11084,
+       "diff":"                    \"text\" : \"    if request.method == 'POST':\\n\\n        username = request.form.get('username')\\n        password = request.form.get('password')\\n        otp = request.form.get('otp')\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password = '",
+          "password = '"
+       ],
+       "path":"/scan_folder/dojo/fixtures/defect_dojo_sample_data.json",
+       "reason":"password (Password)",
+       "linenum":46350,
+       "diff":"        \"content\": \"Stored Boundary Violation (login.jsp) N/A Low **Category:** \\n**Language:** Java\\n**Group:** Java Stored\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=72](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=72)\\n\\n**Line Number:** 15\\n**Column:** 374\\n**Source Object:** executeQuery\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 15\\n**Column:** 352\\n**Source Object:** rs\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 16\\n**Column:** 356\\n**Source Object:** rs\\n**Number:** 16\\n**Code:** if (rs.next()) {\\n-----\\n**Line Number:** 21\\n**Column:** 374\\n**Source Object:** rs\\n**Number:** 21\\n**Code:** String userid = \\\"\\\" + rs.getInt(\\\"userid\\\");\\n-----\\n**Line Number:** 22\\n**Column:** 386\\n**Source Object:** rs\\n**Number:** 22\\n**Code:** session.setAttribute(\\\"username\\\", rs.getString(\\\"name\\\"));\\n-----\\n**Line Number:** 22\\n**Column:** 398\\n**Source Object:** getString\\n**Number:** 22\\n**Code:** session.setAttribute(\\\"username\\\", rs.getString(\\\"name\\\"));\\n-----\\n N/A N/A None None  S3 None None None None None b0de3516ab323f5577e6ad94803e2ddf541214bbae868bf34e828ba3a4d966ca /root/login.jsp\",\r"
+    },
+    {
+       "stringsFound":[
+          "Password=\" "
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"Password (Password)",
+       "linenum":2593,
+       "diff":"    ds.Filter = \"(&amp;(uid=\" + user + \")(userPassword=\" + pass + \"))\"; // Noncompliant"
+    },
+    {
+       "stringsFound":[
+          "password = getEncryptedPass()"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-4-findings-3-to-aggregate.html",
+       "reason":"password (Password)",
+       "linenum":1062,
+       "diff":"  String password = getEncryptedPass();"
+    },
+    {
+       "stringsFound":[
+          "-p /path/to/program "
+       ],
+       "path":"/scan_folder/unittests/scans/jfrog_xray_unified/very_many_vulns.json",
+       "reason":"-p (Password)",
+       "linenum":469332,
+       "diff":"\t\"description\": \"DOCUMENTATION: It was discovered that when executing `ldd` on a malicious file, it is possible to execute code because of the way libraries are loaded into the process memory. An attacker may trick a victim user into running `ldd` on malicious files, thus executing code with their privileges.            STATEMENT: `ldd` is not intended to be executed on untrusted binaries, so a user should be very careful on what he runs `ldd` on.            MITIGATION: Use `objdump -p /path/to/program | grep NEEDED` instead of `ldd` when you want to get the library dependencies of an untrusted executable. However this just returns the direct dependencies of the program, so it should be manually run against all the needed libraries to get the entire dependency tree as `ldd` does.\","
+    },
+    {
+       "stringsFound":[
+          "pass = $"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"pass (Password)",
+       "linenum":3169,
+       "diff":"$pass = $_GET[\"pass\"];"
+    },
+    {
+       "stringsFound":[
+          "pass='\" . $pass . \"'"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings-1-unique_id_changed.html",
+       "reason":"pass (Password)",
+       "linenum":1191,
+       "diff":"$expression = \"/users/user[@name='\" . $user . \"' and @pass='\" . $pass . \"']\";"
+    },
+    {
+       "stringsFound":[
+          "password = retrievePassword()"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar.html",
+       "reason":"password (Password)",
+       "linenum":11092,
+       "diff":"val password = retrievePassword()"
+    },
+    {
+       "stringsFound":[
+          "pass = false"
+       ],
+       "path":"/scan_folder/tests/ibm_appscan_xml_file.xml",
+       "reason":"pass (Password)",
+       "linenum":4423,
+       "diff":"      $pass = false;\r"
+    },
+    {
+       "stringsFound":[
+          "Password = string.Format(\"user="
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar.html",
+       "reason":"Password (Password)",
+       "linenum":79119,
+       "diff":"string usernamePassword = string.Format(\"user={0}&amp;password={1}\", GetEncryptedUsername(), GetEncryptedPassword());"
+    },
+    {
+       "stringsFound":[
+          "password=test&SUBMIT=Login"
+       ],
+       "path":"/scan_folder/unittests/scans/contrast/contrast-node-goat.csv",
+       "reason":"password (Password)",
+       "linenum":10885,
+       "diff":"\"Cross-Site Scripting from \"\"username\"\" Parameter on \"\"/WebGoat/attack\"\" page (lesson_content.jsp, line 37)\",ITPP-BLVV-A4EL-A32U,XSS,reflected-xss,High,Reported,8,1524497064331,1524497100000,WebgoatMaster,ef60f389-35c6-40b4-9cb9-fc2205963208,,http://cwe.mitre.org/data/definitions/79.html,POST,0,http,1.0,/WebGoat/attack,Screen=1572295549&menu=1100,username=test&password=test&SUBMIT=Login"
+    },
+    {
+       "stringsFound":[
+          "password = '",
+          "password = '"
+       ],
+       "path":"/scan_folder/dojo/fixtures/defect_dojo_sample_data.json",
+       "reason":"password (Password)",
+       "linenum":21079,
+       "diff":"        \"description\": \"**Category:** \\n**Language:** Java\\n**Group:** Java Stored\\n**Status:** New\\n**Finding Link:** [https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=72](https://code.checkmarx.io/CxWebClient/ViewerMain.aspx?scanid=1000074&projectid=44&pathid=72)\\n\\n**Line Number:** 15\\n**Column:** 374\\n**Source Object:** executeQuery\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 15\\n**Column:** 352\\n**Source Object:** rs\\n**Number:** 15\\n**Code:** rs = stmt.executeQuery(\\\"SELECT * FROM Users WHERE (name = '\\\" + username + \\\"' AND password = '\\\" + password + \\\"')\\\");\\n-----\\n**Line Number:** 16\\n**Column:** 356\\n**Source Object:** rs\\n**Number:** 16\\n**Code:** if (rs.next()) {\\n-----\\n**Line Number:** 21\\n**Column:** 374\\n**Source Object:** rs\\n**Number:** 21\\n**Code:** String userid = \\\"\\\" + rs.getInt(\\\"userid\\\");\\n-----\\n**Line Number:** 22\\n**Column:** 386\\n**Source Object:** rs\\n**Number:** 22\\n**Code:** session.setAttribute(\\\"username\\\", rs.getString(\\\"name\\\"));\\n-----\\n**Line Number:** 22\\n**Column:** 398\\n**Source Object:** getString\\n**Number:** 22\\n**Code:** session.setAttribute(\\\"username\\\", rs.getString(\\\"name\\\"));\\n-----\\n\",\r"
+    },
+    {
+       "stringsFound":[
+          "password=xxxx\" // Noncompliant"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-single-finding.html",
+       "reason":"password (Password)",
+       "linenum":6723,
+       "diff":"val params = \"password=xxxx\" // Noncompliant"
+    },
+    {
+       "stringsFound":[
+          "Password=\" . $pass . \"))\""
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-6-findings.html",
+       "reason":"Password (Password)",
+       "linenum":877,
+       "diff":"$filter = \"(&amp;(uid=\" . $user . \")(userPassword=\" . $pass . \"))\"; // Unsafe"
+    },
+    {
+       "stringsFound":[
+          "password = '"
+       ],
+       "path":"/scan_folder/unittests/scans/sarif/codeQL-output.sarif",
+       "reason":"password (Password)",
+       "linenum":11571,
+       "diff":"                    \"text\" : \"    c = conn.cursor()\\n\\n    user = c.execute(\\\"SELECT * FROM users WHERE username = '{}' and password = '{}'\\\".format(username, password)).fetchone()\\n\\n    if user:\\n\"\r"
+    },
+    {
+       "stringsFound":[
+          "password : "
+       ],
+       "path":"/scan_folder/helm/defectdojo/templates/secret-postgresql.yaml",
+       "reason":"password (Password)",
+       "linenum":28,
+       "diff":"  postgresql-replication-password : {{ .Values.postgresql.postgresqlReplicationPassword | b64enc | quote }}"
+    },
+    {
+       "stringsFound":[
+          "-p /path/to/program "
+       ],
+       "path":"/scan_folder/unittests/scans/jfrog_xray_unified/very_many_vulns.json",
+       "reason":"-p (Password)",
+       "linenum":463639,
+       "diff":"\t\"description\": \"DOCUMENTATION: It was discovered that when executing `ldd` on a malicious file, it is possible to execute code because of the way libraries are loaded into the process memory. An attacker may trick a victim user into running `ldd` on malicious files, thus executing code with their privileges.            STATEMENT: `ldd` is not intended to be executed on untrusted binaries, so a user should be very careful on what he runs `ldd` on.            MITIGATION: Use `objdump -p /path/to/program | grep NEEDED` instead of `ldd` when you want to get the library dependencies of an untrusted executable. However this just returns the direct dependencies of the program, so it should be manually run against all the needed libraries to get the entire dependency tree as `ldd` does.\","
+    },
+    {
+       "stringsFound":[
+          "password: 'Pass'\","
+       ],
+       "path":"/scan_folder/unittests/scans/horusec/version_2.6.3.json",
+       "reason":"password (Password)",
+       "linenum":5448,
+       "diff":"        \"details\": \"Possible hardcoded password: 'Pass'\","
+    }
+ ]
