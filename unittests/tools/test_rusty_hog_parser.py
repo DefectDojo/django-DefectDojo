@@ -51,14 +51,13 @@ class TestRustyhogParser(DojoTestCase):
         testfile = open("unittests/scans/rusty_hog/durochog_many_vulns.json")
         parser = RustyhogParser()
         findings = parser.get_items(testfile, "Duroc Hog", Test())
-        self.assertEqual(167, len(findings))
+        self.assertEqual(33, len(findings))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding_durochog_content(self):
         testfile = open("unittests/scans/rusty_hog/durochog_many_vulns.json")
         parser = RustyhogParser()
         findings = parser.get_items(testfile, "Duroc Hog", Test())
         self.assertEqual(findings[0].title, "password (Password) found in path /scan_folder/unittests/scans/sonarqube/sonar-no-finding.html")
-        self.assertIn("**This string was found:** ['password = retrievePassword()']", findings[0].description)
         self.assertIn("**Path of Issue:** /scan_folder/unittests/scans/sonarqube/sonar-no-finding.html", findings[0].description)
         self.assertIn("**Linenum of Issue:** 68622", findings[0].description)
         self.assertIn("**Diff:** val password = retrievePassword()", findings[0].description)
