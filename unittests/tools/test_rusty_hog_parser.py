@@ -51,16 +51,17 @@ class TestRustyhogParser(DojoTestCase):
         testfile = open("unittests/scans/rusty_hog/durochog_many_vulns.json")
         parser = RustyhogParser()
         findings = parser.get_items(testfile, "Duroc Hog", Test())
-        self.assertEqual(33, len(findings))
+        self.assertEqual(4, len(findings))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding_durochog_content(self):
         testfile = open("unittests/scans/rusty_hog/durochog_many_vulns.json")
         parser = RustyhogParser()
         findings = parser.get_items(testfile, "Duroc Hog", Test())
         self.assertEqual(findings[0].title, "password (Password) found in path /scan_folder/unittests/scans/sonarqube/sonar-no-finding.html")
+        self.assertIn("**This string was found:** ['password = getEncryptedPass()']", findings[0].description)
         self.assertIn("**Path of Issue:** /scan_folder/unittests/scans/sonarqube/sonar-no-finding.html", findings[0].description)
-        self.assertIn("**Linenum of Issue:** 68622", findings[0].description)
-        self.assertIn("**Diff:** val password = retrievePassword()", findings[0].description)
+        self.assertIn("**Linenum of Issue:** 7712", findings[0].description)
+        self.assertIn("**Diff:** $password = getEncryptedPass();", findings[0].description)
         self.assertIn("Please ensure no secret material nor confidential information is kept in clear within directories, files, and archives.", findings[0].mitigation)
 
     def test_parse_file_with_no_vuln_has_no_finding_gottingenhog(self):
