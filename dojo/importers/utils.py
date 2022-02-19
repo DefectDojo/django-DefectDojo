@@ -132,29 +132,24 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
         except ValidationError as e:
             logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
                             "{}".format(e))
-        ep = None
-        try:
-            ep, created = endpoint_get_or_create(
-                protocol=endpoint.protocol,
-                userinfo=endpoint.userinfo,
-                host=endpoint.host,
-                port=endpoint.port,
-                path=endpoint.path,
-                query=endpoint.query,
-                fragment=endpoint.fragment,
-                product=test.engagement.product)
-        except (MultipleObjectsReturned):
-            pass
 
-        eps = None
-        try:
-            eps, created = Endpoint_Status.objects.get_or_create(
-                finding=finding,
-                endpoint=ep)
-            if created:
-                eps.date = finding.date
-        except (MultipleObjectsReturned):
-            pass
+        # if you have received MultipleObjectsReturned, please check https://github.com/DefectDojo/django-DefectDojo/pull/5944#issuecomment-1046058895
+        ep, created = endpoint_get_or_create(
+            protocol=endpoint.protocol,
+            userinfo=endpoint.userinfo,
+            host=endpoint.host,
+            port=endpoint.port,
+            path=endpoint.path,
+            query=endpoint.query,
+            fragment=endpoint.fragment,
+            product=test.engagement.product)
+
+        # if you have received MultipleObjectsReturned, please check https://github.com/DefectDojo/django-DefectDojo/pull/5944#issuecomment-1046058895
+        eps, created = Endpoint_Status.objects.get_or_create(
+            finding=finding,
+            endpoint=ep)
+        if created:
+            eps.date = finding.date
 
         if ep and eps:
             ep.endpoint_status.add(eps)
