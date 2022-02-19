@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
 from dojo.decorators import dojo_async_task
 from dojo.celery import app
