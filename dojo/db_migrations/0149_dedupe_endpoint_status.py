@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         Endpoint = apps.get_model('dojo', 'endpoint')
         Finding = apps.get_model('dojo', 'finding')
 
-        to_process = Endpoint_Status.objects.values('finding','endpoint').annotate(cnt=Count('id')).filter(cnt__gt=1)
+        to_process = Endpoint_Status.objects.values('finding', 'endpoint').annotate(cnt=Count('id')).filter(cnt__gt=1)
         if to_process.count() == 0:
             logger.info('There is nothing to process')
         else:
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
 
                 finding = Finding.objects.get(id=eps_group.get('finding'))
                 ep = Endpoint.objects.get(id=eps_group.get('endpoint'))
-                epss = Endpoint_Status.objects.filter(finding=finding,endpoint=ep)
+                epss = Endpoint_Status.objects.filter(finding=finding, endpoint=ep)
 
                 # we need to identify, when first was created
                 first_date = epss.order_by('date').first().date

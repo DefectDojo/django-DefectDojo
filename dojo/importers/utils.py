@@ -132,23 +132,51 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
             logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
                             "{}".format(e))
 
-        # if you have received MultipleObjectsReturned, please check https://github.com/DefectDojo/django-DefectDojo/pull/5944#issuecomment-1046058895
-        ep, created = endpoint_get_or_create(
-            protocol=endpoint.protocol,
-            userinfo=endpoint.userinfo,
-            host=endpoint.host,
-            port=endpoint.port,
-            path=endpoint.path,
-            query=endpoint.query,
-            fragment=endpoint.fragment,
-            product=test.engagement.product)
+        ep = None
+        try:
+            ep, created = endpoint_get_or_create(
+                protocol=endpoint.protocol,
+                userinfo=endpoint.userinfo,
+                host=endpoint.host,
+                port=endpoint.port,
+                path=endpoint.path,
+                query=endpoint.query,
+                fragment=endpoint.fragment,
+                product=test.engagement.product)
 
-        # if you have received MultipleObjectsReturned, please check https://github.com/DefectDojo/django-DefectDojo/pull/5944#issuecomment-1046058895
-        eps, created = Endpoint_Status.objects.get_or_create(
-            finding=finding,
-            endpoint=ep)
-        if created:
-            eps.date = finding.date
+        except (MultipleObjectsReturned):
+            raise Exception("Endpoints in your database are broken. Please access {} and migrate them to new format or"
+                            " remove them.".format(reverse('endpoint_migrate')))
+
+        eps = None
+        try:
+            eps, created = Endpoint_Status.objects.get_or_create(
+                finding=finding,
+                endpoint=ep)
+            if created:
+                eps.date = finding.date
+
+        except (MultipleObjectsReturned):
+            epss = Endpoint_Status.objects.filter(finding=finding, endpoint=ep)
+
+            # we need to identify, when first was created
+            first_date = epss.order_by('date').first().date
+
+            # next we need to know, which store the most recent information
+            last_id = epss.order_by('last_modified').last().id
+
+            logger.debug('Redundant endpoint statuses on finding: "%s" & endpoint "%s" will be removed. We are '
+                         'keeping only id: "%s" and we are setting date of the first identification: %s',
+                         str(finding), str(ep), last_id, first_date)
+
+            # Remove all except of the most fresh one
+            Endpoint_Status.objects.filter(finding=eps_group.get('finding'),
+                                           endpoint=eps_group.get('endpoint')).exclude(id=last_id).delete()
+
+            # Use the date from the oldest one
+            eps = Endpoint_Status.objects.get(id=last_id)
+            eps.date = first_date
+            eps.save()
 
         if ep and eps:
             ep.endpoint_status.add(eps)
