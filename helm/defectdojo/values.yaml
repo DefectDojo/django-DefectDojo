@@ -383,16 +383,17 @@ rabbitmq:
     fsGroup: 1001
     runAsUser: 1001
 
+# For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
 redis:
   enabled: false
   transportEncryption:
     enabled: false
     params: ''
-  existingSecret: defectdojo-redis-specific
-  secretKey: redis-password
-  password: ""
-  cluster:
-    slaveCount: 1
+  auth:
+    existingSecret: defectdojo-redis-specific
+    existingSecretPasswordKey: redis-password
+    password: ""
+  architecture: standalone
   # To use an external Redis instance, set enabled to false and uncomment
   # the line below:
   # redisServer: myrediscluster
