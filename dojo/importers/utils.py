@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
 from dojo.decorators import dojo_async_task
 from dojo.celery import app
@@ -131,7 +132,6 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
         except ValidationError as e:
             logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
                             "{}".format(e))
-
         ep = None
         try:
             ep, created = endpoint_get_or_create(
@@ -143,10 +143,9 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
                 query=endpoint.query,
                 fragment=endpoint.fragment,
                 product=test.engagement.product)
-
         except (MultipleObjectsReturned):
-            raise Exception("Endpoints in your database are broken. Please access {} and migrate them to new format or"
-                            " remove them.".format(reverse('endpoint_migrate')))
+            raise Exception("Endpoints in your database are broken. Please access {} and migrate them to new format or "
+                            "remove them.".format(reverse('endpoint_migrate')))
 
         eps = None
         try:
