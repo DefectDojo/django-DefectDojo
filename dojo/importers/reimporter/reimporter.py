@@ -101,7 +101,9 @@ class DojoDefaultReImporter(object):
                         author=user)
                     note.save()
 
-                    endpoint_statuses = finding.endpoint_status.all()
+                    endpoint_statuses = finding.endpoint_status.exclude(false_positive=True,
+                                                                        out_of_scope=True,
+                                                                        risk_accepted=True)
 
                     # Determine if this can be run async
                     if settings.ASYNC_FINDING_IMPORT:
@@ -127,6 +129,7 @@ class DojoDefaultReImporter(object):
                         finding.component_version = finding.component_version if finding.component_version else component_version
                         finding.save(dedupe_option=False)
 
+                    # if finding is the same but list of affected was changed, finding is marked as unchanged. This is known issue
                     unchanged_items.append(finding)
                     unchanged_count += 1
                 if finding.dynamic_finding:

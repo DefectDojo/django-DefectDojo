@@ -156,6 +156,8 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
                 eps.date = finding.date
 
         except (MultipleObjectsReturned):
+            # this is self-healing code
+
             epss = Endpoint_Status.objects.filter(finding=finding, endpoint=ep)
 
             # we need to identify, when first was created
