@@ -16,6 +16,7 @@ from dojo.models import (BurpRawRequestResponse, FileUpload, Finding,
                          Notes, Test_Import)
 from dojo.tools.factory import get_parser
 from dojo.utils import get_current_user
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -101,9 +102,9 @@ class DojoDefaultReImporter(object):
                         author=user)
                     note.save()
 
-                    endpoint_statuses = finding.endpoint_status.exclude(false_positive=True,
-                                                                        out_of_scope=True,
-                                                                        risk_accepted=True)
+                    endpoint_statuses = finding.endpoint_status.exclude(Q(false_positive=True) |
+                                                                        Q(out_of_scope=True) |
+                                                                        Q(risk_accepted=True))
 
                     # Determine if this can be run async
                     if settings.ASYNC_FINDING_IMPORT:

@@ -766,6 +766,17 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         self.permission_delete = Permissions.Endpoint_Edit
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_create_unsuccessful(self):
+        length = self.endpoint_model.objects.count()
+        unsucessful_payload = self.payload.copy()
+        unsucessful_payload['finding'] = 2
+        response = self.client.post(self.url, unsucessful_payload)
+        logger.debug('test_create_response:')
+        logger.debug(response)
+        logger.debug(response.data)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
+
 
 class EndpointTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
