@@ -2,7 +2,7 @@
 asteval==0.9.26
 bleach==4.1.0
 celery==5.2.2
-coverage==6.3.1
+coverage==6.3.2
 defusedxml==0.7.1
 django_celery_results==2.2.0
 django-auditlog==1.0.0
@@ -16,7 +16,7 @@ django-crispy-forms==1.14.0
 django_extensions==3.1.5
 django-slack==5.17.6
 django-tagging==0.5.0
-django-watson==1.6.1
+django-watson==1.6.2
 django-prometheus==2.2.0
 Django==3.2.12
 djangorestframework==3.13.1
@@ -25,7 +25,7 @@ html2text==2020.1.16
 humanize==4.0.0
 jira==3.0.1
 PyGithub==1.55
-lxml==4.7.1
+lxml==4.8.0
 Markdown==3.3.6
 mysqlclient==2.1.0
 openpyxl==3.0.9
@@ -47,7 +47,7 @@ titlecase==2.3
 social-auth-app-django==5.0.0
 social-auth-core==4.2.0
 Python-jose==3.3.0
-gitpython==3.1.26
+gitpython==3.1.27
 debugpy==1.5.1
 python-gitlab==3.1.1
 google-api-python-client==2.37.0
