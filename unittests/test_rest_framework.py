@@ -751,7 +751,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         self.viewset = EndpointStatusViewSet
         self.payload = {
             'endpoint': 2,
-            'finding': 2,
+            'finding': 3,
             'mitigated': False,
             'false_positive': False,
             'risk_accepted': False,

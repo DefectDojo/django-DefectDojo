@@ -27,6 +27,7 @@ from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
+from django.db.utils import IntegrityError
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
@@ -718,10 +719,16 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         endpoint = validated_data['endpoint']
         finding = validated_data['finding']
-        status = Endpoint_Status.objects.create(
-            finding=finding,
-            endpoint=endpoint
-        )
+        try:
+            status = Endpoint_Status.objects.create(
+                finding=finding,
+                endpoint=endpoint
+            )
+        except IntegrityError as ie:
+            if str(ie).split('\n')[0] == 'duplicate key value violates unique constraint "endpoint-finding relation"':
+                raise serializers.ValidationError('This endpoint-finding relation already exists')
+            else:
+                raise
         endpoint.endpoint_status.add(status)
         finding.endpoint_status.add(status)
         status.mitigated = validated_data.get('mitigated', False)

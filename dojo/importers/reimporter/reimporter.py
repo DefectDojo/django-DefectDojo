@@ -129,7 +129,7 @@ class DojoDefaultReImporter(object):
                         finding.component_version = finding.component_version if finding.component_version else component_version
                         finding.save(dedupe_option=False)
 
-                    # if finding is the same but list of affected was changed, finding is marked as unchanged. This is known issue
+                    # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
                     unchanged_items.append(finding)
                     unchanged_count += 1
                 if finding.dynamic_finding:
