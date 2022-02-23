@@ -82,7 +82,6 @@ class StackHawkParser(object):
             component_version=metadata.component_version,
             static_finding=metadata.static_finding,
             dynamic_finding=metadata.dynamic_finding,
-            unique_id_from_tool=raw_finding['pluginId'],
             vuln_id_from_tool=raw_finding['pluginId'],
             nb_occurences=raw_finding['totalCount'],
             service=metadata.service

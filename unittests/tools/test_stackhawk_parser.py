@@ -178,10 +178,11 @@ class TestStackHawkParser(DojoTestCase):
         self.assertEqual(severity_num, actual_finding.numerical_severity)
         self.assertFalse(actual_finding.static_finding)
         self.assertTrue(actual_finding.dynamic_finding)
-        self.assertEqual(finding_id, actual_finding.unique_id_from_tool)
         self.assertEqual(finding_id, actual_finding.vuln_id_from_tool)
         self.assertEqual(count, actual_finding.nb_occurences)
         self.assertEqual(application_name, actual_finding.service)
+        # The following fields should be not be set from this parser.
+        self.assertIsNone(actual_finding.unique_id_from_tool)
 
     def __assertAllEndpointsAreClean(self, findings):
         for finding in findings:
