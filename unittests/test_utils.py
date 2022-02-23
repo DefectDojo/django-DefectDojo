@@ -101,7 +101,6 @@ class TestUtils(DojoTestCase):
         mock_notifications.objects.get.assert_called_with(template=True)
         template.save.assert_called_once()
 
-
     @patch('dojo.models.System_Settings.objects')
     @patch('dojo.utils.Dojo_Group_Member')
     @patch('dojo.utils.Notifications')
