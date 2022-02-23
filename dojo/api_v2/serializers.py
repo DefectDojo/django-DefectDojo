@@ -725,7 +725,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
                 endpoint=endpoint
             )
         except IntegrityError as ie:
-            if str(ie).split('\n')[0] == 'duplicate key value violates unique constraint "endpoint-finding relation"':
+            if "endpoint-finding relation" in str(ie):
                 raise serializers.ValidationError('This endpoint-finding relation already exists')
             else:
                 raise
