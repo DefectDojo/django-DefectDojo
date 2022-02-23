@@ -1836,7 +1836,7 @@ class NotificationsSerializer(serializers.ModelSerializer):
             notifications = Notifications.objects.filter(user=user, product=product, template=False).count()
             if notifications > 0:
                 raise ValidationError("Notification for user and product already exists")
-            if Notifications.objects.filter(template=True).count() > 0:
+        if data.get('template') and  Notifications.objects.filter(template=True).count() > 0:
                 raise ValidationError("Notification template already exists")
 
         return data
