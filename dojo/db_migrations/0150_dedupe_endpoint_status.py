@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0148_default_notifications'),
+        ('dojo', '0149_harmonize_user_format'),
     ]
 
     def dedupe_endpoint_status(apps, schema_editor):

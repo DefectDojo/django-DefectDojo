@@ -166,8 +166,8 @@ class TestEndpointMigration(MigratorTestCase):
 
 # TODO: These tests can be skipped in 2.9.x or later
 class TestEndpointStatusMigration(MigratorTestCase):
-    migrate_from = ('dojo', '0148_default_notifications')
-    migrate_to = ('dojo', '0149_dedupe_endpoint_status')
+    migrate_from = ('dojo', '0149_harmonize_user_format')
+    migrate_to = ('dojo', '0150_dedupe_endpoint_status')
 
     def prepare(self):
         Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
