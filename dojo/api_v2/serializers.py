@@ -739,6 +739,15 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         status.save()
         return status
 
+    def update(self, instance, validated_data):
+        try:
+            return super().update(instance, validated_data)
+        except IntegrityError as ie:
+            if "endpoint-finding relation" in str(ie):
+                raise serializers.ValidationError('This endpoint-finding relation already exists')
+            else:
+                raise
+
 
 class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
