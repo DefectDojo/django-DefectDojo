@@ -11,13 +11,13 @@ class TestStackHawkParser(DojoTestCase):
     def test_invalid_json_format(self):
         testfile = open("unittests/scans/stackhawk/invalid.json")
         parser = StackHawkParser()
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             parser.get_findings(testfile, Test())
 
     def test_parser_ensures_data_is_for_stackhawk_before_parsing(self):
         testfile = open("unittests/scans/stackhawk/oddly_familiar_json_that_isnt_us.json")
         parser = StackHawkParser()
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             parser.get_findings(testfile, Test())
 
     def test_stackhawk_parser_with_no_vuln_has_no_findings(self):
@@ -44,7 +44,6 @@ class TestStackHawkParser(DojoTestCase):
             "Secured Application",
             "Development",
             "High",
-            1,
             "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012",
             "20012",
             "10"
@@ -65,7 +64,6 @@ class TestStackHawkParser(DojoTestCase):
             "Secured Application",
             "Development",
             "Low",
-            3,
             "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/90027",
             "90027",
             "10"
@@ -78,7 +76,6 @@ class TestStackHawkParser(DojoTestCase):
             "Secured Application",
             "Development",
             "Medium",
-            2,
             "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/40025",
             "40025",
             "10"
@@ -91,7 +88,6 @@ class TestStackHawkParser(DojoTestCase):
             "Secured Application",
             "Development",
             "High",
-            1,
             "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012",
             "20012",
             "10"
@@ -104,7 +100,6 @@ class TestStackHawkParser(DojoTestCase):
             "Secured Application",
             "Development",
             "High",
-            1,
             "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/40012",
             "40012",
             "1"
@@ -117,7 +112,6 @@ class TestStackHawkParser(DojoTestCase):
             "Secured Application",
             "Development",
             "Medium",
-            2,
             "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/10038",
             "10038",
             "12"
@@ -130,7 +124,6 @@ class TestStackHawkParser(DojoTestCase):
             "Secured Application",
             "Development",
             "Low",
-            3,
             "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/10063",
             "10063",
             "12"
@@ -157,7 +150,6 @@ class TestStackHawkParser(DojoTestCase):
             application_name,
             environment,
             severity,
-            severity_num,
             finding_url,
             finding_id,
             count
@@ -173,9 +165,6 @@ class TestStackHawkParser(DojoTestCase):
             actual_finding.steps_to_reproduce,
             "Use a specific message link and click 'Validate' to see the cURL!.*"
         )
-        self.assertTrue(actual_finding.active)
-        self.assertTrue(actual_finding.verified)
-        self.assertEqual(severity_num, actual_finding.numerical_severity)
         self.assertFalse(actual_finding.static_finding)
         self.assertTrue(actual_finding.dynamic_finding)
         self.assertEqual(finding_id, actual_finding.vuln_id_from_tool)

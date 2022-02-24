@@ -9,8 +9,6 @@ class StackHawkScanMetadata:
         self.date = completed_scan['scan']['startedTimestamp']
         self.component_name = completed_scan['scan']['application']
         self.component_version = completed_scan['scan']['env']
-        self.active = True
-        self.verified = True
         self.static_finding = False
         self.dynamic_finding = True
         self.service = completed_scan['scan']['application']
@@ -75,9 +73,6 @@ class StackHawkParser(object):
             description="View this finding in the StackHawk platform at:\n" +
                         self.__hyperlink(raw_finding['findingURL']),
             steps_to_reproduce=steps_to_reproduce,
-            active=metadata.active,
-            verified=metadata.verified,
-            numerical_severity=self.__convert_severity(raw_finding['severity']),
             component_name=metadata.component_name,
             component_version=metadata.component_version,
             static_finding=metadata.static_finding,
@@ -94,30 +89,18 @@ class StackHawkParser(object):
     def __parse_json(json_output):
         report = json.load(json_output)
 
-        if not report['scanCompleted'] or report['service'] != 'StackHawk':
+        if 'scanCompleted' not in report or 'service' not in report or report['service'] != 'StackHawk':
             # By verifying the json data, we can now make certain assumptions.
             # Specifically, that the attributes accessed when parsing the finding will always exist.
             # See our documentation for more details on this data:
             # https://docs.stackhawk.com/workflow-integrations/webhook.html#scan-completed
-            raise Exception(" Unexpected JSON format provided. "
-                            "Need help? "
-                            "Check out the StackHawk Docs at "
-                            "https://docs.stackhawk.com/workflow-integrations/defect-dojo.html"
-                            )
+            raise ValueError(" Unexpected JSON format provided. "
+                             "Need help? "
+                             "Check out the StackHawk Docs at "
+                             "https://docs.stackhawk.com/workflow-integrations/defect-dojo.html"
+                             )
 
         return report['scanCompleted']
-
-    @staticmethod
-    def __convert_severity(severity):
-        """Convert severity value"""
-        if severity == 'Low':
-            return 3
-        elif severity == 'Medium':
-            return 2
-        elif severity == 'High':
-            return 1
-        else:
-            return 4
 
     @staticmethod
     def __hyperlink(link: str) -> str:
