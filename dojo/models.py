@@ -198,7 +198,7 @@ class Dojo_User(User):
 
 
 class UserContactInfo(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(Dojo_User, on_delete=models.CASCADE)
     title = models.CharField(blank=True, null=True, max_length=150)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                  message="Phone number must be entered in the format: '+999999999'. "
@@ -511,7 +511,7 @@ class Dojo_Group_Member(models.Model):
 
 
 class Global_Role(models.Model):
-    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(Dojo_User, null=True, blank=True, on_delete=models.CASCADE)
     group = models.OneToOneField(Dojo_Group, null=True, blank=True, on_delete=models.CASCADE)
     role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, blank=True, help_text="The global role will be applied to all product types and products.", verbose_name="Global role")
 
@@ -541,7 +541,7 @@ class NoteHistory(models.Model):
     data = models.TextField()
     time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
-    current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
+    current_editor = models.ForeignKey(Dojo_User, editable=False, null=True, on_delete=models.CASCADE)
 
 
 class Notes(models.Model):
@@ -549,10 +549,10 @@ class Notes(models.Model):
     entry = models.TextField()
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
-    author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
+    author = models.ForeignKey(Dojo_User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
     private = models.BooleanField(default=False)
     edited = models.BooleanField(default=False)
-    editor = models.ForeignKey(User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
+    editor = models.ForeignKey(Dojo_User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
     edit_time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
     history = models.ManyToManyField(NoteHistory, blank=True,
@@ -1092,7 +1092,7 @@ class Engagement(models.Model):
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
-    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     requester = models.ForeignKey(Contact, null=True, blank=True, on_delete=models.CASCADE)
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
@@ -1217,7 +1217,7 @@ class Endpoint_Status(models.Model):
     last_modified = models.DateTimeField(null=True, editable=False, default=get_current_datetime)
     mitigated = models.BooleanField(default=False, blank=True)
     mitigated_time = models.DateTimeField(editable=False, null=True, blank=True)
-    mitigated_by = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
+    mitigated_by = models.ForeignKey(Dojo_User, editable=True, null=True, on_delete=models.RESTRICT)
     false_positive = models.BooleanField(default=False, blank=True)
     out_of_scope = models.BooleanField(default=False, blank=True)
     risk_accepted = models.BooleanField(default=False, blank=True)
@@ -1553,7 +1553,7 @@ class Sonarqube_Issue_Transition(models.Model):
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
-    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
     scan_type = models.TextField(null=True)
     title = models.CharField(max_length=255, null=True, blank=True)
@@ -1827,7 +1827,7 @@ class Finding(models.Model):
                                             on_delete=models.RESTRICT,
                                             verbose_name="Review Requested By",
                                             help_text="Documents who requested a review for this finding.")
-    reviewers = models.ManyToManyField(User,
+    reviewers = models.ManyToManyField(Dojo_User,
                                        blank=True,
                                        verbose_name="Reviewers",
                                        help_text="Documents who reviewed the flaw.")
@@ -1854,14 +1854,14 @@ class Finding(models.Model):
                                      blank=True,
                                      verbose_name="Mitigated",
                                      help_text="Denotes if this flaw has been fixed by storing the date it was fixed.")
-    mitigated_by = models.ForeignKey(User,
+    mitigated_by = models.ForeignKey(Dojo_User,
                                      null=True,
                                      editable=False,
                                      related_name="mitigated_by",
                                      on_delete=models.RESTRICT,
                                      verbose_name="Mitigated By",
                                      help_text="Documents who has marked this flaw as fixed.")
-    reporter = models.ForeignKey(User,
+    reporter = models.ForeignKey(Dojo_User,
                                  editable=False,
                                  default=1,
                                  related_name='reporter',
@@ -1880,7 +1880,7 @@ class Finding(models.Model):
                                          editable=False,
                                          verbose_name="Last Reviewed",
                                          help_text="Provides the date the flaw was last 'touched' by a tester.")
-    last_reviewed_by = models.ForeignKey(User,
+    last_reviewed_by = models.ForeignKey(Dojo_User,
                                          null=True,
                                          editable=False,
                                          related_name='last_reviewed_by',
@@ -2576,7 +2576,7 @@ class Stub_Finding(models.Model):
     severity = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
-    reporter = models.ForeignKey(User, editable=False, default=1, on_delete=models.RESTRICT)
+    reporter = models.ForeignKey(Dojo_User, editable=False, default=1, on_delete=models.RESTRICT)
 
     class Meta:
         ordering = ('-date', 'title')
@@ -2865,7 +2865,7 @@ class FileAccessToken(models.Model):
     """This will allow reports to request the images without exposing the
     media root to the world without
     authentication"""
-    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(Dojo_User, null=False, blank=False, on_delete=models.CASCADE)
     file = models.ForeignKey(FileUpload, null=False, blank=False, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
     size = models.CharField(max_length=9,
@@ -3211,7 +3211,7 @@ class Alerts(models.Model):
     url = models.URLField(max_length=2000, null=True, blank=True)
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
-    user_id = models.ForeignKey(User, null=True, editable=False, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     class Meta:
@@ -3278,7 +3278,7 @@ class Language_Type(models.Model):
 class Languages(models.Model):
     language = models.ForeignKey(Language_Type, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, editable=True, blank=True, null=True, on_delete=models.RESTRICT)
+    user = models.ForeignKey(Dojo_User, editable=True, blank=True, null=True, on_delete=models.RESTRICT)
     files = models.IntegerField(blank=True, null=True, verbose_name='Number of files')
     blank = models.IntegerField(blank=True, null=True, verbose_name='Number of blank lines')
     comment = models.IntegerField(blank=True, null=True, verbose_name='Number of comment lines')
@@ -3295,7 +3295,7 @@ class Languages(models.Model):
 class App_Analysis(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     name = models.CharField(max_length=200, null=False)
-    user = models.ForeignKey(User, editable=True, on_delete=models.RESTRICT)
+    user = models.ForeignKey(Dojo_User, editable=True, on_delete=models.RESTRICT)
     confidence = models.IntegerField(blank=True, null=True, verbose_name='Confidence level')
     version = models.CharField(max_length=200, null=True, blank=True, verbose_name='Version Number')
     icon = models.CharField(max_length=200, null=True, blank=True)
@@ -3639,11 +3639,11 @@ class Answered_Survey(models.Model):
                                    on_delete=models.CASCADE)
     # what surveys have been answered
     survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
-    assignee = models.ForeignKey(User, related_name='assignee',
+    assignee = models.ForeignKey(Dojo_User, related_name='assignee',
                                   null=True, blank=True, editable=True,
                                   default=None, on_delete=models.RESTRICT)
     # who answered it
-    responder = models.ForeignKey(User, related_name='responder',
+    responder = models.ForeignKey(Dojo_User, related_name='responder',
                                   null=True, blank=True, editable=True,
                                   default=None, on_delete=models.RESTRICT)
     completed = models.BooleanField(default=False)
