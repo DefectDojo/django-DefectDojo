@@ -7,11 +7,12 @@ logger = logging.getLogger(__name__)
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0148_default_notifications'),
+        ('dojo', '0149_harmonize_user_format'),
     ]
 
     def migrate_endpoint_mitigated(apps, schema_editor):
-        Endpoint = apps.get_model('dojo', 'endpoint')
+        Endpoint = apps.get_model('dojo', 'Endpoint')
+        Endpoint_Status = apps.get_model('dojo', 'Endpoint_Status')
 
         all_ep = Endpoint.objects.filter(mitigated=True)
 
@@ -28,7 +29,7 @@ class Migration(migrations.Migration):
                     eps.mitigated = True
                     eps.mitigated_by = eps.finding.reporter
                     eps.save()
-                    logger.debug('Status for finding "{}" on endpoint "{}" marked as mitigated at "{}" by "{}',
+                    logger.debug('Status for finding "%s" on endpoint "%s" marked as mitigated at "%s" by "%s"',
                                  str(eps.finding),
                                  str(ep),
                                  eps.date,
