@@ -1611,16 +1611,55 @@ class Test(models.Model):
         self.engagement.risk_acceptance.add(*accepted_risks)
 
     @property
-    def dedupe_algo(self):
+    def deduplication_algorithm(self):
         deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
+
         if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
-            scan_type = self.test_type.name
+            if (self.test_type.name in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+                deduplicationLogger.debug(f'using DEDUPLICATION_ALGORITHM_PER_PARSER for test_type.name: {self.test_type.name}')
+                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[self.test_type.name]
+            elif (self.scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+                deduplicationLogger.debug(f'using DEDUPLICATION_ALGORITHM_PER_PARSER for scan_type: {self.scan_type}')
+                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[self.scan_type]
+        else:
+            deduplicationLogger.debug('Section DEDUPLICATION_ALGORITHM_PER_PARSER not found in settings.dist.py')
 
-            # Check for an override for this scan_type in the deduplication configuration
-            if (scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
-                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[scan_type]
-
+        deduplicationLogger.debug(f'DEDUPLICATION_ALGORITHM_PER_PARSER is: {deduplicationAlgorithm}')
         return deduplicationAlgorithm
+
+    @property
+    def hash_code_fields(self):
+        hashCodeFields = None
+
+        if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER'):
+            if (self.test_type.name in settings.HASHCODE_FIELDS_PER_SCANNER):
+                deduplicationLogger.debug(f'using HASHCODE_FIELDS_PER_SCANNER for test_type.name: {self.test_type.name}')
+                hashCodeFields = settings.HASHCODE_FIELDS_PER_SCANNER[self.test_type.name]
+            elif (self.scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
+                deduplicationLogger.debug(f'using HASHCODE_FIELDS_PER_SCANNER for scan_type: {self.scan_type}')
+                hashCodeFields = settings.HASHCODE_FIELDS_PER_SCANNER[self.scan_type]
+        else:
+            deduplicationLogger.debug('Section HASHCODE_FIELDS_PER_SCANNER not found in settings.dist.py')
+
+        deduplicationLogger.debug(f'HASHCODE_FIELDS_PER_SCANNER is: {hashCodeFields}')
+        return hashCodeFields
+
+    @property
+    def hash_code_allows_null_cwe(self):
+        hashCodeAllowsNullCwe = True
+
+        if hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE'):
+            if (self.test_type.name in settings.HASHCODE_ALLOWS_NULL_CWE):
+                deduplicationLogger.debug(f'using HASHCODE_ALLOWS_NULL_CWE for test_type.name: {self.test_type.name}')
+                hashCodeAllowsNullCwe = settings.HASHCODE_ALLOWS_NULL_CWE[self.test_type.name]
+            elif (self.scan_type in settings.HASHCODE_ALLOWS_NULL_CWE):
+                deduplicationLogger.debug(f'using HASHCODE_ALLOWS_NULL_CWE for scan_type: {self.scan_type}')
+                hashCodeAllowsNullCwe = settings.HASHCODE_ALLOWS_NULL_CWE[self.scan_type]
+        else:
+            deduplicationLogger.debug('Section HASHCODE_ALLOWS_NULL_CWE not found in settings.dist.py')
+
+        deduplicationLogger.debug(f'HASHCODE_ALLOWS_NULL_CWE is: {hashCodeAllowsNullCwe}')
+        return hashCodeAllowsNullCwe
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -2072,55 +2111,49 @@ class Finding(models.Model):
         return None
 
     def compute_hash_code(self):
-        if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
-            # Check for an override for this scan_type in the deduplication configuration
-            scan_type = self.test.test_type.name
-            if (scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
-                hashcodeFieldsCandidate = settings.HASHCODE_FIELDS_PER_SCANNER[scan_type]
-                # check that the configuration is valid: all elements of HASHCODE_FIELDS_PER_SCANNER should be in HASHCODE_ALLOWED_FIELDS
-                if (all(elem in settings.HASHCODE_ALLOWED_FIELDS for elem in hashcodeFieldsCandidate)):
-                    # Makes sure that we have a cwe if we need one
-                    if (scan_type in settings.HASHCODE_ALLOWS_NULL_CWE):
-                        if (settings.HASHCODE_ALLOWS_NULL_CWE[scan_type] or self.cwe != 0):
-                            hashcodeFields = hashcodeFieldsCandidate
-                        else:
-                            deduplicationLogger.warn(
-                                "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
-                                "'. Fallback to legacy mode for this finding.")
-                            return self.compute_hash_code_legacy()
-                    else:
-                        # no configuration found for this scanner: defaulting to accepting null cwe when we find one
-                        hashcodeFields = hashcodeFieldsCandidate
-                        if(self.cwe == 0):
-                            deduplicationLogger.debug(
-                                "Accepting null cwe by default for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
-                                "'. This is because no configuration was found for scanner " + scan_type + " in HASHCODE_ALLOWS_NULL_CWE")
-                else:
-                    deduplicationLogger.debug(
-                        "compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. "
-                        "Using default fields")
-                    return self.compute_hash_code_legacy()
-            else:
-                deduplicationLogger.debug(
-                    "No configuration for hash_code computation found; using default fields for " + ('dynamic' if self.dynamic_finding else 'static') + ' scanners')
-                return self.compute_hash_code_legacy()
-            deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " for scan_type " + scan_type + " based on: " + ', '.join(hashcodeFields))
-            fields_to_hash = ''
-            for hashcodeField in hashcodeFields:
-                if(hashcodeField != 'endpoints'):
-                    # Generically use the finding attribute having the same name, converts to str in case it's integer
-                    fields_to_hash = fields_to_hash + str(getattr(self, hashcodeField))
-                    deduplicationLogger.debug(hashcodeField + ' : ' + str(getattr(self, hashcodeField)))
-                else:
-                    # For endpoints, need to compute the field
-                    myEndpoints = self.get_endpoints()
-                    fields_to_hash = fields_to_hash + myEndpoints
-                    deduplicationLogger.debug(hashcodeField + ' : ' + myEndpoints)
-            deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
-            return self.hash_fields(fields_to_hash)
-        else:
+
+        # Check if all needed settings are defined
+        if not hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') or not hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') or not hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             deduplicationLogger.debug("no or incomplete configuration per hash_code found; using legacy algorithm")
             return self.compute_hash_code_legacy()
+
+        hash_code_fields = self.test.hash_code_fields
+
+        # Check if hash_code fields are found in the settings
+        if not hash_code_fields:
+            deduplicationLogger.debug(
+                "No configuration for hash_code computation found; using default fields for " + ('dynamic' if self.dynamic_finding else 'static') + ' scanners')
+            return self.compute_hash_code_legacy()
+
+        # Check if all elements of HASHCODE_FIELDS_PER_SCANNER are in HASHCODE_ALLOWED_FIELDS
+        if not (all(elem in settings.HASHCODE_ALLOWED_FIELDS for elem in hash_code_fields)):
+            deduplicationLogger.debug(
+                "compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. "
+                "Using default fields")
+            return self.compute_hash_code_legacy()
+
+        # Make sure that we have a cwe if we need one
+        if self.cwe == 0 and not self.test.hash_code_allows_null_cwe:
+            deduplicationLogger.warn(
+                "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
+                "'. Fallback to legacy mode for this finding.")
+            return self.compute_hash_code_legacy()
+
+        deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " based on: " + ', '.join(hash_code_fields))
+
+        fields_to_hash = ''
+        for hashcodeField in hash_code_fields:
+            if(hashcodeField != 'endpoints'):
+                # Generically use the finding attribute having the same name, converts to str in case it's integer
+                fields_to_hash = fields_to_hash + str(getattr(self, hashcodeField))
+                deduplicationLogger.debug(hashcodeField + ' : ' + str(getattr(self, hashcodeField)))
+            else:
+                # For endpoints, need to compute the field
+                myEndpoints = self.get_endpoints()
+                fields_to_hash = fields_to_hash + myEndpoints
+                deduplicationLogger.debug(hashcodeField + ' : ' + myEndpoints)
+        deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
+        return self.hash_fields(fields_to_hash)
 
     def compute_hash_code_legacy(self):
         fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
