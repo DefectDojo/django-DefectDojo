@@ -1068,6 +1068,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'CycloneDX Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'SSLyze Scan (JSON)': ['title', 'description'],
     'Harbor Vulnerability Scan': ['title'],
+    'Rusty Hog Scan': ['title', 'description'],
     'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
 }
 
@@ -1199,6 +1200,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'CycloneDX Scan': DEDUPE_ALGO_HASH_CODE,
     'SSLyze Scan (JSON)': DEDUPE_ALGO_HASH_CODE,
     'Harbor Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
+    'Rusty Hog Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
