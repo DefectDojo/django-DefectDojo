@@ -60,10 +60,16 @@ class StackHawkParser(object):
         host = raw_finding['host']
         endpoints = []
 
-        for path in raw_finding['paths']:
-            steps_to_reproduce += '**' + path['path'] + '**\n' + self.__hyperlink(path['pathURL']) + '\n'
+        paths = raw_finding['paths']
+        for path in paths:
+            steps_to_reproduce += '**' + path['path'] + '**' +\
+                                  self.__endpoint_status(path['status']) +\
+                                  '\n' + self.__hyperlink(path['pathURL']) + '\n'
             endpoint = Endpoint.from_uri(host + path['path'])
             endpoints.append(endpoint)
+
+        are_all_endpoints_risk_accepted = self.__are_all_endpoints_in_status(paths, 'RISK_ACCEPTED')
+        are_all_endpoints_false_positive = self.__are_all_endpoints_in_status(paths, 'FALSE_POSITIVE')
 
         finding = Finding(
             test=test,
@@ -79,7 +85,9 @@ class StackHawkParser(object):
             dynamic_finding=metadata.dynamic_finding,
             vuln_id_from_tool=raw_finding['pluginId'],
             nb_occurences=raw_finding['totalCount'],
-            service=metadata.service
+            service=metadata.service,
+            false_p=are_all_endpoints_false_positive,
+            risk_accepted=are_all_endpoints_risk_accepted
         )
 
         finding.unsaved_endpoints.extend(endpoints)
@@ -105,3 +113,18 @@ class StackHawkParser(object):
     @staticmethod
     def __hyperlink(link: str) -> str:
         return '[' + link + '](' + link + ')'
+
+    @staticmethod
+    def __endpoint_status(status: str) -> str:
+        if status == 'NEW':
+            return '** - New**'
+        elif status == 'RISK_ACCEPTED':
+            return '** - Marked "Risk Accepted"**'
+        elif status == 'FALSE_POSITIVE':
+            return '** - Marked "False Positive"**'
+        else:
+            return ""
+
+    @staticmethod
+    def __are_all_endpoints_in_status(paths, check_status: str) -> bool:
+        return all(item['status'] == check_status for item in paths)
