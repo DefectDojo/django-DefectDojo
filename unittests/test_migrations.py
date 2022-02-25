@@ -160,6 +160,7 @@ class TestEndpointMigration(MigratorTestCase):
         self.assertEqual(eps.count(), 1)
         self.assertFalse(eps[0].mitigated)
 
+
 # TODO: These tests can be skipped in 2.9.x or later
 class TestRemoveEndpointMitigatedMigration(MigratorTestCase):
     migrate_from = ('dojo', '0149_harmonize_user_format')
