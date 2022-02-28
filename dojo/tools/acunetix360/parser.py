@@ -17,14 +17,24 @@ class Acunetix360Parser(object):
         return "Acunetix360 JSON format."
 
     def get_findings(self, filename, test):
-        data = json.load(filename)
+        tree = filename.read()
+        try:
+            data = json.loads(str(tree, 'utf-8-sig'))
+        except:
+            data = json.loads(tree)
         dupes = dict()
         scan_date = datetime.datetime.strptime(data["Generated"], "%d/%m/%Y %H:%M %p").date()
 
         for item in data["Vulnerabilities"]:
             title = item["Name"]
             findingdetail = html2text.html2text(item.get("Description", ""))
-            cwe = int(item["Classification"]["Cwe"]) if "Cwe" in item["Classification"] else None
+            if "Cwe" in item["Classification"]:
+                try:
+                    cwe = int(item["Classification"]["Cwe"].split(',')[0])
+                except:
+                    cwe = None
+            else:
+                cwe = None
             sev = item["Severity"]
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'
@@ -50,6 +60,16 @@ class Acunetix360Parser(object):
                               references=references,
                               cwe=cwe,
                               static_finding=True)
+
+            if item["State"].find("FalsePositive") != -1:
+                finding.active = False
+                finding.verified = False
+                finding.false_p = True
+                finding.mitigated = None
+                finding.is_mitigated = False
+
+            if item["State"].find("AcceptedRisk") != -1:
+                finding.risk_accepted = True
 
             if (item["Classification"] is not None) and (item["Classification"]["Cvss"] is not None) and (item["Classification"]["Cvss"]["Vector"] is not None):
                 finding.cvssv3 = item["Classification"]["Cvss"]["Vector"]
