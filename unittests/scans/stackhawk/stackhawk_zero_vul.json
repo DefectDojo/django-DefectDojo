@@ -1,0 +1,31 @@
+{
+  "service": "StackHawk",
+  "scanCompleted": {
+    "scan": {
+      "id": "e2ff5651-7eef-47e9-b743-0c2f7d861e27",
+      "hawkscanVersion": "2.1.1",
+      "env": "Development",
+      "status": "COMPLETED",
+      "application": "Secured Application",
+      "startedTimestamp": "2022-02-16T23:07:19.575Z",
+      "scanURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27"
+    },
+    "scanDuration": "21",
+    "spiderDuration": "45",
+    "completedScanStats": {
+      "urlsCount": "31",
+      "duration": "66",
+      "scanResultsStats": {
+        "totalCount": "0",
+        "lowCount": "0",
+        "mediumCount": "0",
+        "highCount": "0",
+        "lowTriagedCount": "0",
+        "mediumTriagedCount": "0",
+        "highTriagedCount": "0"
+      }
+    },
+    "findings": [
+    ]
+  }
+}
