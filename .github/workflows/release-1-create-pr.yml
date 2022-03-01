@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout from_branch branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.from_branch }}
       - name: Create release branch
@@ -39,7 +39,7 @@ jobs:
         if: "!startsWith('${{ github.event.inputs.from_branch }}', 'release/')"
         run: git push origin HEAD:${NEW_BRANCH}
       - name: Checkout release branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ env.NEW_BRANCH }}
       - name: Update version numbers in key files

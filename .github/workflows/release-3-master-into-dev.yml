@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout master
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: master
       - name: Create merge back branch
@@ -33,7 +33,7 @@ jobs:
       - name: Push new branch
         run: git push origin HEAD:${NEW_BRANCH}
       - name: Checkout new branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ env.NEW_BRANCH }}
       - name: Update version numbers in key files
