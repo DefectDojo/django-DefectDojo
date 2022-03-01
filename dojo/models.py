@@ -15,7 +15,7 @@ from django.db.models.expressions import Case, When
 from django.urls import reverse
 from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, connection
 from django.db.models import Q, Count
 from django.db.models.functions import Lower
 from django_extensions.db.models import TimeStampedModel
@@ -198,7 +198,7 @@ class Dojo_User(User):
 
 
 class UserContactInfo(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(Dojo_User, on_delete=models.CASCADE)
     title = models.CharField(blank=True, null=True, max_length=150)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                  message="Phone number must be entered in the format: '+999999999'. "
@@ -511,7 +511,7 @@ class Dojo_Group_Member(models.Model):
 
 
 class Global_Role(models.Model):
-    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(Dojo_User, null=True, blank=True, on_delete=models.CASCADE)
     group = models.OneToOneField(Dojo_Group, null=True, blank=True, on_delete=models.CASCADE)
     role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, blank=True, help_text="The global role will be applied to all product types and products.", verbose_name="Global role")
 
@@ -541,7 +541,7 @@ class NoteHistory(models.Model):
     data = models.TextField()
     time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
-    current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
+    current_editor = models.ForeignKey(Dojo_User, editable=False, null=True, on_delete=models.CASCADE)
 
 
 class Notes(models.Model):
@@ -549,10 +549,10 @@ class Notes(models.Model):
     entry = models.TextField()
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
-    author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
+    author = models.ForeignKey(Dojo_User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
     private = models.BooleanField(default=False)
     edited = models.BooleanField(default=False)
-    editor = models.ForeignKey(User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
+    editor = models.ForeignKey(Dojo_User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
     edit_time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
     history = models.ManyToManyField(NoteHistory, blank=True,
@@ -1092,7 +1092,7 @@ class Engagement(models.Model):
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
-    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     requester = models.ForeignKey(Contact, null=True, blank=True, on_delete=models.CASCADE)
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
@@ -1217,7 +1217,7 @@ class Endpoint_Status(models.Model):
     last_modified = models.DateTimeField(null=True, editable=False, default=get_current_datetime)
     mitigated = models.BooleanField(default=False, blank=True)
     mitigated_time = models.DateTimeField(editable=False, null=True, blank=True)
-    mitigated_by = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
+    mitigated_by = models.ForeignKey(Dojo_User, editable=True, null=True, on_delete=models.RESTRICT)
     false_positive = models.BooleanField(default=False, blank=True)
     out_of_scope = models.BooleanField(default=False, blank=True)
     risk_accepted = models.BooleanField(default=False, blank=True)
@@ -1281,6 +1281,8 @@ class Endpoint(models.Model):
 
     def clean(self):
         errors = []
+        null_char_list = ["0x00", "\x00"]
+        db_type = connection.vendor
         if self.protocol or self.protocol == '':
             if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.protocol):  # https://tools.ietf.org/html/rfc3986#section-3.1
                 errors.append(ValidationError('Protocol "{}" has invalid format'.format(self.protocol)))
@@ -1314,18 +1316,39 @@ class Endpoint(models.Model):
         if self.path or self.path == '':
             while len(self.path) > 0 and self.path[0] == "/":  # Endpoint store "root-less" path
                 self.path = self.path[1:]
+            if any([null_char in self.path for null_char in null_char_list]):
+                old_value = self.path
+                if 'postgres' in db_type:
+                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
+                    for remove_str in null_char_list:
+                        self.path = self.path.replace(remove_str, '%00')
+                    errors.append(ValidationError('Path "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.path == '':
                 self.path = None
 
         if self.query or self.query == '':
             if len(self.query) > 0 and self.query[0] == "?":
                 self.query = self.query[1:]
+            if any([null_char in self.query for null_char in null_char_list]):
+                old_value = self.query
+                if 'postgres' in db_type:
+                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
+                    for remove_str in null_char_list:
+                        self.query = self.query.replace(remove_str, '%00')
+                    errors.append(ValidationError('Query "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.query == '':
                 self.query = None
 
         if self.fragment or self.fragment == '':
             if len(self.fragment) > 0 and self.fragment[0] == "#":
                 self.fragment = self.fragment[1:]
+            if any([null_char in self.fragment for null_char in null_char_list]):
+                old_value = self.fragment
+                if 'postgres' in db_type:
+                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
+                    for remove_str in null_char_list:
+                        self.fragment = self.fragment.replace(remove_str, '%00')
+                    errors.append(ValidationError('Fragment "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
             if self.fragment == '':
                 self.fragment = None
 
@@ -1528,7 +1551,7 @@ class Sonarqube_Issue_Transition(models.Model):
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
-    lead = models.ForeignKey(User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
+    lead = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
     scan_type = models.TextField(null=True)
     title = models.CharField(max_length=255, null=True, blank=True)
@@ -1588,16 +1611,55 @@ class Test(models.Model):
         self.engagement.risk_acceptance.add(*accepted_risks)
 
     @property
-    def dedupe_algo(self):
+    def deduplication_algorithm(self):
         deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
+
         if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
-            scan_type = self.test_type.name
+            if (self.test_type.name in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+                deduplicationLogger.debug(f'using DEDUPLICATION_ALGORITHM_PER_PARSER for test_type.name: {self.test_type.name}')
+                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[self.test_type.name]
+            elif (self.scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+                deduplicationLogger.debug(f'using DEDUPLICATION_ALGORITHM_PER_PARSER for scan_type: {self.scan_type}')
+                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[self.scan_type]
+        else:
+            deduplicationLogger.debug('Section DEDUPLICATION_ALGORITHM_PER_PARSER not found in settings.dist.py')
 
-            # Check for an override for this scan_type in the deduplication configuration
-            if (scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
-                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[scan_type]
-
+        deduplicationLogger.debug(f'DEDUPLICATION_ALGORITHM_PER_PARSER is: {deduplicationAlgorithm}')
         return deduplicationAlgorithm
+
+    @property
+    def hash_code_fields(self):
+        hashCodeFields = None
+
+        if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER'):
+            if (self.test_type.name in settings.HASHCODE_FIELDS_PER_SCANNER):
+                deduplicationLogger.debug(f'using HASHCODE_FIELDS_PER_SCANNER for test_type.name: {self.test_type.name}')
+                hashCodeFields = settings.HASHCODE_FIELDS_PER_SCANNER[self.test_type.name]
+            elif (self.scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
+                deduplicationLogger.debug(f'using HASHCODE_FIELDS_PER_SCANNER for scan_type: {self.scan_type}')
+                hashCodeFields = settings.HASHCODE_FIELDS_PER_SCANNER[self.scan_type]
+        else:
+            deduplicationLogger.debug('Section HASHCODE_FIELDS_PER_SCANNER not found in settings.dist.py')
+
+        deduplicationLogger.debug(f'HASHCODE_FIELDS_PER_SCANNER is: {hashCodeFields}')
+        return hashCodeFields
+
+    @property
+    def hash_code_allows_null_cwe(self):
+        hashCodeAllowsNullCwe = True
+
+        if hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE'):
+            if (self.test_type.name in settings.HASHCODE_ALLOWS_NULL_CWE):
+                deduplicationLogger.debug(f'using HASHCODE_ALLOWS_NULL_CWE for test_type.name: {self.test_type.name}')
+                hashCodeAllowsNullCwe = settings.HASHCODE_ALLOWS_NULL_CWE[self.test_type.name]
+            elif (self.scan_type in settings.HASHCODE_ALLOWS_NULL_CWE):
+                deduplicationLogger.debug(f'using HASHCODE_ALLOWS_NULL_CWE for scan_type: {self.scan_type}')
+                hashCodeAllowsNullCwe = settings.HASHCODE_ALLOWS_NULL_CWE[self.scan_type]
+        else:
+            deduplicationLogger.debug('Section HASHCODE_ALLOWS_NULL_CWE not found in settings.dist.py')
+
+        deduplicationLogger.debug(f'HASHCODE_ALLOWS_NULL_CWE is: {hashCodeAllowsNullCwe}')
+        return hashCodeAllowsNullCwe
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1802,7 +1864,7 @@ class Finding(models.Model):
                                             on_delete=models.RESTRICT,
                                             verbose_name="Review Requested By",
                                             help_text="Documents who requested a review for this finding.")
-    reviewers = models.ManyToManyField(User,
+    reviewers = models.ManyToManyField(Dojo_User,
                                        blank=True,
                                        verbose_name="Reviewers",
                                        help_text="Documents who reviewed the flaw.")
@@ -1829,14 +1891,14 @@ class Finding(models.Model):
                                      blank=True,
                                      verbose_name="Mitigated",
                                      help_text="Denotes if this flaw has been fixed by storing the date it was fixed.")
-    mitigated_by = models.ForeignKey(User,
+    mitigated_by = models.ForeignKey(Dojo_User,
                                      null=True,
                                      editable=False,
                                      related_name="mitigated_by",
                                      on_delete=models.RESTRICT,
                                      verbose_name="Mitigated By",
                                      help_text="Documents who has marked this flaw as fixed.")
-    reporter = models.ForeignKey(User,
+    reporter = models.ForeignKey(Dojo_User,
                                  editable=False,
                                  default=1,
                                  related_name='reporter',
@@ -1855,7 +1917,7 @@ class Finding(models.Model):
                                          editable=False,
                                          verbose_name="Last Reviewed",
                                          help_text="Provides the date the flaw was last 'touched' by a tester.")
-    last_reviewed_by = models.ForeignKey(User,
+    last_reviewed_by = models.ForeignKey(Dojo_User,
                                          null=True,
                                          editable=False,
                                          related_name='last_reviewed_by',
@@ -2049,55 +2111,49 @@ class Finding(models.Model):
         return None
 
     def compute_hash_code(self):
-        if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
-            # Check for an override for this scan_type in the deduplication configuration
-            scan_type = self.test.test_type.name
-            if (scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
-                hashcodeFieldsCandidate = settings.HASHCODE_FIELDS_PER_SCANNER[scan_type]
-                # check that the configuration is valid: all elements of HASHCODE_FIELDS_PER_SCANNER should be in HASHCODE_ALLOWED_FIELDS
-                if (all(elem in settings.HASHCODE_ALLOWED_FIELDS for elem in hashcodeFieldsCandidate)):
-                    # Makes sure that we have a cwe if we need one
-                    if (scan_type in settings.HASHCODE_ALLOWS_NULL_CWE):
-                        if (settings.HASHCODE_ALLOWS_NULL_CWE[scan_type] or self.cwe != 0):
-                            hashcodeFields = hashcodeFieldsCandidate
-                        else:
-                            deduplicationLogger.warn(
-                                "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
-                                "'. Fallback to legacy mode for this finding.")
-                            return self.compute_hash_code_legacy()
-                    else:
-                        # no configuration found for this scanner: defaulting to accepting null cwe when we find one
-                        hashcodeFields = hashcodeFieldsCandidate
-                        if(self.cwe == 0):
-                            deduplicationLogger.debug(
-                                "Accepting null cwe by default for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
-                                "'. This is because no configuration was found for scanner " + scan_type + " in HASHCODE_ALLOWS_NULL_CWE")
-                else:
-                    deduplicationLogger.debug(
-                        "compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. "
-                        "Using default fields")
-                    return self.compute_hash_code_legacy()
-            else:
-                deduplicationLogger.debug(
-                    "No configuration for hash_code computation found; using default fields for " + ('dynamic' if self.dynamic_finding else 'static') + ' scanners')
-                return self.compute_hash_code_legacy()
-            deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " for scan_type " + scan_type + " based on: " + ', '.join(hashcodeFields))
-            fields_to_hash = ''
-            for hashcodeField in hashcodeFields:
-                if(hashcodeField != 'endpoints'):
-                    # Generically use the finding attribute having the same name, converts to str in case it's integer
-                    fields_to_hash = fields_to_hash + str(getattr(self, hashcodeField))
-                    deduplicationLogger.debug(hashcodeField + ' : ' + str(getattr(self, hashcodeField)))
-                else:
-                    # For endpoints, need to compute the field
-                    myEndpoints = self.get_endpoints()
-                    fields_to_hash = fields_to_hash + myEndpoints
-                    deduplicationLogger.debug(hashcodeField + ' : ' + myEndpoints)
-            deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
-            return self.hash_fields(fields_to_hash)
-        else:
+
+        # Check if all needed settings are defined
+        if not hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') or not hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') or not hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             deduplicationLogger.debug("no or incomplete configuration per hash_code found; using legacy algorithm")
             return self.compute_hash_code_legacy()
+
+        hash_code_fields = self.test.hash_code_fields
+
+        # Check if hash_code fields are found in the settings
+        if not hash_code_fields:
+            deduplicationLogger.debug(
+                "No configuration for hash_code computation found; using default fields for " + ('dynamic' if self.dynamic_finding else 'static') + ' scanners')
+            return self.compute_hash_code_legacy()
+
+        # Check if all elements of HASHCODE_FIELDS_PER_SCANNER are in HASHCODE_ALLOWED_FIELDS
+        if not (all(elem in settings.HASHCODE_ALLOWED_FIELDS for elem in hash_code_fields)):
+            deduplicationLogger.debug(
+                "compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. "
+                "Using default fields")
+            return self.compute_hash_code_legacy()
+
+        # Make sure that we have a cwe if we need one
+        if self.cwe == 0 and not self.test.hash_code_allows_null_cwe:
+            deduplicationLogger.warn(
+                "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
+                "'. Fallback to legacy mode for this finding.")
+            return self.compute_hash_code_legacy()
+
+        deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " based on: " + ', '.join(hash_code_fields))
+
+        fields_to_hash = ''
+        for hashcodeField in hash_code_fields:
+            if(hashcodeField != 'endpoints'):
+                # Generically use the finding attribute having the same name, converts to str in case it's integer
+                fields_to_hash = fields_to_hash + str(getattr(self, hashcodeField))
+                deduplicationLogger.debug(hashcodeField + ' : ' + str(getattr(self, hashcodeField)))
+            else:
+                # For endpoints, need to compute the field
+                myEndpoints = self.get_endpoints()
+                fields_to_hash = fields_to_hash + myEndpoints
+                deduplicationLogger.debug(hashcodeField + ' : ' + myEndpoints)
+        deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
+        return self.hash_fields(fields_to_hash)
 
     def compute_hash_code_legacy(self):
         fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
@@ -2551,7 +2607,7 @@ class Stub_Finding(models.Model):
     severity = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
-    reporter = models.ForeignKey(User, editable=False, default=1, on_delete=models.RESTRICT)
+    reporter = models.ForeignKey(Dojo_User, editable=False, default=1, on_delete=models.RESTRICT)
 
     class Meta:
         ordering = ('-date', 'title')
@@ -2840,7 +2896,7 @@ class FileAccessToken(models.Model):
     """This will allow reports to request the images without exposing the
     media root to the world without
     authentication"""
-    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(Dojo_User, null=False, blank=False, on_delete=models.CASCADE)
     file = models.ForeignKey(FileUpload, null=False, blank=False, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
     size = models.CharField(max_length=9,
@@ -3088,25 +3144,27 @@ NOTIFICATION_CHOICES = (
     ("alert", "alert")
 )
 
+DEFAULT_NOTIFICATION = ("alert", "alert")
+
 
 class Notifications(models.Model):
-    product_type_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, help_text='Triggered whenever an (re-)import has been done that created/updated/closed findings.')
-    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, verbose_name="JIRA problems", help_text="JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe")
-    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    product_type_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, help_text='Triggered whenever an (re-)import has been done that created/updated/closed findings.')
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, verbose_name="JIRA problems", help_text="JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe")
+    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
     user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
-    sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+    sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
         verbose_name="SLA breach",
         help_text="Get notified of (upcoming) SLA breaches")
     risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
@@ -3184,7 +3242,7 @@ class Alerts(models.Model):
     url = models.URLField(max_length=2000, null=True, blank=True)
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
-    user_id = models.ForeignKey(User, null=True, editable=False, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     class Meta:
@@ -3251,7 +3309,7 @@ class Language_Type(models.Model):
 class Languages(models.Model):
     language = models.ForeignKey(Language_Type, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, editable=True, blank=True, null=True, on_delete=models.RESTRICT)
+    user = models.ForeignKey(Dojo_User, editable=True, blank=True, null=True, on_delete=models.RESTRICT)
     files = models.IntegerField(blank=True, null=True, verbose_name='Number of files')
     blank = models.IntegerField(blank=True, null=True, verbose_name='Number of blank lines')
     comment = models.IntegerField(blank=True, null=True, verbose_name='Number of comment lines')
@@ -3268,7 +3326,7 @@ class Languages(models.Model):
 class App_Analysis(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     name = models.CharField(max_length=200, null=False)
-    user = models.ForeignKey(User, editable=True, on_delete=models.RESTRICT)
+    user = models.ForeignKey(Dojo_User, editable=True, on_delete=models.RESTRICT)
     confidence = models.IntegerField(blank=True, null=True, verbose_name='Confidence level')
     version = models.CharField(max_length=200, null=True, blank=True, verbose_name='Version Number')
     icon = models.CharField(max_length=200, null=True, blank=True)
@@ -3612,11 +3670,11 @@ class Answered_Survey(models.Model):
                                    on_delete=models.CASCADE)
     # what surveys have been answered
     survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
-    assignee = models.ForeignKey(User, related_name='assignee',
+    assignee = models.ForeignKey(Dojo_User, related_name='assignee',
                                   null=True, blank=True, editable=True,
                                   default=None, on_delete=models.RESTRICT)
     # who answered it
-    responder = models.ForeignKey(User, related_name='responder',
+    responder = models.ForeignKey(Dojo_User, related_name='responder',
                                   null=True, blank=True, editable=True,
                                   default=None, on_delete=models.RESTRICT)
     completed = models.BooleanField(default=False)

@@ -18,16 +18,7 @@ Common code for reimporting from APIV2 or from the GUI
 """
 
 
-def get_deduplication_algorithm_from_conf(scan_type):
-    # Default algorithm
-    deduplication_algorithm = 'legacy'
-    # Check for an override for this scan_type in the deduplication configuration
-    if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER') and scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER:
-        deduplication_algorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[scan_type]
-    return deduplication_algorithm
-
-
-def match_new_finding_to_existing_finding(new_finding, test, deduplication_algorithm, scan_type):
+def match_new_finding_to_existing_finding(new_finding, test, deduplication_algorithm):
     # This code should match the logic used for deduplication out of the re-import feature.
     # See utils.py deduplicate_* functions
     deduplicationLogger.debug('return findings bases on algorithm: %s', deduplication_algorithm)
