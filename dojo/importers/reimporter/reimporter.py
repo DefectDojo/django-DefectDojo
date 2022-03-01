@@ -41,11 +41,10 @@ class DojoDefaultReImporter(object):
 
         logger.debug('starting reimport of %i items.', len(items) if items else 0)
         from dojo.importers.reimporter.utils import (
-            get_deduplication_algorithm_from_conf,
             match_new_finding_to_existing_finding,
             update_endpoint_status,
             reactivate_endpoint_status)
-        deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
+        deduplication_algorithm = test.deduplication_algorithm
 
         i = 0
         logger.debug('STEP 1: looping over findings from the reimported report and trying to match them to existing findings')
@@ -73,7 +72,7 @@ class DojoDefaultReImporter(object):
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
 
-            findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm, scan_type)
+            findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm)
 
             deduplicationLogger.debug('found %i findings matching with current new finding', len(findings))
 

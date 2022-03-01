@@ -3,7 +3,7 @@ import sys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from base_test_class import BaseTestCase
 from user_test import UserTest
 
@@ -148,6 +148,34 @@ class GroupTest(BaseTestCase):
         # Assert status is success
         self.assertTrue(self.is_success_message_present(text='Group and relationships successfully removed.'))
 
+    def test_group_edit_configuration(self):
+
+        # Login as standard user and check the user menu does not exist
+        driver = self.driver
+        self.login_standard_page()
+        with self.assertRaises(NoSuchElementException):
+            driver.find_element(By.ID, 'id_group_menu')
+
+        # Login as superuser and activate view user configuration for group with standard user
+        self.login_page()
+        # Navigate to Group Management page
+        driver.get(self.base_url + "group")
+        # Select and click on the particular group to view
+        driver.find_element(By.LINK_TEXT, "Another Name").click()
+        # Open the menu to manage members and click the 'Edit' button
+        # Select view user permission
+        driver.find_element(By.ID, "id_view_group").click()
+
+        # Login as standard user and check the user menu does exist now
+        self.login_standard_page()
+        driver.find_element(By.ID, 'id_group_menu')
+        # Navigate to User Management page
+        driver.get(self.base_url + "group")
+        # Select and click on the particular group to view
+        driver.find_element(By.LINK_TEXT, "Another Name").click()
+        # Check user cannot edit configuration permissions
+        self.assertFalse(self.driver.find_element(By.ID, 'id_add_development_environment').is_enabled())
+
 
 def suite():
     suite = unittest.TestSuite()
@@ -158,6 +186,8 @@ def suite():
     suite.addTest(GroupTest('test_create_group'))
     suite.addTest(GroupTest('test_group_edit_name_and_global_role'))
     suite.addTest(GroupTest('test_add_group_member'))
+    suite.addTest(GroupTest('test_group_edit_configuration'))
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(GroupTest('test_edit_group_member'))
     suite.addTest(GroupTest('test_delete_group_member'))
     suite.addTest(GroupTest('test_group_delete'))

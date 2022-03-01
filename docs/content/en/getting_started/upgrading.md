@@ -38,9 +38,9 @@ The generic upgrade method for docker-compose follows these steps:
     ```
 
 -   Go to the directory where your docker-compose.yml file lives
--   Stop DefectDojo: `docker-compose stop`
+-   Stop DefectDojo: `./dc-stop.sh`
 -   Re-start DefectDojo, allowing for container recreation:
-    `docker-compose up -d`
+    `./dc-up-d.sh`
 -   Database migrations will be run automatically by the initializer.
     Check the output via `docker-compose logs initializer` or relevant k8s command
 -   If you have the initializer disabled (or if you want to be on the
@@ -61,6 +61,18 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.8.x.
+
+**Breaking change for Docker Compose:** Starting DefectDojo with Docker Compose now supports 2 databases (MySQL and PostgreSQL) and 2 celery brokers (RabbitMQ and Redis). To make this possible, docker-compose needs to be started with the parameters `--profile` and `--env-file`. You can get more information in [Setup via Docker Compose - Profiles](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md#setup-via-docker-compose---profiles). The profile `mysql-rabbitmq` provides the same configuration as in previous releases. With this the prerequisites have changed as well: Docker requires at least version 19.03.0 and Docker Compose 1.28.0.
+
+**Breaking change for Helm Chart:** In one of the last releases we upgraded the redis dependency in our helm chart without renaming keys in our helm chart. We fixed this bug with this release, but you may want to check if all redis values are correct ([Pull Request](https://github.com/DefectDojo/django-DefectDojo/pull/5886)).
+
+The flexible permissions for the configuration of DefectDojo are now active by default. With this, the flag **Staff** for users is not relevant and not visible anymore. The old behaviour can still be activated by setting the parameter `FEATURE_CONFIGURATION_AUTHORIZATION` to `False`. If you haven't done so with the previous release, you can still run a migration script with `./manage.py migrate staff_users`. This script:
+
+* creates a group for all staff users,
+* sets all configuration permissions that staff users had and
+* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to `True`.
+
 ## Upgrading to DefectDojo Version 2.7.x.
 
 This release is a breaking change regarding the Choctaw Hog parser. As the maintainers of this project unified multiple parsers under the RustyHog parser, we now support the parsing of Choctaw Hog JSON output files through the Rusty Hog parser. Furthermore, we also support Gottingen Hog and Essex Hog JSON output files with the RustyHog parser.
@@ -75,7 +87,7 @@ To support the transition for these 2 changes, you can run a migration script wi
 
 * creates a group for all staff users,
 * sets all configuration permissions that staff users had and
-* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to True.
+* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to `True`.
 
 ## Upgrading to DefectDojo Version 2.6.x.
 
