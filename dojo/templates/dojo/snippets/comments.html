@@ -58,12 +58,12 @@
           {% endif %}
 
           <div class="row-sm-2">
-            <strong>{{ note.author.username }}</strong>
+            <strong>{{ note.author }}</strong>
             <span class="text-muted">commented {{ note.date }}</span>
           </div>
           {% if note.edited %}
             <div class="row-sm-2">
-              <strong>{{ note.editor.username }}</strong>
+              <strong>{{ note.editor }}</strong>
               <span class="text-muted">edited {{ note.edit_time }}</span>
             </div>
           {% endif %}

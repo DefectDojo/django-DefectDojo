@@ -945,6 +945,7 @@ Rusty Hog is a secret scanner built in Rust for performance, and based on Truffl
 
 DefectDojo currently supports the parsing of the following Rusty Hog JSON outputs:
 - Choctaw Hog: Scans for secrets in a Git repository.
+- Duroc Hog: Scans for secrets in directories, files, and archives.
 - Gottingen Hog: Scans for secrets in a JIRA issue.
 - Essex Hog: Scans for secrets in a Confluence page.
 
@@ -1058,6 +1059,11 @@ XML report of SSLyze version 2 scan
 ### SSLyze 3 Scan (JSON)
 
 JSON report of SSLyze version 3 scan
+
+### StackHawk HawkScan
+
+Import the JSON webhook event from StackHawk.
+For more information, check out our [docs on hooking up StackHawk to Defect Dojo](https://docs.stackhawk.com/workflow-integrations/defect-dojo.html)
 
 ### Testssl Scan
 

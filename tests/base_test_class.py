@@ -111,6 +111,18 @@ class BaseTestCase(unittest.TestCase):
         self.assertFalse(self.is_element_by_css_selector_present('.alert-danger', 'Please enter a correct username and password'))
         return driver
 
+    def login_standard_page(self):
+        driver = self.driver
+        driver.get(self.base_url + "login")
+        driver.find_element(By.ID, "id_username").clear()
+        driver.find_element(By.ID, "id_username").send_keys('propersahm')
+        driver.find_element(By.ID, "id_password").clear()
+        driver.find_element(By.ID, "id_password").send_keys('Def3ctD0jo&')
+        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
+
+        self.assertFalse(self.is_element_by_css_selector_present('.alert-danger', 'Please enter a correct username and password'))
+        return driver
+
     def test_login(self):
         return self.login_page()
 
