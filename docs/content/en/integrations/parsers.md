@@ -1060,6 +1060,11 @@ XML report of SSLyze version 2 scan
 
 JSON report of SSLyze version 3 scan
 
+### StackHawk HawkScan
+
+Import the JSON webhook event from StackHawk.
+For more information, check out our [docs on hooking up StackHawk to Defect Dojo](https://docs.stackhawk.com/workflow-integrations/defect-dojo.html)
+
 ### Testssl Scan
 
 Import CSV output of testssl scan report.

@@ -1245,6 +1245,9 @@ class Endpoint_Status(models.Model):
             models.Index(fields=['finding', 'mitigated']),
             models.Index(fields=['endpoint', 'mitigated']),
         ]
+        constraints = [
+            models.UniqueConstraint(fields=['finding', 'endpoint'], name='endpoint-finding relation')
+        ]
 
 
 class Endpoint(models.Model):

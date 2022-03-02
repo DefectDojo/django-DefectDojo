@@ -36,7 +36,7 @@ env = environ.Env(
     DD_TEAM_NAME=(str, 'Security Team'),
     DD_ADMINS=(str, 'DefectDojo:dojo@localhost,Admin:admin@localhost'),
     DD_WHITENOISE=(bool, False),
-    DD_TRACK_MIGRATIONS=(bool, False),
+    DD_TRACK_MIGRATIONS=(bool, True),
     DD_SECURE_PROXY_SSL_HEADER=(bool, False),
     DD_TEST_RUNNER=(str, 'django.test.runner.DiscoverRunner'),
     DD_URL_PREFIX=(str, ''),
@@ -1069,6 +1069,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'SSLyze Scan (JSON)': ['title', 'description'],
     'Harbor Vulnerability Scan': ['title'],
     'Rusty Hog Scan': ['title', 'description'],
+    'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
