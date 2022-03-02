@@ -16,6 +16,7 @@ from dojo.models import (BurpRawRequestResponse, FileUpload, Finding,
                          Notes, Test_Import)
 from dojo.tools.factory import get_parser
 from dojo.utils import get_current_user
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -100,7 +101,9 @@ class DojoDefaultReImporter(object):
                         author=user)
                     note.save()
 
-                    endpoint_statuses = finding.endpoint_status.all()
+                    endpoint_statuses = finding.endpoint_status.exclude(Q(false_positive=True) |
+                                                                        Q(out_of_scope=True) |
+                                                                        Q(risk_accepted=True))
 
                     # Determine if this can be run async
                     if settings.ASYNC_FINDING_IMPORT:
@@ -126,6 +129,7 @@ class DojoDefaultReImporter(object):
                         finding.component_version = finding.component_version if finding.component_version else component_version
                         finding.save(dedupe_option=False)
 
+                    # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
                     unchanged_items.append(finding)
                     unchanged_count += 1
                 if finding.dynamic_finding:
