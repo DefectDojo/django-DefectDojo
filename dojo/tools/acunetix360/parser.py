@@ -17,11 +17,7 @@ class Acunetix360Parser(object):
         return "Acunetix360 JSON format."
 
     def get_findings(self, filename, test):
-        tree = filename.read()
-        try:
-            data = json.loads(str(tree, 'utf-8-sig'))
-        except:
-            data = json.loads(tree)
+        data = json.load(filename)
         dupes = dict()
         scan_date = datetime.datetime.strptime(data["Generated"], "%d/%m/%Y %H:%M %p").date()
 
@@ -70,6 +66,8 @@ class Acunetix360Parser(object):
 
             if item["State"].find("AcceptedRisk") != -1:
                 finding.risk_accepted = True
+                finding.active = False
+                finding.verified = True
 
             if (item["Classification"] is not None) and (item["Classification"]["Cvss"] is not None) and (item["Classification"]["Cvss"]["Vector"] is not None):
                 finding.cvssv3 = item["Classification"]["Cvss"]["Vector"]
