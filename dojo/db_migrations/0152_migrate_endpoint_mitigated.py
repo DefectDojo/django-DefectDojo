@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0149_harmonize_user_format'),
+        ('dojo', '0151_index_endpoint_status'),
     ]
 
     def migrate_endpoint_mitigated(apps, schema_editor):
