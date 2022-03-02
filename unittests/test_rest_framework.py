@@ -751,7 +751,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         self.viewset = EndpointStatusViewSet
         self.payload = {
             'endpoint': 2,
-            'finding': 2,
+            'finding': 3,
             'mitigated': False,
             'false_positive': False,
             'risk_accepted': False,
@@ -765,6 +765,58 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         self.permission_update = Permissions.Endpoint_Edit
         self.permission_delete = Permissions.Endpoint_Edit
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create_unsuccessful(self):
+        unsucessful_payload = self.payload.copy()
+        unsucessful_payload['finding'] = 2
+        response = self.client.post(self.url, unsucessful_payload)
+        logger.debug('test_create_response:')
+        logger.debug(response)
+        logger.debug(response.data)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
+
+    def test_update_patch_unsuccessful(self):
+        anoher_finding_payload = self.payload.copy()
+        anoher_finding_payload['finding'] = 3
+        response = self.client.post(self.url, anoher_finding_payload)
+
+        current_objects = self.client.get(self.url, format='json').data
+
+        object1 = current_objects['results'][0]
+        object2 = current_objects['results'][1]
+
+        unsucessful_payload = {
+            'endpoint': object2['endpoint'],
+            'finding': object2['finding']
+        }
+
+        relative_url = self.url + '%s/' % object1['id']
+
+        response = self.client.patch(relative_url, unsucessful_payload)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
+
+    def test_update_put_unsuccessful(self):
+        anoher_finding_payload = self.payload.copy()
+        anoher_finding_payload['finding'] = 3
+        response = self.client.post(self.url, anoher_finding_payload)
+
+        current_objects = self.client.get(self.url, format='json').data
+
+        object1 = current_objects['results'][0]
+        object2 = current_objects['results'][1]
+
+        unsucessful_payload = {
+            'endpoint': object2['endpoint'],
+            'finding': object2['finding']
+        }
+
+        relative_url = self.url + '%s/' % object1['id']
+
+        response = self.client.put(relative_url, unsucessful_payload)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
 
 
 class EndpointTest(BaseClass.RESTEndpointTest):
