@@ -41,6 +41,9 @@ class GenericParser(object):
         data = json.load(filename)
         return [self._get_test_json(data)]
 
+    def requires_file(self, scan_type):
+        return True
+
     def _get_test_json(self, data):
         test_internal = ParserTest(
             name=data.get("name", self.ID),
