@@ -89,6 +89,9 @@ class ImportReimportMixin(object):
 
         self.nuclei_empty = self.scans_path + 'nuclei/empty.jsonl'
 
+        self.gitlab_dast_file_name = self.scans_path + 'gitlab_dast/gitlab_dast_one_vul.json'
+        self.scan_type_gitlab_dast = 'GitLab DAST Report'
+
     # import zap scan, testing:
     # - import
     # - active/verifed = True
@@ -1334,6 +1337,52 @@ class ImportReimportMixin(object):
 
         test_id2 = reimport0['test']
         self.assertEqual(test_id, test_id2)
+
+    def test_import_reimport_endpoint_where_eps_date_is_different(self):
+        endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
+        endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import0 = self.import_scan_with_params(self.gitlab_dast_file_name,
+                                                   self.scan_type_gitlab_dast,
+                                                   active=True,
+                                                   verified=True)
+
+        test_id = import0['test']
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+        self.assert_finding_count_json(1, findings)
+
+        test = self.get_test_api(test_id)['id']
+        finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
+        self.assertEqual(finding.endpoint_status.count(), 1)
+
+        original_date = finding.endpoint_status.first().date
+
+        self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
+        self.assertEqual(endpoint_status_count_before_active + 1, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
+
+        reimport0 = self.reimport_scan_with_params(test_id,
+                                                   self.gitlab_dast_file_name,
+                                                   scan_type=self.scan_type_gitlab_dast)
+        test_id = reimport0['test']
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+        self.assert_finding_count_json(1, findings)
+
+        finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
+        self.assertEqual(finding.endpoint_status.count(), 1)
+
+        reimported_date = finding.endpoint_status.first().date
+        self.assertEqual(original_date, reimported_date)
+
+        self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
+        self.assertEqual(endpoint_status_count_before_active + 1, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
 
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
