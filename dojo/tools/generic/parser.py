@@ -23,19 +23,19 @@ class GenericParser(object):
 
     def get_findings(self, filename, test):
         if filename.name.lower().endswith(".csv"):
-            return self.get_findings_csv(filename, test)
+            return self._get_findings_csv(filename)
         elif filename.name.lower().endswith(".json"):
             data = json.load(filename)
             test_internal = self._get_test_json(data)
             return test_internal.findings
         else:  # default to CSV like before
-            return self.get_findings_csv(filename, test)
+            return self._get_findings_csv(filename)
 
     def get_tests(self, scan_type, filename):
         # if the file is a CSV just use the old function
         if filename.name.lower().endswith(".csv"):
-            test = ParserTest(name=self.ID, type=self.ID)
-            test.findings = self.get_findings_csv(filename, test)
+            test = ParserTest(name=self.ID, type=self.ID, version=None)
+            test.findings = self._get_findings_csv(filename)
             return [test]
         # we manage it like a JSON file (default)
         data = json.load(filename)
@@ -97,7 +97,7 @@ class GenericParser(object):
             test_internal.findings.append(finding)
         return test_internal
 
-    def get_findings_csv(self, filename, test):
+    def _get_findings_csv(self, filename):
         content = filename.read()
         if type(content) is bytes:
             content = content.decode("utf-8")
@@ -106,7 +106,6 @@ class GenericParser(object):
         dupes = dict()
         for row in reader:
             finding = Finding(
-                test=test,
                 title=row["Title"],
                 description=row["Description"],
                 date=parse(row["Date"]).date(),
@@ -149,7 +148,9 @@ class GenericParser(object):
                 finding.severity = "Info"
 
             if "CVSSV3" in row:
-                finding.cvssv3 = row["CVSSV3"]
+                cvss_objects = cvss_parser.parse_cvss_from_text(row["CVSSV3"])
+                if len(cvss_objects) > 0:
+                    finding.cvssv3 = cvss_objects[0].clean_vector()
 
             # manage endpoints
             if "Url" in row:
