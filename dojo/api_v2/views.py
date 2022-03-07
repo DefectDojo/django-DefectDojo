@@ -1818,7 +1818,7 @@ class UsersViewSet(mixins.CreateModelMixin,
     serializer_class = serializers.UserSerializer
     queryset = User.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'username', 'first_name', 'last_name', 'email')
+    filter_fields = ('id', 'username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser')
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
     def destroy(self, request, *args, **kwargs):

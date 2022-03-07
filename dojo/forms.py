@@ -754,7 +754,7 @@ class EngForm(forms.ModelForm):
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
             self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View).filter(is_active=True)
         else:
-            self.fields['lead'].queryset = User.objects.filter(is_active=True)
+            self.fields['lead'].queryset = Dojo_User.objects.filter(is_active=True)
 
         self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add)
 
@@ -1555,8 +1555,8 @@ class ClearFindingReviewForm(forms.ModelForm):
 
 
 class ReviewFindingForm(forms.Form):
-    reviewers = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.filter(is_active=True),
-                                               help_text="Select all users who can review Finding.")
+
+    reviewers = forms.MultipleChoiceField(help_text="Select all users who can review Finding.")
     entry = forms.CharField(
         required=True, max_length=2400,
         help_text='Please provide a message for reviewers.',
@@ -1571,9 +1571,18 @@ class ReviewFindingForm(forms.Form):
             finding = kwargs.pop('finding')
 
         super(ReviewFindingForm, self).__init__(*args, **kwargs)
+        self.fields['reviewers'].choices = self._get_choices(Dojo_User.objects.filter(is_active=True))
 
         if finding is not None:
-            self.fields['reviewers'].queryset = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
+            queryset = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
+            self.fields['reviewers'].choices = self._get_choices(queryset)
+
+    @staticmethod
+    def _get_choices(queryset):
+        l_choices = []
+        for item in queryset:
+            l_choices.append((item.pk, item.get_full_name()))
+        return l_choices
 
     class Meta:
         fields = ['reviewers', 'entry']
