@@ -1,4 +1,5 @@
 import json
+import ast
 
 from dojo.models import Finding
 
@@ -54,6 +55,25 @@ def get_item(item_node, test):
         if len(finding['paths']) > 25:
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
+    cwe = item_node['cwe']
+    if cwe.startswith('CWE-'):
+        cwe = int(cwe[4:])
+    elif cwe.startswith('['):
+        # Somehow multiple CWEs end up in the json report like this
+        # [\"CWE-173\",\"CWE-200\",\"CWE-601\"]
+        # which becomes after json load:
+        # ["CWE-173","CWE-200","CWE-601"]
+        # we parse this and take the first CWE
+
+        cwe = ast.literal_eval(cwe)[0][4:]
+        # https://docs.python.org/3/library/ast.html#ast.literal_eval
+        # Safely evaluate an expression node or a string containing a Python literal or container display.
+        # The string or node provided may only consist of the following Python literal structures:
+        # strings, bytes, numbers, tuples, lists, dicts, sets, booleans, None and Ellipsis.
+        # This can be used for safely evaluating strings containing Python values from untrusted sources
+        #  without the need to parse the values oneself. It is not capable of evaluating arbitrarily
+        #  complex expressions, for example involving operators or indexing.
+
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
@@ -66,7 +86,7 @@ def get_item(item_node, test):
                       str(paths) + "\n CWE: " +
                       str(item_node['cwe']) + "\n Access: " +
                       str(item_node['access']),
-                      cwe=item_node['cwe'][4:],
+                      cwe=cwe,
                       cve=item_node['cves'][0] if (len(item_node['cves']) > 0) else None,
                       mitigation=item_node['recommendation'],
                       references=item_node['url'],

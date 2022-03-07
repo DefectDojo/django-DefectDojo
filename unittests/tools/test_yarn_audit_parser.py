@@ -38,6 +38,16 @@ class TestYarnAuditParser(DojoTestCase):
         testfile.close()
         self.assertEqual(3, len(findings))
 
+    def test_yarn_audit_parser_with_multiple_cwes_per_finding(self):
+        testfile = open("unittests/scans/yarn_audit/yarn_audit_multiple_cwe.json")
+        parser = YarnAuditParser()
+        findings = parser.get_findings(testfile, self.get_test())
+        testfile.close()
+        self.assertEqual(3, len(findings))
+        self.assertEqual(findings[0].cwe, '1333')
+        self.assertEqual(findings[1].cwe, '173')
+        self.assertEqual(findings[2].cwe, '918')
+
     def test_yarn_audit_parser_empty_with_error(self):
         with self.assertRaises(ValueError) as context:
             testfile = open("unittests/scans/yarn_audit/empty_with_error.json")
