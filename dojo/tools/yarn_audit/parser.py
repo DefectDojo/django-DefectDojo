@@ -64,7 +64,7 @@ def get_item(item_node, test):
         # ["CWE-173","CWE-200","CWE-601"]
         # we parse this and take the first CWE
 
-        cwe = json.loads(cwe)[0][4:]
+        cwe = int(json.loads(cwe)[0][4:])
 
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
