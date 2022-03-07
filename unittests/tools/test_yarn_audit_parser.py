@@ -44,9 +44,9 @@ class TestYarnAuditParser(DojoTestCase):
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
         self.assertEqual(3, len(findings))
-        self.assertEqual(findings[0].cwe, '1333')
-        self.assertEqual(findings[1].cwe, '173')
-        self.assertEqual(findings[2].cwe, '918')
+        self.assertEqual(findings[0].cwe, 1333)
+        self.assertEqual(findings[1].cwe, 173)
+        self.assertEqual(findings[2].cwe, 918)
 
     def test_yarn_audit_parser_empty_with_error(self):
         with self.assertRaises(ValueError) as context:
