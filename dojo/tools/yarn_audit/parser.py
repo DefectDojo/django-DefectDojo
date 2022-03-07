@@ -1,5 +1,4 @@
 import json
-import ast
 
 from dojo.models import Finding
 
@@ -65,14 +64,7 @@ def get_item(item_node, test):
         # ["CWE-173","CWE-200","CWE-601"]
         # we parse this and take the first CWE
 
-        cwe = ast.literal_eval(cwe)[0][4:]
-        # https://docs.python.org/3/library/ast.html#ast.literal_eval
-        # Safely evaluate an expression node or a string containing a Python literal or container display.
-        # The string or node provided may only consist of the following Python literal structures:
-        # strings, bytes, numbers, tuples, lists, dicts, sets, booleans, None and Ellipsis.
-        # This can be used for safely evaluating strings containing Python values from untrusted sources
-        #  without the need to parse the values oneself. It is not capable of evaluating arbitrarily
-        #  complex expressions, for example involving operators or indexing.
+        cwe = json.loads(cwe)[0][4:]
 
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
