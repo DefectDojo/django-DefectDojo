@@ -54,6 +54,18 @@ def get_item(item_node, test):
         if len(finding['paths']) > 25:
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
+    cwe = item_node['cwe']
+    if cwe.startswith('CWE-'):
+        cwe = int(cwe[4:])
+    elif cwe.startswith('['):
+        # Somehow multiple CWEs end up in the json report like this
+        # [\"CWE-173\",\"CWE-200\",\"CWE-601\"]
+        # which becomes after json load:
+        # ["CWE-173","CWE-200","CWE-601"]
+        # we parse this and take the first CWE
+
+        cwe = int(json.loads(cwe)[0][4:])
+
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
@@ -66,7 +78,7 @@ def get_item(item_node, test):
                       str(paths) + "\n CWE: " +
                       str(item_node['cwe']) + "\n Access: " +
                       str(item_node['access']),
-                      cwe=item_node['cwe'][4:],
+                      cwe=cwe,
                       cve=item_node['cves'][0] if (len(item_node['cves']) > 0) else None,
                       mitigation=item_node['recommendation'],
                       references=item_node['url'],
