@@ -68,7 +68,7 @@ PyJWT==2.3.0
 cvss==2.3
 django-fieldsignals==0.7.0
 hyperlink==21.0.0
-numpy==1.22.2
+numpy==1.22.3
 django-test-migrations==1.2.0
 djangosaml2==1.3.6
 drf-spectacular==0.21.2
