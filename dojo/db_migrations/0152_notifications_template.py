@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0148_default_notifications'),
+        ('dojo', '0151_index_endpoint_status'),
     ]
 
     operations = [

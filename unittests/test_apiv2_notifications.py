@@ -24,7 +24,7 @@ class NotificationsTest(APITestCase):
         return self.client.post(reverse('notifications-list'), kwargs, format='json')
 
     def test_notification_get(self):
-        r = self.client.get(reverse('notifications-list'),  format='json')
+        r = self.client.get(reverse('notifications-list'), format='json')
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json()['results'][0]['template'], False)
 
@@ -38,4 +38,3 @@ class NotificationsTest(APITestCase):
         q = {'template': True, 'scan_added': ['alert', 'slack']}
         r = self.client.post(reverse('notifications-list'), q, format='json')
         self.assertEqual("Notification template already exists", r.json()["non_field_errors"][0])
-
