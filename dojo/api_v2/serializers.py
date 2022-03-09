@@ -394,7 +394,7 @@ class UserContactInfoSerializer(serializers.ModelSerializer):
 
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = Dojo_User
         fields = ('id', 'username', 'first_name', 'last_name')
 
 

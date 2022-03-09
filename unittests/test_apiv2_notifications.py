@@ -23,6 +23,14 @@ class NotificationsTest(APITestCase):
     def create(self, **kwargs):
         return self.client.post(reverse('notifications-list'), kwargs, format='json')
 
+    def create_test_user(self):
+        password = 'testTEST1234!@#$'
+        r = self.client.post(reverse('user-list'), {
+            "username": "api-user-notification",
+            "password": password
+        }, format='json')
+        return r.json()["id"]
+
     def test_notification_get(self):
         r = self.client.get(reverse('notifications-list'), format='json')
         self.assertEqual(r.status_code, 200)
@@ -38,3 +46,17 @@ class NotificationsTest(APITestCase):
         q = {'template': True, 'scan_added': ['alert', 'slack']}
         r = self.client.post(reverse('notifications-list'), q, format='json')
         self.assertEqual("Notification template already exists", r.json()["non_field_errors"][0])
+
+    def test_user_notifications(self):
+        """
+        creates user and checks if template is assigned
+        """
+        user = {"user": self.create_test_user()}
+        q = {'template': True}
+        r = self.client.get(reverse('notifications-list'), q, format='json')
+        r = self.client.get(reverse('notifications-list'), user, format='json')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.json()['results'][0]['template'], False)
+        self.assertEqual(r.json()['results'][0]['scan_added'], ['slack', 'alert'])
+
+
