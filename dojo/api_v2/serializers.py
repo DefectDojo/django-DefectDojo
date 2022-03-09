@@ -350,7 +350,7 @@ class UserSerializer(serializers.ModelSerializer):
                                      validators=[validate_password])
 
     class Meta:
-        model = User
+        model = Dojo_User
         if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
             fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_superuser', 'password')
         else:
@@ -361,7 +361,7 @@ class UserSerializer(serializers.ModelSerializer):
             password = validated_data.pop('password')
         else:
             password = None
-        user = User.objects.create(**validated_data)
+        user = Dojo_User.objects.create(**validated_data)
         if password:
             user.set_password(password)
         else:
