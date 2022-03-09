@@ -58,5 +58,3 @@ class NotificationsTest(APITestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json()['results'][0]['template'], False)
         self.assertEqual(r.json()['results'][0]['scan_added'], ['slack', 'alert'])
-
-
