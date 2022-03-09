@@ -50,7 +50,7 @@ Python-jose==3.3.0
 gitpython==3.1.27
 debugpy==1.5.1
 python-gitlab==3.2.0
-google-api-python-client==2.38.0
+google-api-python-client==2.39.0
 google-auth==2.6.0
 google-auth-oauthlib==0.5.0
 drf_yasg==1.20.0
