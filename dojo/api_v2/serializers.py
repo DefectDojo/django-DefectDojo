@@ -350,7 +350,7 @@ class UserSerializer(serializers.ModelSerializer):
                                      validators=[validate_password])
 
     class Meta:
-        model = User
+        model = Dojo_User
         if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
             fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_superuser', 'password')
         else:
@@ -361,7 +361,7 @@ class UserSerializer(serializers.ModelSerializer):
             password = validated_data.pop('password')
         else:
             password = None
-        user = User.objects.create(**validated_data)
+        user = Dojo_User.objects.create(**validated_data)
         if password:
             user.set_password(password)
         else:
@@ -394,7 +394,7 @@ class UserContactInfoSerializer(serializers.ModelSerializer):
 
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = Dojo_User
         fields = ('id', 'username', 'first_name', 'last_name')
 
 
@@ -1829,6 +1829,7 @@ class NotificationsSerializer(serializers.ModelSerializer):
     other = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
     sla_breach = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
     risk_acceptance_expiration = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    template = serializers.BooleanField(default=False)
 
     class Meta:
         model = Notifications
@@ -1848,9 +1849,11 @@ class NotificationsSerializer(serializers.ModelSerializer):
             product = data.get('product')
 
         if self.instance is None or user != self.instance.user or product != self.instance.product:
-            notifications = Notifications.objects.filter(user=user, product=product).count()
+            notifications = Notifications.objects.filter(user=user, product=product, template=False).count()
             if notifications > 0:
                 raise ValidationError("Notification for user and product already exists")
+        if data.get('template') and Notifications.objects.filter(template=True).count() > 0:
+            raise ValidationError("Notification template already exists")
 
         return data
 
