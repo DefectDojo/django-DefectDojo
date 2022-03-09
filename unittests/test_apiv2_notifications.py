@@ -52,9 +52,7 @@ class NotificationsTest(APITestCase):
         creates user and checks if template is assigned
         """
         user = {"user": self.create_test_user()}
-        q = {'template': True}
-        r = self.client.get(reverse('notifications-list'), q, format='json')
         r = self.client.get(reverse('notifications-list'), user, format='json')
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json()['results'][0]['template'], False)
-        self.assertEqual(r.json()['results'][0]['scan_added'], ['slack', 'alert'])
+        self.assertEqual(r.json()['results'][0]['scan_added'], ['alert', 'slack'])
