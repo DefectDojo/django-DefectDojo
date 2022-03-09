@@ -55,4 +55,5 @@ class NotificationsTest(APITestCase):
         r = self.client.get(reverse('notifications-list'), user, format='json')
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json()['results'][0]['template'], False)
-        self.assertEqual(r.json()['results'][0]['scan_added'], ['alert', 'slack'])
+        self.assertIn('alert', r.json()['results'][0]['scan_added'])
+        self.assertIn('slack', r.json()['results'][0]['scan_added'])
