@@ -250,8 +250,8 @@ class TestEndpointStatusMigration(MigratorTestCase):
 # TODO: These tests can be skipped in 2.10.x or later
 # @skip("Outdated - Any future changes of code should not affect these tests")
 class TestRemoveEndpointMitigatedMigration(MigratorTestCase):
-    migrate_from = ('dojo', '0151_index_endpoint_status')
-    migrate_to = ('dojo', '0152_migrate_endpoint_mitigated')
+    migrate_from = ('dojo', '0152_index_endpoint_status')
+    migrate_to = ('dojo', '0153_migrate_endpoint_mitigated')
 
     def prepare(self):
         Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
