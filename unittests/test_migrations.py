@@ -164,7 +164,8 @@ class TestEndpointMigration(MigratorTestCase):
         self.assertFalse(eps[0].mitigated)
 
 
-# TODO: These tests can be skipped in 2.9.x or later
+# TODO: These tests can be skipped in 2.10.x or later
+# @skip("Outdated - Any future changes of code should not affect these tests")
 class TestEndpointStatusMigration(MigratorTestCase):
     migrate_from = ('dojo', '0149_harmonize_user_format')
     migrate_to = ('dojo', '0150_dedupe_endpoint_status')
@@ -244,3 +245,92 @@ class TestEndpointStatusMigration(MigratorTestCase):
 
         eps = Endpoint_Status.objects.filter(pk=self.another_endpoint_status)
         self.assertEqual(eps.count(), 1)
+
+
+# TODO: These tests can be skipped in 2.10.x or later
+# @skip("Outdated - Any future changes of code should not affect these tests")
+class TestRemoveEndpointMitigatedMigration(MigratorTestCase):
+    migrate_from = ('dojo', '0152_notifications_template')
+    migrate_to = ('dojo', '0153_migrate_endpoint_mitigated')
+
+    def prepare(self):
+        Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
+        Product = self.old_state.apps.get_model('dojo', 'Product')
+        Engagement = self.old_state.apps.get_model('dojo', 'Engagement')
+        Test = self.old_state.apps.get_model('dojo', 'Test')
+        Finding = self.old_state.apps.get_model('dojo', 'Finding')
+        Endpoint = self.old_state.apps.get_model('dojo', 'Endpoint')
+        Endpoint_Status = self.old_state.apps.get_model('dojo', 'Endpoint_Status')
+        Dojo_User = self.old_state.apps.get_model('dojo', 'Dojo_User')
+
+        self.prod_type = Product_Type.objects.create()
+        self.product = Product.objects.create(prod_type=self.prod_type)
+        self.engagement = Engagement.objects.create(
+            product=self.product,
+            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc)
+        )
+        self.test = Test.objects.create(
+            engagement_id=self.engagement.pk,
+            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
+            test_type_id=1
+        )
+
+        self.users = {
+            '1': Dojo_User.objects.create(username='alice').pk,
+            '2': Dojo_User.objects.create(username='bob').pk,
+        }
+        self.findings = {
+            '1': Finding.objects.create(test=self.test, reporter_id=self.users['1']).pk,
+            '2': Finding.objects.create(test=self.test, reporter_id=self.users['2']).pk,
+        }
+        self.endpoints = {
+            'nomit': Endpoint.objects.create(protocol='http', host='foo.bar.eps', product=self.product,
+                                             mitigated=False).pk,
+            'mit': Endpoint.objects.create(protocol='http', host='bar.foo.eps', product=self.product,
+                                           mitigated=True).pk,
+        }
+        self.endpoint_status = {
+            'nomit_nomit_f1': Endpoint_Status.objects.create(
+                endpoint_id=self.endpoints['nomit'],
+                mitigated=False,
+                finding_id=self.findings['1'],
+            ).pk,
+            'nomit_mit1_f2': Endpoint_Status.objects.create(
+                endpoint_id=self.endpoints['nomit'],
+                mitigated=True,
+                mitigated_by_id=self.users['1'],
+                finding_id=self.findings['2'],
+            ).pk,
+            'mit_mit2_f1': Endpoint_Status.objects.create(
+                endpoint_id=self.endpoints['mit'],
+                mitigated=True,
+                mitigated_by_id=self.users['2'],
+                finding_id=self.findings['1'],
+            ).pk,
+            'mit_nomit_f2': Endpoint_Status.objects.create(
+                endpoint_id=self.endpoints['mit'],
+                mitigated=False,
+                finding_id=self.findings['2'],
+            ).pk,
+        }
+
+    def test_migration_endpoint_mitigated(self):
+        Endpoint_Status = self.new_state.apps.get_model('dojo', 'Endpoint_Status')
+
+        eps = Endpoint_Status.objects.get(pk=self.endpoint_status['nomit_nomit_f1'])
+        self.assertFalse(eps.mitigated)
+        self.assertIsNone(eps.mitigated_by)
+
+        eps = Endpoint_Status.objects.get(pk=self.endpoint_status['nomit_mit1_f2'])
+        self.assertTrue(eps.mitigated)
+        self.assertEqual(eps.mitigated_by_id, self.users['1'])
+
+        eps = Endpoint_Status.objects.get(pk=self.endpoint_status['mit_mit2_f1'])
+        self.assertTrue(eps.mitigated)
+        self.assertEqual(eps.mitigated_by_id, self.users['2'])
+
+        eps = Endpoint_Status.objects.get(pk=self.endpoint_status['mit_nomit_f2'])
+        self.assertTrue(eps.mitigated)
+        self.assertEqual(eps.mitigated_by_id, self.users['2'])

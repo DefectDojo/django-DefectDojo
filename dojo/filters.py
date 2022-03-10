@@ -1618,7 +1618,6 @@ class EndpointFilter(DojoFilter):
     path = CharFilter(lookup_expr='icontains')
     query = CharFilter(lookup_expr='icontains')
     fragment = CharFilter(lookup_expr='icontains')
-    mitigated = ReportBooleanFilter()
 
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
@@ -1691,7 +1690,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['mitigated', 'endpoint_status']
+        exclude = ['endpoint_status']
 
 
 class ApiEndpointFilter(DojoFilter):
