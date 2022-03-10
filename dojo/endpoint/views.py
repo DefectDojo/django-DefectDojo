@@ -397,15 +397,11 @@ def endpoint_bulk_update_all(request, pid=None):
                 if skipped_endpoint_count > 0:
                     add_error_message_to_response('Skipped mitigation of {} endpoints because you are not authorized.'.format(skipped_endpoint_count))
 
-                eps_count = 0
-
-                for endpoint in endpoints:
-                    for eps in endpoint.endpoint_status:
-                        eps.mitigated = True
-                        eps.mitigated_by = request.user
-                        eps.last_modified = timezone.now()
-                        eps.save()
-                        eps_count += 1
+                eps_count = Endpoint_Status.objects.filter(endpoint__in=endpoints).update(
+                    mitigated=True,
+                    mitigated_by=request.user,
+                    last_modified=timezone.now()
+                )
 
                 if updated_endpoint_count > 0:
                     messages.add_message(request,
