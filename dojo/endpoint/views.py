@@ -400,6 +400,7 @@ def endpoint_bulk_update_all(request, pid=None):
                 eps_count = Endpoint_Status.objects.filter(endpoint__in=endpoints).update(
                     mitigated=True,
                     mitigated_by=request.user,
+                    mitigated_time=timezone.now(),
                     last_modified=timezone.now()
                 )
 
