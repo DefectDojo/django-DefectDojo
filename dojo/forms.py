@@ -2402,7 +2402,7 @@ class NotificationsForm(forms.ModelForm):
 
     class Meta:
         model = Notifications
-        exclude = ['']
+        exclude = ['template']
 
 
 class ProductNotificationsForm(forms.ModelForm):
