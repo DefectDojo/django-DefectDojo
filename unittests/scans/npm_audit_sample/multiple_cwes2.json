@@ -444,9 +444,7 @@
       },
       "updated": "2021-03-19T22:45:29.000Z",
       "recommendation": "Upgrade to version 4.17.21 or later",
-      "cwe": [
-        "CWE-400"
-      ],
+      "cwe": [],
       "found_by": null,
       "deleted": null,
       "id": 1065397,
