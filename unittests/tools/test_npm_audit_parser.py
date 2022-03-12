@@ -45,8 +45,9 @@ class TestNpmAuditParser(DojoTestCase):
         parser = NpmAuditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        self.assertEqual(1, len(findings))
-        self.assertEqual(346, findings[0].cwe)
+        self.assertEqual(41, len(findings))
+        self.assertEqual(400, findings[0].cwe)
+        self.assertEqual(359, findings[12].cwe)
 
     def test_npm_audit_parser_multiple_cwes_per_finding_list(self):
         # cwes formatted as proper list: "cwe": ["CWE-918","CWE-1333"],

@@ -13,7 +13,6 @@ def get_npm_cwe(item_node):
     """
     if 'cwe' in item_node:
         cwe_node = item_node['cwe']
-        print(cwe_node)
         if type(cwe_node) == list:
             if cwe_node:
                 return int(cwe_node[0][4:])
