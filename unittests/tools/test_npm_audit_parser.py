@@ -18,6 +18,7 @@ class TestNpmAuditParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
+        self.assertEqual(94, findings[0].cwe)
         self.assertEqual("growl", findings[0].component_name)
         self.assertEqual("1.9.2", findings[0].component_version)
 
@@ -37,6 +38,25 @@ class TestNpmAuditParser(DojoTestCase):
         # TODO ordering seems to be different in ci compared to local, so disable for now
         # self.assertEqual('mime', findings[4].component_name)
         # self.assertEqual('1.3.4', findings[4].component_version)
+
+    def test_npm_audit_parser_multiple_cwes_per_finding(self):
+        # cwes formatted as escaped list: "cwe": "[\"CWE-346\",\"CWE-453\"]",
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/multiple_cwes.json"))
+        parser = NpmAuditParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(41, len(findings))
+        self.assertEqual(400, findings[0].cwe)
+        self.assertEqual(359, findings[12].cwe)
+
+    def test_npm_audit_parser_multiple_cwes_per_finding_list(self):
+        # cwes formatted as proper list: "cwe": ["CWE-918","CWE-1333"],
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/multiple_cwes2.json"))
+        parser = NpmAuditParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(6, len(findings))
+        self.assertEqual(918, findings[0].cwe)
 
     def test_npm_audit_parser_empty_with_error(self):
         with self.assertRaises(ValueError) as context:
