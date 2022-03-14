@@ -1,6 +1,7 @@
 import json
 
 from dojo.models import Finding
+from dojo.tools.utils import get_npm_cwe
 
 
 class YarnAuditParser(object):
@@ -54,17 +55,7 @@ def get_item(item_node, test):
         if len(finding['paths']) > 25:
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
-    cwe = item_node['cwe']
-    if cwe.startswith('CWE-'):
-        cwe = int(cwe[4:])
-    elif cwe.startswith('['):
-        # Somehow multiple CWEs end up in the json report like this
-        # [\"CWE-173\",\"CWE-200\",\"CWE-601\"]
-        # which becomes after json load:
-        # ["CWE-173","CWE-200","CWE-601"]
-        # we parse this and take the first CWE
-
-        cwe = int(json.loads(cwe)[0][4:])
+    cwe = get_npm_cwe(item_node)
 
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
