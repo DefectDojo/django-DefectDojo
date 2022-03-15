@@ -261,7 +261,7 @@ def add_finding_to_auto_group(finding, group_by, **kwargs):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def post_process_finding_save(finding, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
+def post_process_finding_save(finding, dedupe_option=True, false_history=True, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
     system_settings = System_Settings.objects.get()
@@ -277,12 +277,13 @@ def post_process_finding_save(finding, dedupe_option=True, false_history=False, 
         else:
             deduplicationLogger.warning("skipping dedupe because hash_code is None")
 
-    if false_history:
-        if system_settings.false_positive_history:
+    if system_settings.false_positive_history:
+        # Only perform false positive history if deduplication is disabled
+        if not system_settings.enable_deduplication:
             from dojo.utils import do_false_positive_history
             do_false_positive_history(finding, *args, **kwargs)
-        else:
-            deduplicationLogger.debug("skipping false positive history because it's disabled in system settings")
+    else:
+        deduplicationLogger.debug("skipping false positive history because it's disabled in system settings")
 
     # STEP 2 run all non-status changing tasks as celery tasks in the background
     if issue_updater_option:
