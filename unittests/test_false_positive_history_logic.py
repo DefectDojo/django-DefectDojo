@@ -106,6 +106,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 #
 # product 3: Security Podcast
 
+
 class TestFalsePositiveHistoryLogic(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
@@ -129,7 +130,6 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def tearDown(self):
         self.log_summary()
-
 
     # Finding 2 in Product 2, Engagement 1, Test 3
     def test_fp_history_equal_hash_code_same_test(self):
@@ -333,7 +333,6 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         # Assert that both findings belongs to a different product and are NOT marked as fp
         self.assert_finding(finding_created_before_mark, false_p=False, not_pk=7, not_product_id=2, not_hash_code=finding_2.hash_code)
         self.assert_finding(finding_created_after_mark, false_p=False, not_pk=7, not_product_id=2, not_hash_code=finding_2.hash_code)
-
 
     # Finding 124 in Product 2, Engagement 5, Test 55
     def test_fp_history_equal_unique_id_same_test(self):
@@ -554,7 +553,6 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         self.assert_finding(finding_created_before_mark, false_p=False, not_pk=124, not_product_id=2, not_unique_id_from_tool=finding_124.unique_id_from_tool)
         self.assert_finding(finding_created_after_mark, false_p=False, not_pk=124, not_product_id=2, not_unique_id_from_tool=finding_124.unique_id_from_tool)
 
-
     # # utility methods
 
     def log_product(self, product):
@@ -653,12 +651,10 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         # return unsaved new product and reloaded existing product
         return new, Product.objects.get(id=id)
 
-    def assert_finding(
-            self, finding, false_p, duplicate=None, not_pk=None, hash_code=None,
-            not_hash_code=None, unique_id_from_tool=None, not_unique_id_from_tool=None,
-            test_id=None, not_test_id=None, engagement_id=None, not_engagement_id=None,
-            product_id=None, not_product_id=None
-        ):
+    def assert_finding(self, finding, false_p, duplicate=None, not_pk=None,
+            hash_code=None, not_hash_code=None, unique_id_from_tool=None,
+            not_unique_id_from_tool=None, test_id=None, not_test_id=None,
+            engagement_id=None, not_engagement_id=None, product_id=None, not_product_id=None):
         # Ensure we're always asserting against the latest state
         finding = Finding.objects.get(id=finding.id)
 

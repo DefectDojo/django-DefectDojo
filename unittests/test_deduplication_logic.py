@@ -907,9 +907,6 @@ class TestDuplicationLogic(DojoTestCase):
         # different uid. and different endpoints, dynamic_finding is set to False hash_code still not affected by endpoints
         self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
 
-
-    # # some extra tests
-
     # # hash_code currently is only created on finding creation and after that never changed. feature or BUG?
     def test_hash_code_onetime(self):
         finding_new, finding_2 = self.copy_and_reset_finding(id=2)
