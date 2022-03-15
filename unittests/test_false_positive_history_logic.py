@@ -335,6 +335,226 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         self.assert_finding(finding_created_after_mark, false_p=False, not_pk=7, not_product_id=2, not_hash_code=finding_2.hash_code)
 
 
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_equal_unique_id_same_test(self):
+        # Make a copy of finding 124 and store it in the same test (to test retroactive replication)
+        finding_created_before_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_before_mark.save()
+        # Mark finding 124 as fp
+        finding_124 = Finding.objects.get(id=124)
+        finding_124.false_p = True
+        finding_124.save()
+        # Make another copy of finding 124 and store it in the same test
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.save()
+        # Assert that both findings belongs to the same test and are marked as fp
+        self.assert_finding(finding_created_before_mark, false_p=True, not_pk=124, test_id=55, unique_id_from_tool=finding_124.unique_id_from_tool)
+        self.assert_finding(finding_created_after_mark, false_p=True, not_pk=124, test_id=55, unique_id_from_tool=finding_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_equal_unique_id_same_test_dedupe_enabled(self):
+        # Enable deduplication
+        self.enable_dedupe()
+        # Mark finding 124 as fp
+        finding_124 = Finding.objects.get(id=124)
+        finding_124.false_p = True
+        finding_124.save()
+        # Make a copy of finding 124 and store it in the same test
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.save()
+        # Assert that finding belongs to the same test and is NOT marked as fp
+        self.assert_finding(finding_created_after_mark, false_p=False, not_pk=124, test_id=55, unique_id_from_tool=finding_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_different_unique_id_same_test(self):
+        # Make a copy of finding 124, change unique_id and store it in the same test (to test retroactive replication)
+        finding_created_before_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_before_mark.unique_id_from_tool = 'somefakeid123'
+        finding_created_before_mark.save()
+        # Mark finding 124 as fp
+        finding_124 = Finding.objects.get(id=124)
+        finding_124.false_p = True
+        finding_124.save()
+        # Make another copy of finding 124, change unique_id and store it in the same test
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.unique_id_from_tool = 'somefakeid123'
+        finding_created_after_mark.save()
+        # Assert that both findings belongs to the same test and are NOT marked as fp
+        self.assert_finding(finding_created_before_mark, false_p=False, not_pk=124, test_id=55, not_unique_id_from_tool=finding_124.unique_id_from_tool)
+        self.assert_finding(finding_created_after_mark, false_p=False, not_pk=124, test_id=55, not_unique_id_from_tool=finding_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_equal_unique_id_same_engagement_different_test(self):
+        # Make a copy of finding 124 and store it at Product 2, Engagement 5, Test 66 (to test retroactive replication)
+        finding_created_before_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_before_mark.test = Test.objects.get(id=66)
+        finding_created_before_mark.save()
+        # Mark finding 124 as fp
+        finding_124 = Finding.objects.get(id=124)
+        finding_124.false_p = True
+        finding_124.save()
+        # Make another copy of finding 124 and store it at Product 2, Engagement 5, Test 66
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.test = Test.objects.get(id=66)
+        finding_created_after_mark.save()
+        # Assert that both findings belongs to the same engagement but in a different test and are marked as fp
+        self.assert_finding(finding_created_before_mark, false_p=True, not_pk=124, engagement_id=5, not_test_id=55, unique_id_from_tool=finding_124.unique_id_from_tool)
+        self.assert_finding(finding_created_after_mark, false_p=True, not_pk=124, engagement_id=5, not_test_id=55, unique_id_from_tool=finding_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_equal_unique_id_same_engagement_different_test_dedupe_enabled(self):
+        # Enable deduplication
+        self.enable_dedupe()
+        # Mark finding 124 as fp
+        finding_124 = Finding.objects.get(id=124)
+        finding_124.false_p = True
+        finding_124.save()
+        # Make a copy of finding 124 and store it at Product 2, Engagement 5, Test 66
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.test = Test.objects.get(id=66)
+        finding_created_after_mark.save()
+        # Assert that finding belongs to the same engagement but in a different test and is NOT marked as fp
+        self.assert_finding(finding_created_after_mark, false_p=False, not_pk=124, engagement_id=5, not_test_id=55, unique_id_from_tool=finding_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_different_unique_id_same_engagement_different_test(self):
+        # Make a copy of finding 124, change unique_id and store it at Product 2, Engagement 5, Test 66 (to test retroactive replication)
+        finding_created_before_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_before_mark.unique_id_from_tool = 'somefakeid123'
+        finding_created_before_mark.test = Test.objects.get(id=66)
+        finding_created_before_mark.save()
+        # Mark finding 124 as fp
+        finding_124 = Finding.objects.get(id=124)
+        finding_124.false_p = True
+        finding_124.save()
+        # Make another copy of finding 124 and store it at Product 2, Engagement 5, Test 66
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.unique_id_from_tool = 'somefakeid123'
+        finding_created_after_mark.test = Test.objects.get(id=66)
+        finding_created_after_mark.save()
+        # Assert that both findings belongs to the same engagement but in a different test and are NOT marked as fp
+        self.assert_finding(finding_created_before_mark, false_p=False, not_pk=124, engagement_id=5, not_test_id=55, not_unique_id_from_tool=finding_124.unique_id_from_tool)
+        self.assert_finding(finding_created_after_mark, false_p=False, not_pk=124, engagement_id=5, not_test_id=55, not_unique_id_from_tool=finding_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_equal_unique_id_same_product_different_engagement(self):
+        # Create new test and new engagament in the same product
+        finding_124 = Finding.objects.get(id=124)
+        test_new, eng_new = self.create_new_test_and_engagment_from_finding(finding_124)
+        # Make a copy of finding 124 and store it at Product 2, New Engagement, New Test (to test retroactive replication)
+        finding_created_before_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_before_mark.test = test_new
+        finding_created_before_mark.save()
+        # Mark finding 124 as fp
+        finding_124.false_p = True
+        finding_124.save()
+        # Make another copy of finding 124 and store it at Product 2, New Engagement, New Test
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.test = test_new
+        finding_created_after_mark.save()
+        # Assert that both findings belongs to the same product but in a different engagement and are marked as fp
+        self.assert_finding(finding_created_before_mark, false_p=True, not_pk=124, product_id=2, not_engagement_id=5, unique_id_from_tool=finding_124.unique_id_from_tool)
+        self.assert_finding(finding_created_after_mark, false_p=True, not_pk=124, product_id=2, not_engagement_id=5, unique_id_from_tool=finding_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_equal_unique_id_same_product_different_engagement_dedupe_enabled(self):
+        # Enable deduplication
+        self.enable_dedupe()
+        # Create new test and new engagament in the same product
+        finding_124 = Finding.objects.get(id=124)
+        test_new, eng_new = self.create_new_test_and_engagment_from_finding(finding_124)
+        # Mark finding 124 as fp
+        finding_124.false_p = True
+        finding_124.save()
+        # Make a copy of finding 124 and store it at Product 2, New Engagement, New Test
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.test = test_new
+        finding_created_after_mark.save()
+        # Assert that finding belongs to the same product but in a different engagement and is NOT marked as fp
+        self.assert_finding(finding_created_after_mark, false_p=False, not_pk=124, product_id=2, not_engagement_id=5, unique_id_from_tool=finding_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_different_unique_id_same_product_different_engagement(self):
+        # Create new test and new engagament in the same product
+        finding_124 = Finding.objects.get(id=124)
+        test_new, eng_new = self.create_new_test_and_engagment_from_finding(finding_124)
+        # Make a copy of finding 124, change unique_id and store it at Product 2, New Engagement, New Test (to test retroactive replication)
+        finding_created_before_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_before_mark.unique_id_from_tool = 'somefakeid123'
+        finding_created_before_mark.test = test_new
+        finding_created_before_mark.save()
+        # Mark finding 124 as fp
+        finding_124.false_p = True
+        finding_124.save()
+        # Make another copy of finding 124, change unique_id and store it at Product 2, New Engagement, New Test
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.unique_id_from_tool = 'somefakeid123'
+        finding_created_after_mark.test = test_new
+        finding_created_after_mark.save()
+        # Assert that both findings belongs to the same product but in a different engagement and are NOT marked as fp
+        self.assert_finding(finding_created_before_mark, false_p=False, not_pk=124, product_id=2, not_engagement_id=5, not_unique_id_from_tool=finding_124.unique_id_from_tool)
+        self.assert_finding(finding_created_after_mark, false_p=False, not_pk=124, product_id=2, not_engagement_id=5, not_unique_id_from_tool=finding_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_equal_unique_id_different_product(self):
+        # Create new test, new engagament and new product
+        finding_124 = Finding.objects.get(id=124)
+        test_new, eng_new, product_new = self.create_new_test_and_engagment_and_product_from_finding(finding_124)
+        # Make a copy of finding 124 and store it at Product 2, New Engagement, New Test (to test retroactive replication)
+        finding_created_before_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_before_mark.test = test_new
+        finding_created_before_mark.save()
+        # Mark finding 124 as fp
+        finding_124.false_p = True
+        finding_124.save()
+        # Make another copy of finding 124 and store it at Product 2, New Engagement, New Test
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.test = test_new
+        finding_created_after_mark.save()
+        # Assert that both findings belongs to the same product but in a different engagement and are NOT marked as fp
+        self.assert_finding(finding_created_before_mark, false_p=False, not_pk=124, not_product_id=2, unique_id_from_tool=finding_124.unique_id_from_tool)
+        self.assert_finding(finding_created_after_mark, false_p=False, not_pk=124, not_product_id=2, unique_id_from_tool=finding_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_equal_unique_id_different_product_dedupe_enabled(self):
+        # Enable deduplication
+        self.enable_dedupe()
+        # Create new test, new engagament and new product
+        finding_124 = Finding.objects.get(id=124)
+        test_new, eng_new, product_new = self.create_new_test_and_engagment_and_product_from_finding(finding_124)
+        # Mark finding 124 as fp
+        finding_124.false_p = True
+        finding_124.save()
+        # Make a copy of finding 124 and store it at Product 2, New Engagement, New Test
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.test = test_new
+        finding_created_after_mark.save()
+        # Assert that finding belongs to the same product but in a different engagement and is NOT marked as fp
+        self.assert_finding(finding_created_after_mark, false_p=False, not_pk=124, not_product_id=2, unique_id_from_tool=finding_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_different_unique_id_different_product(self):
+        # Create new test, new engagament and new product
+        finding_124 = Finding.objects.get(id=124)
+        test_new, eng_new, product_new = self.create_new_test_and_engagment_and_product_from_finding(finding_124)
+        # Make a copy of finding 124 and store it at Product 2, New Engagement, New Test (to test retroactive replication)
+        finding_created_before_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_before_mark.unique_id_from_tool = 'somefakeid123'
+        finding_created_before_mark.test = test_new
+        finding_created_before_mark.save()
+        # Mark finding 124 as fp
+        finding_124.false_p = True
+        finding_124.save()
+        # Make another copy of finding 124 and store it at Product 2, New Engagement, New Test
+        finding_created_after_mark, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_created_after_mark.unique_id_from_tool = 'somefakeid123'
+        finding_created_after_mark.test = test_new
+        finding_created_after_mark.save()
+        # Assert that both findings belongs to the same product but in a different engagement and are NOT marked as fp
+        self.assert_finding(finding_created_before_mark, false_p=False, not_pk=124, not_product_id=2, not_unique_id_from_tool=finding_124.unique_id_from_tool)
+        self.assert_finding(finding_created_after_mark, false_p=False, not_pk=124, not_product_id=2, not_unique_id_from_tool=finding_124.unique_id_from_tool)
+
+
     # # utility methods
 
     def log_product(self, product):
