@@ -39,7 +39,7 @@ redis==4.1.4
 requests==2.27.1
 sqlalchemy==1.4.32  # Required by Celery broker transport
 supervisor==4.2.4
-urllib3==1.26.8
+urllib3==1.26.9
 uWSGI==2.0.20
 vobject==0.9.6.1
 whitenoise==5.2.0
