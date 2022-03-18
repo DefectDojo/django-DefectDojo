@@ -14,7 +14,7 @@ class TestHydraParser(DojoTestCase):
         with self.assertRaises(ValueError):
             parser.get_findings(testfile, Test())
 
-    def test_parser_ensures_data_is_for_stackhawk_before_parsing(self):
+    def test_parser_ensures_data_is_for_hydra_before_parsing(self):
         testfile = open("unittests/scans/hydra/oddly_familiar_json_that_isnt_us.json")
         parser = HydraParser()
         with self.assertRaises(ValueError):
