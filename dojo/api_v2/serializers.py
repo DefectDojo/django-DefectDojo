@@ -691,8 +691,6 @@ class RegulationSerializer(serializers.ModelSerializer):
 
 
 class ToolConfigurationSerializer(serializers.ModelSerializer):
-    configuration_url = serializers.CharField(source='url')
-
     class Meta:
         model = Tool_Configuration
         fields = '__all__'
