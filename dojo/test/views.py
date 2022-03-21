@@ -423,7 +423,7 @@ def add_findings(request, tid):
                         jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
-            new_finding.save(false_history=True, push_to_jira=push_to_jira)
+            new_finding.save(push_to_jira=push_to_jira)
             create_notification(event='other',
                                 title='Addition of %s' % new_finding.title,
                                 finding=new_finding,
@@ -508,12 +508,12 @@ def add_temp_finding(request, tid, fid):
             new_finding.date = datetime.today()
             finding_helper.update_finding_status(new_finding, request.user)
 
-            new_finding.save(dedupe_option=False, false_history=False)
+            new_finding.save(dedupe_option=False)
 
             # Save and add new endpoints
             finding_helper.add_endpoints(new_finding, form)
 
-            new_finding.save(false_history=True)
+            new_finding.save()
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', instance=new_finding, push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
                 if jform.is_valid():

@@ -2427,10 +2427,10 @@ class Finding(models.Model):
         return long_desc
 
     def save_no_options(self, *args, **kwargs):
-        return self.save(dedupe_option=False, false_history=False, rules_option=False, product_grading_option=False,
+        return self.save(dedupe_option=False, rules_option=False, product_grading_option=False,
              issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
+    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
         from dojo.finding import helper as finding_helper
@@ -2470,7 +2470,6 @@ class Finding(models.Model):
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
-            false_history = True
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
 
@@ -2499,8 +2498,8 @@ class Finding(models.Model):
         self.found_by.add(self.test.test_type)
 
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
-        if dedupe_option or false_history or issue_updater_option or product_grading_option or push_to_jira:
-            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
+        if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
+            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
                 issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
         else:
             logger.debug('no options selected that require finding post processing')
