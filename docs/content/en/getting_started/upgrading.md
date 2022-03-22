@@ -63,7 +63,7 @@ If you have installed DefectDojo on "iron" and wish to upgrade the installation,
 
 ## Upgrading to DefectDojo Version 2.9.x.
 
-**Breaking change for APIv2:** From API endpoint `/api/v2/tool_configurations/` was removed `configuration_url` because of redundancy.
+**Breaking change for APIv2:** `configuration_url` was removed from API endpoint `/api/v2/tool_configurations/` due to redundancy.
 
 ## Upgrading to DefectDojo Version 2.8.x.
 
