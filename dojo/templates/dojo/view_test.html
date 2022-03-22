@@ -280,7 +280,7 @@
     <!--Import activity end -->
 
     <!-- Finding Groups begin -->
-    {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+    {% if 'is_finding_feature_group_enabled'|system_setting_enabled %}
     <div class="panel panel-default">
         <div class="panel-heading tight">
             <div class="clearfix">
@@ -567,7 +567,7 @@
                             <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
                         </label>
 
-                        {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                        {% if 'is_finding_feature_group_enabled'|system_setting_enabled %}
                             <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label><br/>
                             <label style="font-size: 80%; font-weight: normal; display: block">
                                 <input id="id_bulk_finding_group_create" name="finding_group_create" class="finding_group_option" type="checkbox" disabled/> <span>Create</span>
@@ -662,7 +662,7 @@
                                     <th>Jira Change</th>
                                 {% endif %}
                             {% endif %}
-                            {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                            {% if 'is_finding_feature_group_enabled'|system_setting_enabled %}
                                 <th>Group</th>
                             {% endif %}
                         </tr>
@@ -890,7 +890,7 @@
                             </td>
                             {% endif %}
                         {% endif %}
-                        {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                        {% if 'is_finding_feature_group_enabled'|system_setting_enabled %}
                             <td class="centered">
                                 {% if finding.has_finding_group %}
                                 <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
@@ -1172,7 +1172,7 @@
                           { "data": "jira_change" },
                       {% endif %}
                   {% endif %}
-                  {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                  {% if 'is_finding_feature_group_enabled'|system_setting_enabled %}
                     { "data": "grouped" },
                   {% endif %}
               ];

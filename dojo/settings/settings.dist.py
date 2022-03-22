@@ -192,7 +192,6 @@ env = environ.Env(
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
     # Allow grouping of findings in the same test, for example to group findings per dependency
-    DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
 

@@ -15,7 +15,7 @@ from dojo.importers import utils as importer_utils
 from dojo.models import (BurpRawRequestResponse, FileUpload, Finding,
                          Notes, Test_Import)
 from dojo.tools.factory import get_parser
-from dojo.utils import get_current_user
+from dojo.utils import get_current_user, is_finding_feature_group_enabled
 from django.db.models import Q
 
 logger = logging.getLogger(__name__)
@@ -152,7 +152,7 @@ class DojoDefaultReImporter(object):
                 logger.debug('%i: reimport created new finding as no existing finding match: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
 
                 # only new items get auto grouped to avoid confusion around already existing items that are already grouped
-                if settings.FEATURE_FINDING_GROUPS and group_by:
+                if is_finding_feature_group_enabled() and group_by:
                     finding_helper.add_finding_to_auto_group(item, group_by, **kwargs)
 
                 finding_added_count += 1
@@ -210,7 +210,7 @@ class DojoDefaultReImporter(object):
 
                 # finding = new finding or existing finding still in the upload report
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
-                if settings.FEATURE_FINDING_GROUPS and finding.finding_group:
+                if is_finding_feature_group_enabled() and finding.finding_group:
                     finding.save()
                 else:
                     finding.save(push_to_jira=push_to_jira)
@@ -224,7 +224,7 @@ class DojoDefaultReImporter(object):
         # while it is in fact a new finding. So we substract new_items
         untouched = set(unchanged_items) - set(to_mitigate) - set(new_items)
 
-        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+        if is_finding_feature_group_enabled() and push_to_jira:
             for finding_group in set([finding.finding_group for finding in reactivated_items + unchanged_items + new_items if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
         sync = kwargs.get('sync', False)
@@ -257,7 +257,7 @@ class DojoDefaultReImporter(object):
                     status.save()
 
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
-                if settings.FEATURE_FINDING_GROUPS and finding.finding_group:
+                if is_finding_feature_group_enabled() and finding.finding_group:
                     # don't try to dedupe findings that we are closing
                     finding.save(dedupe_option=False)
                 else:
@@ -269,7 +269,7 @@ class DojoDefaultReImporter(object):
                 finding.notes.add(note)
                 mitigated_findings.append(finding)
 
-        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+        if is_finding_feature_group_enabled() and push_to_jira:
             for finding_group in set([finding.finding_group for finding in to_mitigate if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
 
