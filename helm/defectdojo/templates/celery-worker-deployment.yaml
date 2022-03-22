@@ -98,21 +98,23 @@ spec:
           valueFrom:
             secretKeyRef:
               {{- if eq .Values.celery.broker "rabbitmq" }}
-              name: {{ .Values.rabbitmq.existingPasswordSecret }}
-              key: {{ .Values.rabbitmq.secretPasswordKey }}  
-              {{- else if eq .Values.celery.broker "redis" }}
-              name: {{ .Values.redis.existingSecret }}
-              key: {{ .Values.redis.secretKey }}
+              name: {{ .Values.rabbitmq.existingPasswordSecret | default "defectdojo-rabbitmq-specific" }}
+              key: {{ .Values.rabbitmq.secretPasswordKey | default "postgresql-password" }}  
+              {{- end -}}
+              {{- if eq .Values.celery.broker "redis" }}
+              name: {{ .Values.redis.existingSecret | default "defectdojo-redis-specific" }}
+              key: {{ .Values.redis.secretKey | default "redis-password" }}
               {{- end }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
-              name: {{ .Values.postgresql.existingSecret }}
-              key: {{ .Values.postgresql.secretKey }}
-              {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.auth.existingSecret }}
-              key: {{ .Values.mysql.auth.secretKey }}
+              name: {{ .Values.postgresql.existingSecret | default "defectdojo-postgresql-specific" }}
+              key: {{ .Values.postgresql.secretKey | default "postgresql-password" }}
+              {{- end -}}
+              {{- if eq .Values.database "mysql" }}
+              name: {{ .Values.mysql.auth.existingSecret | default "defectdojo-mysql-specific" }}
+              key: {{ .Values.mysql.auth.secretKey | default "mysql-password" }}
               {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:
