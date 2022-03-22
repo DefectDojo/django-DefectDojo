@@ -568,7 +568,7 @@
                         </label>
 
                         {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
-                            <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label>(experimental)<br/>
+                            <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label><br/>
                             <label style="font-size: 80%; font-weight: normal; display: block">
                                 <input id="id_bulk_finding_group_create" name="finding_group_create" class="finding_group_option" type="checkbox" disabled/> <span>Create</span>
                                 <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 90%;"/>
@@ -893,9 +893,7 @@
                         {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
                             <td class="centered">
                                 {% if finding.has_finding_group %}
-                                <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">Y</a>
-                                {% else %}
-                                N
+                                <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
                                 {% endif %}
                             </td>
                         {% endif %}

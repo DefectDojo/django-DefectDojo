@@ -452,9 +452,7 @@
                                 {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
                                 <td class="centered">
                                     {% if finding.has_finding_group %}
-                                    <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">Y</a>
-                                    {% else %}
-                                    N
+                                    <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
                                     {% endif %}
                                 </td>
                                 {% endif %}

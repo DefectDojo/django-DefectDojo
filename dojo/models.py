@@ -455,6 +455,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_('Enable Product Tracking Files'),
         help_text=_("With this setting turned off, the product tracking files will be disabled in the user interface."))
+    enable_feature_findings_groups = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_('Enable Finding Groups'),
+        help_text=_("With this setting turned off, the Finding Groups will be disabled."))
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
