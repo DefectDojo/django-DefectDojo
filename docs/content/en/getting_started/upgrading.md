@@ -61,6 +61,10 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.9.x.
+
+**Breaking change for APIv2:** `configuration_url` was removed from API endpoint `/api/v2/tool_configurations/` due to redundancy.
+
 ## Upgrading to DefectDojo Version 2.8.x.
 
 **Breaking change for Docker Compose:** Starting DefectDojo with Docker Compose now supports 2 databases (MySQL and PostgreSQL) and 2 celery brokers (RabbitMQ and Redis). To make this possible, docker-compose needs to be started with the parameters `--profile` and `--env-file`. You can get more information in [Setup via Docker Compose - Profiles](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md#setup-via-docker-compose---profiles). The profile `mysql-rabbitmq` provides the same configuration as in previous releases. With this the prerequisites have changed as well: Docker requires at least version 19.03.0 and Docker Compose 1.28.0.
