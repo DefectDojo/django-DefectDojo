@@ -104,7 +104,7 @@ spec:
             secretKeyRef:
               {{- if eq .Values.celery.broker "rabbitmq" }}
               name: {{ .Values.rabbitmq.existingPasswordSecret | default "defectdojo-rabbitmq-specific" }}
-              key: {{ .Values.rabbitmq.secretPasswordKey | default "postgresql-password" }}  
+              key: {{ .Values.rabbitmq.secretPasswordKey | default "rabbitmq-password" }}  
               {{- end -}}
               {{- if eq .Values.celery.broker "redis" }}
               name: {{ .Values.redis.existingSecret | default "defectdojo-redis-specific" }}
