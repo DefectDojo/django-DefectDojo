@@ -2129,4 +2129,3 @@ def get_enabled_notifications_list():
 def is_finding_feature_group_enabled():
     """Returns true is feature is enabled otherwise false"""
     return get_system_setting("enable_feature_findings_groups")
-

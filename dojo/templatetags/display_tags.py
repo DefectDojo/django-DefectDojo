@@ -702,6 +702,7 @@ def system_setting_enabled(name):
     print(getattr(dojo.utils, name)())
     return getattr(dojo.utils, name)()
 
+
 @register.filter
 def finding_display_status(finding):
     # add urls for some statuses

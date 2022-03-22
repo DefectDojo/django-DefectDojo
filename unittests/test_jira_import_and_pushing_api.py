@@ -1,4 +1,3 @@
-from django.test.utils import override_settings
 from dojo.models import Finding_Group, User, Finding, JIRA_Instance
 from dojo.jira_link import helper as jira_helper
 from rest_framework.authtoken.models import Token
