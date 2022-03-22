@@ -1326,7 +1326,7 @@ class ToolConfigurationsTest(BaseClass.RESTEndpointTest):
         self.endpoint_path = 'tool_configurations'
         self.viewset = ToolConfigurationsViewSet
         self.payload = {
-            "configuration_url": "http://www.example.com",
+            "url": "http://www.example.com",
             "name": "Tool Configuration",
             "description": "",
             "authentication_type": "API",
