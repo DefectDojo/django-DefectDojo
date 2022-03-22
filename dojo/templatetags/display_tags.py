@@ -699,7 +699,6 @@ def setting_enabled(name):
 # this filter checks value directly against of function in utils
 @register.filter
 def system_setting_enabled(name):
-    print(getattr(dojo.utils, name)())
     return getattr(dojo.utils, name)()
 
 
