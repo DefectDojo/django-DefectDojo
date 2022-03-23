@@ -3,7 +3,7 @@ import base64
 from django.db.models.query_utils import Q
 from dojo.importers import utils as importer_utils
 from dojo.decorators import dojo_async_task
-from dojo.utils import get_current_user, is_finding_feature_group_enabled
+from dojo.utils import get_current_user, is_finding_groups_enabled
 from dojo.celery import app
 from django.core.exceptions import ValidationError
 from django.core import serializers
@@ -107,7 +107,7 @@ class DojoDefaultImporter(object):
 
             item.save(dedupe_option=False)
 
-            if is_finding_feature_group_enabled() and group_by:
+            if is_finding_groups_enabled() and group_by:
                 finding_helper.add_finding_to_auto_group(item, group_by, **kwargs)
 
             if (hasattr(item, 'unsaved_req_resp') and
@@ -156,12 +156,12 @@ class DojoDefaultImporter(object):
 
             new_findings.append(item)
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if is_finding_feature_group_enabled() and item.finding_group:
+            if is_finding_groups_enabled() and item.finding_group:
                 item.save()
             else:
                 item.save(push_to_jira=push_to_jira)
 
-        if is_finding_feature_group_enabled() and push_to_jira:
+        if is_finding_groups_enabled() and push_to_jira:
             for finding_group in set([finding.finding_group for finding in new_findings if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
         sync = kwargs.get('sync', False)
@@ -214,13 +214,13 @@ class DojoDefaultImporter(object):
             old_finding.tags.add('stale')
 
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if is_finding_feature_group_enabled() and old_finding.finding_group:
+            if is_finding_groups_enabled() and old_finding.finding_group:
                 # don't try to dedupe findings that we are closing
                 old_finding.save(dedupe_option=False)
             else:
                 old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
 
-        if is_finding_feature_group_enabled() and push_to_jira:
+        if is_finding_groups_enabled() and push_to_jira:
             for finding_group in set([finding.finding_group for finding in old_findings if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
 

@@ -39,7 +39,7 @@ from django.urls import reverse
 from tagulous.forms import TagField
 import logging
 from crum import get_current_user
-from dojo.utils import get_system_setting, get_product, is_finding_feature_group_enabled
+from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
@@ -411,7 +411,7 @@ class ImportScanForm(forms.Form):
                                                         "This affects the whole engagement/product depending on your deduplication scope.",
                                             required=False, initial=False)
 
-    if is_finding_feature_group_enabled():
+    if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     def __init__(self, *args, **kwargs):
@@ -485,7 +485,7 @@ class ReImportScanForm(forms.Form):
     api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
     service = forms.CharField(max_length=200, required=False, help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
 
-    if is_finding_feature_group_enabled():
+    if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
 
     def __init__(self, *args, test=None, **kwargs):
@@ -1175,7 +1175,7 @@ class FindingForm(forms.ModelForm):
             del self.fields['mitigated']
             del self.fields['mitigated_by']
 
-        if not is_finding_feature_group_enabled() or not hasattr(self.instance, 'test'):
+        if not is_finding_groups_enabled() or not hasattr(self.instance, 'test'):
             del self.fields['group']
         else:
             self.fields['group'].queryset = self.instance.test.finding_group_set.all()
@@ -2609,7 +2609,7 @@ class JIRAFindingForm(forms.Form):
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
-        if is_finding_feature_group_enabled():
+        if is_finding_groups_enabled():
             self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one. If this finding is part of a Finding Group, the group will pushed instead of the finding."
         else:
             self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
@@ -2628,7 +2628,7 @@ class JIRAFindingForm(forms.Form):
             if hasattr(self.instance, 'has_jira_issue') and self.instance.has_jira_issue:
                 self.initial['jira_issue'] = self.instance.jira_issue.jira_key
                 self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
-        if is_finding_feature_group_enabled():
+        if is_finding_groups_enabled():
             self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue for this finding, or the group this finding is in.'})
         else:
             self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue for this finding.'})
