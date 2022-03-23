@@ -12,7 +12,7 @@ removed with version 2.12.0 / 5. July 2022. If you have set
 remove this local setting and start using the new authorization as described
 in [Configuration permissions]({{< ref "/usage/permissions#configuration-permissions" >}}).
 
-To support the transition, you can run a migration script with ``./manage.py migrate staff_users``. This script:
+To support the transition, you can run a migration script with ``./manage.py migrate_staff_users``. This script:
 
 * creates a group for all staff users,
 * sets all configuration permissions that staff users had and
