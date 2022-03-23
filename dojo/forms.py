@@ -1137,8 +1137,8 @@ class FindingForm(forms.ModelForm):
         if 'req_resp' in kwargs:
             req_resp = kwargs.pop('req_resp')
 
-        # self.can_edit_mitigated_data = kwargs.pop('can_edit_mitigated_data') if 'can_edit_mitigated_data' in kwargs \
-        #    else False
+        self.can_edit_mitigated_data = kwargs.pop('can_edit_mitigated_data') if 'can_edit_mitigated_data' in kwargs \
+            else False
 
         super(FindingForm, self).__init__(*args, **kwargs)
 
