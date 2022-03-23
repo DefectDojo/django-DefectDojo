@@ -1051,51 +1051,6 @@ class PromoteFindingForm(forms.ModelForm):
                    'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
 
 
-class SplitDateTimeWidget(forms.MultiWidget):
-    supports_microseconds = False
-    template_name = 'dojo/field-datetime.html'
-
-    def __init__(self):
-        widgets = (
-            forms.TextInput(attrs={'type': 'date', 'autocomplete': 'off'}),
-            forms.TextInput(attrs={'type': 'time', 'autocomplete': 'off'}),
-        )
-        super().__init__(widgets)
-
-    def decompress(self, value):
-        if value:
-            value = form_utils.to_current_timezone(value)
-            return [value.date(), value.time()]
-        return [None, None]
-
-
-class SplitDateTimeField(forms.MultiValueField):
-    widget = SplitDateTimeWidget
-    hidden_widget = forms.SplitHiddenDateTimeWidget
-
-    def __init__(self, **kwargs):
-        fields = (
-            forms.DateField(),
-            forms.TimeField(),
-        )
-        super().__init__(fields, **kwargs)
-
-    def compress(self, data_list):
-        if data_list:
-            # preserve default dojo behavior and set current time if any part is empty
-            if data_list[0] in self.empty_values:
-                selected_date = date.today()
-            else:
-                selected_date = data_list[0]
-            if data_list[1] in self.empty_values:
-                selected_time = datetime.now().time()
-            else:
-                selected_time = data_list[1]
-            # keep potential tzinfo
-            return form_utils.from_current_timezone(datetime.combine(selected_date, selected_time, *data_list[2:]))
-        return None
-
-
 class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     group = forms.ModelChoiceField(required=False, queryset=Finding_Group.objects.none(), help_text='The Finding Group to which this finding belongs, leave empty to remove the finding from the group. Groups can only be created via Bulk Edit for now.')
@@ -1121,8 +1076,8 @@ class FindingForm(forms.ModelForm):
                                widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
 
-    # mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
-    # mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
+    mitigated = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
+    mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
 
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
@@ -1167,13 +1122,13 @@ class FindingForm(forms.ModelForm):
 
         self.fields['sla_start_date'].disabled = True
 
-        # if self.can_edit_mitigated_data:
-        #    if hasattr(self, 'instance'):
-        #        self.fields['mitigated'].initial = self.instance.mitigated
-        #        self.fields['mitigated_by'].initial = self.instance.mitigated_by
-        # else:
-        #    del self.fields['mitigated']
-        #    del self.fields['mitigated_by']
+        if self.can_edit_mitigated_data:
+            if hasattr(self, 'instance'):
+                self.fields['mitigated'].initial = self.instance.mitigated
+                self.fields['mitigated_by'].initial = self.instance.mitigated_by
+        else:
+            del self.fields['mitigated']
+            del self.fields['mitigated_by']
 
         if not settings.FEATURE_FINDING_GROUPS or not hasattr(self.instance, 'test'):
             del self.fields['group']
@@ -1208,13 +1163,13 @@ class FindingForm(forms.ModelForm):
     def _post_clean(self):
         super(FindingForm, self)._post_clean()
 
-        # if self.can_edit_mitigated_data:
-        #    opts = self.instance._meta
-        #    try:
-        #        opts.get_field('mitigated').save_form_data(self.instance, self.cleaned_data.get('mitigated'))
-        #        opts.get_field('mitigated_by').save_form_data(self.instance, self.cleaned_data.get('mitigated_by'))
-        #    except forms.ValidationError as e:
-        #        self._update_errors(e)
+        if self.can_edit_mitigated_data:
+            opts = self.instance._meta
+            try:
+                opts.get_field('mitigated').save_form_data(self.instance, self.cleaned_data.get('mitigated'))
+                opts.get_field('mitigated_by').save_form_data(self.instance, self.cleaned_data.get('mitigated_by'))
+            except forms.ValidationError as e:
+                self._update_errors(e)
 
     class Meta:
         model = Finding
