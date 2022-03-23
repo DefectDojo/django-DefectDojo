@@ -477,7 +477,7 @@
                 {% if finding.github_conf_new or finding.github_issue %}
                 <th>GitHub</th>
                 {% endif %}
-                {% if ''is_finding_groups_enabled'|system_setting_enabled and finding.finding_group %}
+                {% if 'is_finding_groups_enabled'|system_setting_enabled and finding.finding_group %}
                 <th>Group</th>
                 {% endif %}
             </tr>
