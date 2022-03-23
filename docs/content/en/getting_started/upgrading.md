@@ -71,7 +71,7 @@ If you have installed DefectDojo on "iron" and wish to upgrade the installation,
 
 **Breaking change for Helm Chart:** In one of the last releases we upgraded the redis dependency in our helm chart without renaming keys in our helm chart. We fixed this bug with this release, but you may want to check if all redis values are correct ([Pull Request](https://github.com/DefectDojo/django-DefectDojo/pull/5886)).
 
-The flexible permissions for the configuration of DefectDojo are now active by default. With this, the flag **Staff** for users is not relevant and not visible anymore. The old behaviour can still be activated by setting the parameter `FEATURE_CONFIGURATION_AUTHORIZATION` to `False`. If you haven't done so with the previous release, you can still run a migration script with `./manage.py migrate staff_users`. This script:
+The flexible permissions for the configuration of DefectDojo are now active by default. With this, the flag **Staff** for users is not relevant and not visible anymore. The old behaviour can still be activated by setting the parameter `FEATURE_CONFIGURATION_AUTHORIZATION` to `False`. If you haven't done so with the previous release, you can still run a migration script with `./manage.py migrate_staff_users`. This script:
 
 * creates a group for all staff users,
 * sets all configuration permissions that staff users had and
@@ -87,7 +87,7 @@ Release 2.7.0 contains a beta functionality to make permissions for the configur
 
 The functionality using the flag `AUTHORIZATION_STAFF_OVERRIDE` has been removed. The same result can be achieved with giving the staff users a global Owner role. 
 
-To support the transition for these 2 changes, you can run a migration script with ``./manage.py migrate staff_users``. This script:
+To support the transition for these 2 changes, you can run a migration script with ``./manage.py migrate_staff_users``. This script:
 
 * creates a group for all staff users,
 * sets all configuration permissions that staff users had and
