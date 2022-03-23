@@ -21,7 +21,6 @@ def migrate_from_settings_file(apps, schema_editor):
             pass
 
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
