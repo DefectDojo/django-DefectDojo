@@ -12,9 +12,14 @@ def migrate_from_settings_file(apps, schema_editor):
     if hasattr(settings, 'FEATURE_FINDING_GROUPS'):
         system_settings_model = apps.get_model('dojo', 'System_Settings')
         logger.info('Migrating value from FEATURE_FINDING_GROUPS into system settings model')
-        system_setting = system_settings_model.objects.get()
-        system_setting.enable_finding_groups = settings.FEATURE_FINDING_GROUPS
-        system_setting.save()
+        try:
+            system_setting = system_settings_model.objects.get()
+            system_setting.enable_finding_groups = settings.FEATURE_FINDING_GROUPS
+            system_setting.save()
+        except:
+            # for a clean installation there is no system_settings record, so just ignore it
+            pass
+
 
 
 class Migration(migrations.Migration):
