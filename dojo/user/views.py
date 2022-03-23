@@ -110,8 +110,8 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    
-    if not settings.SHOW_LOGIN_FORM :
+
+    if not settings.SHOW_LOGIN_FORM:
         return login_view(request)
     else:
         messages.add_message(request,
