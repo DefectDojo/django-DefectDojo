@@ -120,7 +120,7 @@
                                 <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
                             </label>
 
-                            {% if 'is_finding_feature_group_enabled'|system_setting_enabled %}
+                            {% if ''is_finding_groups_enabled'|system_setting_enabled %}
                             <label><b>Group</b></label>
                             <span style="font-size: 80%;">(Only available in per test for now)</span><br/>
                             {% endif %}
@@ -205,7 +205,7 @@
                                 <th>JIRA Change</th>
                               {% endif %}
                             {% endif%}
-                            {% if 'is_finding_feature_group_enabled'|system_setting_enabled %}
+                            {% if ''is_finding_groups_enabled'|system_setting_enabled %}
                                 <th>Group</th>
                             {% endif %}
                             {% if show_product_column and product_tab is None %}
@@ -449,7 +449,7 @@
                                     </td>
                                   {% endif %}
                                 {% endif %}
-                                {% if 'is_finding_feature_group_enabled'|system_setting_enabled %}
+                                {% if ''is_finding_groups_enabled'|system_setting_enabled %}
                                 <td class="centered">
                                     {% if finding.has_finding_group %}
                                     <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
@@ -514,7 +514,7 @@
                     { "data": "jira_change" },
                   {% endif %}
                 {% endif %}
-                {% if 'is_finding_feature_group_enabled'|system_setting_enabled %}
+                {% if ''is_finding_groups_enabled'|system_setting_enabled %}
                   { "data": "grouped" },
                 {% endif %}
                 {% if show_product_column and product_tab is None %}
