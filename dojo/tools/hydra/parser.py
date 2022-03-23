@@ -1,6 +1,6 @@
 import json
 
-from dojo.models import Endpoint, Finding
+from dojo.models import Finding
 from django.utils.dateparse import parse_datetime
 
 
@@ -14,6 +14,7 @@ class HydraScanMetadata:
         self.service_type = generator['service']
         self.tool_version = generator['version']
         self.server = generator['server']
+
 
 class HydraParser(object):
     """
@@ -51,7 +52,7 @@ class HydraParser(object):
         port = raw_finding['port']
         username = raw_finding['login']
         password = raw_finding['password']
-        
+
         finding = Finding(
             test=test,
             title="Weak username / password combination found for " + host,

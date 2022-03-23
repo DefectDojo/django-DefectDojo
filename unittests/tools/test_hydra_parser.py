@@ -45,7 +45,7 @@ class TestHydraParser(DojoTestCase):
             "bill@example.com",
             "bill"
         )
-    
+
     def test_hydra_parser_with_many_findings_has_many_findings(self):
         testfile = open("unittests/scans/hydra/hydra_report_many_finding.json")
         parser = HydraParser()
@@ -53,7 +53,7 @@ class TestHydraParser(DojoTestCase):
         testfile.close()
         self.__assertAllEndpointsAreClean(findings)
         self.assertEqual(3, len(findings))
-        
+
         self.__assertFindingEquals(
             findings[0],
             self.__test_datetime,
