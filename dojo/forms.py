@@ -1121,8 +1121,8 @@ class FindingForm(forms.ModelForm):
                                widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
 
-    #mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
-    #mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
+    # mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
+    # mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
 
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
@@ -1137,7 +1137,7 @@ class FindingForm(forms.ModelForm):
         if 'req_resp' in kwargs:
             req_resp = kwargs.pop('req_resp')
 
-        #self.can_edit_mitigated_data = kwargs.pop('can_edit_mitigated_data') if 'can_edit_mitigated_data' in kwargs \
+        # self.can_edit_mitigated_data = kwargs.pop('can_edit_mitigated_data') if 'can_edit_mitigated_data' in kwargs \
         #    else False
 
         super(FindingForm, self).__init__(*args, **kwargs)
@@ -1167,11 +1167,11 @@ class FindingForm(forms.ModelForm):
 
         self.fields['sla_start_date'].disabled = True
 
-        #if self.can_edit_mitigated_data:
+        # if self.can_edit_mitigated_data:
         #    if hasattr(self, 'instance'):
         #        self.fields['mitigated'].initial = self.instance.mitigated
         #        self.fields['mitigated_by'].initial = self.instance.mitigated_by
-        #else:
+        # else:
         #    del self.fields['mitigated']
         #    del self.fields['mitigated_by']
 
@@ -1208,7 +1208,7 @@ class FindingForm(forms.ModelForm):
     def _post_clean(self):
         super(FindingForm, self)._post_clean()
 
-        #if self.can_edit_mitigated_data:
+        # if self.can_edit_mitigated_data:
         #    opts = self.instance._meta
         #    try:
         #        opts.get_field('mitigated').save_form_data(self.instance, self.cleaned_data.get('mitigated'))
@@ -1513,7 +1513,7 @@ class CloseFindingForm(forms.ModelForm):
 
     mitigated = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
-    
+
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('missing_note_types')
         super(CloseFindingForm, self).__init__(*args, **kwargs)
@@ -1521,7 +1521,7 @@ class CloseFindingForm(forms.ModelForm):
             self.fields['note_type'].widget = forms.HiddenInput()
         else:
             self.fields['note_type'] = forms.ModelChoiceField(queryset=queryset, label='Note Type', required=True)
-        
+
         self.can_edit_mitigated_data = kwargs.pop('can_edit_mitigated_data') if 'can_edit_mitigated_data' in kwargs \
             else False
 
