@@ -192,6 +192,8 @@ env = environ.Env(
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
     # Allow grouping of findings in the same test, for example to group findings per dependency
+    # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
+    DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
 
@@ -1388,6 +1390,8 @@ EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
 USE_L10N = True
 
+# FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
+FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
 JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
 
