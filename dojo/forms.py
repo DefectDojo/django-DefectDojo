@@ -13,7 +13,6 @@ from django.contrib.auth.models import Permission
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
-from django.forms import utils as form_utils
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
