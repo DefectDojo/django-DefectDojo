@@ -36,16 +36,21 @@ markdown_tags = [
     "img",
     "a",
     "sub", "sup",
+    "center",
 ]
 
 markdown_attrs = {
     "*": ["id"],
-    "img": ["src", "alt", "title"],
+    "img": ["src", "alt", "title", "width", "height", "style"],
     "a": ["href", "alt", "target", "title"],
     "span": ["class"],  # used for code highlighting
     "pre": ["class"],  # used for code highlighting
     "div": ["class"],  # used for code highlighting
 }
+
+markdown_styles = [
+    "background-color"
+]
 
 finding_related_action_classes_dict = {
     'reset_finding_duplicate_status': 'fa fa-eraser',
@@ -76,7 +81,7 @@ def markdown_render(value):
                                                       'markdown.extensions.fenced_code',
                                                       'markdown.extensions.toc',
                                                       'markdown.extensions.tables'])
-        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs))
+        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs, markdown_styles))
 
 
 @register.filter(name='url_shortner')
