@@ -72,7 +72,7 @@ jobs:
 
   integration_tests:
     # run tests with docker-compose
-    name: integration tests
+    name: test
     needs: build
     runs-on: ubuntu-latest
     strategy:
@@ -101,6 +101,7 @@ jobs:
           "tests/check_various_pages.py",
           "tests/notifications_test.py",
         ]
+        profile: ["mysql-rabbitmq", "postgres-redis"]
       fail-fast: false
 
     steps:
@@ -122,24 +123,28 @@ jobs:
       - name: Set integration-test mode
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
-      # phased startup so we can use the exit code from integrationtest container
+      # phased startup with MySQL and RabbitMQ so we can use the exit code from integrationtest container
 
-      - name: Start Dojo
-        # implicity starts uwsgi and rabbitmq
-        run: docker-compose up -d mysql nginx celerybeat celeryworker mailhog
+      - name: Start Dojo MySQL + RabbitMQ
+        if: matrix.profile == 'mysql-rabbitmq'
+        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d mysql nginx celerybeat celeryworker mailhog uwsgi rabbitmq
+
+      - name: Start Dojo PostgreSQL + Redis
+        if: matrix.profile == 'postgres-redis'
+        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
 
       - name: Initialize
-        run: docker-compose up --exit-code-from initializer initializer
+        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from initializer initializer
 
       - name: Integration tests
-        run: docker-compose up --exit-code-from integration-tests integration-tests
+        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from integration-tests integration-tests
         env:
           DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
 
       - name: Logs
         if: always()
-        run: docker-compose logs --tail="2500"
+        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env logs --tail="2500"
 
       - name: Shutdown
         if: always()
-        run: docker-compose down
+        run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env down

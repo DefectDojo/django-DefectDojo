@@ -10,6 +10,9 @@ cd /app
 # Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)
 unset DD_DATABASE_URL
 
+# Unset the celery broker URL so that we can force the other DD_CELERY_BROKER settings
+unset DD_CELERY_BROKER_URL
+
 # TARGET_SETTINGS_FILE=dojo/settings/settings.py
 # if [ ! -f ${TARGET_SETTINGS_FILE} ]; then
 #   echo "Creating settings.py"

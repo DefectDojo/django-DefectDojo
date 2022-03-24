@@ -12,7 +12,7 @@ if [ "$NUM_FILES" -gt "0" ]; then
     echo "     Overriding DefectDojo's local_settings.py with multiple"
     echo "     Files: $COMMA_LIST"
     echo "============================================================"
-    cp /app/docker/extra_settings/* /app/dojo/settings/
+    cp /app/docker/extra_settings/*.py /app/dojo/settings/
 fi
 
 echo -n "Waiting for database to be reachable "

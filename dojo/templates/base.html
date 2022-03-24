@@ -316,7 +316,7 @@
                             </li>
                             {% if "auth.view_user"|has_configuration_permission:"staff" or "auth.view_group"|has_configuration_permission:"staff" %}
                                 <li>
-                                    <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users">
+                                    <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users" id="id_user_menu">
                                         <i class="fa fa-user fa-fw"></i>
                                         <span>Users</span>
                                         <span class="glyphicon arrow"></span>
@@ -326,7 +326,7 @@
                                         <li><a href="{% url 'users' %}"> Users </a></li>
                                         {% endif %}
                                         {% if "auth.view_group"|has_configuration_permission:"staff" %}
-                                        <li><a href="{% url 'groups' %}"> Groups </a></li>
+                                        <li><a href="{% url 'groups' %}"  id="id_group_menu"> Groups </a></li>
                                         {% endif %}
                                     </ul>
                                 </li>
@@ -764,10 +764,16 @@
                                                htmlEscape(elem.fields.source) + '</span></div></li><li class="divider"></li>');
                   $("#" + dropdown_alert).text(display_title);
                 });
-                $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "alerts" %}"><strong>See All Alerts </strong>' +
-                                             '<i class="fa fa-angle-right"></i></a></li>');
-                $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>Clear All Alerts </strong>' +
-                                           '<i class="fa fa-angle-right"></i></a></li>');
+
+                if (data.length > 0) {
+                    $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "alerts" %}"><strong>See All Alerts</strong>' +
+                                                 '<i class="fa fa-angle-right"></i></a></li>');
+                    $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>Clear All Alerts</strong>' +
+                                               '<i class="fa fa-angle-right"></i></a></li>');
+                }
+                else {
+                    $('.dropdown-alerts').append('<li class="text-center"><strong>No alerts found</strong></li>');
+                }
             });
             update_alertcount()
         }
