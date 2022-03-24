@@ -1,8 +1,13 @@
 #!/bin/sh
 
 # Allow for bind-mount multiple settings.py overrides
-FILES=$(ls /app/docker/extra_settings/*.py)
-NUM_FILES=$(echo "$FILES" | wc -l)
+if [ -d /app/docker/extra_settings ]; then
+    FILES=$(ls /app/docker/extra_settings/*.py)
+    NUM_FILES=$(echo "$FILES" | wc -l)
+else
+    NUM_FILES=0
+fi
+
 if [ "$NUM_FILES" -gt "0" ]; then
     COMMA_LIST=$(echo $FILES | tr -s '[:blank:]' ', ')
     echo "============================================================"
