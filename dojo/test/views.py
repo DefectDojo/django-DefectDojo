@@ -505,7 +505,7 @@ def add_temp_finding(request, tid, fid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            new_finding.date = datetime.today()
+            new_finding.date = form.cleaned_data['date'] or datetime.today()
             finding_helper.update_finding_status(new_finding, request.user)
 
             new_finding.save(dedupe_option=False, false_history=False)
