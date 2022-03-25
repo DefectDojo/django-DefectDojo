@@ -748,6 +748,18 @@ def edit_finding(request, fid):
 
             new_finding.tags = form.cleaned_data['tags']
 
+            # If active is not checked and CAN_EDIT_MIIGATED_DATA, mitigate the finding and the associated endpoints status
+            if finding_helper.can_edit_mitigated_data(request.user):
+                if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+                    new_finding.is_mitigated = True
+                    endpoint_status = new_finding.endpoint_status.all()
+                    for status in endpoint_status:
+                        status.mitigated_by = request.user
+                        status.mitigated_time = form.cleaned_data["mitigated"] or now
+                        status.mitigated = True
+                        status.last_modified = timezone.now()
+                        status.save()
+
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
                 if burp_rr:
