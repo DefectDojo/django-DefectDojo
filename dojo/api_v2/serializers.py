@@ -1717,6 +1717,18 @@ class FindingToFilesSerializer(serializers.Serializer):
     files = FileSerializer(many=True)
 
 
+class FindingCloseSerializer(serializers.ModelSerializer):
+    is_mitigated = serializers.BooleanField(required=False)
+    mitigated = serializers.DateTimeField(required=False)
+
+    class Meta:
+        model = Finding
+        if settings.EDITABLE_MITIGATED_DATA:
+            fields = ('is_mitigated', 'mitigated')
+        else:
+            fields = ('is_mitigated')
+
+
 class ReportGenerateOptionSerializer(serializers.Serializer):
     include_finding_notes = serializers.BooleanField(default=False)
     include_finding_images = serializers.BooleanField(default=False)
