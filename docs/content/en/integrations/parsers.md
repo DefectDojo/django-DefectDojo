@@ -983,7 +983,7 @@ Output of SKF Sprint summary export.
 ### Snyk
 
 Snyk output file (snyk test \--json \> snyk.json) can be imported in
-JSON format.
+JSON format. Only SCA (Software Composition Analysis) report is supported (SAST report not supported yet).
 
 ### SonarQube Scan (Aggregates findings per cwe, title, description, file\_path.)
 
