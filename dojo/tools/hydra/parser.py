@@ -1,6 +1,6 @@
 import json
 
-from dojo.models import Finding
+from dojo.models import Finding, Endpoint
 from django.utils.dateparse import parse_datetime
 
 
@@ -9,8 +9,6 @@ class HydraScanMetadata:
         self.date = generator['built']
         self.command = generator['commandline']
         self.schema_version = generator['jsonoutputversion']
-        self.static_finding = False
-        self.dynamic_finding = True
         self.service_type = generator['service']
         self.tool_version = generator['version']
         self.server = generator['server']
@@ -59,10 +57,11 @@ class HydraParser(object):
             date=parse_datetime(metadata.date),
             severity="High",
             description=host + " on port " + str(port) + " is allowing logins with easy to guess username " + username + " and password " + password,
-            static_finding=metadata.static_finding,
-            dynamic_finding=metadata.dynamic_finding,
+            static_finding=False,
+            dynamic_finding=True,
             service=metadata.service_type,
         )
+        finding.unsaved_endpoints = [Endpoint(host=host, port=port)]
 
         return finding
 
@@ -74,18 +73,3 @@ class HydraParser(object):
             raise ValueError(" Unexpected JSON format provided. That doesn't look like a Hydra scan!")
 
         return report
-
-    @staticmethod
-    def __hyperlink(link: str) -> str:
-        return '[' + link + '](' + link + ')'
-
-    @staticmethod
-    def __endpoint_status(status: str) -> str:
-        if status == 'NEW':
-            return '** - New**'
-        elif status == 'RISK_ACCEPTED':
-            return '** - Marked "Risk Accepted"**'
-        elif status == 'FALSE_POSITIVE':
-            return '** - Marked "False Positive"**'
-        else:
-            return ""

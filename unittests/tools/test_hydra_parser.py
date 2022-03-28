@@ -97,6 +97,8 @@ class TestHydraParser(DojoTestCase):
         self.assertTrue(actual_finding.dynamic_finding)
         # The following fields should be not be set from this parser.
         self.assertIsNone(actual_finding.unique_id_from_tool)
+        self.assertEqual(actual_finding.unsaved_endpoints[0].host, finding_url)
+        self.assertEqual(str(actual_finding.unsaved_endpoints[0].port), finding_port)
 
     def __assertAllEndpointsAreClean(self, findings):
         for finding in findings:

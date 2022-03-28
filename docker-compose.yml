@@ -13,7 +13,6 @@ services:
       context: ./
       dockerfile: Dockerfile.nginx
     image: "defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}"
-    platform: linux/x86_64
     profiles: 
       - mysql-rabbitmq
       - mysql-redis
@@ -132,7 +131,6 @@ services:
           target: /app/docker/extra_settings
   mysql:
     image: mysql:5.7.37@sha256:66d52e6baa8093820c09fec56992a5ee734f17e9fad8ef5ffc31597b231bd048
-    platform: linux/x86_64
     profiles: 
       - mysql-rabbitmq
       - mysql-redis
