@@ -1723,7 +1723,7 @@ class FindingCloseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Finding
-            fields = ('is_mitigated', 'mitigated')
+        fields = ('is_mitigated', 'mitigated')
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
