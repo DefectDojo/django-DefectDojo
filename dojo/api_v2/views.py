@@ -539,16 +539,16 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                 finding.mitigated_by = request.user
                 finding.active = False
 
-                endpoint_status = finding.endpoint_status.all()
-                for status in endpoint_status:
-                    status.mitigated_by = request.user
+                endpoints_status = finding.endpoint_status.all()
+                for e_status in endpoints_status:
+                    e_status.mitigated_by = request.user
                     if settings.EDITABLE_MITIGATED_DATA:
-                        status.mitigated_time =  finding_close.validated_data["mitigated"] or timezone.now()
+                        e_status.mitigated_time = finding_close.validated_data["mitigated"] or timezone.now()
                     else:
-                         status.mitigated_time = timezone.now()
-                    status.mitigated = True
-                    status.last_modified = timezone.now()
-                    status.save()
+                        e_status.mitigated_time = timezone.now()
+                    e_status.mitigated = True
+                    e_status.last_modified = timezone.now()
+                    e_status.save()
                 finding.save()
             else:
                 return Response(finding_close.errors,

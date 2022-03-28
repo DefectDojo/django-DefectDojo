@@ -1726,7 +1726,7 @@ class FindingCloseSerializer(serializers.ModelSerializer):
         if settings.EDITABLE_MITIGATED_DATA:
             fields = ('is_mitigated', 'mitigated')
         else:
-            fields = ('is_mitigated')
+            fields = ('is_mitigated',)
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
