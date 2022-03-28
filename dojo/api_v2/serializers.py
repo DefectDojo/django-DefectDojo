@@ -1723,10 +1723,7 @@ class FindingCloseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Finding
-        if settings.EDITABLE_MITIGATED_DATA:
             fields = ('is_mitigated', 'mitigated')
-        else:
-            fields = ('is_mitigated',)
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
