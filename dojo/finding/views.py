@@ -1744,7 +1744,6 @@ def finding_bulk_update_all(request, pid=None):
         finding_to_update = request.POST.getlist('finding_to_update')
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
         total_find_count = finds.count()
-        skipped_find_count = 0
         prods = set([find.test.engagement.product for find in finds])
         if request.POST.get('delete_bulk_findings'):
             if form.is_valid() and finding_to_update:
@@ -1908,11 +1907,25 @@ def finding_bulk_update_all(request, pid=None):
                             else:
                                 add_external_issue(finding, 'github')
 
+                if form.cleaned_data['notes']:
+                    logger.info('Setting bulk notes')
+                    note = Notes(entry=form.cleaned_data['notes'], author=request.user, date=timezone.now())
+                    note.save()
+                    history = NoteHistory(data=note.entry,
+                                          time=note.date,
+                                          current_editor=note.author)
+                    history.save()
+                    note.history.add(history)
+                    for finding in finds:
+                        finding.notes.add(note)
+                        finding.save()
+
+
                 if form.cleaned_data['tags']:
                     for finding in finds:
                         # tags = tagulous.utils.render_tags(form.cleaned_data['tags'])
                         tags = form.cleaned_data['tags']
-                        logger.debug('bulk_edit: setting tags for: %i %s %s', finding.id, finding, tags)
+                        logger.info('bulk_edit: setting tags for: %i %s %s', finding.id, finding, tags)
                         # currently bulk edit overwrites existing tags
                         finding.tags = tags
                         finding.save()

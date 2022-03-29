@@ -604,6 +604,8 @@
                             <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA" title="Push_To_Jira"/><br/>
 
                         {% endif %}
+                        <label style="display: block">Notes</label>
+                        {{ bulk_edit_form.notes }}
                         <label style="display: block">Tags</label>
                         {% comment %}
                             Quick hack to make bulk edit work without refactoring the whole bulk edit form
