@@ -128,6 +128,8 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ''),
     DD_SAML2_ENABLED=(bool, False),
+    # Force Authentication to make SSO possible with SAML2
+    DD_SAML2_FORCE_AUTH =(bool, True),
     DD_SAML2_LOGIN_BUTTON_TEXT=(str, 'Login with SAML'),
     # Optional: display the idp SAML Logout URL in DefectDojo
     DD_SAML2_LOGOUT_URL=(str, ''),
@@ -848,7 +850,7 @@ if SAML2_ENABLED:
                 'name_id_format': saml2.saml.NAMEID_FORMAT_TRANSIENT,
                 'want_response_signed': False,
                 'want_assertions_signed': True,
-                'force_authn': True,
+                'force_authn': env('DD_SAML2_FORCE_AUTH'),
                 'allow_unsolicited': True,
 
                 # For Okta add signed logout requets. Enable this:
