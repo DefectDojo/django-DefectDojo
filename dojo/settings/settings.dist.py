@@ -825,6 +825,7 @@ if SAML2_ENABLED:
     SAML_USE_NAME_ID_AS_USERNAME = True
     SAML_CREATE_UNKNOWN_USER = env('DD_SAML2_CREATE_USER')
     SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env('DD_SAML2_ATTRIBUTES_MAP'))
+    SAML_FORCE_AUTH = env('DD_SAML2_FORCE_AUTH')
     BASEDIR = path.dirname(path.abspath(__file__))
     if len(env('DD_SAML2_ENTITY_ID')) == 0:
         SAML2_ENTITY_ID = '%s/saml2/metadata/' % SITE_URL
@@ -850,7 +851,7 @@ if SAML2_ENABLED:
                 'name_id_format': saml2.saml.NAMEID_FORMAT_TRANSIENT,
                 'want_response_signed': False,
                 'want_assertions_signed': True,
-                'force_authn': env('DD_SAML2_FORCE_AUTH'),
+                'force_authn': SAML_FORCE_AUTH,
                 'allow_unsolicited': True,
 
                 # For Okta add signed logout requets. Enable this:
