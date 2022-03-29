@@ -1334,14 +1334,13 @@ class FindingBulkUpdateForm(forms.ModelForm):
     # unlink_from_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
     tags = TagField(required=False, autocomplete_tags=Finding.tags.tag_model.objects.all().order_by('name'))
-    notes = forms.CharField(required=False)
+    notes = forms.CharField(required=False, max_length=1024, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
         self.fields['severity'].required = False
         # we need to defer initialization to prevent multiple initializations if other forms are shown
         self.fields['tags'].widget.tag_options = tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px', 'defer': True})
-        self.fields['notes'].required = False
 
     def clean(self):
         cleaned_data = super(FindingBulkUpdateForm, self).clean()
