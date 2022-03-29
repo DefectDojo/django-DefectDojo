@@ -1920,7 +1920,6 @@ def finding_bulk_update_all(request, pid=None):
                         finding.notes.add(note)
                         finding.save()
 
-
                 if form.cleaned_data['tags']:
                     for finding in finds:
                         # tags = tagulous.utils.render_tags(form.cleaned_data['tags'])
