@@ -19,9 +19,7 @@ class CheckovParser(object):
         if json_output:
             deserialized = self.parse_json(json_output)
             for tree in deserialized:
-                check_type = ''
-                if 'check_type' in tree:
-                    check_type = tree['check_type']
+                check_type = tree.get('check_type', '')
                 findings += self.get_items(tree, test, check_type)
 
         return findings
