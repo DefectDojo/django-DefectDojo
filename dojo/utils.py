@@ -310,10 +310,6 @@ def deduplicate_unique_id_from_tool(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        if not are_endpoints_duplicates(new_finding, find):
-            deduplicationLogger.debug(
-                'endpoints are different, skipping dedupe.'
-            )
         try:
             if are_endpoints_duplicates(new_finding, find):
                 set_duplicate(new_finding, find)

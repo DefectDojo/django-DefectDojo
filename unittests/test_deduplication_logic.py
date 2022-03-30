@@ -544,10 +544,10 @@ class TestDuplicationLogic(DojoTestCase):
         ep.save()
         finding_new.endpoints.add(ep)
         finding_new.save()
-        
+
         # expect: marked as duplicate of original finding 2 (because finding 4 is a duplicate of finding 2 in sample data), hash_code not affected by endpoints (endpoints are not anymore in ZAP configuration for hash_code)
         self.assert_finding(finding_new, not_pk=finding_4.pk, duplicate=True, duplicate_finding_id=2, hash_code=finding_4.hash_code, not_hash_code=None)
-        
+
         # create an identical copy of the new finding, with different endpoints
         finding_new, finding_4 = self.copy_and_reset_finding(id=4)  # finding_4 has host ftp://localhost
         finding_new.save()
@@ -556,7 +556,7 @@ class TestDuplicationLogic(DojoTestCase):
         ep.save()
         finding_new.endpoints.add(ep)
         finding_new.save()
-        
+
         # expect: marked as duplicate of original finding 2 (because finding 4 is a duplicate of finding 2 in sample data), hash_code not affected by endpoints (endpoints are not anymore in ZAP configuration for hash_code)
         self.assert_finding(finding_new, not_pk=finding_4.pk, duplicate=False, hash_code=finding_4.hash_code, not_hash_code=None)
         # reset for further tests
