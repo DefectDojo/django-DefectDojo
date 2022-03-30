@@ -1,6 +1,7 @@
 from .dojo_test_case import DojoTestCase
 from dojo.models import Finding, User, Product, Endpoint, Endpoint_Status, Test, Engagement
 from dojo.models import System_Settings
+from django.conf import settings
 from crum import impersonate
 import logging
 logger = logging.getLogger(__name__)
@@ -532,6 +533,34 @@ class TestDuplicationLogic(DojoTestCase):
 
         # expect: marked as duplicate of original finding 2 (because finding 4 is a duplicate of finding 2 in sample data), hash_code not affected by endpoints (endpoints are not anymore in ZAP configuration for hash_code)
         self.assert_finding(finding_new2, not_pk=finding_new.pk, duplicate=True, duplicate_finding_id=2, hash_code=finding_new.hash_code, not_hash_code=None)
+
+    def test_dedupe_algo_endpoint_fields_host_port(self):
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = ["host", "port"]
+        # create an identical copy of the new finding, with the same endpoints
+        finding_new, finding_4 = self.copy_and_reset_finding(id=4)  # finding_4 has host ftp://localhost
+        finding_new.save()
+
+        ep = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="localhost", protocol="ftp", path="local")
+        ep.save()
+        finding_new.endpoints.add(ep)
+        finding_new.save()
+        
+        # expect: marked as duplicate of original finding 2 (because finding 4 is a duplicate of finding 2 in sample data), hash_code not affected by endpoints (endpoints are not anymore in ZAP configuration for hash_code)
+        self.assert_finding(finding_new, not_pk=finding_4.pk, duplicate=True, duplicate_finding_id=2, hash_code=finding_4.hash_code, not_hash_code=None)
+        
+        # create an identical copy of the new finding, with different endpoints
+        finding_new, finding_4 = self.copy_and_reset_finding(id=4)  # finding_4 has host ftp://localhost
+        finding_new.save()
+
+        ep = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="myhost", protocol="ftp", path="local")
+        ep.save()
+        finding_new.endpoints.add(ep)
+        finding_new.save()
+        
+        # expect: marked as duplicate of original finding 2 (because finding 4 is a duplicate of finding 2 in sample data), hash_code not affected by endpoints (endpoints are not anymore in ZAP configuration for hash_code)
+        self.assert_finding(finding_new, not_pk=finding_4.pk, duplicate=False, hash_code=finding_4.hash_code, not_hash_code=None)
+        # reset for further tests
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = []
 
     def test_identical_hash_code_with_different_endpoints(self):
         finding_new, finding_4 = self.copy_and_reset_finding_add_endpoints(id=4)
