@@ -8,6 +8,7 @@ from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url, get_file_images
+import dojo.utils
 from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
@@ -693,6 +694,12 @@ def full_url(url):
 @register.filter
 def setting_enabled(name):
     return getattr(settings, name, False)
+
+
+# this filter checks value directly against of function in utils
+@register.filter
+def system_setting_enabled(name):
+    return getattr(dojo.utils, name)()
 
 
 @register.filter
