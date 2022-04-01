@@ -128,6 +128,8 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ''),
     DD_SAML2_ENABLED=(bool, False),
+    # Force Authentication to make SSO possible with SAML2
+    DD_SAML2_FORCE_AUTH=(bool, True),
     DD_SAML2_LOGIN_BUTTON_TEXT=(str, 'Login with SAML'),
     # Optional: display the idp SAML Logout URL in DefectDojo
     DD_SAML2_LOGOUT_URL=(str, ''),
@@ -824,6 +826,8 @@ if SAML2_ENABLED:
     SAML_USE_NAME_ID_AS_USERNAME = True
     SAML_CREATE_UNKNOWN_USER = env('DD_SAML2_CREATE_USER')
     SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env('DD_SAML2_ATTRIBUTES_MAP'))
+    SAML_FORCE_AUTH = env('DD_SAML2_FORCE_AUTH')
+    SAML_ALLOW_UNKNOWN_ATTRIBUTES = env('DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE')
     BASEDIR = path.dirname(path.abspath(__file__))
     if len(env('DD_SAML2_ENTITY_ID')) == 0:
         SAML2_ENTITY_ID = '%s/saml2/metadata/' % SITE_URL
@@ -840,7 +844,7 @@ if SAML2_ENABLED:
         # directory with attribute mapping
         'attribute_map_dir': path.join(BASEDIR, 'attribute-maps'),
         # do now discard attributes not specified in attribute-maps
-        'allow_unknown_attributes': env('DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE'),
+        'allow_unknown_attributes': SAML_ALLOW_UNKNOWN_ATTRIBUTES,
         # this block states what services we provide
         'service': {
             # we are just a lonely SP
@@ -849,7 +853,7 @@ if SAML2_ENABLED:
                 'name_id_format': saml2.saml.NAMEID_FORMAT_TRANSIENT,
                 'want_response_signed': False,
                 'want_assertions_signed': True,
-                'force_authn': True,
+                'force_authn': SAML_FORCE_AUTH,
                 'allow_unsolicited': True,
 
                 # For Okta add signed logout requets. Enable this:
