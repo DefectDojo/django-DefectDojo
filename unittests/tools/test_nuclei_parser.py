@@ -131,7 +131,7 @@ class TestNucleiParser(DojoTestCase):
         with self.subTest(i=7):
             finding = findings[7]
             self.assertEqual("OpenSSH Username Enumeration v7.7", finding.title)
-            self.assertEqual("medium", finding.severity)
+            self.assertEqual("Medium", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
             self.assertIn("network", finding.unsaved_tags)
@@ -145,9 +145,9 @@ class TestNucleiParser(DojoTestCase):
         with self.subTest(i=8):
             finding = findings[8]
             self.assertEqual("Exposed Prometheus metrics", finding.title)
-            self.assertEqual("low", finding.severity)
+            self.assertEqual("Low", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
-            self.assertIsNone(finding.description)
+            self.assertEqual('', finding.description)
             self.assertIn("config", finding.unsaved_tags)
             self.assertIn("exposure", finding.unsaved_tags)
             self.assertIn("prometheus", finding.unsaved_tags)
