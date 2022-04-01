@@ -689,7 +689,9 @@ SPECTACULAR_SETTINGS = {
     # OTHER SETTINGS
     # the following set to False could help some client generators
     # 'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
-    'POSTPROCESSING_HOOKS': ['dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook']
+    'POSTPROCESSING_HOOKS': ['dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook'],
+    # show file selection dialogue, see https://github.com/tfranzel/drf-spectacular/issues/455
+    "COMPONENT_SPLIT_REQUEST": True,
 }
 
 # ------------------------------------------------------------------------------
