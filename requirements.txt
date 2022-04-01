@@ -37,7 +37,7 @@ python-dateutil==2.8.2
 pytz==2022.1
 redis==4.2.1
 requests==2.27.1
-sqlalchemy==1.4.32  # Required by Celery broker transport
+sqlalchemy==1.4.34  # Required by Celery broker transport
 supervisor==4.2.4
 urllib3==1.26.9
 uWSGI==2.0.20
