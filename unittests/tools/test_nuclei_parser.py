@@ -127,7 +127,7 @@ class TestNucleiParser(DojoTestCase):
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(3306, finding.unsaved_endpoints[0].port)
             self.assertEqual("mysql-native-password-bruteforce", finding.vuln_id_from_tool)
-            
+
         with self.subTest(i=7):
             finding = findings[7]
             self.assertEqual("OpenSSH Username Enumeration v7.7", finding.title)
@@ -141,7 +141,7 @@ class TestNucleiParser(DojoTestCase):
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(22, finding.unsaved_endpoints[0].port)
             self.assertEqual("CVE-2018-15473", finding.vuln_id_from_tool)
-            
+
         with self.subTest(i=8):
             finding = findings[8]
             self.assertEqual("Exposed Prometheus metrics", finding.title)
