@@ -1897,7 +1897,7 @@ def finding_bulk_update_all(request, pid=None):
                     finds = finds.all()
 
                 if form.cleaned_data['push_to_github']:
-                    logger.info('push selected findings to github')
+                    logger.debug('push selected findings to github')
                     for finding in finds:
                         logger.debug('will push to GitHub finding: ' + str(finding))
                         old_status = finding.status()
@@ -1908,7 +1908,7 @@ def finding_bulk_update_all(request, pid=None):
                                 add_external_issue(finding, 'github')
 
                 if form.cleaned_data['notes']:
-                    logger.info('Setting bulk notes')
+                    logger.debug('Setting bulk notes')
                     note = Notes(entry=form.cleaned_data['notes'], author=request.user, date=timezone.now())
                     note.save()
                     history = NoteHistory(data=note.entry,
@@ -1924,7 +1924,7 @@ def finding_bulk_update_all(request, pid=None):
                     for finding in finds:
                         # tags = tagulous.utils.render_tags(form.cleaned_data['tags'])
                         tags = form.cleaned_data['tags']
-                        logger.info('bulk_edit: setting tags for: %i %s %s', finding.id, finding, tags)
+                        logger.debug('bulk_edit: setting tags for: %i %s %s', finding.id, finding, tags)
                         # currently bulk edit overwrites existing tags
                         finding.tags = tags
                         finding.save()
@@ -1932,7 +1932,7 @@ def finding_bulk_update_all(request, pid=None):
                 error_counts = defaultdict(lambda: 0)
                 success_count = 0
                 finding_groups = set([find.finding_group for find in finds if find.has_finding_group])
-                logger.info('finding_groups: %s', finding_groups)
+                logger.debug('finding_groups: %s', finding_groups)
                 for group in finding_groups:
                     if form.cleaned_data.get('push_to_jira'):
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(group)
