@@ -26,7 +26,7 @@ class TestNucleiParser(DojoTestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
 
-        self.assertEqual(9, len(findings))
+        self.assertEqual(7, len(findings))
 
         with self.subTest(i=0):
             finding = findings[0]
@@ -128,8 +128,18 @@ class TestNucleiParser(DojoTestCase):
             self.assertEqual(3306, finding.unsaved_endpoints[0].port)
             self.assertEqual("mysql-native-password-bruteforce", finding.vuln_id_from_tool)
 
-        with self.subTest(i=7):
-            finding = findings[7]
+    def test_parse_many_findings_new(self):
+        testfile = open("unittests/scans/nuclei/many_findings_new.json")
+        parser = NucleiParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+
+        self.assertEqual(2, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
             self.assertEqual("OpenSSH Username Enumeration v7.7", finding.title)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
@@ -142,8 +152,8 @@ class TestNucleiParser(DojoTestCase):
             self.assertEqual(22, finding.unsaved_endpoints[0].port)
             self.assertEqual("CVE-2018-15473", finding.vuln_id_from_tool)
 
-        with self.subTest(i=8):
-            finding = findings[8]
+        with self.subTest(i=1):
+            finding = findings[1]
             self.assertEqual("Exposed Prometheus metrics", finding.title)
             self.assertEqual("Low", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
