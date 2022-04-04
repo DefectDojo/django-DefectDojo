@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, date
 
 from dojo.tools.hydra.parser import HydraParser
 from dojo.models import Test, Finding
@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase
 
 
 class TestHydraParser(DojoTestCase):
-    __test_datetime = datetime.datetime(2019, 3, 1, 14, 44, 22)
+    __test_datetime = datetime(2019, 3, 1, 14, 44, 22)
 
     def test_invalid_json_format(self):
         testfile = open("unittests/scans/hydra/invalid.json")
@@ -40,6 +40,25 @@ class TestHydraParser(DojoTestCase):
         self.__assertFindingEquals(
             finding,
             self.__test_datetime,
+            "127.0.0.1",
+            "9999",
+            "bill@example.com",
+            "bill"
+        )
+
+    def test_hydra_parser_with_one_finding_and_missing_date_has_one_finding(self):
+        testfile = open("unittests/scans/hydra/hydra_report_one_finding_missing_date.json")
+        parser = HydraParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.__assertAllEndpointsAreClean(findings)
+        self.assertEqual(1, len(findings))
+
+        finding = findings[0]
+
+        self.__assertFindingEquals(
+            finding,
+            date.today(),
             "127.0.0.1",
             "9999",
             "bill@example.com",
@@ -101,7 +120,7 @@ class TestHydraParser(DojoTestCase):
     def __assertFindingEquals(
             self,
             actual_finding: Finding,
-            date: datetime.datetime,
+            date: datetime,
             finding_url,
             finding_port,
             finding_username,

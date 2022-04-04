@@ -1,5 +1,5 @@
 import json
-import datetime
+from datetime import date
 import logging
 
 from dojo.models import Finding, Endpoint
@@ -64,7 +64,7 @@ class HydraParser(object):
         finding = Finding(
             test=test,
             title="Weak username / password combination found for " + host,
-            date=parse_datetime(metadata.date) if metadata.date else datetime.now,
+            date=parse_datetime(metadata.date) if metadata.date else date.today(),
             severity="High",
             description=host + " on port " + str(port) + " is allowing logins with easy to guess username " + username + " and password " + password,
             static_finding=False,
