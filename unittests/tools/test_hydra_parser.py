@@ -46,6 +46,25 @@ class TestHydraParser(DojoTestCase):
             "bill"
         )
 
+    def test_hydra_parser_with_two_findings_with_one_incomplete_has_one_finding(self):
+        testfile = open("unittests/scans/hydra/hydra_report_two_findings_with_one_incomplete.json")
+        parser = HydraParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.__assertAllEndpointsAreClean(findings)
+        self.assertEqual(1, len(findings))
+
+        finding = findings[0]
+
+        self.__assertFindingEquals(
+            finding,
+            self.__test_datetime,
+            "127.0.0.1",
+            "9999",
+            "bill@example.com",
+            "bill"
+        )
+
     def test_hydra_parser_with_many_findings_has_many_findings(self):
         testfile = open("unittests/scans/hydra/hydra_report_many_finding.json")
         parser = HydraParser()
