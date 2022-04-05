@@ -44,9 +44,9 @@ def personal_notifications(request):
 @user_passes_test(lambda u: u.is_superuser)
 def system_notifications(request):
     try:
-        notifications_obj = Notifications.objects.get(user=None, product__isnull=True)
+        notifications_obj = Notifications.objects.get(user=None, product__isnull=True, template=False)
     except:
-        notifications_obj = Notifications(user=None)
+        notifications_obj = Notifications(user=None, template=False)
 
     form = NotificationsForm(instance=notifications_obj)
     if request.method == 'POST':
@@ -62,5 +62,30 @@ def system_notifications(request):
     return render(request, 'dojo/notifications.html',
                   {'form': form,
                    'scope': 'system',
+                   'enabled_notifications': get_enabled_notifications_list(),
+                   'admin': request.user.is_superuser})
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def template_notifications(request):
+    try:
+        notifications_obj = Notifications.objects.get(template=True)
+    except:
+        notifications_obj = Notifications(user=None, template=True)
+
+    form = NotificationsForm(instance=notifications_obj)
+    if request.method == 'POST':
+        form = NotificationsForm(request.POST, instance=notifications_obj)
+        if form.is_valid():
+            new_settings = form.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Settings saved.',
+                                 extra_tags='alert-success')
+
+    add_breadcrumb(title="Template notification settings", top_level=False, request=request)
+    return render(request, 'dojo/notifications.html',
+                  {'form': form,
+                   'scope': 'template',
                    'enabled_notifications': get_enabled_notifications_list(),
                    'admin': request.user.is_superuser})

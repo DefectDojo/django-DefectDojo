@@ -36,6 +36,7 @@ from dojo.finding.queries import get_authorized_findings
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.finding_group.queries import get_authorized_finding_groups
 from django.forms import HiddenInput
+from dojo.utils import is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -254,7 +255,7 @@ def get_finding_filter_fields(metrics=False, similar=False):
             'jira_issue__jira_key',
         ])
 
-    if settings.FEATURE_FINDING_GROUPS:
+    if is_finding_groups_enabled():
         fields.extend([
             'has_finding_group',
             'finding_group',
@@ -1161,7 +1162,7 @@ class FindingFilter(FindingFilterWithTags):
 
     status = FindingStatusFilter(label='Status')
 
-    if settings.FEATURE_FINDING_GROUPS:
+    if is_finding_groups_enabled():
         finding_group = ModelMultipleChoiceFilter(
             queryset=Finding_Group.objects.none(),
             label="Finding Group")
@@ -1185,7 +1186,7 @@ class FindingFilter(FindingFilterWithTags):
         jira_change = DateRangeFilter(field_name='jira_issue__jira_change', label='JIRA Updated')
         jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
 
-        if settings.FEATURE_FINDING_GROUPS:
+        if is_finding_groups_enabled():
             has_jira_group_issue = BooleanFilter(field_name='finding_group__jira_issue',
                                         lookup_expr='isnull',
                                         exclude=True,
@@ -1618,7 +1619,6 @@ class EndpointFilter(DojoFilter):
     path = CharFilter(lookup_expr='icontains')
     query = CharFilter(lookup_expr='icontains')
     fragment = CharFilter(lookup_expr='icontains')
-    mitigated = ReportBooleanFilter()
 
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
@@ -1691,7 +1691,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['mitigated', 'endpoint_status']
+        exclude = ['endpoint_status']
 
 
 class ApiEndpointFilter(DojoFilter):
