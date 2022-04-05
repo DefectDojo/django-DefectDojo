@@ -1,0 +1,26 @@
+{
+    "errormessages": [
+        "[ERROR] Error Message of Something",
+        "[ERROR] Another Message",
+        "These are very free form"
+    ],
+    "generator": {
+        "commandline": "hydra -b jsonv1 -o results.json ... ...",
+        "jsonoutputversion": "1.00",
+        "server": "127.0.0.1",
+        "service": "http-post-form",
+        "software": "Hydra",
+        "version": "v8.5"
+    },
+    "quantityfound": 1,
+    "results": [
+        {
+            "host": "127.0.0.1",
+            "login": "bill@example.com",
+            "password": "bill",
+            "port": 9999,
+            "service": "http-post-form"
+        }
+    ],
+    "success": false
+}
