@@ -1,7 +1,7 @@
 # requirements.txt for DefectDojo using Python 3.x
 asteval==0.9.26
 bleach==4.1.0
-celery==5.2.3
+celery==5.2.6
 coverage==6.3.2
 defusedxml==0.7.1
 django_celery_results==2.3.0
