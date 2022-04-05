@@ -171,11 +171,11 @@ spec:
           valueFrom:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
-              name: {{ .Values.postgresql.existingSecret }}
-              key: {{ .Values.postgresql.secretKey }}
+              name: {{ .Values.postgresql.existingSecret | default "defectdojo-postgresql-specific" }}
+              key: {{ .Values.postgresql.secretKey | default "postgresql-password" }}
               {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.auth.existingSecret }}
-              key: {{ .Values.mysql.auth.secretKey }}
+              name: {{ .Values.mysql.auth.existingSecret | default "defectdojo-mysql-specific" }}
+              key: {{ .Values.mysql.auth.secretKey | default "mysql-password" }}
               {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:
