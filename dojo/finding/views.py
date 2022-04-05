@@ -1744,7 +1744,6 @@ def finding_bulk_update_all(request, pid=None):
         finding_to_update = request.POST.getlist('finding_to_update')
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
         total_find_count = finds.count()
-        skipped_find_count = 0
         prods = set([find.test.engagement.product for find in finds])
         if request.POST.get('delete_bulk_findings'):
             if form.is_valid() and finding_to_update:
@@ -1898,7 +1897,7 @@ def finding_bulk_update_all(request, pid=None):
                     finds = finds.all()
 
                 if form.cleaned_data['push_to_github']:
-                    logger.info('push selected findings to github')
+                    logger.debug('push selected findings to github')
                     for finding in finds:
                         logger.debug('will push to GitHub finding: ' + str(finding))
                         old_status = finding.status()
@@ -1907,6 +1906,19 @@ def finding_bulk_update_all(request, pid=None):
                                 update_external_issue(finding, old_status, 'github')
                             else:
                                 add_external_issue(finding, 'github')
+
+                if form.cleaned_data['notes']:
+                    logger.debug('Setting bulk notes')
+                    note = Notes(entry=form.cleaned_data['notes'], author=request.user, date=timezone.now())
+                    note.save()
+                    history = NoteHistory(data=note.entry,
+                                          time=note.date,
+                                          current_editor=note.author)
+                    history.save()
+                    note.history.add(history)
+                    for finding in finds:
+                        finding.notes.add(note)
+                        finding.save()
 
                 if form.cleaned_data['tags']:
                     for finding in finds:
@@ -1920,7 +1932,7 @@ def finding_bulk_update_all(request, pid=None):
                 error_counts = defaultdict(lambda: 0)
                 success_count = 0
                 finding_groups = set([find.finding_group for find in finds if find.has_finding_group])
-                logger.info('finding_groups: %s', finding_groups)
+                logger.debug('finding_groups: %s', finding_groups)
                 for group in finding_groups:
                     if form.cleaned_data.get('push_to_jira'):
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(group)
