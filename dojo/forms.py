@@ -1334,6 +1334,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     # unlink_from_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
     tags = TagField(required=False, autocomplete_tags=Finding.tags.tag_model.objects.all().order_by('name'))
+    notes = forms.CharField(required=False, max_length=1024, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
