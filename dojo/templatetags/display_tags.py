@@ -8,6 +8,7 @@ from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url, get_file_images
+import dojo.utils
 from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
@@ -36,16 +37,21 @@ markdown_tags = [
     "img",
     "a",
     "sub", "sup",
+    "center",
 ]
 
 markdown_attrs = {
     "*": ["id"],
-    "img": ["src", "alt", "title"],
+    "img": ["src", "alt", "title", "width", "height", "style"],
     "a": ["href", "alt", "target", "title"],
     "span": ["class"],  # used for code highlighting
     "pre": ["class"],  # used for code highlighting
     "div": ["class"],  # used for code highlighting
 }
+
+markdown_styles = [
+    "background-color"
+]
 
 finding_related_action_classes_dict = {
     'reset_finding_duplicate_status': 'fa fa-eraser',
@@ -76,7 +82,7 @@ def markdown_render(value):
                                                       'markdown.extensions.fenced_code',
                                                       'markdown.extensions.toc',
                                                       'markdown.extensions.tables'])
-        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs))
+        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs, markdown_styles))
 
 
 @register.filter(name='url_shortner')
@@ -693,6 +699,12 @@ def full_url(url):
 @register.filter
 def setting_enabled(name):
     return getattr(settings, name, False)
+
+
+# this filter checks value directly against of function in utils
+@register.filter
+def system_setting_enabled(name):
+    return getattr(dojo.utils, name)()
 
 
 @register.filter

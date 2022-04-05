@@ -27,6 +27,7 @@ from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
+from django.db.utils import IntegrityError
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
@@ -349,7 +350,7 @@ class UserSerializer(serializers.ModelSerializer):
                                      validators=[validate_password])
 
     class Meta:
-        model = User
+        model = Dojo_User
         if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
             fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_superuser', 'password')
         else:
@@ -360,7 +361,7 @@ class UserSerializer(serializers.ModelSerializer):
             password = validated_data.pop('password')
         else:
             password = None
-        user = User.objects.create(**validated_data)
+        user = Dojo_User.objects.create(**validated_data)
         if password:
             user.set_password(password)
         else:
@@ -393,7 +394,7 @@ class UserContactInfoSerializer(serializers.ModelSerializer):
 
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = Dojo_User
         fields = ('id', 'username', 'first_name', 'last_name')
 
 
@@ -690,8 +691,6 @@ class RegulationSerializer(serializers.ModelSerializer):
 
 
 class ToolConfigurationSerializer(serializers.ModelSerializer):
-    configuration_url = serializers.CharField(source='url')
-
     class Meta:
         model = Tool_Configuration
         fields = '__all__'
@@ -718,10 +717,16 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         endpoint = validated_data['endpoint']
         finding = validated_data['finding']
-        status = Endpoint_Status.objects.create(
-            finding=finding,
-            endpoint=endpoint
-        )
+        try:
+            status = Endpoint_Status.objects.create(
+                finding=finding,
+                endpoint=endpoint
+            )
+        except IntegrityError as ie:
+            if "endpoint-finding relation" in str(ie):
+                raise serializers.ValidationError('This endpoint-finding relation already exists')
+            else:
+                raise
         endpoint.endpoint_status.add(status)
         finding.endpoint_status.add(status)
         status.mitigated = validated_data.get('mitigated', False)
@@ -731,6 +736,15 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         status.date = validated_data.get('date', timezone.now())
         status.save()
         return status
+
+    def update(self, instance, validated_data):
+        try:
+            return super().update(instance, validated_data)
+        except IntegrityError as ie:
+            if "endpoint-finding relation" in str(ie):
+                raise serializers.ValidationError('This endpoint-finding relation already exists')
+            else:
+                raise
 
 
 class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1813,6 +1827,7 @@ class NotificationsSerializer(serializers.ModelSerializer):
     other = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
     sla_breach = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
     risk_acceptance_expiration = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    template = serializers.BooleanField(default=False)
 
     class Meta:
         model = Notifications
@@ -1832,9 +1847,11 @@ class NotificationsSerializer(serializers.ModelSerializer):
             product = data.get('product')
 
         if self.instance is None or user != self.instance.user or product != self.instance.product:
-            notifications = Notifications.objects.filter(user=user, product=product).count()
+            notifications = Notifications.objects.filter(user=user, product=product, template=False).count()
             if notifications > 0:
                 raise ValidationError("Notification for user and product already exists")
+        if data.get('template') and Notifications.objects.filter(template=True).count() > 0:
+            raise ValidationError("Notification template already exists")
 
         return data
 

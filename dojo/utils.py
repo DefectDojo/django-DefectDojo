@@ -1638,8 +1638,16 @@ def user_post_save(sender, instance, created, **kwargs):
     # This needs to be a signal to make it also work for users created via ldap, oauth and other
     # authentication backends
     if created:
-        logger.info('creating default set of notifications for: ' + str(instance))
-        notifications = Notifications(user=instance)
+        try:
+            notifications = Notifications.objects.get(template=True)
+            notifications.pk = None
+            notifications.template = False
+            notifications.user = instance
+            logger.info('creating default set (from template) of notifications for: ' + str(instance))
+        except Exception as err:
+            notifications = Notifications(user=instance)
+            logger.info('creating default set of notifications for: ' + str(instance))
+
         notifications.save()
 
         system_settings = System_Settings.objects.get()
@@ -2116,3 +2124,8 @@ def get_enabled_notifications_list():
         if get_system_setting('enable_{}_notifications'.format(choice[0])):
             enabled.append(choice[0])
     return enabled
+
+
+def is_finding_groups_enabled():
+    """Returns true is feature is enabled otherwise false"""
+    return get_system_setting("enable_finding_groups")

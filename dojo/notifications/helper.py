@@ -98,7 +98,7 @@ def create_description(event, *args, **kwargs):
         elif event == 'product_type_added':
             kwargs["description"] = "Product Type " + kwargs['title'] + " has been created successfully."
         else:
-            kwargs["description"] = "Event " + str(event) + " has occured."
+            kwargs["description"] = "Event " + str(event) + " has occurred."
 
     return kwargs["description"]
 
@@ -114,7 +114,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     except TemplateDoesNotExist:
         logger.debug('template not found or not implemented yet: %s', template)
     except Exception as e:
-        logger.error("error during rendeing of template %s exception is %s", template, e)
+        logger.error("error during rendering of template %s exception is %s", template, e)
     finally:
         if not notification_message:
             kwargs["description"] = create_description(event, *args, **kwargs)
@@ -127,7 +127,7 @@ def process_notifications(event, notifications=None, **kwargs):
     from dojo.utils import get_system_setting
 
     if not notifications:
-        logger.warn('no notifications!')
+        logger.warning('no notifications!')
         return
 
     logger.debug('sending notification ' + ('asynchronously' if we_want_async() else 'synchronously'))
@@ -326,10 +326,10 @@ def get_slack_user_id(user_email):
                             slack_user_is_found = True
                             break
                     else:
-                        logger.warn("A user with email {} could not be found in this Slack workspace.".format(user_email))
+                        logger.warning("A user with email {} could not be found in this Slack workspace.".format(user_email))
 
             if not slack_user_is_found:
-                logger.warn("The Slack user was not found.")
+                logger.warning("The Slack user was not found.")
 
     return user_id
 
