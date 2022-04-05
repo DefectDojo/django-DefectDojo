@@ -571,7 +571,7 @@
                             <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label><br/>
                             <label style="font-size: 80%; font-weight: normal; display: block">
                                 <input id="id_bulk_finding_group_create" name="finding_group_create" class="finding_group_option" type="checkbox" disabled/> <span>Create</span>
-                                <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 90%;"/>
+                                <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 100%;/* border-color: #ccc; *//* border-width: 1px; */border: 1px solid #ccc;"/>
                             </label>
                             <span>
                                 <label style="font-size: 80%; font-weight: normal;">
@@ -604,6 +604,8 @@
                             <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA" title="Push_To_Jira"/><br/>
 
                         {% endif %}
+                        <label style="display: block">Notes</label>
+                        {{ bulk_edit_form.notes }}
                         <label style="display: block">Tags</label>
                         {% comment %}
                             Quick hack to make bulk edit work without refactoring the whole bulk edit form
