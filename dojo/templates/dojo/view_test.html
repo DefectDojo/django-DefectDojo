@@ -280,7 +280,7 @@
     <!--Import activity end -->
 
     <!-- Finding Groups begin -->
-    {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+    {% if 'is_finding_groups_enabled'|system_setting_enabled %}
     <div class="panel panel-default">
         <div class="panel-heading tight">
             <div class="clearfix">
@@ -567,11 +567,11 @@
                             <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
                         </label>
 
-                        {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
-                            <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label>(experimental)<br/>
+                        {% if 'is_finding_groups_enabled'|system_setting_enabled %}
+                            <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label><br/>
                             <label style="font-size: 80%; font-weight: normal; display: block">
                                 <input id="id_bulk_finding_group_create" name="finding_group_create" class="finding_group_option" type="checkbox" disabled/> <span>Create</span>
-                                <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 90%;"/>
+                                <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 100%;/* border-color: #ccc; *//* border-width: 1px; */border: 1px solid #ccc;"/>
                             </label>
                             <span>
                                 <label style="font-size: 80%; font-weight: normal;">
@@ -604,6 +604,8 @@
                             <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA" title="Push_To_Jira"/><br/>
 
                         {% endif %}
+                        <label style="display: block">Notes</label>
+                        {{ bulk_edit_form.notes }}
                         <label style="display: block">Tags</label>
                         {% comment %}
                             Quick hack to make bulk edit work without refactoring the whole bulk edit form
@@ -662,7 +664,7 @@
                                     <th>Jira Change</th>
                                 {% endif %}
                             {% endif %}
-                            {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                            {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                                 <th>Group</th>
                             {% endif %}
                         </tr>
@@ -890,12 +892,10 @@
                             </td>
                             {% endif %}
                         {% endif %}
-                        {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                        {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                             <td class="centered">
                                 {% if finding.has_finding_group %}
-                                <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">Y</a>
-                                {% else %}
-                                N
+                                <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
                                 {% endif %}
                             </td>
                         {% endif %}
@@ -1174,7 +1174,7 @@
                           { "data": "jira_change" },
                       {% endif %}
                   {% endif %}
-                  {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                  {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                     { "data": "grouped" },
                   {% endif %}
               ];

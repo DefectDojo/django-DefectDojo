@@ -276,6 +276,11 @@
                                                                     <i class="fa fa-plus"></i> Add Finding to Test
                                                                     </a>
                                                                 </li>
+                                                                <li>
+                                                                    <a title="Add Finding from Template" href="{% url 'search' test.id %}">
+                                                                    <span class="icon-add-template"></span> Finding From Template
+                                                                    </a>
+                                                                </li>
                                                             {% endif %}
                                                             {% if test|has_object_permission:"Import_Scan_Result" %}
                                                                 <li class="divider"></li>

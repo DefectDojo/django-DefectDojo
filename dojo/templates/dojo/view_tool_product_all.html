@@ -43,9 +43,7 @@
                                   </td>
                                   <td>{{ tool.tool_configuration.tool_type.name }}</td>
                                   <td>
-                                      <div class="btn-group"><!--
-                                          <a class="btn btn-sm btn-primary"
-                                             href="{% url 'view_tool_product' tool.product.id tool.id  %}">View</a>-->
+                                      <div class="btn-group">
                                           <a class="btn btn-sm btn-warning"
                                              href="{% url 'edit_tool_product' tool.product.id tool.id  %}">Edit</a>
                                           <a class="btn btn-sm btn-danger delete-finding"
