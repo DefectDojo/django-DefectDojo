@@ -24,6 +24,6 @@ class Command(BaseCommand):
             logger.info('There is no broken endpoint_status')
         else:
             logger.warning('We identified %s broken endpoint_statuses', broken_eps.count())
-            if options.get('dry_run'):
+            if not options.get('dry_run'):
                 deleted = broken_eps.delete()
                 logger.warning('We removed %s broken endpoint_statuses', deleted)
