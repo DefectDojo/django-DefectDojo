@@ -1,5 +1,5 @@
 from django.db import migrations
-from django.db.models import Count, Q
+from django.db.models import Q
 import logging
 
 logger = logging.getLogger(__name__)
