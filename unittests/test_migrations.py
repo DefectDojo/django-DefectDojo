@@ -164,7 +164,7 @@ class TestEndpointMigration(MigratorTestCase):
         self.assertFalse(eps[0].mitigated)
 
 
-# TODO: These tests can be skipped in 2.10.x or later
+# TODO: These tests can be skipped in 2.11.x or later
 # @skip("Outdated - Any future changes of code should not affect these tests")
 class TestEndpointStatusMigration(MigratorTestCase):
     migrate_from = ('dojo', '0149_harmonize_user_format')
@@ -216,6 +216,34 @@ class TestEndpointStatusMigration(MigratorTestCase):
                 last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
                 mitigated=True,
                 finding_id=self.finding,
+                endpoint_id=self.endpoint
+            ).pk,
+            'empty_endpoint_1': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=self.finding,
+                endpoint_id=None
+            ).pk,
+            'empty_endpoint_2': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=self.finding,
+                endpoint_id=None
+            ).pk,
+            'empty_finding_1': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=None,
+                endpoint_id=self.endpoint
+            ).pk,
+            'empty_finding_2': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=None,
                 endpoint_id=self.endpoint
             ).pk,
         }
