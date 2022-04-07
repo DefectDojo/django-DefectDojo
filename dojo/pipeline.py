@@ -1,13 +1,19 @@
 import gitlab
 import re
+import logging
+import requests
+import traceback
+
 
 import social_core.pipeline.user
 from django.conf import settings
-from dojo.models import Product, Product_Member, Product_Type, System_Settings, Role
+from dojo.models import Product, Product_Member, Product_Type, System_Settings, Role, Dojo_Group, Dojo_Group_Member
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product.queries import get_authorized_products
+
+logger = logging.getLogger(__name__)
 
 
 def social_uid(backend, details, response, *args, **kwargs):
@@ -67,6 +73,59 @@ def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
                 user.is_staff = True
             else:
                 user.is_staff = False
+
+
+def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
+    if settings.AZUREAD_TENANT_OAUTH2_ENABLED and settings.AZUREAD_TENANT_OAUTH2_GET_GROUPS and isinstance(backend, AzureADTenantOAuth2):
+        soc = user.social_auth.get()
+        token = soc.extra_data['access_token']
+        group_names = []
+        if 'groups' not in kwargs['response'] or kwargs['response']['groups'] == "":
+            logger.warn("No groups in response. Stopping to update groups of user based on azureAD")
+            return
+        group_IDs = kwargs['response']['groups']
+        for group_from_response in group_IDs:
+            logger.debug("Analysing Group_ID " + group_from_response)
+            request_headers = {'Authorization': 'Bearer ' + token}
+            try:
+                if is_group_id(group_from_response):
+                    logger.debug("detected " + group_from_response + " as groupID and will fetch the displayName from microsoft graph")
+                    group_name_request = requests.get((str(soc.extra_data['resource']) + '/v1.0/groups/' + str(group_from_response) + '?$select=displayName'), headers=request_headers)
+                    group_name_request_json = group_name_request.json()
+                    group_name = group_name_request_json['displayName']
+                else:
+                    logger.debug("detected " + group_from_response + " as group name and will not call microsoft graph")
+                    group_name = group_from_response
+
+                group, created_group = Dojo_Group.objects.get_or_create(name=group_name, is_azure=True)
+
+                group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(group=group, user=user, defaults={
+                    'role': Role.objects.get(id=Roles.Writer)})
+                group_names.append(group_name)
+
+                if settings.AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS:
+                    cleanup_old_azureAD_groups_for_user(user, group_names)
+            except:
+                logger.error("Could not call microsoft graph API or save groups to member")
+                traceback.print_exc()
+
+
+def is_group_id(group):
+    if re.search(r'^[a-zA-Z0-9]{8,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{12,}$', group):
+        return True
+    else:
+        return False
+
+
+def cleanup_old_azureAD_groups_for_user(user, group_names):
+    all_groups = Dojo_Group.objects.all()
+    for group in all_groups:
+        member = Dojo_Group_Member.objects.filter(group=group, user=user)  # A user shouldn't have multiple roles (see code above) and therefore only one member will be returned
+        logger.debug("Group to delete: " + str(group))
+        if member:
+            if str(group) not in group_names and group.is_azure:
+                logger.debug("Deleting membership to azure group " + str(group))
+                member.delete()
 
 
 def update_product_access(backend, uid, user=None, social=None, *args, **kwargs):

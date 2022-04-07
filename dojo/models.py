@@ -224,6 +224,7 @@ class Dojo_Group(models.Model):
     description = models.CharField(max_length=4000, null=True, blank=True)
     users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
     auth_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
+    is_azure = models.BooleanField(default=False, null=False, help_text="Group imported from AzureAD.", verbose_name="Is AzureAD Group")
 
     def __str__(self):
         return self.name
