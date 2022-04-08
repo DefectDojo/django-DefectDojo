@@ -7,11 +7,6 @@ from threading import local
 from django.db import models
 from django.urls import reverse
 
-try:
-    from uwsgi import set_logvar
-except:
-    'This should be included by default if uwsgi is in use. But during the build it will fail anytime'
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +49,9 @@ class LoginRequiredMiddleware:
         if request.user.is_authenticated:
             logger.debug("Authenticated user: %s", str(request.user))
             try:
+                uwsgi = __import__('uwsgi', globals(), locals(), ['set_logvar'], 0)
                 # this populates dd_user log var, so can appear in the uwsgi logs
-                set_logvar('dd_user', str(request.user))
+                uwsgi.set_logvar('dd_user', str(request.user))
             except:
                 # to avoid unittests to fail
                 pass
