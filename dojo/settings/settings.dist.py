@@ -128,6 +128,8 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ''),
     DD_SAML2_ENABLED=(bool, False),
+    # Force Authentication to make SSO possible with SAML2
+    DD_SAML2_FORCE_AUTH=(bool, True),
     DD_SAML2_LOGIN_BUTTON_TEXT=(str, 'Login with SAML'),
     # Optional: display the idp SAML Logout URL in DefectDojo
     DD_SAML2_LOGOUT_URL=(str, ''),
@@ -192,6 +194,7 @@ env = environ.Env(
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
     # Allow grouping of findings in the same test, for example to group findings per dependency
+    # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
@@ -686,7 +689,9 @@ SPECTACULAR_SETTINGS = {
     # OTHER SETTINGS
     # the following set to False could help some client generators
     # 'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
-    'POSTPROCESSING_HOOKS': ['dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook']
+    'POSTPROCESSING_HOOKS': ['dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook'],
+    # show file selection dialogue, see https://github.com/tfranzel/drf-spectacular/issues/455
+    "COMPONENT_SPLIT_REQUEST": True,
 }
 
 # ------------------------------------------------------------------------------
@@ -823,6 +828,8 @@ if SAML2_ENABLED:
     SAML_USE_NAME_ID_AS_USERNAME = True
     SAML_CREATE_UNKNOWN_USER = env('DD_SAML2_CREATE_USER')
     SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env('DD_SAML2_ATTRIBUTES_MAP'))
+    SAML_FORCE_AUTH = env('DD_SAML2_FORCE_AUTH')
+    SAML_ALLOW_UNKNOWN_ATTRIBUTES = env('DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE')
     BASEDIR = path.dirname(path.abspath(__file__))
     if len(env('DD_SAML2_ENTITY_ID')) == 0:
         SAML2_ENTITY_ID = '%s/saml2/metadata/' % SITE_URL
@@ -839,7 +846,7 @@ if SAML2_ENABLED:
         # directory with attribute mapping
         'attribute_map_dir': path.join(BASEDIR, 'attribute-maps'),
         # do now discard attributes not specified in attribute-maps
-        'allow_unknown_attributes': env('DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE'),
+        'allow_unknown_attributes': SAML_ALLOW_UNKNOWN_ATTRIBUTES,
         # this block states what services we provide
         'service': {
             # we are just a lonely SP
@@ -848,7 +855,7 @@ if SAML2_ENABLED:
                 'name_id_format': saml2.saml.NAMEID_FORMAT_TRANSIENT,
                 'want_response_signed': False,
                 'want_assertions_signed': True,
-                'force_authn': True,
+                'force_authn': SAML_FORCE_AUTH,
                 'allow_unsolicited': True,
 
                 # For Okta add signed logout requets. Enable this:
@@ -1090,6 +1097,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Harbor Vulnerability Scan': ['title'],
     'Rusty Hog Scan': ['title', 'description'],
     'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
+    'Hydra Scan': ['title', 'description'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1221,6 +1229,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SSLyze Scan (JSON)': DEDUPE_ALGO_HASH_CODE,
     'Harbor Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Rusty Hog Scan': DEDUPE_ALGO_HASH_CODE,
+    'Hydra Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1389,6 +1398,7 @@ EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
 USE_L10N = True
 
+# FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
 FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
 JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')

@@ -2124,3 +2124,8 @@ def get_enabled_notifications_list():
         if get_system_setting('enable_{}_notifications'.format(choice[0])):
             enabled.append(choice[0])
     return enabled
+
+
+def is_finding_groups_enabled():
+    """Returns true is feature is enabled otherwise false"""
+    return get_system_setting("enable_finding_groups")
