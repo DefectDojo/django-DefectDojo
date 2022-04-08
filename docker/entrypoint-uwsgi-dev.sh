@@ -14,8 +14,6 @@ if [ ${DD_DEBUG} == "True" ]; then
   DD_UWSGI_NUM_OF_THREADS=1
 fi
 
-echo $DD_UWSGI_LOGFORMAT
-
 exec uwsgi \
   "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
   --protocol uwsgi \
