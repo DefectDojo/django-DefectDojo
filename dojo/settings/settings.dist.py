@@ -1305,7 +1305,7 @@ LOGGING = {
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins', 'console'],
-            'level': % LOG_LEVEL,
+            'level': '%s' % LOG_LEVEL,
             'propagate': True,
         },
         'django.security': {
@@ -1337,13 +1337,13 @@ LOGGING = {
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': % LOG_LEVEL,
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'titlecase': {
             # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': % LOG_LEVEL,
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
     }
