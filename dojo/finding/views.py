@@ -127,7 +127,7 @@ def findings(request, pid=None, eid=None, view=None, filter_name=None, order_by=
     if view == "All":
         filter_name = "All"
     else:
-        print('Filtering!', view)
+        logger.debug('Filtering!: {}', view)
 
     if pid:
         product = get_object_or_404(Product, id=pid)

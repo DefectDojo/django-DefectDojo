@@ -7,6 +7,12 @@ from threading import local
 from django.db import models
 from django.urls import reverse
 
+try:
+    from uwsgi import set_logvar
+except:
+    'This should be included by default is uwsgi is in use. but during the build it will fail anytime'
+    pass
+
 logger = logging.getLogger(__name__)
 
 EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip('/'))]
@@ -46,6 +52,8 @@ class LoginRequiredMiddleware:
                 return HttpResponseRedirect(fullURL)
 
         if request.user.is_authenticated:
+            logger.debug("Authenticated user: %s", str(request.user))
+            set_logvar('dd_user', str(request.user))
             path = request.path_info.lstrip('/')
             from dojo.models import Dojo_User
             if Dojo_User.force_password_reset(request.user) and path != 'change_password':
