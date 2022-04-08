@@ -1306,7 +1306,7 @@ LOGGING = {
         'django.request': {
             'handlers': ['mail_admins', 'console'],
             'level': '%s' % LOG_LEVEL,
-            'propagate': True,
+            'propagate': False,
         },
         'django.security': {
             'handlers': [r'%s' % LOGGING_HANDLER],
@@ -1333,6 +1333,7 @@ LOGGING = {
         'saml2': {
             'handlers': [r'%s' % LOGGING_HANDLER],
             'level': '%s' % LOG_LEVEL,
+            'propagate': False,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
