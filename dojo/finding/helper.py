@@ -317,7 +317,6 @@ def finding_pre_delete(sender, instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
 
     instance.found_by.clear()
-    instance.status_finding.clear()
 
 
 def finding_delete(instance, **kwargs):
@@ -348,7 +347,6 @@ def finding_delete(instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
     logger.debug('finding delete: clearing found by')
     instance.found_by.clear()
-    instance.status_finding.clear()
 
 
 @receiver(post_delete, sender=Finding)

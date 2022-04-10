@@ -274,6 +274,88 @@ class TestEndpointStatusMigration(MigratorTestCase):
         eps = Endpoint_Status.objects.filter(pk=self.another_endpoint_status)
         self.assertEqual(eps.count(), 1)
 
+# TODO: These tests can be skipped in 2.11.x or later
+# @skip("Outdated - Any future changes of code should not affect these tests")
+class TestEndpointStatusUnlink(MigratorTestCase):
+    migrate_from = ('dojo', '0156_migrate_finding_groups_setting')
+    migrate_to = ('dojo', '0157_remove_broken_endpoint_statuses')
+
+    def prepare(self):
+        Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
+        Product = self.old_state.apps.get_model('dojo', 'Product')
+        Engagement = self.old_state.apps.get_model('dojo', 'Engagement')
+        Test = self.old_state.apps.get_model('dojo', 'Test')
+        Finding = self.old_state.apps.get_model('dojo', 'Finding')
+        Endpoint = self.old_state.apps.get_model('dojo', 'Endpoint')
+        Endpoint_Status = self.old_state.apps.get_model('dojo', 'Endpoint_Status')
+
+        self.prod_type = Product_Type.objects.create()
+        self.product = Product.objects.create(prod_type=self.prod_type)
+        self.engagement = Engagement.objects.create(
+            product_id=self.product.pk,
+            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc)
+        )
+        self.test = Test.objects.create(
+            engagement_id=self.engagement.pk,
+            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
+            test_type_id=1
+        )
+        from django.contrib.auth import get_user_model
+        user = get_user_model().objects.create().pk
+        self.finding = Finding.objects.create(test=self.test, reporter_id=user).pk
+        self.endpoint = Endpoint.objects.create(protocol='http', host='foo.bar.eps', product=self.product).pk
+        self.another_finding = Finding.objects.create(test=self.test, reporter_id=user).pk
+        self.another_endpoint = Endpoint.objects.create(protocol='http', host='bar.foo.eps', product=self.product).pk
+        self.endpoint_status = {
+            'standard': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 3, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 4, 1, tzinfo=timezone.utc),
+                mitigated=False,
+                finding_id=self.finding,
+                endpoint_id=self.endpoint
+            ).pk,
+            'removed_endpoint': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=self.another_finding,
+                endpoint_id=None
+            ).pk,
+            'removed_finding': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=None,
+                endpoint_id=self.another_endpoint
+            ).pk,
+        }
+
+        self.finding.endpoint_status.add(self.endpoint_status['standard'])
+        self.another_finding.endpoint_status.add(self.endpoint_status['removed_endpoint'])
+        Endpoint_Status.objects.filter(id=self.endpoint_status['removed_endpoint']).delete()
+
+        self.endpoint.endpoint_status.add(self.endpoint_status['standard'])
+        self.another_endpoint.endpoint_status.add(self.endpoint_status['removed_finding'])
+        Endpoint_Status.objects.filter(id=self.endpoint_status['removed_finding']).delete()
+
+    def test_unlink_of_broken_eps(self):
+        Finding = self.new_state.apps.get_model('dojo', 'Finding')
+        Endpoint = self.new_state.apps.get_model('dojo', 'Endpoint')
+
+        eps = Finding.objects.filter(id=self.finding)
+        self.assertEqual(eps.count(), 1)
+
+        eps = Finding.objects.filter(id=self.another_finding)
+        self.assertEqual(eps.count(), 0)
+
+        eps = Endpoint.objects.filter(id=self.endpoint)
+        self.assertEqual(eps.count(), 1)
+
+        eps = Endpoint.objects.filter(id=self.another_endpoint)
+        self.assertEqual(eps.count(), 0)
+
 
 # TODO: These tests can be skipped in 2.10.x or later
 # @skip("Outdated - Any future changes of code should not affect these tests")
