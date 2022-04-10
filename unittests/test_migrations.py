@@ -334,18 +334,18 @@ class TestEndpointStatusUnlink(MigratorTestCase):
             ).pk,
         }
 
-        self.finding.endpoint_status.add(
+        Finding.objects.get(id=self.finding).endpoint_status.add(
             Endpoint_Status.objects.get(id=self.endpoint_status['standard'])
         )
-        self.another_finding.endpoint_status.add(
+        Finding.objects.get(id=self.another_finding).endpoint_status.add(
             Endpoint_Status.objects.get(id=self.endpoint_status['removed_endpoint'])
         )
         Endpoint_Status.objects.filter(id=self.endpoint_status['removed_endpoint']).delete()
 
-        self.endpoint.endpoint_status.add(
+        Endpoint.objects.get(id=self.endpoint).endpoint_status.add(
             Endpoint_Status.objects.get(id=self.endpoint_status['standard'])
         )
-        self.another_endpoint.endpoint_status.add(
+        Endpoint.objects.get(id=self.another_endpoint).endpoint_status.add(
             Endpoint_Status.objects.get(id=self.endpoint_status['removed_finding'])
         )
         Endpoint_Status.objects.filter(id=self.endpoint_status['removed_finding']).delete()
