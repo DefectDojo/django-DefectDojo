@@ -1229,7 +1229,7 @@ class Endpoint_Status(models.Model):
     endpoint = models.ForeignKey('Endpoint', null=False, blank=False, on_delete=models.CASCADE, related_name='status_endpoint')
     finding = models.ForeignKey('Finding', null=False, blank=False, on_delete=models.CASCADE, related_name='status_finding')
 
-    def delete(self):
+    def delete(self, *args, **kwargs):
         self.finding.endpoint_status.remove(self)
         self.endpoint.endpoint_status.remove(self)
         super().delete(*args, **kwargs)
@@ -1291,7 +1291,7 @@ class Endpoint(models.Model):
             models.Index(fields=['product']),
         ]
 
-    def delete(self):
+    def delete(self, *args, **kwargs):
         for eps in self.endpoint_status.all():
             eps.finding.endpoint_status.remove(eps)
             eps.delete()

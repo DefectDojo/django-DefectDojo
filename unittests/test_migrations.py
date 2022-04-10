@@ -274,6 +274,7 @@ class TestEndpointStatusMigration(MigratorTestCase):
         eps = Endpoint_Status.objects.filter(pk=self.another_endpoint_status)
         self.assertEqual(eps.count(), 1)
 
+
 # TODO: These tests can be skipped in 2.11.x or later
 # @skip("Outdated - Any future changes of code should not affect these tests")
 class TestEndpointStatusUnlink(MigratorTestCase):
@@ -305,9 +306,10 @@ class TestEndpointStatusUnlink(MigratorTestCase):
         from django.contrib.auth import get_user_model
         user = get_user_model().objects.create().pk
         self.finding = Finding.objects.create(test=self.test, reporter_id=user).pk
-        self.endpoint = Endpoint.objects.create(protocol='http', host='foo.bar.eps', product=self.product).pk
+        self.endpoint = Endpoint.objects.create(protocol='http', host='foo.bar.eps', product_id=self.product.pk).pk
         self.another_finding = Finding.objects.create(test=self.test, reporter_id=user).pk
-        self.another_endpoint = Endpoint.objects.create(protocol='http', host='bar.foo.eps', product=self.product).pk
+        self.another_endpoint = Endpoint.objects.create(protocol='http', host='bar.foo.eps',
+                                                        product_id=self.product.pk).pk
         self.endpoint_status = {
             'standard': Endpoint_Status.objects.create(
                 date=datetime.datetime(2021, 3, 1, tzinfo=timezone.utc),
