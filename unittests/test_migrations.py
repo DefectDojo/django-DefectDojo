@@ -334,12 +334,20 @@ class TestEndpointStatusUnlink(MigratorTestCase):
             ).pk,
         }
 
-        self.finding.endpoint_status.add(self.endpoint_status['standard'])
-        self.another_finding.endpoint_status.add(self.endpoint_status['removed_endpoint'])
+        self.finding.endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['standard'])
+        )
+        self.another_finding.endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['removed_endpoint'])
+        )
         Endpoint_Status.objects.filter(id=self.endpoint_status['removed_endpoint']).delete()
 
-        self.endpoint.endpoint_status.add(self.endpoint_status['standard'])
-        self.another_endpoint.endpoint_status.add(self.endpoint_status['removed_finding'])
+        self.endpoint.endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['standard'])
+        )
+        self.another_endpoint.endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['removed_finding'])
+        )
         Endpoint_Status.objects.filter(id=self.endpoint_status['removed_finding']).delete()
 
     def test_unlink_of_broken_eps(self):

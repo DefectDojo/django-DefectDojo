@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
             eps_findings.add(f.endpoint_status)
         missing_eps_findings = [eps for eps in eps_findings if eps not in epss]
 
-        for f in Finding.objects.filter(endpoint_status__in=missing_eps_findings):
+        for f in Finding.objects.filter(endpoint_status__in=missing_eps_findings).iterator():
             f.endpoint_status.remove(missing_eps_findings)
 
         eps_endpoints = set()
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
             eps_endpoints.add(e.endpoint_status)
         missing_eps_endpoints = [eps for eps in eps_endpoints if eps not in epss]
 
-        for e in Endpoint.objects.filter(endpoint_status__in=missing_eps_endpoints):
+        for e in Endpoint.objects.filter(endpoint_status__in=missing_eps_endpoints).iterator():
             endpoint_status.remove(missing_eps_endpoints)
 
     operations = [
