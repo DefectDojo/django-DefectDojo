@@ -874,7 +874,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Endpoint_Add
         self.permission_update = Permissions.Endpoint_Edit
         self.permission_delete = Permissions.Endpoint_Delete
-        self.deleted_objects = 2
+        self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -905,7 +905,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Engagement_Add
         self.permission_update = Permissions.Engagement_Edit
         self.permission_delete = Permissions.Engagement_Delete
-        self.deleted_objects = 23
+        self.deleted_objects = 24
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1298,7 +1298,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Product_Type_Add_Product
         self.permission_update = Permissions.Product_Edit
         self.permission_delete = Permissions.Product_Delete
-        self.deleted_objects = 16
+        self.deleted_objects = 17
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1358,7 +1358,7 @@ class TestsTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Test_Add
         self.permission_update = Permissions.Test_Edit
         self.permission_delete = Permissions.Test_Delete
-        self.deleted_objects = 18
+        self.deleted_objects = 19
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2162,7 +2162,7 @@ class ProductTypeTest(BaseClass.RESTEndpointTest):
         self.permission_check_class = Product_Type
         self.permission_update = Permissions.Product_Type_Edit
         self.permission_delete = Permissions.Product_Type_Delete
-        self.deleted_objects = 20
+        self.deleted_objects = 21
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create_object_not_authorized(self):
