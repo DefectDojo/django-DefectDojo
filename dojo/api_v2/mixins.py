@@ -18,7 +18,7 @@ class DeletePreviewModelMixin:
         method='get',
         responses={status.HTTP_200_OK: serializers.DeletePreviewSerializer(many=True)}
     )
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["get"], filter_backends=[])
     def delete_preview(self, request, pk=None):
         object = self.get_object()
 
