@@ -169,8 +169,8 @@ spec:
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
             {{- else }}
-              name: {{ .Values.redis.existingSecret }}
-              key: {{ .Values.redis.secretKey }}
+              name: {{ .Values.redis.auth.existingSecret }}
+              key: {{ .Values.redis.auth.existingSecretPasswordKey }}
             {{- end }}  
             {{- end }}
         {{- if .Values.django.uwsgi.enable_debug }}
