@@ -199,7 +199,7 @@ class NessusXMLParser(object):
                         cwe = item.find("cwe").text
                     cvssv3 = None
                     if item.findtext("cvss3_vector"):
-                        cvssv3 = CVSS3(str(item.find("cvss3_vector").text)).clean_vector(output_prefix=False)
+                        cvssv3 = CVSS3(item.findtext("cvss3_vector")).clean_vector()
 
                     title = item.attrib["pluginName"]
                     dupe_key = severity + title

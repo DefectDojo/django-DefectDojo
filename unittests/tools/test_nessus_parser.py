@@ -158,4 +158,4 @@ class TestNessusParser(DojoTestCase):
         print(finding.unsaved_endpoints)
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual("http", endpoint.protocol)
-        self.assertEqual("AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
+        self.assertEqual("CVSS3.0:AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
