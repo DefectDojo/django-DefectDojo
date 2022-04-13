@@ -1229,11 +1229,6 @@ class Endpoint_Status(models.Model):
     endpoint = models.ForeignKey('Endpoint', null=False, blank=False, on_delete=models.CASCADE, related_name='status_endpoint')
     finding = models.ForeignKey('Finding', null=False, blank=False, on_delete=models.CASCADE, related_name='status_finding')
 
-    def delete(self, *args, **kwargs):
-        self.finding.endpoint_status.remove(self)
-        self.endpoint.endpoint_status.remove(self)
-        super().delete(*args, **kwargs)
-
     @property
     def age(self):
 
@@ -1290,12 +1285,6 @@ class Endpoint(models.Model):
         indexes = [
             models.Index(fields=['product']),
         ]
-
-    def delete(self, *args, **kwargs):
-        for eps in self.endpoint_status.all():
-            eps.finding.endpoint_status.remove(eps)
-            eps.delete()
-        super().delete(*args, **kwargs)
 
     def clean(self):
         errors = []
@@ -2113,9 +2102,6 @@ class Finding(models.Model):
 
     def delete(self, *args, **kwargs):
         logger.debug('%d finding delete', self.id)
-        for eps in self.endpoint_status.all():
-            eps.endpoint.endpoint_status.remove(eps)
-            eps.delete()
         import dojo.finding.helper as helper
         helper.finding_delete(self)
         super().delete(*args, **kwargs)

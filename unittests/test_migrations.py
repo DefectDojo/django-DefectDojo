@@ -262,22 +262,30 @@ class TestEndpointStatusMigration(MigratorTestCase):
         Endpoint = self.new_state.apps.get_model('dojo', 'Endpoint')
         Endpoint_Status = self.new_state.apps.get_model('dojo', 'Endpoint_Status')
 
-        eps = Endpoint_Status.objects.filter(
-            finding_id=self.finding,
-            endpoint_id=self.endpoint
-        )
-        self.assertEqual(eps.count(), 1)
-        self.assertTrue(eps[0].mitigated)
-        self.assertEqual(eps[0].date, datetime.datetime(2021, 1, 1, tzinfo=timezone.utc))
-        self.assertEqual(eps[0].last_modified, datetime.datetime(2021, 5, 1, tzinfo=timezone.utc))
+        with self.subTest("Standard usecase"):
+            eps = Endpoint_Status.objects.filter(
+                finding_id=self.finding,
+                endpoint_id=self.endpoint
+            )
+            self.assertEqual(eps.count(), 1)
+            self.assertTrue(eps[0].mitigated)
+            self.assertEqual(eps[0].date, datetime.datetime(2021, 1, 1, tzinfo=timezone.utc))
+            self.assertEqual(eps[0].last_modified, datetime.datetime(2021, 5, 1, tzinfo=timezone.utc))
 
-        eps = Endpoint_Status.objects.filter(pk=self.another_endpoint_status)
-        self.assertEqual(eps.count(), 1)
+            eps = Endpoint_Status.objects.filter(pk=self.another_endpoint_status)
+            self.assertEqual(eps.count(), 1)
+
+        with self.subTest("Broken endpoint_statuses"):
+            eps = Endpoint_Status.objects.filter(endpoint_id=None, finding_id=self.finding)
+            self.assertEqual(eps.count(), 2)
+
+            eps = Endpoint_Status.objects.filter(endpoint_id=self.endpoint, finding_id=None)
+            self.assertEqual(eps.count(), 2)
 
 
 # TODO: These tests can be skipped in 2.11.x or later
 # @skip("Outdated - Any future changes of code should not affect these tests")
-class TestEndpointStatusUnlink(MigratorTestCase):
+class TestEndpointStatusBroken(MigratorTestCase):
     migrate_from = ('dojo', '0156_migrate_finding_groups_setting')
     migrate_to = ('dojo', '0157_remove_broken_endpoint_statuses')
 
@@ -340,7 +348,6 @@ class TestEndpointStatusUnlink(MigratorTestCase):
         Finding.objects.get(id=self.another_finding).endpoint_status.add(
             Endpoint_Status.objects.get(id=self.endpoint_status['removed_endpoint'])
         )
-        Endpoint_Status.objects.filter(id=self.endpoint_status['removed_endpoint']).delete()
 
         Endpoint.objects.get(id=self.endpoint).endpoint_status.add(
             Endpoint_Status.objects.get(id=self.endpoint_status['standard'])
@@ -348,23 +355,37 @@ class TestEndpointStatusUnlink(MigratorTestCase):
         Endpoint.objects.get(id=self.another_endpoint).endpoint_status.add(
             Endpoint_Status.objects.get(id=self.endpoint_status['removed_finding'])
         )
-        Endpoint_Status.objects.filter(id=self.endpoint_status['removed_finding']).delete()
 
-    def test_unlink_of_broken_eps(self):
+    def test_broken_eps(self):
         Finding = self.new_state.apps.get_model('dojo', 'Finding')
         Endpoint = self.new_state.apps.get_model('dojo', 'Endpoint')
+        Endpoint_Status = self.old_state.apps.get_model('dojo', 'Endpoint_Status')
 
-        eps = Finding.objects.filter(id=self.finding)
-        self.assertEqual(eps.count(), 1)
+        with self.subTest('Stadnard eps for finding'):
+            f = Finding.objects.filter(id=self.finding)
+            self.assertEqual(f.count(), 1)
+            f = f.first()
+            self.assertEqual(f.endpoint_status.count(), 1)
+            self.assertEqual(f.endpoint_status.first().pk, self.endpoint_status['standard'])
 
-        eps = Finding.objects.filter(id=self.another_finding)
-        self.assertEqual(eps.count(), 0)
+        with self.subTest('Broken eps for finding'):
+            f = Finding.objects.filter(id=self.another_finding)
+            self.assertEqual(f.count(), 1)
+            f = f.first()
+            self.assertEqual(f.endpoint_status.count(), 0)
 
-        eps = Endpoint.objects.filter(id=self.endpoint)
-        self.assertEqual(eps.count(), 1)
+        with self.subTest('Stadnard eps for endpoint'):
+            e = Endpoint.objects.filter(id=self.endpoint)
+            self.assertEqual(e.count(), 1)
+            e = e.first()
+            self.assertEqual(e.endpoint_status.count(), 1)
+            self.assertEqual(e.endpoint_status.first().pk, self.endpoint_status['standard'])
 
-        eps = Endpoint.objects.filter(id=self.another_endpoint)
-        self.assertEqual(eps.count(), 0)
+        with self.subTest('Broken eps for endpoint'):
+            e = Endpoint.objects.filter(id=self.another_endpoint)
+            self.assertEqual(e.count(), 1)
+            e = e.first()
+            self.assertEqual(e.endpoint_status.count(), 0)
 
 
 # TODO: These tests can be skipped in 2.10.x or later

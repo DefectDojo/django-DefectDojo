@@ -21,25 +21,7 @@ class Migration(migrations.Migration):
         else:
             logger.warning('We identified %s broken endpoint_statuses', broken_eps.count())
             deleted = broken_eps.delete()
-            logger.warning('We removed %s broken endpoint_statuses', deleted)
-
-        epss = Endpoint_Status.objects.all()
-
-        eps_findings = set()
-        for f in Finding.objects.all():
-            eps_findings.add(f.endpoint_status)
-        missing_eps_findings = [eps for eps in eps_findings if eps not in epss]
-
-        for f in Finding.objects.filter(finding_endpoint_status__in=missing_eps_findings):
-            f.endpoint_status.remove(missing_eps_findings)
-
-        eps_endpoints = set()
-        for e in Endpoint.objects.all():
-            eps_endpoints.add(e.endpoint_status)
-        missing_eps_endpoints = [eps for eps in eps_endpoints if eps not in epss]
-
-        for e in Endpoint.objects.filter(endpoint_endpoint_status__in=missing_eps_endpoints):
-            endpoint_status.remove(missing_eps_endpoints)
+            logger.warning('We removed: %s', deleted)
 
     operations = [
         migrations.RunPython(remove_broken_endpoint_statuses)
