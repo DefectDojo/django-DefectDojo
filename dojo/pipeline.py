@@ -98,10 +98,14 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
                     group_name = group_from_response
 
                 group, created_group = Dojo_Group.objects.get_or_create(name=group_name, is_azure=True)
+                if settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER == "" or re.search(settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER, group_name):
+                    group_names.append(group_name)
+                else:
+                    logger.debug("Skipping group " + group_name + " due to AZUREAD_TENANT_OAUTH2_GROUPS_FILTER " + settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER)
+                    continue
 
                 group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(group=group, user=user, defaults={
                     'role': Role.objects.get(id=Roles.Writer)})
-                group_names.append(group_name)
 
                 if settings.AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS:
                     cleanup_old_azureAD_groups_for_user(user, group_names)

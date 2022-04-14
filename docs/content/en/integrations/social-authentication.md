@@ -148,7 +148,7 @@ GET parameter starts with `http://` instead of
 `SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` in the settings.
 
 ## Azure Active Directory
-
+### AzureAD Configuration
 You can now use your corporate Azure Active Directory to authenticate
 users to Defect Dojo. Users will be using your corporate Azure AD
 account (A.K.A. Office 365 identity) to authenticate via OAuth, and all
@@ -190,6 +190,26 @@ user, such as 'staff' or 'superuser'
 
 5.  Restart your Dojo, and you should now see a **Login with Azure AD**
     button on the login page which should *magically* work
+
+### Automatic Import of User-Groups
+To import groups from AzureAD users, the following env. var needs to be set:  
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=True
+    {{< /highlight >}}
+This allows to automatically limit the products a user can interact with.
+
+To prevent authorization creep, old AzureAD groups a user is not having anymore can be deleted with the following env. parameter:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER
+    {{< /highlight >}}
+
+ To limit the amount of groups, a regular expression can be used as the following:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS='^team-.*' # or 'teamA|teamB|groupC'
+    {{< /highlight >}}
 
 ## Gitlab
 
