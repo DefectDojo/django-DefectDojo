@@ -489,6 +489,10 @@ class TestDuplicationLogic(DojoTestCase):
         # both test 3 and 4 are ZAP scans (cross scanner dedupe is still not working very well)
         finding_new, finding_2 = self.copy_and_reset_finding(id=2)
         finding_new.test = Test.objects.get(id=4)
+        finding_new.save(dedupe_option=False)
+        ep = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="localhost", protocol="ftp", path="local")
+        ep.save()
+        finding_new.endpoints.add(ep)
         finding_new.save(dedupe_option=True)
 
         self.assert_finding(finding_new, not_pk=2, duplicate=False, hash_code=finding_2.hash_code)
@@ -502,6 +506,10 @@ class TestDuplicationLogic(DojoTestCase):
 
         finding_new, finding_2 = self.copy_and_reset_finding(id=2)
         finding_new.test = Test.objects.get(id=4)
+        finding_new.save(dedupe_option=False)
+        ep = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="localhost", protocol="ftp")
+        ep.save()
+        finding_new.endpoints.add(ep)
         finding_new.save(dedupe_option=True)
 
         self.assert_finding(finding_new, not_pk=2, duplicate=True, duplicate_finding_id=2, hash_code=finding_2.hash_code)
@@ -516,26 +524,22 @@ class TestDuplicationLogic(DojoTestCase):
         self.assert_finding(finding_new, not_pk=2, duplicate=True, duplicate_finding_id=2, hash_code=finding_2.hash_code)
 
     def test_identical_hash_code_with_identical_endpoints(self):
-        finding_new, finding_4 = self.copy_and_reset_finding_add_endpoints(id=4)  # has myhost.com, myhost2.com
+        # create an identical copy of the new finding, with the same endpoints
+        finding_new, finding_4 = self.copy_and_reset_finding(id=4)  # has ftp://localhost
+        finding_new.save(dedupe_option=False)
+
+        ep1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="localhost", protocol="ftp")
+        ep1.save()
+        finding_new.endpoints.add(ep1)
         finding_new.save()
 
-        # create an identical copy of the new finding, with the same endpoints
-        finding_new2, finding_new = self.copy_and_reset_finding(id=finding_new.id)
-        finding_new2.save(dedupe_option=False)
-
-        ep1 = Endpoint(product=finding_new2.test.engagement.product, finding=finding_new2, host="myhost.com", protocol="https")
-        ep1.save()
-        ep2 = Endpoint(product=finding_new2.test.engagement.product, finding=finding_new2, host="myhost2.com", protocol="https")
-        ep2.save()
-        finding_new2.endpoints.add(ep1)
-        finding_new2.endpoints.add(ep2)
-        finding_new2.save()
-
         # expect: marked as duplicate of original finding 2 (because finding 4 is a duplicate of finding 2 in sample data), hash_code not affected by endpoints (endpoints are not anymore in ZAP configuration for hash_code)
-        self.assert_finding(finding_new2, not_pk=finding_new.pk, duplicate=True, duplicate_finding_id=2, hash_code=finding_new.hash_code, not_hash_code=None)
+        self.assert_finding(finding_new, not_pk=finding_4.pk, duplicate=True, duplicate_finding_id=2, hash_code=finding_4.hash_code, not_hash_code=None)
 
     def test_dedupe_algo_endpoint_fields_host_port(self):
+        dedupe_algo_endpoint_fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
         settings.DEDUPE_ALGO_ENDPOINT_FIELDS = ["host", "port"]
+        
         # create an identical copy of the new finding, with the same endpoints
         finding_new, finding_4 = self.copy_and_reset_finding(id=4)  # finding_4 has host ftp://localhost
         finding_new.save()
@@ -560,7 +564,7 @@ class TestDuplicationLogic(DojoTestCase):
         # expect: marked as duplicate of original finding 2 (because finding 4 is a duplicate of finding 2 in sample data), hash_code not affected by endpoints (endpoints are not anymore in ZAP configuration for hash_code)
         self.assert_finding(finding_new, not_pk=finding_4.pk, duplicate=False, hash_code=finding_4.hash_code, not_hash_code=None)
         # reset for further tests
-        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = []
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
 
     def test_identical_hash_code_with_different_endpoints(self):
         finding_new, finding_4 = self.copy_and_reset_finding_add_endpoints(id=4)
@@ -905,8 +909,11 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.endpoints.add(ep1)
         finding_new.save()
 
-        # expect duplicate, as endpoints shouldn't affect dedupe and hash_code due to unique_id
-        self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+        if settings.DEDUPE_ALGO_ENDPOINT_FIELDS == []:
+            # expect duplicate, as endpoints shouldn't affect dedupe and hash_code due to unique_id
+            self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+        else:
+            self.assert_finding(finding_new, not_pk=224, duplicate=False, duplicate_finding_id=None, hash_code=finding_224.hash_code)
 
         # same scenario, now with different uid. and different endpoints, but hash will be different due the endpoints because we set dynamic_finding to True
         finding_new, finding_224 = self.copy_and_reset_finding(id=224)
@@ -919,8 +926,11 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.dynamic_finding = True
         finding_new.save()
 
-        # different uid. and different endpoints, but endpoints not used for hash anymore -> duplicate
-        self.assert_finding(finding_new, not_pk=224, duplicate=True, hash_code=finding_224.hash_code)
+        if settings.DEDUPE_ALGO_ENDPOINT_FIELDS == []:
+            # different uid. and different endpoints, but endpoints not used for hash anymore -> duplicate
+            self.assert_finding(finding_new, not_pk=224, duplicate=True, hash_code=finding_224.hash_code)
+        else:
+            self.assert_finding(finding_new, not_pk=224, duplicate=False, hash_code=finding_224.hash_code)
 
         # same scenario, now with different uid. and different endpoints
         finding_new, finding_224 = self.copy_and_reset_finding(id=224)
@@ -933,9 +943,11 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.dynamic_finding = False
         finding_new.save()
 
-        # different uid. and different endpoints, dynamic_finding is set to False hash_code still not affected by endpoints
-        self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
-
+        if settings.DEDUPE_ALGO_ENDPOINT_FIELDS == []:
+            # different uid. and different endpoints, dynamic_finding is set to False hash_code still not affected by endpoints
+            self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+        else:
+            self.assert_finding(finding_new, not_pk=224, duplicate=False, duplicate_finding_id=None, hash_code=finding_224.hash_code)
     # sync false positive history tests
 
     def test_false_positive_history_with_dedupe_no_endpoints_identical(self):
@@ -1343,6 +1355,16 @@ class TestDuplicationLogic(DojoTestCase):
         new.hash_code = None
         # return unsaved new finding and reloaded existing finding
         return new, Finding.objects.get(id=id)
+
+    def copy_with_endpoints_and_reset_finding(self, id):
+        finding_new, finding_org = self.copy_and_reset_finding(id=id)
+        # first save without dedupe to avoid hash_code calculation to happen without endpoints
+        finding_new.save(dedupe_option=False)
+        for ep in finding_org.endpoints.all():
+            finding_new.endpoints.add(ep)
+        finding_new.save(dedupe_option=True)
+        # return saved new finding and reloaded existing finding
+        return finding_new, finding_org
 
     def copy_and_reset_finding_add_endpoints(self, id, static=False, dynamic=True):
         finding_new, finding_org = self.copy_and_reset_finding(id=id)

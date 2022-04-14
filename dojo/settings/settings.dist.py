@@ -1174,7 +1174,7 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # - Host and path (['host', 'path']) means: A and B stay untouched because the path is different.
 #
 # If a finding has more than one Endpoint, only one Endpointpair musst match to mark the finding as duplicate.
-DEDUPE_ALGO_ENDPOINT_FIELDS = []
+DEDUPE_ALGO_ENDPOINT_FIELDS = ['host', 'path']
 
 # Choice of deduplication algorithm per parser
 # Key = the scan_type from factory.py (= the test_type)

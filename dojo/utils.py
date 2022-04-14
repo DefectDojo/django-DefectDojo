@@ -150,11 +150,13 @@ def are_endpoints_duplicates(new_finding, to_duplicate_finding):
     fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
     # shortcut if fields list is empty/feature is disabled
     if len(fields) == 0:
+        deduplicationLogger.debug("deduplication by endpoint fields is disabled")
         return True
 
     list1 = get_endpoints_as_url(new_finding)
     list2 = get_endpoints_as_url(to_duplicate_finding)
 
+    deduplicationLogger.debug("Starting deduplication by endpoint fields for finding {} with urls {} and finding {} with urls {}".format(new_finding.id, list1, to_duplicate_finding.id, list2))
     if list1 == [] and list2 == []:
         return True
 
@@ -311,8 +313,7 @@ def deduplicate_unique_id_from_tool(new_finding):
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:
-            if are_endpoints_duplicates(new_finding, find):
-                set_duplicate(new_finding, find)
+            set_duplicate(new_finding, find)
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
