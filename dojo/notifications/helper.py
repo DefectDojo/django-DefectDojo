@@ -95,7 +95,6 @@ def create_notification(event=None, **kwargs):
                 logger.debug('Product is not specified, making it silent')
                 users = users.filter(is_superuser=True)
 
-
             for user in users:
                 logger.debug("Authorized user for the product %s", user)
                 # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
