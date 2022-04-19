@@ -26,6 +26,7 @@ administrator might want notifications of all upcoming engagements sent
 to a certain Slack channel, whereas an individual user wants email
 notifications to be sent to the user\'s specified email address when a
 report has finished generating.
+
 Users can define notifications on a product level as well, and these settings will be applied only for selected products.
 
 Microsoft Teams does not provide an easy way to send messages to a personal
