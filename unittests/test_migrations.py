@@ -247,8 +247,7 @@ class TestEndpointStatusMigration(MigratorTestCase):
         self.assertEqual(eps.count(), 1)
 
 
-# TODO: These tests can be skipped in 2.10.x or later
-# @skip("Outdated - Any future changes of code should not affect these tests")
+@skip("Outdated - Any future changes of code should not affect these tests")
 class TestRemoveEndpointMitigatedMigration(MigratorTestCase):
     migrate_from = ('dojo', '0152_notifications_template')
     migrate_to = ('dojo', '0153_migrate_endpoint_mitigated')
