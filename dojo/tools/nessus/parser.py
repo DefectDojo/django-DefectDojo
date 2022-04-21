@@ -180,7 +180,13 @@ class NessusXMLParser(object):
                         impact += "CVSS Base Score: " + item.find("cvss_base_score").text + "\n"
                     if item.findtext("cvss_temporal_score"):
                         impact += "CVSS Temporal Score: " + item.find("cvss_temporal_score").text + "\n"
-
+                    if item.findtext("cvss3_vector"):
+                        impact += "CVSSv3 Vector: " + item.find("cvss3_vector").text + "\n"
+                    if item.findtext("cvss3_base_score"):
+                        impact += "CVSSv3 Base Score: " + item.find("cvss3_base_score").text + "\n"
+                    if item.findtext("cvss3_temporal_score"):
+                        impact += "CVSSv3 Temporal Score: " + item.find("cvss3_temporal_score").text + "\n"
+                        
                     mitigation = item.find("solution").text if item.find("solution") is not None else "N/A"
                     references = ""
                     for ref in item.iter("see_also"):
