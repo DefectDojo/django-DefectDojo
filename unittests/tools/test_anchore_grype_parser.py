@@ -22,9 +22,12 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual(1509, len(findings))
         for finding in findings:
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertIsNotNone(finding.cve)
+            vulnerability_references = finding.unsaved_vulnerability_references
+            self.assertTrue(len(vulnerability_references) >= 1)
             if finding.vuln_id_from_tool == "CVE-2011-3389":
-                self.assertEqual("CVE-2011-3389", finding.cve)
+                vulnerability_references = finding.unsaved_vulnerability_references
+                self.assertEqual(1, len(vulnerability_references))
+                self.assertEqual('CVE-2011-3389', vulnerability_references[0])
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("libgnutls-openssl27", finding.component_name)
                 self.assertEqual("3.6.7-4+deb10u5", finding.component_version)
@@ -41,9 +44,12 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual(1567, len(findings))
         for finding in findings:
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertIsNotNone(finding.cve)
+            vulnerability_references = finding.unsaved_vulnerability_references
+            self.assertTrue(len(vulnerability_references) >= 1)
             if finding.vuln_id_from_tool == "CVE-2019-9192":
-                self.assertEqual("CVE-2019-9192", finding.cve)
+                vulnerability_references = finding.unsaved_vulnerability_references
+                self.assertEqual(1, len(vulnerability_references))
+                self.assertEqual('CVE-2019-9192', vulnerability_references[0])
                 self.assertEqual("libc6-dev", finding.component_name)
                 self.assertEqual("2.28-10", finding.component_version)
                 self.assertEqual("Info", finding.severity)
@@ -60,9 +66,12 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual(327, len(findings))
         for finding in findings:
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertIsNotNone(finding.cve)
+            vulnerability_references = finding.unsaved_vulnerability_references
+            self.assertTrue(len(vulnerability_references) >= 1)
             if finding.vuln_id_from_tool == "CVE-2011-3389":
-                self.assertEqual("CVE-2011-3389", finding.cve)
+                vulnerability_references = finding.unsaved_vulnerability_references
+                self.assertEqual(1, len(vulnerability_references))
+                self.assertEqual('CVE-2011-3389', vulnerability_references[0])
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("libgnutls30", finding.component_name)
                 self.assertEqual("3.6.7-4+deb10u5", finding.component_version)
@@ -79,9 +88,12 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual(9, len(findings))
         for finding in findings:
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertIsNotNone(finding.cve)
+            vulnerability_references = finding.unsaved_vulnerability_references
+            self.assertTrue(len(vulnerability_references) >= 1)
             if finding.vuln_id_from_tool == "CVE-1999-1338":
-                self.assertEqual("CVE-1999-1338", finding.cve)
+                vulnerability_references = finding.unsaved_vulnerability_references
+                self.assertEqual(1, len(vulnerability_references))
+                self.assertEqual('CVE-1999-1338', vulnerability_references[0])
                 self.assertEqual("Medium", finding.severity)
                 self.assertTrue("javascript-matcher" in finding.description)
                 self.assertEqual("delegate", finding.component_name)
@@ -98,13 +110,15 @@ class TestAnchoreGrypeParser(DojoTestCase):
 
         finding = findings[0]
         self.assertEqual('CVE-2004-0971 in libgssapi-krb5-2:1.17-3+deb10u3', finding.title)
-        description = '''**Vulnerability Id:** CVE-2004-0971
-**Vulnerability Namespace:** debian:10
+        description = '''**Vulnerability Namespace:** debian:10
 **Related Vulnerability Description:** The krb5-send-pr script in the kerberos5 (krb5) package in Trustix Secure Linux 1.5 through 2.1, and possibly other operating systems, allows local users to overwrite files via a symlink attack on temporary files.
 **Matcher:** dpkg-matcher
 **Package URL:** pkg:deb/debian/libgssapi-krb5-2@1.17-3+deb10u3?arch=amd64'''
         self.assertEqual(description, finding.description)
-        self.assertEqual('CVE-2004-0971', finding.cve)
+        vulnerability_references = finding.unsaved_vulnerability_references
+        self.assertEqual(2, len(vulnerability_references))
+        self.assertEqual('CVE-2004-0971', vulnerability_references[0])
+        self.assertEqual('CVE-2004-0971', vulnerability_references[1])
         self.assertEqual(1352, finding.cwe)
         self.assertIsNone(finding.cvssv3)
         self.assertIsNone(finding.cvssv3_score)
@@ -130,15 +144,16 @@ class TestAnchoreGrypeParser(DojoTestCase):
 
         finding = findings[1]
         self.assertEqual('CVE-2021-32626 in redis:4.0.2', finding.title)
-        description = '''**Vulnerability Id:** CVE-2021-32626
-**Vulnerability Namespace:** nvd
+        description = '''**Vulnerability Namespace:** nvd
 **Vulnerability Description:** Redis is an open source, in-memory database that persists on disk. In affected versions specially crafted Lua scripts executing in Redis can cause the heap-based Lua stack to be overflowed, due to incomplete checks for this condition. This can result with heap corruption and potentially remote code execution. This problem exists in all versions of Redis with Lua scripting support, starting from 2.6. The problem is fixed in versions 6.2.6, 6.0.16 and 5.0.14. For users unable to update an additional workaround to mitigate the problem without patching the redis-server executable is to prevent users from executing Lua scripts. This can be done using ACL to restrict EVAL and EVALSHA commands.
 **Matchers:**
 - python-matcher
 - python2-matcher
 **Package URL:** pkg:pypi/redis@4.0.2'''
         self.assertEqual(description, finding.description)
-        self.assertEqual('CVE-2021-32626', finding.cve)
+        vulnerability_references = finding.unsaved_vulnerability_references
+        self.assertEqual(1, len(vulnerability_references))
+        self.assertEqual('CVE-2021-32626', vulnerability_references[0])
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
         self.assertEqual('High', finding.severity)
@@ -165,13 +180,15 @@ class TestAnchoreGrypeParser(DojoTestCase):
 
         finding = findings[2]
         self.assertEqual('CVE-2021-33574 in libc-bin:2.28-10', finding.title)
-        description = '''**Vulnerability Id:** CVE-2021-33574
-**Vulnerability Namespace:** debian:10
+        description = '''**Vulnerability Namespace:** debian:10
 **Related Vulnerability Description:** The mq_notify function in the GNU C Library (aka glibc) versions 2.32 and 2.33 has a use-after-free. It may use the notification thread attributes object (passed through its struct sigevent parameter) after it has been freed by the caller, leading to a denial of service (application crash) or possibly unspecified other impact.
 **Matcher:** dpkg-matcher
 **Package URL:** pkg:deb/debian/libc-bin@2.28-10?arch=amd64'''
         self.assertEqual(description, finding.description)
-        self.assertEqual('CVE-2021-33574', finding.cve)
+        vulnerability_references = finding.unsaved_vulnerability_references
+        self.assertEqual(2, len(vulnerability_references))
+        self.assertEqual('CVE-2021-33574', vulnerability_references[0])
+        self.assertEqual('CVE-2021-33574', vulnerability_references[1])
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
         self.assertEqual('Critical', finding.severity)
@@ -194,13 +211,15 @@ class TestAnchoreGrypeParser(DojoTestCase):
 
         finding = findings[3]
         self.assertEqual('CVE-2021-33574 in libc6:2.28-10', finding.title)
-        description = '''**Vulnerability Id:** CVE-2021-33574
-**Vulnerability Namespace:** debian:10
+        description = '''**Vulnerability Namespace:** debian:10
 **Related Vulnerability Description:** The mq_notify function in the GNU C Library (aka glibc) versions 2.32 and 2.33 has a use-after-free. It may use the notification thread attributes object (passed through its struct sigevent parameter) after it has been freed by the caller, leading to a denial of service (application crash) or possibly unspecified other impact.
 **Matcher:** dpkg-matcher
 **Package URL:** pkg:deb/debian/libc6@2.28-10?arch=amd64'''
         self.assertEqual(description, finding.description)
-        self.assertEqual('CVE-2021-33574', finding.cve)
+        vulnerability_references = finding.unsaved_vulnerability_references
+        self.assertEqual(2, len(vulnerability_references))
+        self.assertEqual('CVE-2021-33574', vulnerability_references[0])
+        self.assertEqual('CVE-2021-33574', vulnerability_references[1])
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
         self.assertEqual('Critical', finding.severity)
@@ -222,16 +241,17 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual(1, finding.nb_occurences)
 
         finding = findings[4]
-        self.assertEqual('CVE-2021-44420 in Django:3.2.9', finding.title)
-        description = '''**Vulnerability Id:** GHSA-v6rh-hp5x-86rv
-**Vulnerability Namespace:** github:python
+        self.assertEqual('GHSA-v6rh-hp5x-86rv in Django:3.2.9', finding.title)
+        description = '''**Vulnerability Namespace:** github:python
 **Vulnerability Description:** Potential bypass of an upstream access control based on URL paths in Django
-**Related Vulnerability Id:** CVE-2021-44420
 **Related Vulnerability Description:** In Django 2.2 before 2.2.25, 3.1 before 3.1.14, and 3.2 before 3.2.10, HTTP requests for URLs with trailing newlines could bypass upstream access control based on URL paths.
 **Matcher:** python-matcher
 **Package URL:** pkg:pypi/Django@3.2.9'''
         self.assertEqual(description, finding.description)
-        self.assertEqual('CVE-2021-44420', finding.cve)
+        vulnerability_references = finding.unsaved_vulnerability_references
+        self.assertEqual(2, len(vulnerability_references))
+        self.assertEqual('GHSA-v6rh-hp5x-86rv', vulnerability_references[0])
+        self.assertEqual('CVE-2021-44420', vulnerability_references[1])
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L', finding.cvssv3)
         self.assertEqual('High', finding.severity)

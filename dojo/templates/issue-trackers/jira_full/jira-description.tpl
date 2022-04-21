@@ -16,7 +16,7 @@
 {% endif %}
 
 {% if finding.cve %}
-*CVE:* [{{ finding.cve }}|{{ finding.cve|cve_url }}]
+*CVE:* [{{ finding.cve }}|{{ finding.cve|vulnerability_url }}]
 {% else %}
 *CVE:* Unknown
 {% endif %}

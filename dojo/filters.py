@@ -21,7 +21,7 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group, Vulnerability_Reference
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
@@ -50,6 +50,21 @@ def custom_filter(queryset, name, value):
     values = value.split(',')
     filter = ('%s__in' % (name))
     return queryset.filter(Q(**{filter: values}))
+
+
+def custom_vulnerability_reference_filter(queryset, name, value):
+    values = value.split(',')
+    ids = Vulnerability_Reference.objects \
+        .filter(vulnerability_reference__in=values) \
+        .values_list('finding_id', flat=True)
+    return queryset.filter(id__in=ids)
+
+
+def vulnerability_reference_filter(queryset, name, value):
+    ids = Vulnerability_Reference.objects \
+        .filter(vulnerability_reference=value) \
+        .values_list('finding_id', flat=True)
+    return queryset.filter(id__in=ids)
 
 
 def now():
@@ -205,7 +220,6 @@ def get_finding_filter_fields(metrics=False, similar=False):
 
     fields.extend([
                 'date',
-                'cve',
                 'cwe',
                 'severity',
                 'last_reviewed',
@@ -1010,7 +1024,7 @@ class ApiFindingFilter(DojoFilter):
     # CharFilter
     component_version = CharFilter(lookup_expr='icontains')
     component_name = CharFilter(lookup_expr='icontains')
-    cve = CharFilter(method=custom_filter, field_name='cve')
+    vulnerability_reference = CharFilter(method=custom_vulnerability_reference_filter)
     description = CharFilter(lookup_expr='icontains')
     file_path = CharFilter(lookup_expr='icontains')
     hash_code = CharFilter(lookup_expr='icontains')
@@ -1088,7 +1102,6 @@ class ApiFindingFilter(DojoFilter):
             ('created', 'created'),
             ('last_status_update', 'last_status_update'),
             ('last_reviewed', 'last_reviewed'),
-            ('cve', 'cve'),
             ('cwe', 'cwe'),
             ('date', 'date'),
             ('duplicate', 'duplicate'),
@@ -1113,7 +1126,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'thread_id', 'notes', 'files',
-                   'line', 'endpoint_status']
+                   'line', 'endpoint_status', 'cve']
 
 
 class FindingFilter(FindingFilterWithTags):
@@ -1124,6 +1137,7 @@ class FindingFilter(FindingFilterWithTags):
     last_reviewed = DateRangeFilter()
     last_status_update = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
+    vulnerability_reference = CharFilter(method=vulnerability_reference_filter, label='Vulnerability Reference')
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all(), label='Test Type')
@@ -1325,6 +1339,7 @@ class AcceptedFindingFilter(FindingFilter):
 
 class SimilarFindingFilter(FindingFilter):
     hash_code = MultipleChoiceFilter()
+    vulnerability_references = CharFilter(method=custom_vulnerability_reference_filter, label='Vulnerability References')
 
     class Meta(FindingFilter.Meta):
         model = Finding
@@ -1347,7 +1362,7 @@ class SimilarFindingFilter(FindingFilter):
             # get a mutable copy of the QueryDict
             data = data.copy()
 
-            data['cve'] = self.finding.cve
+            data['vulnerability_references'] = ','.join(self.finding.vulnerability_references)
             data['cwe'] = self.finding.cwe
             data['file_path'] = self.finding.file_path
             data['line'] = self.finding.line
@@ -1480,6 +1495,7 @@ class MetricsFindingFilter(FindingFilter):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
+    vulnerability_reference = CharFilter(method=vulnerability_reference_filter, label='Vulnerability Reference')
 
     not_tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
