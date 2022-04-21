@@ -24,7 +24,9 @@ class TestParser(DojoTestCase):
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("libopenjp2-7", finding.component_name)
                 self.assertEqual("2.3.0-2+deb10u2", finding.component_version)
-                self.assertEqual("CVE-2019-6988", finding.cve)
+                vulnerability_references = finding.unsaved_vulnerability_references
+                self.assertEqual(1, len(vulnerability_references))
+                self.assertEqual('CVE-2019-6988', vulnerability_references[0])
                 self.assertEqual(datetime.date(2021, 4, 13), datetime.datetime.date(finding.date))
 
     def test_spec1_report(self):
@@ -37,7 +39,9 @@ class TestParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual("CVE-2018-7489", finding.cve)
+                vulnerability_references = finding.unsaved_vulnerability_references
+                self.assertEqual(1, len(vulnerability_references))
+                self.assertEqual('CVE-2018-7489', vulnerability_references[0])
                 self.assertEqual("Critical", finding.severity)
                 self.assertIn(finding.cwe, [184, 502])  # there is 2 CWE in the report
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
@@ -95,7 +99,9 @@ class TestParser(DojoTestCase):
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("tar", finding.component_name)
                 self.assertEqual("1.30+dfsg-6", finding.component_version)
-                self.assertEqual("CVE-2019-9923", finding.cve)
+                vulnerability_references = finding.unsaved_vulnerability_references
+                self.assertEqual(1, len(vulnerability_references))
+                self.assertEqual('CVE-2019-9923', vulnerability_references[0])
                 self.assertIn("urn:uuid:be0e9032-5b6b-4ce4-9be4-e5956a0309c1", finding.description)
                 self.assertEqual("CVE-2019-9923", finding.vuln_id_from_tool)
             with self.subTest(i=380):
@@ -103,7 +109,9 @@ class TestParser(DojoTestCase):
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("tar", finding.component_name)
                 self.assertEqual("1.30+dfsg-6", finding.component_version)
-                self.assertEqual("CVE-2021-20193", finding.cve)
+                vulnerability_references = finding.unsaved_vulnerability_references
+                self.assertEqual(1, len(vulnerability_references))
+                self.assertEqual('CVE-2021-20193', vulnerability_references[0])
                 self.assertIn("urn:uuid:17a8ccee-f13b-4d9d-abfc-f3964597df9a", finding.description)
                 self.assertEqual("CVE-2021-20193", finding.vuln_id_from_tool)
 
@@ -122,7 +130,6 @@ class TestParser(DojoTestCase):
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("jackson-databind", finding.component_name)
                 self.assertEqual("2.9.4", finding.component_version)
-                self.assertEqual("CVE-2018-7489", finding.cve)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertIn(
                     "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",
@@ -141,6 +148,11 @@ class TestParser(DojoTestCase):
                     finding.references,
                 )
                 self.assertEqual("SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111", finding.vuln_id_from_tool)
+                vulnerability_references = finding.unsaved_vulnerability_references
+                self.assertEqual(3, len(vulnerability_references))
+                self.assertEqual('SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111', vulnerability_references[0])
+                self.assertEqual('CVE-2018-7489', vulnerability_references[1])
+                self.assertEqual('CVE-2018-7489', vulnerability_references[2])
 
     def test_cyclonedx_1_4_json(self):
         """ClyconeDX version 1.4 JSON format"""
@@ -157,7 +169,6 @@ class TestParser(DojoTestCase):
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("jackson-databind", finding.component_name)
                 self.assertEqual("2.9.4", finding.component_version)
-                self.assertEqual("CVE-2018-7489", finding.cve)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertIn(
                     "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",
@@ -176,6 +187,10 @@ class TestParser(DojoTestCase):
                     finding.references,
                 )
                 self.assertEqual("SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111", finding.vuln_id_from_tool)
+                vulnerability_references = finding.unsaved_vulnerability_references
+                self.assertEqual(2, len(vulnerability_references))
+                self.assertEqual('SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111', vulnerability_references[0])
+                self.assertEqual('CVE-2018-7489', vulnerability_references[1])
 
     def test_cyclonedx_1_4_jake_json(self):
         """ClyconeDX version 1.4 JSON format produced by jake 1.4.1"""
@@ -192,7 +207,9 @@ class TestParser(DojoTestCase):
                         self.assertEqual("High", finding.severity)
                         self.assertEqual("Django", finding.component_name)
                         self.assertEqual("2.0.1", finding.component_version)
-                        self.assertEqual("CVE-2021-33203", finding.cve)
+                        vulnerability_references = finding.unsaved_vulnerability_references
+                        self.assertEqual(1, len(vulnerability_references))
+                        self.assertEqual('CVE-2021-33203', vulnerability_references[0])
                         self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N", finding.cvssv3)
                         self.assertIn(
                             "Django before 2.2.24, 3.x before 3.1.12, and 3.2.x before 3.2.4 has a potential directory traversal",
@@ -204,7 +221,9 @@ class TestParser(DojoTestCase):
                         self.assertEqual("Medium", finding.severity)
                         self.assertEqual("Django", finding.component_name)
                         self.assertEqual("2.0.1", finding.component_version)
-                        self.assertEqual("CVE-2018-7489", finding.cve)
+                        vulnerability_references = finding.unsaved_vulnerability_references
+                        self.assertEqual(1, len(vulnerability_references))
+                        self.assertEqual('CVE-2018-7489', vulnerability_references[0])
                         self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L", finding.cvssv3)
                         self.assertIn(
                             "An issue was discovered in Django 2.0 before 2.0.3, 1.11 before 1.11.11, and 1.8 before 1.8.19.",
@@ -216,7 +235,9 @@ class TestParser(DojoTestCase):
                         self.assertEqual("High", finding.severity)
                         self.assertEqual("Django", finding.component_name)
                         self.assertEqual("2.0.1", finding.component_version)
-                        self.assertEqual("CVE-2018-6188", finding.cve)
+                        vulnerability_references = finding.unsaved_vulnerability_references
+                        self.assertEqual(1, len(vulnerability_references))
+                        self.assertEqual('CVE-2018-6188', vulnerability_references[0])
                         self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N", finding.cvssv3)
                         self.assertIn(
                             "django.contrib.auth.forms.AuthenticationForm in Django 2.0 before 2.0.2, and 1.11.8 and 1.11.9, allows remote attackers to obtain potentially sensitive information",

@@ -12,7 +12,7 @@ h2. Group
 
 
 || Severity || CVE || CWE || Component || Version || Title || Status ||{% for finding in finding_group.findings.all %}
-| {{finding.severity}} | {% if finding.cve %}[{{finding.cve}}|{{finding.cve|cve_url}}]{% else %}None{% endif %} | [{{finding.cwe}}|{{finding.cwe|cwe_url}}] | {{finding.component_name|jiraencode_component}} | {{finding.component_version}} | [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}] | {{ finding.status }} |{% endfor %}
+| {{finding.severity}} | {% if finding.cve %}[{{finding.cve}}|{{finding.cve|vulnerability_url}}]{% else %}None{% endif %} | [{{finding.cwe}}|{{finding.cwe|cwe_url}}] | {{finding.component_name|jiraencode_component}} | {{finding.component_version}} | [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}] | {{ finding.status }} |{% endfor %}
 
 *Branch/Tag:* {{ finding_group.test.engagement.branch_tag }}
 
@@ -30,7 +30,7 @@ h3. [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]
 *Defect Dojo link:* {{ finding_url|full_url }} ({{ finding.id }})
 *Severity:* {{ finding.severity }}
 {% if finding.cwe > 0 %}*CWE:* [CWE-{{ finding.cwe }}|{{ finding.cwe|cwe_url }}]{% else %}*CWE:* Unknown{% endif %}
-{% if finding.cve %}*CVE:* [{{ finding.cve }}|{{ finding.cve|cve_url }}]{% else %}*CVE:* Unknown{% endif %}
+{% if finding.cve %}*CVE:* [{{ finding.cve }}|{{ finding.cve|vulnerability_url }}]{% else %}*CVE:* Unknown{% endif %}
 
 {% if finding.endpoints.all %}
 *Systems/Endpoints*:

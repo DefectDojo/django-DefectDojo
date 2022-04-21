@@ -308,7 +308,7 @@
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>Findings</th>
-                            <th>CVEs</th>
+                            <th>Vulnerability References</th>
                             <th>Components</th>
                             <th>Date</th>
                             <th>Age</th>
@@ -377,7 +377,18 @@
                             </i>
                         </td>
                         <td>
-                            {% for find in group.findings.all %}{% if find.cve%}<a target="_blank" href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}
+                            {% for find in group.findings.all %}
+                                {% with find|first_vulnerability_reference as first_vulnerability_reference %}
+                                {% if first_vulnerability_reference %}
+                                    {% if first_vulnerability_reference|has_vulnerability_url%}
+                                        <a target="_blank" href="{{ first_vulnerability_reference|vulnerability_url }}">{{ first_vulnerability_reference }}</a>
+                                    {% else %}
+                                        {{ first_vulnerability_reference }}
+                                    {% endif %}
+                                    {% if not forloop.last %}, {% endif %}
+                                {% endif %}
+                                {% endwith %}
+                            {% endfor %}
                         </td>
                         <td>
                             {{ group.components }}
@@ -649,7 +660,7 @@
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>CWE</th>
-                            <th>CVE</th>
+                            <th>Vulnerability Reference</th>
                             <th>Date</th>
                             <th>Age</th>
                             {% if system_settings.enable_finding_sla %}
@@ -843,11 +854,17 @@
                         {% endif %}
                         </td>
                         <td class="nowrap">
-                            {% if finding.cve %}
-                              <a target="_blank" href="{{ finding.cve|cve_url }}">
-                                  <i class="fa fa-external-link"></i> {{ finding.cve|default:"" }}
-                              </a>
+                            {% with finding|first_vulnerability_reference as first_vulnerability_reference %}
+                            {% if first_vulnerability_reference %}
+                                {% if first_vulnerability_reference|has_vulnerability_url %}
+                                <a target="_blank" href="{{ first_vulnerability_reference|vulnerability_url }}">
+                                    <i class="fa fa-external-link"></i> {{ first_vulnerability_reference|default:"" }}
+                                </a>
+                                {% else %}
+                                    {{ first_vulnerability_reference }}
+                                {% endif %}
                             {% endif %}
+                            {% endwith %}
                         </td>
                         <td class="nowrap">{{ finding.date }}</td>
                         <td>{{ finding.age }}</td>
