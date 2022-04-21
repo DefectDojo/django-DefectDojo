@@ -1418,3 +1418,11 @@ FEATURE_CONFIGURATION_AUTHORIZATION = env("DD_FEATURE_CONFIGURATION_AUTHORIZATIO
 # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
 # see https://github.com/laymonage/django-jsonfield-backport
 SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
+
+VULNERABILITY_URLS = {
+    'CVE': 'https://nvd.nist.gov/vuln/detail/',
+    'GHSA': 'https://github.com/advisories/',
+    'OSV': 'https://osv.dev/vulnerability/',
+    'PYSEC': 'https://osv.dev/vulnerability/',
+    'SNYK': 'https://snyk.io/vuln/',
+}
