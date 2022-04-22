@@ -35,7 +35,7 @@ class JFrogXrayApiSummaryArtifactParser(object):
                 artifact_issues = artifactNode['issues']
                 for node in artifact_issues:
                     service = decode_service(artifact_general['name'])
-                    item = get_item(node, service, test)
+                    item = get_item(node, str(service), test)
                     items.append(item)
 
         return items
