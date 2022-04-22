@@ -39,7 +39,7 @@ from django.urls import reverse
 from tagulous.forms import TagField
 import logging
 from crum import get_current_user
-from dojo.utils import get_system_setting, get_product
+from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
@@ -56,6 +56,13 @@ FINDING_STATUS = (('verified', 'Verified'),
                   ('false_p', 'False Positive'),
                   ('duplicate', 'Duplicate'),
                   ('out_of_scope', 'Out of Scope'))
+
+vulnerability_references_field = forms.CharField(max_length=5000,
+    required=False,
+    label="Vulnerability References",
+    help_text="References to security advisories associated with this finding. Can be Common Vulnerabilities and Exposures (CVE) or from other sources."
+                "You may enter one vulnerability reference per line.",
+    widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
 
 
 class MultipleSelectWithPop(forms.SelectMultiple):
@@ -401,8 +408,9 @@ class ImportScanForm(forms.Form):
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx, .txt, .sarif"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"}),
         label="Choose report file",
+        allow_empty_file=True,
         required=False)
 
     close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
@@ -410,7 +418,7 @@ class ImportScanForm(forms.Form):
                                                         "This affects the whole engagement/product depending on your deduplication scope.",
                                             required=False, initial=False)
 
-    if settings.FEATURE_FINDING_GROUPS:
+    if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     def __init__(self, *args, **kwargs):
@@ -471,8 +479,9 @@ class ReImportScanForm(forms.Form):
     tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx, .txt, .sarif"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .jsonl, .html, .js, .zip, .xlsx, .txt, .sarif"}),
         label="Choose report file",
+        allow_empty_file=True,
         required=False)
     close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing.",
                                             required=False, initial=True)
@@ -483,7 +492,7 @@ class ReImportScanForm(forms.Form):
     api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
     service = forms.CharField(max_length=200, required=False, help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
 
-    if settings.FEATURE_FINDING_GROUPS:
+    if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
 
     def __init__(self, *args, test=None, **kwargs):
@@ -752,7 +761,7 @@ class EngForm(forms.ModelForm):
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
             self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View).filter(is_active=True)
         else:
-            self.fields['lead'].queryset = User.objects.filter(is_active=True)
+            self.fields['lead'].queryset = Dojo_User.objects.filter(is_active=True)
 
         self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add)
 
@@ -852,7 +861,7 @@ class AddFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False)
+    vulnerability_references = vulnerability_references_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -873,7 +882,7 @@ class AddFindingForm(forms.ModelForm):
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+    field_order = ('title', 'date', 'cwe', 'vulnerability_references', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'endpoints_to_add', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
                    'risk_accepted', 'under_defect_review')
 
@@ -917,7 +926,7 @@ class AddFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers', 'cve',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
@@ -926,7 +935,7 @@ class AdHocFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False)
+    vulnerability_references = vulnerability_references_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -947,7 +956,7 @@ class AdHocFindingForm(forms.ModelForm):
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+    field_order = ('title', 'date', 'cwe', 'vulnerability_references', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'endpoints_to_add', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
                    'risk_accepted', 'under_defect_review', 'sla_start_date')
 
@@ -988,7 +997,7 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
@@ -997,7 +1006,7 @@ class PromoteFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False)
+    vulnerability_references = vulnerability_references_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -1015,7 +1024,7 @@ class PromoteFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_references', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
                    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
                    'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
@@ -1045,7 +1054,7 @@ class PromoteFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'active', 'false_p', 'verified', 'endpoint_status',
+        exclude = ('reporter', 'url', 'numerical_severity', 'active', 'false_p', 'verified', 'endpoint_status', 'cve',
                    'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
 
 
@@ -1100,7 +1109,7 @@ class FindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False, strip=False)
+    vulnerability_references = vulnerability_references_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -1125,7 +1134,7 @@ class FindingForm(forms.ModelForm):
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_references', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
                    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
                    'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
@@ -1173,7 +1182,7 @@ class FindingForm(forms.ModelForm):
             del self.fields['mitigated']
             del self.fields['mitigated_by']
 
-        if not settings.FEATURE_FINDING_GROUPS or not hasattr(self.instance, 'test'):
+        if not is_finding_groups_enabled() or not hasattr(self.instance, 'test'):
             del self.fields['group']
         else:
             self.fields['group'].queryset = self.instance.test.finding_group_set.all()
@@ -1184,7 +1193,6 @@ class FindingForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
 
-        cleaned_data['cve'] = None if cleaned_data['cve'] == '' else cleaned_data['cve']
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
@@ -1216,7 +1224,7 @@ class FindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
 
 
@@ -1245,7 +1253,7 @@ class ApplyFindingTemplateForm(forms.Form):
     title = forms.CharField(max_length=1000, required=True)
 
     cwe = forms.IntegerField(label="CWE", required=False)
-    cve = forms.CharField(label="CVE", max_length=28, required=False)
+    vulnerability_references = vulnerability_references_field
     cvssv3 = forms.CharField(label="CVSSv3", max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
 
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={'required': 'Select valid choice: In Progress, On Hold, Completed', 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
@@ -1261,6 +1269,8 @@ class ApplyFindingTemplateForm(forms.Form):
         super(ApplyFindingTemplateForm, self).__init__(*args, **kwargs)
         self.fields['tags'].autocomplete_tags = Finding.tags.tag_model.objects.all().order_by('name')
         self.template = template
+        if template:
+            self.template.vulnerability_references = '\n'.join(template.vulnerability_references)
 
     def clean(self):
         cleaned_data = super(ApplyFindingTemplateForm, self).clean()
@@ -1274,8 +1284,8 @@ class ApplyFindingTemplateForm(forms.Form):
         return cleaned_data
 
     class Meta:
-        fields = ['title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
-        order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact', 'is_mitigated')
+        fields = ['title', 'cwe', 'vulnerability_references', 'cvssv3', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
+        order = ('title', 'cwe', 'vulnerability_references', 'cvssv3', 'severity', 'description', 'impact', 'is_mitigated')
 
 
 class FindingTemplateForm(forms.ModelForm):
@@ -1283,7 +1293,7 @@ class FindingTemplateForm(forms.ModelForm):
     title = forms.CharField(max_length=1000, required=True)
 
     cwe = forms.IntegerField(label="CWE", required=False)
-    cve = forms.CharField(label="CVE", max_length=28, required=False)
+    vulnerability_references = vulnerability_references_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     severity = forms.ChoiceField(
         required=False,
@@ -1292,7 +1302,7 @@ class FindingTemplateForm(forms.ModelForm):
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
-    field_order = ['title', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
+    field_order = ['title', 'cwe', 'vulnerability_references', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
 
     def __init__(self, *args, **kwargs):
         super(FindingTemplateForm, self).__init__(*args, **kwargs)
@@ -1300,8 +1310,8 @@ class FindingTemplateForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Template
-        order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact')
-        exclude = ('numerical_severity', 'is_mitigated', 'last_used', 'endpoint_status')
+        order = ('title', 'cwe', 'vulnerability_references', 'cvssv3', 'severity', 'description', 'impact')
+        exclude = ('numerical_severity', 'is_mitigated', 'last_used', 'endpoint_status', 'cve')
 
 
 class DeleteFindingTemplateForm(forms.ModelForm):
@@ -1332,6 +1342,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     # unlink_from_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
     tags = TagField(required=False, autocomplete_tags=Finding.tags.tag_model.objects.all().order_by('name'))
+    notes = forms.CharField(required=False, max_length=1024, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
@@ -1553,8 +1564,8 @@ class ClearFindingReviewForm(forms.ModelForm):
 
 
 class ReviewFindingForm(forms.Form):
-    reviewers = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.filter(is_active=True),
-                                               help_text="Select all users who can review Finding.")
+
+    reviewers = forms.MultipleChoiceField(help_text="Select all users who can review Finding.")
     entry = forms.CharField(
         required=True, max_length=2400,
         help_text='Please provide a message for reviewers.',
@@ -1569,9 +1580,18 @@ class ReviewFindingForm(forms.Form):
             finding = kwargs.pop('finding')
 
         super(ReviewFindingForm, self).__init__(*args, **kwargs)
+        self.fields['reviewers'].choices = self._get_choices(Dojo_User.objects.filter(is_active=True))
 
         if finding is not None:
-            self.fields['reviewers'].queryset = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
+            queryset = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
+            self.fields['reviewers'].choices = self._get_choices(queryset)
+
+    @staticmethod
+    def _get_choices(queryset):
+        l_choices = []
+        for item in queryset:
+            l_choices.append((item.pk, item.get_full_name()))
+        return l_choices
 
     class Meta:
         fields = ['reviewers', 'entry']
@@ -2391,7 +2411,7 @@ class NotificationsForm(forms.ModelForm):
 
     class Meta:
         model = Notifications
-        exclude = ['']
+        exclude = ['template']
 
 
 class ProductNotificationsForm(forms.ModelForm):
@@ -2598,7 +2618,7 @@ class JIRAFindingForm(forms.Form):
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
-        if settings.FEATURE_FINDING_GROUPS:
+        if is_finding_groups_enabled():
             self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one. If this finding is part of a Finding Group, the group will pushed instead of the finding."
         else:
             self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
@@ -2617,7 +2637,7 @@ class JIRAFindingForm(forms.Form):
             if hasattr(self.instance, 'has_jira_issue') and self.instance.has_jira_issue:
                 self.initial['jira_issue'] = self.instance.jira_issue.jira_key
                 self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
-        if settings.FEATURE_FINDING_GROUPS:
+        if is_finding_groups_enabled():
             self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue for this finding, or the group this finding is in.'})
         else:
             self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue for this finding.'})

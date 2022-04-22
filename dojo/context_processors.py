@@ -2,7 +2,7 @@
 from django.conf import settings
 
 
-def globalize_oauth_vars(request):
+def globalize_vars(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
     return {'SHOW_LOGIN_FORM': settings.SHOW_LOGIN_FORM,
             'FORGOT_PASSWORD': settings.FORGOT_PASSWORD,
@@ -14,9 +14,12 @@ def globalize_oauth_vars(request):
             'AZUREAD_TENANT_OAUTH2_ENABLED': settings.AZUREAD_TENANT_OAUTH2_ENABLED,
             'KEYCLOAK_ENABLED': settings.KEYCLOAK_OAUTH2_ENABLED,
             'SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT': settings.SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT,
+            'GITHUB_ENABLED': settings.GITHUB_OAUTH2_ENABLED,
+            'GITHUB_ENTERPRISE_ENABLED': settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED,
             'SAML2_ENABLED': settings.SAML2_ENABLED,
             'SAML2_LOGIN_BUTTON_TEXT': settings.SAML2_LOGIN_BUTTON_TEXT,
-            'SAML2_LOGOUT_URL': settings.SAML2_LOGOUT_URL}
+            'SAML2_LOGOUT_URL': settings.SAML2_LOGOUT_URL,
+            'DOCUMENTATION_URL': settings.DOCUMENTATION_URL}
 
 
 def bind_system_settings(request):

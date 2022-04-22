@@ -816,11 +816,12 @@ class TestDuplicationLogic(DojoTestCase):
         # create identical copy
         finding_new, finding_224 = self.copy_and_reset_finding(id=224)
 
-        # first setup some finding with same unique_id in different engagement, but same test_type
+        # first setup some finding with same unique_id in different engagement, but same scan_type
         self.set_dedupe_inside_engagement(False)
         finding_22 = Finding.objects.get(id=22)
 
         finding_22.test.test_type = finding_224.test.test_type
+        finding_22.test.scan_type = finding_224.test.scan_type
         finding_22.test.save()
 
         finding_22.unique_id_from_tool = '888'
@@ -1261,7 +1262,7 @@ class TestDuplicationLogic(DojoTestCase):
         if isinstance(test, int):
             test = Test.objects.get(pk=test)
 
-        logger.debug('\t\t' + 'test %i: %s (algo=%s, dynamic=%s)', test.id, test, test.dedupe_algo, test.test_type.dynamic_tool)
+        logger.debug('\t\t' + 'test %i: %s (algo=%s, dynamic=%s)', test.id, test, test.deduplication_algorithm, test.test_type.dynamic_tool)
         self.log_findings(test.finding_set.all())
 
     def log_all_products(self):

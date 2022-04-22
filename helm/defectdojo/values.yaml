@@ -20,7 +20,14 @@ createPostgresqlSecret: false
 # Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
 database: postgresql
+# Primary hostname of instance
 host: defectdojo.default.minikube.local
+
+# optional list of alternative hostnames to use that gets appended to
+# DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match
+# the global hostname.
+# alternativeHosts:
+#  - defectdojo.example.com
 imagePullPolicy: Always
 # Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
 repositoryPrefix: defectdojo
@@ -329,7 +336,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.28.0
+    tag: 1.30.0
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
@@ -376,16 +383,17 @@ rabbitmq:
     fsGroup: 1001
     runAsUser: 1001
 
+# For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
 redis:
   enabled: false
   transportEncryption:
     enabled: false
     params: ''
-  existingSecret: defectdojo-redis-specific
-  secretKey: redis-password
-  password: ""
-  cluster:
-    slaveCount: 1
+  auth:
+    existingSecret: defectdojo-redis-specific
+    existingSecretPasswordKey: redis-password
+    password: ""
+  architecture: standalone
   # To use an external Redis instance, set enabled to false and uncomment
   # the line below:
   # redisServer: myrediscluster

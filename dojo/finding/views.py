@@ -31,7 +31,7 @@ from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, P
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, Endpoint_Status, \
-    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, Test_Import_Finding_Action, User, Engagement
+    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, Test_Import_Finding_Action, User, Engagement, Vulnerability_Reference_Template
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, \
     redirect_to_return_url_or_else, get_return_url, add_external_issue, update_external_issue, \
@@ -220,6 +220,7 @@ def prefetch_for_findings(findings, prefetch_type='all'):
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__members')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__members')
+        prefetched_findings = prefetched_findings.prefetch_related('vulnerability_reference_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -251,6 +252,7 @@ def prefetch_for_similar_findings(findings):
         # prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
         # prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         # prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
+        prefetched_findings = prefetched_findings.prefetch_related('vulnerability_reference_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -676,8 +678,10 @@ def edit_finding(request, fid):
         )
     else:
         req_resp = None
+
     form = FindingForm(instance=finding, req_resp=req_resp,
-                       can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
+                       can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user),
+                       initial={'vulnerability_references': '\n'.join(finding.vulnerability_references)})
     form_error = False
     jform = None
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
@@ -808,6 +812,8 @@ def edit_finding(request, fid):
             push_group_to_jira = push_to_jira and new_finding.finding_group
             # any existing finding should be updated
             push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
+
+            finding_helper.save_vulnerability_references(new_finding, form.cleaned_data['vulnerability_references'].split())
 
             # if we're removing the "duplicate" in the edit finding screen
             # do not relaunch deduplication, otherwise, it's never taken into account
@@ -1031,7 +1037,6 @@ def mktemplate(request, fid):
         template = Finding_Template(
             title=finding.title,
             cwe=finding.cwe,
-            cve=finding.cve,
             cvssv3=finding.cvssv3,
             severity=finding.severity,
             description=finding.description,
@@ -1042,6 +1047,12 @@ def mktemplate(request, fid):
             tags=finding.tags.all())
         template.save()
         template.tags = finding.tags.all()
+
+        for vulnerability_reference in finding.vulnerability_references:
+            Vulnerability_Reference_Template(
+                finding_template=template,
+                vulnerability_reference=vulnerability_reference
+            ).save()
 
         messages.add_message(
             request,
@@ -1100,6 +1111,8 @@ def choose_finding_template_options(request, tid, fid):
     data = finding.__dict__
     # Not sure what's going on here, just leave same as with django-tagging
     data['tags'] = [tag.name for tag in template.tags.all()]
+    data['vulnerability_references'] = '\n'.join(finding.vulnerability_references)
+
     form = ApplyFindingTemplateForm(data=data, template=template)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Finding Template Options", tab="findings")
     return render(request, 'dojo/apply_finding_template.html', {
@@ -1124,7 +1137,6 @@ def apply_template_to_finding(request, fid, tid):
             template.save()
             finding.title = form.cleaned_data['title']
             finding.cwe = form.cleaned_data['cwe']
-            finding.cve = form.cleaned_data['cve']
             finding.severity = form.cleaned_data['severity']
             finding.description = form.cleaned_data['description']
             finding.mitigation = form.cleaned_data['mitigation']
@@ -1133,6 +1145,10 @@ def apply_template_to_finding(request, fid, tid):
             finding.last_reviewed = timezone.now()
             finding.last_reviewed_by = request.user
             finding.tags = form.cleaned_data['tags']
+
+            finding.cve = None
+            finding_helper.save_vulnerability_references(finding, form.cleaned_data['vulnerability_references'].split())
+
             finding.save()
         else:
             messages.add_message(
@@ -1296,6 +1312,8 @@ def promote_to_finding(request, fid):
                         jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
+            finding_helper.save_vulnerability_references(new_finding, form.cleaned_data['vulnerability_references'].split())
+
             # Save it and push it to JIRA
             new_finding.save(push_to_jira=push_to_jira)
 
@@ -1427,6 +1445,7 @@ def add_template(request):
             apply_message = ""
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
+            finding_helper.save_vulnerability_references_template(template, form.cleaned_data['vulnerability_references'].split())
             template.save()
             form.save_m2m()
             count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
@@ -1455,13 +1474,17 @@ def add_template(request):
 @user_is_configuration_authorized('dojo.change_finding_template', 'staff')
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
-    form = FindingTemplateForm(instance=template)
+    form = FindingTemplateForm(
+        instance=template,
+        initial={'vulnerability_references': '\n'.join(template.vulnerability_references)}
+    )
 
     if request.method == 'POST':
         form = FindingTemplateForm(request.POST, instance=template)
         if form.is_valid():
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
+            finding_helper.save_vulnerability_references_template(template, form.cleaned_data['vulnerability_references'].split())
             template.save()
             form.save_m2m()
 
@@ -1744,7 +1767,6 @@ def finding_bulk_update_all(request, pid=None):
         finding_to_update = request.POST.getlist('finding_to_update')
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
         total_find_count = finds.count()
-        skipped_find_count = 0
         prods = set([find.test.engagement.product for find in finds])
         if request.POST.get('delete_bulk_findings'):
             if form.is_valid() and finding_to_update:
@@ -1898,7 +1920,7 @@ def finding_bulk_update_all(request, pid=None):
                     finds = finds.all()
 
                 if form.cleaned_data['push_to_github']:
-                    logger.info('push selected findings to github')
+                    logger.debug('push selected findings to github')
                     for finding in finds:
                         logger.debug('will push to GitHub finding: ' + str(finding))
                         old_status = finding.status()
@@ -1907,6 +1929,19 @@ def finding_bulk_update_all(request, pid=None):
                                 update_external_issue(finding, old_status, 'github')
                             else:
                                 add_external_issue(finding, 'github')
+
+                if form.cleaned_data['notes']:
+                    logger.debug('Setting bulk notes')
+                    note = Notes(entry=form.cleaned_data['notes'], author=request.user, date=timezone.now())
+                    note.save()
+                    history = NoteHistory(data=note.entry,
+                                          time=note.date,
+                                          current_editor=note.author)
+                    history.save()
+                    note.history.add(history)
+                    for finding in finds:
+                        finding.notes.add(note)
+                        finding.save()
 
                 if form.cleaned_data['tags']:
                     for finding in finds:
@@ -1920,7 +1955,7 @@ def finding_bulk_update_all(request, pid=None):
                 error_counts = defaultdict(lambda: 0)
                 success_count = 0
                 finding_groups = set([find.finding_group for find in finds if find.has_finding_group])
-                logger.info('finding_groups: %s', finding_groups)
+                logger.debug('finding_groups: %s', finding_groups)
                 for group in finding_groups:
                     if form.cleaned_data.get('push_to_jira'):
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(group)

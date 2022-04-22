@@ -204,7 +204,7 @@ spec:
         {{- if .Values.django.uwsgi.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
-            path: /login?next=/
+            path: /login?force_login_form&next=/
             port: http
             httpHeaders:
             - name: Host
