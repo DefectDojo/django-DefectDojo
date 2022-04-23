@@ -2177,7 +2177,7 @@ class Finding(models.Model):
     def get_vulnerability_references(self):
         vulnerability_reference_str = ''
         if self.id is None:
-            if len(self.unsaved_vulnerability_references) > 0:
+            if self.unsaved_vulnerability_references:
                 deduplicationLogger.debug("get_vulnerability_references before the finding was saved")
                 # convert list of unsaved vulnerability_references to the list of their canonical representation
                 vulnerability_reference_str_list = list(
@@ -2190,12 +2190,13 @@ class Finding(models.Model):
             else:
                 deduplicationLogger.debug("finding has no unsaved vulnerability references")
         else:
-            deduplicationLogger.debug("get_vulnerability_references after the finding was saved. Vulnerability references count: " + str(self.vulnerability_references.count()))
+            vulnerability_references = Vulnerability_Reference.objects.filter(finding=self)
+            deduplicationLogger.debug("get_vulnerability_references after the finding was saved. Vulnerability references count: " + str(vulnerability_references.count()))
             # convert list of vulnerability_references to the list of their canonical representation
             vulnerability_reference_str_list = list(
                 map(
                     lambda vulnerability_reference: str(vulnerability_reference),
-                    self.vulnerability_references.all()
+                    vulnerability_references.all()
                 ))
             # sort vulnerability_references strings
             vulnerability_reference_str = ''.join(sorted(vulnerability_reference_str_list))
@@ -2668,6 +2669,9 @@ Finding.endpoints.through.__str__ = lambda \
 class Vulnerability_Id(models.Model):
     finding = models.ForeignKey(Finding, editable=False, on_delete=models.CASCADE)
     vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+
+    def __str__(self):
+        return self.vulnerability_reference
 
 
 class Stub_Finding(models.Model):
