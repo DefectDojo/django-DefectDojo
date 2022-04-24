@@ -197,7 +197,8 @@ To import groups from Azure AD users, the following environment variable needs t
     {{< highlight python >}}
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=True
     {{< /highlight >}}
-In case groups are associated with products (e.g. via an automatic job or manually mapped), this allows to automatically limit the products a user can interact with.
+This will ensure the user is added to all the groups found in the Azure AD Token. Any missing groups will be created in DefectDojo (unless filtered). This group synchronization allows for product access via groups to limit the products a user can interact with.
+Do not activate `Emit groups as role claims` within the Azure AD "Token configuration".
 
 To prevent authorization creep, old Azure AD groups a user is not having anymore can be deleted with the following environment parameter:
 

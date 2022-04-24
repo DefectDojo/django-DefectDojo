@@ -106,12 +106,11 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
 
                 group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(group=group, user=user, defaults={
                     'role': Role.objects.get(id=Roles.Writer)})
-
-                if settings.AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS:
-                    cleanup_old_azureAD_groups_for_user(user, group_names)
             except:
                 logger.error("Could not call microsoft graph API or save groups to member")
                 traceback.print_exc()
+        if settings.AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS:
+            cleanup_old_azureAD_groups_for_user(user, group_names)
 
 
 def is_group_id(group):
@@ -122,14 +121,11 @@ def is_group_id(group):
 
 
 def cleanup_old_azureAD_groups_for_user(user, group_names):
-    all_groups = Dojo_Group.objects.all()
-    for group in all_groups:
-        member = Dojo_Group_Member.objects.filter(group=group, user=user)  # A user shouldn't have multiple roles (see code above) and therefore only one member will be returned
-        logger.debug("Group to delete: " + str(group))
-        if member:
-            if str(group) not in group_names and group.is_azure:
-                logger.debug("Deleting membership to azure group " + str(group))
-                member.delete()
+    for group_member in Dojo_Group_Member.objects.filter(group__is_azure=True).select_related('group').filter(user=user):
+        group = group_member.group
+        if str(group) not in group_names:
+            logger.debug("Deleting membership to azure ad group " + str(group))
+            group_member.delete()
 
 
 def update_product_access(backend, uid, user=None, social=None, *args, **kwargs):
