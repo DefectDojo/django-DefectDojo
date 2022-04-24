@@ -148,7 +148,7 @@ GET parameter starts with `http://` instead of
 `SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` in the settings.
 
 ## Azure Active Directory
-### AzureAD Configuration
+### Azure AD Configuration
 You can now use your corporate Azure Active Directory to authenticate
 users to Defect Dojo. Users will be using your corporate Azure AD
 account (A.K.A. Office 365 identity) to authenticate via OAuth, and all
