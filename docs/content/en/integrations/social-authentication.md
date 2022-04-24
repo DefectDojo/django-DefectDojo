@@ -199,7 +199,7 @@ To import groups from Azure AD users, the following environment variable needs t
     {{< /highlight >}}
 This allows to automatically limit the products a user can interact with.
 
-To prevent authorization creep, old AzureAD groups a user is not having anymore can be deleted with the following env. parameter:
+To prevent authorization creep, old Azure AD groups a user is not having anymore can be deleted with the following environment parameter:
 
     {{< highlight python >}}
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER
