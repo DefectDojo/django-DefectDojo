@@ -202,13 +202,13 @@ This allows to automatically limit the products a user can interact with.
 To prevent authorization creep, old Azure AD groups a user is not having anymore can be deleted with the following environment parameter:
 
     {{< highlight python >}}
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS=True
     {{< /highlight >}}
 
- To limit the amount of groups, a regular expression can be used as the following:
-
+ To limit the amount of groups imported from Azure AD, a regular expression can be used as the following:
+    
     {{< highlight python >}}
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS='^team-.*' # or 'teamA|teamB|groupC'
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER='^team-.*' # or 'teamA|teamB|groupC'
     {{< /highlight >}}
 
 ## Gitlab
