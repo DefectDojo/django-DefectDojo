@@ -192,7 +192,7 @@ user, such as 'staff' or 'superuser'
     button on the login page which should *magically* work
 
 ### Automatic Import of User-Groups
-To import groups from AzureAD users, the following env. var needs to be set:  
+To import groups from Azure AD users, the following environment variable needs to be set:  
 
     {{< highlight python >}}
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=True
