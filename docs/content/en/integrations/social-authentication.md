@@ -197,7 +197,7 @@ To import groups from Azure AD users, the following environment variable needs t
     {{< highlight python >}}
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=True
     {{< /highlight >}}
-This allows to automatically limit the products a user can interact with.
+In case groups are associated withs products (e.g. via an automatic job or manually mapped), this allows to automatically limit the products a user can interact with.
 
 To prevent authorization creep, old Azure AD groups a user is not having anymore can be deleted with the following environment parameter:
 
