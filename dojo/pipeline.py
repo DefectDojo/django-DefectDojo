@@ -105,7 +105,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
 
                 group, created_group = Dojo_Group.objects.get_or_create(name=group_name, is_azure=True)
                 group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(group=group, user=user, defaults={
-                    'role': Role.objects.get(id=Roles.Writer)})
+                    'role': Role.objects.get(id=Roles.Maintainer)})
             except:
                 logger.error("Could not call microsoft graph API or save groups to member")
                 traceback.print_exc()
