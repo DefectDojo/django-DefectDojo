@@ -7,8 +7,8 @@ from dojo.models import Finding
 
 
 class JFrogXrayApiSummaryArtifactParser(object):
-    
-    # This function return a list of all the scan_type supported by your parser. This identifiers are used internally. Your parser can support more than one scan_type. 
+
+    # This function return a list of all the scan_type supported by your parser. This identifiers are used internally. Your parser can support more than one scan_type
     # For example some parsers use different identifier to modify the behavior of the parser (aggregate, filter, etc…)
     def get_scan_types(self):
         return ["JFrog Xray API Summary Artifact Scan"]
@@ -70,7 +70,7 @@ def get_item(vulnerability, service, test):
         if 'cvss_v3' in cves[0]:
             cvss_v3 = cves[0]['cvss_v3']
             cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector()
-            cvssv3_score =CVSS3.from_rh_vector(cvss_v3).base_score
+            cvssv3_score = CVSS3.from_rh_vector(cvss_v3).base_score
 
     impact_paths = vulnerability.get('impact_path', [])
     if len(impact_paths) > 0:
