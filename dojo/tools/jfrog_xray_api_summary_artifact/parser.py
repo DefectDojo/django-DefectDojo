@@ -43,7 +43,7 @@ class JFrogXrayApiSummaryArtifactParser(object):
 
 # Retrieve the findings
 def get_item(vulnerability, service, test):
-    cve = "No CVE"
+    cve = None
     cwe = None
     cvssv3 = None
     cvss_v3 = "No CVSS v3 score"
@@ -80,8 +80,10 @@ def get_item(vulnerability, service, test):
         title = vulnerability['issue_id'] + " - " + impact_path.name + ":" + impact_path.version
     elif cve:
         title = str(cve) + " - " + impact_path.name + ":" + impact_path.version
+    elif impact_path.sha:
+        title = impact_path.sha + " - " + impact_path.name + ":" + impact_path.version
     else:
-        title = "No CVE - " + impact_path.name + ":" + impact_path.version
+        title = ""
 
     unique_id_from_tool = title
 
@@ -94,9 +96,7 @@ def get_item(vulnerability, service, test):
         cvssv3_score=cvssv3_score,
         severity=severity,
         description=vulnerability['description'],
-        verified=False,
         test=test,
-        hash_code=impact_path.sha,
         file_path=impact_paths[0],
         component_name=impact_path.name,
         component_version=impact_path.version,
