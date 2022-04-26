@@ -164,11 +164,11 @@ class TestEndpointMigration(MigratorTestCase):
         self.assertFalse(eps[0].mitigated)
 
 
-# TODO: These tests can be skipped in 2.10.x or later
+# TODO: These tests can be skipped in 2.11.x or later
 # @skip("Outdated - Any future changes of code should not affect these tests")
 class TestEndpointStatusMigration(MigratorTestCase):
     migrate_from = ('dojo', '0149_harmonize_user_format')
-    migrate_to = ('dojo', '0150_dedupe_endpoint_status')
+    migrate_to = ('dojo', '0151_index_endpoint_status')
 
     def prepare(self):
         Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
@@ -218,6 +218,34 @@ class TestEndpointStatusMigration(MigratorTestCase):
                 finding_id=self.finding,
                 endpoint_id=self.endpoint
             ).pk,
+            'empty_endpoint_1': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=self.finding,
+                endpoint_id=None
+            ).pk,
+            'empty_endpoint_2': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=self.finding,
+                endpoint_id=None
+            ).pk,
+            'empty_finding_1': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=None,
+                endpoint_id=self.endpoint
+            ).pk,
+            'empty_finding_2': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=None,
+                endpoint_id=self.endpoint
+            ).pk,
         }
 
         self.another_finding = Finding.objects.create(test=self.test, reporter_id=user).pk
@@ -234,17 +262,25 @@ class TestEndpointStatusMigration(MigratorTestCase):
         Endpoint = self.new_state.apps.get_model('dojo', 'Endpoint')
         Endpoint_Status = self.new_state.apps.get_model('dojo', 'Endpoint_Status')
 
-        eps = Endpoint_Status.objects.filter(
-            finding_id=self.finding,
-            endpoint_id=self.endpoint
-        )
-        self.assertEqual(eps.count(), 1)
-        self.assertTrue(eps[0].mitigated)
-        self.assertEqual(eps[0].date, datetime.datetime(2021, 1, 1, tzinfo=timezone.utc))
-        self.assertEqual(eps[0].last_modified, datetime.datetime(2021, 5, 1, tzinfo=timezone.utc))
+        with self.subTest("Standard usecase"):
+            eps = Endpoint_Status.objects.filter(
+                finding_id=self.finding,
+                endpoint_id=self.endpoint
+            )
+            self.assertEqual(eps.count(), 1)
+            self.assertTrue(eps[0].mitigated)
+            self.assertEqual(eps[0].date, datetime.datetime(2021, 1, 1, tzinfo=timezone.utc))
+            self.assertEqual(eps[0].last_modified, datetime.datetime(2021, 5, 1, tzinfo=timezone.utc))
 
-        eps = Endpoint_Status.objects.filter(pk=self.another_endpoint_status)
-        self.assertEqual(eps.count(), 1)
+            eps = Endpoint_Status.objects.filter(pk=self.another_endpoint_status)
+            self.assertEqual(eps.count(), 1)
+
+        with self.subTest("Broken endpoint_statuses"):
+            eps = Endpoint_Status.objects.filter(endpoint_id=None, finding_id=self.finding)
+            self.assertEqual(eps.count(), 2)
+
+            eps = Endpoint_Status.objects.filter(endpoint_id=self.endpoint, finding_id=None)
+            self.assertEqual(eps.count(), 2)
 
 
 # TODO: These tests can be skipped in 2.10.x or later
