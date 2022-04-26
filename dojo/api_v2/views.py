@@ -1380,7 +1380,6 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
             instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},

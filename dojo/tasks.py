@@ -5,7 +5,7 @@ from django.conf import settings
 from django.urls import reverse
 from dojo.celery import app
 from celery.utils.log import get_task_logger
-from dojo.models import Alerts, Product_Type, Product, Engagement, Test, Finding, Endpoint, System_Settings, User
+from dojo.models import Alerts, Product, Engagement, Finding, System_Settings, User
 from django.utils import timezone
 from dojo.utils import calculate_grade
 from dojo.utils import sla_compute_and_notify, get_setting
