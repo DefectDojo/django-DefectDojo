@@ -8,7 +8,7 @@ from celery.utils.log import get_task_logger
 from dojo.models import Alerts, Product, Engagement, Finding, System_Settings, User
 from django.utils import timezone
 from dojo.utils import calculate_grade
-from dojo.utils import sla_compute_and_notify, get_setting
+from dojo.utils import sla_compute_and_notify
 from dojo.notifications.helper import create_notification
 
 
