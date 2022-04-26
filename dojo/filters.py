@@ -2,7 +2,7 @@ import collections
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
-from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY
+from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY, UNDER_REVIEW_QUERY
 import logging
 from datetime import timedelta, datetime
 from django import forms
@@ -105,6 +105,9 @@ class FindingStatusFilter(ChoiceFilter):
     def closed(self, qs, name):
         return qs.filter(CLOSED_FINDINGS_QUERY)
 
+    def under_review(self, qs, name):
+        return qs.filter(UNDER_REVIEW_QUERY)
+
     options = {
         '': (_('Any'), any),
         0: (_('Open'), open),
@@ -114,6 +117,7 @@ class FindingStatusFilter(ChoiceFilter):
         4: (_('Inactive'), inactive),
         5: (_('Risk Accepted'), risk_accepted),
         6: (_('Closed'), closed),
+        7: (_('Under Review'),under_review),
     }
 
     def __init__(self, *args, **kwargs):
