@@ -1,6 +1,8 @@
 # import the settings file
 from django.conf import settings
 
+from dojo import announcement_banner
+
 
 def globalize_oauth_vars(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
@@ -33,7 +35,8 @@ def bind_announcement_banner(request):
     from dojo.models import AnnouncementBanner
     try:
         if request.user.is_authenticated:
-            return {'announcement_banner': AnnouncementBanner.objects.get(id=1)}
+            announcement_banner = AnnouncementBanner.objects.select_related('dismissal').get(id=1)
+            return {'announcement_banner': announcement_banner}
         return {}
     except Exception:
         return {}

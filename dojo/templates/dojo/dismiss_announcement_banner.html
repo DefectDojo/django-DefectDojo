@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+    {{ block.super }}
+    <h3> Dismiss Announcement Banner {{ product }}</h3>
+    <p>
+        Dismissing the announcement banner will remove the current announcement from your view
+    </p>
+    <div class="danger-zone panel panel-danger">
+        <div class="panel-heading">
+            <h3>Danger Zone</h3>
+        </div>
+        <form class="form-horizontal" method="post">
+            {% csrf_token %}
+            {{ form }}
+
+            <div class="form-group">
+                <button class="btn btn-danger" type="submit" name="dismiss_announcement_banner_name" value="dismiss_announcement_banner">Dismiss Announcement</button>
+            </div>
+        </form>
+    </div>
+    <br/>
+    <br/>
+{% endblock %}

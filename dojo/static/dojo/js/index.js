@@ -44,10 +44,6 @@ $(function () {
         return false;
     });
 
-    $('.announcement-banner').children('.close').on('click', function() {
-        $.cookie('dojo-announcement-dismissed', $('.announcement-banner').text())
-    })
-
 });
 
 $.fn.serializeObject = function()
@@ -66,14 +62,6 @@ $.fn.serializeObject = function()
     });
     return o;
 };
-
-//TODO: This is too slow, maybe just pull from DB with a new model and call it a day
-function announcement() { // Ensures announcement is shown if not dismissed
-    var announcement = $('.announcement-banner');
-    if(announcement && $.cookie('dojo-announcement-dismissed') == announcement.text()) {
-        announcement.switchClass('show', 'hide');
-    }
-}
 
 function sidebar() {  // minimize side nav bar
     var action = 'min';

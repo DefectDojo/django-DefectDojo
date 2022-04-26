@@ -2871,6 +2871,11 @@ class AnnouncementBanner(models.Model):
     style = models.CharField(max_length=64, choices=ANNOUNCEMENT_BANNER_STYLE_CHOICES, default='info',
                             help_text="The style of banner to display. (info, success, warning, danger)")
 
+class AnnouncementBannerDismissal(models.Model):
+    announcement_banner_id = models.ForeignKey(AnnouncementBanner, null=True, editable=False, on_delete=models.CASCADE, related_name='dismissal')
+    user_id = models.ForeignKey(User, null=True, editable=False, on_delete=models.CASCADE)
+    dismissal_date = models.DateTimeField(null=False, editable=True, default=now)
+
 class BannerConf(models.Model):
     banner_enable = models.BooleanField(default=False, null=True, blank=True)
     banner_message = models.CharField(max_length=500, help_text="This message will be displayed on the login page. It can contain basic html tags, for example <a href='https://www.fred.com' style='color: #337ab7;' target='_blank'>https://example.com</a>", default='')
