@@ -41,7 +41,7 @@ from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
-from dojo.utils import get_period_counts_legacy, get_system_setting
+from dojo.utils import get_period_counts_legacy, get_system_setting, get_setting, async_delete
 from dojo.api_v2 import serializers, permissions, prefetch, schema
 import dojo.jira_link.helper as jira_helper
 import logging
@@ -244,6 +244,15 @@ class EngagementViewSet(mixins.ListModelMixin,
     @property
     def risk_application_model_class(self):
         return Engagement
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if get_setting("ASYNC_OBJECT_DELETE"):
+            async_del = async_delete()
+            async_del.delete(instance)
+        else:
+            instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
         return get_authorized_engagements(Permissions.Engagement_View).prefetch_related(
@@ -1181,6 +1190,15 @@ class ProductViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_products(Permissions.Product_View).distinct()
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if get_setting("ASYNC_OBJECT_DELETE"):
+            async_del = async_delete()
+            async_del.delete(instance)
+        else:
+            instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     # def list(self, request):
     #     print(vars(request))
     #     # Note the use of `get_queryset()` instead of `self.queryset`
@@ -1352,6 +1370,16 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
         member.product_type = Product_Type(**product_type_data)
         member.role = Role.objects.get(is_owner=True)
         member.save()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if get_setting("ASYNC_OBJECT_DELETE"):
+            async_del = async_delete()
+            async_del.delete(instance)
+        else:
+            instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -1541,6 +1569,15 @@ class TestsViewSet(mixins.ListModelMixin,
         return get_authorized_tests(Permissions.Test_View).prefetch_related(
                                                 'notes',
                                                 'files').distinct()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if get_setting("ASYNC_OBJECT_DELETE"):
+            async_del = async_delete()
+            async_del.delete(instance)
+        else:
+            instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_serializer_class(self):
         if self.request and self.request.method == 'POST':

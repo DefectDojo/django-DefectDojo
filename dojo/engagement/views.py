@@ -35,8 +35,8 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Cred_Mapping, Dojo_User, System_Settings, Note_Type, Product_API_Scan_Configuration
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
-    get_system_setting, redirect_to_return_url_or_else, get_return_url
+    FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
+    get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
@@ -289,11 +289,17 @@ def delete_engagement(request, eid):
             form = DeleteEngagementForm(request.POST, instance=engagement)
             if form.is_valid():
                 product = engagement.product
-                engagement.delete()
+                if get_setting("ASYNC_OBJECT_DELETE"):
+                    async_del = async_delete()
+                    async_del.delete(engagement)
+                    message = 'Engagement and relationships will be removed in the background.'
+                else:
+                    message = 'Engagement and relationships removed.'
+                    engagement.delete()
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Engagement and relationships removed.',
+                    message,
                     extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % engagement.name,
@@ -305,9 +311,12 @@ def delete_engagement(request, eid):
 
                 return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([engagement])
-    rels = collector.nested()
+    rels = ['Previewing the relationships has been disabled.', '']
+    display_preview = get_setting('DELETE_PREVIEW')
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([engagement])
+        rels = collector.nested()
 
     product_tab = Product_Tab(product.id, title="Delete Engagement", tab="engagements")
     product_tab.setEngagement(engagement)

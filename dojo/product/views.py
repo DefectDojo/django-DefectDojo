@@ -27,8 +27,8 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, T
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
                         Product_Group, Product_API_Scan_Configuration
-from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
-                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, get_enabled_notifications_list
+from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, async_delete, \
+                       get_system_setting, get_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, get_enabled_notifications_list
 
 from dojo.notifications.helper import create_notification
 from django.db.models import Prefetch, F, OuterRef, Subquery
@@ -884,10 +884,16 @@ def delete_product(request, pid):
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
                 product_type = product.prod_type
-                product.delete()
+                if get_setting("ASYNC_OBJECT_DELETE"):
+                    async_del = async_delete()
+                    async_del.delete(product)
+                    message = 'Product and relationships will be removed in the background.'
+                else:
+                    message = 'Product and relationships removed.'
+                    product.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Product and relationships removed.',
+                                     message,
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % product.name,
@@ -903,9 +909,12 @@ def delete_product(request, pid):
 
     logger.debug('delete_product: GET')
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([product])
-    rels = collector.nested()
+    rels = ['Previewing the relationships has been disabled.', '']
+    display_preview = get_setting('DELETE_PREVIEW')
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([product])
+        rels = collector.nested()
 
     product_tab = Product_Tab(pid, title="Product", tab="settings")
 
