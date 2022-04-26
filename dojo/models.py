@@ -1276,7 +1276,6 @@ class Endpoint(models.Model):
                                           "be omitted. For example 'section-13', 'paragraph-2'."))
     product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE)
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True, editable=False)
-    endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add."))
 
@@ -1441,12 +1440,15 @@ class Endpoint(models.Model):
         return self.active_findings_count() > 0
 
     def findings(self):
+        # TODO
         return Finding.objects.filter(endpoints=self).distinct()
 
     def findings_count(self):
+        # TODO
         return self.findings().count()
 
     def active_findings(self):
+        # TODO
         findings = self.findings().filter(active=True,
                                       verified=True,
                                       out_of_scope=False,
@@ -1810,12 +1812,8 @@ class Finding(models.Model):
     endpoints = models.ManyToManyField(Endpoint,
                                        blank=True,
                                        verbose_name=_('Endpoints'),
-                                       help_text=_("The hosts within the product that are susceptible to this flaw."))
-    endpoint_status = models.ManyToManyField(Endpoint_Status,
-                                             blank=True,
-                                             related_name="finding_endpoint_status",
-                                             verbose_name=_('Endpoint Status'),
-                                             help_text=_('The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...).'))
+                                       help_text=_("The hosts within the product that are susceptible to this flaw. + The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...)."),
+                                       through=Endpoint_Status)
     references = models.TextField(null=True,
                                   blank=True,
                                   db_column="refs",
@@ -2229,6 +2227,7 @@ class Finding(models.Model):
         else:
             deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
             # convert list of endpoints to the list of their canonical representation
+            # TODO Just test
             endpoint_str_list = list(
                 map(
                     lambda endpoint: str(endpoint),
@@ -2455,6 +2454,7 @@ class Finding(models.Model):
             long_desc += '*Commit hash:* ' + self.test.engagement.commit_hash + '\n\n'
         long_desc += '*Systems*: \n\n'
 
+        # TODO just test
         for e in self.endpoints.all():
             long_desc += str(e) + '\n\n'
         long_desc += '*Description*: \n' + str(self.description) + '\n\n'
@@ -2524,6 +2524,7 @@ class Finding(models.Model):
         else:
             # logger.debug('setting static / dynamic in save')
             # need to have an id/pk before we can access endpoints
+            # TODO just test
             if (self.file_path is not None) and (self.endpoints.count() == 0):
                 self.static_finding = True
                 self.dynamic_finding = False
@@ -2658,10 +2659,9 @@ class FindingAdmin(admin.ModelAdmin):
     # IDs rather than multi-select
     raw_id_fields = (
         'endpoints',
-        'endpoint_status',
     )
 
-
+# TODO Check
 Finding.endpoints.through.__str__ = lambda \
     x: "Endpoint: " + str(x.endpoint)
 

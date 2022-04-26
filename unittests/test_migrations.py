@@ -474,3 +474,5 @@ class TestRemoveEndpointMitigatedMigration(MigratorTestCase):
         eps = Endpoint_Status.objects.get(pk=self.endpoint_status['mit_nomit_f2'])
         self.assertTrue(eps.mitigated)
         self.assertEqual(eps.mitigated_by_id, self.users['2'])
+
+# TODO: write tests for 0158_optimize_usage_of_endpoint_status.py
