@@ -75,9 +75,17 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.10.x.
+
+**Breaking change for Findings:** The field `cve` will be replaced by a list of Vulnerability References, which can store references to security advisories associated with this finding. These can be Common Vulnerabilities and Exposures (CVE) or from other sources, eg. GitHub Security Advisories. Although the field does still exist in the code, the API and the UI have already been changed to use the list of Vulnerability References. Other areas like hash code calculation, search and parsers will be migrated step by step in later stages.
+
+This change also causes an API change for the endpoint `/engagements/{id}/accept_risks/`.
+
+
 ## Upgrading to DefectDojo Version 2.9.x.
 
 **Breaking change for APIv2:** `configuration_url` was removed from API endpoint `/api/v2/tool_configurations/` due to redundancy.
+
 
 ## Upgrading to DefectDojo Version 2.8.x.
 

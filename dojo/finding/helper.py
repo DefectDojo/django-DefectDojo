@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
 from dojo.utils import get_current_user, mass_model_updater, to_str_typed
-from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test, Endpoint, Endpoint_Status
+from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test, Endpoint, Endpoint_Status, \
+    Vulnerability_Reference, Vulnerability_Reference_Template
 from dojo.endpoint.utils import save_endpoints_to_add
 
 
@@ -556,3 +557,41 @@ def add_endpoints(new_finding, form):
             endpoint=endpoint, defaults={'date': form.cleaned_data['date'] or now})
         endpoint.endpoint_status.add(eps)
         new_finding.endpoint_status.add(eps)
+
+
+def save_vulnerability_references(finding, vulnerability_references):
+    # Remove duplicates
+    vulnerability_references = list(dict.fromkeys(vulnerability_references))
+
+    previous_vulnerability_references = set(Vulnerability_Reference.objects.filter(finding=finding))
+    for vulnerability_reference in vulnerability_references:
+        obj, created = Vulnerability_Reference.objects.get_or_create(
+            finding=finding, vulnerability_reference=vulnerability_reference)
+        if not created:
+            previous_vulnerability_references.remove(obj)
+    for vulnerability_reference in previous_vulnerability_references:
+        vulnerability_reference.delete()
+
+    if vulnerability_references:
+        finding.cve = vulnerability_references[0]
+    else:
+        finding.cve = None
+
+
+def save_vulnerability_references_template(finding_template, vulnerability_references):
+    # Remove duplicates
+    vulnerability_references = list(dict.fromkeys(vulnerability_references))
+
+    previous_vulnerability_references = set(Vulnerability_Reference_Template.objects.filter(finding_template=finding_template))
+    for vulnerability_reference in vulnerability_references:
+        obj, created = Vulnerability_Reference_Template.objects.get_or_create(
+            finding_template=finding_template, vulnerability_reference=vulnerability_reference)
+        if not created:
+            previous_vulnerability_references.remove(obj)
+    for vulnerability_reference in previous_vulnerability_references:
+        vulnerability_reference.delete()
+
+    if vulnerability_references:
+        finding_template.cve = vulnerability_references[0]
+    else:
+        finding_template.cve = None

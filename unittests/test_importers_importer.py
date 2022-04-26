@@ -5,13 +5,14 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
-from dojo.models import Development_Environment, Engagement, Product, Product_Type, Test, User
+from dojo.models import Development_Environment, Engagement, Finding, Product, Product_Type, Test, User
 from dojo.tools.factory import get_parser
 from dojo.tools.sarif.parser import SarifParser
 from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from .dojo_test_case import DojoAPITestCase
 from .test_utils import assertImportModelsCreated
 import logging
+from dojo.importers.utils import handle_vulnerability_references
 
 from dojo.utils import get_object_or_none
 
@@ -533,3 +534,65 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True, expected_http_status_code=400)
             self.assertEqual(import0, ['product_name parameter missing'])
+
+
+class TestImporterUtils(DojoAPITestCase):
+    @patch('dojo.importers.utils.Vulnerability_Reference', autospec=True)
+    def test_handle_vulnerability_references_references_and_cve(self, mock):
+        finding = Finding()
+        finding.cve = 'CVE'
+        finding.unsaved_vulnerability_references = ['REF-1', 'REF-2']
+
+        handle_vulnerability_references(finding)
+
+        vulnerability_references = ['CVE', 'REF-1', 'REF-2']
+
+        self.assertEqual(6, len(mock.mock_calls))
+        self.assertEqual('CVE', mock.mock_calls[0].kwargs['vulnerability_reference'])
+        self.assertEqual('CVE', mock.mock_calls[0].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_references, mock.mock_calls[0].kwargs['finding'].unsaved_vulnerability_references)
+        self.assertEqual('REF-1', mock.mock_calls[2].kwargs['vulnerability_reference'])
+        self.assertEqual('CVE', mock.mock_calls[2].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_references, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_references)
+        self.assertEqual('REF-2', mock.mock_calls[4].kwargs['vulnerability_reference'])
+        self.assertEqual('CVE', mock.mock_calls[4].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_references, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_references)
+
+    @patch('dojo.importers.utils.Vulnerability_Reference', autospec=True)
+    def test_handle_no_vulnerability_references_references_and_cve(self, mock):
+        finding = Finding()
+        finding.cve = 'CVE'
+
+        handle_vulnerability_references(finding)
+
+        vulnerability_references = ['CVE']
+
+        self.assertEqual(2, len(mock.mock_calls))
+        self.assertEqual('CVE', mock.mock_calls[0].kwargs['vulnerability_reference'])
+        self.assertEqual('CVE', mock.mock_calls[0].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_references, mock.mock_calls[0].kwargs['finding'].unsaved_vulnerability_references)
+
+    @patch('dojo.importers.utils.Vulnerability_Reference', autospec=True)
+    def test_handle_vulnerability_references_references_and_no_cve(self, mock):
+        finding = Finding()
+        finding.unsaved_vulnerability_references = ['REF-1', 'REF-2']
+
+        handle_vulnerability_references(finding)
+
+        vulnerability_references = ['REF-1', 'REF-2']
+
+        self.assertEqual(4, len(mock.mock_calls))
+        self.assertEqual('REF-1', mock.mock_calls[0].kwargs['vulnerability_reference'])
+        self.assertEqual('REF-1', mock.mock_calls[0].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_references, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_references)
+        self.assertEqual('REF-2', mock.mock_calls[2].kwargs['vulnerability_reference'])
+        self.assertEqual('REF-1', mock.mock_calls[2].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_references, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_references)
+
+    @patch('dojo.importers.utils.Vulnerability_Reference', autospec=True)
+    def test_no_handle_vulnerability_references_references_and_no_cve(self, mock):
+        finding = Finding()
+
+        handle_vulnerability_references(finding)
+
+        mock.assert_not_called()
