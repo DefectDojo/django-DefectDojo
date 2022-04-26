@@ -363,3 +363,16 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
                 # if tags are not supposed to be added, this value remain unchanged
                 endpoint.tags = existing_tags
             endpoint.save()
+
+
+def remove_broken_endpoint_statuses(apps):
+    Finding = apps.get_model('dojo', 'Finding')
+    Endpoint = apps.get_model('dojo', 'Endpoint')
+    Endpoint_Status = apps.get_model('dojo', 'endpoint_status')
+    broken_eps = Endpoint_Status.objects.filter(Q(endpoint=None) | Q(finding=None))
+    if broken_eps.count() == 0:
+        logger.info('There is no broken endpoint_status')
+    else:
+        logger.warning('We identified %s broken endpoint_statuses', broken_eps.count())
+        deleted = broken_eps.delete()
+        logger.warning('We removed: %s', deleted)
