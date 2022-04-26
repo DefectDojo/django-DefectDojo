@@ -1440,11 +1440,11 @@ class Endpoint(models.Model):
         return self.active_findings_count() > 0
 
     def findings(self):
-        # TODO
-        return Finding.objects.filter(endpoints=self).distinct()
+        # TODO just test
+        return self.endpoint_status_set.all().distinct()
 
     def findings_count(self):
-        # TODO
+        # TODO just test
         return self.findings().count()
 
     def active_findings(self):
@@ -2661,7 +2661,7 @@ class FindingAdmin(admin.ModelAdmin):
         'endpoints',
     )
 
-# TODO Check
+# TODO Remove, but test reports
 Finding.endpoints.through.__str__ = lambda \
     x: "Endpoint: " + str(x.endpoint)
 

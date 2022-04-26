@@ -18,8 +18,8 @@ class Migration(migrations.Migration):
             model_name='finding',
             name='endpoint_status',
         ),
-        # Yes, we can just remove it and add it again because there reduntant data in "Endpoint_Status"
-        # - there will be no data-loss; it was tested
+        # Yes, we can just remove it and add it again because there reduntant data in "Endpoint_Status" - there will be no data-loss; it was tested
+        # AlterField is not usable because of: ValueError: Cannot alter field xxx into yyy - they are not compatible types (you cannot alter to or from M2M fields, or add or remove through= on M2M fields)
         migrations.RemoveField(
             model_name='finding',
             name='endpoints',
