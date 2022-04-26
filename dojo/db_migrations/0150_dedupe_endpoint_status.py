@@ -1,5 +1,5 @@
 from django.db import migrations
-from django.db.models import Count
+from django.db.models import Count, Q
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
         Endpoint = apps.get_model('dojo', 'endpoint')
         Finding = apps.get_model('dojo', 'finding')
 
-        to_process = Endpoint_Status.objects.values('finding', 'endpoint').annotate(cnt=Count('id')).filter(cnt__gt=1)
+        to_process = Endpoint_Status.objects.exclude(Q(endpoint=None) | Q(finding=None))\
+            .values('finding', 'endpoint').annotate(cnt=Count('id')).filter(cnt__gt=1)
         if to_process.count() == 0:
             logger.info('There is nothing to process')
         else:
