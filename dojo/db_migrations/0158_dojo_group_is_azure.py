@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0156_migrate_finding_groups_setting'),
+        ('dojo', '0157_vulnerability_reference'),
     ]
 
     operations = [
