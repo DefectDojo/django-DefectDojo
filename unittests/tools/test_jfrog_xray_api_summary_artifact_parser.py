@@ -21,7 +21,6 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
         item = findings[0]
         self.assertEquals("XRAY-124116", item.title[:11])
         self.assertEquals("openssl:1.1.1k-r0", item.title[-17:])
-        self.assertEquals("No CVE", item.cve)
         self.assertEquals("Critical", item.severity)
         self.assertEquals("OpenSSL contains an overflow", item.description[:28])
         self.assertEquals(" code.", item.description[-6:])
