@@ -20,7 +20,10 @@ AcceptedRisk = NamedTuple('AcceptedRisk', (('cve', str), ('justification', str),
 
 
 class AcceptedRiskSerializer(serializers.Serializer):
-    cve = serializers.CharField(max_length=28, label='CVE', help_text='CVE or vulnerability id to accept findings for')
+    cve = serializers.CharField(
+        max_length=50,
+        label='Vulnerability Reference',
+        help_text='A reference to a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposure (CVE) or from other sources.')
     justification = serializers.CharField(help_text='Justification for accepting findings with this CVE')
     accepted_by = serializers.CharField(max_length=200, help_text='Name or email of person who accepts the risk')
 

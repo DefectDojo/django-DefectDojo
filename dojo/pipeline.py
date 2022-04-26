@@ -1,6 +1,7 @@
 import gitlab
 import re
 
+import social_core.pipeline.user
 from django.conf import settings
 from dojo.models import Product, Product_Member, Product_Type, System_Settings, Role
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
@@ -57,7 +58,8 @@ def social_uid(backend, details, response, *args, **kwargs):
 
 
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
-    if kwargs.get('is_new'):
+    # if user doesn't exist then user is None
+    if user is not None and kwargs.get('is_new'):
         system_settings = System_Settings.objects.get()
         if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
             if system_settings.staff_user_email_pattern is not None and \
@@ -110,3 +112,10 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
             if product_name not in project_names:
                 product = Product.objects.get(name=product_name)
                 Product_Member.objects.filter(product=product, user=user).delete()
+
+
+def create_user(strategy, details, backend, user=None, *args, **kwargs):
+    if not settings.SOCIAL_AUTH_CREATE_USER:
+        return
+    else:
+        return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)

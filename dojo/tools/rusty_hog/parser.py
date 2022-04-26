@@ -38,7 +38,10 @@ class RustyhogParser(object):
             if 'commit' in node or 'commitHash' in node or 'parent_commit_hash' in node or 'old_file_id' in node or 'new_file_id' in node:
                 parsername = "Choctaw Hog"
                 break
-            if 'issue_id' in node or 'location' in node or 'url' in node:
+            if 'linenum' in node or 'diff' in node:
+                parsername = "Duroc Hog"
+                break
+            if 'issue_id' in node or 'location' in node:
                 parsername = "Gottingen Hog"
                 break
             if 'page_id' in node:
@@ -81,6 +84,15 @@ class RustyhogParser(object):
                     description += "\n**Old and new line numbers:** {} - {}".format(
                                     vulnerability.get('old_line_num'),
                                     vulnerability.get('new_line_num'))
+            elif scanner == "Duroc Hog":
+                """Duroc Hog"""
+                description = "**This string was found:** {}".format(vulnerability.get('stringsFound'))
+                if vulnerability.get('path') is not None:
+                    description += "\n**Path of Issue:** {}".format(vulnerability.get('path'))
+                if vulnerability.get('linenum') is not None:
+                    description += "\n**Linenum of Issue:** {}".format(vulnerability.get('linenum'))
+                if vulnerability.get('diff') is not None:
+                    description += "\n**Diff:** {}".format(vulnerability.get('diff'))
             elif scanner == "Gottingen Hog":
                 """Gottingen Hog"""
                 description = "**This string was found:** {}".format(vulnerability.get('stringsFound'))
@@ -105,6 +117,10 @@ class RustyhogParser(object):
                         vulnerability.get('reason'),
                         vulnerability.get('path'),
                         vulnerability.get('commitHash'))
+            elif scanner == "Duroc Hog":
+                title = "{} found in path {}".format(
+                        vulnerability.get('reason'),
+                        vulnerability.get('path'))
             elif scanner == "Gottingen Hog":
                 title = "{} found in Jira ID {} ({})".format(
                         vulnerability.get('reason'),
@@ -128,6 +144,8 @@ class RustyhogParser(object):
             if scanner == "Choctaw Hog":
                 finding.line = int(vulnerability.get('new_line_num'))
                 finding.mitigation = "Please ensure no secret material nor confidential information is kept in clear within git repositories."
+            elif scanner == "Duroc Hog":
+                finding.mitigation = "Please ensure no secret material nor confidential information is kept in clear within directories, files, and archives."
             elif scanner == "Gottingen Hog":
                 finding.mitigation = "Please ensure no secret material nor confidential information is kept in clear within JIRA Tickets."
             elif scanner == "Essex Hog":

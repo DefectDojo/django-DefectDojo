@@ -74,7 +74,7 @@ def severity_count(queryset, method, expression):
     total_expression = expression + '__in'
     return getattr(queryset, method)(
         total=Sum(
-            Case(When(**{total_expression: ('Critical', 'High', 'Medium', 'Low')},
+            Case(When(**{total_expression: ('Critical', 'High', 'Medium', 'Low', 'Info')},
                         then=Value(1)),
                     output_field=IntegerField())),
         critical=Sum(

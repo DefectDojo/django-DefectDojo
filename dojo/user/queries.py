@@ -1,7 +1,6 @@
-from django.contrib.auth import get_user_model
 from django.db.models import Q
 from dojo.models import Dojo_Group_Member, Product_Member, Product_Type_Member, \
-    Product_Group, Product_Type_Group
+    Product_Group, Product_Type_Group, Dojo_User
 from dojo.authorization.authorization import get_roles_for_permission
 
 
@@ -21,8 +20,7 @@ def get_authorized_users_for_product_type(users, product_type, permission):
 
 def get_authorized_users_for_product_and_product_type(users, product, permission):
     if users is None:
-        User = get_user_model()
-        users = User.objects.filter(is_active=True)
+        users = Dojo_User.objects.filter(is_active=True)
 
     roles = get_roles_for_permission(permission)
     product_members = Product_Member.objects \

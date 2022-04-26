@@ -123,7 +123,7 @@ def view_test(request, tid):
     product_tab.setEngagement(test.engagement)
     jira_project = jira_helper.get_jira_project(test)
 
-    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue', 'creator')
+    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue', 'creator', 'findings__vulnerability_reference_set')
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
@@ -215,7 +215,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set__jira_issue')
         prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
-
+        prefetched_findings = prefetched_findings.prefetch_related('vulnerability_reference_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -423,6 +423,8 @@ def add_findings(request, tid):
                         jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
+            finding_helper.save_vulnerability_references(new_finding, form.cleaned_data['vulnerability_references'].split())
+
             new_finding.save(false_history=True, push_to_jira=push_to_jira)
             create_notification(event='other',
                                 title='Addition of %s' % new_finding.title,
@@ -505,7 +507,7 @@ def add_temp_finding(request, tid, fid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            new_finding.date = datetime.today()
+            new_finding.date = form.cleaned_data['date'] or datetime.today()
             finding_helper.update_finding_status(new_finding, request.user)
 
             new_finding.save(dedupe_option=False, false_history=False)

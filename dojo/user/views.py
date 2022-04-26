@@ -82,6 +82,9 @@ def login_view(request):
         settings.AZUREAD_TENANT_OAUTH2_ENABLED,
         settings.GITLAB_OAUTH2_ENABLED,
         settings.AUTH0_OAUTH2_ENABLED,
+        settings.KEYCLOAK_OAUTH2_ENABLED,
+        settings.GITHUB_OAUTH2_ENABLED,
+        settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED,
         settings.SAML2_ENABLED
     ]) == 1 and not ('force_login_form' in request.GET):
         if settings.GOOGLE_OAUTH_ENABLED:
@@ -92,8 +95,14 @@ def login_view(request):
             social_auth = 'azuread-tenant-oauth2'
         elif settings.GITLAB_OAUTH2_ENABLED:
             social_auth = 'gitlab'
+        elif settings.KEYCLOAK_OAUTH2_ENABLED:
+            social_auth = 'keycloak'
         elif settings.AUTH0_OAUTH2_ENABLED:
             social_auth = 'auth0'
+        elif settings.GITHUB_OAUTH2_ENABLED:
+            social_auth = 'github'
+        elif settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED:
+            social_auth = 'github-enterprise'
         else:
             return HttpResponseRedirect('/saml2/login')
         return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', args=[social_auth]),

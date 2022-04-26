@@ -1818,7 +1818,7 @@ class UsersViewSet(mixins.CreateModelMixin,
     serializer_class = serializers.UserSerializer
     queryset = User.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'username', 'first_name', 'last_name', 'email')
+    filter_fields = ('id', 'username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser')
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
     def destroy(self, request, *args, **kwargs):
@@ -2306,7 +2306,7 @@ def report_generate(request, obj, options):
                         if eng.test_set.all():
                             for t in eng.test_set.all():
                                 test_type_name = t.test_type.name
-                                if test.environment:
+                                if t.environment:
                                     test_environment_name = t.environment.name
                                 test_target_start = t.target_start
                                 if t.target_end:
@@ -2434,7 +2434,7 @@ class NotificationsViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.NotificationsSerializer
     queryset = Notifications.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'user', 'product')
+    filter_fields = ('id', 'user', 'product', 'template')
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
     swagger_schema = prefetch.get_prefetch_schema(["notifications_list", "notifications_read"],
         serializers.NotificationsSerializer).to_schema()

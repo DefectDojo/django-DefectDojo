@@ -7,7 +7,7 @@ from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.utils import max_safe
 from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, \
     IMPORT_REACTIVATED_FINDING, IMPORT_UNTOUCHED_FINDING, Test_Import, Test_Import_Finding_Action, \
-    Endpoint_Status
+    Endpoint_Status, Vulnerability_Reference
 import logging
 
 
@@ -144,16 +144,15 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
                 fragment=endpoint.fragment,
                 product=test.engagement.product)
         except (MultipleObjectsReturned):
-            pass
+            raise Exception("Endpoints in your database are broken. Please access {} and migrate them to new format or "
+                            "remove them.".format(reverse('endpoint_migrate')))
 
-        eps = None
-        try:
-            eps, created = Endpoint_Status.objects.get_or_create(
-                finding=finding,
-                endpoint=ep,
-                date=finding.date)
-        except (MultipleObjectsReturned):
-            pass
+        eps, created = Endpoint_Status.objects.get_or_create(
+            finding=finding,
+            endpoint=ep)
+        if created:
+            eps.date = finding.date
+            eps.save()
 
         if ep and eps:
             ep.endpoint_status.add(eps)
@@ -166,6 +165,32 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
 # and after endpoint task, so this should only run after all the other ones are done
 @dojo_async_task
 @app.task()
-def update_test_progress(test):
+def update_test_progress(test, **kwargs):
     test.percent_complete = 100
     test.save()
+
+
+def handle_vulnerability_references(finding):
+    # Synchronize the cve field with the unsaved_vulnerability_references
+    # We do this to be as flexible as possible to handle the fields until
+    # the cve field is not needed anymore and can be removed.
+    if finding.unsaved_vulnerability_references and finding.cve:
+        # Make sure the first entry of the list is the value of the cve field
+        finding.unsaved_vulnerability_references.insert(0, finding.cve)
+    elif finding.unsaved_vulnerability_references and not finding.cve:
+        # If the cve field is not set, use the first entry of the list to set it
+        finding.cve = finding.unsaved_vulnerability_references[0]
+    elif not finding.unsaved_vulnerability_references and finding.cve:
+        # If there is no list, make one with the value of the cve field
+        finding.unsaved_vulnerability_references = [finding.cve]
+
+    if finding.unsaved_vulnerability_references:
+        # Remove duplicates
+        finding.unsaved_vulnerability_references = list(dict.fromkeys(finding.unsaved_vulnerability_references))
+
+        # Add all vulnerability references to the database
+        for vulnerability_reference in finding.unsaved_vulnerability_references:
+            Vulnerability_Reference(
+                vulnerability_reference=vulnerability_reference,
+                finding=finding,
+            ).save()

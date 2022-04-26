@@ -22,7 +22,7 @@ def we_want_async(*args, func=None, **kwargs):
         logger.debug('dojo_async_task %s: running task in the foreground as sync=True has been found as kwarg', func)
         return False
 
-    user = get_current_user()
+    user = kwargs.get('async_user', get_current_user())
     logger.debug('user: %s', user)
 
     if Dojo_User.wants_block_execution(user):
@@ -38,6 +38,9 @@ def we_want_async(*args, func=None, **kwargs):
 def dojo_async_task(func):
     @wraps(func)
     def __wrapper__(*args, **kwargs):
+        from dojo.utils import get_current_user
+        user = get_current_user()
+        kwargs['async_user'] = user
         if we_want_async(*args, func=func, **kwargs):
             return func.delay(*args, **kwargs)
         else:

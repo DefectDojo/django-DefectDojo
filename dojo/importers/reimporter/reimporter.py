@@ -15,7 +15,8 @@ from dojo.importers import utils as importer_utils
 from dojo.models import (BurpRawRequestResponse, FileUpload, Finding,
                          Notes, Test_Import)
 from dojo.tools.factory import get_parser
-from dojo.utils import get_current_user
+from dojo.utils import get_current_user, is_finding_groups_enabled
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -41,11 +42,10 @@ class DojoDefaultReImporter(object):
 
         logger.debug('starting reimport of %i items.', len(items) if items else 0)
         from dojo.importers.reimporter.utils import (
-            get_deduplication_algorithm_from_conf,
             match_new_finding_to_existing_finding,
             update_endpoint_status,
             reactivate_endpoint_status)
-        deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
+        deduplication_algorithm = test.deduplication_algorithm
 
         i = 0
         logger.debug('STEP 1: looping over findings from the reimported report and trying to match them to existing findings')
@@ -73,7 +73,7 @@ class DojoDefaultReImporter(object):
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
 
-            findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm, scan_type)
+            findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm)
 
             deduplicationLogger.debug('found %i findings matching with current new finding', len(findings))
 
@@ -101,7 +101,9 @@ class DojoDefaultReImporter(object):
                         author=user)
                     note.save()
 
-                    endpoint_statuses = finding.endpoint_status.all()
+                    endpoint_statuses = finding.endpoint_status.exclude(Q(false_positive=True) |
+                                                                        Q(out_of_scope=True) |
+                                                                        Q(risk_accepted=True))
 
                     # Determine if this can be run async
                     if settings.ASYNC_FINDING_IMPORT:
@@ -127,6 +129,7 @@ class DojoDefaultReImporter(object):
                         finding.component_version = finding.component_version if finding.component_version else component_version
                         finding.save(dedupe_option=False)
 
+                    # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
                     unchanged_items.append(finding)
                     unchanged_count += 1
                 if finding.dynamic_finding:
@@ -149,8 +152,8 @@ class DojoDefaultReImporter(object):
                 logger.debug('%i: reimport created new finding as no existing finding match: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
 
                 # only new items get auto grouped to avoid confusion around already existing items that are already grouped
-                if settings.FEATURE_FINDING_GROUPS and group_by:
-                    finding_helper.add_finding_to_auto_group(item, group_by)
+                if is_finding_groups_enabled() and group_by:
+                    finding_helper.add_finding_to_auto_group(item, group_by, **kwargs)
 
                 finding_added_count += 1
                 new_items.append(item)
@@ -201,13 +204,15 @@ class DojoDefaultReImporter(object):
                         file_upload.save()
                         finding.files.add(file_upload)
 
+                importer_utils.handle_vulnerability_references(finding)
+
                 # existing findings may be from before we had component_name/version fields
                 finding.component_name = finding.component_name if finding.component_name else component_name
                 finding.component_version = finding.component_version if finding.component_version else component_version
 
                 # finding = new finding or existing finding still in the upload report
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
-                if settings.FEATURE_FINDING_GROUPS and finding.finding_group:
+                if is_finding_groups_enabled() and finding.finding_group:
                     finding.save()
                 else:
                     finding.save(push_to_jira=push_to_jira)
@@ -221,7 +226,7 @@ class DojoDefaultReImporter(object):
         # while it is in fact a new finding. So we substract new_items
         untouched = set(unchanged_items) - set(to_mitigate) - set(new_items)
 
-        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+        if is_finding_groups_enabled() and push_to_jira:
             for finding_group in set([finding.finding_group for finding in reactivated_items + unchanged_items + new_items if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
         sync = kwargs.get('sync', False)
@@ -254,7 +259,7 @@ class DojoDefaultReImporter(object):
                     status.save()
 
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
-                if settings.FEATURE_FINDING_GROUPS and finding.finding_group:
+                if is_finding_groups_enabled() and finding.finding_group:
                     # don't try to dedupe findings that we are closing
                     finding.save(dedupe_option=False)
                 else:
@@ -266,7 +271,7 @@ class DojoDefaultReImporter(object):
                 finding.notes.add(note)
                 mitigated_findings.append(finding)
 
-        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+        if is_finding_groups_enabled() and push_to_jira:
             for finding_group in set([finding.finding_group for finding in to_mitigate if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
 

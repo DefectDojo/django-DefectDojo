@@ -30,7 +30,7 @@ def tool_issue_updater(finding, *args, **kwargs):
 
 @dojo_async_task
 @app.task
-def update_findings_from_source_issues():
+def update_findings_from_source_issues(**kwargs):
     from dojo.tools.sonarqube_api.updater_from_source import \
         SonarQubeApiUpdaterFromSource
 
