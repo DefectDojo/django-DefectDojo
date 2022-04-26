@@ -4,7 +4,7 @@ bleach==4.1.0
 celery==5.2.6
 coverage==6.3.2
 defusedxml==0.7.1
-django_celery_results==2.3.0
+django_celery_results==2.3.1
 django-auditlog==1.0.0
 django-dbbackup==3.3.0
 django-environ==0.8.1
@@ -18,7 +18,7 @@ django-slack==5.17.6
 django-tagging==0.5.0
 django-watson==1.6.2
 django-prometheus==2.2.0
-Django==3.2.12
+Django==3.2.13
 djangorestframework==3.13.1
 gunicorn==20.1.0
 html2text==2020.1.16
@@ -37,7 +37,7 @@ python-dateutil==2.8.2
 pytz==2022.1
 redis==4.2.2
 requests==2.27.1
-sqlalchemy==1.4.34  # Required by Celery broker transport
+sqlalchemy==1.4.35  # Required by Celery broker transport
 supervisor==4.2.4
 urllib3==1.26.9
 uWSGI==2.0.20
@@ -50,8 +50,8 @@ Python-jose==3.3.0
 gitpython==3.1.27
 debugpy==1.6.0
 python-gitlab==3.3.0
-google-api-python-client==2.42.0
-google-auth==2.6.2
+google-api-python-client==2.45.0
+google-auth==2.6.6
 google-auth-oauthlib==0.5.1
 drf_yasg==1.20.0
 cpe==1.2.1
