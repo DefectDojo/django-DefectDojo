@@ -117,7 +117,7 @@ class FindingStatusFilter(ChoiceFilter):
         4: (_('Inactive'), inactive),
         5: (_('Risk Accepted'), risk_accepted),
         6: (_('Closed'), closed),
-        7: (_('Under Review'),under_review),
+        7: (_('Under Review'), under_review),
     }
 
     def __init__(self, *args, **kwargs):
