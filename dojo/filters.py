@@ -1718,6 +1718,7 @@ class EndpointFilter(DojoFilter):
         model = Endpoint
         fields = '__all__'
 
+
 class ApiEndpointFilter(DojoFilter):
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
