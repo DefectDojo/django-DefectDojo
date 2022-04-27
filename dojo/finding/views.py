@@ -31,7 +31,7 @@ from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, P
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, Endpoint_Status, \
-    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, Test_Import_Finding_Action, User, Engagement, Vulnerability_Reference_Template
+    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, Test_Import_Finding_Action, User, Engagement, Vulnerability_Id_Template
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, \
     redirect_to_return_url_or_else, get_return_url, add_external_issue, update_external_issue, \
@@ -220,7 +220,7 @@ def prefetch_for_findings(findings, prefetch_type='all'):
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__members')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__members')
-        prefetched_findings = prefetched_findings.prefetch_related('vulnerability_reference_set')
+        prefetched_findings = prefetched_findings.prefetch_related('vulnerability_id_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -252,7 +252,7 @@ def prefetch_for_similar_findings(findings):
         # prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
         # prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         # prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
-        prefetched_findings = prefetched_findings.prefetch_related('vulnerability_reference_set')
+        prefetched_findings = prefetched_findings.prefetch_related('vulnerability_id_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -681,7 +681,7 @@ def edit_finding(request, fid):
 
     form = FindingForm(instance=finding, req_resp=req_resp,
                        can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user),
-                       initial={'vulnerability_references': '\n'.join(finding.vulnerability_references)})
+                       initial={'vulnerability_ids': '\n'.join(finding.vulnerability_ids)})
     form_error = False
     jform = None
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
@@ -813,7 +813,7 @@ def edit_finding(request, fid):
             # any existing finding should be updated
             push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
 
-            finding_helper.save_vulnerability_references(new_finding, form.cleaned_data['vulnerability_references'].split())
+            finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
 
             # if we're removing the "duplicate" in the edit finding screen
             # do not relaunch deduplication, otherwise, it's never taken into account
@@ -1048,10 +1048,10 @@ def mktemplate(request, fid):
         template.save()
         template.tags = finding.tags.all()
 
-        for vulnerability_reference in finding.vulnerability_references:
-            Vulnerability_Reference_Template(
+        for vulnerability_id in finding.vulnerability_ids:
+            Vulnerability_Id_Template(
                 finding_template=template,
-                vulnerability_reference=vulnerability_reference
+                vulnerability_id=vulnerability_id
             ).save()
 
         messages.add_message(
@@ -1111,7 +1111,7 @@ def choose_finding_template_options(request, tid, fid):
     data = finding.__dict__
     # Not sure what's going on here, just leave same as with django-tagging
     data['tags'] = [tag.name for tag in template.tags.all()]
-    data['vulnerability_references'] = '\n'.join(finding.vulnerability_references)
+    data['vulnerability_ids'] = '\n'.join(finding.vulnerability_ids)
 
     form = ApplyFindingTemplateForm(data=data, template=template)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Finding Template Options", tab="findings")
@@ -1147,7 +1147,7 @@ def apply_template_to_finding(request, fid, tid):
             finding.tags = form.cleaned_data['tags']
 
             finding.cve = None
-            finding_helper.save_vulnerability_references(finding, form.cleaned_data['vulnerability_references'].split())
+            finding_helper.save_vulnerability_ids(finding, form.cleaned_data['vulnerability_ids'].split())
 
             finding.save()
         else:
@@ -1312,7 +1312,7 @@ def promote_to_finding(request, fid):
                         jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
-            finding_helper.save_vulnerability_references(new_finding, form.cleaned_data['vulnerability_references'].split())
+            finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
 
             # Save it and push it to JIRA
             new_finding.save(push_to_jira=push_to_jira)
@@ -1445,7 +1445,7 @@ def add_template(request):
             apply_message = ""
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
-            finding_helper.save_vulnerability_references_template(template, form.cleaned_data['vulnerability_references'].split())
+            finding_helper.save_vulnerability_ids_template(template, form.cleaned_data['vulnerability_ids'].split())
             template.save()
             form.save_m2m()
             count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
@@ -1476,7 +1476,7 @@ def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = FindingTemplateForm(
         instance=template,
-        initial={'vulnerability_references': '\n'.join(template.vulnerability_references)}
+        initial={'vulnerability_ids': '\n'.join(template.vulnerability_ids)}
     )
 
     if request.method == 'POST':
@@ -1484,7 +1484,7 @@ def edit_template(request, tid):
         if form.is_valid():
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
-            finding_helper.save_vulnerability_references_template(template, form.cleaned_data['vulnerability_references'].split())
+            finding_helper.save_vulnerability_ids_template(template, form.cleaned_data['vulnerability_ids'].split())
             template.save()
             form.save_m2m()
 

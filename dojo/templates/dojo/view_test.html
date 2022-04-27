@@ -308,7 +308,7 @@
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>Findings</th>
-                            <th>Vulnerability References</th>
+                            <th>Vulnerability Ids</th>
                             <th>Components</th>
                             <th>Date</th>
                             <th>Age</th>
@@ -378,12 +378,12 @@
                         </td>
                         <td>
                             {% for find in group.findings.all %}
-                                {% with find|first_vulnerability_reference as first_vulnerability_reference %}
-                                {% if first_vulnerability_reference %}
-                                    {% if first_vulnerability_reference|has_vulnerability_url%}
-                                        <a target="_blank" href="{{ first_vulnerability_reference|vulnerability_url }}">{{ first_vulnerability_reference }}</a>
+                                {% with find|first_vulnerability_id as first_vulnerability_id %}
+                                {% if first_vulnerability_id %}
+                                    {% if first_vulnerability_id|has_vulnerability_url%}
+                                        <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">{{ first_vulnerability_id }}</a>
                                     {% else %}
-                                        {{ first_vulnerability_reference }}
+                                        {{ first_vulnerability_id }}
                                     {% endif %}
                                     {% if not forloop.last %}, {% endif %}
                                 {% endif %}
@@ -660,7 +660,7 @@
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>CWE</th>
-                            <th>Vulnerability Reference</th>
+                            <th>Vulnerability Id</th>
                             <th>Date</th>
                             <th>Age</th>
                             {% if system_settings.enable_finding_sla %}
@@ -854,14 +854,14 @@
                         {% endif %}
                         </td>
                         <td class="nowrap">
-                            {% with finding|first_vulnerability_reference as first_vulnerability_reference %}
-                            {% if first_vulnerability_reference %}
-                                {% if first_vulnerability_reference|has_vulnerability_url %}
-                                <a target="_blank" href="{{ first_vulnerability_reference|vulnerability_url }}">
-                                    <i class="fa fa-external-link"></i> {{ first_vulnerability_reference|default:"" }}
+                            {% with finding|first_vulnerability_id as first_vulnerability_id %}
+                            {% if first_vulnerability_id %}
+                                {% if first_vulnerability_id|has_vulnerability_url %}
+                                <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                                    <i class="fa fa-external-link"></i> {{ first_vulnerability_id|default:"" }}
                                 </a>
                                 {% else %}
-                                    {{ first_vulnerability_reference }}
+                                    {{ first_vulnerability_id }}
                                 {% endif %}
                             {% endif %}
                             {% endwith %}

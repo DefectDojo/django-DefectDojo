@@ -59,11 +59,11 @@ class PipAuditParser:
                         static_finding=True,
                         dynamic_finding=False,
                     )
-                    vulnerability_references = list()
+                    vulnerability_ids = list()
                     if vuln_id:
-                        vulnerability_references.append(vuln_id)
-                    if vulnerability_references:
-                        finding.unsaved_vulnerability_references = vulnerability_references
+                        vulnerability_ids.append(vuln_id)
+                    if vulnerability_ids:
+                        finding.unsaved_vulnerability_ids = vulnerability_ids
 
                     findings.append(finding)
 

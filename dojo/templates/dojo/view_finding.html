@@ -242,7 +242,7 @@
                         <th>Mitigated By</th>
                     {% endif %}
                         <th>CWE</th>
-                        <th>Vulnerability Reference</th>
+                        <th>Vulnerability Id</th>
                     <th>Found by</th>
                 </tr>
                 <tr>
@@ -372,14 +372,14 @@
                         {% endif %}
                         </td>
                     <td>
-                    {% with finding|first_vulnerability_reference as first_vulnerability_reference %}
-                    {% if first_vulnerability_reference %}
-                        {% if first_vulnerability_reference|has_vulnerability_url %}
-                            <a target="_blank" href="{{ first_vulnerability_reference|vulnerability_url }}">
-                                <i class="fa fa-external-link"></i> {{ first_vulnerability_reference }}
+                    {% with finding|first_vulnerability_id as first_vulnerability_id %}
+                    {% if first_vulnerability_id %}
+                        {% if first_vulnerability_id|has_vulnerability_url %}
+                            <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                                <i class="fa fa-external-link"></i> {{ first_vulnerability_id }}
                             </a>
                         {% else %}
-                            {{ first_vulnerability_reference }}
+                            {{ first_vulnerability_id }}
                         {% endif %}
                     {% endif %}
                     </td>
@@ -392,21 +392,21 @@
         </div>
     </div>
 
-    {% with finding|additional_vulnerability_references as additional_vulnerability_references %}
-    {% if additional_vulnerability_references %}
+    {% with finding|additional_vulnerability_ids as additional_vulnerability_ids %}
+    {% if additional_vulnerability_ids %}
     <div class="panel panel-default">
         <table id="additional_finding_references" class="table-striped table table-condensed table-hover centered">
             <tr>
-                <th>Additional Vulnerability References</th>
+                <th>Additional Vulnerability Ids</th>
             </tr>
             <tr>
                 <td>
-                    {% for vulnerability_reference in additional_vulnerability_references %}
-                        {% if vulnerability_reference|has_vulnerability_url%}
-                            <a target="_blank" href="{{ vulnerability_reference|vulnerability_url }}">
-                                <i class="fa fa-external-link"></i> {{ vulnerability_reference }}</a>
+                    {% for vulnerability_id in additional_vulnerability_ids %}
+                        {% if vulnerability_id|has_vulnerability_url%}
+                            <a target="_blank" href="{{ vulnerability_id|vulnerability_url }}">
+                                <i class="fa fa-external-link"></i> {{ vulnerability_id }}</a>
                         {% else %}
-                            {{ vulnerability_reference }}
+                            {{ vulnerability_id }}
                         {% endif %}
                         {% if not forloop.last %}, {% endif %}
                     {% endfor %}
@@ -657,7 +657,7 @@
                 <h4 class="has-filters">Similar Findings ({{ similar_findings.paginator.count }})
                     <i class="fa fa-question-circle has-popover" data-trigger="hover"
                        data-content="Opening this panel shows findings that are not exact duplicates,
-                        but have similar values for Vulnerability Reference, CWE, file_path, line number, unique_id_from_tool.
+                        but have similar values for Vulnerability Id, CWE, file_path, line number, unique_id_from_tool.
                         It has a filter panel where filtering can be made less or more strict, and across
                         product boundaries. The resulting findings can be view, marked as duplicate or original.
                         Clear filters will empty all filters. Restart will start over by matching against the fields

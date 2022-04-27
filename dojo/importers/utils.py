@@ -7,7 +7,7 @@ from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.utils import max_safe
 from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, \
     IMPORT_REACTIVATED_FINDING, IMPORT_UNTOUCHED_FINDING, Test_Import, Test_Import_Finding_Action, \
-    Endpoint_Status, Vulnerability_Reference
+    Endpoint_Status, Vulnerability_Id
 import logging
 
 
@@ -170,27 +170,27 @@ def update_test_progress(test, **kwargs):
     test.save()
 
 
-def handle_vulnerability_references(finding):
-    # Synchronize the cve field with the unsaved_vulnerability_references
+def handle_vulnerability_ids(finding):
+    # Synchronize the cve field with the unsaved_vulnerability_ids
     # We do this to be as flexible as possible to handle the fields until
     # the cve field is not needed anymore and can be removed.
-    if finding.unsaved_vulnerability_references and finding.cve:
+    if finding.unsaved_vulnerability_ids and finding.cve:
         # Make sure the first entry of the list is the value of the cve field
-        finding.unsaved_vulnerability_references.insert(0, finding.cve)
-    elif finding.unsaved_vulnerability_references and not finding.cve:
+        finding.unsaved_vulnerability_ids.insert(0, finding.cve)
+    elif finding.unsaved_vulnerability_ids and not finding.cve:
         # If the cve field is not set, use the first entry of the list to set it
-        finding.cve = finding.unsaved_vulnerability_references[0]
-    elif not finding.unsaved_vulnerability_references and finding.cve:
+        finding.cve = finding.unsaved_vulnerability_ids[0]
+    elif not finding.unsaved_vulnerability_ids and finding.cve:
         # If there is no list, make one with the value of the cve field
-        finding.unsaved_vulnerability_references = [finding.cve]
+        finding.unsaved_vulnerability_ids = [finding.cve]
 
-    if finding.unsaved_vulnerability_references:
+    if finding.unsaved_vulnerability_ids:
         # Remove duplicates
-        finding.unsaved_vulnerability_references = list(dict.fromkeys(finding.unsaved_vulnerability_references))
+        finding.unsaved_vulnerability_ids = list(dict.fromkeys(finding.unsaved_vulnerability_ids))
 
-        # Add all vulnerability references to the database
-        for vulnerability_reference in finding.unsaved_vulnerability_references:
-            Vulnerability_Reference(
-                vulnerability_reference=vulnerability_reference,
+        # Add all vulnerability ids to the database
+        for vulnerability_id in finding.unsaved_vulnerability_ids:
+            Vulnerability_Id(
+                vulnerability_id=vulnerability_id,
                 finding=finding,
             ).save()
