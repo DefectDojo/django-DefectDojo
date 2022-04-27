@@ -21,7 +21,7 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group, Vulnerability_Reference
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group, Vulnerability_Id
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
@@ -52,17 +52,17 @@ def custom_filter(queryset, name, value):
     return queryset.filter(Q(**{filter: values}))
 
 
-def custom_vulnerability_reference_filter(queryset, name, value):
+def custom_vulnerability_id_filter(queryset, name, value):
     values = value.split(',')
-    ids = Vulnerability_Reference.objects \
-        .filter(vulnerability_reference__in=values) \
+    ids = Vulnerability_Id.objects \
+        .filter(vulnerability_id__in=values) \
         .values_list('finding_id', flat=True)
     return queryset.filter(id__in=ids)
 
 
-def vulnerability_reference_filter(queryset, name, value):
-    ids = Vulnerability_Reference.objects \
-        .filter(vulnerability_reference=value) \
+def vulnerability_id_filter(queryset, name, value):
+    ids = Vulnerability_Id.objects \
+        .filter(vulnerability_id=value) \
         .values_list('finding_id', flat=True)
     return queryset.filter(id__in=ids)
 
@@ -1024,7 +1024,7 @@ class ApiFindingFilter(DojoFilter):
     # CharFilter
     component_version = CharFilter(lookup_expr='icontains')
     component_name = CharFilter(lookup_expr='icontains')
-    vulnerability_reference = CharFilter(method=custom_vulnerability_reference_filter)
+    vulnerability_id = CharFilter(method=custom_vulnerability_id_filter)
     description = CharFilter(lookup_expr='icontains')
     file_path = CharFilter(lookup_expr='icontains')
     hash_code = CharFilter(lookup_expr='icontains')
@@ -1137,7 +1137,7 @@ class FindingFilter(FindingFilterWithTags):
     last_reviewed = DateRangeFilter()
     last_status_update = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
-    vulnerability_reference = CharFilter(method=vulnerability_reference_filter, label='Vulnerability Reference')
+    vulnerability_id = CharFilter(method=vulnerability_id_filter, label='Vulnerability Id')
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all(), label='Test Type')
@@ -1339,7 +1339,7 @@ class AcceptedFindingFilter(FindingFilter):
 
 class SimilarFindingFilter(FindingFilter):
     hash_code = MultipleChoiceFilter()
-    vulnerability_references = CharFilter(method=custom_vulnerability_reference_filter, label='Vulnerability References')
+    vulnerability_ids = CharFilter(method=custom_vulnerability_id_filter, label='Vulnerability Ids')
 
     class Meta(FindingFilter.Meta):
         model = Finding
@@ -1362,7 +1362,7 @@ class SimilarFindingFilter(FindingFilter):
             # get a mutable copy of the QueryDict
             data = data.copy()
 
-            data['vulnerability_references'] = ','.join(self.finding.vulnerability_references)
+            data['vulnerability_ids'] = ','.join(self.finding.vulnerability_ids)
             data['cwe'] = self.finding.cwe
             data['file_path'] = self.finding.file_path
             data['line'] = self.finding.line
@@ -1495,7 +1495,7 @@ class MetricsFindingFilter(FindingFilter):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
-    vulnerability_reference = CharFilter(method=vulnerability_reference_filter, label='Vulnerability Reference')
+    vulnerability_id = CharFilter(method=vulnerability_id_filter, label='Vulnerability Id')
 
     not_tags = ModelMultipleChoiceFilter(
         field_name='tags__name',

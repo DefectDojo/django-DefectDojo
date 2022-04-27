@@ -1250,7 +1250,7 @@ def ad_hoc_finding(request, pid):
                 if gform.is_valid():
                     add_external_issue(new_finding, 'github')
 
-            finding_helper.save_vulnerability_references(new_finding, form.cleaned_data['vulnerability_references'].split())
+            finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
 
             new_finding.save(push_to_jira=push_to_jira)
 

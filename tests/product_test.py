@@ -273,8 +273,8 @@ class ProductTest(BaseTestCase):
         driver.find_element(By.ID, "id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # finding Description
         driver.find_element(By.ID, "id_cvssv3").send_keys(Keys.TAB, "This is just a Test Case Finding")
-        # finding Vulnerability References
-        driver.find_element(By.ID, "id_vulnerability_references").send_keys("REF-1\nREF-2")
+        # finding Vulnerability Ids
+        driver.find_element(By.ID, "id_vulnerability_ids").send_keys("REF-1\nREF-2")
         # Finding Mitigation
         # Use Javascript to bypass the editor by making Setting textArea style from none to inline
         # Any Text written to textarea automatically reflects in Editor field.
@@ -299,7 +299,7 @@ class ProductTest(BaseTestCase):
         self.assertTrue(self.is_text_present_on_page(text='product.finding.com'))
         self.assertTrue(self.is_text_present_on_page(text='REF-1'))
         self.assertTrue(self.is_text_present_on_page(text='REF-2'))
-        self.assertTrue(self.is_text_present_on_page(text='Additional Vulnerability References'))
+        self.assertTrue(self.is_text_present_on_page(text='Additional Vulnerability Ids'))
 
     @on_exception_html_source_logger
     def test_add_product_endpoints(self):

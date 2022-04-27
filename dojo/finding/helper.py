@@ -10,7 +10,7 @@ from django.conf import settings
 from fieldsignals import pre_save_changed
 from dojo.utils import get_current_user, mass_model_updater, to_str_typed
 from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test, Endpoint, Endpoint_Status, \
-    Vulnerability_Reference, Vulnerability_Reference_Template
+    Vulnerability_Id, Vulnerability_Id_Template
 from dojo.endpoint.utils import save_endpoints_to_add
 
 
@@ -557,39 +557,39 @@ def add_endpoints(new_finding, form):
         new_finding.endpoint_status.add(eps)
 
 
-def save_vulnerability_references(finding, vulnerability_references):
+def save_vulnerability_ids(finding, vulnerability_ids):
     # Remove duplicates
-    vulnerability_references = list(dict.fromkeys(vulnerability_references))
+    vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
-    previous_vulnerability_references = set(Vulnerability_Reference.objects.filter(finding=finding))
-    for vulnerability_reference in vulnerability_references:
-        obj, created = Vulnerability_Reference.objects.get_or_create(
-            finding=finding, vulnerability_reference=vulnerability_reference)
+    previous_vulnerability_ids = set(Vulnerability_Id.objects.filter(finding=finding))
+    for vulnerability_id in vulnerability_ids:
+        obj, created = Vulnerability_Id.objects.get_or_create(
+            finding=finding, vulnerability_id=vulnerability_id)
         if not created:
-            previous_vulnerability_references.remove(obj)
-    for vulnerability_reference in previous_vulnerability_references:
-        vulnerability_reference.delete()
+            previous_vulnerability_ids.remove(obj)
+    for vulnerability_id in previous_vulnerability_ids:
+        vulnerability_id.delete()
 
-    if vulnerability_references:
-        finding.cve = vulnerability_references[0]
+    if vulnerability_ids:
+        finding.cve = vulnerability_ids[0]
     else:
         finding.cve = None
 
 
-def save_vulnerability_references_template(finding_template, vulnerability_references):
+def save_vulnerability_ids_template(finding_template, vulnerability_ids):
     # Remove duplicates
-    vulnerability_references = list(dict.fromkeys(vulnerability_references))
+    vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
-    previous_vulnerability_references = set(Vulnerability_Reference_Template.objects.filter(finding_template=finding_template))
-    for vulnerability_reference in vulnerability_references:
-        obj, created = Vulnerability_Reference_Template.objects.get_or_create(
-            finding_template=finding_template, vulnerability_reference=vulnerability_reference)
+    previous_vulnerability_ids = set(Vulnerability_Id_Template.objects.filter(finding_template=finding_template))
+    for vulnerability_id in vulnerability_ids:
+        obj, created = Vulnerability_Id_Template.objects.get_or_create(
+            finding_template=finding_template, vulnerability_id=vulnerability_id)
         if not created:
-            previous_vulnerability_references.remove(obj)
-    for vulnerability_reference in previous_vulnerability_references:
-        vulnerability_reference.delete()
+            previous_vulnerability_ids.remove(obj)
+    for vulnerability_id in previous_vulnerability_ids:
+        vulnerability_id.delete()
 
-    if vulnerability_references:
-        finding_template.cve = vulnerability_references[0]
+    if vulnerability_ids:
+        finding_template.cve = vulnerability_ids[0]
     else:
         finding_template.cve = None
