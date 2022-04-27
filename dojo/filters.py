@@ -1157,10 +1157,10 @@ class FindingFilter(FindingFilterWithTags):
 
     reporter = ModelMultipleChoiceFilter(
         queryset=Dojo_User.objects.all())
-    
+
     reviewers = ModelMultipleChoiceFilter(
         queryset=Dojo_User.objects.all())
-    
+
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
