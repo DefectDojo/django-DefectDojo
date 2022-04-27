@@ -241,7 +241,7 @@ def finding_querys(prod_type, request):
         'end_date': end_date,
     }
 
-
+# TODO
 def endpoint_querys(prod_type, request):
     endpoints_query = Endpoint_Status.objects.filter(mitigated=False,
                                       finding__severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(

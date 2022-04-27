@@ -729,8 +729,6 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('This endpoint-finding relation already exists')
             else:
                 raise
-        endpoint.endpoint_status.add(status)
-        finding.endpoint_status.add(status)
         status.mitigated = validated_data.get('mitigated', False)
         status.false_positive = validated_data.get('false_positive', False)
         status.out_of_scope = validated_data.get('out_of_scope', False)

@@ -101,6 +101,7 @@ class DojoDefaultReImporter(object):
                         author=user)
                     note.save()
 
+                    # TODO
                     endpoint_statuses = finding.endpoint_status.exclude(Q(false_positive=True) |
                                                                         Q(out_of_scope=True) |
                                                                         Q(risk_accepted=True))

@@ -1716,8 +1716,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['endpoint_status']
-
+        fields = '__all__'
 
 class ApiEndpointFilter(DojoFilter):
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
@@ -1899,7 +1898,7 @@ class EndpointReportFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['product', 'endpoint_status']
+        exclude = ['product']
 
 
 class ReportFindingFilter(FindingFilterWithTags):
@@ -1929,7 +1928,7 @@ class ReportFindingFilter(FindingFilterWithTags):
         # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'sonarqube_issue',
-                   'thread_id', 'notes', 'endpoints', 'endpoint_status',
+                   'thread_id', 'notes', 'endpoint_status',
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 

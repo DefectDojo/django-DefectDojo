@@ -34,6 +34,7 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
     if vulnerable:
         endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
                                      finding__duplicate=False, finding__out_of_scope=False)
+        # TODO
         endpoints = endpoints.filter(endpoint_status__mitigated=False)
     else:
         endpoints = Endpoint.objects.all()
