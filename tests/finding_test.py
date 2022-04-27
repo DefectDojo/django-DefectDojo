@@ -110,8 +110,8 @@ class FindingTest(BaseTestCase):
         Select(driver.find_element(By.ID, "id_severity")).select_by_visible_text("Critical")
         # cvssv3
         driver.find_element(By.ID, "id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
-        # finding Vulnerability References
-        driver.find_element(By.ID, "id_vulnerability_references").send_keys("\nREF-3\nREF-4\n")
+        # finding Vulnerability Ids
+        driver.find_element(By.ID, "id_vulnerability_ids").send_keys("\nREF-3\nREF-4\n")
         # "Click" the Done button to Edit the finding
         driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
@@ -122,7 +122,7 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_text_present_on_page(text='REF-2'))
         self.assertTrue(self.is_text_present_on_page(text='REF-3'))
         self.assertTrue(self.is_text_present_on_page(text='REF-4'))
-        self.assertTrue(self.is_text_present_on_page(text='Additional Vulnerability References'))
+        self.assertTrue(self.is_text_present_on_page(text='Additional Vulnerability Ids'))
 
     def test_add_image(self):
         # print("\n\nDebug Print Log: testing 'add image' \n")

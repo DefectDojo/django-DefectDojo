@@ -57,11 +57,11 @@ FINDING_STATUS = (('verified', 'Verified'),
                   ('duplicate', 'Duplicate'),
                   ('out_of_scope', 'Out of Scope'))
 
-vulnerability_references_field = forms.CharField(max_length=5000,
+vulnerability_ids_field = forms.CharField(max_length=5000,
     required=False,
-    label="Vulnerability References",
-    help_text="References to security advisories associated with this finding. Can be Common Vulnerabilities and Exposures (CVE) or from other sources."
-                "You may enter one vulnerability reference per line.",
+    label="Vulnerability Ids",
+    help_text="Ids of vulnerabilities in security advisories associated with this finding. Can be Common Vulnerabilities and Exposures (CVE) or from other sources."
+                "You may enter one vulnerability id per line.",
     widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
 
 
@@ -861,7 +861,7 @@ class AddFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    vulnerability_references = vulnerability_references_field
+    vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -882,7 +882,7 @@ class AddFindingForm(forms.ModelForm):
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'cwe', 'vulnerability_references', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+    field_order = ('title', 'date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'endpoints_to_add', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
                    'risk_accepted', 'under_defect_review')
 
@@ -935,7 +935,7 @@ class AdHocFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    vulnerability_references = vulnerability_references_field
+    vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -956,7 +956,7 @@ class AdHocFindingForm(forms.ModelForm):
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'cwe', 'vulnerability_references', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+    field_order = ('title', 'date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'endpoints_to_add', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
                    'risk_accepted', 'under_defect_review', 'sla_start_date')
 
@@ -1006,7 +1006,7 @@ class PromoteFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    vulnerability_references = vulnerability_references_field
+    vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -1024,7 +1024,7 @@ class PromoteFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_references', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
                    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
                    'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
@@ -1109,7 +1109,7 @@ class FindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    vulnerability_references = vulnerability_references_field
+    vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -1134,7 +1134,7 @@ class FindingForm(forms.ModelForm):
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_references', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
                    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
                    'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
@@ -1253,7 +1253,7 @@ class ApplyFindingTemplateForm(forms.Form):
     title = forms.CharField(max_length=1000, required=True)
 
     cwe = forms.IntegerField(label="CWE", required=False)
-    vulnerability_references = vulnerability_references_field
+    vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(label="CVSSv3", max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
 
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={'required': 'Select valid choice: In Progress, On Hold, Completed', 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
@@ -1270,7 +1270,7 @@ class ApplyFindingTemplateForm(forms.Form):
         self.fields['tags'].autocomplete_tags = Finding.tags.tag_model.objects.all().order_by('name')
         self.template = template
         if template:
-            self.template.vulnerability_references = '\n'.join(template.vulnerability_references)
+            self.template.vulnerability_ids = '\n'.join(template.vulnerability_ids)
 
     def clean(self):
         cleaned_data = super(ApplyFindingTemplateForm, self).clean()
@@ -1284,8 +1284,8 @@ class ApplyFindingTemplateForm(forms.Form):
         return cleaned_data
 
     class Meta:
-        fields = ['title', 'cwe', 'vulnerability_references', 'cvssv3', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
-        order = ('title', 'cwe', 'vulnerability_references', 'cvssv3', 'severity', 'description', 'impact', 'is_mitigated')
+        fields = ['title', 'cwe', 'vulnerability_ids', 'cvssv3', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
+        order = ('title', 'cwe', 'vulnerability_ids', 'cvssv3', 'severity', 'description', 'impact', 'is_mitigated')
 
 
 class FindingTemplateForm(forms.ModelForm):
@@ -1293,7 +1293,7 @@ class FindingTemplateForm(forms.ModelForm):
     title = forms.CharField(max_length=1000, required=True)
 
     cwe = forms.IntegerField(label="CWE", required=False)
-    vulnerability_references = vulnerability_references_field
+    vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     severity = forms.ChoiceField(
         required=False,
@@ -1302,7 +1302,7 @@ class FindingTemplateForm(forms.ModelForm):
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
-    field_order = ['title', 'cwe', 'vulnerability_references', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
+    field_order = ['title', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
 
     def __init__(self, *args, **kwargs):
         super(FindingTemplateForm, self).__init__(*args, **kwargs)
@@ -1310,7 +1310,7 @@ class FindingTemplateForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Template
-        order = ('title', 'cwe', 'vulnerability_references', 'cvssv3', 'severity', 'description', 'impact')
+        order = ('title', 'cwe', 'vulnerability_ids', 'cvssv3', 'severity', 'description', 'impact')
         exclude = ('numerical_severity', 'is_mitigated', 'last_used', 'endpoint_status', 'cve')
 
 

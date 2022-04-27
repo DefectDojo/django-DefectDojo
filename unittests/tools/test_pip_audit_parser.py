@@ -32,9 +32,9 @@ class TestPipAuditParser(DojoTestCase):
         description = 'aiohttp is an asynchronous HTTP client/server framework for asyncio and Python. In aiohttp before version 3.7.4 there is an open redirect vulnerability. A maliciously crafted link to an aiohttp-based web-server could redirect the browser to a different website. It is caused by a bug in the `aiohttp.web_middlewares.normalize_path_middleware` middleware. This security problem has been fixed in 3.7.4. Upgrade your dependency using pip as follows "pip install aiohttp >= 3.7.4". If upgrading is not an option for you, a workaround can be to avoid using `aiohttp.web_middlewares.normalize_path_middleware` in your applications.'
         self.assertEqual(description, finding.description)
         self.assertEqual(1352, finding.cwe)
-        vulnerability_references = finding.unsaved_vulnerability_references
-        self.assertEqual(1, len(vulnerability_references))
-        self.assertEqual('PYSEC-2021-76', vulnerability_references[0])
+        vulnerability_ids = finding.unsaved_vulnerability_ids
+        self.assertEqual(1, len(vulnerability_ids))
+        self.assertEqual('PYSEC-2021-76', vulnerability_ids[0])
         self.assertEqual('Medium', finding.severity)
         self.assertEqual('Upgrade to version: 3.7.4', finding.mitigation)
         self.assertEqual('aiohttp', finding.component_name)
@@ -45,9 +45,9 @@ class TestPipAuditParser(DojoTestCase):
         self.assertEqual('PYSEC-2021-439 in django:3.2.9', finding.title)
         description = 'In Django 2.2 before 2.2.25, 3.1 before 3.1.14, and 3.2 before 3.2.10, HTTP requests for URLs with trailing newlines could bypass upstream access control based on URL paths.'
         self.assertEqual(description, finding.description)
-        vulnerability_references = finding.unsaved_vulnerability_references
-        self.assertEqual(1, len(vulnerability_references))
-        self.assertEqual('PYSEC-2021-439', vulnerability_references[0])
+        vulnerability_ids = finding.unsaved_vulnerability_ids
+        self.assertEqual(1, len(vulnerability_ids))
+        self.assertEqual('PYSEC-2021-439', vulnerability_ids[0])
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('Medium', finding.severity)
         mitigation = '''Upgrade to version:
@@ -63,9 +63,9 @@ class TestPipAuditParser(DojoTestCase):
         self.assertEqual('PYSEC-2021-852 in lxml:4.6.4', finding.title)
         description = 'lxml is a library for processing XML and HTML in the Python language. Prior to version 4.6.5, the HTML Cleaner in lxml.html lets certain crafted script content pass through, as well as script content in SVG files embedded using data URIs. Users that employ the HTML cleaner in a security relevant context should upgrade to lxml 4.6.5 to receive a patch. There are no known workarounds available.'
         self.assertEqual(description, finding.description)
-        vulnerability_references = finding.unsaved_vulnerability_references
-        self.assertEqual(1, len(vulnerability_references))
-        self.assertEqual('PYSEC-2021-852', vulnerability_references[0])
+        vulnerability_ids = finding.unsaved_vulnerability_ids
+        self.assertEqual(1, len(vulnerability_ids))
+        self.assertEqual('PYSEC-2021-852', vulnerability_ids[0])
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('Medium', finding.severity)
         self.assertIsNone(finding.mitigation)
