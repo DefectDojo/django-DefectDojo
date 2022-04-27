@@ -46,7 +46,6 @@ def get_item(vulnerability, service, test):
     cve = None
     cwe = None
     cvssv3 = None
-    cvss_v3 = "No CVSS v3 score"
     cvssv3_score = 0.0
     unique_id_from_tool = None
     impact_paths = None
@@ -62,7 +61,7 @@ def get_item(vulnerability, service, test):
 
     # Some entries have no CVE entries, despite they exist. Example CVE-2017-1000502.
     cves = vulnerability.get('cves', [])
-    if len(cves) > 0:
+    if cves > 0:
         if 'cve' in cves[0]:
             cve = cves[0]['cve']
         if len(cves[0].get('cwe', [])) > 0:
@@ -70,7 +69,6 @@ def get_item(vulnerability, service, test):
         if 'cvss_v3' in cves[0]:
             cvss_v3 = cves[0]['cvss_v3']
             cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector()
-            cvssv3_score = CVSS3.from_rh_vector(cvss_v3).base_score
 
     impact_paths = vulnerability.get('impact_path', [])
     if len(impact_paths) > 0:
