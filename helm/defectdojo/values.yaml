@@ -16,6 +16,10 @@ createPostgresqlSecret: false
 # - enabled, enables tracking configuration changes based on SHA256
 # trackConfig: disabled
 
+# When set to true, enables a Network Policy for the for the defectDojo.
+# networkPolicy: false
+
+
 # Configuration value to select database type
 # Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
