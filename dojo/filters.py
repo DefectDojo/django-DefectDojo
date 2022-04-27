@@ -117,7 +117,7 @@ class FindingStatusFilter(ChoiceFilter):
         4: (_('Inactive'), inactive),
         5: (_('Risk Accepted'), risk_accepted),
         6: (_('Closed'), closed),
-        7: (_('Under Review'),under_review),
+        7: (_('Under Review'), under_review),
     }
 
     def __init__(self, *args, **kwargs):
@@ -230,6 +230,7 @@ def get_finding_filter_fields(metrics=False, similar=False):
                 'last_status_update',
                 'mitigated',
                 'reporter',
+                'reviewers',
                 'test__engagement__product__prod_type',
                 'test__engagement__product',
                 'test__engagement',
@@ -1156,6 +1157,10 @@ class FindingFilter(FindingFilterWithTags):
 
     reporter = ModelMultipleChoiceFilter(
         queryset=Dojo_User.objects.all())
+    
+    reviewers = ModelMultipleChoiceFilter(
+        queryset=Dojo_User.objects.all())
+        
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")

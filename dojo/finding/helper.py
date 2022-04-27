@@ -28,6 +28,7 @@ WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptan
 CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
 UNDER_REVIEW_QUERY = Q(under_review=True)
 
+
 # this signal is triggered just before a finding is getting saved
 # and one of the status related fields has changed
 # this allows us to:
