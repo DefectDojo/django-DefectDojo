@@ -286,8 +286,8 @@ class TestEndpointStatusMigration(MigratorTestCase):
 # TODO: These tests can be skipped in 2.11.x or later
 # @skip("Outdated - Any future changes of code should not affect these tests")
 class TestEndpointStatusBroken(MigratorTestCase):
-    migrate_from = ('dojo', '0157_vulnerability_reference')
-    migrate_to = ('dojo', '0159_set_notnull_endpoint_statuses')
+    migrate_from = ('dojo', '0158_vulnerability_id')
+    migrate_to = ('dojo', '0160_set_notnull_endpoint_statuses')
 
     def prepare(self):
         Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
