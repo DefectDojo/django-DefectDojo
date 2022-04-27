@@ -164,12 +164,12 @@ class CycloneDXParser(object):
         if len(cwes) > 0:
             finding.cwe = cwes[0]
 
-        vulnerability_references = list()
-        # set id as first vulnerability reference
+        vulnerability_ids = list()
+        # set id as first vulnerability id
         if vuln_id:
-            vulnerability_references.append(vuln_id)
-        if vulnerability_references:
-            finding.unsaved_vulnerability_references = vulnerability_references
+            vulnerability_ids.append(vuln_id)
+        if vulnerability_ids:
+            finding.unsaved_vulnerability_ids = vulnerability_ids
 
         return finding
 
@@ -202,15 +202,15 @@ class CycloneDXParser(object):
                 references += f'**URL:** {url}\n'
             references += '\n'
 
-        vulnerability_references = list()
-        # set id as first vulnerability reference
+        vulnerability_ids = list()
+        # set id as first vulnerability id
         if vuln_id:
-            vulnerability_references.append(vuln_id)
-        # check references to see if we have other vulnerability references
+            vulnerability_ids.append(vuln_id)
+        # check references to see if we have other vulnerability ids
         for reference in vulnerability.findall("b:references/b:reference", namespaces=ns):
-            vulnerability_reference = reference.findtext("b:id", namespaces=ns)
-            if vulnerability_reference:
-                vulnerability_references.append(vulnerability_reference)
+            vulnerability_id = reference.findtext("b:id", namespaces=ns)
+            if vulnerability_id:
+                vulnerability_ids.append(vulnerability_id)
 
         # for all component affected
         findings = []
@@ -232,8 +232,8 @@ class CycloneDXParser(object):
                 nb_occurences=1,
             )
 
-            if vulnerability_references:
-                finding.unsaved_vulnerability_references = vulnerability_references
+            if vulnerability_ids:
+                finding.unsaved_vulnerability_ids = vulnerability_ids
 
             if report_date:
                 finding.date = report_date
@@ -337,17 +337,17 @@ class CycloneDXParser(object):
                             finding.cvssv3 = cvssv3.clean_vector()
                             finding.severity = cvssv3.severities()[0]
 
-                vulnerability_references = list()
-                # set id as first vulnerability reference
+                vulnerability_ids = list()
+                # set id as first vulnerability id
                 if vulnerability.get('id'):
-                    vulnerability_references.append(vulnerability.get('id'))
-                # check references to see if we have other vulnerability references
+                    vulnerability_ids.append(vulnerability.get('id'))
+                # check references to see if we have other vulnerability ids
                 for reference in vulnerability.get("references", []):
-                    vulnerability_reference = reference.get("id")
-                    if vulnerability_reference:
-                        vulnerability_references.append(vulnerability_reference)
-                if vulnerability_references:
-                    finding.unsaved_vulnerability_references = vulnerability_references
+                    vulnerability_id = reference.get("id")
+                    if vulnerability_id:
+                        vulnerability_ids.append(vulnerability_id)
+                if vulnerability_ids:
+                    finding.unsaved_vulnerability_ids = vulnerability_ids
 
                 findings.append(finding)
         return findings

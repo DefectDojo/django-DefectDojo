@@ -192,7 +192,7 @@
                             <th class="nowrap centered">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th>CWE</th>
-                            <th>Vulnerability Reference</th>
+                            <th>Vulnerability Id</th>
                             {% if filter_name == 'Closed' %}
                             <th class="nowrap">{% dojo_sort request 'Closed Date' 'mitigated'%}</th>
                             {% else %}
@@ -400,14 +400,14 @@
                                   {% endif %}
                                 </td>
                                 <td class="nowrap">
-                                    {% with finding|first_vulnerability_reference as first_vulnerability_reference %}
-                                    {% if first_vulnerability_reference %}  
-                                    {% if first_vulnerability_reference|has_vulnerability_url %}
-                                        <a target="_blank" href="{{ first_vulnerability_reference|vulnerability_url }}">
-                                            <i class="fa fa-external-link"></i> {{ first_vulnerability_reference }}
+                                    {% with finding|first_vulnerability_id as first_vulnerability_id %}
+                                    {% if first_vulnerability_id %}  
+                                    {% if first_vulnerability_id|has_vulnerability_url %}
+                                        <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                                            <i class="fa fa-external-link"></i> {{ first_vulnerability_id }}
                                         </a>
                                     {% else %}
-                                        {{ first_vulnerability_reference }}
+                                        {{ first_vulnerability_id }}
                                     {% endif %}
                                   {% endif %}
                                   {% endwith %}

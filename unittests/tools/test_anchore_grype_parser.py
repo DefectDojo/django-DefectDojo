@@ -22,12 +22,12 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual(1509, len(findings))
         for finding in findings:
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            vulnerability_references = finding.unsaved_vulnerability_references
-            self.assertTrue(len(vulnerability_references) >= 1)
+            vulnerability_ids = finding.unsaved_vulnerability_ids
+            self.assertTrue(len(vulnerability_ids) >= 1)
             if finding.vuln_id_from_tool == "CVE-2011-3389":
-                vulnerability_references = finding.unsaved_vulnerability_references
-                self.assertEqual(1, len(vulnerability_references))
-                self.assertEqual('CVE-2011-3389', vulnerability_references[0])
+                vulnerability_ids = finding.unsaved_vulnerability_ids
+                self.assertEqual(1, len(vulnerability_ids))
+                self.assertEqual('CVE-2011-3389', vulnerability_ids[0])
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("libgnutls-openssl27", finding.component_name)
                 self.assertEqual("3.6.7-4+deb10u5", finding.component_version)
@@ -44,12 +44,12 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual(1567, len(findings))
         for finding in findings:
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            vulnerability_references = finding.unsaved_vulnerability_references
-            self.assertTrue(len(vulnerability_references) >= 1)
+            vulnerability_ids = finding.unsaved_vulnerability_ids
+            self.assertTrue(len(vulnerability_ids) >= 1)
             if finding.vuln_id_from_tool == "CVE-2019-9192":
-                vulnerability_references = finding.unsaved_vulnerability_references
-                self.assertEqual(1, len(vulnerability_references))
-                self.assertEqual('CVE-2019-9192', vulnerability_references[0])
+                vulnerability_ids = finding.unsaved_vulnerability_ids
+                self.assertEqual(1, len(vulnerability_ids))
+                self.assertEqual('CVE-2019-9192', vulnerability_ids[0])
                 self.assertEqual("libc6-dev", finding.component_name)
                 self.assertEqual("2.28-10", finding.component_version)
                 self.assertEqual("Info", finding.severity)
@@ -66,12 +66,12 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual(327, len(findings))
         for finding in findings:
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            vulnerability_references = finding.unsaved_vulnerability_references
-            self.assertTrue(len(vulnerability_references) >= 1)
+            vulnerability_ids = finding.unsaved_vulnerability_ids
+            self.assertTrue(len(vulnerability_ids) >= 1)
             if finding.vuln_id_from_tool == "CVE-2011-3389":
-                vulnerability_references = finding.unsaved_vulnerability_references
-                self.assertEqual(1, len(vulnerability_references))
-                self.assertEqual('CVE-2011-3389', vulnerability_references[0])
+                vulnerability_ids = finding.unsaved_vulnerability_ids
+                self.assertEqual(1, len(vulnerability_ids))
+                self.assertEqual('CVE-2011-3389', vulnerability_ids[0])
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("libgnutls30", finding.component_name)
                 self.assertEqual("3.6.7-4+deb10u5", finding.component_version)
@@ -88,12 +88,12 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual(9, len(findings))
         for finding in findings:
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            vulnerability_references = finding.unsaved_vulnerability_references
-            self.assertTrue(len(vulnerability_references) >= 1)
+            vulnerability_ids = finding.unsaved_vulnerability_ids
+            self.assertTrue(len(vulnerability_ids) >= 1)
             if finding.vuln_id_from_tool == "CVE-1999-1338":
-                vulnerability_references = finding.unsaved_vulnerability_references
-                self.assertEqual(1, len(vulnerability_references))
-                self.assertEqual('CVE-1999-1338', vulnerability_references[0])
+                vulnerability_ids = finding.unsaved_vulnerability_ids
+                self.assertEqual(1, len(vulnerability_ids))
+                self.assertEqual('CVE-1999-1338', vulnerability_ids[0])
                 self.assertEqual("Medium", finding.severity)
                 self.assertTrue("javascript-matcher" in finding.description)
                 self.assertEqual("delegate", finding.component_name)
@@ -115,10 +115,10 @@ class TestAnchoreGrypeParser(DojoTestCase):
 **Matcher:** dpkg-matcher
 **Package URL:** pkg:deb/debian/libgssapi-krb5-2@1.17-3+deb10u3?arch=amd64'''
         self.assertEqual(description, finding.description)
-        vulnerability_references = finding.unsaved_vulnerability_references
-        self.assertEqual(2, len(vulnerability_references))
-        self.assertEqual('CVE-2004-0971', vulnerability_references[0])
-        self.assertEqual('CVE-2004-0971', vulnerability_references[1])
+        vulnerability_ids = finding.unsaved_vulnerability_ids
+        self.assertEqual(2, len(vulnerability_ids))
+        self.assertEqual('CVE-2004-0971', vulnerability_ids[0])
+        self.assertEqual('CVE-2004-0971', vulnerability_ids[1])
         self.assertEqual(1352, finding.cwe)
         self.assertIsNone(finding.cvssv3)
         self.assertIsNone(finding.cvssv3_score)
@@ -151,9 +151,9 @@ class TestAnchoreGrypeParser(DojoTestCase):
 - python2-matcher
 **Package URL:** pkg:pypi/redis@4.0.2'''
         self.assertEqual(description, finding.description)
-        vulnerability_references = finding.unsaved_vulnerability_references
-        self.assertEqual(1, len(vulnerability_references))
-        self.assertEqual('CVE-2021-32626', vulnerability_references[0])
+        vulnerability_ids = finding.unsaved_vulnerability_ids
+        self.assertEqual(1, len(vulnerability_ids))
+        self.assertEqual('CVE-2021-32626', vulnerability_ids[0])
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
         self.assertEqual('High', finding.severity)
@@ -185,10 +185,10 @@ class TestAnchoreGrypeParser(DojoTestCase):
 **Matcher:** dpkg-matcher
 **Package URL:** pkg:deb/debian/libc-bin@2.28-10?arch=amd64'''
         self.assertEqual(description, finding.description)
-        vulnerability_references = finding.unsaved_vulnerability_references
-        self.assertEqual(2, len(vulnerability_references))
-        self.assertEqual('CVE-2021-33574', vulnerability_references[0])
-        self.assertEqual('CVE-2021-33574', vulnerability_references[1])
+        vulnerability_ids = finding.unsaved_vulnerability_ids
+        self.assertEqual(2, len(vulnerability_ids))
+        self.assertEqual('CVE-2021-33574', vulnerability_ids[0])
+        self.assertEqual('CVE-2021-33574', vulnerability_ids[1])
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
         self.assertEqual('Critical', finding.severity)
@@ -216,10 +216,10 @@ class TestAnchoreGrypeParser(DojoTestCase):
 **Matcher:** dpkg-matcher
 **Package URL:** pkg:deb/debian/libc6@2.28-10?arch=amd64'''
         self.assertEqual(description, finding.description)
-        vulnerability_references = finding.unsaved_vulnerability_references
-        self.assertEqual(2, len(vulnerability_references))
-        self.assertEqual('CVE-2021-33574', vulnerability_references[0])
-        self.assertEqual('CVE-2021-33574', vulnerability_references[1])
+        vulnerability_ids = finding.unsaved_vulnerability_ids
+        self.assertEqual(2, len(vulnerability_ids))
+        self.assertEqual('CVE-2021-33574', vulnerability_ids[0])
+        self.assertEqual('CVE-2021-33574', vulnerability_ids[1])
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
         self.assertEqual('Critical', finding.severity)
@@ -248,10 +248,10 @@ class TestAnchoreGrypeParser(DojoTestCase):
 **Matcher:** python-matcher
 **Package URL:** pkg:pypi/Django@3.2.9'''
         self.assertEqual(description, finding.description)
-        vulnerability_references = finding.unsaved_vulnerability_references
-        self.assertEqual(2, len(vulnerability_references))
-        self.assertEqual('GHSA-v6rh-hp5x-86rv', vulnerability_references[0])
-        self.assertEqual('CVE-2021-44420', vulnerability_references[1])
+        vulnerability_ids = finding.unsaved_vulnerability_ids
+        self.assertEqual(2, len(vulnerability_ids))
+        self.assertEqual('GHSA-v6rh-hp5x-86rv', vulnerability_ids[0])
+        self.assertEqual('CVE-2021-44420', vulnerability_ids[1])
         self.assertEqual(1352, finding.cwe)
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L', finding.cvssv3)
         self.assertEqual('High', finding.severity)
