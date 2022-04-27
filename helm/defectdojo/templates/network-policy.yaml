@@ -1,0 +1,22 @@
+{{- if eq (.Values.networkPolicy.enabled | toString) "true"  }}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-networkpolicy
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: {{ .Release.Name }}
+  {{- if .Values.networkPolicy.egress }}
+  egress:
+  {{- toYaml .Values.networkPolicy.egress | nindent 4 }}
+  {{ end }}
+{{ end }}

@@ -16,9 +16,18 @@ createPostgresqlSecret: false
 # - enabled, enables tracking configuration changes based on SHA256
 # trackConfig: disabled
 
-# When set to true, enables a Network Policy for the for the defectDojo.
-# networkPolicy: false
-
+# Enables network policy for server pods
+# check https://kubernetes.io/docs/concepts/services-networking/network-policies/
+networkPolicy:
+  enabled: false
+  egress: []
+  # egress:
+  # - to:
+  #   - ipBlock:
+  #       cidr: 10.0.0.0/24
+  #   ports:
+  #   - protocol: TCP
+  #     port: 443
 
 # Configuration value to select database type
 # Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
