@@ -1,5 +1,6 @@
 import datetime
 from .dojo_test_case import DojoTestCase
+from unittest import skip
 
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.models import Product_Type, Product, Engagement, Test, Finding, Endpoint, Endpoint_Status
@@ -155,8 +156,7 @@ class TestEndpointModel(DojoTestCase):
         self.assertTrue(created7)
 
 
-# TODO: These tests can be skipped in the future (when Endpoint_Status.{finding,endpoint}(null=False,blank=False))
-# @skip("Outdated - this class was testing clean-up broken entries in old version of model; new version of model doesn't to store broken entries")
+@skip("Outdated - this class was testing clean-up broken entries in old version of model; new version of model doesn't to store broken entries")
 class TestEndpointStatusBrokenModel(DojoTestCase):
 
     def test_endpoint_status_broken(self):
