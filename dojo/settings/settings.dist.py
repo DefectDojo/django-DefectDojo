@@ -1305,8 +1305,8 @@ LOGGING = {
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins', 'console'],
-            'level': 'WARN',
-            'propagate': True,
+            'level': '%s' % LOG_LEVEL,
+            'propagate': False,
         },
         'django.security': {
             'handlers': [r'%s' % LOGGING_HANDLER],
@@ -1333,17 +1333,18 @@ LOGGING = {
         'saml2': {
             'handlers': [r'%s' % LOGGING_HANDLER],
             'level': '%s' % LOG_LEVEL,
+            'propagate': False,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'WARNING',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'titlecase': {
             # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'WARNING',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
     }
