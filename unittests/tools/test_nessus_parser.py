@@ -49,13 +49,13 @@ class TestNessusParser(DojoTestCase):
         # TODO work on component attributes for Nessus CSV parser
         self.assertIsNotNone(finding.component_name)
         self.assertEqual("md5", finding.component_name)
-        self.assertEqual(1, len(finding.unsaved_vulnerability_references))
-        self.assertEqual("CVE-2004-2761", finding.unsaved_vulnerability_references[0])
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2004-2761", finding.unsaved_vulnerability_ids[0])
         # this vuln have 'CVE-2013-2566,CVE-2015-2808' as CVE
         finding = findings[3]
-        self.assertEqual(2, len(finding.unsaved_vulnerability_references))
-        self.assertEqual("CVE-2013-2566", finding.unsaved_vulnerability_references[0])
-        self.assertEqual("CVE-2015-2808", finding.unsaved_vulnerability_references[1])
+        self.assertEqual(2, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2013-2566", finding.unsaved_vulnerability_ids[0])
+        self.assertEqual("CVE-2015-2808", finding.unsaved_vulnerability_ids[1])
 
     def test_parse_some_findings_csv2(self):
         """Test that use default columns of Nessus Pro 8.13.1 (#257)"""
@@ -76,8 +76,8 @@ class TestNessusParser(DojoTestCase):
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("SSL Certificate Signed Using Weak Hashing Algorithm (Known CA)", finding.title)
         self.assertEqual("Info", finding.severity)
-        self.assertEqual(1, len(finding.unsaved_vulnerability_references))
-        self.assertEqual("CVE-2004-2761", finding.unsaved_vulnerability_references[0])
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2004-2761", finding.unsaved_vulnerability_ids[0])
 
     def test_parse_some_findings_csv2_all(self):
         """Test that use a report with all columns of Nessus Pro 8.13.1 (#257)"""
@@ -98,8 +98,8 @@ class TestNessusParser(DojoTestCase):
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("SSL Certificate Signed Using Weak Hashing Algorithm (Known CA)", finding.title)
         self.assertEqual("Info", finding.severity)
-        self.assertEqual(1, len(finding.unsaved_vulnerability_references))
-        self.assertEqual("CVE-2004-2761", finding.unsaved_vulnerability_references[0])
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2004-2761", finding.unsaved_vulnerability_ids[0])
 
     def test_parse_some_findings_csv_bytes(self):
         """This tests is designed to test the parser with different read modes"""
@@ -135,20 +135,20 @@ class TestNessusParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Info", finding.severity)
-        self.assertFalse(finding.unsaved_vulnerability_references)
+        self.assertFalse(finding.unsaved_vulnerability_ids)
         self.assertEqual("Nessus Scan Information", finding.title)
 
         finding = findings[25]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Nessus SYN scanner", finding.title)
         self.assertEqual("Info", finding.severity)
-        self.assertFalse(finding.unsaved_vulnerability_references)
+        self.assertFalse(finding.unsaved_vulnerability_ids)
         endpoint = finding.unsaved_endpoints[26]
         self.assertEqual("http", endpoint.protocol)
         endpoint = finding.unsaved_endpoints[37]
         self.assertEqual("tcp", endpoint.protocol)
 
         finding = findings[9]
-        self.assertEqual(7, len(finding.unsaved_vulnerability_references))
-        for vulnerability_reference in finding.unsaved_vulnerability_references:
-            self.assertEqual('CVE-2005-1794', vulnerability_reference)
+        self.assertEqual(7, len(finding.unsaved_vulnerability_ids))
+        for vulnerability_id in finding.unsaved_vulnerability_ids:
+            self.assertEqual('CVE-2005-1794', vulnerability_id)

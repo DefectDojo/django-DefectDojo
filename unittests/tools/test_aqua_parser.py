@@ -26,8 +26,8 @@ class TestAquaParser(DojoTestCase):
         self.assertEqual('\nhttps://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-14697', finding.references)
         self.assertEqual('musl', finding.component_name)
         self.assertEqual('1.1.20-r4', finding.component_version)
-        self.assertEqual(1, len(finding.unsaved_vulnerability_references))
-        self.assertEqual('CVE-2019-14697', finding.unsaved_vulnerability_references[0])
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual('CVE-2019-14697', finding.unsaved_vulnerability_ids[0])
 
     def test_aqua_parser_has_many_findings(self):
         testfile = open("unittests/scans/aqua/many_vulns.json")
@@ -46,8 +46,8 @@ class TestAquaParser(DojoTestCase):
             self.assertEqual('Medium', finding.severity)
             self.assertEqual('CURL before 7.68.0 lacks proper input validation, which allows users to create a `FILE:` URL that can make the client access a remote file using SMB (Windows-only issue).', finding.description)
             self.assertEqual('Upgrade to curl 7.68.0', finding.mitigation)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_references))
-            self.assertEqual('CVE-2019-15601', finding.unsaved_vulnerability_references[0])
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual('CVE-2019-15601', finding.unsaved_vulnerability_ids[0])
 
     def test_aqua_parser_v2_has_many_findings(self):
         with open("unittests/scans/aqua/many_v2.json") as testfile:

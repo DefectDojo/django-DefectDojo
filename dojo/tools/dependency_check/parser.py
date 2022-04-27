@@ -137,11 +137,11 @@ class DependencyCheckParser(object):
         # I need the notes field since this is how the suppression is documented.
         notes = vulnerability.findtext(f'.//{namespace}notes')
 
-        vulnerability_reference = name[:28]
-        if vulnerability_reference and not vulnerability_reference.startswith('CVE'):
+        vulnerability_id = name[:28]
+        if vulnerability_id and not vulnerability_id.startswith('CVE'):
             # for vulnerability sources which have a CVE, it is the start of the 'name'.
             # for other sources, we have to set it to None
-            vulnerability_reference = None
+            vulnerability_id = None
 
         # Use CWE-1035 as fallback
         cwe = 1035  # Vulnerable Third Party Component
@@ -236,8 +236,8 @@ class DependencyCheckParser(object):
             component_version=component_version,
         )
 
-        if vulnerability_reference:
-            finding.unsaved_vulnerability_references = [vulnerability_reference]
+        if vulnerability_id:
+            finding.unsaved_vulnerability_ids = [vulnerability_id]
 
         return finding
 

@@ -65,6 +65,6 @@ def get_item(item_node, test):
                       impact="No impact provided")
 
     if item_node['vulnerability']:
-        finding.unsaved_vulnerability_references = [item_node['vulnerability']]
+        finding.unsaved_vulnerability_ids = [item_node['vulnerability']]
 
     return finding

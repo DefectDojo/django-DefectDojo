@@ -31,11 +31,11 @@ class TestNpmAuditParser(DojoTestCase):
 
         for find in findings:
             if find.file_path == "censored_by_npm_audit>send>mime":
-                self.assertEqual(1, len(find.unsaved_vulnerability_references))
-                self.assertEqual("CVE-2017-16138", find.unsaved_vulnerability_references[0])
+                self.assertEqual(1, len(find.unsaved_vulnerability_ids))
+                self.assertEqual("CVE-2017-16138", find.unsaved_vulnerability_ids[0])
             if find.file_path == "express>fresh":
-                self.assertEqual(1, len(find.unsaved_vulnerability_references))
-                self.assertEqual("CVE-2017-16119", find.unsaved_vulnerability_references[0])
+                self.assertEqual(1, len(find.unsaved_vulnerability_ids))
+                self.assertEqual("CVE-2017-16119", find.unsaved_vulnerability_ids[0])
 
         # TODO ordering seems to be different in ci compared to local, so disable for now
         # self.assertEqual('mime', findings[4].component_name)

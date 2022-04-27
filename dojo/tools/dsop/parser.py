@@ -54,7 +54,7 @@ class DsopParser:
                             static_finding=True, dynamic_finding=False)
 
                 if row[headers['identifiers']]:
-                    finding.unsaved_vulnerability_references = [row[headers['identifiers']]]
+                    finding.unsaved_vulnerability_ids = [row[headers['identifiers']]]
 
                 finding.unsaved_tags = tags
                 items.append(finding)
@@ -93,7 +93,7 @@ class DsopParser:
                         test=test, static_finding=True, dynamic_finding=False)
 
                 if row[headers['ref']]:
-                    finding.unsaved_vulnerability_references = [row[headers['ref']]]
+                    finding.unsaved_vulnerability_ids = [row[headers['ref']]]
 
                 finding.unsaved_tags = tags
                 items.append(finding)
@@ -132,7 +132,7 @@ class DsopParser:
                                         static_finding=True, dynamic_finding=False)
 
                 if row[headers['cve']]:
-                    finding.unsaved_vulnerability_references = [row[headers['cve']]]
+                    finding.unsaved_vulnerability_ids = [row[headers['cve']]]
 
                 finding.unsaved_tags = tags
                 items.append(finding)
@@ -164,7 +164,7 @@ class DsopParser:
                                         file_path=file_path)
 
                 if row[headers['cve']]:
-                    finding.unsaved_vulnerability_references = [row[headers['cve']]]
+                    finding.unsaved_vulnerability_ids = [row[headers['cve']]]
 
                 finding.unsaved_tags = tags
                 items.append(finding)

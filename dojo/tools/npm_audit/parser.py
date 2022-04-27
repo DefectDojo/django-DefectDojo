@@ -119,8 +119,8 @@ def get_item(item_node, test):
                       dynamic_finding=False)
 
     if len(item_node['cves']) > 0:
-        dojo_finding.unsaved_vulnerability_references = list()
-        for vulnerability_reference in item_node['cves']:
-            dojo_finding.unsaved_vulnerability_references.append(vulnerability_reference)
+        dojo_finding.unsaved_vulnerability_ids = list()
+        for vulnerability_id in item_node['cves']:
+            dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
 
     return dojo_finding

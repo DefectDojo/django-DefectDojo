@@ -39,9 +39,9 @@ class CargoAuditParser(object):
                 date = advisory.get('date')
 
                 if len(advisory.get('aliases')) != 0:
-                    vulnerability_reference = advisory.get('aliases')[0]
+                    vulnerability_id = advisory.get('aliases')[0]
                 else:
-                    vulnerability_reference = None
+                    vulnerability_id = None
 
                 package_name = item.get('package').get('name')
                 package_version = item.get('package').get('version')
@@ -56,7 +56,7 @@ class CargoAuditParser(object):
                 except KeyError:
                     mitigation = "No information about patched version"
                 dupe_key = hashlib.sha256(
-                    (vuln_id + str(vulnerability_reference) + date + package_name + package_version).encode('utf-8')
+                    (vuln_id + str(vulnerability_id) + date + package_name + package_version).encode('utf-8')
                 ).hexdigest()
 
                 if dupe_key in dupes:
@@ -77,7 +77,7 @@ class CargoAuditParser(object):
                         references=references,
                         mitigation=mitigation
                     )
-                    if vulnerability_reference:
-                        finding.unsaved_vulnerability_references = [vulnerability_reference]
+                    if vulnerability_id:
+                        finding.unsaved_vulnerability_ids = [vulnerability_id]
                     dupes[dupe_key] = finding
         return list(dupes.values())

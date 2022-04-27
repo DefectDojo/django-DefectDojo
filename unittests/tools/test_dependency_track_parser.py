@@ -43,12 +43,12 @@ class TestDependencyTrackParser(DojoTestCase):
         testfile.close()
         self.assertEqual(4, len(findings))
 
-        self.assertIsNone(findings[0].unsaved_vulnerability_references)
-        self.assertIsNone(findings[1].unsaved_vulnerability_references)
-        self.assertEqual(1, len(findings[2].unsaved_vulnerability_references))
-        self.assertEqual('CVE-2016-2097', findings[2].unsaved_vulnerability_references[0])
-        self.assertEqual(1, len(findings[3].unsaved_vulnerability_references))
-        self.assertEqual('CVE-2016-2097', findings[3].unsaved_vulnerability_references[0])
+        self.assertIsNone(findings[0].unsaved_vulnerability_ids)
+        self.assertIsNone(findings[1].unsaved_vulnerability_ids)
+        self.assertEqual(1, len(findings[2].unsaved_vulnerability_ids))
+        self.assertEqual('CVE-2016-2097', findings[2].unsaved_vulnerability_ids[0])
+        self.assertEqual(1, len(findings[3].unsaved_vulnerability_ids))
+        self.assertEqual('CVE-2016-2097', findings[3].unsaved_vulnerability_ids[0])
 
     def test_dependency_track_parser_has_one_finding(self):
         testfile = open(

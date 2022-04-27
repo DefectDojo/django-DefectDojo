@@ -90,7 +90,7 @@ class NessusCSVParser(object):
                                 impact=impact,
                                 references=references)
                 if detected_cve:
-                    find.unsaved_vulnerability_references = detected_cve
+                    find.unsaved_vulnerability_ids = detected_cve
 
                 # manage CVSS vector (only v3.x for now)
                 if 'CVSS V3 Vector' in row and '' != row.get('CVSS V3 Vector'):
@@ -186,9 +186,9 @@ class NessusXMLParser(object):
                     for xref in item.iter("xref"):
                         references += xref.text + "\n"
 
-                    vulnerability_reference = None
+                    vulnerability_id = None
                     if item.findtext("cve"):
-                        vulnerability_reference = item.find("cve").text
+                        vulnerability_id = item.find("cve").text
                     cwe = None
                     if item.findtext("cwe"):
                         cwe = item.find("cwe").text
@@ -208,12 +208,12 @@ class NessusXMLParser(object):
                                        impact=impact,
                                        references=references,
                                        cwe=cwe)
-                        find.unsaved_vulnerability_references = list()
+                        find.unsaved_vulnerability_ids = list()
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
-                    if vulnerability_reference:
-                        find.unsaved_vulnerability_references.append(vulnerability_reference)
+                    if vulnerability_id:
+                        find.unsaved_vulnerability_ids.append(vulnerability_id)
 
                     if fqdn and '://' in fqdn:
                         endpoint = Endpoint.from_uri(fqdn)

@@ -42,7 +42,7 @@ class AquaParser(object):
 def get_item(resource, vuln, test):
     resource_name = resource.get('name', resource.get('path'))
     resource_version = resource.get('version', 'No version')
-    vulnerability_reference = vuln.get('name', 'No CVE')
+    vulnerability_id = vuln.get('name', 'No CVE')
     fix_version = vuln.get('fix_version', 'None')
     description = vuln.get('description', 'No description.')
     cvssv3 = None
@@ -85,7 +85,7 @@ def get_item(resource, vuln, test):
         severity_justification += "\n{}".format(used_for_classification)
 
     finding = Finding(
-        title=vulnerability_reference + " - " + resource_name + " (" + resource_version + ") ",
+        title=vulnerability_id + " - " + resource_name + " (" + resource_version + ") ",
         test=test,
         severity=severity,
         severity_justification=severity_justification,
@@ -97,14 +97,14 @@ def get_item(resource, vuln, test):
         component_name=resource.get('name'),
         component_version=resource.get('version'),
         impact=severity)
-    if vulnerability_reference != 'No CVE':
-        finding.unsaved_vulnerability_references = [vulnerability_reference]
+    if vulnerability_id != 'No CVE':
+        finding.unsaved_vulnerability_ids = [vulnerability_id]
 
     return finding
 
 
 def get_item_v2(item, test):
-    vulnerability_reference = item['name']
+    vulnerability_id = item['name']
     file_path = item['file']
     url = item.get('url')
     severity = severity_of(float(item['score']))
@@ -118,7 +118,7 @@ def get_item_v2(item, test):
     else:
         mitigation = 'No known mitigation'
 
-    finding = Finding(title=str(vulnerability_reference) + ': ' + str(file_path),
+    finding = Finding(title=str(vulnerability_id) + ': ' + str(file_path),
                    description=description,
                    url=url,
                    cwe=0,
@@ -126,7 +126,7 @@ def get_item_v2(item, test):
                    severity=severity,
                    impact=severity,
                    mitigation=mitigation)
-    finding.unsaved_vulnerability_references = [vulnerability_reference]
+    finding.unsaved_vulnerability_ids = [vulnerability_id]
 
     return finding
 

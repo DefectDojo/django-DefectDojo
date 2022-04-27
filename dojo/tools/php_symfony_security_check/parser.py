@@ -71,6 +71,6 @@ def get_item(dependency_name, dependency_version, advisory, test):
                       component_version=dependency_version)
 
     if advisory['cve']:
-        finding.unsaved_vulnerability_references = [advisory['cve']]
+        finding.unsaved_vulnerability_ids = [advisory['cve']]
 
     return finding

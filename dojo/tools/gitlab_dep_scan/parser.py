@@ -100,14 +100,14 @@ def get_item(vuln, test):
         mitigation = vuln['solution']
 
     cwe = None
-    vulnerability_reference = None
+    vulnerability_id = None
     references = ''
     if 'identifiers' in vuln:
         for identifier in vuln['identifiers']:
             if identifier['type'].lower() == 'cwe':
                 cwe = identifier['value']
             elif identifier['type'].lower() == 'cve':
-                vulnerability_reference = identifier['value']
+                vulnerability_id = identifier['value']
             else:
                 references += 'Identifier type: {}\n'.format(identifier['type'])
                 references += 'Name: {}\n'.format(identifier['name'])
@@ -116,7 +116,7 @@ def get_item(vuln, test):
                     references += 'URL: {}\n'.format(identifier['url'])
                 references += '\n'
 
-    finding = Finding(title=vulnerability_reference + ": " + title if vulnerability_reference else title,
+    finding = Finding(title=vulnerability_id + ": " + title if vulnerability_id else title,
                       test=test,
                       description=description,
                       severity=severity,
@@ -131,7 +131,7 @@ def get_item(vuln, test):
                       static_finding=True,
                       dynamic_finding=False)
 
-    if vulnerability_reference:
-        finding.unsaved_vulnerability_references = [vulnerability_reference]
+    if vulnerability_id:
+        finding.unsaved_vulnerability_ids = [vulnerability_id]
 
     return finding

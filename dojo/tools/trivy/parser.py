@@ -119,7 +119,7 @@ class TrivyParser:
                 )
 
                 if vuln_id:
-                    finding.unsaved_vulnerability_references = [vuln_id]
+                    finding.unsaved_vulnerability_ids = [vuln_id]
 
                 items.append(finding)
         return items

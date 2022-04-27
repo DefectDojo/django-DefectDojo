@@ -28,8 +28,8 @@ class TestCargoAuditParser(DojoTestCase):
             self.assertEqual("RUSTSEC-2020-0091", finding.vuln_id_from_tool)
             self.assertEqual("2020-12-10", finding.publish_date)
             self.assertEqual(1, finding.nb_occurences)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_references))
-            self.assertEqual("CVE-2020-35711", finding.unsaved_vulnerability_references[0])
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2020-35711", finding.unsaved_vulnerability_ids[0])
 
         with self.subTest(i=1):
             finding = findings[1]
@@ -42,8 +42,8 @@ class TestCargoAuditParser(DojoTestCase):
             self.assertEqual("RUSTSEC-2021-0020", finding.vuln_id_from_tool)
             self.assertEqual("2021-02-05", finding.publish_date)
             self.assertEqual(1, finding.nb_occurences)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_references))
-            self.assertEqual("CVE-2021-21299", finding.unsaved_vulnerability_references[0])
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2021-21299", finding.unsaved_vulnerability_ids[0])
 
         with self.subTest(i=2):
             finding = findings[2]
@@ -56,8 +56,8 @@ class TestCargoAuditParser(DojoTestCase):
             self.assertEqual("RUSTSEC-2021-0003", finding.vuln_id_from_tool)
             self.assertEqual("2021-01-08", finding.publish_date)
             self.assertEqual(1, finding.nb_occurences)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_references))
-            self.assertEqual("CVE-2021-25900", finding.unsaved_vulnerability_references[0])
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2021-25900", finding.unsaved_vulnerability_ids[0])
 
         with self.subTest(i=3):
             finding = findings[3]
@@ -70,5 +70,5 @@ class TestCargoAuditParser(DojoTestCase):
             self.assertEqual("RUSTSEC-2021-0003", finding.vuln_id_from_tool)
             self.assertEqual("2021-01-08", finding.publish_date)
             self.assertEqual(1, finding.nb_occurences)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_references))
-            self.assertEqual("CVE-2021-25900", finding.unsaved_vulnerability_references[0])
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2021-25900", finding.unsaved_vulnerability_ids[0])

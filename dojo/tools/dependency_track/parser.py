@@ -144,7 +144,7 @@ class DependencyTrackParser(object):
         # The vulnId is not always a CVE (e.g. if the vulnerability is not from the NVD source)
         # So here we set the cve for the DefectDojo finding to null unless the source of the
         # Dependency Track vulnerability is NVD
-        vulnerability_reference = vuln_id if source is not None and source.upper() == 'NVD' else None
+        vulnerability_id = vuln_id if source is not None and source.upper() == 'NVD' else None
 
         # Default CWE to CWE-1035 Using Components with Known Vulnerabilities if there is no CWE
         if 'cweId' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['cweId'] is not None:
@@ -210,8 +210,8 @@ class DependencyTrackParser(object):
             static_finding=True,
             dynamic_finding=False)
 
-        if vulnerability_reference:
-            finding.unsaved_vulnerability_references = [vulnerability_reference]
+        if vulnerability_id:
+            finding.unsaved_vulnerability_ids = [vulnerability_id]
 
         return finding
 
