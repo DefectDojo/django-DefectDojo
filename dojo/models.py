@@ -1226,8 +1226,8 @@ class Endpoint_Status(models.Model):
     false_positive = models.BooleanField(default=False, blank=True)
     out_of_scope = models.BooleanField(default=False, blank=True)
     risk_accepted = models.BooleanField(default=False, blank=True)
-    endpoint = models.ForeignKey('Endpoint', null=True, blank=True, on_delete=models.CASCADE, related_name='status_endpoint')
-    finding = models.ForeignKey('Finding', null=True, blank=True, on_delete=models.CASCADE, related_name='status_finding')
+    endpoint = models.ForeignKey('Endpoint', null=False, blank=False, on_delete=models.CASCADE, related_name='status_endpoint')
+    finding = models.ForeignKey('Finding', null=False, blank=False, on_delete=models.CASCADE, related_name='status_finding')
 
     @property
     def age(self):
@@ -1768,8 +1768,8 @@ class Finding(models.Model):
     cve = models.CharField(max_length=50,
                            null=True,
                            blank=False,
-                           verbose_name=_("Vulnerability Reference"),
-                           help_text=_("A reference to a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources."))
+                           verbose_name=_("Vulnerability Id"),
+                           help_text=_("An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources."))
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex],
                               max_length=117,
@@ -2092,7 +2092,7 @@ class Finding(models.Model):
         self.unsaved_response = None
         self.unsaved_tags = None
         self.unsaved_files = None
-        self.unsaved_vulnerability_references = None
+        self.unsaved_vulnerability_ids = None
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -2596,27 +2596,27 @@ class Finding(models.Model):
         return self.references
 
     @cached_property
-    def vulnerability_references(self):
-        # Get vulnerability references from database and convert to list of strings
-        vulnerability_references_model = self.vulnerability_reference_set.all()
-        vulnerability_references = list()
-        for vulnerability_reference in vulnerability_references_model:
-            vulnerability_references.append(vulnerability_reference.vulnerability_reference)
+    def vulnerability_ids(self):
+        # Get vulnerability ids from database and convert to list of strings
+        vulnerability_ids_model = self.vulnerability_id_set.all()
+        vulnerability_ids = list()
+        for vulnerability_id in vulnerability_ids_model:
+            vulnerability_ids.append(vulnerability_id.vulnerability_id)
 
-        # Synchronize the cve field with the unsaved_vulnerability_references
+        # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
         # the cve field is not needed anymore and can be removed.
-        if vulnerability_references and self.cve:
+        if vulnerability_ids and self.cve:
             # Make sure the first entry of the list is the value of the cve field
-            vulnerability_references.insert(0, self.cve)
-        elif not vulnerability_references and self.cve:
+            vulnerability_ids.insert(0, self.cve)
+        elif not vulnerability_ids and self.cve:
             # If there is no list, make one with the value of the cve field
-            vulnerability_references = [self.cve]
+            vulnerability_ids = [self.cve]
 
         # Remove duplicates
-        vulnerability_references = list(dict.fromkeys(vulnerability_references))
+        vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
-        return vulnerability_references
+        return vulnerability_ids
 
 
 class FindingAdmin(admin.ModelAdmin):
@@ -2632,9 +2632,9 @@ Finding.endpoints.through.__str__ = lambda \
     x: "Endpoint: " + str(x.endpoint)
 
 
-class Vulnerability_Reference(models.Model):
+class Vulnerability_Id(models.Model):
     finding = models.ForeignKey(Finding, editable=False, on_delete=models.CASCADE)
-    vulnerability_reference = models.TextField(max_length=50, blank=False, null=False)
+    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
 
 
 class Stub_Finding(models.Model):
@@ -2746,8 +2746,8 @@ class Finding_Template(models.Model):
     cve = models.CharField(max_length=50,
                            null=True,
                            blank=False,
-                           verbose_name="Vulnerability Reference",
-                           help_text="A reference to a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources.")
+                           verbose_name="Vulnerability Id",
+                           help_text="An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources.")
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
@@ -2781,32 +2781,32 @@ class Finding_Template(models.Model):
         return reverse('edit_template', args=[str(self.id)])
 
     @cached_property
-    def vulnerability_references(self):
-        # Get vulnerability references from database and convert to list of strings
-        vulnerability_references_model = self.vulnerability_reference_template_set.all()
-        vulnerability_references = list()
-        for vulnerability_reference in vulnerability_references_model:
-            vulnerability_references.append(vulnerability_reference.vulnerability_reference)
+    def vulnerability_ids(self):
+        # Get vulnerability ids from database and convert to list of strings
+        vulnerability_ids_model = self.vulnerability_id_template_set.all()
+        vulnerability_ids = list()
+        for vulnerability_id in vulnerability_ids_model:
+            vulnerability_ids.append(vulnerability_id.vulnerability_id)
 
-        # Synchronize the cve field with the unsaved_vulnerability_references
+        # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
         # the cve field is not needed anymore and can be removed.
-        if vulnerability_references and self.cve:
+        if vulnerability_ids and self.cve:
             # Make sure the first entry of the list is the value of the cve field
-            vulnerability_references.insert(0, self.cve)
-        elif not vulnerability_references and self.cve:
+            vulnerability_ids.insert(0, self.cve)
+        elif not vulnerability_ids and self.cve:
             # If there is no list, make one with the value of the cve field
-            vulnerability_references = [self.cve]
+            vulnerability_ids = [self.cve]
 
         # Remove duplicates
-        vulnerability_references = list(dict.fromkeys(vulnerability_references))
+        vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
-        return vulnerability_references
+        return vulnerability_ids
 
 
-class Vulnerability_Reference_Template(models.Model):
+class Vulnerability_Id_Template(models.Model):
     finding_template = models.ForeignKey(Finding_Template, editable=False, on_delete=models.CASCADE)
-    vulnerability_reference = models.TextField(max_length=50, blank=False, null=False)
+    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
 
 
 class Check_List(models.Model):

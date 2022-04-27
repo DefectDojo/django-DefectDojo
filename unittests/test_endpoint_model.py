@@ -1,8 +1,13 @@
+import datetime
 from .dojo_test_case import DojoTestCase
+from unittest import skip
 
 from dojo.endpoint.utils import endpoint_get_or_create
-from dojo.models import Endpoint
+from dojo.models import Product_Type, Product, Engagement, Test, Finding, Endpoint, Endpoint_Status
 from django.core.exceptions import ValidationError
+from django.apps import apps
+from django.utils import timezone
+from dojo.endpoint.utils import remove_broken_endpoint_statuses
 
 
 class TestEndpointModel(DojoTestCase):
@@ -149,3 +154,94 @@ class TestEndpointModel(DojoTestCase):
             port=8443
         )
         self.assertTrue(created7)
+
+
+@skip("Outdated - this class was testing clean-up broken entries in old version of model; new version of model doesn't to store broken entries")
+class TestEndpointStatusBrokenModel(DojoTestCase):
+
+    def test_endpoint_status_broken(self):
+
+        self.prod_type = Product_Type.objects.create()
+        self.product = Product.objects.create(prod_type=self.prod_type)
+        self.engagement = Engagement.objects.create(
+            product=self.product,
+            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc)
+        )
+        self.test = Test.objects.create(
+            engagement=self.engagement,
+            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
+            test_type_id=1
+        )
+        from django.contrib.auth import get_user_model
+        user = get_user_model().objects.create().pk
+        self.finding = Finding.objects.create(test=self.test, reporter_id=user).pk
+        self.endpoint = Endpoint.objects.create(protocol='http', host='foo.bar.eps').pk
+        self.another_finding = Finding.objects.create(test=self.test, reporter_id=user).pk
+        self.another_endpoint = Endpoint.objects.create(protocol='http', host='bar.foo.eps').pk
+        self.endpoint_status = {
+            'standard': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 3, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 4, 1, tzinfo=timezone.utc),
+                mitigated=False,
+                finding_id=self.finding,
+                endpoint_id=self.endpoint
+            ).pk,
+            'removed_endpoint': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=self.another_finding,
+                endpoint_id=None
+            ).pk,
+            'removed_finding': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=None,
+                endpoint_id=self.another_endpoint
+            ).pk,
+        }
+
+        Finding.objects.get(id=self.finding).endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['standard'])
+        )
+        Finding.objects.get(id=self.another_finding).endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['removed_endpoint'])
+        )
+
+        Endpoint.objects.get(id=self.endpoint).endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['standard'])
+        )
+        Endpoint.objects.get(id=self.another_endpoint).endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['removed_finding'])
+        )
+
+        remove_broken_endpoint_statuses(apps)
+
+        with self.subTest('Stadnard eps for finding'):
+            f = Finding.objects.filter(id=self.finding)
+            self.assertEqual(f.count(), 1)
+            f = f.first()
+            self.assertEqual(f.endpoint_status.count(), 1)
+            self.assertEqual(f.endpoint_status.first().pk, self.endpoint_status['standard'])
+
+        with self.subTest('Broken eps for finding'):
+            f = Finding.objects.filter(id=self.another_finding)
+            self.assertEqual(f.count(), 1)
+            f = f.first()
+            self.assertEqual(f.endpoint_status.count(), 0)
+
+        with self.subTest('Stadnard eps for endpoint'):
+            e = Endpoint.objects.filter(id=self.endpoint)
+            self.assertEqual(e.count(), 1)
+            e = e.first()
+            self.assertEqual(e.endpoint_status.count(), 1)
+            self.assertEqual(e.endpoint_status.first().pk, self.endpoint_status['standard'])
+
+        with self.subTest('Broken eps for endpoint'):
+            e = Endpoint.objects.filter(id=self.another_endpoint)
+            self.assertEqual(e.count(), 1)
+            e = e.first()
+            self.assertEqual(e.endpoint_status.count(), 0)

@@ -770,21 +770,21 @@ def vulnerability_url(vulnerability_id):
 
 
 @register.filter
-def first_vulnerability_reference(finding):
-    vulnerability_references = finding.vulnerability_references
-    if vulnerability_references:
-        return vulnerability_references[0]
+def first_vulnerability_id(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids:
+        return vulnerability_ids[0]
     else:
         return None
 
 
 @register.filter
-def additional_vulnerability_references(finding):
-    vulnerability_references = finding.vulnerability_references
-    if vulnerability_references and len(vulnerability_references) > 1:
+def additional_vulnerability_ids(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids and len(vulnerability_ids) > 1:
         references = list()
-        for vulnerability_reference in vulnerability_references[1:]:
-            references.append(vulnerability_reference)
+        for vulnerability_id in vulnerability_ids[1:]:
+            references.append(vulnerability_id)
         return references
     else:
         return None

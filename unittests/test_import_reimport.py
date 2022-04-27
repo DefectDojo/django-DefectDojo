@@ -1141,27 +1141,27 @@ class ImportReimportMixin(object):
         for finding in active_findings_after['results']:
             if 'v0.0.0-20190219172222-a4c6cb3142f2' == finding['component_version']:
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['vulnerability_references'][0]['vulnerability_reference'])
+                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/crypto", finding['component_name'])
                 count = count + 1
             elif 'v0.0.0-20190308221718-c2843e01d9a2' == finding['component_version']:
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['vulnerability_references'][0]['vulnerability_reference'])
+                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/crypto", finding['component_name'])
                 count = count + 1
             elif 'v0.0.0-20200302210943-78000ba7a073' == finding['component_version']:
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['vulnerability_references'][0]['vulnerability_reference'])
+                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/crypto", finding['component_name'])
                 count = count + 1
             elif 'v0.3.0' == finding['component_version']:
                 self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
-                self.assertEqual("CVE-2020-14040", finding['vulnerability_references'][0]['vulnerability_reference'])
+                self.assertEqual("CVE-2020-14040", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/text", finding['component_name'])
                 count = count + 1
             elif 'v0.3.2' == finding['component_version']:
                 self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
-                self.assertEqual("CVE-2020-14040", finding['vulnerability_references'][0]['vulnerability_reference'])
+                self.assertEqual("CVE-2020-14040", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/text", finding['component_name'])
                 count = count + 1
 
@@ -1388,8 +1388,8 @@ class ImportReimportMixin(object):
         self.assertEqual(endpoint_status_count_before_active + 1, self.db_endpoint_status_count(mitigated=False))
         self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
 
-    # test handling of vulnerability references with import
-    def test_import_reimport_vulnerability_references(self):
+    # test handling of vulnerability ids with import
+    def test_import_reimport_vulnerability_ids(self):
 
         import0 = self.import_scan_with_params(self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
 
@@ -1398,9 +1398,9 @@ class ImportReimportMixin(object):
         findings = Finding.objects.filter(test=test)
         self.assertEqual(4, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
-        self.assertEqual(2, len(findings[3].vulnerability_references))
-        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_references[0])
-        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_references[1])
+        self.assertEqual(2, len(findings[3].vulnerability_ids))
+        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
+        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_ids[1])
 
         test_type = Test_Type.objects.get(name=self.anchore_grype_scan_type)
         reimport_test = Test(
@@ -1416,9 +1416,9 @@ class ImportReimportMixin(object):
         findings = Finding.objects.filter(test=reimport_test)
         self.assertEqual(4, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
-        self.assertEqual(2, len(findings[3].vulnerability_references))
-        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_references[0])
-        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_references[1])
+        self.assertEqual(2, len(findings[3].vulnerability_ids))
+        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
+        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_ids[1])
 
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
