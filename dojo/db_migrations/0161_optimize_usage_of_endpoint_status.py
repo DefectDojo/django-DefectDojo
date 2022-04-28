@@ -33,4 +33,12 @@ class Migration(migrations.Migration):
                                          to='dojo.Endpoint',
                                          verbose_name='Endpoints'),
         ),
+        migrations.AddField(
+            model_name='endpoint',
+            name='findings',
+            field=models.ManyToManyField(blank=True,
+                                         through='dojo.Endpoint_Status',
+                                         to='dojo.Finding',
+                                         verbose_name='Findings'),
+        ),
     ]

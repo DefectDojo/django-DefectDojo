@@ -1240,10 +1240,7 @@ class Endpoint_Status(models.Model):
         return days if days > 0 else 0
 
     def __str__(self):
-        field_values = []
-        for field in self._meta.get_fields():
-            field_values.append(str(getattr(self, field.name, '')))
-        return ' '.join(field_values)
+        return "'{}' on '{}'".format(str(self.finding), str(self.endpoint))
 
     class Meta:
         indexes = [
@@ -1438,65 +1435,78 @@ class Endpoint(models.Model):
 
     @property
     def mitigated(self):
-        return not self.vulnerable()
+        return not self.vulnerable
 
+    @property
     def vulnerable(self):
-        return self.active_findings_count() > 0
+        return self.active_findings_count > 0
 
-    def findings(self):
-        # TODO just test
-        return self.endpoint_status_set.all().distinct()
-
+    @property
     def findings_count(self):
-        # TODO just test
-        return self.findings().count()
+        return self.findings.count()
 
+    @property
     def active_findings(self):
-        # TODO
-        findings = self.findings().filter(active=True,
+        findings = self.findings.filter(active=True,
                                       verified=True,
                                       out_of_scope=False,
                                       mitigated__isnull=True,
                                       false_p=False,
-                                      duplicate=False).order_by('numerical_severity')
-        findings = findings.filter(endpoint_status__mitigated=False)
+                                      duplicate=False,
+                                      status_finding__mitigated=False,
+                                      status_finding__false_positive=False,
+                                      status_finding__out_of_scope=False,
+                                      status_finding__risk_accepted=False).order_by('numerical_severity')
         return findings
 
+    @property
     def active_findings_count(self):
-        return self.active_findings().count()
+        return self.active_findings.count()
 
+    @property
     def host_endpoints(self):
         return Endpoint.objects.filter(host=self.host,
                                        product=self.product).distinct()
 
+    @property
     def host_endpoints_count(self):
-        return self.host_endpoints().count()
+        return self.host_endpoints.count()
 
+    @property
     def host_mitigated_endpoints(self):
-        meps = Endpoint_Status.objects.filter(endpoint__in=self.host_endpoints(), mitigated=True)
-        return Endpoint.objects.filter(endpoint_status__in=meps).distinct()
+        # TODO
+        meps = Endpoint_Status.objects.filter(endpoint__in=self.host_endpoints, mitigated=True)
+        return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
+    @property
     def host_mitigated_endpoints_count(self):
-        return self.host_mitigated_endpoints().count()
+        return self.host_mitigated_endpoints.count()
 
+    @property
     def host_findings(self):
-        return Finding.objects.filter(endpoints__in=self.host_endpoints()).distinct()
+        return Finding.objects.filter(endpoints__in=self.host_endpoints).distinct()
 
+    @property
     def host_findings_count(self):
-        return self.host_finding().count()
+        return self.host_finding.count()
 
+    @property
     def host_active_findings(self):
-        findings = self.host_findings().filter(active=True,
-                                           verified=True,
-                                           out_of_scope=False,
-                                           mitigated__isnull=True,
-                                           false_p=False,
-                                           duplicate=False).order_by('numerical_severity')
-        findings = findings.filter(endpoint_status__mitigated=False)
+        findings = self.host_findings.filter(active=True,
+                                        verified=True,
+                                        out_of_scope=False,
+                                        mitigated__isnull=True,
+                                        false_p=False,
+                                        duplicate=False,
+                                        status_finding__mitigated=False,
+                                        status_finding__false_positive=False,
+                                        status_finding__out_of_scope=False,
+                                        status_finding__risk_accepted=False).order_by('numerical_severity')
         return findings
 
+    @property
     def host_active_findings_count(self):
-        return self.host_active_findings().count()
+        return self.host_active_findings.count()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -2231,7 +2241,6 @@ class Finding(models.Model):
         else:
             deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
             # convert list of endpoints to the list of their canonical representation
-            # TODO Just test
             endpoint_str_list = list(
                 map(
                     lambda endpoint: str(endpoint),
@@ -2458,7 +2467,6 @@ class Finding(models.Model):
             long_desc += '*Commit hash:* ' + self.test.engagement.commit_hash + '\n\n'
         long_desc += '*Systems*: \n\n'
 
-        # TODO just test
         for e in self.endpoints.all():
             long_desc += str(e) + '\n\n'
         long_desc += '*Description*: \n' + str(self.description) + '\n\n'
@@ -2528,7 +2536,6 @@ class Finding(models.Model):
         else:
             # logger.debug('setting static / dynamic in save')
             # need to have an id/pk before we can access endpoints
-            # TODO just test
             if (self.file_path is not None) and (self.endpoints.count() == 0):
                 self.static_finding = True
                 self.dynamic_finding = False
@@ -2664,10 +2671,6 @@ class FindingAdmin(admin.ModelAdmin):
     raw_id_fields = (
         'endpoints',
     )
-
-# TODO Remove, but test reports
-Finding.endpoints.through.__str__ = lambda \
-    x: "Endpoint: " + str(x.endpoint)
 
 
 class Vulnerability_Id(models.Model):
