@@ -910,9 +910,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [
-        2
-      ],
       "last_reviewed": null
     }
   },
@@ -959,7 +956,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1006,7 +1002,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1053,7 +1048,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1100,7 +1094,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1149,7 +1142,6 @@
       ],
       "dynamic_finding": false,
       "hash_code": "c89d25e445b088ba339908f68e15e3177b78d22f3039d1bfea51c4be251bf4e0",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1197,7 +1189,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1244,7 +1235,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1291,7 +1281,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1339,7 +1328,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1387,7 +1375,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1435,7 +1422,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "6f8d0bf970c14175e597843f4679769a4775742549d90f902ff803de9244c7e1",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1483,7 +1469,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "6f8d0bf970c14175e597843f4679769a4775742549d90f902ff803de9244c7e1",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
