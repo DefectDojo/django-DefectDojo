@@ -1461,18 +1461,16 @@ class Endpoint(models.Model):
 
     @property
     def active_findings_count(self):
-        return self.active_findings.count()
+        return self.active_findings().count()
 
-    @property
     def host_endpoints(self):
         return Endpoint.objects.filter(host=self.host,
                                        product=self.product).distinct()
 
     @property
     def host_endpoints_count(self):
-        return self.host_endpoints.count()
+        return self.host_endpoints().count()
 
-    @property
     def host_mitigated_endpoints(self):
         # TODO
         meps = Endpoint_Status.objects.filter(endpoint__in=self.host_endpoints, mitigated=True)
@@ -1480,17 +1478,15 @@ class Endpoint(models.Model):
 
     @property
     def host_mitigated_endpoints_count(self):
-        return self.host_mitigated_endpoints.count()
+        return self.host_mitigated_endpoints().count()
 
-    @property
     def host_findings(self):
         return Finding.objects.filter(endpoints__in=self.host_endpoints).distinct()
 
     @property
     def host_findings_count(self):
-        return self.host_finding.count()
+        return self.host_finding().count()
 
-    @property
     def host_active_findings(self):
         findings = self.host_findings.filter(active=True,
                                         verified=True,
@@ -1506,7 +1502,7 @@ class Endpoint(models.Model):
 
     @property
     def host_active_findings_count(self):
-        return self.host_active_findings.count()
+        return self.host_active_findings().count()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()

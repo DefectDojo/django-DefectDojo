@@ -1132,7 +1132,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'thread_id', 'notes', 'files',
-                   'line', 'endpoint_status', 'cve']
+                   'line', 'cve']
 
 
 class FindingFilter(FindingFilterWithTags):
@@ -1292,7 +1292,7 @@ class FindingFilter(FindingFilterWithTags):
                    'endpoints', 'references',
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
-                   'hash_code', 'endpoint_status',
+                   'hash_code',
                    'reviewers',
                    'created', 'files', 'sla_start_date', 'cvssv3',
                    'severity_justification', 'steps_to_reproduce']
@@ -1716,7 +1716,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        fields = '__all__'
+        exclude = ['findings']
 
 
 class ApiEndpointFilter(DojoFilter):
@@ -1928,8 +1928,8 @@ class ReportFindingFilter(FindingFilterWithTags):
         model = Finding
         # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references', 'test', 'sonarqube_issue',
-                   'thread_id', 'notes', 'endpoint_status',
+                   'references', 'test', 'sonarqube_issue',
+                   'thread_id', 'notes', 'endpoints',
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 
