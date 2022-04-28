@@ -384,7 +384,7 @@ def finding_querys(request, prod):
 
     return filters
 
-# TODO
+
 def endpoint_querys(request, prod):
     filters = dict()
     endpoints_query = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,

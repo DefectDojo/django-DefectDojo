@@ -101,8 +101,7 @@ class DojoDefaultReImporter(object):
                         author=user)
                     note.save()
 
-                    # TODO
-                    endpoint_statuses = finding.endpoint_status.exclude(Q(false_positive=True) |
+                    endpoint_statuses = finding.status_finding.exclude(Q(false_positive=True) |
                                                                         Q(out_of_scope=True) |
                                                                         Q(risk_accepted=True))
 
@@ -251,7 +250,7 @@ class DojoDefaultReImporter(object):
                 finding.mitigated_by = user
                 finding.active = False
 
-                endpoint_status = finding.endpoint_status.all()
+                endpoint_status = finding.status_finding.all()
                 for status in endpoint_status:
                     status.mitigated_by = user
                     status.mitigated_time = timezone.now()
