@@ -140,7 +140,7 @@ jobs:
           minikube version: 'v1.24.0'
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
-          start args: '--addons=ingress'
+          start args: '--addons=ingress --cni calico'
 
       - name: Status of minikube
         run: |-
@@ -194,6 +194,7 @@ jobs:
 
       - name: Check Application
         run: |-
+             echo 'Running from fork'
              to_complete () {
                kubectl wait --for=$1 $2 --timeout=500s --selector=$3 2>/tmp/test || true
                if [[ -s /tmp/test ]]; then
