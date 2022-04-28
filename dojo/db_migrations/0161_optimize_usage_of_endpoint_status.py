@@ -29,6 +29,8 @@ class Migration(migrations.Migration):
             name='endpoints',
             field=models.ManyToManyField(blank=True,
                                          help_text='The hosts within the product that are susceptible to this flaw. + The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...).',
-                                         through='dojo.Endpoint_Status', to='dojo.Endpoint', verbose_name='Endpoints'),
+                                         through='dojo.Endpoint_Status',
+                                         to='dojo.Endpoint',
+                                         verbose_name='Endpoints'),
         ),
     ]
