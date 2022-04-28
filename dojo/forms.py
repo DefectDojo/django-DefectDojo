@@ -1905,7 +1905,8 @@ class AddDojoUserForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         current_user = get_current_user()
         if not current_user.is_superuser:
-            self.fields['is_staff'].disabled = True
+            if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+                self.fields['is_staff'].disabled = True
             self.fields['is_superuser'].disabled = True
 
 
@@ -1922,7 +1923,8 @@ class EditDojoUserForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         current_user = get_current_user()
         if not current_user.is_superuser:
-            self.fields['is_staff'].disabled = True
+            if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+                self.fields['is_staff'].disabled = True
             self.fields['is_superuser'].disabled = True
 
 
