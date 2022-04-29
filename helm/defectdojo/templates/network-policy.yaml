@@ -15,9 +15,6 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/instance: {{ .Release.Name }}
-    - from: []
-      ports:
-        - port: 8080
   {{- if .Values.networkPolicy.egress }}
   egress:
   {{- toYaml .Values.networkPolicy.egress | nindent 4 }}
@@ -37,4 +34,5 @@ spec:
     - from: []
       ports:
         - port: 8080
+          protocol: TCP
 {{ end }}
