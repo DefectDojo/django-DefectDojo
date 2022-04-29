@@ -436,7 +436,7 @@ def close_finding(request, fid):
                 finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
-                endpoint_status = finding.endpoint_status.all()
+                endpoint_status = finding.status_finding.all()
                 for status in endpoint_status:
                     status.mitigated_by = request.user
                     status.mitigated_time = timezone.now()
@@ -571,7 +571,7 @@ def reopen_finding(request, fid):
     finding.is_mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
-    endpoint_status = finding.endpoint_status.all()
+    endpoint_status = finding.status_finding.all()
     for status in endpoint_status:
         status.mitigated_by = None
         status.mitigated_time = None
