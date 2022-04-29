@@ -15,8 +15,26 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/instance: {{ .Release.Name }}
+    - from: []
+      ports:
+        - port: 8080
   {{- if .Values.networkPolicy.egress }}
   egress:
   {{- toYaml .Values.networkPolicy.egress | nindent 4 }}
   {{ end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-networkpolicy-django
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  podSelector:
+    matchLabels:
+      defectdojo.org/component: django
+  ingress:
+    - from: []
+      ports:
+        - port: 8080
 {{ end }}
