@@ -6,6 +6,9 @@ metadata:
   name: {{ $fullName }}-networkpolicy
   labels:
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
 spec:
   podSelector:
     matchLabels:
@@ -26,6 +29,9 @@ metadata:
   name: {{ $fullName }}-networkpolicy-django
   labels:
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
 spec:
   podSelector:
     matchLabels:
