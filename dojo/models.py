@@ -1443,9 +1443,8 @@ class Endpoint(models.Model):
 
     @property
     def findings_count(self):
-        return self.findings.count()
+        return self.findings.all().count()
 
-    @property
     def active_findings(self):
         findings = self.findings.filter(active=True,
                                       verified=True,
