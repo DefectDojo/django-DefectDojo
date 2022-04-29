@@ -43,6 +43,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.test.queries import get_authorized_tests
+from dojo.user.queries import get_authorized_users
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
 
 
@@ -322,7 +323,7 @@ def test_calendar(request):
         'caltype': 'tests',
         'leads': request.GET.getlist('lead', ''),
         'tests': tests,
-        'users': Dojo_User.objects.all()})
+        'users': get_authorized_users(Permissions.Test_View)})
 
 
 @user_is_authorized(Test, Permissions.Test_View, 'tid')

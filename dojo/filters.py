@@ -35,6 +35,7 @@ from dojo.test.queries import get_authorized_tests
 from dojo.finding.queries import get_authorized_findings
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.finding_group.queries import get_authorized_finding_groups
+from dojo.user.queries import get_authorized_users
 from django.forms import HiddenInput
 from dojo.utils import is_finding_groups_enabled
 
@@ -592,10 +593,7 @@ class ComponentFilter(ProductComponentFilter):
 
 class EngagementDirectFilter(DojoFilter):
     name = CharFilter(lookup_expr='icontains', label='Engagement name contains')
-    lead = ModelChoiceFilter(
-        queryset=Dojo_User.objects.filter(
-            engagement__lead__isnull=False).distinct(),
-        label="Lead")
+    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
     version = CharFilter(field_name='version', lookup_expr='icontains', label='Engagement version')
     test__version = CharFilter(field_name='test__version', lookup_expr='icontains', label='Test version')
 
@@ -647,6 +645,8 @@ class EngagementDirectFilter(DojoFilter):
     def __init__(self, *args, **kwargs):
         super(EngagementDirectFilter, self).__init__(*args, **kwargs)
         self.form.fields['product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+        self.form.fields['lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+            .filter(engagement__lead__isnull=False).distinct()
 
     class Meta:
         model = Engagement
@@ -655,10 +655,7 @@ class EngagementDirectFilter(DojoFilter):
 
 class EngagementFilter(DojoFilter):
     engagement__name = CharFilter(lookup_expr='icontains', label='Engagement name contains')
-    engagement__lead = ModelChoiceFilter(
-        queryset=Dojo_User.objects.filter(
-            engagement__lead__isnull=False).distinct(),
-        label="Lead")
+    engagement__lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
     engagement__version = CharFilter(field_name='engagement__version', lookup_expr='icontains', label='Engagement version')
     engagement__test__version = CharFilter(field_name='engagement__test__version', lookup_expr='icontains', label='Test version')
 
@@ -704,6 +701,8 @@ class EngagementFilter(DojoFilter):
     def __init__(self, *args, **kwargs):
         super(EngagementFilter, self).__init__(*args, **kwargs)
         self.form.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+        self.form.fields['engagement__lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+            .filter(engagement__lead__isnull=False).distinct()
 
     class Meta:
         model = Product
@@ -711,10 +710,7 @@ class EngagementFilter(DojoFilter):
 
 
 class ProductEngagementFilter(DojoFilter):
-    lead = ModelChoiceFilter(
-        queryset=Dojo_User.objects.filter(
-            engagement__lead__isnull=False).distinct(),
-        label="Lead")
+    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
     version = CharFilter(lookup_expr='icontains', label='Engagement version')
     test__version = CharFilter(field_name='test__version', lookup_expr='icontains', label='Test version')
 
@@ -760,9 +756,14 @@ class ProductEngagementFilter(DojoFilter):
 
     )
 
+    def __init__(self, *args, **kwargs):
+        super(ProductEngagementFilter, self).__init__(*args, **kwargs)
+        self.form.fields['lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+            .filter(engagement__lead__isnull=False).distinct()
+
     class Meta:
         model = Product
-        fields = ['id', 'name']
+        fields = ['name']
 
 
 class ApiEngagementFilter(DojoFilter):
@@ -1156,10 +1157,10 @@ class FindingFilter(FindingFilterWithTags):
     payload = CharFilter(lookup_expr='icontains')
 
     reporter = ModelMultipleChoiceFilter(
-        queryset=Dojo_User.objects.all())
+        queryset=Dojo_User.objects.none())
 
     reviewers = ModelMultipleChoiceFilter(
-        queryset=Dojo_User.objects.all())
+        queryset=Dojo_User.objects.none())
 
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
@@ -1331,6 +1332,8 @@ class FindingFilter(FindingFilterWithTags):
             self.form.fields['finding_group'].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View)
         if self.form.fields.get('endpoints'):
             self.form.fields['endpoints'].queryset = get_authorized_endpoints(Permissions.Endpoint_View).distinct()
+        self.form.fields['reporter'].queryset = get_authorized_users(Permissions.Finding_View)
+        self.form.fields['reviewers'].queryset = self.form.fields['reporter'].queryset
 
 
 class AcceptedFindingFilter(FindingFilter):
@@ -1339,11 +1342,12 @@ class AcceptedFindingFilter(FindingFilter):
 
     risk_acceptance__owner = \
         ModelMultipleChoiceFilter(
-            queryset=Dojo_User.objects.all(),
+            queryset=Dojo_User.objects.none(),
             label="Risk Acceptance Owner")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.form.fields['risk_acceptance__owner'].queryset = get_authorized_users(Permissions.Finding_View)
 
 
 class SimilarFindingFilter(FindingFilter):
@@ -1741,10 +1745,7 @@ class ApiEndpointFilter(DojoFilter):
 
 
 class EngagementTestFilter(DojoFilter):
-    lead = ModelChoiceFilter(
-        queryset=Dojo_User.objects.filter(
-            engagement__lead__isnull=False).distinct(),
-        label="Lead")
+    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
     version = CharFilter(lookup_expr='icontains', label='Version')
 
     if settings.TRACK_IMPORT_HISTORY:
@@ -1799,6 +1800,8 @@ class EngagementTestFilter(DojoFilter):
         super(DojoFilter, self).__init__(*args, **kwargs)
         self.form.fields['test_type'].queryset = Test_Type.objects.filter(test__engagement=self.engagement).distinct().order_by('name')
         self.form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=self.engagement.product).distinct()
+        self.form.fields['lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+            .filter(test__lead__isnull=False).distinct()
 
 
 class ApiTestFilter(DojoFilter):
@@ -2080,13 +2083,17 @@ class LogEntryFilter(DojoFilter):
     from auditlog.models import LogEntry
 
     action = MultipleChoiceFilter(choices=LogEntry.Action.choices)
-    actor = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.all())
+    actor = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())
     timestamp = DateRangeFilter()
+
+    def __init__(self, *args, **kwargs):
+        super(LogEntryFilter, self).__init__(*args, **kwargs)
+        self.form.fields['actor'].queryset = get_authorized_users(Permissions.Product_View)
 
     class Meta:
         model = LogEntry
         exclude = ['content_type', 'object_pk', 'object_id', 'object_repr',
-                   'changes', 'additional_data']
+                   'changes', 'additional_data', 'remote_addr']
 
 
 class ProductTypeFilter(DojoFilter):
