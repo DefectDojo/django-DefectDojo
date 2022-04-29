@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<analysis xmlns="https://jeremylong.github.io/DependencyCheck/dependency-check.2.5.xsd">
+   <scanInfo>
+      <engineVersion>6.5.3</engineVersion>
+      <dataSource>
+         <name>NVD CVE Checked</name>
+         <timestamp>2022-01-15T15:27:20</timestamp>
+      </dataSource>
+      <dataSource>
+         <name>NVD CVE Modified</name>
+         <timestamp>2022-01-15T14:00:01</timestamp>
+      </dataSource>
+      <dataSource>
+         <name>VersionCheckOn</name>
+         <timestamp>2022-01-15T15:27:20</timestamp>
+      </dataSource>
+   </scanInfo>
+   <projectInfo>
+      <name />
+      <reportDate>2022-01-15T14:31:13.042600508Z</reportDate>
+      <credits>This report contains data retrieved from the National Vulnerability Database: https://nvd.nist.gov, NPM Public Advisories: https://www.npmjs.com/advisories, and the RetireJS community.</credits>
+   </projectInfo>
+   <dependencies>
+      <dependency isVirtual="false">
+         <fileName>log4j-api-2.12.4.jar</fileName>
+         <filePath>/home/damien/vulnerabilities/apache-log4j-2.12.4-bin/log4j-api-2.12.4.jar</filePath>
+         <md5>f0edf6299d91b0661456d539f641cae4</md5>
+         <sha1>c1d3c1f6b392ebd4ca8a9d65e8bad549e885fcbc</sha1>
+         <sha256>109df2737a67e8a6a962fdebd31a5f076cfc61bd348d893cffdb48caa264a826</sha256>
+         <description>The Apache Log4j API</description>
+         <license>https://www.apache.org/licenses/LICENSE-2.0.txt</license>
+         <evidenceCollected>
+            <evidence type="vendor" confidence="HIGH">
+               <source>file</source>
+               <name>name</name>
+               <value>log4j-api</value>
+            </evidence>
+            <evidence type="vendor" confidence="HIGHEST">
+               <source>jar</source>
+               <name>package name</name>
+               <value>apache</value>
+            </evidence>
+            <evidence type="vendor" confidence="HIGHEST">
+               <source>jar</source>
+               <name>package name</name>
+               <value>log4j</value>
+            </evidence>
+            <evidence type="vendor" confidence="HIGHEST">
+               <source>jar</source>
+               <name>package name</name>
+               <value>logging</value>
+            </evidence>
+            <evidence type="vendor" confidence="HIGHEST">
+               <source>jar</source>
+               <name>package name</name>
+               <value>org</value>
+            </evidence>
+            <evidence type="vendor" confidence="LOW">
+               <source>Manifest</source>
+               <name>bundle-docurl</name>
+               <value>https://www.apache.org/</value>
+            </evidence>
+            <evidence type="vendor" confidence="MEDIUM">
+               <source>Manifest</source>
+               <name>bundle-symbolicname</name>
+               <value>org.apache.logging.log4j.api</value>
+            </evidence>
+            <evidence type="vendor" confidence="LOW">
+               <source>Manifest</source>
+               <name>implementation-url</name>
+               <value>https://logging.apache.org/log4j/2.x/log4j-api/</value>
+            </evidence>
+            <evidence type="vendor" confidence="HIGH">
+               <source>Manifest</source>
+               <name>Implementation-Vendor</name>
+               <value>The Apache Software Foundation</value>
+            </evidence>
+            <evidence type="vendor" confidence="MEDIUM">
+               <source>Manifest</source>
+               <name>Implementation-Vendor-Id</name>
+               <value>org.apache.logging.log4j</value>
+            </evidence>
+            <evidence type="vendor" confidence="LOW">
+               <source>Manifest</source>
+               <name>log4jreleasekey</name>
+               <value>B3D8E1BA</value>
+            </evidence>
+            <evidence type="vendor" confidence="LOW">
+               <source>Manifest</source>
+               <name>log4jreleasemanager</name>
+               <value>Ralph Goers</value>
+            </evidence>
+            <evidence type="vendor" confidence="MEDIUM">
+               <source>Manifest</source>
+               <name>log4jsigningusername</name>
+               <value>rgoers@apache.org</value>
+            </evidence>
+            <evidence type="vendor" confidence="LOW">
+               <source>Manifest</source>
+               <name>multi-release</name>
+               <value>true</value>
+            </evidence>
+            <evidence type="vendor" confidence="LOW">
+               <source>Manifest</source>
+               <name>require-capability</name>
+               <value>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.7))"</value>
+            </evidence>
+            <evidence type="vendor" confidence="LOW">
+               <source>Manifest</source>
+               <name>specification-vendor</name>
+               <value>The Apache Software Foundation</value>
+            </evidence>
+            <evidence type="vendor" confidence="LOW">
+               <source>pom</source>
+               <name>artifactid</name>
+               <value>log4j-api</value>
+            </evidence>
+            <evidence type="vendor" confidence="HIGHEST">
+               <source>pom</source>
+               <name>groupid</name>
+               <value>org.apache.logging.log4j</value>
+            </evidence>
+            <evidence type="vendor" confidence="HIGH">
+               <source>pom</source>
+               <name>name</name>
+               <value>Apache Log4j API</value>
+            </evidence>
+            <evidence type="vendor" confidence="LOW">
+               <source>pom</source>
+               <name>parent-artifactid</name>
+               <value>log4j</value>
+            </evidence>
+            <evidence type="product" confidence="HIGH">
+               <source>file</source>
+               <name>name</name>
+               <value>log4j-api</value>
+            </evidence>
+            <evidence type="product" confidence="HIGHEST">
+               <source>jar</source>
+               <name>package name</name>
+               <value>apache</value>
+            </evidence>
+            <evidence type="product" confidence="HIGHEST">
+               <source>jar</source>
+               <name>package name</name>
+               <value>log4j</value>
+            </evidence>
+            <evidence type="product" confidence="HIGHEST">
+               <source>jar</source>
+               <name>package name</name>
+               <value>logging</value>
+            </evidence>
+            <evidence type="product" confidence="HIGHEST">
+               <source>jar</source>
+               <name>package name</name>
+               <value>org</value>
+            </evidence>
+            <evidence type="product" confidence="LOW">
+               <source>Manifest</source>
+               <name>bundle-docurl</name>
+               <value>https://www.apache.org/</value>
+            </evidence>
+            <evidence type="product" confidence="MEDIUM">
+               <source>Manifest</source>
+               <name>Bundle-Name</name>
+               <value>Apache Log4j API</value>
+            </evidence>
+            <evidence type="product" confidence="MEDIUM">
+               <source>Manifest</source>
+               <name>bundle-symbolicname</name>
+               <value>org.apache.logging.log4j.api</value>
+            </evidence>
+            <evidence type="product" confidence="HIGH">
+               <source>Manifest</source>
+               <name>Implementation-Title</name>
+               <value>Apache Log4j API</value>
+            </evidence>
+            <evidence type="product" confidence="LOW">
+               <source>Manifest</source>
+               <name>implementation-url</name>
+               <value>https://logging.apache.org/log4j/2.x/log4j-api/</value>
+            </evidence>
+            <evidence type="product" confidence="LOW">
+               <source>Manifest</source>
+               <name>log4jreleasekey</name>
+               <value>B3D8E1BA</value>
+            </evidence>
+            <evidence type="product" confidence="LOW">
+               <source>Manifest</source>
+               <name>log4jreleasemanager</name>
+               <value>Ralph Goers</value>
+            </evidence>
+            <evidence type="product" confidence="MEDIUM">
+               <source>Manifest</source>
+               <name>log4jsigningusername</name>
+               <value>rgoers@apache.org</value>
+            </evidence>
+            <evidence type="product" confidence="LOW">
+               <source>Manifest</source>
+               <name>multi-release</name>
+               <value>true</value>
+            </evidence>
+            <evidence type="product" confidence="LOW">
+               <source>Manifest</source>
+               <name>require-capability</name>
+               <value>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.7))"</value>
+            </evidence>
+            <evidence type="product" confidence="MEDIUM">
+               <source>Manifest</source>
+               <name>specification-title</name>
+               <value>Apache Log4j API</value>
+            </evidence>
+            <evidence type="product" confidence="HIGHEST">
+               <source>pom</source>
+               <name>artifactid</name>
+               <value>log4j-api</value>
+            </evidence>
+            <evidence type="product" confidence="HIGHEST">
+               <source>pom</source>
+               <name>groupid</name>
+               <value>org.apache.logging.log4j</value>
+            </evidence>
+            <evidence type="product" confidence="HIGH">
+               <source>pom</source>
+               <name>name</name>
+               <value>Apache Log4j API</value>
+            </evidence>
+            <evidence type="product" confidence="MEDIUM">
+               <source>pom</source>
+               <name>parent-artifactid</name>
+               <value>log4j</value>
+            </evidence>
+            <evidence type="version" confidence="HIGH">
+               <source>file</source>
+               <name>version</name>
+               <value>2.12.4</value>
+            </evidence>
+            <evidence type="version" confidence="HIGH">
+               <source>Manifest</source>
+               <name>Bundle-Version</name>
+               <value>2.12.4</value>
+            </evidence>
+            <evidence type="version" confidence="HIGH">
+               <source>Manifest</source>
+               <name>Implementation-Version</name>
+               <value>2.12.4</value>
+            </evidence>
+            <evidence type="version" confidence="MEDIUM">
+               <source>Manifest</source>
+               <name>log4jreleaseversion</name>
+               <value>2.12.4</value>
+            </evidence>
+            <evidence type="version" confidence="HIGHEST">
+               <source>pom</source>
+               <name>version</name>
+               <value>2.12.4</value>
+            </evidence>
+         </evidenceCollected>
+         <identifiers>
+            <package confidence="HIGH">
+               <id>pkg:maven/org.apache.logging.log4j/log4j-api@2.12.4</id>
+               <url>https://ossindex.sonatype.org/component/pkg:maven/org.apache.logging.log4j/log4j-api@2.12.4?utm_source=dependency-check&amp;utm_medium=integration&amp;utm_content=6.2.2</url>
+            </package>
+            <vulnerabilityIds confidence="HIGHEST">
+               <id>cpe:2.3:a:apache:log4j:2.12.4:*:*:*:*:*:*:*</id>
+               <url>https://nvd.nist.gov/vuln/search/results?form_type=Advanced&amp;results_type=overview&amp;search_type=all&amp;cpe_vendor=cpe%3A%2F%3Aapache&amp;cpe_product=cpe%3A%2F%3Aapache%3Alog4j&amp;cpe_version=cpe%3A%2F%3Aapache%3Alog4j%3A2.12.4</url>
+            </vulnerabilityIds>
+         </identifiers>
+         <vulnerabilities>
+            <vulnerability source="NVD">
+               <name>CVE-2020-9488</name>
+               <severity>LOW</severity>
+               <cvssV2>
+                  <score>4.3</score>
+                  <accessVector>NETWORK</accessVector>
+                  <accessComplexity>MEDIUM</accessComplexity>
+                  <authenticationr>NONE</authenticationr>
+                  <confidentialImpact>PARTIAL</confidentialImpact>
+                  <integrityImpact>NONE</integrityImpact>
+                  <availabilityImpact>NONE</availabilityImpact>
+                  <severity>MEDIUM</severity>
+                  <version>2.0</version>
+                  <exploitabilityScore>8.6</exploitabilityScore>
+                  <impactScore>2.9</impactScore>
+               </cvssV2>
+               <cvssV3>
+                  <baseScore>3.7</baseScore>
+                  <attackVector>NETWORK</attackVector>
+                  <attackComplexity>HIGH</attackComplexity>
+                  <privilegesRequired>NONE</privilegesRequired>
+                  <userInteraction>NONE</userInteraction>
+                  <scope>UNCHANGED</scope>
+                  <confidentialityImpact>LOW</confidentialityImpact>
+                  <integrityImpact>NONE</integrityImpact>
+                  <availabilityImpact>NONE</availabilityImpact>
+                  <baseSeverity>LOW</baseSeverity>
+                  <exploitabilityScore>2.2</exploitabilityScore>
+                  <impactScore>1.4</impactScore>
+                  <version>3.1</version>
+               </cvssV3>
+               <cwes>
+                  <cwe>CWE-295</cwe>
+               </cwes>
+               <description>Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.</description>
+               <references>
+                  <reference>
+                     <source>MISC</source>
+                     <url>https://www.oracle.com/security-alerts/cpuoct2020.html</url>
+                     <name>https://www.oracle.com/security-alerts/cpuoct2020.html</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r9776e71e3c67c5d13a91c1eba0dc025b48b802eb7561cc6956d6961c@%3Cissues.hive.apache.org%3E</url>
+                     <name>[hive-issues] 20201208 [jira] [Work logged] (HIVE-24500) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MISC</source>
+                     <url>https://www.oracle.com/security-alerts/cpujul2020.html</url>
+                     <name>https://www.oracle.com/security-alerts/cpujul2020.html</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/rd55f65c6822ff235eda435d31488cfbb9aa7055cdf47481ebee777cc@%3Cissues.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-issues] 20200504 [jira] [Resolved] (ZOOKEEPER-3817) owasp failing due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/rf1c2a81a08034c688b8f15cf58a4cfab322d00002ca46d20133bee20@%3Cdev.kafka.apache.org%3E</url>
+                     <name>[kafka-dev] 20200514 [jira] [Created] (KAFKA-9997) upgrade log4j lib to address CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r1fc73f0e16ec2fa249d3ad39a5194afb9cc5afb4c023dc0bab5a5881@%3Cissues.hive.apache.org%3E</url>
+                     <name>[hive-issues] 20201207 [jira] [Work started] (HIVE-24500) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/rc2dbc4633a6eea1fcbce6831876cfa17b73759a98c65326d1896cb1a@%3Ctorque-dev.db.apache.org%3E</url>
+                     <name>[db-torque-dev] 20210127 Re: Items for our (delayed) quarterly report to the board?</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r7e739f2961753af95e2a3a637828fb88bfca68e5d6b0221d483a9ee5@%3Cnotifications.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-notifications] 20200504 [GitHub] [zookeeper] symat opened a new pull request #1346: ZOOKEEPER-3817: suppress log4j SmtpAppender related CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MISC</source>
+                     <url>https://lists.apache.org/thread.html/rbc7642b9800249553f13457e46b813bea1aec99d2bc9106510e00ff3@%3Ctorque-dev.db.apache.org%3E</url>
+                     <name>https://lists.apache.org/thread.html/rbc7642b9800249553f13457e46b813bea1aec99d2bc9106510e00ff3@%3Ctorque-dev.db.apache.org%3E</name>
+                  </reference>
+                  <reference>
+                     <source>CONFIRM</source>
+                     <url>https://issues.apache.org/jira/browse/LOG4J2-2819</url>
+                     <name>https://issues.apache.org/jira/browse/LOG4J2-2819</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r4d5dc9f3520071338d9ebc26f9f158a43ae28a91923d176b550a807b@%3Cdev.hive.apache.org%3E</url>
+                     <name>[hive-dev] 20210216 [jira] [Created] (HIVE-24787) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r4db540cafc5d7232c62e076051ef661d37d345015b2e59b3f81a932f@%3Cdev.hive.apache.org%3E</url>
+                     <name>[hive-dev] 20201207 [jira] [Created] (HIVE-24500) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r4285398e5585a0456d3d9db021a4fce6e6fcf3ec027dfa13a450ec98@%3Cissues.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-issues] 20200504 [jira] [Commented] (ZOOKEEPER-3817) owasp failing due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MISC</source>
+                     <url>https://www.oracle.com/security-alerts/cpujan2021.html</url>
+                     <name>https://www.oracle.com/security-alerts/cpujan2021.html</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r7e5c10534ed06bf805473ac85e8412fe3908a8fa4cabf5027bf11220@%3Cdev.kafka.apache.org%3E</url>
+                     <name>[kafka-dev] 20200514 [jira] [Created] (KAFKA-9996) upgrade zookeeper to 3.5.8 to address security vulnerabilities</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r8c001b9a95c0bbec06f4457721edd94935a55932e64b82cc5582b846@%3Cissues.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-issues] 20200504 [jira] [Created] (ZOOKEEPER-3817) owasp failing due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r5a68258e5ab12532dc179edae3d6e87037fa3b50ab9d63a90c432507@%3Cissues.hive.apache.org%3E</url>
+                     <name>[hive-issues] 20210216 [jira] [Assigned] (HIVE-24787) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r7641ee788e1eb1be4bb206a7d15f8a64ec6ef23e5ec6132d5a567695@%3Cnotifications.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-notifications] 20200504 Build failed in Jenkins: zookeeper-master-maven-owasp #489</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r48efc7cb5aeb4e1f67aaa06fb4b5479a5635d12f07d0b93fc2d08809@%3Ccommits.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-commits] 20200504 [zookeeper] branch branch-3.6 updated: ZOOKEEPER-3817: suppress log4j SmtpAppender related CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/rd5d58088812cf8e677d99b07f73c654014c524c94e7fedbdee047604@%3Ctorque-dev.db.apache.org%3E</url>
+                     <name>[db-torque-dev] 20210128 Antwort: Re: Items for our (delayed) quarterly report to the board?</name>
+                  </reference>
+                  <reference>
+                     <source>CONFIRM</source>
+                     <url>https://security.netapp.com/advisory/ntap-20200504-0003/</url>
+                     <name>https://security.netapp.com/advisory/ntap-20200504-0003/</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/rd0e44e8ef71eeaaa3cf3d1b8b41eb25894372e2995ec908ce7624d26@%3Ccommits.pulsar.apache.org%3E</url>
+                     <name>[pulsar-commits] 20201215 [GitHub] [pulsar] yanshuchong opened a new issue #8967: CVSS issue list</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r0df3d7a5acb98c57e64ab9266aa21eeee1d9b399addb96f9cf1cbe05@%3Cdev.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-dev] 20200504 log4j SmtpAppender related CVE</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r22a56beb76dd8cf18e24fda9072f1e05990f49d6439662d3782a392f@%3Cissues.hive.apache.org%3E</url>
+                     <name>[hive-issues] 20210216 [jira] [Resolved] (HIVE-24787) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>DEBIAN</source>
+                     <url>https://www.debian.org/security/2021/dsa-5020</url>
+                     <name>DSA-5020</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r2f209d271349bafd91537a558a279c08ebcff8fa3e547357d58833e6@%3Cdev.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-dev] 20200504 [jira] [Created] (ZOOKEEPER-3817) owasp failing due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/rbc45eb0f53fd6242af3e666c2189464f848a851d408289840cecc6e3@%3Ccommits.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-commits] 20200504 [zookeeper] branch master updated: ZOOKEEPER-3817: suppress log4j SmtpAppender related CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.debian.org/debian-lts-announce/2021/12/msg00017.html</url>
+                     <name>[debian-lts-announce] 20211226 [SECURITY] [DLA 2852-1] apache-log4j2 security update</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r9a79175c393d14d760a0ae3731b4a873230a16ef321aa9ca48a810cd@%3Cissues.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-issues] 20200504 [jira] [Updated] (ZOOKEEPER-3817) owasp failing due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/rc6b81c013618d1de1b5d6b8c1088aaf87b4bacc10c2371f15a566701@%3Cnotifications.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-notifications] 20200504 [GitHub] [zookeeper] symat commented on pull request #1346: ZOOKEEPER-3817: suppress log4j SmtpAppender related CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MISC</source>
+                     <url>https://lists.apache.org/thread.html/re024d86dffa72ad800f2848d0c77ed93f0b78ee808350b477a6ed987@%3Cgitbox.hive.apache.org%3E</url>
+                     <name>https://lists.apache.org/thread.html/re024d86dffa72ad800f2848d0c77ed93f0b78ee808350b477a6ed987@%3Cgitbox.hive.apache.org%3E</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/ra632b329b2ae2324fabbad5da204c4ec2e171ff60348ec4ba698fd40@%3Cissues.hive.apache.org%3E</url>
+                     <name>[hive-issues] 20201207 [jira] [Assigned] (HIVE-24500) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r393943de452406f0f6f4b3def9f8d3c071f96323c1f6ed1a098f7fe4@%3Ctorque-dev.db.apache.org%3E</url>
+                     <name>[db-torque-dev] 20200715 Build failed in Jenkins: Torque4-trunk #685</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/ra051e07a0eea4943fa104247e69596f094951f51512d42c924e86c75@%3Cissues.hive.apache.org%3E</url>
+                     <name>[hive-issues] 20210218 [jira] [Updated] (HIVE-24787) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/rf9fa47ab66495c78bb4120b0754dd9531ca2ff0430f6685ac9b07772@%3Cdev.mina.apache.org%3E</url>
+                     <name>[mina-dev] 20210225 [jira] [Created] (FTPSERVER-500) Security vulnerability in common/lib/log4j-1.2.17.jar</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r2721aba31a8562639c4b937150897e24f78f747cdbda8641c0f659fe@%3Cusers.kafka.apache.org%3E</url>
+                     <name>[kafka-users] 20210617 vulnerabilities</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/rd8e87c4d69df335d0ba7d815b63be8bd8a6352f429765c52eb07ddac@%3Cissues.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-issues] 20200504 [jira] [Assigned] (ZOOKEEPER-3817) owasp failing due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r33864a0fc171c1c4bf680645ebb6d4f8057899ab294a43e1e4fe9d04@%3Cissues.hive.apache.org%3E</url>
+                     <name>[hive-issues] 20210209 [jira] [Resolved] (HIVE-24500) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r45916179811a32cbaa500f972de9098e6ee80ee81c7f134fce83e03a@%3Cissues.flink.apache.org%3E</url>
+                     <name>[flink-issues] 20210510 [GitHub] [flink] zentol opened a new pull request #15879: [FLINK-22407][build] Bump log4j to 2.24.1</name>
+                  </reference>
+                  <reference>
+                     <source>MISC</source>
+                     <url>https://www.oracle.com/security-alerts/cpuoct2021.html</url>
+                     <name>https://www.oracle.com/security-alerts/cpuoct2021.html</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r4ed1f49616a8603832d378cb9d13e7a8b9b27972bb46d946ccd8491f@%3Cissues.hive.apache.org%3E</url>
+                     <name>[hive-issues] 20201207 [jira] [Updated] (HIVE-24500) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r0a2699f724156a558afd1abb6c044fb9132caa66dce861b82699722a@%3Cjira.kafka.apache.org%3E</url>
+                     <name>[kafka-jira] 20200514 [jira] [Created] (KAFKA-9997) upgrade log4j lib to address CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MISC</source>
+                     <url>https://www.oracle.com/security-alerts/cpuApr2021.html</url>
+                     <name>https://www.oracle.com/security-alerts/cpuApr2021.html</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r3d1d00441c55144a4013adda74b051ae7864128ebcfb6ee9721a2eb3@%3Cissues.hive.apache.org%3E</url>
+                     <name>[hive-issues] 20210125 [jira] [Work logged] (HIVE-24500) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r48bcd06049c1779ef709564544c3d8a32ae6ee5c3b7281a606ac4463@%3Cjira.kafka.apache.org%3E</url>
+                     <name>[kafka-jira] 20200515 [jira] [Commented] (KAFKA-9997) upgrade log4j lib to address CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r65578f3761a89bc164e8964acd5d913b9f8fd997967b195a89a97ca3@%3Cissues.hive.apache.org%3E</url>
+                     <name>[hive-issues] 20201208 [jira] [Updated] (HIVE-24500) Hive - upgrade log4j 2.12.1 to 2.13.2+ due to CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/rec34b1cccf907898e7cb36051ffac3ccf1ea89d0b261a2a3b3fb267f@%3Ccommits.zookeeper.apache.org%3E</url>
+                     <name>[zookeeper-commits] 20200504 [zookeeper] branch branch-3.5 updated: ZOOKEEPER-3817: suppress log4j SmtpAppender related CVE-2020-9488</name>
+                  </reference>
+                  <reference>
+                     <source>MLIST</source>
+                     <url>https://lists.apache.org/thread.html/r8e96c340004b7898cad3204ea51280ef6e4b553a684e1452bf1b18b1@%3Cjira.kafka.apache.org%3E</url>
+                     <name>[kafka-jira] 20200514 [jira] [Created] (KAFKA-9996) upgrade zookeeper to 3.5.8 to address security vulnerabilities</name>
+                  </reference>
+               </references>
+               <vulnerableSoftware>
+                  <software vulnerabilityIdMatched="true" versionEndExcluding="2.13.2">cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:communications_application_session_controller:3.9m0p1:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:communications_billing_and_revenue_management:7.5.0.23.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:communications_billing_and_revenue_management:12.0.0.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:communications_eagle_ftp_table_base_retrieval:4.5:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:communications_offline_mediation_controller:12.0.0.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:communications_services_gatekeeper:7.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:communications_unified_inventory_management:7.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:communications_unified_inventory_management:7.4.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:data_integrator:12.2.1.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:data_integrator:12.2.1.4.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:enterprise_manager_for_peoplesoft:13.4.1.1:*:*:*:*:*:*:*</software>
+                  <software versionStartIncluding="8.0.6.0.0" versionEndIncluding="8.1.0.0.0">cpe:2.3:a:oracle:financial_services_analytical_applications_infrastructure:*:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:financial_services_institutional_performance_analytics:8.0.6:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:financial_services_institutional_performance_analytics:8.1.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:financial_services_institutional_performance_analytics:8.7.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:financial_services_market_risk_measurement_and_management:8.0.6:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:financial_services_market_risk_measurement_and_management:8.0.8:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:financial_services_market_risk_measurement_and_management:8.1.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:financial_services_price_creation_and_discovery:8.0.6:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:financial_services_price_creation_and_discovery:8.0.7:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:financial_services_retail_customer_analytics:8.0.6:*:*:*:*:*:*:*</software>
+                  <software versionStartIncluding="11.5.0" versionEndIncluding="11.7.0">cpe:2.3:a:oracle:flexcube_core_banking:*:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:flexcube_core_banking:5.2.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:flexcube_private_banking:12.0.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:flexcube_private_banking:12.1.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:health_sciences_information_manager:3.0.1:*:*:*:*:*:*:*</software>
+                  <software versionStartIncluding="5.0.0.0" versionEndIncluding="5.6.0.0">cpe:2.3:a:oracle:insurance_insbridge_rating_and_underwriting:*:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:insurance_insbridge_rating_and_underwriting:5.6.1.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:insurance_policy_administration_j2ee:10.2.0.37:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:insurance_policy_administration_j2ee:10.2.4.12:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:insurance_policy_administration_j2ee:11.0.2.25:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:insurance_policy_administration_j2ee:11.1.0.15:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:insurance_policy_administration_j2ee:11.2.0.26:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:insurance_rules_palette:10.2.0.37:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:insurance_rules_palette:10.2.4.12:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:insurance_rules_palette:11.0.2.25:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:insurance_rules_palette:11.1.0.15:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:insurance_rules_palette:11.2.0.26:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:jd_edwards_world_security:a9.4:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:oracle_goldengate_application_adapters:19.1.0.0.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:peoplesoft_enterprise_peopletools:8.56:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:peoplesoft_enterprise_peopletools:8.57:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:peoplesoft_enterprise_peopletools:8.58:*:*:*:*:*:*:*</software>
+                  <software versionStartIncluding="12.2.0" versionEndIncluding="12.2.20">cpe:2.3:a:oracle:policy_automation:*:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:policy_automation_connector_for_siebel:10.4.6:*:*:*:*:*:*:*</software>
+                  <software versionStartIncluding="12.2.0" versionEndIncluding="12.2.20">cpe:2.3:a:oracle:policy_automation_for_mobile_devices:*:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:primavera_unifier:18.8:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:primavera_unifier:19.12:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_advanced_inventory_planning:14.1:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_assortment_planning:15.0.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_assortment_planning:16.0.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_bulk_data_integration:15.0.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_bulk_data_integration:16.0.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_customer_management_and_segmentation_foundation:16.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_customer_management_and_segmentation_foundation:17.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_customer_management_and_segmentation_foundation:18.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_customer_management_and_segmentation_foundation:19.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_eftlink:15.0.2:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_eftlink:16.0.3:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_eftlink:17.0.2:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_eftlink:18.0.1:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_eftlink:19.0.1:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_insights_cloud_service_suite:19.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_integration_bus:14.1:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_integration_bus:15.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_integration_bus:16.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_order_broker_cloud_service:16.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_order_broker_cloud_service:18.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_order_broker_cloud_service:19.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_order_broker_cloud_service:19.1:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_order_broker_cloud_service:19.2:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_order_broker_cloud_service:19.3:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_predictive_application_server:14.1.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_predictive_application_server:15.0.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_predictive_application_server:16.0.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_xstore_point_of_service:15.0.4:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_xstore_point_of_service:16.0.6:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_xstore_point_of_service:17.0.4:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_xstore_point_of_service:18.0.3:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:retail_xstore_point_of_service:19.0.2:*:*:*:*:*:*:*</software>
+                  <software versionEndIncluding="21.9">cpe:2.3:a:oracle:siebel_apps_-_marketing:*:*:*:*:*:*:*:*</software>
+                  <software versionEndIncluding="21.2">cpe:2.3:a:oracle:siebel_ui_framework:*:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:spatial_and_graph:18c:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:spatial_and_graph:19c:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:spatial_and_graph:12.2.0.1:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:storagetek_tape_analytics_sw_tool:2.3.1:*:*:*:*:*:*:*</software>
+                  <software versionStartIncluding="4.3.0.1.0" versionEndIncluding="4.3.0.6.0">cpe:2.3:a:oracle:utilities_framework:*:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:utilities_framework:2.2.0.0.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:utilities_framework:4.2.0.2.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:utilities_framework:4.2.0.3.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:utilities_framework:4.4.0.0.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:utilities_framework:4.4.0.2.0:*:*:*:*:*:*:*</software>
+                  <software>cpe:2.3:a:oracle:weblogic_server:10.3.6.0.0:*:*:*:*:*:*:*</software>
+               </vulnerableSoftware>
+            </vulnerability>
+         </vulnerabilities>
+      </dependency>
+   </dependencies>
+</analysis>
+

@@ -27,7 +27,9 @@ jobs:
       #     password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       # - name: Read Docker Image Identifiers
       #   id: read-docker-image-identifiers
@@ -35,18 +37,10 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-
-      # build with docker so we can use layer caching
-      - name: Cache Docker layers
-        uses: actions/cache@v2
         with:
-          path: /tmp/.buildx-cache-${{ env.docker-image }}
-          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}
-
+          buildkitd-flags: --debug
+          driver-opts: image=moby/buildkit:master # needed to get the fix for https://github.com/moby/buildkit/issues/2426
+          
       - name: Build
         id: docker_build
         uses: docker/build-push-action@v2
@@ -58,8 +52,8 @@ jobs:
             ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
           file: Dockerfile.${{ env.docker-image }}
 
-          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
-          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # run tests with docker-compose
       - name: Set unit-test mode
@@ -67,16 +61,16 @@ jobs:
 
       # phased startup so we can use the exit code from unit test container
       - name: Start MySQL
-        run: docker-compose up -d
+        run: docker-compose --env-file ./docker/environments/mysql-redis.env up -d mysql
 
       # no celery or initializer needed for unit tests
       - name: Unit tests
-        run: docker-compose up --no-deps --exit-code-from uwsgi uwsgi
+        run: docker-compose --profile mysql-redis --env-file ./docker/environments/mysql-redis.env up --no-deps --exit-code-from uwsgi uwsgi
 
       - name: Logs
         if: failure()
-        run: docker-compose logs --tail="2500" uwsgi
+        run: docker-compose --profile mysql-redis --env-file ./docker/environments/mysql-redis.env logs --tail="2500" uwsgi
 
       - name: Shutdown
         if: always()
-        run: docker-compose down
+        run: docker-compose --profile mysql-redis --env-file ./docker/environments/mysql-redis.env down

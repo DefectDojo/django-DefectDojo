@@ -7,9 +7,9 @@ draft: false
 
 ## System-wide permissions
 
-* Administrators (aka super users) have no limitations in the system. They can change all settings, manage users  and have read and write access to all data.
-* Staff users can add Product Types, and have access to data according to their role in a Product or Product Type. There is the parameter `AUTHORIZATION_STAFF_OVERRIDE` in the settings to give all staff users full access to all Products and Product Types.
-* Guest users have limited functionality available. They cannot add Product Types but have access to data according to their role in a Product or Product Type
+* Administrators (aka superusers) have no limitations in the system. They can change all settings, manage users  and have read and write access to all data.
+* Staff users can add Product Types, and have access to data according to their role in a Product or Product Type.
+* Regular users have limited functionality available. They cannot add Product Types but have access to data according to their role in a Product or Product Type
 
 ## Product and Product Type permissions
 
@@ -19,7 +19,7 @@ Users can be assigned as members to Products and Product Types, giving them one 
 
 |                             | Reader | Writer | Maintainer | Owner | API Importer |
 |-----------------------------|:------:|:------:|:----------:|:-----:|:------------:|
-| Add Product Type <sup>1)</sup> |     |        |            |       |              |
+| Add Product Type            |        |        | <sup>1)</sup>           |<sup>1)</sup>       |              |
 | View Product Type           | x      | x      | x          | x     | x            |
 | Remove yourself as a member | x      | x      | x          | x     |              |
 | Manage Product Type members |        |        | x          | x     |              |
@@ -68,14 +68,14 @@ Users can be assigned as members to Products and Product Types, giving them one 
 | View Components             | x      | x      | x          | x     | x            |
 |                             |        |        |            |       |              |
 | View Note History           | x      | x      | x          | x     |              |
-| Add Note                    |        | x      | x          | x     |              |
-| Edit Note                   |        | x      | x          | x     |              |
-| Delete Note                 |        | (x) <sup>2)</sub> | x          | x     |              |
+| Add Note                    | x      | x      | x          | x     |              |
+| Edit Note                   | (x) <sup>2)</sub> | x                 | x          | x     |              |
+| Delete Note                 | (x) <sup>2)</sub> | (x) <sup>2)</sub> | x          | x     |              |
 
 
-<sup>1)</sup> Every staff user and administrator can add Product Types. Guest users are not allowed to add Product Types.
+<sup>1)</sup> Every staff user and administrator can add Product Types. Regular users are not allowed to add Product Types, unless they are Global Owner or Maintainer.
 
-<sup>2)</sup> Every user is allowed to delete his own notes.
+<sup>2)</sup> Every user is allowed to edit and delete his own notes.
 
 The role of a user within a Product Type is inherited by all Products of that Product Type, unless the user is explicitly defined as a member of a Product with a different role. In that case, if a user doesn't have a certain right for the Product Type, it is then checked if he has the right for the Product.
 
@@ -105,8 +105,23 @@ The membership of a group itself has a role that determines what permissions the
 | Add Group member as Owner   |        |            | x     |
 | Delete Group                |        |            | x     |
 
-<sup>1)</sup> Every staff user and administrator can add groups. Guest users are not allowed to add groups.
+<sup>1)</sup> Every staff user and administrator can add groups. Regular users are not allowed to add groups.
 
 The permissions to manage the roles of Products and Product types for a group is defined by the role of the user in the respective Product or Product Type.
 
 Groups can have a global role too. This global role gives all members of the group access to all Product Types and Products, including the underlying data, with permissions according to the respective role.
+
+## Configuration permissions
+
+Release 2.7.0 contains a beta functionality to make permissions for the configuration of DefectDojo more flexible. When the settings parameter `FEATURE_CONFIGURATION_AUTHORIZATION` is set to `True`, many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their **Superuser** or **Staff** status:
+
+![Configuration permissions](../../images/configuration_permissions.png)
+
+3 configurations can still only be changed by superusers:
+* System settings
+* Notifications on system level
+* Configuration permissions for users and groups
+
+{{% alert title="Warning" color="warning" %}}
+These configuration settings are a powerful tool and should be used with great care.
+{{% /alert %}}

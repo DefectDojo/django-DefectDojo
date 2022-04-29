@@ -5,6 +5,19 @@ draft: false
 weight: 5
 ---
 
+{{% alert title="Deprecation notice" color="warning" %}}
+Legacy authorization for changing configurations based on staff users will be
+removed with version 2.12.0 / 5. July 2022. If you have set
+`FEATURE_CONFIGURATION_AUTHORIZATION` to `False` in your local configuration,
+remove this local setting and start using the new authorization as described
+in [Configuration permissions]({{< ref "/usage/permissions#configuration-permissions" >}}).
+
+To support the transition, you can run a migration script with ``./manage.py migrate_staff_users``. This script:
+
+* creates a group for all staff users,
+* sets all configuration permissions that staff users had and
+* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to `True`.
+{{% /alert %}}
 
 Docker-compose
 --------------
@@ -39,9 +52,9 @@ The generic upgrade method for docker-compose follows these steps:
     ```
 
 -   Go to the directory where your docker-compose.yml file lives
--   Stop DefectDojo: `docker-compose stop`
+-   Stop DefectDojo: `./dc-stop.sh`
 -   Re-start DefectDojo, allowing for container recreation:
-    `docker-compose up -d`
+    `./dc-up-d.sh`
 -   Database migrations will be run automatically by the initializer.
     Check the output via `docker-compose logs initializer` or relevant k8s command
 -   If you have the initializer disabled (or if you want to be on the
@@ -56,6 +69,98 @@ first. (Of course, if you're doing this, then you know you have to
 update the source code first)
 
 Replace the first step above with this one: `docker-compose build`
+
+godojo installations
+--------------------
+
+If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
+
+## Upgrading to DefectDojo Version 2.10.x.
+
+**Breaking change for Findings:** The field `cve` will be replaced by a list of Vulnerability Ids, which can store references to security advisories associated with this finding. These can be Common Vulnerabilities and Exposures (CVE) or from other sources, eg. GitHub Security Advisories. Although the field does still exist in the code, the API and the UI have already been changed to use the list of Vulnerability Ids. Other areas like hash code calculation, search and parsers will be migrated step by step in later stages.
+
+This change also causes an API change for the endpoint `/engagements/{id}/accept_risks/`.
+
+
+## Upgrading to DefectDojo Version 2.9.x.
+
+**Breaking change for APIv2:** `configuration_url` was removed from API endpoint `/api/v2/tool_configurations/` due to redundancy.
+
+
+## Upgrading to DefectDojo Version 2.8.x.
+
+**Breaking change for Docker Compose:** Starting DefectDojo with Docker Compose now supports 2 databases (MySQL and PostgreSQL) and 2 celery brokers (RabbitMQ and Redis). To make this possible, docker-compose needs to be started with the parameters `--profile` and `--env-file`. You can get more information in [Setup via Docker Compose - Profiles](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md#setup-via-docker-compose---profiles). The profile `mysql-rabbitmq` provides the same configuration as in previous releases. With this the prerequisites have changed as well: Docker requires at least version 19.03.0 and Docker Compose 1.28.0.
+
+**Breaking change for Helm Chart:** In one of the last releases we upgraded the redis dependency in our helm chart without renaming keys in our helm chart. We fixed this bug with this release, but you may want to check if all redis values are correct ([Pull Request](https://github.com/DefectDojo/django-DefectDojo/pull/5886)).
+
+The flexible permissions for the configuration of DefectDojo are now active by default. With this, the flag **Staff** for users is not relevant and not visible anymore. The old behaviour can still be activated by setting the parameter `FEATURE_CONFIGURATION_AUTHORIZATION` to `False`. If you haven't done so with the previous release, you can still run a migration script with `./manage.py migrate_staff_users`. This script:
+
+* creates a group for all staff users,
+* sets all configuration permissions that staff users had and
+* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to `True`.
+
+## Upgrading to DefectDojo Version 2.7.x.
+
+This release is a breaking change regarding the Choctaw Hog parser. As the maintainers of this project unified multiple parsers under the RustyHog parser, we now support the parsing of Choctaw Hog JSON output files through the Rusty Hog parser. Furthermore, we also support Gottingen Hog and Essex Hog JSON output files with the RustyHog parser.
+
+There is another breaking change regarding the import of SSLyze scans. The parser has been renamed from `SSLyze 3 Scan (JSON)` to `SSLyze Scan (JSON)`. The data in the database is fixed by the initializer, but it may break scripted API calls.
+
+Release 2.7.0 contains a beta functionality to make permissions for the configuration of DefectDojo more flexible. When the settings parameter `FEATURE_CONFIGURATION_AUTHORIZATION` is set to `True`, many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their **Superuser** or **Staff** status, see [Configuration Permissions]({{< ref "../usage/permissions/#configuration-permissions" >}}).
+
+The functionality using the flag `AUTHORIZATION_STAFF_OVERRIDE` has been removed. The same result can be achieved with giving the staff users a global Owner role. 
+
+To support the transition for these 2 changes, you can run a migration script with ``./manage.py migrate_staff_users``. This script:
+
+* creates a group for all staff users,
+* sets all configuration permissions that staff users had and
+* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to `True`.
+
+## Upgrading to DefectDojo Version 2.6.x.
+
+There are no special instruction for upgrading to 2.6.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.6.0) for the contents of the release.
+
+Please consult the security advisories [GHSA-f82x-m585-gj24](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-f82x-m585-gj24) (moderate) and [GHSA-v7fv-g69g-x7p2](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-v7fv-g69g-x7p2) (high) to see what security issues were fixed in this release. These will be published and become visible at January 18th, 2022.
+
+## Upgrading to DefectDojo Version 2.5.x.
+
+Legacy authorization has been completely removed with version 2.5.0. This includes removal of the migration of users
+to the new authorization as described in https://defectdojo.github.io/django-DefectDojo/getting_started/upgrading/#authorization.
+If you are still using the legacy authorization, you should run the migration with ``./manage.py migrate_authorization_v2``
+before upgrading to version 2.5.0
+
+This release introduces the "Forgot password" functionality (`DD_FORGOT_PASSWORD`: default `True`). The function
+allows sending an e-mail with the reset password link. Missing configuration or misconfiguration of SMTP
+(`DD_EMAIL_URL`) could raise an error (HTTP-500). Check and test (for example by resetting your own password) if you
+configured SMTP correctly. If you want to avoid HTTP-500 and you don't want to set up SMTP, you can just simply switch
+off the "Forgot password" functionality (`DD_FORGOT_PASSWORD=False`).
+
+Release renamed system setting `mail_notifications_from` to `email_from`. This value will not be used only for sending
+notifications but also for sending the reset password emails. It is highly recommended to check the content of this
+value if you are satisfied. If you installed DefectDojo earlier, you can expect `"from@example.com"` there. A fresh
+installation will use `"no-reply@example.com"`
+
+This release [updates](https://github.com/DefectDojo/django-DefectDojo/pull/5450) our helm dependencies. There is a breaking change if you are using the mysql database from the helm chart because we replaced the deprecated chart from the stable repo with a chart from bitnami. If you have persistance enabled, ensure to backup your data before upgrading. All data get lost when replacing the mysql chart during the upgrade. For data migration take a look at the mysql backup and restore process.
+
+Furthermore we updated our kubernetes version. Current tests run on 1.18.16 and 1.22.0.
+
+## Upgrading to DefectDojo Version 2.4.x. (Security Release)
+
+This releases fixes a High severity vulnerability for which the details will be disclosed on November 16th in [GHSA-fwg9-752c-qh8w](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-fwg9-752c-qh8w)
+
+There is a breaking change in the API for importing and re-importings scans with SonarQube API and Cobalt.io API. The [scan configurations
+have been unified](https://github.com/DefectDojo/django-DefectDojo/pull/5289) and are set now with the attribute `api_scan_configuration`.
+The existing configurations for SonarQube API and Cobalt.io API have been migrated.
+
+At the request of pyup.io, we had to remove the parser for Safety scans.
+
+
+## Upgrading to DefectDojo Version 2.3.x.
+
+There are no special instruction for upgrading to 2.3.0.
+In 2.3.0 we [changed the default password hashing algorithm to Argon2 (from PBKDF2)](https://github.com/DefectDojo/django-DefectDojo/pull/5205).
+When logging in, exising hashes get replaced by an Argon2 hash. If you want to rehash password without users having to login,
+please see the [Django password management docs](https://docs.djangoproject.com/en/3.2/topics/auth/passwords/).
+The previous password hashing algorithm (PBKDF2) was not unsafe, but we wanted to follow the [OWASP guidelines](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
 
 
 ## Upgrading to DefectDojo Version 2.2.x.
@@ -92,11 +197,11 @@ We decided to name this version 2.0.0 because we did some big cleanups in this r
 - Refactor EndPoint handling/formatting ([#4473](https://github.com/DefectDojo/django-DefectDojo/pull/4473))
 - Upgrade to Django 3.x ([#3632](https://github.com/DefectDojo/django-DefectDojo/pull/3632))
 - PDF Reports removed ([#4418](https://github.com/DefectDojo/django-DefectDojo/pull/4418))
-- Hashcode calculation logic has changed. To update existing findings run: 
-  
+- Hashcode calculation logic has changed. To update existing findings run:
+
   `./manage.py dedupe --hash_code_only`.
 
-If you're using docker: 
+If you're using docker:
 
 `docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`.
 
@@ -197,7 +302,7 @@ This can take a while depeneding on your instance size. It might possible that n
 
 -   See release notes:
     <https://github.com/DefectDojo/django-DefectDojo/releases>
--   Defect Dojo now provides a `settings.py` file
+-   DefectDojo now provides a `settings.py` file
     out-of-the-box. Custom settings need to go into
     `local\_settings.py`. See
     <https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.py>

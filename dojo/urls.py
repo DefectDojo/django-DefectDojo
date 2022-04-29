@@ -17,10 +17,11 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
-    SonarqubeProductViewSet, RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
+    RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
     DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
-    NotificationsViewSet
+    NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset, UserContactInfoViewSet, \
+    ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -67,6 +68,7 @@ admin.autodiscover()
 v2_api = DefaultRouter()
 v2_api.register(r'technologies', AppAnalysisViewSet)
 v2_api.register(r'endpoints', EndPointViewSet)
+v2_api.register(r'endpoint_meta_import', EndpointMetaImporterView, basename='endpointmetaimport')
 v2_api.register(r'endpoint_status', EndpointStatusViewSet)
 v2_api.register(r'engagements', EngagementViewSet)
 v2_api.register(r'development_environments', DevelopmentEnvironmentViewSet)
@@ -79,18 +81,17 @@ v2_api.register(r'jira_product_configurations', JiraProjectViewSet)  # backwards
 v2_api.register(r'jira_projects', JiraProjectViewSet)
 v2_api.register(r'products', ProductViewSet)
 v2_api.register(r'product_types', ProductTypeViewSet)
-if settings.FEATURE_AUTHORIZATION_V2:
-    v2_api.register(r'dojo_groups', DojoGroupViewSet)
-    v2_api.register(r'dojo_group_members', DojoGroupMemberViewSet)
-    v2_api.register(r'product_type_members', ProductTypeMemberViewSet)
-    v2_api.register(r'product_members', ProductMemberViewSet)
-    v2_api.register(r'product_type_groups', ProductTypeGroupViewSet)
-    v2_api.register(r'product_groups', ProductGroupViewSet)
-    v2_api.register(r'roles', RoleViewSet)
-    v2_api.register(r'global_roles', GlobalRoleViewSet)
+v2_api.register(r'dojo_groups', DojoGroupViewSet)
+v2_api.register(r'dojo_group_members', DojoGroupMemberViewSet)
+v2_api.register(r'product_type_members', ProductTypeMemberViewSet)
+v2_api.register(r'product_members', ProductMemberViewSet)
+v2_api.register(r'product_type_groups', ProductTypeGroupViewSet)
+v2_api.register(r'product_groups', ProductGroupViewSet)
+v2_api.register(r'roles', RoleViewSet)
+v2_api.register(r'global_roles', GlobalRoleViewSet)
 v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
 v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
-v2_api.register(r'sonarqube_product_configurations', SonarqubeProductViewSet)
+v2_api.register(r'product_api_scan_configurations', ProductAPIScanConfigurationViewSet)
 v2_api.register(r'stub_findings', StubFindingsViewSet)
 v2_api.register(r'tests', TestsViewSet)
 v2_api.register(r'test_types', TestTypesViewSet)
@@ -99,6 +100,7 @@ v2_api.register(r'tool_configurations', ToolConfigurationsViewSet)
 v2_api.register(r'tool_product_settings', ToolProductSettingsViewSet)
 v2_api.register(r'tool_types', ToolTypesViewSet)
 v2_api.register(r'users', UsersViewSet)
+v2_api.register(r'user_contact_infos', UserContactInfoViewSet)
 v2_api.register(r'import-scan', ImportScanView, basename='importscan')
 v2_api.register(r'reimport-scan', ReImportScanView, basename='reimportscan')
 v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')
@@ -110,7 +112,8 @@ v2_api.register(r'language_types', LanguageTypeViewSet)
 v2_api.register(r'languages', LanguageViewSet)
 v2_api.register(r'import-languages', ImportLanguagesView, basename='importlanguages')
 v2_api.register(r'notifications', NotificationsViewSet, basename='notifications')
-
+v2_api.register(r'engagement_presets', EngagementPresetsViewset)
+v2_api.register(r'network_locations', NetworkLocationsViewset)
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls
@@ -164,7 +167,8 @@ urlpatterns = [
     url(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history,
         name='action_history'),
     url(r'^%s' % get_system_setting('url_prefix'), include(ur)),
-    url(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token),
+    url(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token, name='api-token-auth'),
+    url(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
 
     # drf-yasg = OpenAPI2
     url(r'^%sapi/v2/doc/' % get_system_setting('url_prefix'), schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),

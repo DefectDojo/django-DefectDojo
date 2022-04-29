@@ -54,7 +54,9 @@ jobs:
       #     password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Read Docker Image Identifiers
         id: read-docker-image-identifiers
@@ -64,7 +66,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           docker-image: ${{ matrix.docker-image }}
         with:
@@ -106,9 +108,22 @@ jobs:
 
     strategy:
       matrix:
-        databases: [pgsql, mysql]
-        brokers: [redis, rabbit]
-        k8s: ['v1.16.0','v1.20.0']
+        include:
+          # databases, broker and k8s are independent, so we don't need to test each combination
+          # lastest k8s version (https://kubernetes.io/releases/) and oldest supported version from aws
+          # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
+          - databases: pgsql
+            brokers: redis
+            k8s: 'v1.18.16'
+          - databases: mysql
+            brokers: rabbit
+            k8s: 'v1.18.16'
+          - databases: pgsql
+            brokers: rabbit
+            k8s: 'v1.22.0'
+          - databases: mysql
+            brokers: redis
+            k8s: 'v1.22.0'
 
     steps:
 #      - name: Login to DockerHub
@@ -117,12 +132,12 @@ jobs:
 #          username: ${{ secrets.DOCKERHUB_USERNAME }}
 #          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@v2.4.2
+        uses: manusa/actions-setup-minikube@v2.4.3
         with:
-          minikube version: 'v1.22.0'
+          minikube version: 'v1.24.0'
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress'
@@ -132,7 +147,7 @@ jobs:
           minikube status
 
       - name: Load images from artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
 
       - name: Load docker images
         run: |-
@@ -143,7 +158,6 @@ jobs:
 
       - name: Configure HELM repos
         run: |-
-             helm repo add stable https://charts.helm.sh/stable
              helm repo add bitnami https://charts.bitnami.com/bitnami
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
@@ -170,7 +184,7 @@ jobs:
                ${{ steps.set.outputs[matrix.databases] }} \
                ${{ steps.set.outputs[matrix.brokers] }} \
                --set createSecret=true \
-              #  --set imagePullSecrets=defectdojoregistrykey
+               # --set imagePullSecrets=defectdojoregistrykey
 
       - name: Check deployment status
         run: |-

@@ -8,7 +8,6 @@ from django.db import models
 from django.db.models.functions import Length
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core import serializers
 from django.urls import reverse
@@ -25,15 +24,14 @@ from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
-
-from dojo.filters import OpenFindingFilter, AcceptedFindingFilter, ClosedFindingFilter, TemplateFindingFilter, SimilarFindingFilter
+from dojo.filters import TemplateFindingFilter, SimilarFindingFilter, FindingFilter, AcceptedFindingFilter
 from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
-from dojo.models import Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
+from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, Endpoint_Status, \
-    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
+    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, Test_Import_Finding_Action, User, Engagement, Vulnerability_Id_Template
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, \
     redirect_to_return_url_or_else, get_return_url, add_external_issue, update_external_issue, \
@@ -42,61 +40,83 @@ from dojo.notifications.helper import create_notification
 
 from django.template.defaultfilters import pluralize
 from django.db.models import Q, QuerySet, Count
+from django.db.models.query import Prefetch
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
 
 logger = logging.getLogger(__name__)
 
 
-def open_findings_filter(request, queryset, user, pid):
-    return OpenFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
+def get_filtered_findings(request, pid=None, eid=None, tid=None, filter_name=None, order_by='numerical_severity'):
 
+    findings = get_authorized_findings(Permissions.Finding_View)
 
-def accepted_findings_filter(request, queryset, user, pid):
-    return AcceptedFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
+    findings = findings.order_by(order_by)
 
+    if pid:
+        findings = findings.filter(test__engagement__product__id=pid)
+    elif eid:
+        findings = findings.filter(test__engagement=eid)
+    elif tid:
+        findings = findings.filter(test=tid)
 
-def closed_findings_filter(request, queryset, user, pid):
-    return ClosedFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
+    if filter_name == 'Open':
+        findings = findings.filter(finding_helper.OPEN_FINDINGS_QUERY)
+    elif filter_name == 'Verified':
+        findings = findings.filter(finding_helper.VERIFIED_FINDINGS_QUERY)
+    elif filter_name == 'Out of Scope':
+        findings = findings.filter(finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY)
+    elif filter_name == 'False Positive':
+        findings = findings.filter(finding_helper.FALSE_POSITIVE_FINDINGS_QUERY)
+    elif filter_name == 'Inactive':
+        findings = findings.filter(finding_helper.INACTIVE_FINDINGS_QUERY)
+    elif filter_name == 'Accepted':
+        findings = findings.filter(finding_helper.ACCEPTED_FINDINGS_QUERY)
+    elif filter_name == 'Closed':
+        findings = findings.filter(finding_helper.CLOSED_FINDINGS_QUERY)
+
+    if filter_name == 'Accepted':
+        findings = AcceptedFindingFilter(request.GET, findings, user=request.user, pid=pid)
+    else:
+        findings = FindingFilter(request.GET, findings, user=request.user, pid=pid)
+
+    return findings
 
 
 def open_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=finding_helper.OPEN_FINDINGS_QUERY, prefetch_type='open')
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", prefetch_type='open')
 
 
 def verified_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Verified", query_filter=finding_helper.VERIFIED_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Verified")
 
 
 def out_of_scope_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Out of Scope", query_filter=finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Out of Scope")
 
 
 def false_positive_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="False Positive", query_filter=finding_helper.FALSE_POSITIVE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="False Positive")
 
 
 def inactive_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive", query_filter=finding_helper.INACTIVE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive")
 
 
 def accepted_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=finding_helper.ACCEPTED_FINDINGS_QUERY,
-                    django_filter=accepted_findings_filter)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted")
 
 
 def closed_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", query_filter=finding_helper.CLOSED_FINDINGS_QUERY, order_by=('-mitigated'),
-                    django_filter=closed_findings_filter)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", order_by=('-mitigated'))
 
 
-def findings(request, pid=None, eid=None, view=None, filter_name=None, query_filter=None, order_by='numerical_severity',
-django_filter=open_findings_filter, prefetch_type='all'):
+def findings(request, pid=None, eid=None, view=None, filter_name=None, order_by='numerical_severity', prefetch_type='all'):
 
     show_product_column = True
     custom_breadcrumb = None
@@ -104,21 +124,14 @@ django_filter=open_findings_filter, prefetch_type='all'):
     jira_project = None
     github_config = None
 
-    findings = get_authorized_findings(Permissions.Finding_View)
-    # print('View: ', view)
     if view == "All":
         filter_name = "All"
     else:
-        print('Filtering!', view)
-        findings = findings.filter(query_filter)
-
-    findings = findings.order_by(order_by)
-    # print('findings.query1', findings.query)
+        logger.debug('Filtering!: %s', view)
 
     if pid:
         product = get_object_or_404(Product, id=pid)
-        findings = findings.filter(test__engagement__product__id=pid)
-
+        user_has_permission_or_403(request.user, product, Permissions.Product_View)
         show_product_column = False
         product_tab = Product_Tab(pid, title="Findings", tab="findings")
         jira_project = jira_helper.get_jira_project(product)
@@ -126,8 +139,7 @@ django_filter=open_findings_filter, prefetch_type='all'):
 
     elif eid:
         engagement = get_object_or_404(Engagement, id=eid)
-        findings = findings.filter(test__engagement=eid)
-
+        user_has_permission_or_403(request.user, engagement, Permissions.Engagement_View)
         show_product_column = False
         product_tab = Product_Tab(engagement.product_id, title=engagement.name, tab="engagements")
         jira_project = jira_helper.get_jira_project(engagement)
@@ -135,13 +147,7 @@ django_filter=open_findings_filter, prefetch_type='all'):
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
-    print('findings.query2', findings.query)
-    # print(django_filter)
-    findings_filter = django_filter(request, findings, request.user, pid)
-
-    print('findings.query3', findings_filter.qs.query)
-
-    print('done')
+    findings_filter = get_filtered_findings(request, pid, eid, None, filter_name, order_by)
 
     title_words = get_words_for_field(Finding, 'title')
     component_words = get_words_for_field(Finding, 'component_name')
@@ -199,7 +205,10 @@ def prefetch_for_findings(findings, prefetch_type='all'):
             prefetched_findings = prefetched_findings.prefetch_related('original_finding')
             prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
 
-        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
+        # filter out noop reimport actions from finding status history
+        prefetched_findings = prefetched_findings.prefetch_related(Prefetch('test_import_finding_action_set',
+                                                                            queryset=Test_Import_Finding_Action.objects.exclude(action=IMPORT_UNTOUCHED_FINDING)))
+
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
@@ -208,11 +217,10 @@ def prefetch_for_findings(findings, prefetch_type='all'):
         prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
         prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
-        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
-        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__members')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__members')
+        prefetched_findings = prefetched_findings.prefetch_related('vulnerability_id_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -232,7 +240,10 @@ def prefetch_for_similar_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
         prefetched_findings = prefetched_findings.prefetch_related('original_finding')
         prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
-        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
+        # filter out noop reimport actions from finding status history
+        prefetched_findings = prefetched_findings.prefetch_related(Prefetch('test_import_finding_action_set',
+                                                                            queryset=Test_Import_Finding_Action.objects.exclude(action=IMPORT_UNTOUCHED_FINDING)))
+
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
@@ -241,15 +252,14 @@ def prefetch_for_similar_findings(findings):
         # prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
         # prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         # prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
-        # prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
-        # prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
+        prefetched_findings = prefetched_findings.prefetch_related('vulnerability_id_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
     return prefetched_findings
 
 
-@user_is_authorized(Finding, Permissions.Finding_View, 'fid', 'view')
+@user_is_authorized(Finding, Permissions.Finding_View, 'fid')
 def view_finding(request, fid):
     finding_qs = prefetch_for_findings(Finding.objects.all())
     finding = get_object_or_404(finding_qs, id=fid)
@@ -286,6 +296,7 @@ def view_finding(request, fid):
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
     if request.method == 'POST':
+        user_has_permission_or_403(request.user, finding, Permissions.Note_Add)
         if note_type_activation:
             form = TypedNoteForm(request.POST, available_note_types=available_note_types)
         else:
@@ -388,7 +399,7 @@ def view_finding(request, fid):
         })
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def close_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -472,7 +483,7 @@ def close_finding(request, fid):
     })
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def defect_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -552,7 +563,7 @@ def defect_finding_review(request, fid):
     })
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid',)
 def reopen_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.active = True
@@ -591,7 +602,7 @@ def reopen_finding(request, fid):
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id, )))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def apply_template_cwe(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -618,7 +629,7 @@ def apply_template_cwe(request, fid):
         return HttpResponseForbidden()
 
 
-@user_is_authorized(Finding, Permissions.Finding_Delete, 'fid', 'delete')
+@user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
 def delete_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -652,7 +663,7 @@ def delete_finding(request, fid):
         return HttpResponseForbidden()
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # finding = finding._detag_to_serializable()
@@ -667,8 +678,10 @@ def edit_finding(request, fid):
         )
     else:
         req_resp = None
-    form = FindingForm(instance=finding, template=False, req_resp=req_resp,
-                       can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
+
+    form = FindingForm(instance=finding, req_resp=req_resp,
+                       can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user),
+                       initial={'vulnerability_ids': '\n'.join(finding.vulnerability_ids)})
     form_error = False
     jform = None
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
@@ -678,7 +691,7 @@ def edit_finding(request, fid):
     github_enabled = finding.has_github_issue()
 
     if request.method == 'POST':
-        form = FindingForm(request.POST, instance=finding, template=False, req_resp=None,
+        form = FindingForm(request.POST, instance=finding, req_resp=None,
                            can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
 
         if finding.active:
@@ -725,16 +738,15 @@ def edit_finding(request, fid):
                 if new_finding.risk_accepted:
                     ra_helper.risk_unaccept(new_finding, perform_save=False)
 
-            create_template = new_finding.is_template
-            # always false now since this will be deprecated soon in favor of new Finding_Template model
-            new_finding.is_template = False
-            new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            for endpoint in form.cleaned_data['endpoints']:
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=endpoint)
-                endpoint.endpoint_status.add(eps)
-                new_finding.endpoint_status.add(eps)
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
+
+            # Remove unrelated endpoints
+            endpoint_status_list = Endpoint_Status.objects.filter(finding=new_finding)
+            for endpoint_status in endpoint_status_list:
+                if endpoint_status.endpoint not in new_finding.endpoints.all():
+                    endpoint_status.delete()
+
             new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
 
@@ -801,6 +813,8 @@ def edit_finding(request, fid):
             # any existing finding should be updated
             push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
 
+            finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
+
             # if we're removing the "duplicate" in the edit finding screen
             # do not relaunch deduplication, otherwise, it's never taken into account
             if old_finding.duplicate and not new_finding.duplicate:
@@ -827,33 +841,6 @@ def edit_finding(request, fid):
                     jira_message,
                     extra_tags='alert-success')
 
-            if create_template:
-                templates = Finding_Template.objects.filter(
-                    title=new_finding.title)
-                if len(templates) > 0:
-                    messages.add_message(
-                        request,
-                        messages.ERROR,
-                        'A finding template was not created.  A template with this title already '
-                        'exists.',
-                        extra_tags='alert-danger')
-                else:
-                    template = Finding_Template(
-                        title=new_finding.title,
-                        cwe=new_finding.cwe,
-                        severity=new_finding.severity,
-                        description=new_finding.description,
-                        mitigation=new_finding.mitigation,
-                        impact=new_finding.impact,
-                        references=new_finding.references,
-                        numerical_severity=new_finding.numerical_severity)
-                    template.save()
-                    messages.add_message(
-                        request,
-                        messages.SUCCESS,
-                        'A finding template was also created.',
-                        extra_tags='alert-success')
-
             return redirect_to_return_url_or_else(request, reverse('view_finding', args=(new_finding.id,)))
         else:
             add_error_message_to_response('The form has errors, please correct them below.')
@@ -868,11 +855,6 @@ def edit_finding(request, fid):
             if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
                 gform = GITHUBFindingForm(enabled=github_enabled, prefix='githubform')
 
-    if form_error and 'endpoints' in form.cleaned_data:
-        form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
-    else:
-        form.fields['endpoints'].queryset = finding.endpoints.all()
-
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
 
     return render(request, 'dojo/edit_finding.html', {
@@ -885,7 +867,7 @@ def edit_finding(request, fid):
     })
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -894,7 +876,7 @@ def touch_finding(request, fid):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_is_authorized(Finding, Permissions.Risk_Acceptance, 'fid', 'staff')
+@user_is_authorized(Finding, Permissions.Risk_Acceptance, 'fid')
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -903,17 +885,28 @@ def simple_risk_accept(request, fid):
 
     ra_helper.simple_risk_accept(finding)
 
+    messages.add_message(request,
+                        messages.WARNING,
+                        'Finding risk accepted.',
+                        extra_tags='alert-success')
+
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_is_authorized(Finding, Permissions.Risk_Acceptance, 'fid', 'staff')
+@user_is_authorized(Finding, Permissions.Risk_Acceptance, 'fid')
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     ra_helper.risk_unaccept(finding)
+
+    messages.add_message(request,
+                        messages.WARNING,
+                        'Finding risk unaccepted.',
+                        extra_tags='alert-success')
+
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -975,7 +968,7 @@ def request_finding_review(request, fid):
     })
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def clear_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -1030,7 +1023,7 @@ def clear_finding_review(request, fid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_finding_template', 'staff')
 def mktemplate(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     templates = Finding_Template.objects.filter(title=finding.title)
@@ -1044,7 +1037,6 @@ def mktemplate(request, fid):
         template = Finding_Template(
             title=finding.title,
             cwe=finding.cwe,
-            cve=finding.cve,
             cvssv3=finding.cvssv3,
             severity=finding.severity,
             description=finding.description,
@@ -1056,6 +1048,12 @@ def mktemplate(request, fid):
         template.save()
         template.tags = finding.tags.all()
 
+        for vulnerability_id in finding.vulnerability_ids:
+            Vulnerability_Id_Template(
+                finding_template=template,
+                vulnerability_id=vulnerability_id
+            ).save()
+
         messages.add_message(
             request,
             messages.SUCCESS,
@@ -1066,7 +1064,8 @@ def mktemplate(request, fid):
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
 def find_template_to_apply(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
@@ -1105,13 +1104,15 @@ def find_template_to_apply(request, fid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
     data = finding.__dict__
     # Not sure what's going on here, just leave same as with django-tagging
     data['tags'] = [tag.name for tag in template.tags.all()]
+    data['vulnerability_ids'] = '\n'.join(finding.vulnerability_ids)
+
     form = ApplyFindingTemplateForm(data=data, template=template)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Finding Template Options", tab="findings")
     return render(request, 'dojo/apply_finding_template.html', {
@@ -1123,7 +1124,7 @@ def choose_finding_template_options(request, tid, fid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def apply_template_to_finding(request, fid, tid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
@@ -1136,7 +1137,6 @@ def apply_template_to_finding(request, fid, tid):
             template.save()
             finding.title = form.cleaned_data['title']
             finding.cwe = form.cleaned_data['cwe']
-            finding.cve = form.cleaned_data['cve']
             finding.severity = form.cleaned_data['severity']
             finding.description = form.cleaned_data['description']
             finding.mitigation = form.cleaned_data['mitigation']
@@ -1145,6 +1145,10 @@ def apply_template_to_finding(request, fid, tid):
             finding.last_reviewed = timezone.now()
             finding.last_reviewed_by = request.user
             finding.tags = form.cleaned_data['tags']
+
+            finding.cve = None
+            finding_helper.save_vulnerability_ids(finding, form.cleaned_data['vulnerability_ids'].split())
+
             finding.save()
         else:
             messages.add_message(
@@ -1168,7 +1172,7 @@ def apply_template_to_finding(request, fid, tid):
             reverse('view_finding', args=(finding.id, )))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Add, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid')
 def add_stub_finding(request, tid):
     test = get_object_or_404(Test, id=tid)
     form = StubFindingForm()
@@ -1210,7 +1214,7 @@ def add_stub_finding(request, tid):
     return HttpResponseRedirect(reverse('view_test', args=(tid, )))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Delete, 'fid', 'staff')
+@user_is_authorized(Stub_Finding, Permissions.Finding_Delete, 'fid')
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     form = DeleteStubFindingForm(instance=finding)
@@ -1236,7 +1240,7 @@ def delete_stub_finding(request, fid):
         return HttpResponseForbidden()
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
+@user_is_authorized(Stub_Finding, Permissions.Finding_Edit, 'fid')
 def promote_to_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     test = finding.test
@@ -1248,7 +1252,7 @@ def promote_to_finding(request, fid):
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
     if request.method == 'POST':
-        form = PromoteFindingForm(request.POST)
+        form = PromoteFindingForm(request.POST, product=test.engagement.product)
         if use_jira:
             jform = JIRAFindingForm(request.POST, instance=finding, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding))
 
@@ -1271,7 +1275,9 @@ def promote_to_finding(request, fid):
             new_finding.out_of_scope = False
 
             new_finding.save()
-            new_finding.endpoints.set(form.cleaned_data['endpoints'])
+
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
 
             # Push to jira?
             push_to_jira = False
@@ -1306,6 +1312,8 @@ def promote_to_finding(request, fid):
                         jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
+            finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
+
             # Save it and push it to JIRA
             new_finding.save(push_to_jira=push_to_jira)
 
@@ -1328,11 +1336,6 @@ def promote_to_finding(request, fid):
 
             return HttpResponseRedirect(reverse('view_test', args=(test.id, )))
         else:
-            if 'endpoints' in form.cleaned_data:
-                form.fields['endpoints'].queryset = form.cleaned_data[
-                    'endpoints']
-            else:
-                form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
             add_error_message_to_response('The form has errors, please correct them below.')
             add_field_errors_to_response(jform)
@@ -1348,7 +1351,7 @@ def promote_to_finding(request, fid):
                 'description': finding.description,
                 'test': finding.test,
                 'reporter': finding.reporter
-            })
+            }, product=test.engagement.product)
 
         if use_jira:
             jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test))
@@ -1364,7 +1367,7 @@ def promote_to_finding(request, fid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
 def templates(request):
     templates = Finding_Template.objects.all().order_by('cwe')
     templates = TemplateFindingFilter(request.GET, queryset=templates)
@@ -1382,7 +1385,7 @@ def templates(request):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize('json', Finding_Template.objects.all())
     return HttpResponse(leads_as_json, content_type='json')
@@ -1433,7 +1436,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
     return count
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_finding_template', 'staff')
 def add_template(request):
     form = FindingTemplateForm()
     if request.method == 'POST':
@@ -1442,6 +1445,7 @@ def add_template(request):
             apply_message = ""
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
+            finding_helper.save_vulnerability_ids_template(template, form.cleaned_data['vulnerability_ids'].split())
             template.save()
             form.save_m2m()
             count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
@@ -1467,16 +1471,20 @@ def add_template(request):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.change_finding_template', 'staff')
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
-    form = FindingTemplateForm(instance=template)
+    form = FindingTemplateForm(
+        instance=template,
+        initial={'vulnerability_ids': '\n'.join(template.vulnerability_ids)}
+    )
 
     if request.method == 'POST':
         form = FindingTemplateForm(request.POST, instance=template)
         if form.is_valid():
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
+            finding_helper.save_vulnerability_ids_template(template, form.cleaned_data['vulnerability_ids'].split())
             template.save()
             form.save_m2m()
 
@@ -1509,7 +1517,7 @@ def edit_template(request, tid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.delete_finding_template', 'staff')
 def delete_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
 
@@ -1596,7 +1604,7 @@ def download_finding_pic(request, token):
         return response
 
 
-@user_is_authorized(Product, Permissions.Finding_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Finding_Edit, 'pid')
 def merge_finding_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     finding_to_update = request.GET.getlist('finding_to_update')
@@ -1759,21 +1767,13 @@ def finding_bulk_update_all(request, pid=None):
         finding_to_update = request.POST.getlist('finding_to_update')
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
         total_find_count = finds.count()
-        skipped_find_count = 0
         prods = set([find.test.engagement.product for find in finds])
         if request.POST.get('delete_bulk_findings'):
             if form.is_valid() and finding_to_update:
 
-                if not settings.FEATURE_AUTHORIZATION_V2:
-                    if not request.user.is_staff and not settings.AUTHORIZED_USERS_ALLOW_DELETE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
-                        raise PermissionDenied
-                else:
-                    if pid is None:
-                        if not request.user.is_staff:
-                            raise PermissionDenied
-                    else:
-                        product = get_object_or_404(Product, id=pid)
-                        user_has_permission_or_403(request.user, product, Permissions.Finding_Delete)
+                if pid is not None:
+                    product = get_object_or_404(Product, id=pid)
+                    user_has_permission_or_403(request.user, product, Permissions.Finding_Delete)
 
                 finds = get_authorized_findings(Permissions.Finding_Delete, finds).distinct()
 
@@ -1797,16 +1797,9 @@ def finding_bulk_update_all(request, pid=None):
         else:
             if form.is_valid() and finding_to_update:
 
-                if not settings.FEATURE_AUTHORIZATION_V2:
-                    if not request.user.is_staff and not settings.AUTHORIZED_USERS_ALLOW_CHANGE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
-                        raise PermissionDenied
-                else:
-                    if pid is None:
-                        if not request.user.is_staff:
-                            raise PermissionDenied
-                    else:
-                        product = get_object_or_404(Product, id=pid)
-                        user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
+                if pid is not None:
+                    product = get_object_or_404(Product, id=pid)
+                    user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
                 # make sure users are not editing stuff they are not authorized for
                 finds = get_authorized_findings(Permissions.Finding_Edit, finds).distinct()
@@ -1846,13 +1839,14 @@ def finding_bulk_update_all(request, pid=None):
                 skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
                     for finding in finds:
-                        if form.cleaned_data['risk_accept']:
-                            if not finding.test.engagement.product.enable_simple_risk_acceptance:
-                                skipped_risk_accept_count += 1
-                            else:
-                                ra_helper.simple_risk_accept(finding)
-                        elif form.cleaned_data['risk_unaccept']:
-                            ra_helper.risk_unaccept(finding)
+                        if not finding.duplicate:
+                            if form.cleaned_data['risk_accept']:
+                                if not finding.test.engagement.product.enable_simple_risk_acceptance:
+                                    skipped_risk_accept_count += 1
+                                else:
+                                    ra_helper.simple_risk_accept(finding)
+                            elif form.cleaned_data['risk_unaccept']:
+                                ra_helper.risk_unaccept(finding)
 
                     for prod in prods:
                         calculate_grade(prod)
@@ -1926,7 +1920,7 @@ def finding_bulk_update_all(request, pid=None):
                     finds = finds.all()
 
                 if form.cleaned_data['push_to_github']:
-                    logger.info('push selected findings to github')
+                    logger.debug('push selected findings to github')
                     for finding in finds:
                         logger.debug('will push to GitHub finding: ' + str(finding))
                         old_status = finding.status()
@@ -1935,6 +1929,19 @@ def finding_bulk_update_all(request, pid=None):
                                 update_external_issue(finding, old_status, 'github')
                             else:
                                 add_external_issue(finding, 'github')
+
+                if form.cleaned_data['notes']:
+                    logger.debug('Setting bulk notes')
+                    note = Notes(entry=form.cleaned_data['notes'], author=request.user, date=timezone.now())
+                    note.save()
+                    history = NoteHistory(data=note.entry,
+                                          time=note.date,
+                                          current_editor=note.author)
+                    history.save()
+                    note.history.add(history)
+                    for finding in finds:
+                        finding.notes.add(note)
+                        finding.save()
 
                 if form.cleaned_data['tags']:
                     for finding in finds:
@@ -1948,7 +1955,7 @@ def finding_bulk_update_all(request, pid=None):
                 error_counts = defaultdict(lambda: 0)
                 success_count = 0
                 finding_groups = set([find.finding_group for find in finds if find.has_finding_group])
-                logger.info('finding_groups: %s', finding_groups)
+                logger.debug('finding_groups: %s', finding_groups)
                 for group in finding_groups:
                     if form.cleaned_data.get('push_to_jira'):
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(group)
@@ -2055,7 +2062,7 @@ def get_missing_mandatory_notetypes(finding):
     return queryset
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'original_id', 'change')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'original_id')
 @require_POST
 def mark_finding_duplicate(request, original_id, duplicate_id):
     original = get_object_or_404(Finding, id=original_id)
@@ -2109,7 +2116,7 @@ def reset_finding_duplicate_status_internal(user, duplicate_id):
     return duplicate.id
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'duplicate_id', 'change')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'duplicate_id')
 @require_POST
 def reset_finding_duplicate_status(request, duplicate_id):
     checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, duplicate_id)
@@ -2170,7 +2177,7 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
     return True
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'finding_id', 'change')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'finding_id')
 @require_POST
 def set_finding_as_original(request, finding_id, new_original_id):
     success = set_finding_as_original_internal(request.user, finding_id, new_original_id)
@@ -2184,7 +2191,7 @@ def set_finding_as_original(request, finding_id, new_original_id):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding_id,)))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 @require_POST
 def unlink_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
@@ -2218,7 +2225,7 @@ def unlink_jira(request, fid):
         return HttpResponse(status=400)
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 @require_POST
 def push_to_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)

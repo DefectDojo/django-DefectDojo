@@ -3,6 +3,7 @@ import logging
 import re
 
 from dojo.models import Finding
+from dojo.tools.utils import get_npm_cwe
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,6 @@ class NpmAuditParser(object):
 
     def parse_json(self, json_output):
         if json_output is None:
-            self.items = []
             return
         try:
             data = json_output.read()
@@ -91,12 +91,7 @@ def get_item(item_node, test):
         if len(npm_finding['paths']) > 25:
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
-    # Use CWE-1035 as fallback
-    cwe = 1035  # Vulnerable Third Party Component
-    if item_node['cwe']:
-        m = re.match(r"^(CWE-)?(\d+)", item_node['cwe'])
-        if m:
-            cwe = int(m.group(2))
+    cwe = get_npm_cwe(item_node)
 
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,

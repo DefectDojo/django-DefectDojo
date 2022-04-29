@@ -1,7 +1,6 @@
 {% extends "base.html"%}
 {% block content %}
     {{ block.super }}
- {{ block.super }}
     <h3> Add a JIRA Configuration Express </h3>
     <form class="form-horizontal" action="{% url 'express_jira' %}" method="post">{% csrf_token %}
      {% include "dojo/form_fields.html" with form=jform %}

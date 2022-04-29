@@ -28,7 +28,8 @@ Enabling the Webhook
 1.  Visit <https://>\<**YOUR JIRA URL**\>/plugins/servlet/webhooks
 2.  Click \'Create a Webhook\'
 3.  For the field labeled \'URL\' enter: <https://>\<**YOUR DOJO
-    DOMAIN**\>/webhook/
+    DOMAIN**\>/jira/webhook/<**YOUR GENERATED WEBHOOK SECRET**>
+    This value can be found under Defect Dojo System settings
 4.  Under \'Comments\' enable \'Created\'. Under Issue enable
     \'Updated\'.
 
@@ -38,15 +39,21 @@ Configurations in Dojo
 1.  Navigate to the System Settings from the menu on the left side
     or by directly visiting \<your url\>/system\_settings.
 2.  Enable \'Enable JIRA integration\' and click submit.
+3.  For the webhook created in Enabling the Webhook, enable
+    \'Enable JIRA web hook\' and click submit.
 
 Adding JIRA to Dojo
 -------------------
 
 1.  Click \'JIRA\' from the left hand menu.
 2.  Select \'Add Configuration\' from the drop-down.
-3.  If you use Jira Cloud, you will need to generate an [API token
-    for Jira](https://id.atlassian.com/manage/api-tokens) to use as
-    the password
+3.  For JIRA Server: 
+    
+    Enter the _Username_ & _Password_. A _Username_ and JIRA _Personal Access Token_ will not necessarily work.
+    
+    For JIRA Cloud:
+    
+    Enter _Email Address_ & [API token for Jira](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/)
 4.  To obtain the \'open status key\' and \'closed status key\'
     visit <https://>\<**YOUR JIRA
     URL**\>/rest/api/latest/issue/\<**ANY VALID ISSUE

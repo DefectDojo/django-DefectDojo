@@ -1,6 +1,10 @@
 from django import template
 from django.utils.safestring import mark_safe as safe
 from django.utils.html import escape
+from urllib.parse import urlencode
+
+from dojo.authorization.roles_permissions import Permissions
+from dojo.product_type.queries import get_authorized_product_types
 
 
 register = template.Library()
@@ -60,7 +64,7 @@ def dojo_sort(request, display='Name', value='title', default=None):
     icon += ' dd-sort"></i>'
     dict_ = request.GET.copy()
     dict_[field] = value
-    link = '<a title="' + title + '" href="?' + dict_.urlencode() + '">' + display + '&nbsp;' + icon + '</a>'
+    link = '<a title="' + title + '" href="?' + escape(urlencode(dict_)) + '">' + display + '&nbsp;' + icon + '</a>'
     return safe(link)
 
 
@@ -126,3 +130,8 @@ def paginate(page, adjacent=2):
                      safe('Next')))
 
     return pages
+
+
+@register.filter
+def can_add_product(user):
+    return get_authorized_product_types(Permissions.Product_Type_Add_Product).count() > 0

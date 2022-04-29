@@ -40,12 +40,13 @@
                 {{ group.description|markdown_render }}
             </div>
         </div>
-        {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
-
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">Members</h4>
+                    &nbsp;
+                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/#groups" target="_blank">
+                        <i class="fa fa-question-circle"></i></a>
                     {% if group|has_object_permission:"Group_Manage_Members" %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
@@ -60,8 +61,6 @@
                                 </a>
                             </li>
                         </ul>
-                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/#groups" target="_blank">
-                            <i class="fa fa-question-circle text-low"></i></a>
                     </div>
                     {% endif %}
                 </div>
@@ -118,6 +117,9 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">Product Type Groups</h4>
+                    &nbsp;
+                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                        <i class="fa fa-question-circle"></i></a>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddProductTypeGroup"
@@ -132,8 +134,6 @@
                                 </a>
                             </li>
                         </ul>
-                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                            <i class="fa fa-question-circle text-low"></i></a>
                     </div>
                     {% endif %}
                 </div>
@@ -191,6 +191,9 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">Product Groups</h4>
+                    &nbsp;
+                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                        <i class="fa fa-question-circle"></i></a>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button"  id="dropdownMenuAddProductGroup"
@@ -205,9 +208,6 @@
                                 </a>
                             </li>
                         </ul>
-                        &nbsp;
-                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                            <i class="fa fa-question-circle text-low"></i></a>
                     </div>
                     {% endif %}
                 </div>
@@ -260,8 +260,6 @@
             </div>
             {% endif %}
         </div>
-
-        {% endif %}
     </div>
     <div class="col-md-4">
         <div class="panel panel-default-secondary">
@@ -299,6 +297,86 @@
                 </table>
             </div>
         </div>
+        <!-- Configuration permissions -->
+        {% if 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
+        <div class="panel panel-default-secondary" id="edit_permissions">
+            <div class="panel-heading">
+                <h3 class="panel-title"><span class="fa fa-unlock-alt" aria-hidden="true"></span>&nbsp;&nbsp;Configuration Permissions</h3>
+            </div>
+            <form id="edit_permissions_form" class="form-horizontal" method="post" action="{% url 'edit_group_permissions' group.id %}">{% csrf_token %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <tr>
+                        <td id="saving_permissions">&nbsp;</td>
+                        <td class="centered"><strong>View</strong></td>
+                        <td class="centered"><strong>Add</strong></td>
+                        <td class="centered"><strong>Edit</strong></td>
+                        <td class="centered"><strong>Delete</strong></td>
+                    </tr>
+                    {% for field in configuration_permission_form.permission_fields %}
+                    <tr>
+                        <td><strong>{{ field.display_name }}</strong></td>
+                        <td class="centered">
+                            {% if field.view_codename %}
+                            <input id="id_{{ field.view_codename }}"
+                                {% if not request.user.is_superuser %}disabled{% endif %}
+                                name="{{ field.view_codename }}"
+                                aria-label="{{ field.view_codename }}"
+                                type="checkbox"
+                                {% if group.auth_group|group_has_configuration_permission:field.view_codename %}checked{% endif %} />
+                            {% endif %}
+                        </td>
+                        <td class="centered">
+                            {% if field.add_codename %}
+                            <input id="id_{{ field.add_codename }}"
+                                {% if not request.user.is_superuser %}disabled{% endif %}
+                                name="{{ field.add_codename }}"
+                                aria-label="{{ field.add_codename }}"
+                                type="checkbox"
+                                {% if group.auth_group|group_has_configuration_permission:field.add_codename %}checked{% endif %} />
+                            {% endif %}
+                        </td>
+                        <td class="centered">
+                            {% if field.change_codename %}
+                            <input id="id_{{ field.change_codename }}"
+                                {% if not request.user.is_superuser %}disabled{% endif %}
+                                name="{{ field.change_codename }}"
+                                aria-label="{{ field.change_codename }}"
+                                type="checkbox"
+                                {% if group.auth_group|group_has_configuration_permission:field.change_codename %}checked{% endif %} />
+                            {% endif %}
+                        </td>
+                        <td class="centered">
+                            {% if field.delete_codename %}
+                            <input id="id_{{ field.delete_codename }}"
+                                {% if not request.user.is_superuser %}disabled{% endif %}
+                                name="{{ field.delete_codename }}"
+                                aria-label="{{ field.delete_codename }}"
+                                type="checkbox"
+                                {% if group.auth_group|group_has_configuration_permission:field.delete_codename %}checked{% endif %} />
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            </form>
+        </div>
+        {% endif %}
+        <!-- End Configuration Permissions -->
     </div>
 </div>
+{% endblock %}
+{% block postscript %}
+{{ block.super }}
+<script type="text/javascript">
+
+    $(function() {
+        $('div#edit_permissions input[type=checkbox]').on('click', function() {
+            $('#saving_permissions').append(' <small>(saving...)</small>')
+            $('#edit_permissions_form').submit()
+        });
+    });
+
+</script>
 {% endblock %}

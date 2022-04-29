@@ -6,8 +6,10 @@ urlpatterns = [
     #  engagements and calendar
     url(r'^calendar$', views.engagement_calendar, name='calendar'),
     url(r'^calendar/engagements$', views.engagement_calendar, name='engagement_calendar'),
-    url(r'^engagement$', views.engagement, name='engagement'),
+    url(r'^engagement$', views.engagements, {'view': 'active'}, name='engagement'),
     url(r'^engagements_all$', views.engagements_all, name='engagements_all'),
+    url(r'^engagement/all$', views.engagements, {'view': 'all'}, name='all_engagements'),
+    url(r'^engagement/active$', views.engagements, {'view': 'active'}, name='active_engagements'),
     url(r'^engagement/(?P<eid>\d+)$', views.view_engagement,
         name='view_engagement'),
     url(r'^engagement/(?P<eid>\d+)/ics$', views.engagement_ics,
@@ -46,4 +48,8 @@ urlpatterns = [
         name='view_threatmodel'),
     url(r'^engagement/(?P<eid>\d+)/threatmodel/upload$',
         views.upload_threatmodel, name='upload_threatmodel'),
+    url(r'^engagement/csv_export$',
+        views.csv_export, name='engagement_csv_export'),
+    url(r'^engagement/excel_export$',
+        views.excel_export, name='engagement_excel_export'),
 ]

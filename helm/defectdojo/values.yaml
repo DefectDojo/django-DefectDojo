@@ -20,7 +20,14 @@ createPostgresqlSecret: false
 # Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
 database: postgresql
+# Primary hostname of instance
 host: defectdojo.default.minikube.local
+
+# optional list of alternative hostnames to use that gets appended to
+# DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match
+# the global hostname.
+# alternativeHosts:
+#  - defectdojo.example.com
 imagePullPolicy: Always
 # Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
 repositoryPrefix: defectdojo
@@ -63,7 +70,7 @@ monitoring:
   # Add the nginx prometheus exporter sidecar
   prometheus:
     enabled: false
-    image: nginx/nginx-prometheus-exporter:0.8.0
+    image: nginx/nginx-prometheus-exporter:0.10.0
     imagePullPolicy: IfNotPresent
 
 annotations: {}
@@ -109,11 +116,45 @@ celery:
       # concurrency: 8
       # prefetch_multiplier: 128
 
+  # A list of extra volumes to mount. This
+  # is useful for bringing in extra data that can be referenced by other configurations
+  # at a well known path, such as local_settings. The
+  # value of this should be a list of objects.
+  #
+  # Example:
+  #
+  # ```yaml
+  # extraVolumes:
+  #   - type: configMap
+  #     name: local_settings
+  #     path: /app/dojo/settings/local_settings.py
+  #     subPath: local_settings.py
+  #   - type: hostPath
+  #     name: host_directory
+  #     path: /tmp
+  #     hostPath: /tmp
+  # ```
+  #
+  # Each object supports the following keys:
+  #
+  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath". Case sensitive.
+  #    Even is supported we are highly recommending to avoid hostPath for security reasons (usually blocked by PSP)
+  # - `name` - Name of the configMap or secret to be mounted. This also controls
+  #    the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
+  # - `path` - defines where file should be exposed
+  # - `subPath` - extracts only particular file from secret or configMap
+  # - `pathType` - only for hostPath, can be one of the "DirectoryOrCreate", "Directory" (default), "FileOrCreate",
+  #   "File", "Socket", "CharDevice", "BlockDevice"
+  # - `hostPath` - only for hostPath, file or directory from local host
+  # @type: array<map>
+  extraVolumes: []
+
 django:
   annotations: {}
   affinity: {}
   ingress:
     enabled: true
+    ingressClassName: ""
     activateTLS: true
     secretName: defectdojo-tls
     annotations: {}
@@ -155,7 +196,7 @@ django:
     app_settings:
       processes: 2
       threads: 2
-    enable_debugpy: false  # this also requires DD_DEBUG to be set to True
+    enable_debug: false  # this also requires DD_DEBUG to be set to True
     certificates:
     # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
     # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
@@ -164,8 +205,57 @@ django:
       certMountPath: /certs/
       certFileName: ca.crt
 
+  # A list of extra volumes to mount. This
+  # is useful for bringing in extra data that can be referenced by other configurations
+  # at a well known path, such as local_settings. The
+  # value of this should be a list of objects.
+  #
+  # Example:
+  #
+  # ```yaml
+  # extraVolumes:
+  #   - type: configMap
+  #     name: local_settings
+  #     path: /app/dojo/settings/local_settings.py
+  #     container: uwsgi
+  #     subPath: local_settings.py
+  #   - type: hostPath
+  #     name: host_directory
+  #     path: /app/dojo/settings/
+  #     hostPath: /var/run
+  #     container: uwsgi
+  # ```
+  #
+  # Each object supports the following keys:
+  #
+  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath". Case sensitive.
+  #    Even is supported we are highly recommending to avoid hostPath for security reasons (usually blocked by PSP)
+  # - `name` - Name of the configMap or secret to be mounted. This also controls
+  #    the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
+  # - `path` - defines where file should be exposed
+  # - `container` -  defines where volume needs to be mounted, must be uwsgi or nginx
+  # - `subPath` - extracts only particular file from secret or configMap
+  # - `pathType` - only for hostPath, can be one of the "DirectoryOrCreate", "Directory" (default), "FileOrCreate",
+  #   "File", "Socket", "CharDevice", "BlockDevice"
+  # - `hostPath` - only for hostPath, file or directory from local host
+  # @type: array<map>
+  extraVolumes: []
+
+  # This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume
+  mediaPersistentVolume:
+    enabled: true
+    fsGroup: 1001
+    # any name
+    name: media
+    # could be emptyDir (not for production) or pvc
+    type: emptyDir
+    # in case if pvc specified, should point to the already existing pvc
+    persistentVolumeClaim: media
+
+
 initializer:
   run: true
+  annotations: {}
   keepSeconds: 60
   affinity: {}
   nodeSelector: {}
@@ -179,16 +269,19 @@ initializer:
 
 mysql:
   enabled: false
-  mysqlUser: defectdojo
-  mysqlPassword: ""
-  mysqlRootPassword: ""
-  existingSecret: defectdojo-mysql-specific
-  secretKey: mysql-password
-  mysqlDatabase: defectdojo
-  service:
+  auth:
+    username: defectdojo
+    password: ""
+    rootPassword: ""
+    database: defectdojo
+    existingSecret: defectdojo-mysql-specific
+    secretKey: mysql-password
+  master:
+    service:
+      port: 3306
   # To use an external mySQL instance, set enabled to false and uncomment
-  # the line below:
-  mysqlServer: "127.0.0.1"
+  # the line below / add external address:
+  # mysqlServer: "127.0.0.1"
 
 postgresql:
   enabled: true
@@ -206,12 +299,12 @@ postgresql:
   service:
     port: 5432
   securityContext:
-    # Default is tue for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+    # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
     enabled: true
     # fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
     fsGroup: 1001
   containerSecurityContext:
-    # Default is tue for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+    # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
     enabled: true
     # runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
     runAsUser: 1001
@@ -243,10 +336,14 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.17
+    tag: 1.30.0
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
+  # use IAM database authentication
+  enable_iam_login: false
+  # whether to use a private IP to connect to the database
+  use_private_ip: false
 
 # Settings to make running the chart on GKE simpler
 gke:
@@ -266,6 +363,7 @@ rabbitmq:
     password: ""
     erlangCookie: ""
     existingPasswordSecret: defectdojo-rabbitmq-specific
+    secretPasswordKey: ""
     existingErlangSecret: defectdojo-rabbitmq-specific
   memoryHighWatermark:
     enabled: true
@@ -285,16 +383,17 @@ rabbitmq:
     fsGroup: 1001
     runAsUser: 1001
 
+# For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
 redis:
   enabled: false
   transportEncryption:
     enabled: false
     params: ''
-  existingSecret: defectdojo-redis-specific
-  secretKey: redis-password
-  password: ""
-  cluster:
-    slaveCount: 1
+  auth:
+    existingSecret: defectdojo-redis-specific
+    existingSecretPasswordKey: redis-password
+    password: ""
+  architecture: standalone
   # To use an external Redis instance, set enabled to false and uncomment
   # the line below:
   # redisServer: myrediscluster
@@ -310,3 +409,4 @@ redis:
 # NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
 # extraSecrets:
 #   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
+extraConfigs: {}

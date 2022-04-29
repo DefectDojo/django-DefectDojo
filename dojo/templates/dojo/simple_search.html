@@ -115,14 +115,8 @@
                             {% if product.id %}
                             <tr>
                                 <td>
-                                    <a class="search-finding"
-                                        href="{% url 'view_product' product.id %}">{{ product.name }}</a>
-                                    <sup>
-                                        {% for tag in product.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                    <a class="search-finding" href="{% url 'view_product' product.id %}">{{ product.name }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=product.tags.alll %}
                                 </td>
                                 <td>{{ product.description|truncatechars_html:150|markdown_render }}</td>
                             </tr>
@@ -148,22 +142,13 @@
                             {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
                             {% if engagement.id %}
                             <tr>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_engagement' engagement.id %}">{{ engagement.name }}</a>
-                                    <sup>
-                                        {% for tag in engagement.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                <td>
+                                    <a class="search-finding" href="{% url 'view_engagement' engagement.id %}">{{ engagement.name }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=engagement.tags.alll %}
                                 </td>
-                                <td><a href="{% url 'view_product' engagement.product.id %}">{{ engagement.product.name }}</a>
-                                  <sup>
-                                      {% for tag in engagement.product.tags.all %}
-                                          <a title="Search {{ tag }}" class="tag-label tag-color"
-                                             href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                      {% endfor %}
-                                  </sup>
+                                <td>
+                                    <a href="{% url 'view_product' engagement.product.id %}">{{ engagement.product.name }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=engagement.product.tags.alll %}
                                 </td>
                                 <td>{{ engagement.target_start|date }} - {{ engagement.target_end|date }}</td>
                                 <td>{{ engagement.status }}</td>
@@ -191,30 +176,17 @@
                             {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
                             {% if test.id %}
                             <tr>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_test' test.id %}">{{ test }}</a>
-                                    <sup>
-                                        {% for tag in test.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query=test-tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                <td>
+                                    <a class="search-finding" href="{% url 'view_test' test.id %}">{{ test }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=test.tags.alll %}
                                 </td>
-                                <td><a href="{% url 'view_product' test.engagement.product.id %}">{{ test.engagement.product.name }}</a>
-                                  <sup>
-                                      {% for tag in test.engagement.product.tags.all %}
-                                          <a title="Search {{ tag }}" class="tag-label tag-color"
-                                             href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                      {% endfor %}
-                                  </sup>
+                                <td>
+                                    <a href="{% url 'view_product' test.engagement.product.id %}">{{ test.engagement.product.name }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=test.engagement.product.tags.all %}
                                 </td>
-                                <td><a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a>
-                                  <sup>
-                                      {% for tag in test.engagement.tags.all %}
-                                          <a title="Search {{ tag }}" class="tag-label tag-color"
-                                             href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
-                                      {% endfor %}
-                                  </sup>
+                                <td>
+                                    <a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=test.engagement.tags.all %}
                                 </td>
                                 <td>{{ test.engagement.target_start|date }} - {{ test.engagement.target_end|date }}</td>
                                 <td>{{ test.engagement.status }}</td>
@@ -238,23 +210,14 @@
                         <tbody>
                         {% for e in endpoints %}
                             <tr>
-                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
-                                  {% if e.tags %}
-                                      <sup>
-                                          {% for tag in e.tags.all %}
-                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
-                                          {% endfor %}
-                                      </sup>
-                                  {% endif %}
+                                <td>
+                                    <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
                                 {% if e.product %}
-                                    <td><a href="{% url 'view_product' e.product.id %}">{{ e.product.name }}</a>
-                                    <sup>
-                                        {% for tag in e.product.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                                href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                    <td>
+                                        <a href="{% url 'view_product' e.product.id %}">{{ e.product.name }}</a>
+                                        {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
                                     </td>
                                 {% else %}
                                     <td>None</td>
@@ -284,14 +247,9 @@
                         <tbody>
                         {% for finding_template in finding_templates %}
                             <tr>
-                                <td><a class="search-finding"
-                                       href="{% url 'edit_template' finding_template.id %}">{{ finding_template.title }}</a>
-                                    <sup>
-                                        {% for tag in finding_template.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                <td>
+                                    <a class="search-finding" href="{% url 'edit_template' finding_template.id %}">{{ finding_template.title }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=finding_template.tags.all %}
                                 </td>
                                 <td>{{ finding_template.description }}</td>
                             </tr>
@@ -315,14 +273,9 @@
                         {% for lang in languages %}
                             <tr>
                                <td>{{ lang.language.language }}</td>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_product' lang.product.id %}">{{ lang.product.name }}</a>
-                                    <sup>
-                                        {% for tag in lang.product.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                <td>
+                                    <a class="search-finding" href="{% url 'view_product' lang.product.id %}">{{ lang.product.name }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=lang.product.tags.all %}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -345,14 +298,9 @@
                         {% for app in app_analysis %}
                             <tr>
                                <td>{{ app.name }}</td>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_product' app.product.id %}">{{ app.product.name }}</a>
-                                    <sup>
-                                        {% for tag in app.product.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                <td>
+                                    <a class="search-finding" href="{% url 'view_product' app.product.id %}">{{ app.product.name }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=app.product.tags.all %}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -376,14 +324,9 @@
                             {% for test in tagged_tests %}
                                 <tr>
                                     <td>Test</td>
-                                    <td><a class="search-finding"
-                                           href="{% url 'view_test' test.id %}">{{ test }}</a>
-                                        <sup>
-                                            {% for tag in test.tags.all %}
-                                                <a title="Search {{ tag }}" class="tag-label tag-color"
-                                                   href="{% url 'simple_search' %}?query=test-tag:{{ tag }}">{{ tag }}</a>
-                                            {% endfor %}
-                                        </sup>
+                                    <td>
+                                        <a class="search-finding" href="{% url 'view_test' test.id %}">{{ test }}</a>
+                                        {% include "dojo/snippets/tags.html" with tags=test.tags.all %}
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -399,56 +342,36 @@
                         {% for finding_template in tagged_finding_templates %}
                             <tr>
                                 <td>Finding Template</td>
-                                <td><a class="search-finding"
-                                       href="{% url 'edit_template' finding_template.id %}">{{ finding_template.title }}</a>
-                                    <sup>
-                                        {% for tag in finding_template.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                <td>
+                                    <a class="search-finding" href="{% url 'edit_template' finding_template.id %}">{{ finding_template.title }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=finding_template.tags.all %}
                                 </td>
                             </tr>
                         {% endfor %}
                         {% for product in tagged_products %}
                             <tr>
                                 <td>Product</td>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_product' product.id %}">{{ product.name }}</a>
-                                    <sup>
-                                        {% for tag in product.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                <td>
+                                    <a class="search-finding" href="{% url 'view_product' product.id %}">{{ product.name }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=product.tags.all %}
                                 </td>
                             </tr>
                         {% endfor %}
                         {% for endpoint in tagged_endpoints %}
                             <tr>
                                 <td>Endpoint</td>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
-                                    <sup>
-                                        {% for tag in endpoint.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                <td>
+                                    <a class="search-finding" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
                                 </td>
                             </tr>
                         {% endfor %}
                         {% for eng in tagged_engagements %}
                             <tr>
                                 <td>Engagement</td>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_engagement' eng.id %}">{{ eng }}</a>
-                                    <sup>
-                                        {% for tag in eng.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                <td>
+                                    <a class="search-finding" href="{% url 'view_engagement' eng.id %}">{{ eng }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=eng.tags.all %}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -467,7 +390,7 @@
                             <th>Product</th>
                             <th>Severity</th>
                             <th>Title</th>
-                            <th>CVE</th>
+                            <th>Vulnerability Id/th>
                             <th>Description</th>
                             <th>JIRA</th>
                             <th>Rank</th>
@@ -513,12 +436,12 @@
                                         </a>
                                     </td>
                                     <td class="nowrap">
-                                        {% if result.meta.cve %}
-                                            <a target="_blank" href="{{ result.meta.cve|cve_url }}">
+                                        {% if result.meta.cve|has_vulnerability_url %}
+                                            <a target="_blank" href="{{ result.meta.cve|vulnerability_url }}">
                                                 <i class="fa fa-external-link"></i> {{ result.meta.cve|default:"" }}
                                             </a>
                                         {% else %}
-                                            None
+                                            {{ result.meta.cve }}
                                         {% endif %}
                                     </td>
                                     <td width="50%">

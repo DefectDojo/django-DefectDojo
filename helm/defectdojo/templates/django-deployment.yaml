@@ -43,6 +43,10 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
+      {{- if .Values.django.mediaPersistentVolume.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.django.mediaPersistentVolume.fsGroup | default 1001 }}
+      {{- end }}
       volumes:
       - name: run
         emptyDir: {}
@@ -50,6 +54,27 @@ spec:
       - name: cert-mount
         configMap:
           name: {{ .Values.django.uwsgi.certificates.configName }}
+      {{- end }}
+      {{- range .Values.django.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
+          path: {{ .hostPath }}
+          {{- end }}
+      {{- end }}
+      {{- if .Values.django.mediaPersistentVolume.enabled }}
+      - name: {{ .Values.django.mediaPersistentVolume.name }}
+        {{- if eq .Values.django.mediaPersistentVolume.type "pvc"  }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.django.mediaPersistentVolume.persistentVolumeClaim }}
+        {{ else }}
+        emptyDir: {}
+        {{- end }}
       {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
@@ -64,14 +89,20 @@ spec:
         {{- if eq .Values.database "postgresql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
         {{- else if eq .Values.database "mysql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.master.service.port }}"
+        {{- end }}
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
         {{- end }}
       {{- end }}
       {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
       - name: metrics
         image: {{ .Values.monitoring.prometheus.image }}
         imagePullPolicy: {{ .Values.monitoring.prometheus.imagePullPolicy }}
-        command: [ '/usr/bin/exporter', '-nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
+        command: [ '/usr/bin/nginx-prometheus-exporter', '-nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
         livenessProbe:
           httpGet:
             path: /metrics
@@ -94,6 +125,18 @@ spec:
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
         {{- end }}
+        {{- range .Values.django.extraVolumes }}
+        {{- if (eq .container "uwsgi") }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.django.mediaPersistentVolume.enabled }}
+        - name: {{ .Values.django.mediaPersistentVolume.name }}
+          mountPath: {{.Values.extraConfigs.DD_MEDIA_ROOT | default "/app/media" | quote }}
+        {{- end }}
         ports:
         - name: http
           protocol: TCP
@@ -113,8 +156,23 @@ spec:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
+            {{- if eq .Values.celery.broker "rabbitmq" }}
+            {{- if .Values.rabbitmq.enabled }}
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
+            {{- else }}
+              name: {{ .Values.rabbitmq.existingPasswordSecret }}
+              key: {{ .Values.rabbitmq.secretPasswordKey }}  
+            {{- end }}            
+            {{- else if eq .Values.celery.broker "redis" }}
+            {{- if .Values.redis.enabled }}
+              name: defectdojo-{{ .Values.celery.broker }}-specific
+              key: {{ .Values.celery.broker }}-password
+            {{- else }}
+              name: {{ .Values.redis.existingSecret }}
+              key: {{ .Values.redis.secretKey }}
+            {{- end }}  
+            {{- end }}
         {{- if .Values.django.uwsgi.enable_debug }}
         - name: DD_DEBUG
           value: 'True'
@@ -126,8 +184,8 @@ spec:
               name: {{ .Values.postgresql.existingSecret }}
               key: {{ .Values.postgresql.secretKey }}
               {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.existingSecret }}
-              key: {{ .Values.mysql.secretKey }}
+              name: {{ .Values.mysql.auth.existingSecret }}
+              key: {{ .Values.mysql.auth.secretKey }}
               {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:
@@ -146,7 +204,7 @@ spec:
         {{- if .Values.django.uwsgi.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
-            path: /login?next=/
+            path: /login?force_login_form&next=/
             port: http
             httpHeaders:
             - name: Host
@@ -169,6 +227,18 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        {{- range .Values.django.extraVolumes }}
+        {{- if (eq .container "nginx") }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.django.mediaPersistentVolume.enabled }}
+        - name: {{ .Values.django.mediaPersistentVolume.name }}
+          mountPath: /usr/share/nginx/html/media
+        {{- end }}
         ports:
         - name: http
           protocol: TCP

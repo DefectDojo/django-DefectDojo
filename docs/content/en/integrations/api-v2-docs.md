@@ -6,10 +6,12 @@ weight: 2
 ---
 
 
+
+
 DefectDojo\'s API is created using [Django Rest
 Framework](http://www.django-rest-framework.org/). The documentation of
 each endpoint is available within each DefectDojo installation at
-`/api/v2/doc/` and can be accessed by choosing the API v2
+[`/api/v2/doc/`](https://demo.defectdojo.org/api/v2/) and can be accessed by choosing the API v2
 Docs link on the user drop down menu in the header.
 
 ![image](../../images/api_v2_1.png)
@@ -18,21 +20,20 @@ The documentation is generated using [Django Rest Framework
 Yet Another Swagger Generator](https://github.com/axnsan12/drf-yasg/), and is
 interactive. On the top of API v2 docs is a link that generates an OpenAPI v2 spec.
 
+As a preparation to move to OpenAPIv3, we have added an compatible spec and documentation at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/?docExpansion=none)
+
 To interact with the documentation, a valid Authorization header value
 is needed. Visit the `/api/v2/key/` view to generate your
 API Key (`Token <api_key>`) and copy the header value provided.
 
 ![image](../../images/api_v2_2.png)
 
-Return to the `/api/v2/doc/` and click on
-`Authorize` to open the Authorization form. Paste your key in
-the form field provided and click on the `Authorize` button. Your
-authorization header value will be captured and used for all requests.
-
 Each section allows you to make calls to the API and view the Request
 URL, Response Body, Response Code and Response Headers.
 
 ![image](../../images/api_v2_3.png)
+
+If you're logged in to the Defect Dojo web UI, you do not need to provide the authorization token.
 
 Authentication
 --------------
@@ -157,7 +158,6 @@ Example for importing a scan result:
     active:true
     lead:1
     tags:test
-    scan_date:2019-04-30
     scan_type:ZAP Scan
     minimum_severity:Info
     skip_duplicates:true
@@ -171,3 +171,17 @@ Example for importing a scan result:
        -   Browse for the file to upload
 
 -   Click send
+
+Clients / API Wrappers
+----------------------
+
+| Wrapper                      | Status                   | Notes |
+| -----------------------------| ------------------------| ------------------------|
+| [Specific python wrapper](https://github.com/DefectDojo/defectdojo_api)      | working (2021-01-21)    | API Wrapper including scripts for continous CI/CD uploading. Is lagging behind a bit on latest API features as we plan to revamp the API wrapper |
+| [Openapi python wrapper](https://github.com/alles-klar/defectdojo-api-v2-client)       | | proof of concept only where we found out the the OpenAPI spec is not perfect yet |
+| [Java library](https://github.com/secureCodeBox/defectdojo-client-java)                 | working (2021-08-30)    | Created by the kind people of [SecureCodeBox](https://github.com/secureCodeBox/secureCodeBox) |
+| [Image using the Java library](https://github.com/SDA-SE/defectdojo-client) | working (2021-08-30)    | |
+| [.Net/C# library](https://www.nuget.org/packages/DefectDojo.Api/)              | working (2021-06-08)    | |
+| [dd-import](https://github.com/MaibornWolff/dd-import)                    | working (2021-08-24)    | dd-import is not directly an API wrapper. It offers some convenience functions to make it easier to import findings and language data from CI/CD pipelines. |
+
+Some of the api wrappers contain quite a bit of logic to ease scanning and importing in CI/CD environments. We are in the process of simplifying this by making the DefectDojo API smarter (so api wrappers / script can be dumber).

@@ -24,8 +24,6 @@
             $("#id_questions").bind("DOMSubtreeModified", function() {
                 $("#id_questions").trigger("chosen:updated");
             });
-
-            $('#id_questions').chosen({'placeholder_text_multiple': 'Select some questions...you can also search for questions here.'});
         });
     </script>
     <script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>

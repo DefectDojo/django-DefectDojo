@@ -87,9 +87,9 @@ class SnykParser(object):
         vulnPath = ''
         for index, item in enumerate(vulnerability['from']):
             if index == 0:
-                vulnPath += item.split("@")[0]
+                vulnPath += "@".join(item.split("@")[0:-1])
             else:
-                vulnPath += " > " + item.split("@")[0]
+                vulnPath += " > " + "@".join(item.split("@")[0:-1])
 
         # create the finding object
         finding = Finding(

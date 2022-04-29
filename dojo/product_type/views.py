@@ -3,7 +3,6 @@ import logging
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -16,10 +15,9 @@ from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
-from django.conf import settings
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.authorization_decorators import user_has_global_permission, user_is_authorized
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_members_for_product_type, \
     get_authorized_groups_for_product_type
 from dojo.product.queries import get_authorized_products
@@ -58,7 +56,6 @@ def prefetch_for_product_type(prod_types):
         active_findings_query = Q(prod_type__engagement__test__finding__active=True)
         active_verified_findings_query = Q(prod_type__engagement__test__finding__active=True,
                                 prod_type__engagement__test__finding__verified=True)
-        prefetch_prod_types = prefetch_prod_types.prefetch_related('authorized_users')
         prefetch_prod_types = prefetch_prod_types.annotate(
             active_findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))
         prefetch_prod_types = prefetch_prod_types.annotate(
@@ -70,19 +67,18 @@ def prefetch_for_product_type(prod_types):
     return prefetch_prod_types
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_has_global_permission(Permissions.Product_Type_Add)
 def add_product_type(request):
     form = Product_TypeForm()
     if request.method == 'POST':
         form = Product_TypeForm(request.POST)
         if form.is_valid():
             product_type = form.save()
-            if settings.FEATURE_AUTHORIZATION_V2:
-                member = Product_Type_Member()
-                member.user = request.user
-                member.product_type = product_type
-                member.role = Role.objects.get(is_owner=True)
-                member.save()
+            member = Product_Type_Member()
+            member.user = request.user
+            member.product_type = product_type
+            member.role = Role.objects.get(is_owner=True)
+            member.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product type added successfully.',
@@ -98,12 +94,13 @@ def add_product_type(request):
     })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid', 'view')
+@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid')
 def view_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_View)
     groups = get_authorized_groups_for_product_type(pt, Permissions.Product_Type_View)
     products = get_authorized_products(Permissions.Product_View).filter(prod_type=pt)
+    products = get_page_items(request, products, 25)
     add_breadcrumb(title="View Product Type", top_level=False, request=request)
     return render(request, 'dojo/view_product_type.html', {
         'name': 'View Product Type',
@@ -113,7 +110,7 @@ def view_product_type(request, ptid):
         'members': members})
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Delete, 'ptid', 'delete')
+@user_is_authorized(Product_Type, Permissions.Product_Type_Delete, 'ptid')
 def delete_product_type(request, ptid):
     product_type = get_object_or_404(Product_Type, pk=ptid)
     form = Delete_Product_TypeForm(instance=product_type)
@@ -147,17 +144,14 @@ def delete_product_type(request, ptid):
                    })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Edit, 'ptid', 'staff')
+@user_is_authorized(Product_Type, Permissions.Product_Type_Edit, 'ptid')
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
-    authed_users = pt.authorized_users.all()
     members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_Manage_Members)
-    pt_form = Product_TypeForm(instance=pt, initial={'authorized_users': authed_users})
+    pt_form = Product_TypeForm(instance=pt)
     if request.method == "POST" and request.POST.get('edit_product_type'):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
             pt = pt_form.save()
             messages.add_message(
                 request,

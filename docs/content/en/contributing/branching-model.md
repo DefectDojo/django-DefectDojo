@@ -7,7 +7,7 @@ weight: 3
 
 ## Regular releases
 
-The DefectDojo team aims to release at least once a month, on the last Tuesday.
+The DefectDojo team aims to release at least once a month, on the first Tuesday.
 Bugfix or security releases can come at any time.
 
 In doubt, GitHub Actions are the source of truth. The releases are semi-automated right now, with a DefectDojo maintainer proceeding with each major step in the release. The steps for a regular release are:
@@ -24,3 +24,6 @@ PRs that relate to security issues are done through [security advisories](https:
 ![Schemas](../../images/branching_model.png)
 
 Diagrams created with [plantUML](https://plantuml.com). Find a web-based editor for PlantUML at https://www.planttext.com.
+
+## Documentation
+A `dev` version of the documentation built from the `dev` branch is available at [DefectDojo Documentation - dev branch](https://defectdojo.github.io/django-DefectDojo/dev/).

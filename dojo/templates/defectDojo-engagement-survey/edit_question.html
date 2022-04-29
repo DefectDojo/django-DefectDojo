@@ -12,7 +12,7 @@
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <input class="btn btn-primary" type="submit" label="edit_questionnaire_questions" name="edit_questionnaire_questions"
-                       value="Edit Questions"/>
+                       value="Submit"/>
             </div>
         </div>
     </form>
@@ -24,9 +24,6 @@
             $("#id_choices").bind("DOMSubtreeModified", function () {
                 $("#id_choices").trigger("chosen:updated");
             });
-
-            $('#id_choices').chosen(
-                    {'placeholder_text_multiple': 'Select some choices...you can also search for choices here.'});
         });
     </script>
     <script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>

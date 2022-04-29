@@ -52,14 +52,14 @@ a {
 .panel-default .btn-primary {
     background-color: transparent!important;
     border-style: none!important;
-    color: #546474!important;
-    border: 1px solid #546474!important;
+    color: #fff!important;
+    border: 1px solid #fff!important;
 }
 
 .panel-default .btn-primary:hover {
     background-color: transparent!important;
-    color: #36404a!important;
-    border: 1px solid #546474!important;
+    color: #fff!important;
+    border: 1px solid #fff!important;
 }
 
 .btn-primary {
@@ -71,6 +71,18 @@ a {
 .btn-primary:hover {
     background-color: #38434d!important;
 }
+
+.btn-secondary {
+    color: #fff;
+    background-color: #546474;
+	border-style: none!important;
+}
+
+.btn-secondary:hover {
+    color: #fff;
+    background-color: #38434d!important;
+}
+
 /*
 .btn-primary.active.focus, .btn-primary.active:focus, .btn-primary.active:hover, .btn-primary:active.focus, .btn-primary:active:focus, .btn-primary:active:hover, .open > .dropdown-toggle.btn-primary.focus, .open > .dropdown-toggle.btn-primary:focus, .open > .dropdown-toggle.btn-primary:hover {
     background-color: transparent!important;
@@ -312,6 +324,21 @@ form.metric_form p label {
 
 .filters .panel-heading:first-child {
     border-top: 0px solid #ddd;
+}
+
+.panel-blue .panel-heading,
+.panel-blue {
+    color: #f5f5f5;
+    background-color: #546474!important;
+    border-color: #546474!important;
+}
+
+.panel-blue a {
+    color: #546474;
+}
+
+.panel-blue a:hover {
+    color: #38434d;
 }
 
 .nowrap {
@@ -572,13 +599,18 @@ form ul#id_accepted_findings input {
 }
 
 .pagination {
-    margin: 10px 0 15px;
+    margin: 10px;
 }
 
 .pagination>.active>a, .pagination>.active>a:focus, .pagination>.active>a:hover, .pagination>.active>span, .pagination>.active>span:focus, .pagination>.active>span:hover
 {
   background-color: #546474;
   border-color: #546474;
+}
+
+.pagination-in-panel {
+    margin-left: 10px!important;
+    margin-right: 10px!important;
 }
 
 #risk_acceptance table form {
@@ -718,6 +750,11 @@ body #header form#api_selector .input a#explore {
 .controls ul {
     list-style-type: none;
     margin: 0
+}
+
+div.dataTables_wrapper
+div.dataTables_filter {
+    margin: 10px!important;
 }
 
 .navbar li.search-form {
@@ -1200,6 +1237,10 @@ div.custom-search-form {
 	color: #246c91;
 }
 
+div.dt-buttons {
+    margin: 10px!important;
+}
+
 table#product_types .btn-success{
 	background-color: #546474;
 	border-color: #546474;
@@ -1222,10 +1263,6 @@ table#product_types .btn-warning:hover{
 
 span.pull-right.clickable i.glyphicon-chevron-up, span.pull-right.clickable i.glyphicon-chevron-down {
     color: #546474;
-}
-
-table.finding-endpoints {
-    font-size: 13px;
 }
 
 .finding-description {
@@ -1525,12 +1562,6 @@ div.tags .label {
 .tag-label:visited {
     color: white;
     text-decoration: none;
-}
-
-@media (min-width: 768px) {
-    #findingImageModal .modal-dialog {
-        width: 50%;
-    }
 }
 
 #finding_pic, .modal_finding_pic:hover {

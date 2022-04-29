@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load navigation_tags %}
 {% load humanize %}
 {% load display_tags %}
 {% load authorization_tags %}
@@ -18,23 +19,20 @@
             <div class="clearfix">
                 <h4 class="pull-left finding-title">
                     {% if host_view %}
-                      {{ endpoint.host }} -
-                      {{ endpoint.host_mitigated_endpoints_count }} / {{ endpoint.host_endpoints_count }} Mitigated Endpoints
+                      Host: {{ endpoint.host }} -
+                      {{ endpoint.host_mitigated_endpoints_count }} / {{ endpoint.host_endpoints_count }} mitigated endpoints
                     {% else %}
-                      {{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %} -
+                      Endpoint: {{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %} -
                       {% if endpoint.mitigated %}
                         Mitigated
                       {% else %}
                         {% if endpoint.active_findings_count > 0 %}
                           Vulnerable
                         {% else %}
-                          No Open, Active Findings
+                          No active verified findings
                         {% endif %}
                       {% endif %}
                     {% endif %}
-                    <span class="text-muted endpoint_product">
-                        <a href="{% url 'view_product' endpoint.product.id %}">{{ endpoint.product }}</a>
-                    </span>
                 </h4>
 
 
@@ -50,14 +48,12 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                               {% if not host_view %}
-                                {% if endpoint|has_object_permission:"Endpoint_Edit" or user|is_authorized_for_change:endpoint %}
+                                {% if endpoint|has_object_permission:"Endpoint_Edit" %}
                                     <li role="presentation">
                                         <a href="{% url 'edit_endpoint' endpoint.id %}">
                                             <i class="fa fa-pencil-square-o"></i> Edit Endpoint
                                         </a>
                                     </li>
-                                {% endif %}
-                                {% if endpoint|has_object_permission:"Endpoint_Edit" or user|is_authorized_for_staff:endpoint %}
                                     <li role="presentation">
                                         <a href="{% url 'add_endpoint_meta_data' endpoint.id %}">
                                             <i class="fa fa-list-alt"></i> Add Metadata
@@ -71,11 +67,11 @@
                                     </li>
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation">
-                                        <a href="{% url 'endpoint_report' endpoint.id %}">
+                                        <a href="{% url 'endpoint_report' endpoint.id %}?active=1">
                                             <i class="fa fa-file-text-o"></i> Report
                                         </a>
                                     </li>
-                                {% if endpoint|has_object_permission:"Endpoint_Delete" or user|is_authorized_for_delete:endpoint %}
+                                {% if endpoint|has_object_permission:"Endpoint_Delete" %}
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation" class="text-danger">
                                         <a class="text-danger" href="{% url 'delete_endpoint' endpoint.id %}">
@@ -85,7 +81,7 @@
                                 {% endif %}
                               {% else %}
                                 <li role="presentation">
-                                    <a href="{% url 'endpoint_report' endpoint.id %}?host_view">
+                                    <a href="{% url 'endpoint_host_report' endpoint.id %}?&active=1">
                                         <i class="fa fa-file-text-o"></i> Report
                                     </a>
                                 </li>
@@ -127,8 +123,13 @@
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ all_findings|length }}</span>
-                                    <span><a href="{% url 'endpoint_report' endpoint.id %}">endpoint
-                                        finding{{ all_findings|length|pluralize }} <i
+                                    <span>
+                                      {% if not host_view %}
+                                        <a href="{% url 'endpoint_report' endpoint.id %}">
+                                      {% else %}
+                                        <a href="{% url 'endpoint_host_report' endpoint.id %}">
+                                      {% endif %}
+                                            endpoint finding{{ all_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -155,7 +156,7 @@
                     </div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
-                        <div id="opened_per_month" class="graph"></div>
+                        <div id="opened_per_month_2" class="graph"></div>
                     </div>
                     <!-- /.panel-body -->
                 </div>
@@ -164,9 +165,9 @@
         </div>
     </div>
 
-    <div class="panel panel-default endpoints table-responsive">
+    <div class="panel panel-default table-responsive">
         {% if host_view %}
-            <div class="panel-heading">Endpoints</div>
+            <div class="panel-heading"><h4>Endpoints</h4></div>
             {% if endpoints %}
                 {% colgroup endpoints into 3 cols as grouped_items %}
                 <table class="table-striped table table table-condensed table-hover finding-endpoints">
@@ -176,11 +177,11 @@
                                 <td>{% if item %}
                                       <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
                                       {% if item.vulnerable %}
-                                        &#10005;
+                                        <span style="color:OrangeRed" class="fa fa-thumbs-down"></span>
                                       {% else %}
-                                        &#10003;
+                                        <span class="fa fa-thumbs-up"></span>
                                       {% endif %}
-                                      {{ item|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                      &nbsp;{{ item|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
                                     {% endif %}
                                 </td>
                             {% endfor %}
@@ -193,22 +194,20 @@
                 </div>
             {% endif %}
         {% else %}
-            <div class="panel-heading">Host</div>
-            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
+            <div class="panel-heading"><h4>Host</h4></div>
+            <div id="vuln_endpoints" class="panel-body table-responsive">
                 <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.host }}" href="{% url 'view_endpoint_host' endpoint.id %}">{{ endpoint.host }}</a>
             </div>
         {% endif %}
     </div>
 
-    {% if not host_view and endpoint.tags %}
+    {% if not host_view and endpoint.tags.all %}
         <div class="panel panel-default tags">
             <div class="panel-heading">
                 <h4>Tags</h4>
             </div>
             <div class="tags panel-body">
-                {% for tag in endpoint.tags.all %}
-                    <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                {% endfor %}
+                {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
             </div>
         </div>
     {% endif %}
@@ -248,47 +247,58 @@
 
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h4>Active Findings</h4>
+            <h4>Active Verified Findings</h4>
         </div>
-        {% if findings %}
-            <table id="findings" class="tablesorter-bootstrap table table-striped table-bordered">
+    {% if findings %}
+    <div class="clearfix pagination-in-panel">
+        {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
+    </div>
+    <div class="table-responsive panel panel-default">
+        <table id="findings" class="tablesorter-bootstrap table table-striped">
                 <thead>
                 <tr>
                     <th>Title</th>
-                    <th>Date</th>
-                    <th>Severity</th>
-                    <th>Age</th>
+                    <th class="text-center">Severity</th>
+                    <th class="text-center">Date</th>
+                    <th class="text-center">Age</th>
+                    <th>Found by</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for finding in findings %}
                     <tr>
-                        <td>
+                        <td> 
                             <a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                         </td>
-                        <td>
+                        <td class="text-center">
+                            <span class="label severity severity-{{ finding.severity }}">
+                            {{ finding.severity }}
+                            </span>
+                        </td>
+                        <td class="text-center">
                             {{ finding.date }}
                         </td>
-                        <td>
-                            {{ finding.severity }}
+                        <td class="text-center">
+                            {{ finding.age }}
                         </td>
                         <td>
-                            {{ finding.age }}
+                            {% for scanner in finding.found_by.all %}
+                            {{ scanner }}
+                            {% endfor %}
                         </td>
                     </tr>
                 {% endfor %}
 
                 </tbody>
             </table>
-            <div class="clearfix">
-                {% include "dojo/paging_snippet.html" with page=findings %}
-            </div>
-        {% else %}
-            <p class="text-center">No findings found.</p>
-        {% endif %}
-
+        </div>
+    <div class="clearfix pagination-in-panel">
+        {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
     </div>
-
+    {% else %}
+        <p class="text-center">No findings found.</p>
+    {% endif %}
+    </div>
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
@@ -299,6 +309,9 @@
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
     <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
     <script type="text/javascript">
         $(function () {
             $(document).on('click', '.panel-heading button.clickable', function (e) {
@@ -314,79 +327,6 @@
                 }
             });
 
-            finding_age();
-            open_findings();
-            $(".product-graphs").hide();
-
-        });
-
-        function finding_age() {
-            var data = {};
-            var data_1 = []
-            var ticks = []
-            {% for f in all_findings %}
-                if (data[{{ f.age }}]) {
-                    data[{{ f.age }}] += 1
-                }
-                else {
-                    data[{{ f.age }}] = 1
-                }
-            {% endfor %}
-            var i = 0;
-            $.each(data, function (index, value) {
-                if (value > 0) {
-                    data_1.push([i, value]);
-                    ticks.push([i, index])
-                }
-                i++;
-            });
-
-
-            var dataset = [
-                {data: data_1, color: "#337ab7", fillColor: "#337ab7"}
-            ];
-
-            var options = {
-                series: {
-                    bars: {
-                        show: true,
-                        fill: true,
-                        fillColor: "#337ab7"
-                    }
-                },
-                bars: {
-                    align: "center",
-                    barWidth: 0.5
-                },
-                xaxis: {
-                    axisLabel: "Days Open",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 10,
-                    ticks: ticks,
-                },
-                yaxis: {
-                    axisLabel: "Number of Findings",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 3,
-                },
-                legend: {
-                    show: false,
-                },
-                grid: {
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-                }
-            };
-
-
-            $.plot("#finding_age", dataset, options);
-        }
-        ;
-        function open_findings() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -425,166 +365,44 @@
             var d5 = [
                 [4, info],
             ];
+            open_findings(d1, d2, d3, d4, d5, ticks);
+            $(".product-graphs").hide();
+        });
 
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
 
-            $.plot("#open_findings", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-        {% if opened_per_month %}
-            opened_per_month();
-            function opened_per_month() {
-                var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
-
-                {% for month in opened_per_month|slice:'1:' %}
-                    critical.push([{{ month.0 }}, {{ month.2 }}]);
-                    high.push([{{ month.0 }}, {{ month.3 }}]);
-                    medium.push([{{ month.0 }}, {{ month.4 }}]);
-                    low.push([{{ month.0 }}, {{ month.5 }}]);
-                {% endfor %}
-
-                var tick_count = critical.length < 7 ? critical.length : 7;
-                var options = {
-                    xaxis: {
-                        mode: "time",
-                        timeformat: "%m-%d-%Y",
-                        timezone: 'browser'
-                    },
-                    xaxes: [{
-                        ticks: tick_count
-                    }],
-                    yaxes: [{
-                        min: 0
-                    }],
-                    series: {
-                        stack: true,
-                        lines: {
-                            show: true
-                        },
-                        points: {
-                            show: true
-                        }
-                    },
-                    grid: {
-                        hoverable: true,
-                        borderWidth: 1,
-                        borderColor: '#e7e7e7'
-
-                    },
-                    tooltip: true
-                };
-                var plotObj = $.plot($("#opened_per_month"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-
-                        }],
-                        options);
+        var data = {};
+        var data_1 = [];
+        ticks = [];
+        {% for f in all_findings %}
+            if (data[{{ f.age }}]) {
+                data[{{ f.age }}] += 1
             }
+            else {
+                data[{{ f.age }}] = 1
+            }
+        {% endfor %}
+        var i = 0;
+        $.each(data, function (index, value) {
+            if (value > 0) {
+                data_1.push([i, value]);
+                ticks.push([i, index])
+            }
+            i++;
+        });
+        finding_age(data_1, ticks);
+
+        {% if opened_per_month %}
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            {% for month in opened_per_month|slice:'1:' %}
+                critical.push([{{ month.0 }}, {{ month.2 }}]);
+                high.push([{{ month.0 }}, {{ month.3 }}]);
+                medium.push([{{ month.0 }}, {{ month.4 }}]);
+                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% endfor %}
+            opened_per_month_2(critical, high, medium, low);
         {%  endif %}
     </script>
 {% endblock %}

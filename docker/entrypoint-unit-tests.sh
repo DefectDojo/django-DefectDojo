@@ -10,6 +10,9 @@ cd /app
 # Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)
 unset DD_DATABASE_URL
 
+# Unset the celery broker URL so that we can force the other DD_CELERY_BROKER settings
+unset DD_CELERY_BROKER_URL
+
 # TARGET_SETTINGS_FILE=dojo/settings/settings.py
 # if [ ! -f ${TARGET_SETTINGS_FILE} ]; then
 #   echo "Creating settings.py"
@@ -66,12 +69,12 @@ EOF
 python3 manage.py migrate
 
 # --parallel fails on GitHub Actions
-#python3 manage.py test dojo.unittests -v 3 --no-input --parallel
+#python3 manage.py test unittests -v 3 --no-input --parallel
 
 echo "Swagger Schema Tests - Broken"
 echo "------------------------------------------------------------"
-python3 manage.py test dojo.unittests -v 3 --no-input --tag broken && true
+python3 manage.py test unittests -v 3 --keepdb --no-input --tag broken && true
 
 echo "Unit Tests"
 echo "------------------------------------------------------------"
-python3 manage.py test dojo.unittests -v 3 --keepdb --no-input --exclude-tag broken
+python3 manage.py test unittests -v 3 --keepdb --no-input --exclude-tag broken

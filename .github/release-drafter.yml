@@ -6,10 +6,14 @@ categories:
   - title: '💣 Breaking changes'
     labels:
       - 'Breaking Changes'
-  - title: '🚩 Requires settings changes, database migration, hash code recomputation'
+  - title: '🚩 Changes to `settings.dist.py` / `local_settings.py`'
     labels:
       - 'settings_changes'
+  - title: '🚩 Database migration'
+    labels:
       - 'New Migration'
+  - title: '🚩 Requires hash code recomputation'
+    labels:
       - 'hashcode-update-needed'
   - title: '🚩 Security'
     labels:
@@ -35,9 +39,13 @@ categories:
     labels:
       - 'dependencies'
       - 'maintenance'
+  - title: '🖌 Updates in UI'
+    label: 'ui'
 exclude-labels:
   - 'skip-changelog'      
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
+  Please consult the [Upgrade notes in the documentation ](https://defectdojo.github.io/django-DefectDojo/getting_started/upgrading/) for specific instructions for this release, and general upgrade instructions. Below is an automatically generated list of all PRs merged since the previous release.
+  
   ## Changes since $PREVIOUS_TAG
   $CHANGES

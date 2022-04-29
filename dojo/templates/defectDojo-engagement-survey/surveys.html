@@ -34,7 +34,7 @@
                                     <i class="fa fa-edit"></i> Edit Responses</a>
                                 </li>
                                 {% endif %}
-                                {% if survey.engagement|has_object_permission:"Engagement_Edit" or user|is_authorized_for_change:survey.engagement %}
+                                {% if survey.engagement|has_object_permission:"Engagement_Edit" %}
                                 <li role="presentation"
                                     ><a class="" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign">
                                         <i class="fa fa-plus"></i> Assign User</a>
@@ -46,7 +46,7 @@
                                     data-whatever="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer">
                                     <i class="fa fa-share-alt"></i> Share Questionnaire</a>
                                 </li>
-                                {% if survey.engagement|has_object_permission:"Engagement_Edit" or user|is_authorized_for_change:survey.engagement %}
+                                {% if survey.engagement|has_object_permission:"Engagement_Edit" %}
                                 <li class="divider"></li>
                                 <li role="presentation">
                                     <a class="text-danger" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/delete">

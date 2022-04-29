@@ -234,7 +234,7 @@ def get_item(item_node, test):
     cwes = do_clean_cwe(item_node.findall('vulnerabilityClassifications'))
     if len(cwes) > 1:
         # FIXME support more than one CWE
-        logger.warning(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
+        logger.debug(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
     if len(cwes) > 0:
         finding.cwe = cwes[0]
     return finding

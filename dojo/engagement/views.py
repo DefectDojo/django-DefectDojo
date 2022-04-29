@@ -1,14 +1,19 @@
-#  engagements
 import logging
+import csv
+import re
+from openpyxl import Workbook
+from openpyxl.styles import Font
+from tempfile import NamedTemporaryFile
+
 from datetime import datetime
 import operator
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.urls import reverse
 from django.db.models import Q, Count
-from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse, FileResponse
+from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse, QueryDict
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
@@ -27,8 +32,8 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
-    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Sonarqube_Product
-from dojo.tools.factory import get_choices
+    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Product_API_Scan_Configuration
+from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
     get_system_setting, redirect_to_return_url_or_else, get_return_url
@@ -48,6 +53,7 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 import dojo.notifications.helper as notifications_helper
+from dojo.endpoint.utils import save_endpoints_to_add
 
 
 logger = logging.getLogger(__name__)
@@ -81,20 +87,32 @@ def engagement_calendar(request):
         })
 
 
-def engagement(request):
-    products = get_authorized_products(Permissions.Engagement_View).distinct()
-    engagements = Engagement.objects.filter(
-        product__in=products, active=True
-    ).select_related(
-        'product',
-        'product__prod_type',
-    ).prefetch_related(
-        'lead',
-        'tags',
-        'product__tags',
-    )
+def get_filtered_engagements(request, view):
 
-    # Get the test counts per engagments. As a separate query, this is much
+    if view not in ['all', 'active']:
+        raise ValidationError(f'View {view} is not allowed')
+
+    engagements = get_authorized_engagements(Permissions.Engagement_View).order_by('-target_start')
+
+    if view == 'active':
+        engagements = engagements.filter(active=True)
+
+    engagements = engagements.select_related('product', 'product__prod_type') \
+        .prefetch_related('lead', 'tags', 'product__tags')
+
+    if System_Settings.objects.get().enable_jira:
+        engagements = engagements.prefetch_related(
+            'jira_project__jira_instance',
+            'product__jira_project_set__jira_instance'
+        )
+
+    engagements = EngagementDirectFilter(request.GET, queryset=engagements)
+
+    return engagements
+
+
+def get_test_counts(engagements):
+    # Get the test counts per engagement. As a separate query, this is much
     # faster than annotating the above `engagements` query.
     engagement_test_counts = {
         test['engagement']: test['test_count']
@@ -106,34 +124,33 @@ def engagement(request):
             test_count=Count('engagement')
         )
     }
+    return engagement_test_counts
 
-    if System_Settings.objects.get().enable_jira:
-        engagements = engagements.prefetch_related(
-            'jira_project__jira_instance',
-            'product__jira_project_set__jira_instance'
-        )
 
-    filtered_engagements = EngagementDirectFilter(
-        request.GET,
-        queryset=engagements
-    )
+def engagements(request, view):
+
+    if not view:
+        view = 'active'
+
+    filtered_engagements = get_filtered_engagements(request, view)
 
     engs = get_page_items(request, filtered_engagements.qs, 25)
-    product_name_words = sorted(products.values_list('name', flat=True))
-    engagement_name_words = sorted(engagements.values_list('name', flat=True).distinct())
+    product_name_words = sorted(get_authorized_products(Permissions.Product_View).values_list('name', flat=True))
+    engagement_name_words = sorted(get_authorized_engagements(Permissions.Engagement_View).values_list('name', flat=True).distinct())
 
     add_breadcrumb(
-        title="Active Engagements",
+        title=f"{view.capitalize()} Engagements",
         top_level=not len(request.GET),
         request=request)
 
     return render(
         request, 'dojo/engagement.html', {
             'engagements': engs,
-            'engagement_test_counts': engagement_test_counts,
+            'engagement_test_counts': get_test_counts(filtered_engagements.qs),
             'filter_form': filtered_engagements.form,
             'product_name_words': product_name_words,
             'engagement_name_words': engagement_name_words,
+            'view': view.capitalize(),
         })
 
 
@@ -183,7 +200,7 @@ def engagements_all(request):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'change')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
     is_ci_cd = engagement.engagement_type == "CI/CD"
@@ -205,7 +222,7 @@ def edit_engagement(request, eid):
                 create_notification(event='close_engagement',
                         title='Closure of %s' % engagement.name,
                         description='The engagement "%s" was closed' % (engagement.name),
-                        engagement=engagement, url=reverse('engagment_all_findings', args=(engagement.id, ))),
+                        engagement=engagement, url=reverse('engagement_all_findings', args=(engagement.id, ))),
             else:
                 engagement.active = True
             engagement.save()
@@ -261,7 +278,7 @@ def edit_engagement(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Delete, 'eid', 'delete')
+@user_is_authorized(Engagement, Permissions.Engagement_Delete, 'eid')
 def delete_engagement(request, eid):
     engagement = get_object_or_404(Engagement, pk=eid)
     product = engagement.product
@@ -302,7 +319,7 @@ def delete_engagement(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     tests = eng.test_set.all().order_by('test_type__name', '-updated')
@@ -338,11 +355,7 @@ def view_engagement(request, eid):
     form = DoneForm()
     files = eng.files.all()
     if request.method == 'POST':
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
-        else:
-            if not request.user.is_staff:
-                raise PermissionDenied
+        user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
         eng.progress = 'check_list'
         eng.save()
 
@@ -426,7 +439,7 @@ def prefetch_for_view_tests(tests):
     return prefetched
 
 
-@user_is_authorized(Engagement, Permissions.Test_Add, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Test_Add, 'eid')
 def add_tests(request, eid):
     eng = Engagement.objects.get(id=eid)
     cred_form = CredMappingForm()
@@ -440,6 +453,8 @@ def add_tests(request, eid):
             engagement=eng).order_by('cred_id')
         if form.is_valid():
             new_test = form.save(commit=False)
+            # set default scan_type as it's used in reimport
+            new_test.scan_type = new_test.test_type.name
             new_test.engagement = eng
             try:
                 new_test.lead = User.objects.get(id=form['lead'].value())
@@ -518,14 +533,10 @@ def import_scan_results(request, eid=None, pid=None):
     elif pid:
         product = get_object_or_404(Product, id=pid)
         engagement_or_product = product
-    elif not user.is_staff:
-        raise PermissionDenied
-
-    if settings.FEATURE_AUTHORIZATION_V2:
-        user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
     else:
-        if not user_is_authorized(user, 'staff', engagement_or_product):
-            raise PermissionDenied
+        raise Exception('Either Engagement or Product has to be provided')
+
+    user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
 
     push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
 
@@ -552,18 +563,14 @@ def import_scan_results(request, eid=None, pid=None):
             branch_tag = form.cleaned_data.get('branch_tag', None)
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
-            sonarqube_config = form.cleaned_data.get('sonarqube_config', None)
+            api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
+            service = form.cleaned_data.get('service', None)
             close_old_findings = form.cleaned_data.get('close_old_findings', None)
             # Will save in the provided environment or in the `Development` one if absent
             environment_id = request.POST.get('environment', 'Development')
             environment = Development_Environment.objects.get(id=environment_id)
 
             group_by = form.cleaned_data.get('group_by', None)
-
-            # TODO move to form validation?
-            if not any(scan_type in code
-                       for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
-                raise Http404()
 
             # TODO move to form validation?
             if scan and is_scan_file_too_large(scan):
@@ -597,12 +604,15 @@ def import_scan_results(request, eid=None, pid=None):
             push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
             error = False
 
+            # Save newly added endpoints
+            added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, engagement.product)
+
             try:
                 importer = Importer()
-                test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
-                            minimum_severity=minimum_severity, endpoints_to_add=form.cleaned_data['endpoints'], scan_date=scan_date,
+                test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
+                            minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings, group_by=group_by, sonarqube_config=sonarqube_config)
+                            close_old_findings=close_old_findings, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
 
@@ -651,7 +661,7 @@ def import_scan_results(request, eid=None, pid=None):
         jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product_tab.product)
+    form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
     return render(request,
         'dojo/import_scan_results.html',
         {'form': form,
@@ -661,11 +671,11 @@ def import_scan_results(request, eid=None, pid=None):
          'title': title,
          'cred_form': cred_form,
          'jform': jform,
-         'scan_types': get_choices(),
+         'scan_types': get_scan_types_sorted(),
          })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     close_engagement(eng)
@@ -677,11 +687,11 @@ def close_eng(request, eid):
     create_notification(event='close_engagement',
                         title='Closure of %s' % eng.name,
                         description='The engagement "%s" was closed' % (eng.name),
-                        engagement=eng, url=reverse('engagment_all_findings', args=(eng.id, ))),
+                        engagement=eng, url=reverse('engagement_all_findings', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def reopen_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     reopen_engagement(eng)
@@ -705,7 +715,7 @@ method to complete checklists from the engagement view
 """
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def complete_checklist(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     try:
@@ -757,7 +767,7 @@ def complete_checklist(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
 def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     finding = None
@@ -827,12 +837,12 @@ def add_risk_acceptance(request, eid, fid=None):
                   })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def view_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
 def edit_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
 
@@ -996,7 +1006,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1006,7 +1016,7 @@ def expire_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
 def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1019,7 +1029,7 @@ def reinstate_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1034,7 +1044,7 @@ def delete_risk_acceptance(request, eid, raid):
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def download_risk_acceptance(request, eid, raid):
     import mimetypes
 
@@ -1060,7 +1070,7 @@ under media folder
 """
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def upload_threatmodel(request, eid):
     eng = Engagement.objects.get(id=eid)
     add_breadcrumb(
@@ -1093,14 +1103,14 @@ def upload_threatmodel(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def view_threatmodel(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
     response = FileResponse(open(eng.tmodel_path, 'rb'))
     return response
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def engagement_ics(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     start_date = datetime.combine(eng.target_start, datetime.min.time())
@@ -1117,4 +1127,135 @@ def engagement_ics(request, eid):
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'
     response['Content-Disposition'] = 'attachment; filename=%s.ics' % eng.name
+    return response
+
+
+def get_list_index(list, index):
+    try:
+        element = list[index]
+    except Exception as e:
+        element = None
+    return element
+
+
+def get_engagements(request):
+    url = request.META.get('QUERY_STRING')
+    if not url:
+        raise ValidationError('Please use the export button when exporting engagements')
+    else:
+        if url.startswith('url='):
+            url = url[4:]
+
+    path_items = list(filter(None, re.split('/|\?', url))) # noqa W605
+
+    if not path_items or path_items[0] != 'engagement':
+        raise ValidationError('URL is not an engagement view')
+
+    view = query = None
+    if get_list_index(path_items, 1) in ['active', 'all']:
+        view = get_list_index(path_items, 1)
+        query = get_list_index(path_items, 2)
+    else:
+        view = 'active'
+        query = get_list_index(path_items, 1)
+
+    request.GET = QueryDict(query)
+    engagements = get_filtered_engagements(request, view).qs
+    test_counts = get_test_counts(engagements)
+
+    return engagements, test_counts
+
+
+def get_excludes():
+    return ['is_ci_cd', 'jira_issue', 'jira_project', 'objects', 'unaccepted_open_findings']
+
+
+def get_foreign_keys():
+    return ['build_server', 'lead', 'orchestration_engine', 'preset', 'product',
+        'report_type', 'requester', 'source_code_management_server']
+
+
+def csv_export(request):
+    engagements, test_counts = get_engagements(request)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=engagements.csv'
+
+    writer = csv.writer(response)
+
+    first_row = True
+    for engagement in engagements:
+        if first_row:
+            fields = []
+            for key in dir(engagement):
+                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith('_'):
+                    fields.append(key)
+            fields.append('tests')
+
+            writer.writerow(fields)
+
+            first_row = False
+        if not first_row:
+            fields = []
+            for key in dir(engagement):
+                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith('_'):
+                    value = engagement.__dict__.get(key)
+                    if key in get_foreign_keys() and getattr(engagement, key):
+                        value = str(getattr(engagement, key))
+                    if value and isinstance(value, str):
+                        value = value.replace('\n', ' NEWLINE ').replace('\r', '')
+                    fields.append(value)
+            fields.append(test_counts.get(engagement.id, 0))
+
+            writer.writerow(fields)
+
+    return response
+
+
+def excel_export(request):
+    engagements, test_counts = get_engagements(request)
+
+    workbook = Workbook()
+    workbook.iso_dates = True
+    worksheet = workbook.active
+    worksheet.title = 'Engagements'
+
+    font_bold = Font(bold=True)
+
+    row_num = 1
+    for engagement in engagements:
+        if row_num == 1:
+            col_num = 1
+            for key in dir(engagement):
+                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith('_'):
+                    cell = worksheet.cell(row=row_num, column=col_num, value=key)
+                    cell.font = font_bold
+                    col_num += 1
+            cell = worksheet.cell(row=row_num, column=col_num, value='tests')
+            cell.font = font_bold
+            row_num = 2
+        if row_num > 1:
+            col_num = 1
+            for key in dir(engagement):
+                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith('_'):
+                    value = engagement.__dict__.get(key)
+                    if key in get_foreign_keys() and getattr(engagement, key):
+                        value = str(getattr(engagement, key))
+                    if value and isinstance(value, datetime):
+                        value = value.replace(tzinfo=None)
+                    worksheet.cell(row=row_num, column=col_num, value=value)
+                    col_num += 1
+            worksheet.cell(row=row_num, column=col_num, value=test_counts.get(engagement.id, 0))
+        row_num += 1
+
+    with NamedTemporaryFile() as tmp:
+        workbook.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+
+    response = HttpResponse(
+        content=stream,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=engagements.xlsx'
     return response

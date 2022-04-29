@@ -216,7 +216,7 @@ The deduplication part of this command will run the deduplication for each findi
 run the deduplication in the foreground process, use:
 
 {{< highlight bash >}}
-docker-compose exec uwsgi ./manage.py dedupe --dedupe-sync
+docker-compose exec uwsgi ./manage.py dedupe --dedupe_sync
 {{< / highlight >}}
 
 Please note the deduplication process is resource intensive and can take a long time to complete
@@ -368,9 +368,11 @@ $ docker-compose exec uwsgi /bin/bash -c 'python manage.py sla_notifications'
 
 ## Reports
 
+### Instant reports
+
 ![Report Listing](../../images/report_1.png)
 
-Reports can be generated for:
+Instant reports can be generated for:
 
 1.  Product types
 2.  Products
@@ -378,11 +380,12 @@ Reports can be generated for:
 4.  Tests
 5.  List of Findings
 6.  Endpoints
-7.  Custom reports
-
-![Report Generation](../../images/report_2.png)
 
 Filtering is available on all report generation views to aid in focusing the report for the appropriate need.
+
+### Custom reports
+
+![Report Generation](../../images/report_2.png)
 
 Custom reports, generated with the Report Builder, allow you to select specific components to be added to the report. These include:
 
@@ -505,3 +508,37 @@ enabled benchmarks for that AVSV level.
 
 Additional benchmarks can be added/updated in the Django admin site. In
 a future release this will be brought out to the UI.
+
+## Endpoint Meta Importer
+
+For heavy infrastructure scanning organizations, endpoints need to be as 
+flexible as possible to get the most of DefectDojo. This flexibility comes
+in the form of Tags and custom fields. Tags allow users to filter, sort, and
+report objects in ways the base object is not totally proficient in doing.
+
+Endpoint Meta Importer provides a means to apply arbitrary tags and custom fields to 
+endpoints in mass via a CSV file. Tags and customs fields are stored in the
+format of column:row.
+
+Here is a very simple example with only two columns:
+
+```
+hostname                     | team                | public_facing
+------------------------------------------------------------------
+sheets.google.com            | data analytics      | yes
+docs.google.com              | language processing | yes
+feedback.internal.google.com | human resources     | no
+```
+
+The three endpoints hosts will be used to find existing endpoints with matching hosts,
+or create new endpoints, and then apply meta as follows:
+
+```
+sheets.google.com (endpoint) -> [ team:data analytics, public_facing:yes ] (tags)
+docs.google.com (endpoint) -> [ team:language processing, public_facing:yes ] (tags)
+feedback.internal.google.com (endpoint) -> [ team:human resources, public_facing:no ] (tags)
+```
+
+Endpoint Meta Importer can be found in the Endpoint tab when viewing a Product
+
+**Note:** The field "hostname" is required as it is used to query/create endpoints.

@@ -57,35 +57,36 @@ Configurations in DefectDojo
 
     ![Google Sheets Sync Configuration Page](../../images/google_sheets_sync_1.png)
 
-    a.  Upload the downloaded json file into the **Upload
-        Credentials file** field.
-    b.  Drive Folder Id
+    * Upload the downloaded json file into the **Upload
+      Credentials file** field.
 
-        a.  Create a folder inside the Google drive of the same
-            gmail account used to create the service account.
+    * Drive Folder Id:
 
-        b.  Get the **client\_email** from the downloaded json file
-            and share the created drive folder with client\_email
-            giving **edit access**.
+        * Create a folder inside the Google drive of the same
+          Gmail account used to create the service account.
+        * Get the **client\_email** from the downloaded json file
+          and share the created drive folder with client\_email
+          giving **edit access**.
+        * Extract the folder id from the URL and insert it as the
+          **Drive Folder Id**:
 
-        c.  Extract the folder id from the URL and insert it as the
-            **Drive Folder Id**.
+          ![Extracting Drive Folder ID](../../images/google_sheets_sync_2.png)
 
-    ![Extracting Drive Folder ID](../../images/google_sheets_sync_2.png)
+    * Tick the **Enable Service** check box. (**Optional** as this
+      has no impact on the configuration, but you must set it to
+      true inorder to use the feature. Service can be enabled or
+      disabled at any point after the configuration using this
+      check box)
 
-    c.  Tick the **Enable Service** check box. (**Optional** as this
-        has no impact on the configuration, but you must set it to
-        true inorder to use the feature. Service can be enabled or
-        disabled at any point after the configuration using this
-        check box)
-    d.  For each field in the finding table there are two related
-        entries in the form.
-        a.  In the drop down, select Hide if the column needs to be
-            hidden in the Google Sheet, else select any other option
-            based on the length of the entry that goes under the
-            column.
-        b.  If the column needs to be protected in the Google Sheet,
-            tick the check box. Otherwise leave it unchecked.
+    * For each field in the finding table there are two related
+      entries in the form:
+
+        * In the drop down, select Hide if the column needs to be
+          hidden in the Google Sheet, else select any other option
+          based on the length of the entry that goes under the
+          column.
+        * If the column needs to be protected in the Google Sheet,
+          tick the check box. Otherwise leave it unchecked.
 
 4.  Click \'Submit\'.
 

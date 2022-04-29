@@ -31,7 +31,7 @@
                                 <td>{{ h.actor }}</td>
                                 <td>{{ h.timestamp }}</td>
                                 <td>
-                                    {{ h.changes|action_log_entry }}
+                                    {{ h.changes|action_log_entry|linebreaks}}
                                 </td>
                             </tr>
                         {% endfor %}

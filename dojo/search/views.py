@@ -10,7 +10,7 @@ from dojo.utils import add_breadcrumb, get_page_items, get_words_for_field
 import re
 from dojo.finding.views import prefetch_for_findings
 from dojo.endpoint.views import prefetch_for_endpoints
-from dojo.filters import OpenFindingFilter
+from dojo.filters import FindingFilter
 from django.conf import settings
 import shlex
 import itertools
@@ -119,7 +119,7 @@ def simple_search(request):
             elif search_findings:
                 logger.debug('searching findings')
 
-                findings_filter = OpenFindingFilter(request.GET, queryset=findings, user=request.user, pid=None, prefix='finding')
+                findings_filter = FindingFilter(request.GET, queryset=findings, user=request.user, pid=None, prefix='finding')
                 # setting initial values for filters is not supported and discouraged: https://django-filter.readthedocs.io/en/stable/guide/tips.html#using-initial-values-as-defaults
                 # we could try to modify request.GET before generating the filter, but for now we'll leave it as is
 

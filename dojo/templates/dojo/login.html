@@ -11,22 +11,29 @@
                 </div>
             {% endif %}
 
-            {% if SHOW_LOGIN_FORM %}
+            {% if SHOW_LOGIN_FORM or 'force_login_form' in request.GET %}
                {% include "dojo/form_fields.html" with form=form %}
             {% endif %}
 
             <!-- Button -->
             <div class="form-group">
-                {% if SHOW_LOGIN_FORM %}
-                    <div class="col-sm-offset-1 col-sm-4" id="toggleBox" onclick="togglePassVisibility()">
+
+                {% if SHOW_LOGIN_FORM or 'force_login_form' in request.GET %}
+                    <div class="col-sm-offset-1 col-sm-2" id="toggleBox" onclick="togglePassVisibility()">
                         <i class="fa fa-eye"></i>
                         <span><b>Show Password</b></span>
                     </div>
                 {% endif %}
-                {% if CLASSIC_AUTH_ENABLED and SHOW_LOGIN_FORM %}
-                    <div class="col-sm-offset-1 col-sm-1">
+
+                {% if CLASSIC_AUTH_ENABLED and SHOW_LOGIN_FORM or 'force_login_form' in request.GET %}
+                    <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success">Login</button>
                     </div>
+                    {% if FORGOT_PASSWORD %}
+                        <div class="col-sm-3">
+                            <a id="reset-password" href="{% url 'password_reset' %}">I forgot my password</a>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="form-group">
@@ -70,10 +77,34 @@
                     </div>
                 {% endif %}
 
+                {% if KEYCLOAK_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <button class="btn btn-success" type="button">
+                            <a href="{% url 'social:begin' 'keycloak' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">{{ SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT }}</a>
+                        </button>
+                    </div>
+                {% endif %}
+
+                {% if GITHUB_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <button class="btn btn-success" type="button">
+                            <a href="{% url 'social:begin' 'github' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Github</a>
+                        </button>
+                    </div>
+                {% endif %}
+
+                {% if GITHUB_ENTERPRISE_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <button class="btn btn-success" type="button">
+                            <a href="{% url 'social:begin' 'github-enterprise' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Github Enterprise</a>
+                        </button>
+                    </div>
+                {% endif %}
+
                 {% if SAML2_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
-                            <a id="oauth-login-saml" rel="nofollow" data-method="post" href="/saml2/login" style="color: rgb(255,255,255)">Login with SAML</a>
+                            <a id="oauth-login-saml" rel="nofollow" data-method="post" href="/saml2/login" style="color: rgb(255,255,255)">{{ SAML2_LOGIN_BUTTON_TEXT }}</a>
                         </button>
                     </div>
                 {% endif %}

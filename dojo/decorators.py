@@ -2,8 +2,6 @@ from functools import wraps
 from dojo.models import Finding, Dojo_User
 from django.db import models
 from django.conf import settings
-from django.forms.models import model_to_dict
-from django.db.models.query import QuerySet
 
 from ratelimit.exceptions import Ratelimited
 from ratelimit.core import is_ratelimited
@@ -24,7 +22,7 @@ def we_want_async(*args, func=None, **kwargs):
         logger.debug('dojo_async_task %s: running task in the foreground as sync=True has been found as kwarg', func)
         return False
 
-    user = get_current_user()
+    user = kwargs.get('async_user', get_current_user())
     logger.debug('user: %s', user)
 
     if Dojo_User.wants_block_execution(user):
@@ -40,6 +38,9 @@ def we_want_async(*args, func=None, **kwargs):
 def dojo_async_task(func):
     @wraps(func)
     def __wrapper__(*args, **kwargs):
+        from dojo.utils import get_current_user
+        user = get_current_user()
+        kwargs['async_user'] = user
         if we_want_async(*args, func=func, **kwargs):
             return func.delay(*args, **kwargs)
         else:
@@ -144,48 +145,6 @@ def get_parameter_froms_args_kwargs(args, kwargs, parameter):
         logger.error('unable to get parameter: ' + parameter)
 
     return model_or_id
-
-
-def model_to_dict_with_tags(model):
-    converted = model_to_dict(model)
-    if 'tags' in converted:
-        # further conversion needed from Tag Queryset to strings
-        converted['tags'] = converted['tags'].values_list()
-
-    # dirty hack to now barf on accepted_findings... we may need to rethink all this mess with celery
-    if 'accepted_findings' in converted:
-        converted['accepted_findings'] = list_of_models_to_dict_with_tags(converted['accepted_findings'])
-
-    logger.debug('dict: %s', converted)
-    return converted
-
-
-def list_of_models_to_dict_with_tags(model_list):
-    result = []
-    for item in model_list:
-        if isinstance(item, models.Model):
-            result.append(model_to_dict_with_tags(item))
-    return result
-
-
-def convert_kwargs_if_async(**kwargs):
-    if we_want_async(func=convert_kwargs_if_async):
-        # not sync means using celery for notifications.
-        # sending full model instances to celery is bad practice.
-        # and any models with tags cannot be sent to celery due to serialization problems with celery
-        # we convert all model instances into dictionaries
-        for key, value in kwargs.items():
-            # logger.debug('converting: %s', key)
-            if isinstance(value, models.Model):
-                # logger.debug('model_to_dict_with_tags')
-                kwargs[key] = model_to_dict_with_tags(value)
-            elif isinstance(value, list):
-                kwargs[key] = list_of_models_to_dict_with_tags(value)
-            elif isinstance(value, QuerySet):
-                # logger.debug('queryset')
-                kwargs[key] = list_of_models_to_dict_with_tags(list(value))
-
-    return kwargs
 
 
 def on_exception_log_kwarg(func):

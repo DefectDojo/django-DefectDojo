@@ -8,7 +8,7 @@ from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url, get_file_images
-from dojo.user.helper import user_is_authorized
+import dojo.utils
 from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
@@ -37,16 +37,21 @@ markdown_tags = [
     "img",
     "a",
     "sub", "sup",
+    "center",
 ]
 
 markdown_attrs = {
     "*": ["id"],
-    "img": ["src", "alt", "title"],
+    "img": ["src", "alt", "title", "width", "height", "style"],
     "a": ["href", "alt", "target", "title"],
     "span": ["class"],  # used for code highlighting
     "pre": ["class"],  # used for code highlighting
     "div": ["class"],  # used for code highlighting
 }
+
+markdown_styles = [
+    "background-color"
+]
 
 finding_related_action_classes_dict = {
     'reset_finding_duplicate_status': 'fa fa-eraser',
@@ -77,7 +82,7 @@ def markdown_render(value):
                                                       'markdown.extensions.fenced_code',
                                                       'markdown.extensions.toc',
                                                       'markdown.extensions.tables'])
-        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs))
+        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs, markdown_styles))
 
 
 @register.filter(name='url_shortner')
@@ -312,8 +317,7 @@ def action_log_entry(value, autoescape=None):
     text = ''
     for k in history.keys():
         text += k.capitalize() + ' changed from "' + \
-                history[k][0] + '" to "' + history[k][1] + '"'
-
+                history[k][0] + '" to "' + history[k][1] + '"\n'
     return text
 
 
@@ -697,6 +701,12 @@ def setting_enabled(name):
     return getattr(settings, name, False)
 
 
+# this filter checks value directly against of function in utils
+@register.filter
+def system_setting_enabled(name):
+    return getattr(dojo.utils, name)()
+
+
 @register.filter
 def finding_display_status(finding):
     # add urls for some statuses
@@ -731,30 +741,6 @@ def finding_display_status(finding):
 
 
 @register.filter
-def is_authorized_for_change(user, obj):
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        return user_is_authorized(user, 'change', obj)
-    else:
-        return False
-
-
-@register.filter
-def is_authorized_for_delete(user, obj):
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        return user_is_authorized(user, 'delete', obj)
-    else:
-        return False
-
-
-@register.filter
-def is_authorized_for_staff(user, obj):
-    if not settings.FEATURE_AUTHORIZATION_V2:
-        return user_is_authorized(user, 'staff', obj)
-    else:
-        return False
-
-
-@register.filter
 def cwe_url(cwe):
     if not cwe:
         return ''
@@ -762,10 +748,46 @@ def cwe_url(cwe):
 
 
 @register.filter
-def cve_url(cve):
-    if not cve:
-        return ''
-    return 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(cve)
+def has_vulnerability_url(vulnerability_id):
+    if not vulnerability_id:
+        return False
+
+    for key in settings.VULNERABILITY_URLS:
+        if vulnerability_id.upper().startswith(key):
+            return True
+    return False
+
+
+@register.filter
+def vulnerability_url(vulnerability_id):
+    if not vulnerability_id:
+        return False
+
+    for key in settings.VULNERABILITY_URLS:
+        if vulnerability_id.upper().startswith(key):
+            return settings.VULNERABILITY_URLS[key] + str(vulnerability_id)
+    return ''
+
+
+@register.filter
+def first_vulnerability_id(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids:
+        return vulnerability_ids[0]
+    else:
+        return None
+
+
+@register.filter
+def additional_vulnerability_ids(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids and len(vulnerability_ids) > 1:
+        references = list()
+        for vulnerability_id in vulnerability_ids[1:]:
+            references.append(vulnerability_id)
+        return references
+    else:
+        return None
 
 
 @register.filter
@@ -853,8 +875,8 @@ def finding_related_action_title(related_action):
 
 
 @register.filter
-def product_findings(product):
-    return Finding.objects.filter(test__engagement__product=product)
+def product_findings(product, findings):
+    return findings.filter(test__engagement__product=product).order_by('numerical_severity')
 
 
 @register.filter
@@ -967,6 +989,7 @@ def import_history(finding, autoescape=True):
     else:
         esc = lambda x: x
 
+    # prefetched, so no filtering here
     status_changes = finding.test_import_finding_action_set.all()
 
     if not status_changes or len(status_changes) < 2:

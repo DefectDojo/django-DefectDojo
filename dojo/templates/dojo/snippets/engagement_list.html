@@ -29,9 +29,8 @@
         <div id="the-filters-{{status}}" class="is-filters panel-body collapse {% if filter.form.has_changed %}in{% endif %}">
             {% include "dojo/filter_snippet.html" with form=filter.form %}
         </div>
-    </div>
 
-    <div class="clearfix">
+        <div class="clearfix pagination-in-panel">
             {% include "dojo/paging_snippet.html" with page=engs prefix=prefix page_size=True %}
         </div>
         {% if engs %}
@@ -70,7 +69,7 @@
                                <a class="" href="{% url 'view_engagement' eng.id %}">
                                  <i class="fa fa-list-alt"></i> View
                              </li>
-                             {% if eng|has_object_permission:"Engagement_Edit" or user|is_authorized_for_change:eng %}
+                             {% if eng|has_object_permission:"Engagement_Edit" %}
                              <li>
                                <a class="" href="{% url 'edit_engagement' eng.id %}">
                                  <i class="fa fa-pencil-square-o"></i> Edit
@@ -90,14 +89,14 @@
                             </li>
                             <li class="divider"></li>
                             {% endif %}
-                            {% if eng|has_object_permission:"Test_Add" or user|is_authorized_for_change:eng %}
+                            {% if eng|has_object_permission:"Test_Add" %}
                             <li role="presentation">
                                 <a class="" href="{% url 'add_tests' eng.id %}">
                                     <i class="fa fa-plus"></i> Add Tests
                                 </a>
                             </li>
                             {% endif %}
-                            {% if eng|has_object_permission:"Import_Scan_Result" or user|is_authorized_for_change:eng %}
+                            {% if eng|has_object_permission:"Import_Scan_Result" %}
                             <li role="presentation">
                                 <a class="" href="{% url 'import_scan_results' eng.id %}">
                                     <i class="fa fa-upload"></i> Import Scan Results
@@ -106,27 +105,27 @@
                             {% endif %}
                             <li class="divider"></li>
                             <li role="presentation">
-                              <a href="{% url 'engagment_open_findings' eng.id %}?active=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
+                              <a href="{% url 'engagement_open_findings' eng.id %}">
                                 <i class="fa fa-file-text-o"></i> View Active Findings
                               </a>
                             </li>
                             <li role="presentation">
-                              <a href="{% url 'engagment_open_findings' eng.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
+                              <a href="{% url 'engagement_verified_findings' eng.id %}">
                                 <i class="fa fa-file-text-o"></i> View Active and Verified Findings
                               </a>
                             </li>
                             <li role="presentation">
-                              <a href="{% url 'engagment_closed_findings' eng.id %}?is_mitigated=2&test__engagement={{ eng.id }}">
+                              <a href="{% url 'engagement_closed_findings' eng.id %}">
                                 <i class="fa fa-file-text-o"></i> View Mitigated Findings
                               </a>
                             </li>
                             <li role="presentation">
-                                <a href="{% url 'engagment_open_findings' eng.id %}?risk_acceptance=1&test__engagement={{ eng.id }}">
+                                <a href="{% url 'engagement_accepted_findings' eng.id %}">
                                     <i class="fa fa-file-text-o"></i> View Accepted Findings
                                 </a>
                               </li>
                             <li role="presentation">
-                              <a href="{% url 'engagment_all_findings' eng.id %}?test__engagement={{ eng.id }}">
+                              <a href="{% url 'engagement_all_findings' eng.id %}">
                                   <i class="fa fa-file-text-o"></i> View All Findings
                               </a>
                             </li>
@@ -136,7 +135,7 @@
                                   <i class="fa fa-file-text-o"></i> Engagement Report
                               </a>
                             </li>
-                            {% if eng|has_object_permission:"Engagement_Delete" or user|is_authorized_for_delete:eng %}
+                            {% if eng|has_object_permission:"Engagement_Delete" %}
                             <li class="divider"></li>
                             <li>
                               <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
@@ -157,13 +156,7 @@
                               {{ eng.version }}</a>
                         </sup>
                     {% endif %}
-                    {% if eng.tags %}
-                        <sup>
-                            {% for tag in eng.tags.all %}
-                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
-                            {% endfor %}
-                        </sup>
-                    {% endif %}
+                    {% include "dojo/snippets/tags.html" with tags=eng.tags.all %}
                     </td>
                     <td>{{ eng.engagement_type }}</td>
                     <td style="width: 150px;">
@@ -272,8 +265,9 @@
             </div>
         {% endif %}
 
-    <div class="clearfix">
-        {% include "dojo/paging_snippet.html" with page=engs prefix=prefix page_size=True %}
+        <div class="clearfix pagination-in-panel">
+            {% include "dojo/paging_snippet.html" with page=engs prefix=prefix page_size=True %}
+        </div>
     </div>
 </div>
 {% block postscript %}

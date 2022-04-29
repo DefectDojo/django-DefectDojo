@@ -5,4 +5,4 @@ weight: 4
 chapter: true
 ---
 
-You can find further information in the [contributing guidelines](https://github.com/DefectDojo/django-DefectDojo/blob/master/CONTRIBUTING.md).
+You can find further information in the [contributing guidelines](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/CONTRIBUTING.md).

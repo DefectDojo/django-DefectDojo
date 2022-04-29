@@ -93,7 +93,6 @@
                           <th>Authentication Provider</th>
                           <th>Authentication Type</th>
                           <th>HTTP Authentication</th>
-                          <th>Selenium Script</th>
                           <th>Login RegEx</th>
                           <th>Logout RegEx</th>
                         </tr>
@@ -101,7 +100,6 @@
                             <td>{{ cred_product.is_authn_provider }}</td>
                             <td>{{ cred.cred_id.authentication }}</td>
                             <td>{{ cred.cred_id.http_authentication }}</td>
-                            <td><!--<a href="{% url 'view_selenium' cred.cred_id.id %}">Download</a>-->
                             <td>{{ cred.cred_id.login_regex }}</td>
                             <td>{{ cred.cred_id.logout_regex }}</td>
                         </tr>

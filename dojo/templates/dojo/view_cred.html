@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load get_config_setting %}
+{% load authorization_tags %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -9,7 +10,7 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         Credential Manager
-                        {% if "DB_KEY"|get_config_setting == True %}
+                        {% if "DB_KEY"|get_config_setting == True and "dojo.add_cred_user"|has_configuration_permission:"superuser" %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -60,13 +61,17 @@
                                 <td>{{ conf.is_valid }}</td>
                                 <td>
                                     <div class="btn-group">
-                                        <a class="btn btn-sm btn-primary"
+                                        <a class="btn btn-sm btn-secondary"
                                            href="{% url 'view_cred_details' conf.id  %}">View</a>
+                                        {% if "dojo.change_cred_user"|has_configuration_permission:"superuser" %}
                                         <a class="btn btn-sm btn-warning"
                                            href="{% url 'edit_cred' conf.id  %}">Edit</a>
+                                        {% endif %}
+                                        {% if "dojo.delete_cred_user"|has_configuration_permission:"superuser" %}
                                         <a class="btn btn-sm btn-danger delete-finding"
                                            href="{% url 'delete_cred' conf.id  %}">Delete</a>
-                                    </div>
+                                        {% endif %}
+                                        </div>
                                 </td>
                             </tr>
                         {% endfor %}

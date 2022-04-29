@@ -13,11 +13,15 @@ def sq_clean(apps, schema_editor):
 
     sqtc = Tool_Configuration_model.objects.filter(tool_type__in=tts).first()
 
-    for sq in Sonarqube_Product_model.objects.filter(sonarqube_tool_config__isnull=True):
-        logger.warning('Setting Product SonarQube Configuration for product {} to only existing SonarQube Tool '
-                    'Configuration'.format(sq.product.pk))
-        sq.sonarqube_tool_config = sqtc
-        sq.save()
+    if sqtc:
+        for sq in Sonarqube_Product_model.objects.filter(sonarqube_tool_config__isnull=True):
+            logger.info('Setting Product SonarQube Configuration for product {} to only existing SonarQube Tool '
+                        'Configuration'.format(sq.product.pk))
+            sq.sonarqube_tool_config = sqtc
+            sq.save()
+    else:
+        logger.warning('No SonarQube tool configuration found, all invalid SonarQube configurations will be removed.')
+        Sonarqube_Product_model.objects.filter(sonarqube_tool_config__isnull=True).delete()
 
 
 class Migration(migrations.Migration):

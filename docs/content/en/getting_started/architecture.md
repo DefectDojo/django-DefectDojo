@@ -44,4 +44,4 @@ itself down after all tasks are performed.
 ## Database
 
 The Database stores all data of DefectDojo. Currently [MySQL](https://dev.mysql.com/)
-and [PostgreSQL](https://www.postgresql.org/) are supported.
+and [PostgreSQL](https://www.postgresql.org/) are supported. Please note the `django-watson` search engine require one or more MyISAM tables, so you cannot use Azure MySQL or Cloud SQL for MySQL. AWS RDS MySQL supports MyISAM tables, so it will work.
