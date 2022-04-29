@@ -32,12 +32,12 @@ openpyxl==3.0.9
 xlrd==1.2.0
 Pillow==9.1.0  # required by django-imagekit
 psycopg2-binary==2.9.3
-cryptography==36.0.2
+cryptography==37.0.0
 python-dateutil==2.8.2
 pytz==2022.1
 redis==4.2.2
 requests==2.27.1
-sqlalchemy==1.4.35  # Required by Celery broker transport
+sqlalchemy==1.4.36  # Required by Celery broker transport
 supervisor==4.2.4
 urllib3==1.26.9
 uWSGI==2.0.20
@@ -50,7 +50,7 @@ Python-jose==3.3.0
 gitpython==3.1.27
 debugpy==1.6.0
 python-gitlab==3.3.0
-google-api-python-client==2.45.0
+google-api-python-client==2.46.0
 google-auth==2.6.6
 google-auth-oauthlib==0.5.1
 drf_yasg==1.20.0
@@ -71,6 +71,6 @@ hyperlink==21.0.0
 numpy==1.22.3
 django-test-migrations==1.2.0
 djangosaml2==1.5.0
-drf-spectacular==0.22.0
+drf-spectacular==0.22.1
 django-ratelimit==3.0.1
 argon2-cffi==21.3.0

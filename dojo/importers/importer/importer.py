@@ -154,7 +154,7 @@ class DojoDefaultImporter(object):
                     file_upload.save()
                     item.files.add(file_upload)
 
-            importer_utils.handle_vulnerability_references(item)
+            importer_utils.handle_vulnerability_ids(item)
 
             new_findings.append(item)
             # to avoid pushing a finding group multiple times, we push those outside of the loop
