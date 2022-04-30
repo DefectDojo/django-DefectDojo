@@ -2183,7 +2183,7 @@ class Finding(models.Model):
                 vulnerability_id_str_list = list(
                     map(
                         lambda vulnerability_id: str(vulnerability_id),
-                        self.vulnerability_ids
+                        self.unsaved_vulnerability_ids
                     ))
                 # deduplicate (usually done upon saving finding) and sort endpoints
                 vulnerability_id_str = ''.join(sorted(list(dict.fromkeys(vulnerability_id_str_list))))
