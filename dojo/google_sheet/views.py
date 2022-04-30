@@ -225,7 +225,7 @@ def export_to_sheet(request, tid):
             errors = sync['errors']
             sheet_title = sync['sheet_title']
             if len(errors) > 0:
-                product_tab = Product_Tab(test.engagement.product.id, title="Syncing Errors", tab="engagements")
+                product_tab = Product_Tab(test.engagement.product, title="Syncing Errors", tab="engagements")
                 product_tab.setEngagement(test.engagement)
                 spreadsheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
                 return render(
