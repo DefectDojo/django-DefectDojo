@@ -1737,7 +1737,7 @@ class ApiEndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        fields = ['id', 'host', 'product']
+        fields = ['id', 'protocol', 'userinfo', 'host', 'port', 'path', 'query', 'fragment', 'product']
 
 
 class EngagementTestFilter(DojoFilter):
