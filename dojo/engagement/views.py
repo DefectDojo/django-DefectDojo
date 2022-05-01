@@ -265,7 +265,7 @@ def edit_engagement(request, eid):
     else:
         title = 'Edit Interactive Engagement'
 
-    product_tab = Product_Tab(engagement.product.id, title=title, tab="engagements")
+    product_tab = Product_Tab(engagement.product, title=title, tab="engagements")
     product_tab.setEngagement(engagement)
     return render(request, 'dojo/new_eng.html', {
         'product_tab': product_tab,
@@ -309,7 +309,7 @@ def delete_engagement(request, eid):
     collector.collect([engagement])
     rels = collector.nested()
 
-    product_tab = Product_Tab(product.id, title="Delete Engagement", tab="engagements")
+    product_tab = Product_Tab(product, title="Delete Engagement", tab="engagements")
     product_tab.setEngagement(engagement)
     return render(request, 'dojo/delete_engagement.html', {
         'product_tab': product_tab,
@@ -395,7 +395,7 @@ def view_engagement(request, eid):
     title = ""
     if eng.engagement_type == "CI/CD":
         title = " CI/CD"
-    product_tab = Product_Tab(prod.id, title="View" + title + " Engagement", tab="engagements")
+    product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
     product_tab.setEngagement(eng)
     return render(
         request, 'dojo/view_eng.html', {
@@ -506,7 +506,7 @@ def add_tests(request, eid):
         form.initial['lead'] = request.user
     add_breadcrumb(
         parent=eng, title="Add Tests", top_level=False, request=request)
-    product_tab = Product_Tab(eng.product.id, title="Add Tests", tab="engagements")
+    product_tab = Product_Tab(eng.product, title="Add Tests", tab="engagements")
     product_tab.setEngagement(eng)
     return render(request, 'dojo/add_tests.html', {
         'product_tab': product_tab,
@@ -649,13 +649,11 @@ def import_scan_results(request, eid=None, pid=None):
     custom_breadcrumb = None
     title = "Import Scan Results"
     if engagement:
-        prod_id = engagement.product.id
-        product_tab = Product_Tab(prod_id, title=title, tab="engagements")
+        product_tab = Product_Tab(engagement.product, title=title, tab="engagements")
         product_tab.setEngagement(engagement)
     else:
-        prod_id = pid
         custom_breadcrumb = {"", ""}
-        product_tab = Product_Tab(prod_id, title=title, tab="findings")
+        product_tab = Product_Tab(product, title=title, tab="findings")
 
     if jira_helper.get_jira_project(engagement_or_product):
         jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
@@ -757,7 +755,7 @@ def complete_checklist(request, eid):
         findings = Finding.objects.filter(test__in=tests).all()
         form = CheckForm(instance=checklist, findings=findings)
 
-    product_tab = Product_Tab(eng.product.id, title="Checklist", tab="engagements")
+    product_tab = Product_Tab(eng.product, title="Checklist", tab="engagements")
     product_tab.setEngagement(eng)
     return render(request, 'dojo/checklist.html', {
         'form': form,
@@ -827,7 +825,7 @@ def add_risk_acceptance(request, eid, fid=None):
     form.fields['accepted_findings'].queryset = finding_choices
     if fid:
         form.fields['accepted_findings'].initial = {fid}
-    product_tab = Product_Tab(eng.product.id, title="Risk Acceptance", tab="engagements")
+    product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
 
     return render(request, 'dojo/add_risk_acceptance.html', {
@@ -984,7 +982,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     add_findings_form.fields[
         "accepted_findings"].queryset = add_fpage.object_list
 
-    product_tab = Product_Tab(eng.product.id, title="Risk Acceptance", tab="engagements")
+    product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
     return render(
         request, 'dojo/view_risk_acceptance.html', {
@@ -1095,7 +1093,7 @@ def upload_threatmodel(request, eid):
                 reverse('view_engagement', args=(eid, )))
     else:
         form = UploadThreatForm()
-    product_tab = Product_Tab(eng.product.id, title="Upload Threat Model", tab="engagements")
+    product_tab = Product_Tab(eng.product, title="Upload Threat Model", tab="engagements")
     return render(request, 'dojo/up_threat.html', {
         'form': form,
         'product_tab': product_tab,

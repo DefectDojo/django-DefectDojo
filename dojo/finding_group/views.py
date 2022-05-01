@@ -59,7 +59,7 @@ def delete_finding_group(request, fgid):
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([finding_group])
     rels = collector.nested()
-    product_tab = Product_Tab(finding_group.test.engagement.product.id, title="Product", tab="settings")
+    product_tab = Product_Tab(finding_group.test.engagement.product, title="Product", tab="settings")
 
     return render(request, 'dojo/delete_finding_group.html',
                   {'finding_group': finding_group,
