@@ -95,15 +95,6 @@ Moderators can help you with pull requests or feedback on dev ideas:
   maintainer for years. He performed Dojo's first UI overhaul, optimized code structure/features, and added numerous enhancements.
 
 
-## Sponsors
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/10Security-logo.png" github-user="devgrega" alt="10Security" height="65"/>](https://10security.com)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/isaac.png" github-user="valentijnscholten" alt="ISAAC" height="80"/>](https://isaac.nl)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/timo-pagel-logo.png" github-user="wurstbot" alt="Tim Pagel" height="65" />](https://pagel.pro/)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png" github-user="madchap" alt="Cloudbees" height="65" />](https://cloudbees.com/)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/arrival.png" github-user="ansidorov" alt="ARRIVAL" height="65" />](https://arrival.com)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png" github-user="mtesauro" alt="WeHackPurle" height="120" />](https://wehackpurple.com/)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png" github-user="StefanFl" alt="MiabornWolff" height="120" />]((https://www.maibornwolff.de/en))
-
 ## Security
 
 Please report Security issues via our [disclosure policy](readme-docs/SECURITY.md).
