@@ -1493,8 +1493,8 @@ def get_celery_worker_status():
 
 # Used to display the counts and enabled tabs in the product view
 class Product_Tab():
-    def __init__(self, product_id, title=None, tab=None):
-        self.product = Product.objects.get(id=product_id)
+    def __init__(self, product, title=None, tab=None):
+        self.product = product
         self.title = title
         self.tab = tab
         self.engagement_count = Engagement.objects.filter(

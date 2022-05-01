@@ -34,7 +34,7 @@ def new_tool_product(request, pid):
                 reverse('all_tool_product', args=(pid, )))
     else:
         tform = ToolProductSettingsForm()
-    product_tab = Product_Tab(pid, title="Tool Configurations", tab="settings")
+    product_tab = Product_Tab(prod, title="Tool Configurations", tab="settings")
     return render(request, 'dojo/new_tool_product.html', {
         'tform': tform,
         'product_tab': product_tab,
@@ -46,7 +46,7 @@ def new_tool_product(request, pid):
 def all_tool_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
-    product_tab = Product_Tab(prod.id, title="Tool Configurations", tab="settings")
+    product_tab = Product_Tab(prod, title="Tool Configurations", tab="settings")
     return render(request, 'dojo/view_tool_product_all.html', {
         'prod': prod,
         'tools': tools,
@@ -74,7 +74,7 @@ def edit_tool_product(request, pid, ttid):
     else:
         tform = ToolProductSettingsForm(instance=tool_product)
 
-    product_tab = Product_Tab(pid, title="Edit Product Tool Configuration", tab="settings")
+    product_tab = Product_Tab(product, title="Edit Product Tool Configuration", tab="settings")
     return render(request, 'dojo/edit_tool_product.html', {
         'tform': tform,
         'product_tab': product_tab
@@ -101,7 +101,7 @@ def delete_tool_product(request, pid, ttid):
     else:
         tform = ToolProductSettingsForm(instance=tool_product)
 
-    product_tab = Product_Tab(pid, title="Delete Product Tool Configuration", tab="settings")
+    product_tab = Product_Tab(product, title="Delete Product Tool Configuration", tab="settings")
 
     return render(request, 'dojo/delete_tool_product.html', {
         'tform': tform,
