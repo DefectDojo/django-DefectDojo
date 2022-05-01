@@ -709,3 +709,20 @@ class TestCheckmarxParser(DojoTestCase):
             self.assertEqual(datetime.datetime(2021, 12, 24, 9, 12, 14), finding.date)
             self.assertEqual(bool, type(finding.static_finding))
             self.assertEqual(True, finding.static_finding)
+
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_with_many_aggregated_findings(self, mock):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/checkmarx/many_aggregated_findings.xml"
+        )
+        parser = CheckmarxParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.teardown(my_file_handle)
+        self.assertEqual(1, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            # ScanStart
+            self.assertEqual("Insufficient Logging of Exceptions (filename3.cs)", finding.title)
+            self.assertEqual("Information", finding.severity)
+            self.assertEqual(185, finding.nb_occurences)
+            self.assertEqual("5273", finding.vuln_id_from_tool)
