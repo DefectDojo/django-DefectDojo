@@ -1426,4 +1426,5 @@ VULNERABILITY_URLS = {
     'OSV': 'https://osv.dev/vulnerability/',
     'PYSEC': 'https://osv.dev/vulnerability/',
     'SNYK': 'https://snyk.io/vuln/',
+    'RUSTSEC': 'https://rustsec.org/advisories/',
 }
