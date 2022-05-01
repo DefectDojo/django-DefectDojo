@@ -1,4 +1,4 @@
-name: "[OOB] Release helm chart"
+name: "release-X: Release helm chart"
 
 env:
   GIT_USERNAME: "DefectDojo release bot"
@@ -15,9 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.inputs.release_number }}
           fetch-depth: 0
       - name: Get upload URL
         id: get-upload-url

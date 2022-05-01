@@ -85,6 +85,18 @@ class TestSnykParser(DojoTestCase):
             "com.test:myframework > org.apache.santuario:xmlsec", finding.file_path
         )
 
+    def test_snykParser_file_path_with_ampersand_is_preserved(self):
+        testfile = open("unittests/scans/snyk/single_project_one_vuln_with_ampersands.json")
+        parser = SnykParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual(
+            "myproject > @angular/localize > @babel/core > lodash",
+            finding.file_path
+        )
+
     def test_snykParser_allprojects_issue4277(self):
         """Report to linked to issue 4277"""
         testfile = open("unittests/scans/snyk/all_projects_issue4277.json")

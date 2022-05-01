@@ -197,20 +197,20 @@ In a similar fashion to that of Google and OKTA, using Gitlab as a
 OAuth2 provider carries the same attributes and a similar procedure.
 Follow along below.
 
-1.  Navigate to your Gitlab settings page and got to the Applications
+1. Navigate to your Gitlab settings page and got to the Applications
     section
 
     -   <https://gitlab.com/profile/applications>
     -   **OR**
     -   [https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications](https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications)
 
-2.  Choose a name for your application
-3.  For the Redirect URI, enter the DefectDojo URL with the following
+2. Choose a name for your application
+3. For the Redirect URI, enter the DefectDojo URL with the following
     format
 
     -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/)
 
-4.  Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+4. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
     information:
 
     {{< highlight python >}}
@@ -227,14 +227,107 @@ Follow along below.
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT = True
     {{< /highlight >}}
 
-5.  Restart DefectDojo, and you should now see a **Login with Gitlab**
+5. Restart DefectDojo, and you should now see a **Login with Gitlab**
     button on the login page.
+
+## Keycloak
+There is also an option to use Keycloak as OAuth2 provider in order to authenticate users to Defect Dojo, also by using
+the social-auth plugin.
+
+Here are suggestion on how to configure Keycloak and DefectDojo: 
+
+### Configure Keycloak
+(assuming you already have an existing realm, otherwise create one)
+1. Navigate to your keycloak realm and add a new client of type openid-connect. Choose a name for the client id and use this value below for DD_SOCIAL_AUTH_KEYCLOAK_KEY).
+2. In the client settings:
+   * Set `access type` to `confidential`
+   * Under `valid Redirect URIs`, add the URI to your defect dojo installation, e.g. 'https://<YOUR_DD_HOST>/*'
+   * Under `web origins`, add the same (or '+')
+   * Under `Fine grained openID connect configuration` -> `user info signed response algorithm`: set to `RS256`
+   * Under `Fine grained openID connect configuration` -> `request object signature algorithm`: set to `RS256`
+   * -> save these settings in keycloak (hit save button)
+3. Under `Scope` -> `Full Scope Allowed` set to `off`
+4. Under `mappers` -> add a custom mapper here: 
+   * Name: `aud`
+   * Mapper type: `audience`
+   * Included audience: select your client/client-id here
+   * Add ID to token: `off`
+   * Add access to token: `on`
+5. Under `credentials`: copy the secret (and use as DD_SOCIAL_AUTH_KEYCLOAK_SECRET below)
+6. In your realm settings -> keys: copy the "Public key" (signing key) (use for DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY below)
+7. In your realm settings -> general -> endpoints: look into openId endpoint configuration
+   and look up your authorization and token endpoint (use them below)
+
+### Configure Defect Dojo
+Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+   information:
+
+   {{< highlight python >}}
+   DD_SESSION_COOKIE_SECURE=True,
+   DD_CSRF_COOKIE_SECURE=True,
+   DD_SECURE_SSL_REDIRECT=True,
+   DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=True,
+   DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY=(str, '<your realm public key>'),
+   DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, '<your client id>'), 
+   DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, '<your keycloak client credentials secret>'), 
+   DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL=(str, '<your authorization endpoint>'),
+   DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL=(str, '<your token endpoint>')         
+   {{< /highlight >}}
+ 
+or, alternatively, for helm configuration, add this to the `extraConfig` section: 
+
+```
+DD_SESSION_COOKIE_SECURE: 'True'
+DD_CSRF_COOKIE_SECURE: 'True'
+DD_SECURE_SSL_REDIRECT: 'True'
+DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED: 'True'
+DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: '<your realm public key>'
+DD_SOCIAL_AUTH_KEYCLOAK_KEY: '<your client id>'
+DD_SOCIAL_AUTH_KEYCLOAK_SECRET: '<your keycloak client credentials secret>'
+DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL: '<your authorization endpoint>'
+DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL: '<your token endpoint>'
+```
+
+Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order to customize the login button's text caption. 
+
+## GitHub
+1. Navigate to GitHub.com and follow instructions to create a new OAuth App [https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app)
+2. Choose a name for your application
+3. For the Redirect URI, enter the DefectDojo URL with the following
+    format
+    -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github/)
+4. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+    information:
+    {{< highlight python >}}  
+    DD_SOCIAL_AUTH_GITHUB_KEY=(str, 'GitHub OAuth App Client ID'),  
+    DD_SOCIAL_AUTH_GITHUB_SECRET=(str, 'GitHub OAuth App Client Secret'),  
+    DD_SOCIAL_AUTH_GITHUB_OAUTH2_ENABLED = True  
+    {{< /highlight >}}
+5. Restart DefectDojo, and you should now see a **Login with GitHub**
+    button on the login page.
+
+## GitHub Enterprise
+1.  Navigate to your GitHub Enterprise Server and follow instructions to create a new OAuth App [https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app](https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app)
+2. Choose a name for your application
+3. For the Redirect URI, enter the DefectDojo URL with the following
+    format
+    -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github-enterprise/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github-enterprise/)
+4. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+    information:
+    {{< highlight python >}}  
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, 'GitHub Enterprise OAuth App Client ID'),  
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, 'GitHub Enterprise OAuth App Client Secret'),  
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_URL=(str, 'https://github.<your_company>.com/'),  
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL=(str, 'https://github.<your_company>.com/api/v3/'),  
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED = True,  
+    {{< /highlight >}}
+5. Restart DefectDojo, and you should now see a **Login with GitHub Enterprise**
+    button on the login page.  
 
 ## SAML 2.0
 In a similar direction to OAuth, this SAML addition provides a more secure
 perogative to SSO. For definitions of terms used and more information,
-see the plugin [plugin
-homepage](https://github.com/IdentityPython/djangosaml2). 
+see the plugin [plugin homepage](https://github.com/IdentityPython/djangosaml2). 
 
 1.  Navigate to your SAML IdP and find your metadata
 2.  Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
@@ -261,6 +354,8 @@ homepage](https://github.com/IdentityPython/djangosaml2).
     {{< /highlight >}}
 
 NOTE: *DD_SAML2_ATTRIBUTES_MAP* in k8s can be referenced as extraConfig (e.g. `DD_SAML2_ATTRIBUTES_MAP: 'Email'='email', 'Username'='username'...`)
+
+NOTE: *DD_SITE_URL* might also need to be set depending on the choices you make with the metadata.xml provider. (File versus URL).
 
 4.  Checkout the SAML section in dojo/`dojo/settings/settings.dist.py` and verfiy if it fits your requirement. If you need help, take a look at the [plugin
 documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
@@ -315,20 +410,20 @@ Newly created users are neither staff nor superuser by default. The `is_staff` f
 
 `.*@example.com` will make `alice@example.com` a staff user, while `bob@partner.example.com` or `chris@example.org` will be non-staff users.
 
-
 ## Login speed-up
 
-If you are using only one Social authentication and you are not using the standard login mechanism (`SHOW_LOGIN_FORM` is
-set to `False`), showing login page could be useless because every time user clicks on the only existing button on the
-page like "Login with SAML" (or another similar button). If you set `SOCIAL_LOGIN_AUTO_REDIRECT` to `True`, the login
-page is skipped and the user is automatically redirected to the identity provider's page.
+You can bypass the login form if you are only using SSO/Social authentication for login in by enabling these two environment variables:
+
+```
+DD_SOCIAL_LOGIN_AUTO_REDIRECT: "true"
+DD_SOCIAL_AUTH_SHOW_LOGIN_FORM: "false"
+```
 
 ### Login form fallback
 
 If you are using "login speed-up", it can be useful to be able to login by the standard way, for example when an admin
-user needs to log in because of a change of some settings or permissions. Accessing
-[`<DD_HOST>/login?force_login_form`](https://<DD_HOST>/login?force_login_form) shows login form even "login speed-up" is
-enabled.
+user needs to log in because of a change of some settings or permissions. This feature is accessible by a visiting the URL
+`<DD_HOST>/login?force_login_form`.
 
 
 ## Other Providers

@@ -6,13 +6,14 @@ Although Docker Compose is one of the supported installation methods to deploy a
 
 
 # Prerequisites
+
 *  Docker version
-    *  Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
+    *  Installing with docker-compose requires at least Docker 19.03.0 and Docker Compose 1.28.0. See "Checking Docker versions" below for version errors during running docker-compose.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ .
 
 
-# Setup via Docker Compose - introduction
+# Setup via Docker Compose - Introduction
 
 DefectDojo needs several docker images to run. Two of them depend on DefectDojo code:
 
@@ -29,34 +30,66 @@ When running the application without building images, the application will run b
     *  https://hub.docker.com/r/defectdojo/defectdojo-nginx
 
 
-# Setup via Docker Compose - building and running the application
+# Setup via Docker Compose - Profiles
+
+## Parameters to start docker-compose
+
+The Docker Compose setup supports 2 different databases (MySQL and PostgreSQL) and 2 different celery brokers (RabbitMQ and Redis). To make this possible, docker-compose needs to be started with the parameter `--profile` with one of these choices:
+
+- mysql-rabbitmq
+- mysql-redis
+- postgres-rabbitmq
+- postgres-redis
+
+The environment variables needed for the different profiles are prepared in files, which need to be included additionally with the parameter `--env-file` with a choices that fits to the profile:
+
+- ./docker/environments/mysql-rabbitmq.env
+- ./docker/environments/mysql-redis.env
+- ./docker/environments/postgres-rabbitmq.env
+- ./docker/environments/postgres-redis.env
+
+## Scripts
+
+5 shell scripts make life easier and avoid typing long commands:
+
+- `./dc-build.sh` - Build the docker images, it can take one additional parameter to be used in the build process, e.g. `./dc-build.sh --no-cache`.
+- `./dc-up.sh` - Start the docker containers in the foreground, it needs one of the profile names as a parameter, e.g. `./dc-up.sh postgres-redis`.
+- `./dc-up-d.sh` - Start the docker containers in the background, it needs one of the profile names as a parameter, e.g. `./dc-up-d.sh mysql-rabbitmq`
+- `./dc-stop.sh` - Stop the docker containers, it can take one additional parameter to be used in the stop process.
+- `./dc-down.sh` - Stop and remove the docker containers, it can take one additional parameter to be used in the stop and remove process.
+- `./dc-unittest.sh` - Utility script to aid in running a specific unit test class.  Requires a profile and test case as parameters.
+
+A default profile can be set with the environment variable `DD_PROFILE`. If this environment variable is set when starting the containers, the parameter for the profile needs not to be given for the start scripts .
+
+# Setup via Docker Compose - Building and running the application
+
 ## Building images
 
 To build images and put them in your local docker cache, run:
 
 ```zsh
-docker-compose build
+./dc-build.sh
 ```
 
 To build a single image, run:
 
 ```zsh
-docker-compose build uwsgi
+./dc-build.sh uwsgi
 ```
 or
 
 ```
-docker-compose build nginx
+./dc-build.sh nginx
 ```
 
 > **_NOTE:_**  It's possible to add extra fixtures in folder "/docker/extra_fixtures".
 
-## Run with Docker compose in release mode
+## Run with Docker Compose in release mode
 To run the application based on previously built image (or based on dockerhub images if none was locally built), run:
 
 ```zsh
 docker/setEnv.sh release
-docker-compose up
+./dc-up.sh
 ```
 
 This will run the application based on docker-compose.yml only.
@@ -64,14 +97,14 @@ This will run the application based on docker-compose.yml only.
 In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers.
 
 
-## Run with Docker compose in development mode with hot-reloading
+## Run with Docker Compose in development mode with hot-reloading
 
 For development, use:
 
 ```zsh
 docker/setEnv.sh dev
-docker-compose build
-docker-compose up
+./dc-build.sh
+./dc-up.sh
 ```
 
 This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.dev.yml.
@@ -100,7 +133,7 @@ To update changes in static resources, served by nginx, just refresh the browser
 id -u
 ```
 
-## Run with Docker compose in development mode with debugpy (remote debug)
+## Run with Docker Compose in development mode with debugpy (remote debug)
 
 The debug mode, offers out of the box a debugging server listening on port 3000
 
@@ -108,7 +141,7 @@ The debug mode, offers out of the box a debugging server listening on port 3000
 # switch to debug configuration
 docker/setEnv.sh debug
 # then use docker-compose as usual
-docker-compose up
+./dc-up.sh
 ```
 
 This will run the application based on merged configurations from `docker-compose.yml` and `docker-compose.override.debug.yml`.
@@ -116,8 +149,8 @@ This will run the application based on merged configurations from `docker-compos
 Alternatively (if using docker for windows for example), you can copy the override file over (and re-create the containers):
 ```
 cp docker-compose.override.debug.yml docker-compose.override.yml
-docker-compose down
-docker-compose up
+./dc-down.sh
+./dc-up.sh
 ```
 
 The default configuration assumes port 3000 by default for debug.
@@ -231,17 +264,18 @@ aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"
 Removes all containers
 
 ```zsh
-docker-compose down
+./dc-down.sh
 ```
 
 Removes all containers, networks and the database volume
 
 ```zsh
-docker-compose down --volumes
+./dc-down.sh --volumes
 ```
 
-# Run with docker using https
-## use your own  Credentials
+# Run with Docker Compose using https
+
+## Use your own credentials
 To secure the application by https, follow those steps
 *  Generate a private key without password
 *  Generate a CSR (Certificate Signing Request)
@@ -263,17 +297,17 @@ chmod 400 nginx/*.key
 ```
 rm -f docker-compose.override.yml
 ln -s docker-compose.override.https.yml docker-compose.override.yml
-docker-compose up
+./dc-up.sh
 ```
 
-## create Credentials on the fly
+## Create credentials on the fly
 * you can generate a Certificate on the fly (without valid domainname etc.)
 
 * Run defectDojo with:
 ```
 rm -f docker-compose.override.yml
 ln -s docker-compose.override.https.yml docker-compose.override.yml
-docker-compose up
+./dc-up.sh
 ```
 
 The default https port is 8443.
@@ -286,18 +320,18 @@ To change the port:
 NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker-compose declarations to discover which ports to map when publishing the application.
 
 
-# Run the tests with docker
+# Run the tests with Docker Compose
 The unit-tests are under `dojo/unittests`
 
 The integration-tests are under `tests`
 
 
-## Running the unit-tests
+## Running the unit tests
 This will run all unit-tests and leave the uwsgi container up:
 
 ```
 docker/setEnv.sh unit_tests
-docker-compose up
+./dc-up.sh
 ```
 Enter the container to run more tests:
 
@@ -322,15 +356,22 @@ Run a single test. Example:
 python manage.py test unittests.tools.test_dependency_check_parser.TestDependencyCheckParser.test_parse_file_with_no_vulnerabilities_has_no_findings --keepdb
 ```
 
-## Running the integration-tests
+For docker compose stack, there is a convenience script (`dc-unittest.sh`) capable of running a single test class. 
+You will need to provide a docker compose profile (`--profile`), and a test case (`--test-case`). Example:
+
+```
+./dc-unittest.sh --profile mysql-rabbitmq --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
+```
+
+## Running the integration tests
 This will run all integration-tests and leave the containers up:
 
 ```
 docker/setEnv.sh integration_tests
-docker-compose up
+./dc-up.sh
 ```
 
-NB: the first time you run it, initializing the database may be too long for the tests to succeed. In that case, you'll need to wait for the initializer container to end, then re-run `docker-compose up`
+NB: the first time you run it, initializing the database may be too long for the tests to succeed. In that case, you'll need to wait for the initializer container to end, then re-run `./dc-up.sh`
 
 Check the logs with:
 ```

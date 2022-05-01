@@ -18,7 +18,8 @@ from dojo.models import IMPORT_ACTIONS, SEVERITIES, STATS_FIELDS, Dojo_User, Fin
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
-    Network_Locations, UserContactInfo, Product_API_Scan_Configuration
+    Network_Locations, UserContactInfo, Product_API_Scan_Configuration, DEFAULT_NOTIFICATION, \
+    Vulnerability_Id, Vulnerability_Id_Template
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from dojo.utils import is_scan_file_too_large
@@ -27,6 +28,7 @@ from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
+from django.db.utils import IntegrityError
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
@@ -38,6 +40,7 @@ from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
 
 
 logger = logging.getLogger(__name__)
@@ -349,15 +352,18 @@ class UserSerializer(serializers.ModelSerializer):
                                      validators=[validate_password])
 
     class Meta:
-        model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser', 'password')
+        model = Dojo_User
+        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+            fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_superuser', 'password')
+        else:
+            fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser', 'password')
 
     def create(self, validated_data):
         if 'password' in validated_data:
             password = validated_data.pop('password')
         else:
             password = None
-        user = User.objects.create(**validated_data)
+        user = Dojo_User.objects.create(**validated_data)
         if password:
             user.set_password(password)
         else:
@@ -366,6 +372,15 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def validate(self, data):
+
+        if self.instance is not None:
+            instance_is_superuser = self.instance.is_superuser
+        else:
+            instance_is_superuser = False
+        data_is_superuser = data.get('is_superuser', False)
+        if not self.context['request'].user.is_superuser and (instance_is_superuser or data_is_superuser):
+            raise ValidationError('Only superusers are allowed to add or edit superusers.')
+
         if self.context['request'].method in ['PATCH', 'PUT'] and 'password' in data:
             raise ValidationError('Update of password though API is not allowed')
         else:
@@ -381,7 +396,7 @@ class UserContactInfoSerializer(serializers.ModelSerializer):
 
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = Dojo_User
         fields = ('id', 'username', 'first_name', 'last_name')
 
 
@@ -678,8 +693,6 @@ class RegulationSerializer(serializers.ModelSerializer):
 
 
 class ToolConfigurationSerializer(serializers.ModelSerializer):
-    configuration_url = serializers.CharField(source='url')
-
     class Meta:
         model = Tool_Configuration
         fields = '__all__'
@@ -706,10 +719,16 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         endpoint = validated_data['endpoint']
         finding = validated_data['finding']
-        status = Endpoint_Status.objects.create(
-            finding=finding,
-            endpoint=endpoint
-        )
+        try:
+            status = Endpoint_Status.objects.create(
+                finding=finding,
+                endpoint=endpoint
+            )
+        except IntegrityError as ie:
+            if "endpoint-finding relation" in str(ie):
+                raise serializers.ValidationError('This endpoint-finding relation already exists')
+            else:
+                raise
         endpoint.endpoint_status.add(status)
         finding.endpoint_status.add(status)
         status.mitigated = validated_data.get('mitigated', False)
@@ -719,6 +738,15 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         status.date = validated_data.get('date', timezone.now())
         status.save()
         return status
+
+    def update(self, instance, validated_data):
+        try:
+            return super().update(instance, validated_data)
+        except IntegrityError as ie:
+            if "endpoint-finding relation" in str(ie):
+                raise serializers.ValidationError('This endpoint-finding relation already exists')
+            else:
+                raise
 
 
 class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1029,6 +1057,12 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
         return JIRAIssueSerializer(read_only=True).to_representation(issue)
 
 
+class VulnerabilityReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vulnerability_Id
+        fields = ['vulnerability_id']
+
+
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
@@ -1043,10 +1077,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     jira_change = serializers.SerializerMethodField(read_only=True)
     display_status = serializers.SerializerMethodField()
     finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
+    vulnerability_ids = VulnerabilityReferenceSerializer(source='vulnerability_id_set', many=True, required=False)
 
     class Meta:
         model = Finding
-        fields = '__all__'
+        exclude = ['cve']
 
     @extend_schema_field(serializers.DateTimeField())
     @swagger_serializer_method(serializers.DateTimeField())
@@ -1082,6 +1117,15 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         # pop push_to_jira so it won't get send to the model as a field
         # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
         push_to_jira = validated_data.pop('push_to_jira') or jira_helper.is_push_all_issues(instance)
+
+        # Save vulnerability ids and pop them
+        if 'vulnerability_id_set' in validated_data:
+            vulnerability_id_set = validated_data.pop('vulnerability_id_set')
+            vulnerability_ids = list()
+            if vulnerability_id_set:
+                for vulnerability_id in vulnerability_id_set:
+                    vulnerability_ids.append(vulnerability_id['vulnerability_id'])
+            save_vulnerability_ids(instance, vulnerability_ids)
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
 
@@ -1162,10 +1206,11 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         default=None)
     tags = TagListSerializerField(required=False)
     push_to_jira = serializers.BooleanField(default=False)
+    vulnerability_ids = VulnerabilityReferenceSerializer(source='vulnerability_id_set', many=True, required=False)
 
     class Meta:
         model = Finding
-        fields = '__all__'
+        exclude = ['cve']
         extra_kwargs = {
             'active': {'required': True},
             'verified': {'required': True},
@@ -1180,8 +1225,22 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # pop push_to_jira so it won't get send to the model as a field
         push_to_jira = validated_data.pop('push_to_jira')
 
+        # Save vulnerability ids and pop them
+        if 'vulnerability_id_set' in validated_data:
+            vulnerability_id_set = validated_data.pop('vulnerability_id_set')
+        else:
+            vulnerability_id_set = None
+
         # first save, so we have an instance to get push_all_to_jira from
         new_finding = super(TaggitSerializer, self).create(validated_data)
+
+        if vulnerability_id_set:
+            vulnerability_ids = list()
+            for vulnerability_id in vulnerability_id_set:
+                vulnerability_ids.append(vulnerability_id['vulnerability_id'])
+            validated_data['cve'] = vulnerability_ids[0]
+            save_vulnerability_ids(new_finding, vulnerability_ids)
+            new_finding.save()
 
         # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
         push_to_jira = push_to_jira or jira_helper.is_push_all_issues(new_finding)
@@ -1216,12 +1275,50 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         return data
 
 
+class VulnerabilityReferenceTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vulnerability_Id_Template
+        fields = ['vulnerability_id']
+
+
 class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
+    vulnerability_ids = VulnerabilityReferenceTemplateSerializer(source='vulnerability_id_template_set', many=True, required=False)
 
     class Meta:
         model = Finding_Template
-        fields = '__all__'
+        exclude = ['cve']
+
+    def create(self, validated_data):
+        # Save vulnerability ids and pop them
+        if 'vulnerability_id_template_set' in validated_data:
+            vulnerability_id_set = validated_data.pop('vulnerability_id_template_set')
+        else:
+            vulnerability_id_set = None
+
+        new_finding_template = super(TaggitSerializer, self).create(validated_data)
+
+        if vulnerability_id_set:
+            vulnerability_ids = list()
+            for vulnerability_id in vulnerability_id_set:
+                vulnerability_ids.append(vulnerability_id['vulnerability_id'])
+            validated_data['cve'] = vulnerability_ids[0]
+            save_vulnerability_ids_template(new_finding_template, vulnerability_ids)
+            new_finding_template.save()
+
+        return new_finding_template
+
+    def update(self, instance, validated_data):
+        # Save vulnerability ids and pop them
+        if 'vulnerability_id_template_set' in validated_data:
+            vulnerability_id_set = validated_data.pop('vulnerability_id_template_set')
+            vulnerability_ids = list()
+            if vulnerability_id_set:
+                for vulnerability_id in vulnerability_id_set:
+                    vulnerability_ids.append(vulnerability_id['vulnerability_id'])
+            save_vulnerability_ids_template(instance, vulnerability_ids)
+
+        return super(TaggitSerializer, self).update(instance, validated_data)
 
 
 class StubFindingSerializer(serializers.ModelSerializer):
@@ -1276,7 +1373,7 @@ class ImportScanSerializer(serializers.Serializer):
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                          required=False,
                                                          default=None)
-    file = serializers.FileField(required=False)
+    file = serializers.FileField(allow_empty_file=True, required=False)
 
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
@@ -1415,7 +1512,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                           default=None,
                                                           required=False)
-    file = serializers.FileField(required=False)
+    file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
@@ -1776,6 +1873,7 @@ class FindingNoteSerializer(serializers.Serializer):
 
 
 class NotificationsSerializer(serializers.ModelSerializer):
+
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(),
                                                  required=False,
                                                  default=None,
@@ -1784,22 +1882,23 @@ class NotificationsSerializer(serializers.ModelSerializer):
                                                  required=False,
                                                  default=None,
                                                  allow_null=True)
-    product_type_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    product_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    engagement_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    test_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    scan_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    jira_update = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    upcoming_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    stale_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    auto_close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    user_mentioned = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    code_review = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    review_requested = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    other = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    sla_breach = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
-    risk_acceptance_expiration = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    product_type_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    product_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    engagement_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    test_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    scan_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    jira_update = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    upcoming_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    stale_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    auto_close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    user_mentioned = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    code_review = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    review_requested = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    other = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    sla_breach = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    risk_acceptance_expiration = MultipleChoiceField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION)
+    template = serializers.BooleanField(default=False)
 
     class Meta:
         model = Notifications
@@ -1819,9 +1918,11 @@ class NotificationsSerializer(serializers.ModelSerializer):
             product = data.get('product')
 
         if self.instance is None or user != self.instance.user or product != self.instance.product:
-            notifications = Notifications.objects.filter(user=user, product=product).count()
+            notifications = Notifications.objects.filter(user=user, product=product, template=False).count()
             if notifications > 0:
                 raise ValidationError("Notification for user and product already exists")
+        if data.get('template') and Notifications.objects.filter(template=True).count() > 0:
+            raise ValidationError("Notification template already exists")
 
         return data
 

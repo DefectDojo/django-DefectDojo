@@ -390,7 +390,7 @@
                             <th>Product</th>
                             <th>Severity</th>
                             <th>Title</th>
-                            <th>CVE</th>
+                            <th>Vulnerability Id/th>
                             <th>Description</th>
                             <th>JIRA</th>
                             <th>Rank</th>
@@ -436,12 +436,12 @@
                                         </a>
                                     </td>
                                     <td class="nowrap">
-                                        {% if result.meta.cve %}
-                                            <a target="_blank" href="{{ result.meta.cve|cve_url }}">
+                                        {% if result.meta.cve|has_vulnerability_url %}
+                                            <a target="_blank" href="{{ result.meta.cve|vulnerability_url }}">
                                                 <i class="fa fa-external-link"></i> {{ result.meta.cve|default:"" }}
                                             </a>
                                         {% else %}
-                                            None
+                                            {{ result.meta.cve }}
                                         {% endif %}
                                     </td>
                                     <td width="50%">

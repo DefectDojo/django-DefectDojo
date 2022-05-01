@@ -7,6 +7,10 @@ docker:
 - docker**
 - Docker*
 
+helm:
+- helm/defectdojo/*
+- helm/defectdojo/**/*
+
 "New Migration":
 - dojo/db_migrations/*
 
@@ -26,3 +30,6 @@ ui:
   - dojo/static/**/*
   - dojo/templates/**/*
   - dojo/templatetags/**/*
+
+parser:
+  - dojo/tools/**/*

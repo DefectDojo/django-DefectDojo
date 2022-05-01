@@ -82,6 +82,9 @@ def login_view(request):
         settings.AZUREAD_TENANT_OAUTH2_ENABLED,
         settings.GITLAB_OAUTH2_ENABLED,
         settings.AUTH0_OAUTH2_ENABLED,
+        settings.KEYCLOAK_OAUTH2_ENABLED,
+        settings.GITHUB_OAUTH2_ENABLED,
+        settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED,
         settings.SAML2_ENABLED
     ]) == 1 and not ('force_login_form' in request.GET):
         if settings.GOOGLE_OAUTH_ENABLED:
@@ -92,8 +95,14 @@ def login_view(request):
             social_auth = 'azuread-tenant-oauth2'
         elif settings.GITLAB_OAUTH2_ENABLED:
             social_auth = 'gitlab'
+        elif settings.KEYCLOAK_OAUTH2_ENABLED:
+            social_auth = 'keycloak'
         elif settings.AUTH0_OAUTH2_ENABLED:
             social_auth = 'auth0'
+        elif settings.GITHUB_OAUTH2_ENABLED:
+            social_auth = 'github'
+        elif settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED:
+            social_auth = 'github-enterprise'
         else:
             return HttpResponseRedirect('/saml2/login')
         return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', args=[social_auth]),
@@ -265,10 +274,6 @@ def user(request):
 @user_is_configuration_authorized('auth.add_user', 'superuser')
 def add_user(request):
     form = AddDojoUserForm()
-    if not request.user.is_superuser:
-        form.fields['is_staff'].widget.attrs['disabled'] = True
-        form.fields['is_superuser'].widget.attrs['disabled'] = True
-        form.fields['is_active'].widget.attrs['disabled'] = True
     contact_form = UserContactInfoForm()
     global_role_form = GlobalRoleForm()
     user = None
@@ -278,25 +283,36 @@ def add_user(request):
         contact_form = UserContactInfoForm(request.POST)
         global_role_form = GlobalRoleForm(request.POST)
         if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
-            user = form.save(commit=False)
-            password = request.POST['password']
-            if password:
-                user.set_password(password)
+            if not request.user.is_superuser and form.cleaned_data['is_superuser']:
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    'Only superusers are allowed to add superusers. User was not saved.',
+                                    extra_tags='alert-danger')
+            elif not request.user.is_superuser and global_role_form.cleaned_data['role']:
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    'Only superusers are allowed to add users with a global role. User was not saved.',
+                                    extra_tags='alert-danger')
             else:
-                user.set_unusable_password()
-            user.active = True
-            user.save()
-            contact = contact_form.save(commit=False)
-            contact.user = user
-            contact.save()
-            global_role = global_role_form.save(commit=False)
-            global_role.user = user
-            global_role.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'User added successfully.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_user', args=(user.id,)))
+                user = form.save(commit=False)
+                password = request.POST['password']
+                if password:
+                    user.set_password(password)
+                else:
+                    user.set_unusable_password()
+                user.active = True
+                user.save()
+                contact = contact_form.save(commit=False)
+                contact.user = user
+                contact.save()
+                global_role = global_role_form.save(commit=False)
+                global_role.user = user
+                global_role.save()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'User added successfully.',
+                                    extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_user', args=(user.id,)))
         else:
             messages.add_message(request,
                                  messages.ERROR,
@@ -332,10 +348,6 @@ def view_user(request, uid):
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = EditDojoUserForm(instance=user)
-    if not request.user.is_superuser:
-        form.fields['is_staff'].widget.attrs['disabled'] = True
-        form.fields['is_superuser'].widget.attrs['disabled'] = True
-        form.fields['is_active'].widget.attrs['disabled'] = True
 
     user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
     if user_contact is None:
@@ -362,22 +374,33 @@ def edit_user(request, uid):
             global_role_form = GlobalRoleForm(request.POST, instance=global_role)
 
         if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
-            form.save()
-            contact = contact_form.save(commit=False)
-            contact.user = user
-            contact.save()
-            global_role = global_role_form.save(commit=False)
-            global_role.user = user
-            global_role.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'User saved successfully.',
-                                 extra_tags='alert-success')
+            if not request.user.is_superuser and form.cleaned_data['is_superuser']:
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    'Only superusers are allowed to edit superusers. User was not saved.',
+                                    extra_tags='alert-danger')
+            elif not request.user.is_superuser and global_role_form.cleaned_data['role']:
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    'Only superusers are allowed to edit users with a global role. User was not saved.',
+                                    extra_tags='alert-danger')
+            else:
+                form.save()
+                contact = contact_form.save(commit=False)
+                contact.user = user
+                contact.save()
+                global_role = global_role_form.save(commit=False)
+                global_role.user = user
+                global_role.save()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'User saved successfully.',
+                                    extra_tags='alert-success')
         else:
             messages.add_message(request,
-                                 messages.ERROR,
-                                 'User was not saved successfully.',
-                                 extra_tags='alert-danger')
+                                messages.ERROR,
+                                'User was not saved successfully.',
+                                extra_tags='alert-danger')
     add_breadcrumb(title="Edit User", top_level=False, request=request)
     return render(request, "dojo/add_user.html", {
         'name': 'Edit User',
@@ -403,18 +426,29 @@ def delete_user(request, uid):
         if 'id' in request.POST and str(user.id) == request.POST['id']:
             form = DeleteUserForm(request.POST, instance=user)
             if form.is_valid():
-                try:
-                    user.delete()
+                if not request.user.is_superuser and user.is_superuser:
                     messages.add_message(request,
-                                        messages.SUCCESS,
-                                        'User and relationships removed.',
-                                        extra_tags='alert-success')
-                except RestrictedError as err:
+                                        messages.ERROR,
+                                        'Only superusers are allowed to delete superusers. User was not removed.',
+                                        extra_tags='alert-danger')
+                elif not request.user.is_superuser and hasattr(user, 'global_role') and user.global_role.role:
                     messages.add_message(request,
-                                         messages.WARNING,
-                                         'User cannot be deleted: {}'.format(err),
-                                         extra_tags='alert-warning')
-                return HttpResponseRedirect(reverse('users'))
+                                        messages.ERROR,
+                                        'Only superusers are allowed to delete users with a global role. User was not removed.',
+                                        extra_tags='alert-danger')
+                else:
+                    try:
+                        user.delete()
+                        messages.add_message(request,
+                                            messages.SUCCESS,
+                                            'User and relationships removed.',
+                                            extra_tags='alert-success')
+                    except RestrictedError as err:
+                        messages.add_message(request,
+                                            messages.WARNING,
+                                            'User cannot be deleted: {}'.format(err),
+                                            extra_tags='alert-warning')
+                    return HttpResponseRedirect(reverse('users'))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([user])
@@ -428,7 +462,7 @@ def delete_user(request, uid):
                    })
 
 
-@user_is_configuration_authorized('auth.change_user', 'superuser')
+@user_passes_test(lambda u: u.is_superuser)
 def add_product_type_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Type_Member_UserForm(initial={'user': user.id})
@@ -456,7 +490,7 @@ def add_product_type_member(request, uid):
     })
 
 
-@user_is_configuration_authorized('auth.change_user', 'superuser')
+@user_passes_test(lambda u: u.is_superuser)
 def add_product_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Member_UserForm(initial={'user': user.id})
@@ -484,7 +518,7 @@ def add_product_member(request, uid):
     })
 
 
-@user_is_configuration_authorized('auth.change_user', 'superuser')
+@user_passes_test(lambda u: u.is_superuser)
 def add_group_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Group_Member_UserForm(initial={'user': user.id})

@@ -1,6 +1,5 @@
 import logging
 
-from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse
@@ -9,11 +8,12 @@ from dojo.utils import add_breadcrumb
 
 from dojo.forms import LoginBanner
 from dojo.models import BannerConf
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.change_bannerconf', 'superuser')
 def configure_banner(request):
     banner_config = get_object_or_404(BannerConf, id=1)
     if request.method == 'POST':

@@ -36,7 +36,7 @@ env = environ.Env(
     DD_TEAM_NAME=(str, 'Security Team'),
     DD_ADMINS=(str, 'DefectDojo:dojo@localhost,Admin:admin@localhost'),
     DD_WHITENOISE=(bool, False),
-    DD_TRACK_MIGRATIONS=(bool, False),
+    DD_TRACK_MIGRATIONS=(bool, True),
     DD_SECURE_PROXY_SSL_HEADER=(bool, False),
     DD_TEST_RUNNER=(str, 'django.test.runner.DiscoverRunner'),
     DD_URL_PREFIX=(str, ''),
@@ -81,6 +81,7 @@ env = environ.Env(
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
     DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
+    DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
     DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
@@ -111,7 +112,24 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, ''),
+    DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY=(str, ''),
+    DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL=(str, ''),
+    DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL=(str, ''),
+    DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT=(str, 'Login with Keycloak'),
+    DD_SOCIAL_AUTH_GITHUB_OAUTH2_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_GITHUB_KEY=(str, ''),
+    DD_SOCIAL_AUTH_GITHUB_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_URL=(str, ''),
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL=(str, ''),
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ''),
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ''),
     DD_SAML2_ENABLED=(bool, False),
+    # Force Authentication to make SSO possible with SAML2
+    DD_SAML2_FORCE_AUTH=(bool, True),
     DD_SAML2_LOGIN_BUTTON_TEXT=(str, 'Login with SAML'),
     # Optional: display the idp SAML Logout URL in DefectDojo
     DD_SAML2_LOGOUT_URL=(str, ''),
@@ -131,6 +149,8 @@ env = environ.Env(
         'Lastname': 'last_name'
     }),
     DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
+    # if somebody is using own documentation how to use DefectDojo in his own company
+    DD_DOCUMENTATION_URL=(str, 'https://defectdojo.github.io/django-DefectDojo'),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
@@ -174,6 +194,7 @@ env = environ.Env(
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
     # Allow grouping of findings in the same test, for example to group findings per dependency
+    # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
@@ -197,7 +218,7 @@ env = environ.Env(
     # The number fo findings to be processed per celeryworker
     DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE=(int, 100),
     # Feature toggle for new authorization for configurations
-    DD_FEATURE_CONFIGURATION_AUTHORIZATION=(bool, False),
+    DD_FEATURE_CONFIGURATION_AUTHORIZATION=(bool, True),
 )
 
 
@@ -390,6 +411,9 @@ AUTHENTICATION_BACKENDS = (
     'dojo.okta.OktaOAuth2',
     'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
     'social_core.backends.gitlab.GitLabOAuth2',
+    'social_core.backends.keycloak.KeycloakOAuth2',
+    'social_core.backends.github.GithubOAuth2',
+    'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
     'django.contrib.auth.backends.RemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -418,7 +442,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.user.get_username',
     'social_core.pipeline.social_auth.associate_by_email',
-    'social_core.pipeline.user.create_user',
+    'dojo.pipeline.create_user',
     'dojo.pipeline.modify_permissions',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
@@ -431,6 +455,7 @@ FORGOT_PASSWORD = env('DD_FORGOT_PASSWORD')
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
 SHOW_LOGIN_FORM = env('DD_SOCIAL_AUTH_SHOW_LOGIN_FORM')
 SOCIAL_LOGIN_AUTO_REDIRECT = env('DD_SOCIAL_LOGIN_AUTO_REDIRECT')
+SOCIAL_AUTH_CREATE_USER = env('DD_SOCIAL_AUTH_CREATE_USER')
 
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
@@ -472,6 +497,26 @@ SOCIAL_AUTH_AUTH0_SECRET = env('DD_SOCIAL_AUTH_AUTH0_SECRET')
 SOCIAL_AUTH_AUTH0_DOMAIN = env('DD_SOCIAL_AUTH_AUTH0_DOMAIN')
 SOCIAL_AUTH_AUTH0_SCOPE = env('DD_SOCIAL_AUTH_AUTH0_SCOPE')
 SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
+
+KEYCLOAK_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED')
+SOCIAL_AUTH_KEYCLOAK_KEY = env('DD_SOCIAL_AUTH_KEYCLOAK_KEY')
+SOCIAL_AUTH_KEYCLOAK_SECRET = env('DD_SOCIAL_AUTH_KEYCLOAK_SECRET')
+SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY = env('DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY')
+SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = env('DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL')
+SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = env('DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL')
+SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT = env('DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT')
+
+GITHUB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITHUB_OAUTH2_ENABLED')
+SOCIAL_AUTH_GITHUB_KEY = env('DD_SOCIAL_AUTH_GITHUB_KEY')
+SOCIAL_AUTH_GITHUB_SECRET = env('DD_SOCIAL_AUTH_GITHUB_SECRET')
+
+GITHUB_ENTERPRISE_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED')
+SOCIAL_AUTH_GITHUB_ENTERPRISE_URL = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_URL')
+SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL')
+SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY')
+SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET')
+
+DOCUMENTATION_URL = env('DD_DOCUMENTATION_URL')
 
 # Setting SLA_NOTIFY_ACTIVE and SLA_NOTIFY_ACTIVE_VERIFIED to False will disable the feature
 # If you import thousands of Active findings through your pipeline everyday,
@@ -644,7 +689,9 @@ SPECTACULAR_SETTINGS = {
     # OTHER SETTINGS
     # the following set to False could help some client generators
     # 'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
-    'POSTPROCESSING_HOOKS': ['dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook']
+    'POSTPROCESSING_HOOKS': ['dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook'],
+    # show file selection dialogue, see https://github.com/tfranzel/drf-spectacular/issues/455
+    "COMPONENT_SPLIT_REQUEST": True,
 }
 
 # ------------------------------------------------------------------------------
@@ -664,7 +711,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
-                'dojo.context_processors.globalize_oauth_vars',
+                'dojo.context_processors.globalize_vars',
                 'dojo.context_processors.bind_system_settings',
                 'dojo.context_processors.bind_alert_count',
             ],
@@ -781,6 +828,8 @@ if SAML2_ENABLED:
     SAML_USE_NAME_ID_AS_USERNAME = True
     SAML_CREATE_UNKNOWN_USER = env('DD_SAML2_CREATE_USER')
     SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env('DD_SAML2_ATTRIBUTES_MAP'))
+    SAML_FORCE_AUTH = env('DD_SAML2_FORCE_AUTH')
+    SAML_ALLOW_UNKNOWN_ATTRIBUTES = env('DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE')
     BASEDIR = path.dirname(path.abspath(__file__))
     if len(env('DD_SAML2_ENTITY_ID')) == 0:
         SAML2_ENTITY_ID = '%s/saml2/metadata/' % SITE_URL
@@ -797,7 +846,7 @@ if SAML2_ENABLED:
         # directory with attribute mapping
         'attribute_map_dir': path.join(BASEDIR, 'attribute-maps'),
         # do now discard attributes not specified in attribute-maps
-        'allow_unknown_attributes': env('DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE'),
+        'allow_unknown_attributes': SAML_ALLOW_UNKNOWN_ATTRIBUTES,
         # this block states what services we provide
         'service': {
             # we are just a lonely SP
@@ -806,7 +855,7 @@ if SAML2_ENABLED:
                 'name_id_format': saml2.saml.NAMEID_FORMAT_TRANSIENT,
                 'want_response_signed': False,
                 'want_assertions_signed': True,
-                'force_authn': True,
+                'force_authn': SAML_FORCE_AUTH,
                 'allow_unsolicited': True,
 
                 # For Okta add signed logout requets. Enable this:
@@ -1040,7 +1089,15 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
     'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
     'pip-audit Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
+    'Edgescan Scan': ['unique_id_from_tool'],
     'Rubocop Scan': ['vuln_id_from_tool', 'file_path', 'line'],
+    'JFrog Xray Scan': ['title', 'description', 'component_name', 'component_version'],
+    'CycloneDX Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
+    'SSLyze Scan (JSON)': ['title', 'description'],
+    'Harbor Vulnerability Scan': ['title'],
+    'Rusty Hog Scan': ['title', 'description'],
+    'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
+    'Hydra Scan': ['title', 'description'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1074,6 +1131,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Hadolint Dockerfile check': True,
     'Semgrep JSON Report': True,
     'Generic Findings Import': True,
+    'Edgescan Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1164,7 +1222,14 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Solar Appscreener Scan': DEDUPE_ALGO_HASH_CODE,
     'Gitleaks Scan': DEDUPE_ALGO_HASH_CODE,
     'pip-audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Edgescan Scan': DEDUPE_ALGO_HASH_CODE,
     'Rubocop Scan': DEDUPE_ALGO_HASH_CODE,
+    'JFrog Xray Scan': DEDUPE_ALGO_HASH_CODE,
+    'CycloneDX Scan': DEDUPE_ALGO_HASH_CODE,
+    'SSLyze Scan (JSON)': DEDUPE_ALGO_HASH_CODE,
+    'Harbor Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
+    'Rusty Hog Scan': DEDUPE_ALGO_HASH_CODE,
+    'Hydra Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1240,8 +1305,8 @@ LOGGING = {
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins', 'console'],
-            'level': 'WARN',
-            'propagate': True,
+            'level': '%s' % LOG_LEVEL,
+            'propagate': False,
         },
         'django.security': {
             'handlers': [r'%s' % LOGGING_HANDLER],
@@ -1268,17 +1333,18 @@ LOGGING = {
         'saml2': {
             'handlers': [r'%s' % LOGGING_HANDLER],
             'level': '%s' % LOG_LEVEL,
+            'propagate': False,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'WARNING',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'titlecase': {
             # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'WARNING',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
     }
@@ -1333,6 +1399,7 @@ EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
 USE_L10N = True
 
+# FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
 FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
 JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
@@ -1348,3 +1415,15 @@ ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")
 ASYNC_FINDING_IMPORT_CHUNK_SIZE = env("DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE")
 # Feature toggle for new authorization for configurations
 FEATURE_CONFIGURATION_AUTHORIZATION = env("DD_FEATURE_CONFIGURATION_AUTHORIZATION")
+
+# django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
+# see https://github.com/laymonage/django-jsonfield-backport
+SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
+
+VULNERABILITY_URLS = {
+    'CVE': 'https://nvd.nist.gov/vuln/detail/',
+    'GHSA': 'https://github.com/advisories/',
+    'OSV': 'https://osv.dev/vulnerability/',
+    'PYSEC': 'https://osv.dev/vulnerability/',
+    'SNYK': 'https://snyk.io/vuln/',
+}

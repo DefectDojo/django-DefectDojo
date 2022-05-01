@@ -4,7 +4,6 @@ import logging
 
 # Third party imports
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.admin.utils import NestedObjects
 from django.urls import reverse
 from django.db import DEFAULT_DB_ALIAS
@@ -21,6 +20,7 @@ from dojo.utils import add_breadcrumb, add_error_message_to_response, get_system
 from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
 import dojo.jira_link.helper as jira_helper
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
 logger = logging.getLogger(__name__)
 
@@ -224,7 +224,7 @@ def get_custom_field(jira, label):
     return field
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.add_jira_instance', 'superuser')
 def express_new_jira(request):
     if request.method == 'POST':
         jform = ExpressJIRAForm(request.POST, instance=JIRA_Instance())
@@ -309,7 +309,7 @@ def express_new_jira(request):
                   {'jform': jform})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.add_jira_instance', 'superuser')
 def new_jira(request):
     if request.method == 'POST':
         jform = JIRAForm(request.POST, instance=JIRA_Instance())
@@ -344,7 +344,7 @@ def new_jira(request):
                   {'jform': jform})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.change_jira_instance', 'superuser')
 def edit_jira(request, jid):
     jira = JIRA_Instance.objects.get(pk=jid)
     jira_password_from_db = jira.password
@@ -390,7 +390,7 @@ def edit_jira(request, jid):
                   })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.view_jira_instance', 'superuser')
 def jira(request):
     jira_instances = JIRA_Instance.objects.all()
     add_breadcrumb(title="JIRA List", top_level=not len(request.GET), request=request)
@@ -400,7 +400,7 @@ def jira(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.delete_jira_instance', 'superuser')
 def delete_jira(request, tid):
     jira_instance = get_object_or_404(JIRA_Instance, pk=tid)
     # eng = test.engagement

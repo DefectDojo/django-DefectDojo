@@ -1,4 +1,4 @@
-name: "Release: 2. tag, release, docker push"
+name: "Release-2: Tag, Release, Push"
 
 env:
   GIT_USERNAME: "DefectDojo release bot"
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: master
       - name: Configure git
@@ -54,7 +54,7 @@ jobs:
           tag_name: ${{ github.event.inputs.release_number }}  # this does not create a tag
           release_name: Release ${{ github.event.inputs.release_number }}
           body: |
-            Fill in with release drafter information manually for now, then publish.
+            Run the release drafter to populate the release notes.
           draft: true
           prerelease: false
       - name: Upload Release Asset
@@ -101,7 +101,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Checkout tag
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.release_number }}
 
@@ -113,7 +113,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           docker-image: ${{ matrix.docker-image }}
         with:

@@ -2,8 +2,8 @@ from collections import OrderedDict
 from drf_spectacular.drainage import GENERATOR_STATS
 # from drf_spectacular.renderers import OpenApiJsonRenderer
 from unittest.mock import MagicMock, call, patch, ANY
-from dojo.models import Product, Engagement, Test, Finding, \
-    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
+from dojo.models import Development_Environment, Product, Engagement, Test, Finding, \
+    JIRA_Issue, Test_Type, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Product_API_Scan_Configuration, Notes, \
@@ -11,10 +11,10 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Role, Product_Type_Member, Product_Member, Product_Type_Group, \
     Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
     Notifications, UserContactInfo
-from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
+from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
-    StubFindingsViewSet, TestsViewSet, \
+    StubFindingsViewSet, TestTypesViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
     EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet, ProductTypeViewSet, \
@@ -23,6 +23,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
     NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet
 from json import dumps
+from enum import Enum
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -255,6 +256,12 @@ class SchemaChecker():
         self._prefix = []
         _check(schema, obj)
         assert not self._has_failed, "\n" + '\n'.join(self._errors) + "\nFailed with " + str(len(self._errors)) + " errors"
+
+
+class TestType(Enum):
+    STANDARD = 1
+    OBJECT_PERMISSIONS = 2
+    CONFIGURATION_PERMISSIONS = 3
 
 
 class BaseClass():
@@ -498,8 +505,8 @@ class BaseClass():
             self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
         @skipIfNotSubclass(ListModelMixin)
-        def test_list_not_authorized(self):
-            if not self.object_permission:
+        def test_list_object_not_authorized(self):
+            if not self.test_type == TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             self.setUp_not_authorized()
@@ -509,8 +516,8 @@ class BaseClass():
             self.assertEqual(200, response.status_code, response.content[:1000])
 
         @skipIfNotSubclass(RetrieveModelMixin)
-        def test_detail_not_authorized(self):
-            if not self.object_permission:
+        def test_detail_object_not_authorized(self):
+            if not self.test_type == TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             self.setUp_not_authorized()
@@ -522,8 +529,8 @@ class BaseClass():
 
         @skipIfNotSubclass(CreateModelMixin)
         @patch('dojo.api_v2.permissions.user_has_permission')
-        def test_create_not_authorized(self, mock):
-            if not self.object_permission:
+        def test_create_object_not_authorized(self, mock):
+            if not self.test_type == TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             mock.return_value = False
@@ -536,8 +543,8 @@ class BaseClass():
 
         @skipIfNotSubclass(DestroyModelMixin)
         @patch('dojo.api_v2.permissions.user_has_permission')
-        def test_delete_not_authorized(self, mock):
-            if not self.object_permission:
+        def test_delete_object_not_authorized(self, mock):
+            if not self.test_type == TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             mock.return_value = False
@@ -545,14 +552,22 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.delete(relative_url)
+
+            if self.endpoint_model == Endpoint_Status:
+                permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
+            elif self.endpoint_model == JIRA_Issue:
+                permission_object = Finding.objects.get(id=current_objects['results'][0]['finding'])
+            else:
+                permission_object = self.permission_check_class.objects.get(id=current_objects['results'][0]['id'])
+
             mock.assert_called_with(User.objects.get(username='admin'),
-                self.permission_check_class.objects.get(id=self.permission_check_id),
+                permission_object,
                 self.permission_delete)
 
         @skipIfNotSubclass(UpdateModelMixin)
         @patch('dojo.api_v2.permissions.user_has_permission')
-        def test_update_not_authorized(self, mock):
-            if not self.object_permission:
+        def test_update_object_not_authorized(self, mock):
+            if not self.test_type == TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             mock.return_value = False
@@ -560,17 +575,84 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
 
+            if self.endpoint_model == Endpoint_Status:
+                permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
+            elif self.endpoint_model == JIRA_Issue:
+                permission_object = Finding.objects.get(id=current_objects['results'][0]['finding'])
+            else:
+                permission_object = self.permission_check_class.objects.get(id=current_objects['results'][0]['id'])
+
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username='admin'),
-                self.permission_check_class.objects.get(id=self.permission_check_id),
+                permission_object,
                 self.permission_update)
 
             response = self.client.put(relative_url, self.payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username='admin'),
-                self.permission_check_class.objects.get(id=self.permission_check_id),
+                permission_object,
                 self.permission_update)
+
+        @skipIfNotSubclass(ListModelMixin)
+        def test_list_configuration_not_authorized(self):
+            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+                self.skipTest('Authorization is not configuration based')
+
+            self.setUp_not_authorized()
+
+            response = self.client.get(self.url, format='json')
+            self.assertEqual(403, response.status_code, response.content[:1000])
+
+        @skipIfNotSubclass(RetrieveModelMixin)
+        def test_detail_configuration_not_authorized(self):
+            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+                self.skipTest('Authorization is not configuration based')
+
+            self.setUp_not_authorized()
+
+            current_objects = self.endpoint_model.objects.all()
+            relative_url = self.url + '%s/' % current_objects[0].id
+            response = self.client.get(relative_url)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+
+        @skipIfNotSubclass(CreateModelMixin)
+        def test_create_configuration_not_authorized(self):
+            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+                self.skipTest('Authorization is not configuration based')
+
+            self.setUp_not_authorized()
+
+            response = self.client.post(self.url, self.payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+
+        @skipIfNotSubclass(DestroyModelMixin)
+        def test_delete_configuration_not_authorized(self):
+            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+                self.skipTest('Authorization is not configuration based')
+
+            self.setUp_not_authorized()
+
+            current_objects = self.endpoint_model.objects.all()
+            relative_url = self.url + '%s/' % current_objects[0].id
+            response = self.client.delete(relative_url)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+
+        @skipIfNotSubclass(UpdateModelMixin)
+        def test_update_configuration_not_authorized(self):
+            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+                self.skipTest('Authorization is not configuration based')
+
+            self.setUp_not_authorized()
+
+            current_objects = self.endpoint_model.objects.all()
+            relative_url = self.url + '%s/' % current_objects[0].id
+
+            response = self.client.patch(relative_url, self.update_fields)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+
+            response = self.client.put(relative_url, self.payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
 
     class MemberEndpointTest(RESTEndpointTest):
         def __init__(self, *args, **kwargs):
@@ -589,8 +671,8 @@ class BaseClass():
 
         @skipIfNotSubclass(UpdateModelMixin)
         @patch('dojo.api_v2.permissions.user_has_permission')
-        def test_update_not_authorized(self, mock):
-            if not self.object_permission:
+        def test_update_object_not_authorized(self, mock):
+            if not self.test_type == TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             mock.return_value = False
@@ -601,8 +683,34 @@ class BaseClass():
             response = self.client.put(relative_url, self.payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username='admin'),
-                self.permission_check_class.objects.get(id=self.permission_check_id),
+                self.permission_check_class.objects.get(id=current_objects['results'][0]['id']),
                 self.permission_update)
+
+    class AuthenticatedViewTest(RESTEndpointTest):
+        def __init__(self, *args, **kwargs):
+            BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+        @skipIfNotSubclass(ListModelMixin)
+        def test_list_configuration_not_authorized(self):
+            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+                self.skipTest('Authorization is not configuration based')
+
+            self.setUp_not_authorized()
+
+            response = self.client.get(self.url, format='json')
+            self.assertEqual(200, response.status_code, response.content[:1000])
+
+        @skipIfNotSubclass(RetrieveModelMixin)
+        def test_detail_configuration_not_authorized(self):
+            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+                self.skipTest('Authorization is not configuration based')
+
+            self.setUp_not_authorized()
+
+            current_objects = self.endpoint_model.objects.all()
+            relative_url = self.url + '%s/' % current_objects[0].id
+            response = self.client.get(relative_url)
+            self.assertEqual(200, response.status_code, response.content[:1000])
 
 
 class AppAnalysisTest(BaseClass.RESTEndpointTest):
@@ -625,9 +733,8 @@ class AppAnalysisTest(BaseClass.RESTEndpointTest):
             'created': '2018-08-16T16:58:23.908Z'
         }
         self.update_fields = {'version': '9.0'}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
-        self.permission_check_id = 1
         self.permission_create = Permissions.Technology_Add
         self.permission_update = Permissions.Technology_Edit
         self.permission_delete = Permissions.Technology_Delete
@@ -644,7 +751,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         self.viewset = EndpointStatusViewSet
         self.payload = {
             'endpoint': 2,
-            'finding': 2,
+            'finding': 3,
             'mitigated': False,
             'false_positive': False,
             'risk_accepted': False,
@@ -652,13 +759,64 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
             "date": "2017-01-12T00:00",
         }
         self.update_fields = {'mitigated': True}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Endpoint
-        self.permission_check_id = 2
         self.permission_create = Permissions.Endpoint_Edit
         self.permission_update = Permissions.Endpoint_Edit
         self.permission_delete = Permissions.Endpoint_Edit
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create_unsuccessful(self):
+        unsucessful_payload = self.payload.copy()
+        unsucessful_payload['finding'] = 2
+        response = self.client.post(self.url, unsucessful_payload)
+        logger.debug('test_create_response:')
+        logger.debug(response)
+        logger.debug(response.data)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
+
+    def test_update_patch_unsuccessful(self):
+        anoher_finding_payload = self.payload.copy()
+        anoher_finding_payload['finding'] = 3
+        response = self.client.post(self.url, anoher_finding_payload)
+
+        current_objects = self.client.get(self.url, format='json').data
+
+        object1 = current_objects['results'][0]
+        object2 = current_objects['results'][1]
+
+        unsucessful_payload = {
+            'endpoint': object2['endpoint'],
+            'finding': object2['finding']
+        }
+
+        relative_url = self.url + '%s/' % object1['id']
+
+        response = self.client.patch(relative_url, unsucessful_payload)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
+
+    def test_update_put_unsuccessful(self):
+        anoher_finding_payload = self.payload.copy()
+        anoher_finding_payload['finding'] = 3
+        response = self.client.post(self.url, anoher_finding_payload)
+
+        current_objects = self.client.get(self.url, format='json').data
+
+        object1 = current_objects['results'][0]
+        object2 = current_objects['results'][1]
+
+        unsucessful_payload = {
+            'endpoint': object2['endpoint'],
+            'finding': object2['finding']
+        }
+
+        relative_url = self.url + '%s/' % object1['id']
+
+        response = self.client.put(relative_url, unsucessful_payload)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
 
 
 class EndpointTest(BaseClass.RESTEndpointTest):
@@ -679,9 +837,8 @@ class EndpointTest(BaseClass.RESTEndpointTest):
             "tags": ["mytag", "yourtag"]
         }
         self.update_fields = {'protocol': 'ftp', 'tags': ['one_new_tag']}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Endpoint
-        self.permission_check_id = 2
         self.permission_create = Permissions.Endpoint_Add
         self.permission_update = Permissions.Endpoint_Edit
         self.permission_delete = Permissions.Endpoint_Delete
@@ -710,9 +867,8 @@ class EngagementTest(BaseClass.RESTEndpointTest):
             "tags": ["mytag"]
         }
         self.update_fields = {'version': 'latest'}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Engagement
-        self.permission_check_id = 1
         self.permission_create = Permissions.Engagement_Add
         self.permission_update = Permissions.Engagement_Edit
         self.permission_delete = Permissions.Engagement_Delete
@@ -824,9 +980,8 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "tags": ['tag1', 'tag_2'],
         }
         self.update_fields = {'duplicate': False, 'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Finding
-        self.permission_check_id = 3
         self.permission_create = Permissions.Finding_Add
         self.permission_update = Permissions.Finding_Edit
         self.permission_delete = Permissions.Finding_Delete
@@ -868,7 +1023,7 @@ class FindingMetadataTest(BaseClass.RESTEndpointTest):
         self.viewname = 'finding'
         self.viewset = FindingViewSet
         self.payload = {}
-        self.object_permission = False
+        self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def setUp(self):
@@ -938,7 +1093,7 @@ class FindingTemplatesTest(BaseClass.RESTEndpointTest):
             "references": "",
         }
         self.update_fields = {'references': 'some reference'}
-        self.object_permission = False
+        self.test_type = TestType.CONFIGURATION_PERMISSIONS
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -967,7 +1122,7 @@ class JiraInstancesTest(BaseClass.RESTEndpointTest):
             "global_jira_sla_notification": False
         }
         self.update_fields = {'epic_name_id': 1}
-        self.object_permission = False
+        self.test_type = TestType.CONFIGURATION_PERMISSIONS
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -985,9 +1140,8 @@ class JiraIssuesTest(BaseClass.RESTEndpointTest):
             "finding": 2,
         }
         self.update_fields = {'jira_change': '2022-01-02T13:47:38.021481Z'}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Finding
-        self.permission_check_id = 5
         self.permission_create = Permissions.Finding_Edit
         self.permission_update = Permissions.Finding_Edit
         self.permission_delete = Permissions.Finding_Edit
@@ -1012,9 +1166,8 @@ class JiraProjectTest(BaseClass.RESTEndpointTest):
             "jira_instance": 2,
         }
         self.update_fields = {'jira_instance': 3}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Edit
         self.permission_update = Permissions.Product_Edit
         self.permission_delete = Permissions.Product_Edit
@@ -1035,7 +1188,7 @@ class SonarqubeIssueTest(BaseClass.RESTEndpointTest):
             "type": "VULNERABILITY"
         }
         self.update_fields = {'key': 'AREwS5n5TxsFUNm31CxP'}
-        self.object_permission = False
+        self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1054,7 +1207,7 @@ class SonarqubeIssuesTransitionTest(BaseClass.RESTEndpointTest):
             "transitions": "confirm"
         }
         self.update_fields = {'sonarqube_status': 'CLOSED'}
-        self.object_permission = False
+        self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1072,9 +1225,8 @@ class Product_API_Scan_ConfigurationTest(BaseClass.RESTEndpointTest):
             "tool_configuration": 3
         }
         self.update_fields = {'tool_configuration': 2}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_API_Scan_Configuration
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_API_Scan_Configuration_Add
         self.permission_update = Permissions.Product_API_Scan_Configuration_Edit
         self.permission_delete = Permissions.Product_API_Scan_Configuration_Delete
@@ -1099,9 +1251,8 @@ class ProductTest(BaseClass.RESTEndpointTest):
             "tags": ["mytag, yourtag"]
         }
         self.update_fields = {'prod_type': 2}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Type_Add_Product
         self.permission_update = Permissions.Product_Edit
         self.permission_delete = Permissions.Product_Delete
@@ -1125,9 +1276,8 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
             "test": 3,
         }
         self.update_fields = {'severity': 'LOW'}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Stub_Finding
-        self.permission_check_id = 2
         self.permission_create = Permissions.Finding_Add
         self.permission_update = Permissions.Finding_Edit
         self.permission_delete = Permissions.Finding_Delete
@@ -1159,9 +1309,8 @@ class TestsTest(BaseClass.RESTEndpointTest):
             "commit_hash": "1234567890abcdefghijkl",
         }
         self.update_fields = {'percent_complete': 100}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Test
-        self.permission_check_id = 3
         self.permission_create = Permissions.Test_Add
         self.permission_update = Permissions.Test_Edit
         self.permission_delete = Permissions.Test_Delete
@@ -1177,7 +1326,7 @@ class ToolConfigurationsTest(BaseClass.RESTEndpointTest):
         self.endpoint_path = 'tool_configurations'
         self.viewset = ToolConfigurationsViewSet
         self.payload = {
-            "configuration_url": "http://www.example.com",
+            "url": "http://www.example.com",
             "name": "Tool Configuration",
             "description": "",
             "authentication_type": "API",
@@ -1189,7 +1338,7 @@ class ToolConfigurationsTest(BaseClass.RESTEndpointTest):
             "tool_type": 1,
         }
         self.update_fields = {'ssh': 'test string'}
-        self.object_permission = False
+        self.test_type = TestType.CONFIGURATION_PERMISSIONS
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1210,9 +1359,8 @@ class ToolProductSettingsTest(BaseClass.RESTEndpointTest):
             "product": 2,
         }
         self.update_fields = {'tool_project_id': '2'}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Edit
         self.permission_update = Permissions.Product_Edit
         self.permission_delete = Permissions.Product_Edit
@@ -1232,7 +1380,7 @@ class ToolTypesTest(BaseClass.RESTEndpointTest):
             "description": "test tool type"
         }
         self.update_fields = {'description': 'changed description'}
-        self.object_permission = False
+        self.test_type = TestType.CONFIGURATION_PERMISSIONS
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1252,7 +1400,7 @@ class NoteTypesTest(BaseClass.RESTEndpointTest):
             "is_mandatory": False
         }
         self.update_fields = {'description': 'changed description'}
-        self.object_permission = False
+        self.test_type = TestType.CONFIGURATION_PERMISSIONS
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1271,7 +1419,7 @@ class NotesTest(BaseClass.RESTEndpointTest):
             "editor": '{"username": "user1"}'
         }
         self.update_fields = {'entry': 'changed entry'}
-        self.object_permission = False
+        self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1291,7 +1439,7 @@ class UsersTest(BaseClass.RESTEndpointTest):
             "is_active": True,
         }
         self.update_fields = {"first_name": "test changed"}
-        self.object_permission = False
+        self.test_type = TestType.CONFIGURATION_PERMISSIONS
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1311,7 +1459,7 @@ class UserContactInfoTest(BaseClass.RESTEndpointTest):
             "twitter_username": "defectdojo",
         }
         self.update_fields = {"title": "Lady"}
-        self.object_permission = False
+        self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1354,7 +1502,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
             "tags": ["ci/cd", "api"],
             "version": "1.0.0",
         }
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_create = Permissions.Import_Scan_Result
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
@@ -1959,14 +2107,13 @@ class ProductTypeTest(BaseClass.RESTEndpointTest):
             "critical_product": False
         }
         self.update_fields = {'description': "changed"}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Type
-        self.permission_check_id = 1
         self.permission_update = Permissions.Product_Type_Edit
         self.permission_delete = Permissions.Product_Type_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
-    def test_create_not_authorized(self):
+    def test_create_object_not_authorized(self):
         self.setUp_not_authorized()
 
         response = self.client.post(self.url, self.payload)
@@ -1998,20 +2145,19 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
             "description": "Test",
         }
         self.update_fields = {'description': "changed"}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Dojo_Group
-        self.permission_check_id = 1
         self.permission_update = Permissions.Group_Edit
         self.permission_delete = Permissions.Group_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
-    def test_list_not_authorized(self):
+    def test_list_object_not_authorized(self):
         self.setUp_not_authorized()
 
         response = self.client.get(self.url, format='json')
         self.assertEqual(403, response.status_code, response.content[:1000])
 
-    def test_detail_not_authorized(self):
+    def test_detail_object_not_authorized(self):
         self.setUp_not_authorized()
 
         current_objects = self.endpoint_model.objects.all()
@@ -2019,7 +2165,7 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
         response = self.client.get(relative_url)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
-    def test_create_not_authorized(self):
+    def test_create_object_not_authorized(self):
         self.setUp_not_authorized()
 
         response = self.client.post(self.url, self.payload)
@@ -2040,9 +2186,8 @@ class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
             "role": 4
         }
         self.update_fields = {'role': 3}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Dojo_Group_Member
-        self.permission_check_id = 1
         self.permission_create = Permissions.Group_Manage_Members
         self.permission_update = Permissions.Group_Manage_Members
         self.permission_delete = Permissions.Group_Member_Delete
@@ -2057,7 +2202,7 @@ class RolesTest(BaseClass.RESTEndpointTest):
         self.endpoint_path = 'roles'
         self.viewname = 'role'
         self.viewset = RoleViewSet
-        self.object_permission = False
+        self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2074,7 +2219,7 @@ class GlobalRolesTest(BaseClass.RESTEndpointTest):
             "role": 2
         }
         self.update_fields = {'role': 3}
-        self.object_permission = False
+        self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2092,9 +2237,8 @@ class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
             "role": 2
         }
         self.update_fields = {'role': 3}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Type_Member
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Type_Manage_Members
         self.permission_update = Permissions.Product_Type_Manage_Members
         self.permission_delete = Permissions.Product_Type_Member_Delete
@@ -2115,9 +2259,8 @@ class ProductMemberTest(BaseClass.MemberEndpointTest):
             "role": 2
         }
         self.update_fields = {'role': 3}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Member
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Manage_Members
         self.permission_update = Permissions.Product_Manage_Members
         self.permission_delete = Permissions.Product_Member_Delete
@@ -2138,9 +2281,8 @@ class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
             "role": 2
         }
         self.update_fields = {'role': 3}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Type_Group
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Type_Group_Add
         self.permission_update = Permissions.Product_Type_Group_Edit
         self.permission_delete = Permissions.Product_Type_Group_Delete
@@ -2161,9 +2303,8 @@ class ProductGroupTest(BaseClass.MemberEndpointTest):
             "role": 2
         }
         self.update_fields = {'role': 3}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Group
-        self.permission_check_id = 1
         self.permission_create = Permissions.Product_Group_Add
         self.permission_update = Permissions.Product_Group_Edit
         self.permission_delete = Permissions.Product_Group_Delete
@@ -2184,7 +2325,7 @@ class LanguageTypeTest(BaseClass.RESTEndpointTest):
             'created': '2018-08-16T16:58:23.908Z'
         }
         self.update_fields = {'color': 'blue'}
-        self.object_permission = False
+        self.test_type = TestType.CONFIGURATION_PERMISSIONS
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2207,9 +2348,8 @@ class LanguageTest(BaseClass.RESTEndpointTest):
             'created': '2018-08-16T16:58:23.908Z'
         }
         self.update_fields = {'code': 10}
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Languages
-        self.permission_check_id = 1
         self.permission_create = Permissions.Language_Add
         self.permission_update = Permissions.Language_Edit
         self.permission_delete = Permissions.Language_Delete
@@ -2228,7 +2368,7 @@ class ImportLanguagesTest(BaseClass.RESTEndpointTest):
             'product': 1,
             'file': open("unittests/files/defectdojo_cloc.json")
         }
-        self.object_permission = True
+        self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Languages
         self.permission_create = Permissions.Language_Add
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -2269,7 +2409,7 @@ class NotificationsTest(BaseClass.RESTEndpointTest):
             'product_type_added': ["alert", "msteams"]
         }
         self.update_fields = {'product_added': ["alert", "msteams"]}
-        self.object_permission = False
+        self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2300,3 +2440,41 @@ class UserProfileTest(DojoAPITestCase):
         self.assertEqual(1, data['product_type_member'][0]['product_type'])
         self.assertEqual(1, data['product_member'][1]['user'])
         self.assertEqual(3, data['product_member'][1]['product'])
+
+
+class DevelopmentEnvironmentTest(BaseClass.AuthenticatedViewTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Development_Environment
+        self.endpoint_path = 'development_environments'
+        self.viewname = 'development_environment'
+        self.viewset = DevelopmentEnvironmentViewSet
+        self.payload = {
+            'name': 'Test_1'
+        }
+        self.update_fields = {'name': 'Test_2'}
+        self.test_type = TestType.CONFIGURATION_PERMISSIONS
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_delete(self):
+        current_objects = self.client.get(self.url, format='json').data
+        relative_url = self.url + '%s/' % current_objects['results'][-1]['id']
+        response = self.client.delete(relative_url)
+        self.assertEqual(409, response.status_code, response.content[:1000])
+
+
+class TestTypeTest(BaseClass.AuthenticatedViewTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Test_Type
+        self.endpoint_path = 'test_types'
+        self.viewname = 'test_type'
+        self.viewset = TestTypesViewSet
+        self.payload = {
+            'name': 'Test_1'
+        }
+        self.update_fields = {'name': 'Test_2'}
+        self.test_type = TestType.CONFIGURATION_PERMISSIONS
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

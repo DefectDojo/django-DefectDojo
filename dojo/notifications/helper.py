@@ -20,7 +20,7 @@ def create_notification(event=None, **kwargs):
 
     if 'recipients' in kwargs:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
-        logger.debug('creating notifications for recipients')
+        logger.debug('creating notifications for recipients: %s', kwargs['recipients'])
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
             # kwargs.update({'user': recipient_notifications.user})
             process_notifications(event, recipient_notifications, **kwargs)
@@ -32,19 +32,29 @@ def create_notification(event=None, **kwargs):
         product_type = None
         if 'product_type' in kwargs:
             product_type = kwargs.get('product_type')
+            logger.debug("Defined product type %s", product_type)
 
         product = None
         if 'product' in kwargs:
             product = kwargs.get('product')
+            logger.debug("Defined product  %s", product)
+
         elif 'engagement' in kwargs:
             product = kwargs['engagement'].product
+            logger.debug("Defined product of engagement %s", product)
+
         elif 'test' in kwargs:
             product = kwargs['test'].engagement.product
+            logger.debug("Defined product of test %s", product)
+
         elif 'finding' in kwargs:
             product = kwargs['finding'].test.engagement.product
+            logger.debug("Defined product of finding %s", product)
+
         elif 'obj' in kwargs:
             from dojo.utils import get_product
             product = get_product(kwargs['obj'])
+            logger.debug("Defined product of obj %s", product)
 
         # System notifications
         try:
@@ -73,16 +83,25 @@ def create_notification(event=None, **kwargs):
                 .filter((Q(applicable_notifications_count__gt=0) | Q(is_superuser=True)))
 
             # only send to authorized users or admin/superusers
+            logger.debug('Filtering users for the product %s', product)
+
             if product:
                 users = get_authorized_users_for_product_and_product_type(users, product, Permissions.Product_View)
+
             elif product_type:
                 users = get_authorized_users_for_product_type(users, product_type, Permissions.Product_Type_View)
+            else:
+                # nor product_type nor product defined, we should not make noise and send only notifications to admins
+                logger.debug('Product is not specified, making it silent')
+                users = users.filter(is_superuser=True)
 
             for user in users:
+                logger.debug("Authorized user for the product %s", user)
                 # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
                 # kwargs.update({'user': user})
                 applicable_notifications = user.applicable_notifications
                 if user.is_superuser:
+                    logger.debug("User %s is superuser", user)
                     # admin users get all system notifications
                     applicable_notifications.append(system_notifications)
 
@@ -98,7 +117,7 @@ def create_description(event, *args, **kwargs):
         elif event == 'product_type_added':
             kwargs["description"] = "Product Type " + kwargs['title'] + " has been created successfully."
         else:
-            kwargs["description"] = "Event " + str(event) + " has occured."
+            kwargs["description"] = "Event " + str(event) + " has occurred."
 
     return kwargs["description"]
 
@@ -114,7 +133,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     except TemplateDoesNotExist:
         logger.debug('template not found or not implemented yet: %s', template)
     except Exception as e:
-        logger.error("error during rendeing of template %s exception is %s", template, e)
+        logger.error("error during rendering of template %s exception is %s", template, e)
     finally:
         if not notification_message:
             kwargs["description"] = create_description(event, *args, **kwargs)
@@ -127,7 +146,7 @@ def process_notifications(event, notifications=None, **kwargs):
     from dojo.utils import get_system_setting
 
     if not notifications:
-        logger.warn('no notifications!')
+        logger.warning('no notifications!')
         return
 
     logger.debug('sending notification ' + ('asynchronously' if we_want_async() else 'synchronously'))
@@ -326,10 +345,10 @@ def get_slack_user_id(user_email):
                             slack_user_is_found = True
                             break
                     else:
-                        logger.warn("A user with email {} could not be found in this Slack workspace.".format(user_email))
+                        logger.warning("A user with email {} could not be found in this Slack workspace.".format(user_email))
 
             if not slack_user_is_found:
-                logger.warn("The Slack user was not found.")
+                logger.warning("The Slack user was not found.")
 
     return user_id
 

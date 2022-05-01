@@ -1,38 +1,28 @@
 #!/bin/sh
 
-# Test types shall be initialized every time by the initializer, to make sure test types are complete
-# when new parsers have been implemented
-initialize_test_types()
+initialize_data()
 {
+    # Test types shall be initialized every time by the initializer, to make sure test types are complete
+    # when new parsers have been implemented
     echo "Initialization of test_types"
     python3 manage.py initialize_test_types
+
+    # Non-standard permissions cannot be created with a database migration, because the content type will only
+    # be available after the dojo migrations
+    echo "Creation of non-standard permissions"
+    python3 manage.py initialize_permissions
 }
 
-# Allow for bind-mount setting.py overrides
-FILE=/app/docker/extra_settings/settings.dist.py
-if test -f "$FILE"; then
+# Allow for bind-mount multiple settings.py overrides
+FILES=$(ls /app/docker/extra_settings/*.py 2>/dev/null)
+NUM_FILES=$(echo "$FILES" | wc -w)
+if [ "$NUM_FILES" -gt 0 ]; then
+    COMMA_LIST=$(echo $FILES | tr -s '[:blank:]' ', ')
     echo "============================================================"
-    echo "     Overriding DefectDojo's settings.dist.py with $FILE."
+    echo "     Overriding DefectDojo's local_settings.py with multiple"
+    echo "     Files: $COMMA_LIST"
     echo "============================================================"
-    cp "$FILE" /app/dojo/settings/settings.dist.py
-fi
-
-# Allow for bind-mount setting.py overrides
-FILE=/app/docker/extra_settings/settings.py
-if test -f "$FILE"; then
-    echo "============================================================"
-    echo "     Overriding DefectDojo's settings.py with $FILE."
-    echo "============================================================"
-    cp "$FILE" /app/dojo/settings/settings.py
-fi
-
-# Allow for bind-mount setting.py overrides
-FILE=/app/docker/extra_settings/local_settings.py
-if test -f "$FILE"; then
-    echo "============================================================"
-    echo "     Overriding DefectDojo's local_settings.py with $FILE."
-    echo "============================================================"
-    cp "$FILE" /app/dojo/settings/local_settings.py
+    cp /app/docker/extra_settings/*.py /app/dojo/settings/
 fi
 
 umask 0002
@@ -65,7 +55,7 @@ then
     echo "Admin password: Initialization detected that the admin user ${DD_ADMIN_USER} already exists in your database."
     echo "If you don't remember the ${DD_ADMIN_USER} password, you can create a new superuser with:"
     echo "$ docker-compose exec uwsgi /bin/bash -c 'python manage.py createsuperuser'"
-    initialize_test_types
+    initialize_data
     exit
 fi
 
@@ -118,6 +108,6 @@ EOD
   echo "Migration of textquestions for surveys"
   python3 manage.py migrate_textquestions
 
-  initialize_test_types
+  initialize_data
 
 fi

@@ -9,9 +9,9 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         Test Type List
-                        {% if "dojo.add_test_type"|has_configuration_permission:"staff" %}
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            {% if "dojo.add_test_type"|has_configuration_permission:"staff" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -19,15 +19,13 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                {% if request.user.is_staff %}
                                     <li role="presentation">
                                         <a href="{%  url 'add_test_type' %}">
                                             <i class="fa fa-plus"></i> New Test Type </a>
                                     </li>
-                                {% endif %}
                             </ul>
+                            {% endif %}
                         </div>
-                        {% endif %}
                     </h3>
                 </div>
                 <div id="the-filters" class="is-filters panel-body collapse {% if test_types.form.has_changed %}in{% endif %}">

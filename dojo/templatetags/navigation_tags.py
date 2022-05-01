@@ -3,6 +3,9 @@ from django.utils.safestring import mark_safe as safe
 from django.utils.html import escape
 from urllib.parse import urlencode
 
+from dojo.authorization.roles_permissions import Permissions
+from dojo.product_type.queries import get_authorized_product_types
+
 
 register = template.Library()
 
@@ -127,3 +130,8 @@ def paginate(page, adjacent=2):
                      safe('Next')))
 
     return pages
+
+
+@register.filter
+def can_add_product(user):
+    return get_authorized_product_types(Permissions.Product_Type_Add_Product).count() > 0

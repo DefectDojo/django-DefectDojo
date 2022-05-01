@@ -5,13 +5,14 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
-from dojo.models import Development_Environment, Engagement, Product, Product_Type, Test, User
+from dojo.models import Development_Environment, Engagement, Finding, Product, Product_Type, Test, User
 from dojo.tools.factory import get_parser
 from dojo.tools.sarif.parser import SarifParser
 from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from .dojo_test_case import DojoAPITestCase
 from .test_utils import assertImportModelsCreated
 import logging
+from dojo.importers.utils import handle_vulnerability_ids
 
 from dojo.utils import get_object_or_none
 
@@ -58,8 +59,8 @@ class TestDojoDefaultImporter(DojoTestCase):
             target_start=timezone.now(),
             target_end=timezone.now(),
         )
-        lead = None
-        environment = None
+        lead, _ = User.objects.get_or_create(username="admin")
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
 
         # boot
         importer = Importer()
@@ -111,10 +112,10 @@ class TestDojoDefaultImporter(DojoTestCase):
             target_start=timezone.now(),
             target_end=timezone.now(),
         )
-
         importer = Importer()
         scan_date = None
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
@@ -146,7 +147,8 @@ class TestDojoDefaultImporter(DojoTestCase):
 
         importer = Importer()
         scan_date = None
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
@@ -532,3 +534,65 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True, expected_http_status_code=400)
             self.assertEqual(import0, ['product_name parameter missing'])
+
+
+class TestImporterUtils(DojoAPITestCase):
+    @patch('dojo.importers.utils.Vulnerability_Id', autospec=True)
+    def test_handle_vulnerability_ids_references_and_cve(self, mock):
+        finding = Finding()
+        finding.cve = 'CVE'
+        finding.unsaved_vulnerability_ids = ['REF-1', 'REF-2']
+
+        handle_vulnerability_ids(finding)
+
+        vulnerability_ids = ['CVE', 'REF-1', 'REF-2']
+
+        self.assertEqual(6, len(mock.mock_calls))
+        self.assertEqual('CVE', mock.mock_calls[0].kwargs['vulnerability_id'])
+        self.assertEqual('CVE', mock.mock_calls[0].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_ids, mock.mock_calls[0].kwargs['finding'].unsaved_vulnerability_ids)
+        self.assertEqual('REF-1', mock.mock_calls[2].kwargs['vulnerability_id'])
+        self.assertEqual('CVE', mock.mock_calls[2].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_ids, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_ids)
+        self.assertEqual('REF-2', mock.mock_calls[4].kwargs['vulnerability_id'])
+        self.assertEqual('CVE', mock.mock_calls[4].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_ids, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_ids)
+
+    @patch('dojo.importers.utils.Vulnerability_Id', autospec=True)
+    def test_handle_no_vulnerability_ids_references_and_cve(self, mock):
+        finding = Finding()
+        finding.cve = 'CVE'
+
+        handle_vulnerability_ids(finding)
+
+        vulnerability_ids = ['CVE']
+
+        self.assertEqual(2, len(mock.mock_calls))
+        self.assertEqual('CVE', mock.mock_calls[0].kwargs['vulnerability_id'])
+        self.assertEqual('CVE', mock.mock_calls[0].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_ids, mock.mock_calls[0].kwargs['finding'].unsaved_vulnerability_ids)
+
+    @patch('dojo.importers.utils.Vulnerability_Id', autospec=True)
+    def test_handle_vulnerability_ids_references_and_no_cve(self, mock):
+        finding = Finding()
+        finding.unsaved_vulnerability_ids = ['REF-1', 'REF-2']
+
+        handle_vulnerability_ids(finding)
+
+        vulnerability_ids = ['REF-1', 'REF-2']
+
+        self.assertEqual(4, len(mock.mock_calls))
+        self.assertEqual('REF-1', mock.mock_calls[0].kwargs['vulnerability_id'])
+        self.assertEqual('REF-1', mock.mock_calls[0].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_ids, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_ids)
+        self.assertEqual('REF-2', mock.mock_calls[2].kwargs['vulnerability_id'])
+        self.assertEqual('REF-1', mock.mock_calls[2].kwargs['finding'].cve)
+        self.assertEqual(vulnerability_ids, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_ids)
+
+    @patch('dojo.importers.utils.Vulnerability_Id', autospec=True)
+    def test_no_handle_vulnerability_ids_references_and_no_cve(self, mock):
+        finding = Finding()
+
+        handle_vulnerability_ids(finding)
+
+        mock.assert_not_called()

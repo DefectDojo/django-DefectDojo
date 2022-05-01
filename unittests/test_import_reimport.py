@@ -1,5 +1,6 @@
+import datetime
 from django.urls import reverse
-from dojo.models import User, Test, Finding
+from dojo.models import Test_Type, User, Test, Finding
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from django.test.client import Client
@@ -86,6 +87,14 @@ class ImportReimportMixin(object):
         self.aws_prowler_file_name = self.scans_path + 'aws_prowler/many_vuln.json'
         self.aws_prowler_file_name_plus_one = self.scans_path + 'aws_prowler/many_vuln_plus_one.json'
         self.scan_type_aws_prowler = 'AWS Prowler Scan'
+
+        self.nuclei_empty = self.scans_path + 'nuclei/empty.jsonl'
+
+        self.gitlab_dast_file_name = self.scans_path + 'gitlab_dast/gitlab_dast_one_vul.json'
+        self.scan_type_gitlab_dast = 'GitLab DAST Report'
+
+        self.anchore_grype_file_name = self.scans_path + 'anchore_grype/check_all_fields.json'
+        self.anchore_grype_scan_type = 'Anchore Grype'
 
     # import zap scan, testing:
     # - import
@@ -1132,27 +1141,27 @@ class ImportReimportMixin(object):
         for finding in active_findings_after['results']:
             if 'v0.0.0-20190219172222-a4c6cb3142f2' == finding['component_version']:
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/crypto", finding['component_name'])
                 count = count + 1
             elif 'v0.0.0-20190308221718-c2843e01d9a2' == finding['component_version']:
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/crypto", finding['component_name'])
                 count = count + 1
             elif 'v0.0.0-20200302210943-78000ba7a073' == finding['component_version']:
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/crypto", finding['component_name'])
                 count = count + 1
             elif 'v0.3.0' == finding['component_version']:
                 self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
-                self.assertEqual("CVE-2020-14040", finding['cve'])
+                self.assertEqual("CVE-2020-14040", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/text", finding['component_name'])
                 count = count + 1
             elif 'v0.3.2' == finding['component_version']:
                 self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
-                self.assertEqual("CVE-2020-14040", finding['cve'])
+                self.assertEqual("CVE-2020-14040", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/text", finding['component_name'])
                 count = count + 1
 
@@ -1316,6 +1325,100 @@ class ImportReimportMixin(object):
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
         self.assert_finding_count_json(0, findings)
+
+    def test_import_nuclei_emptyc(self):
+        """This test do a basic import of Nuclei report with no vulnerability
+
+        This test is useful because Nuclei use jsonl for his format so it can generate empty files.
+        It tests the condition limit of loading an empty file.
+        """
+
+        import0 = self.import_scan_with_params(self.nuclei_empty, scan_type="Nuclei Scan")
+
+        test_id = import0['test']
+
+        reimport0 = self.reimport_scan_with_params(test_id, self.nuclei_empty, scan_type="Nuclei Scan")
+
+        test_id2 = reimport0['test']
+        self.assertEqual(test_id, test_id2)
+
+    def test_import_reimport_endpoint_where_eps_date_is_different(self):
+        endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
+        endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import0 = self.import_scan_with_params(self.gitlab_dast_file_name,
+                                                   self.scan_type_gitlab_dast,
+                                                   active=True,
+                                                   verified=True)
+
+        test_id = import0['test']
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+        self.assert_finding_count_json(1, findings)
+
+        test = self.get_test_api(test_id)['id']
+        finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
+        self.assertEqual(finding.endpoint_status.count(), 1)
+
+        original_date = finding.endpoint_status.first().date
+
+        self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
+        self.assertEqual(endpoint_status_count_before_active + 1, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
+
+        reimport0 = self.reimport_scan_with_params(test_id,
+                                                   self.gitlab_dast_file_name,
+                                                   scan_type=self.scan_type_gitlab_dast)
+        test_id = reimport0['test']
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+        self.assert_finding_count_json(1, findings)
+
+        finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
+        self.assertEqual(finding.endpoint_status.count(), 1)
+
+        reimported_date = finding.endpoint_status.first().date
+        self.assertEqual(original_date, reimported_date)
+
+        self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
+        self.assertEqual(endpoint_status_count_before_active + 1, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
+
+    # test handling of vulnerability ids with import
+    def test_import_reimport_vulnerability_ids(self):
+
+        import0 = self.import_scan_with_params(self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
+
+        test_id = import0['test']
+        test = Test.objects.get(id=test_id)
+        findings = Finding.objects.filter(test=test)
+        self.assertEqual(4, len(findings))
+        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
+        self.assertEqual(2, len(findings[3].vulnerability_ids))
+        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
+        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_ids[1])
+
+        test_type = Test_Type.objects.get(name=self.anchore_grype_scan_type)
+        reimport_test = Test(
+            engagement=test.engagement,
+            test_type=test_type,
+            scan_type=self.anchore_grype_scan_type,
+            target_start=datetime.datetime.now(),
+            target_end=datetime.datetime.now(),
+        )
+        reimport_test.save()
+
+        reimport0 = self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
+        findings = Finding.objects.filter(test=reimport_test)
+        self.assertEqual(4, len(findings))
+        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
+        self.assertEqual(2, len(findings[3].vulnerability_ids))
+        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
+        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_ids[1])
 
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):

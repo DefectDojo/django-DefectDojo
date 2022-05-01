@@ -11,6 +11,8 @@ The docker-compose.yml file in this repository is fully functional to evaluate D
 
 Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation.
 
+See [Running with Docker Compose](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) for more information how to run DefectDojo with Docker Compose.
+
 ### Database performance and backup
 
 It is recommended to use a dedicated database server and not the preconfigured MySQL database. This will improve the performance of DefectDojo

@@ -119,17 +119,17 @@ def view_test(request, tid):
     paged_stub_findings = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in get_choices_sorted())
 
-    product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
+    product_tab = Product_Tab(prod, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
     jira_project = jira_helper.get_jira_project(test)
 
-    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue', 'creator')
+    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue', 'creator', 'findings__vulnerability_id_set')
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
     google_sheets_enabled = system_settings.enable_google_sheets
     sheet_url = None
-    if google_sheets_enabled:
+    if google_sheets_enabled and system_settings.credentials:
         spreadsheet_name = test.engagement.product.name + "-" + test.engagement.name + "-" + str(test.id)
         system_settings = get_object_or_404(System_Settings, id=1)
         service_account_info = json.loads(system_settings.credentials)
@@ -181,7 +181,7 @@ def view_test(request, tid):
                    'creds': creds,
                    'cred_test': cred_test,
                    'jira_project': jira_project,
-                   'show_export': google_sheets_enabled,
+                   'show_export': google_sheets_enabled and system_settings.credentials,
                    'sheet_url': sheet_url,
                    'bulk_edit_form': bulk_edit_form,
                    'paged_test_imports': paged_test_imports,
@@ -215,7 +215,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set__jira_issue')
         prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
-
+        prefetched_findings = prefetched_findings.prefetch_related('vulnerability_id_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -252,7 +252,7 @@ def edit_test(request, tid):
     form.initial['target_end'] = test.target_end.date()
     form.initial['description'] = test.description
 
-    product_tab = Product_Tab(test.engagement.product.id, title="Edit Test", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title="Edit Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/edit_test.html',
                   {'test': test,
@@ -290,7 +290,7 @@ def delete_test(request, tid):
     collector.collect([test])
     rels = collector.nested()
 
-    product_tab = Product_Tab(test.engagement.product.id, title="Delete Test", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title="Delete Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/delete_test.html',
                   {'test': test,
@@ -423,6 +423,8 @@ def add_findings(request, tid):
                         jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
+            finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
+
             new_finding.save(false_history=True, push_to_jira=push_to_jira)
             create_notification(event='other',
                                 title='Addition of %s' % new_finding.title,
@@ -454,7 +456,7 @@ def add_findings(request, tid):
         if use_jira:
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
-    product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
@@ -505,7 +507,7 @@ def add_temp_finding(request, tid, fid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            new_finding.date = datetime.today()
+            new_finding.date = form.cleaned_data['date'] or datetime.today()
             finding_helper.update_finding_status(new_finding, request.user)
 
             new_finding.save(dedupe_option=False, false_history=False)
@@ -559,7 +561,7 @@ def add_temp_finding(request, tid, fid):
     # logger.debug('jform errors: %s', jform.errors)
     # logger.debug('jform errors: %s', vars(jform))
 
-    product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
@@ -677,7 +679,7 @@ def re_import_scan_results(request, tid):
 
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
 
-    product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
+    product_tab = Product_Tab(engagement.product, title="Re-upload a %s" % scan_type, tab="engagements")
     product_tab.setEngagement(engagement)
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     form.initial['api_scan_configuration'] = test.api_scan_configuration

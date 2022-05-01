@@ -1,0 +1,66 @@
+[
+    {
+        "id": 21581,
+        "asset_id": 60,
+        "name": "Cross-site scripting (reflected)",
+        "location": "http://test.example.com",
+        "location_specifier_id": 1904,
+        "asset_name": "test_asset",
+        "label": "",
+        "status": "open",
+        "pci_compliance_status": "fail",
+        "date_opened": "2014-12-05 14:53:43 UTC",
+        "date_closed": null,
+        "risk": 1,
+        "severity": 4,
+        "threat": 5,
+        "layer": "application",
+        "remediation": "Remediation Text",
+        "description": "Description Text",
+        "cwes": [
+            "CWE-75"
+        ],
+        "cves": [
+            "CVE-2021-5300"
+        ],
+        "pci_exception": "none",
+        "pci_exception_description": null,
+        "pci_exception_expiry": null,
+        "cvss_score": 0.0,
+        "cvss_vector": "AV:N/AC:L/Au:N/C:N/I:N/A:N",
+        "cvss_version": 2,
+        "asset_tags": "APPROVED,Demo-Asset"
+    },
+    {
+        "id": 21583,
+        "asset_id": 60,
+        "name": "Directory listing",
+        "location": "http://example.test.com",
+        "location_specifier_id": 1904,
+        "asset_name": "test_asset_2",
+        "label": "",
+        "status": "closed",
+        "pci_compliance_status": "pass",
+        "date_opened": "2014-09-05 14:53:43 UTC",
+        "date_closed": "2020-07-13 09:39:56 UTC",
+        "risk": 5,
+        "severity": 2,
+        "threat": 3,
+        "layer": "application",
+        "remediation": "Remediation Text 2",
+        "description": "Description Text 2",
+        "cwes": [
+            "CWE-77"
+        ],
+        "cves": [
+            "CVE-2021-4008"
+        ],
+        "pci_exception": "none",
+        "pci_exception_description": null,
+        "pci_exception_expiry": null,
+        "cvss_score": 3.7,
+        "cvss_vector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+        "cvss_version": 3,
+        "asset_tags": ""
+    }
+]

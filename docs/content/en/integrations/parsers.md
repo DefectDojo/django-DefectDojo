@@ -375,6 +375,24 @@ Import JSON container image linter reports
 
 Import of JSON report from <https://github.com/Yelp/detect-secrets>
 
+### Edgescan
+
+Import Edgescan vulnerabilities by JSON file or API - no file required.
+
+Follow these steps to setup API importing:
+
+1.  Configure the Edgescan Authentication details by navigating to
+    Configuration / Tool Configuration, selecting the Tool Type to "Edgescan",
+    and Authentication Type "API Key". Paste your Edgescan API key in the
+    "API Key" field.
+2.  In the Product settings select "Add API Scan Configuration" and select the
+    previously added Edgescan Tool Configuration. Provide the ID
+    of the asset from which to import findings in the field *Service key 1*.
+3.  After this is done, you can import the findings by selecting 
+    "Edgescan Scan" as the scan type. If you have more than one asset 
+    configured, you must also select which Edgescan API Scan Configuration to 
+    use.
+
 ### ESLint
 
 ESLint Json report format (-f json)
@@ -654,6 +672,46 @@ References:
 Import JSON reports from
 [HuskyCI](<https://github.com/globocom/huskyCI>)
 
+### Hydra
+
+Import JSON reports from [THC Hydra](https://github.com/vanhauser-thc/thc-hydra).
+
+Hydra can discover weak login credentials on different types of services (e.g. RDP).
+
+As Hydra cannot provide a severity rating (as it doesn't know how severe a weak login is at this scanned service), all imported findings will be rated 'High'.
+
+Sample JSON report:
+```json
+{
+    "errormessages": [
+        "[ERROR] Error Message of Something",
+        "[ERROR] Another Message",
+        "These are very free form"
+    ],
+    "generator": {
+        "built": "2019-03-01 14:44:22",
+        "commandline": "hydra -b jsonv1 -o results.json ... ...",
+        "jsonoutputversion": "1.00",
+        "server": "127.0.0.1",
+        "service": "http-post-form",
+        "software": "Hydra",
+        "version": "v8.5"
+    },
+    "quantityfound": 1,
+    "results": [
+        {
+            "host": "127.0.0.1",
+            "login": "bill@example.com",
+            "password": "bill",
+            "port": 9999,
+            "service": "http-post-form"
+        }
+    ],
+    "success": false
+}
+```
+
+
 ### IBM AppScan DAST
 
 XML file from IBM App Scanner.
@@ -927,7 +985,9 @@ Rusty Hog is a secret scanner built in Rust for performance, and based on Truffl
 
 DefectDojo currently supports the parsing of the following Rusty Hog JSON outputs:
 - Choctaw Hog: Scans for secrets in a Git repository.
+- Duroc Hog: Scans for secrets in directories, files, and archives.
 - Gottingen Hog: Scans for secrets in a JIRA issue.
+- Essex Hog: Scans for secrets in a Confluence page.
 
 ### SARIF
 
@@ -963,7 +1023,7 @@ Output of SKF Sprint summary export.
 ### Snyk
 
 Snyk output file (snyk test \--json \> snyk.json) can be imported in
-JSON format.
+JSON format. Only SCA (Software Composition Analysis) report is supported (SAST report not supported yet).
 
 ### SonarQube Scan (Aggregates findings per cwe, title, description, file\_path.)
 
@@ -1039,6 +1099,11 @@ XML report of SSLyze version 2 scan
 ### SSLyze 3 Scan (JSON)
 
 JSON report of SSLyze version 3 scan
+
+### StackHawk HawkScan
+
+Import the JSON webhook event from StackHawk.
+For more information, check out our [docs on hooking up StackHawk to Defect Dojo](https://docs.stackhawk.com/workflow-integrations/defect-dojo.html)
 
 ### Testssl Scan
 

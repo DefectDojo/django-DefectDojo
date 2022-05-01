@@ -31,11 +31,6 @@ class Command(BaseCommand):
                     # Check if the status object was created, otherwise, there is nothing to do
                     if created:
                         status.date = finding.date
-                        # If the parent endpoint was mitigated with the old system,
-                        # reflect the same on the endpoint status object
-                        if endpoint.mitigated:
-                            status.mitigated = True
-                            status.mitigated_by = finding.reporter
                         # Save the status object with at least one updated field
                         status.save()
                         # Attach the status to the endpoint and finding

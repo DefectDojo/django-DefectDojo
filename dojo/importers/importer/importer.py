@@ -3,7 +3,7 @@ import base64
 from django.db.models.query_utils import Q
 from dojo.importers import utils as importer_utils
 from dojo.decorators import dojo_async_task
-from dojo.utils import get_current_user
+from dojo.utils import get_current_user, is_finding_groups_enabled
 from dojo.celery import app
 from django.core.exceptions import ValidationError
 from django.core import serializers
@@ -50,13 +50,10 @@ class DojoDefaultImporter(object):
             build_id=build_id,
             commit_hash=commit_hash,
             api_scan_configuration=api_scan_configuration,
-            tags=tags)
-        try:
-            # TODO What is going on here?
-            test.full_clean()
-        except ValidationError:
-            pass
+            tags=tags,
+        )
 
+        test.full_clean()
         test.save()
         return test
 
@@ -110,8 +107,8 @@ class DojoDefaultImporter(object):
 
             item.save(dedupe_option=False)
 
-            if settings.FEATURE_FINDING_GROUPS and group_by:
-                finding_helper.add_finding_to_auto_group(item, group_by)
+            if is_finding_groups_enabled() and group_by:
+                finding_helper.add_finding_to_auto_group(item, group_by, **kwargs)
 
             if (hasattr(item, 'unsaved_req_resp') and
                     len(item.unsaved_req_resp) > 0):
@@ -157,14 +154,16 @@ class DojoDefaultImporter(object):
                     file_upload.save()
                     item.files.add(file_upload)
 
+            importer_utils.handle_vulnerability_ids(item)
+
             new_findings.append(item)
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if settings.FEATURE_FINDING_GROUPS and item.finding_group:
+            if is_finding_groups_enabled() and item.finding_group:
                 item.save()
             else:
                 item.save(push_to_jira=push_to_jira)
 
-        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+        if is_finding_groups_enabled() and push_to_jira:
             for finding_group in set([finding.finding_group for finding in new_findings if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
         sync = kwargs.get('sync', False)
@@ -217,13 +216,13 @@ class DojoDefaultImporter(object):
             old_finding.tags.add('stale')
 
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if settings.FEATURE_FINDING_GROUPS and old_finding.finding_group:
+            if is_finding_groups_enabled() and old_finding.finding_group:
                 # don't try to dedupe findings that we are closing
                 old_finding.save(dedupe_option=False)
             else:
                 old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
 
-        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+        if is_finding_groups_enabled() and push_to_jira:
             for finding_group in set([finding.finding_group for finding in old_findings if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
 
@@ -320,7 +319,6 @@ class DojoDefaultImporter(object):
             # Indicate that the test is not complete yet as endpoints will still be rolling in.
             test.percent_complete = 50
             test.save()
-            importer_utils.update_test_progress(test)
         else:
             new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                             verified, minimum_severity=minimum_severity,
@@ -347,6 +345,9 @@ class DojoDefaultImporter(object):
         updated_count = len(new_findings) + len(closed_findings)
         if updated_count > 0:
             notifications_helper.notify_scan_added(test, updated_count, new_findings=new_findings, findings_mitigated=closed_findings)
+
+        logger.debug('IMPORT_SCAN: Updating Test progress')
+        importer_utils.update_test_progress(test)
 
         logger.debug('IMPORT_SCAN: Done')
 

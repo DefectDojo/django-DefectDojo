@@ -36,6 +36,7 @@ from django.http import HttpResponseRedirect
 import crum
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 
 
 logger = logging.getLogger(__name__)
@@ -92,6 +93,9 @@ def do_false_positive_history(new_finding, *args, **kwargs):
         new_finding.false_p = True
         new_finding.active = False
         new_finding.verified = True
+        # Remove the async user kwarg because save() really does not like it
+        # Would rather not add anything to Finding.save()
+        kwargs.pop('async_user')
         super(Finding, new_finding).save(*args, **kwargs)
 
 
@@ -117,26 +121,14 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
     if enabled:
         deduplicationLogger.debug('dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
-        # TODO use test.dedupe_algo and case statement
-        if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
-            scan_type = new_finding.test.test_type.name
-            deduplicationLogger.debug('scan_type for this finding is :' + scan_type)
-            # Default algorithm
-            deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
-            # Check for an override for this scan_type in the deduplication configuration
-            if (scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
-                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[scan_type]
-            deduplicationLogger.debug('deduplication algorithm: ' + deduplicationAlgorithm)
-            if(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL):
-                deduplicate_unique_id_from_tool(new_finding)
-            elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_HASH_CODE):
-                deduplicate_hash_code(new_finding)
-            elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE):
-                deduplicate_uid_or_hash_code(new_finding)
-            else:
-                logger.debug('dedupe legacy start')
-                deduplicate_legacy(new_finding)
-                logger.debug('dedupe legacy start.done.')
+        deduplicationAlgorithm = new_finding.test.deduplication_algorithm
+        deduplicationLogger.debug('deduplication algorithm: ' + deduplicationAlgorithm)
+        if deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
+            deduplicate_unique_id_from_tool(new_finding)
+        elif deduplicationAlgorithm == settings.DEDUPE_ALGO_HASH_CODE:
+            deduplicate_hash_code(new_finding)
+        elif deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
+            deduplicate_uid_or_hash_code(new_finding)
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
@@ -1244,7 +1236,7 @@ def handle_uploaded_selenium(f, cred):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def add_external_issue(find, external_issue_provider):
+def add_external_issue(find, external_issue_provider, **kwargs):
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
     logger.debug('adding external issue with provider: ' + external_issue_provider)
@@ -1257,7 +1249,7 @@ def add_external_issue(find, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def update_external_issue(find, old_status, external_issue_provider):
+def update_external_issue(find, old_status, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
@@ -1269,7 +1261,7 @@ def update_external_issue(find, old_status, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def close_external_issue(find, note, external_issue_provider):
+def close_external_issue(find, note, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
@@ -1281,7 +1273,7 @@ def close_external_issue(find, note, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def reopen_external_issue(find, note, external_issue_provider):
+def reopen_external_issue(find, note, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
@@ -1501,8 +1493,8 @@ def get_celery_worker_status():
 
 # Used to display the counts and enabled tabs in the product view
 class Product_Tab():
-    def __init__(self, product_id, title=None, tab=None):
-        self.product = Product.objects.get(id=product_id)
+    def __init__(self, product, title=None, tab=None):
+        self.product = product
         self.title = title
         self.tab = tab
         self.engagement_count = Engagement.objects.filter(
@@ -1647,8 +1639,16 @@ def user_post_save(sender, instance, created, **kwargs):
     # This needs to be a signal to make it also work for users created via ldap, oauth and other
     # authentication backends
     if created:
-        logger.info('creating default set of notifications for: ' + str(instance))
-        notifications = Notifications(user=instance)
+        try:
+            notifications = Notifications.objects.get(template=True)
+            notifications.pk = None
+            notifications.template = False
+            notifications.user = instance
+            logger.info('creating default set (from template) of notifications for: ' + str(instance))
+        except Exception as err:
+            notifications = Notifications(user=instance)
+            logger.info('creating default set of notifications for: ' + str(instance))
+
         notifications.save()
 
         system_settings = System_Settings.objects.get()
@@ -1661,6 +1661,12 @@ def user_post_save(sender, instance, created, **kwargs):
                     user=instance,
                     role=system_settings.default_group_role)
                 dojo_group_member.save()
+
+    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+        # Superusers shall always be staff
+        if instance.is_superuser and not instance.is_staff:
+            instance.is_staff = True
+            instance.save()
 
 
 @receiver(post_save, sender=Engagement)
@@ -2119,3 +2125,37 @@ def get_enabled_notifications_list():
         if get_system_setting('enable_{}_notifications'.format(choice[0])):
             enabled.append(choice[0])
     return enabled
+
+
+def is_finding_groups_enabled():
+    """Returns true is feature is enabled otherwise false"""
+    return get_system_setting("enable_finding_groups")
+
+
+@receiver(user_logged_in)
+def log_user_login(sender, request, user, **kwargs):
+    # to cover more complex cases:
+    # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
+
+    logger.info('login user: {user} via ip: {ip}'.format(
+        user=user.username,
+        ip=request.META.get('REMOTE_ADDR')
+    ))
+
+
+@receiver(user_logged_out)
+def log_user_logout(sender, request, user, **kwargs):
+
+    logger.info('logout user: {user} via ip: {ip}'.format(
+        user=user.username,
+        ip=request.META.get('REMOTE_ADDR')
+    ))
+
+
+@receiver(user_login_failed)
+def log_user_login_failed(sender, credentials, request, **kwargs):
+
+    logger.warning('login failed for: {credentials} via ip: {ip}'.format(
+        credentials=credentials['username'],
+        ip=request.META['REMOTE_ADDR']
+    ))

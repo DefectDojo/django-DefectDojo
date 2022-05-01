@@ -7,7 +7,7 @@ draft: false
 
 ## System-wide permissions
 
-* Administrators (aka super users) have no limitations in the system. They can change all settings, manage users  and have read and write access to all data.
+* Administrators (aka superusers) have no limitations in the system. They can change all settings, manage users  and have read and write access to all data.
 * Staff users can add Product Types, and have access to data according to their role in a Product or Product Type.
 * Regular users have limited functionality available. They cannot add Product Types but have access to data according to their role in a Product or Product Type
 
@@ -110,3 +110,18 @@ The membership of a group itself has a role that determines what permissions the
 The permissions to manage the roles of Products and Product types for a group is defined by the role of the user in the respective Product or Product Type.
 
 Groups can have a global role too. This global role gives all members of the group access to all Product Types and Products, including the underlying data, with permissions according to the respective role.
+
+## Configuration permissions
+
+Release 2.7.0 contains a beta functionality to make permissions for the configuration of DefectDojo more flexible. When the settings parameter `FEATURE_CONFIGURATION_AUTHORIZATION` is set to `True`, many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their **Superuser** or **Staff** status:
+
+![Configuration permissions](../../images/configuration_permissions.png)
+
+3 configurations can still only be changed by superusers:
+* System settings
+* Notifications on system level
+* Configuration permissions for users and groups
+
+{{% alert title="Warning" color="warning" %}}
+These configuration settings are a powerful tool and should be used with great care.
+{{% /alert %}}

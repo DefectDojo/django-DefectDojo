@@ -1,24 +1,24 @@
 import logging
-import os
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
-from django.http import HttpResponseRedirect, StreamingHttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from dojo.models import Finding, Product, Engagement, Cred_User, Cred_Mapping, Test
 from dojo.utils import add_breadcrumb, Product_Tab
 from dojo.forms import CredUserForm, NoteForm, CredMappingFormProd, CredMappingForm
 
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view, FileIterWrapper
+from dojo.utils import dojo_crypto_encrypt, prepare_for_view
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.cred.queries import get_authorized_cred_mappings
 
 
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.add_cred_user', 'superuser')
 def new_cred(request):
     if request.method == 'POST':
         tform = CredUserForm(request.POST)
@@ -45,11 +45,11 @@ def all_cred_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     creds = Cred_Mapping.objects.filter(product=prod).order_by('cred_id__name')
 
-    product_tab = Product_Tab(prod.id, title="Credentials", tab="settings")
+    product_tab = Product_Tab(prod, title="Credentials", tab="settings")
     return render(request, 'dojo/view_cred_prod.html', {'product_tab': product_tab, 'creds': creds, 'prod': prod})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.change_cred_user', 'superuser')
 def edit_cred(request, ttid):
     tool_config = Cred_User.objects.get(pk=ttid)
     if request.method == 'POST':
@@ -81,12 +81,13 @@ def edit_cred(request, ttid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
 def view_cred_details(request, ttid):
     cred = Cred_User.objects.get(pk=ttid)
     notes = cred.notes.all()
     cred_products = Cred_Mapping.objects.select_related('product').filter(
         product_id__isnull=False, cred_id=ttid).order_by('product__name')
+    cred_products = get_authorized_cred_mappings(Permissions.Product_View, cred_products)
 
     if request.method == 'POST':
         form = NoteForm(request.POST)
@@ -117,7 +118,7 @@ def view_cred_details(request, ttid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
 def cred(request):
     confs = Cred_User.objects.all().order_by('name', 'environment', 'username')
     add_breadcrumb(title="Credential Manager", top_level=True, request=request)
@@ -126,8 +127,8 @@ def cred(request):
     })
 
 
-# The dialogue shows the credentials and there can only be viewed by superusers
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
 def view_cred_product(request, pid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -182,8 +183,8 @@ def view_cred_product(request, pid, ttid):
         })
 
 
-# The dialogue shows the credentials and there can only be viewed by superusers
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Product, Permissions.Endpoint_View, 'eid')
+@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
 def view_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -236,8 +237,8 @@ def view_cred_product_engagement(request, eid, ttid):
         })
 
 
-# The dialogue shows the credentials and there can only be viewed by superusers
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Product, Permissions.Test_View, 'tid')
+@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
 def view_cred_engagement_test(request, tid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -292,8 +293,8 @@ def view_cred_engagement_test(request, tid, ttid):
         })
 
 
-# The dialogue shows the credentials and there can only be viewed by superusers
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Product, Permissions.Finding_View, 'fid')
+@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
 def view_cred_finding(request, fid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -367,7 +368,7 @@ def edit_cred_product(request, pid, ttid):
     else:
         tform = CredMappingFormProd(instance=cred)
 
-    product_tab = Product_Tab(prod.id, title="Edit Product Credential", tab="settings")
+    product_tab = Product_Tab(prod, title="Edit Product Credential", tab="settings")
     return render(request, 'dojo/edit_cred_all.html', {
         'tform': tform,
         'product_tab': product_tab,
@@ -434,7 +435,7 @@ def new_cred_product(request, pid):
     else:
         tform = CredMappingFormProd()
 
-    product_tab = Product_Tab(pid, title="Add Credential Configuration", tab="settings")
+    product_tab = Product_Tab(prod, title="Add Credential Configuration", tab="settings")
 
     return render(request, 'dojo/new_cred_product.html', {
         'tform': tform,
@@ -661,26 +662,26 @@ def delete_cred_controller(request, destination_url, id, ttid):
     add_breadcrumb(title="Delete Credential", top_level=False, request=request)
     product_tab = None
     if id:
-        pid = None
+        product = None
         if destination_url == "all_cred_product":
-            pid = id
+            product = get_object_or_404(Product, id)
         elif destination_url == "view_engagement":
             engagement = get_object_or_404(Engagement, id=id)
-            pid = engagement.product.id
+            product = engagement.product
         elif destination_url == "view_test":
             test = get_object_or_404(Test, id=id)
-            pid = test.engagement.product.id
+            product = test.engagement.product
         elif destination_url == "view_finding":
             finding = get_object_or_404(Finding, id=id)
-            pid = finding.test.engagement.product.id
-        product_tab = Product_Tab(pid, title="Delete Credential Mapping", tab="settings")
+            product = finding.test.engagement.product
+        product_tab = Product_Tab(product, title="Delete Credential Mapping", tab="settings")
     return render(request, 'dojo/delete_cred_all.html', {
         'tform': tform,
         'product_tab': product_tab
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.delete_cred_user', 'superuser')
 def delete_cred(request, ttid):
     return delete_cred_controller(request, "cred", 0, ttid)
 
@@ -703,21 +704,3 @@ def delete_cred_test(request, tid, ttid):
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def delete_cred_finding(request, fid, ttid):
     return delete_cred_controller(request, "view_finding", fid, ttid)
-
-
-@user_passes_test(lambda u: u.is_superuser)
-def view_selenium(request, ttid):
-    import mimetypes
-
-    mimetypes.init()
-    cred = Cred_Mapping.objects.get(pk=ttid)
-    # print(cred.cred_id.selenium_script)
-    # mimetype, encoding = mimetypes.guess_type(cred.cred_id.selenium_script)
-    response = StreamingHttpResponse(
-        FileIterWrapper(open(cred.cred_id.selenium_script)))
-    fileName, fileExtension = os.path.splitext(cred.cred_id.selenium_script)
-    response[
-        'Content-Disposition'] = 'attachment; filename=selenium_script' + fileExtension
-    response['Content-Type'] = mimetypes
-
-    return response

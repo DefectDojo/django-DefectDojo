@@ -1028,7 +1028,7 @@ def jira_check_attachment(issue, source_file_name):
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Engagement)
-def close_epic(eng, push_to_jira):
+def close_epic(eng, push_to_jira, **kwargs):
     engagement = eng
     if not is_jira_enabled():
         return False
@@ -1070,7 +1070,7 @@ def close_epic(eng, push_to_jira):
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Engagement)
-def update_epic(engagement):
+def update_epic(engagement, **kwargs):
     logger.debug('trying to update jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
@@ -1101,7 +1101,7 @@ def update_epic(engagement):
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Engagement)
-def add_epic(engagement):
+def add_epic(engagement, **kwargs):
     logger.debug('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
@@ -1175,7 +1175,7 @@ def jira_get_issue(jira_project, issue_key):
 @app.task
 @dojo_model_from_id(model=Notes, parameter=1)
 @dojo_model_from_id
-def add_comment(obj, note, force_push=False):
+def add_comment(obj, note, force_push=False, **kwargs):
     if not is_jira_configured_and_enabled(obj):
         return False
 

@@ -12,7 +12,7 @@ from dojo.models import Engagement, Test, Finding, Endpoint, Product, FileUpload
 from dojo.filters import LogEntryFilter
 from dojo.forms import ManageFileFormSet
 from dojo.utils import get_page_items, Product_Tab, get_system_setting
-from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
+from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403, user_has_configuration_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 
 
@@ -68,13 +68,15 @@ def action_history(request, cid, oid):
                 break
         if not authorized:
             raise PermissionDenied
+    elif ct.model == "user":
+        user_has_configuration_permission_or_403(request.user, 'auth.view_user', legacy='superuser')
     else:
         if not request.user.is_superuser:
             raise PermissionDenied
 
     product_tab = None
     if product_id:
-        product_tab = Product_Tab(product_id, title="History", tab=active_tab)
+        product_tab = Product_Tab(get_object_or_404(Product, id=product_id), title="History", tab=active_tab)
         if active_tab == "engagements":
             if str(ct) == "engagement":
                 product_tab.setEngagement(object_value)

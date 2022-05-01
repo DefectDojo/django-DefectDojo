@@ -280,7 +280,7 @@
     <!--Import activity end -->
 
     <!-- Finding Groups begin -->
-    {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+    {% if 'is_finding_groups_enabled'|system_setting_enabled %}
     <div class="panel panel-default">
         <div class="panel-heading tight">
             <div class="clearfix">
@@ -308,7 +308,7 @@
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>Findings</th>
-                            <th>CVEs</th>
+                            <th>Vulnerability Ids</th>
                             <th>Components</th>
                             <th>Date</th>
                             <th>Age</th>
@@ -377,7 +377,18 @@
                             </i>
                         </td>
                         <td>
-                            {% for find in group.findings.all %}{% if find.cve%}<a target="_blank" href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}
+                            {% for find in group.findings.all %}
+                                {% with find|first_vulnerability_id as first_vulnerability_id %}
+                                {% if first_vulnerability_id %}
+                                    {% if first_vulnerability_id|has_vulnerability_url%}
+                                        <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">{{ first_vulnerability_id }}</a>
+                                    {% else %}
+                                        {{ first_vulnerability_id }}
+                                    {% endif %}
+                                    {% if not forloop.last %}, {% endif %}
+                                {% endif %}
+                                {% endwith %}
+                            {% endfor %}
                         </td>
                         <td>
                             {{ group.components }}
@@ -496,16 +507,14 @@
         <div id="the-filters" class="is-filters panel-body collapse">
             {% include "dojo/filter_snippet.html" with form=filtered.form %}
         </div>
-    </div>
-    {% if findings %}
-        <div class="clearfix">
+        {% if findings %}
+        <div class="clearfix pagination-in-panel">
             {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
         </div>
-
         {% if test|has_object_permission:"Finding_Edit" or test|has_object_permission:"Finding_Delete" %}
         <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
             {% if test|has_object_permission:"Finding_Edit" %}
-                <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
+                <button class="btn btn-info btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenu2"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     Bulk Edit
                     <span class="caret"></span>
@@ -513,14 +522,14 @@
             {% endif %}
             <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
                 {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
-                    <button type="button" id="merge_findings" class="btn btn-info btn-sm btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
+                    <button type="button" id="merge_findings" class="btn btn-info btn-sm btn-secondary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                         <a class="white-color merge" href="#" alt="Merge Findings">
                             <i class="fa fa-compress"></i>
                         </a>
                     </button>
                 {% endif %}
                 {% if test|has_object_permission:"Finding_Delete" %}
-                    <button type="button" class="btn btn-info btn-sm btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
+                    <button type="button" class="btn btn-info btn-sm btn-secondary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                         <a class="white-color delete-bulk" href="#" alt="Delete Findings">
                             <i class="fa fa-trash"></i>
                         </a>
@@ -569,11 +578,11 @@
                             <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
                         </label>
 
-                        {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
-                            <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label>(experimental)<br/>
+                        {% if 'is_finding_groups_enabled'|system_setting_enabled %}
+                            <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label><br/>
                             <label style="font-size: 80%; font-weight: normal; display: block">
                                 <input id="id_bulk_finding_group_create" name="finding_group_create" class="finding_group_option" type="checkbox" disabled/> <span>Create</span>
-                                <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 90%;"/>
+                                <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 100%;/* border-color: #ccc; *//* border-width: 1px; */border: 1px solid #ccc;"/>
                             </label>
                             <span>
                                 <label style="font-size: 80%; font-weight: normal;">
@@ -606,6 +615,8 @@
                             <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA" title="Push_To_Jira"/><br/>
 
                         {% endif %}
+                        <label style="display: block">Notes</label>
+                        {{ bulk_edit_form.notes }}
                         <label style="display: block">Tags</label>
                         {% comment %}
                             Quick hack to make bulk edit work without refactoring the whole bulk edit form
@@ -613,15 +624,13 @@
                         {{ bulk_edit_form.media.css }}
                         {{ bulk_edit_form.media.js }}
                         {{ bulk_edit_form.tags }}
-                        <input type="submit" class="btn btn-sm btn-primary" value="Submit" title="sub-button"/>
+                        <input type="submit" class="btn btn-sm btn-secondary" value="Submit" title="sub-button"/>
                     </form>
                 </li>
             </ul>
         </div>
         {% endif %}
-    {% endif %}
-    <div class="panel panel-default table-responsive">
-        {% if findings %}
+        <div class="table-responsive">
             <table id="test_findings" class="table-striped tablesorter-bootstrap table table-condensed table-hover">
                 <thead>
                         <tr>
@@ -651,7 +660,7 @@
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>CWE</th>
-                            <th>CVE</th>
+                            <th>Vulnerability Id</th>
                             <th>Date</th>
                             <th>Age</th>
                             {% if system_settings.enable_finding_sla %}
@@ -666,7 +675,7 @@
                                     <th>Jira Change</th>
                                 {% endif %}
                             {% endif %}
-                            {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                            {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                                 <th>Group</th>
                             {% endif %}
                         </tr>
@@ -718,14 +727,14 @@
                                             </a>
                                         </li>
                                     {% endif %}
-                                    {% if user.is_staff %}
+                                    {% if "dojo.add_finding_template"|has_configuration_permission:"staff" %}
                                         <li role="presentation">
                                             <a href="{% url 'mktemplate' finding.id %}">
                                                 <i class="fa fa-copy"></i> Make Finding a Template
                                             </a>
                                         </li>
                                     {% endif %}
-                                    {% if finding|has_object_permission:"Finding_Edit" %}
+                                    {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission:"staff" %}
                                         <li role="presentation">
                                             <a href="{% url 'find_template_to_apply' finding.id %}">
                                                 <i class="fa fa-copy"></i> Apply Template to Finding
@@ -845,11 +854,17 @@
                         {% endif %}
                         </td>
                         <td class="nowrap">
-                            {% if finding.cve %}
-                              <a target="_blank" href="{{ finding.cve|cve_url }}">
-                                  <i class="fa fa-external-link"></i> {{ finding.cve|default:"" }}
-                              </a>
+                            {% with finding|first_vulnerability_id as first_vulnerability_id %}
+                            {% if first_vulnerability_id %}
+                                {% if first_vulnerability_id|has_vulnerability_url %}
+                                <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                                    <i class="fa fa-external-link"></i> {{ first_vulnerability_id|default:"" }}
+                                </a>
+                                {% else %}
+                                    {{ first_vulnerability_id }}
+                                {% endif %}
                             {% endif %}
+                            {% endwith %}
                         </td>
                         <td class="nowrap">{{ finding.date }}</td>
                         <td>{{ finding.age }}</td>
@@ -894,12 +909,10 @@
                             </td>
                             {% endif %}
                         {% endif %}
-                        {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                        {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                             <td class="centered">
                                 {% if finding.has_finding_group %}
-                                <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">Y</a>
-                                {% else %}
-                                N
+                                <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
                                 {% endif %}
                             </td>
                         {% endif %}
@@ -907,16 +920,16 @@
                 {% endfor %}
                 </tbody>
             </table>
+            <div class="clearfix pagination-in-panel">
+                {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
+            </div>
+        </div>
         {% else %}
             <div class="panel-body">
                 <p class="text-center">No findings found.</p>
             </div>
         {% endif %}
-        <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
-        </div>
-
-     </div>
+    </div>
 
      <div class="panel panel-default table-responsive potential-finding">
             <div class="panel-heading">
@@ -1158,9 +1171,7 @@
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
             var columns = [
-                  {% if user.is_staff %}
                   { "data": "dropdown" },
-                  {% endif %}
                   { "data": "action" },
                   { "data": "severity" },
                   { "data": "name" },
@@ -1180,7 +1191,7 @@
                           { "data": "jira_change" },
                       {% endif %}
                   {% endif %}
-                  {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                  {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                     { "data": "grouped" },
                   {% endif %}
               ];
