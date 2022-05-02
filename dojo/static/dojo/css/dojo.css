@@ -1153,6 +1153,18 @@ div.custom-search-form {
     background-color: #f9f9f9;
 }
 
+#the-filters-open {
+    background-color: #f9f9f9;
+}
+
+#the-filters-paused {
+    background-color: #f9f9f9;
+}
+
+#the-filters-closed {
+    background-color: #f9f9f9;
+}
+
 .panel-default {
     border: 1px solid #dddedf;
 }

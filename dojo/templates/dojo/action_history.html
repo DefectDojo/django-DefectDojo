@@ -8,7 +8,13 @@
                 <div class="panel-heading tight">
                     <h3>
                         {{ obj }} History
+                        <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters" aria-label="Filter"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        </div>
                     </h3>
+                </div>
+                <div id="the-filters" class="is-filters panel-body collapse {% if log_entry_filter.form.has_changed %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=log_entry_filter.form %}
                 </div>
             </div>
             {% if history %}
