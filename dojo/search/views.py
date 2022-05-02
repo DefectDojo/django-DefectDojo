@@ -1,5 +1,6 @@
 import logging
 
+from django.utils.translation import gettext as _
 from django.shortcuts import render
 from watson import search as watson
 from django.db.models import Q
@@ -303,7 +304,7 @@ def simple_search(request):
             logger.debug(form.errors)
             form = SimpleSearchForm()
 
-        add_breadcrumb(title="Simple Search", top_level=True, request=request)
+        add_breadcrumb(title=_("Simple Search"), top_level=True, request=request)
 
         activetab = 'findings' if findings \
             else 'products' if products \
@@ -332,7 +333,7 @@ def simple_search(request):
         'tagged_engagements': tagged_engagements,
         'engagements': engagements,
         'endpoints': endpoints,
-        'name': 'Simple Search',
+        'name': _('Simple Search'),
         'metric': False,
         'user': request.user,
         'form': form,
