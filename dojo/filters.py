@@ -1173,9 +1173,7 @@ class FindingFilter(FindingFilterWithTags):
         queryset=Engagement.objects.none(),
         label="Engagement")
 
-    endpoints = ModelMultipleChoiceFilter(
-        queryset=Endpoint.objects.none(),
-        label="Endpoint")
+    endpoints__host = CharFilter(lookup_expr='icontains', label="Endpoint Host")
 
     test = ModelMultipleChoiceFilter(
         queryset=Test.objects.none(),
@@ -1291,7 +1289,7 @@ class FindingFilter(FindingFilterWithTags):
         fields = get_finding_filter_fields()
 
         exclude = ['url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references',
+                   'endpoints', 'references',
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'endpoint_status',
@@ -1330,8 +1328,6 @@ class FindingFilter(FindingFilterWithTags):
             self.form.fields['test__engagement__product'].queryset = get_authorized_products(Permissions.Product_View)
         if self.form.fields.get('finding_group', None):
             self.form.fields['finding_group'].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View)
-        if self.form.fields.get('endpoints'):
-            self.form.fields['endpoints'].queryset = get_authorized_endpoints(Permissions.Endpoint_View).distinct()
         self.form.fields['reporter'].queryset = get_authorized_users(Permissions.Finding_View)
         self.form.fields['reviewers'].queryset = self.form.fields['reporter'].queryset
 
@@ -1547,6 +1543,9 @@ class MetricsEndpointFilter(FilterSet):
     finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES, label="Severity")
 
+    endpoint__host = CharFilter(lookup_expr='icontains', label="Endpoint Host")
+    finding_title = CharFilter(lookup_expr='icontains', label="Finding Title")
+
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
         to_field_name='name',
@@ -1629,12 +1628,9 @@ class MetricsEndpointFilter(FilterSet):
             self.form.fields[
                 'finding__test__engagement__product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
 
-        self.form.fields['finding'].queryset = get_authorized_findings(Permissions.Finding_View)
-        self.form.fields['endpoint'].queryset = get_authorized_endpoints(Permissions.Endpoint_View)
-
     class Meta:
         model = Endpoint_Status
-        exclude = ['last_modified']
+        exclude = ['last_modified', 'endpoint', 'finding']
 
 
 class EndpointFilter(DojoFilter):
