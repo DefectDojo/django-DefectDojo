@@ -74,12 +74,6 @@ class NessusCSVParser(object):
             dupe_key = severity + title + row.get('Host', 'No host') + str(row.get('Port', 'No port')) + row.get('Synopsis', 'No synopsis')
 
             detected_cve = self._format_cve(str(row.get('CVE')))
-            cve = None
-            if detected_cve:
-                # FIXME support more than one CVE in Nessus CSV parser
-                cve = detected_cve[0]
-                if len(detected_cve) > 1:
-                    LOGGER.debug("more than one CVE for a finding. NOT supported by Nessus CSV parser")
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -90,12 +84,13 @@ class NessusCSVParser(object):
                     description = description + str(row.get('Plugin Output'))
                 find = Finding(title=title,
                                 test=test,
-                                cve=cve,
                                 description=description,
                                 severity=severity,
                                 mitigation=mitigation,
                                 impact=impact,
                                 references=references)
+                if detected_cve:
+                    find.unsaved_vulnerability_ids = detected_cve
 
                 # manage CVSS vector (only v3.x for now)
                 if 'CVSS V3 Vector' in row and '' != row.get('CVSS V3 Vector'):
@@ -191,9 +186,9 @@ class NessusXMLParser(object):
                     for xref in item.iter("xref"):
                         references += xref.text + "\n"
 
-                    cve = None
+                    vulnerability_id = None
                     if item.findtext("cve"):
-                        cve = item.find("cve").text
+                        vulnerability_id = item.find("cve").text
                     cwe = None
                     if item.findtext("cwe"):
                         cwe = item.find("cwe").text
@@ -212,10 +207,13 @@ class NessusXMLParser(object):
                                        mitigation=mitigation,
                                        impact=impact,
                                        references=references,
-                                       cwe=cwe,
-                                       cve=cve)
+                                       cwe=cwe)
+                        find.unsaved_vulnerability_ids = list()
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
+
+                    if vulnerability_id:
+                        find.unsaved_vulnerability_ids.append(vulnerability_id)
 
                     if fqdn and '://' in fqdn:
                         endpoint = Endpoint.from_uri(fqdn)

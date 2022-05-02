@@ -43,16 +43,19 @@ class DsopParser:
                     severity = 'Info'
                 else:
                     severity = row[headers['severity']].title()
-                cve = row[headers['identifiers']]
                 references = row[headers['refs']]
                 description = row[headers['desc']]
                 impact = row[headers['rationale']]
                 date = row[headers['scanned_date']]
                 tags = "disa"
 
-                finding = Finding(title=title, date=date, cve=cve, severity=severity, description=description,
+                finding = Finding(title=title, date=date, severity=severity, description=description,
                             impact=impact, references=references, test=test, unique_id_from_tool=unique_id,
                             static_finding=True, dynamic_finding=False)
+
+                if row[headers['identifiers']]:
+                    finding.unsaved_vulnerability_ids = [row[headers['identifiers']]]
+
                 finding.unsaved_tags = tags
                 items.append(finding)
 
@@ -84,11 +87,14 @@ class DsopParser:
                 else:
                     severity = 'Info'
                 unique_id = row[headers['id']]
-                cve = row[headers['ref']]
                 tags = "oval"
 
-                finding = Finding(title=title, cve=cve, severity=severity, unique_id_from_tool=unique_id,
+                finding = Finding(title=title, severity=severity, unique_id_from_tool=unique_id,
                         test=test, static_finding=True, dynamic_finding=False)
+
+                if row[headers['ref']]:
+                    finding.unsaved_vulnerability_ids = [row[headers['ref']]]
+
                 finding.unsaved_tags = tags
                 items.append(finding)
 
@@ -104,14 +110,13 @@ class DsopParser:
             else:
                 if row[headers['severity']] is None:
                     continue
-                cve = row[headers['cve']]
                 description = row[headers['desc']]
                 mitigation = row[headers['status']]
                 url = row[headers['link']]
 
                 component_name = row[headers['packageName']]
                 component_version = row[headers['packageVersion']]
-                title = '{}: {} - {}'.format(cve, component_name, component_version)
+                title = '{}: {} - {}'.format(row[headers['cve']], component_name, component_version)
                 if row[headers['severity']] == 'important':
                     severity = 'High'
                 elif row[headers['severity']] == 'moderate':
@@ -121,10 +126,14 @@ class DsopParser:
                 severity_justification = row[headers['vecStr']]
                 tags = "twistlock"
 
-                finding = Finding(title=title, cve=cve, url=url, severity=severity, description=description,
+                finding = Finding(title=title, url=url, severity=severity, description=description,
                                         component_name=component_name, component_version=component_version,
                                         severity_justification=severity_justification, test=test,
                                         static_finding=True, dynamic_finding=False)
+
+                if row[headers['cve']]:
+                    finding.unsaved_vulnerability_ids = [row[headers['cve']]]
+
                 finding.unsaved_tags = tags
                 items.append(finding)
 
@@ -140,20 +149,23 @@ class DsopParser:
             else:
                 if row[0] is None:
                     continue
-                cve = row[headers['cve']]
                 severity = row[headers['severity']]
                 component = row[headers['package']]
                 file_path = row[headers['package_path']]
                 mitigation = row[headers['fix']]
                 description = "Image affected: {}".format(row[headers['tag']])
-                title = '{}: {}'.format(cve, component)
+                title = '{}: {}'.format(row[headers['cve']], component)
                 tags = "anchore"
 
-                finding = Finding(title=title, cve=cve, severity=severity,
+                finding = Finding(title=title, severity=severity,
                                         mitigation=mitigation, component_name=component,
                                         description=description, test=test,
                                         static_finding=True, dynamic_finding=False,
                                         file_path=file_path)
+
+                if row[headers['cve']]:
+                    finding.unsaved_vulnerability_ids = [row[headers['cve']]]
+
                 finding.unsaved_tags = tags
                 items.append(finding)
 
