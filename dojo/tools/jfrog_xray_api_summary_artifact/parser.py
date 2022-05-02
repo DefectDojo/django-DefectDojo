@@ -78,12 +78,8 @@ def get_item(vulnerability, service, test):
         title = vulnerability['issue_id'] + " - " + impact_path.name + ":" + impact_path.version
     elif cve:
         title = str(cve) + " - " + impact_path.name + ":" + impact_path.version
-    elif impact_path.sha:
-        title = impact_path.sha + " - " + impact_path.name + ":" + impact_path.version
     else:
-        title = ""
-
-    unique_id_from_tool = title
+        title = impact_path.name + ":" + impact_path.version
 
     finding = Finding(
         service=service,
@@ -99,8 +95,7 @@ def get_item(vulnerability, service, test):
         component_name=impact_path.name,
         component_version=impact_path.version,
         static_finding=True,
-        dynamic_finding=False,
-        unique_id_from_tool=unique_id_from_tool
+        dynamic_finding=False
     )
 
     return finding
