@@ -38,9 +38,9 @@ class CheckmarxOsaParser(object):
 
             # Possible status as per checkmarx 9.2: TO_VERIFY, NOT_EXPLOITABLE, CONFIRMED, URGENT, PROPOSED_NOT_EXPLOITABLE
             status = item['state']['name']
-            cve = item.get('cveName', 'NC')
+            vulnerability_id = item.get('cveName', 'NC')
             finding_item = Finding(
-                title='{0} {1} | {2}'.format(library['name'], library['version'], cve),
+                title='{0} {1} | {2}'.format(library['name'], library['version'], vulnerability_id),
                 severity=item['severity']['name'],
                 description=item.get('description', 'NC'),
                 unique_id_from_tool=item.get('id', None),
@@ -48,7 +48,6 @@ class CheckmarxOsaParser(object):
                 mitigation=item.get('recommendations', None),
                 component_name=library['name'],
                 component_version=library['version'],
-                cve=cve,
                 # 1035 is "Using Components with Known Vulnerabilities"
                 # Possible improvment: get the CWE from the CVE using some database?
                 # nvd.nist.gov has the info; see for eg https://nvd.nist.gov/vuln/detail/CVE-2020-25649 "Weakness Enumeration"
@@ -63,6 +62,8 @@ class CheckmarxOsaParser(object):
                 verified=status != 'TO_VERIFY' and status != 'NOT_EXPLOITABLE' and status != 'PROPOSED_NOT_EXPLOITABLE',
                 test=test
             )
+            if vulnerability_id != 'NC':
+                finding_item.unsaved_vulnerability_ids = [vulnerability_id]
             items.append(finding_item)
         return items
 
