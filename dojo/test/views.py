@@ -27,7 +27,7 @@ from dojo.forms import NoteForm, TestForm, \
     ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
 from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
+    Finding_Template, Cred_Mapping, System_Settings, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
 
 from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
@@ -43,6 +43,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.test.queries import get_authorized_tests
+from dojo.user.queries import get_authorized_users
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
 
 
@@ -322,7 +323,7 @@ def test_calendar(request):
         'caltype': 'tests',
         'leads': request.GET.getlist('lead', ''),
         'tests': tests,
-        'users': Dojo_User.objects.all()})
+        'users': get_authorized_users(Permissions.Test_View)})
 
 
 @user_is_authorized(Test, Permissions.Test_View, 'tid')

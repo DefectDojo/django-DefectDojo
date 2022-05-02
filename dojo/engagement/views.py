@@ -32,7 +32,7 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
-    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Product_API_Scan_Configuration
+    Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
@@ -50,6 +50,7 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product.queries import get_authorized_products
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.user.queries import get_authorized_users
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 import dojo.notifications.helper as notifications_helper
@@ -83,7 +84,7 @@ def engagement_calendar(request):
             'caltype': 'engagements',
             'leads': request.GET.getlist('lead', ''),
             'engagements': engagements,
-            'users': Dojo_User.objects.all()
+            'users': get_authorized_users(Permissions.Engagement_View)
         })
 
 
