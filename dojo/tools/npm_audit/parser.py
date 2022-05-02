@@ -106,7 +106,6 @@ def get_item(item_node, test):
                       str(item_node['cwe']) + "\n Access: " +
                       str(item_node['access']),
                       cwe=cwe,
-                      cve=item_node['cves'][0] if (len(item_node['cves']) > 0) else None,
                       mitigation=item_node['recommendation'],
                       references=item_node['url'],
                       component_name=item_node['module_name'],
@@ -118,5 +117,10 @@ def get_item(item_node, test):
                       impact="No impact provided",
                       static_finding=True,
                       dynamic_finding=False)
+
+    if len(item_node['cves']) > 0:
+        dojo_finding.unsaved_vulnerability_ids = list()
+        for vulnerability_id in item_node['cves']:
+            dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
 
     return dojo_finding
