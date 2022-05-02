@@ -19,13 +19,19 @@ fi
 
 echo 'Supported docker-compose version'
 
-if [ $# -eq 0 ]
-then
+if [ $# -eq 0 ]; then
     if [ -z $DD_PROFILE ]
     then
-        echo "No profile supplied"
+        echo "No profile supplied, running default: mysql-rabbitmq"
+        PROFILE="mysql-rabbitmq"
+        echo "Other supported profiles:
+          mysql-rabbitmq*
+          mysql-redis
+          postgres-rabbitmq
+          postgres-redis
 
-        exit 1
+        Usage example: ./dc-up.sh mysql-redis
+        "
     else
         PROFILE=$DD_PROFILE
     fi
