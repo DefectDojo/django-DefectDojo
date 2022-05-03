@@ -356,6 +356,10 @@ class EndpointStatusTest(BaseClass.SchemaTest):
         self.model = Endpoint_Status
         self.serializer = EndpointStatusSerializer
 
+    # We can not simulate creating of the endpoint-finding relation with the same parameters as existing one. We will use another finding for this case
+    def test_post_endpoint(self):
+        super().test_post_endpoint(extra_data={"finding": "3"})
+
 
 class EndpointTest(BaseClass.SchemaTest):
     def __init__(self, *args, **kwargs):
@@ -389,7 +393,7 @@ class EngagementTest(BaseClass.SchemaTest):
 
         data = [
             {
-                "cve": 1,
+                "vulnerability_id": 1,
                 "justification": "test",
                 "accepted_by": "2"
             }

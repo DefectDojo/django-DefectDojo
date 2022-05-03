@@ -910,7 +910,9 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [],
+      "endpoints": [
+        2
+      ],
       "last_reviewed": null
     }
   },

@@ -5,6 +5,20 @@ draft: false
 weight: 5
 ---
 
+{{% alert title="Deprecation notice" color="warning" %}}
+Legacy authorization for changing configurations based on staff users will be
+removed with version 2.12.0 / 5. July 2022. If you have set
+`FEATURE_CONFIGURATION_AUTHORIZATION` to `False` in your local configuration,
+remove this local setting and start using the new authorization as described
+in [Configuration permissions]({{< ref "/usage/permissions#configuration-permissions" >}}).
+
+To support the transition, you can run a migration script with ``./manage.py migrate_staff_users``. This script:
+
+* creates a group for all staff users,
+* sets all configuration permissions that staff users had and
+* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to `True`.
+{{% /alert %}}
+
 Docker-compose
 --------------
 
@@ -61,13 +75,25 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.10.x.
+
+**Breaking change for Findings:** The field `cve` will be replaced by a list of Vulnerability Ids, which can store references to security advisories associated with this finding. These can be Common Vulnerabilities and Exposures (CVE) or from other sources, eg. GitHub Security Advisories. Although the field does still exist in the code, the API and the UI have already been changed to use the list of Vulnerability Ids. Other areas like hash code calculation, search and parsers will be migrated step by step in later stages.
+
+This change also causes an API change for the endpoint `/engagements/{id}/accept_risks/`.
+
+
+## Upgrading to DefectDojo Version 2.9.x.
+
+**Breaking change for APIv2:** `configuration_url` was removed from API endpoint `/api/v2/tool_configurations/` due to redundancy.
+
+
 ## Upgrading to DefectDojo Version 2.8.x.
 
 **Breaking change for Docker Compose:** Starting DefectDojo with Docker Compose now supports 2 databases (MySQL and PostgreSQL) and 2 celery brokers (RabbitMQ and Redis). To make this possible, docker-compose needs to be started with the parameters `--profile` and `--env-file`. You can get more information in [Setup via Docker Compose - Profiles](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md#setup-via-docker-compose---profiles). The profile `mysql-rabbitmq` provides the same configuration as in previous releases. With this the prerequisites have changed as well: Docker requires at least version 19.03.0 and Docker Compose 1.28.0.
 
 **Breaking change for Helm Chart:** In one of the last releases we upgraded the redis dependency in our helm chart without renaming keys in our helm chart. We fixed this bug with this release, but you may want to check if all redis values are correct ([Pull Request](https://github.com/DefectDojo/django-DefectDojo/pull/5886)).
 
-The flexible permissions for the configuration of DefectDojo are now active by default. With this, the flag **Staff** for users is not relevant and not visible anymore. The old behaviour can still be activated by setting the parameter `FEATURE_CONFIGURATION_AUTHORIZATION` to `False`. If you haven't done so with the previous release, you can still run a migration script with `./manage.py migrate staff_users`. This script:
+The flexible permissions for the configuration of DefectDojo are now active by default. With this, the flag **Staff** for users is not relevant and not visible anymore. The old behaviour can still be activated by setting the parameter `FEATURE_CONFIGURATION_AUTHORIZATION` to `False`. If you haven't done so with the previous release, you can still run a migration script with `./manage.py migrate_staff_users`. This script:
 
 * creates a group for all staff users,
 * sets all configuration permissions that staff users had and
@@ -83,7 +109,7 @@ Release 2.7.0 contains a beta functionality to make permissions for the configur
 
 The functionality using the flag `AUTHORIZATION_STAFF_OVERRIDE` has been removed. The same result can be achieved with giving the staff users a global Owner role. 
 
-To support the transition for these 2 changes, you can run a migration script with ``./manage.py migrate staff_users``. This script:
+To support the transition for these 2 changes, you can run a migration script with ``./manage.py migrate_staff_users``. This script:
 
 * creates a group for all staff users,
 * sets all configuration permissions that staff users had and

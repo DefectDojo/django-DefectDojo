@@ -29,9 +29,9 @@ metadata:
 {{- end }}
 spec:
 {{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
-   {{- if .Values.django.ingress.ingressClassName }}
-   ingressClassName: {{ .Values.django.ingress.ingressClassName }}
-   {{- end }}
+  {{- if .Values.django.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.django.ingress.ingressClassName }}
+  {{- end }}
 {{- end }}
 {{- if .Values.django.ingress.activateTLS }}
   tls:

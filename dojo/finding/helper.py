@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
 from dojo.utils import get_current_user, mass_model_updater, to_str_typed
-from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test, Endpoint, Endpoint_Status
+from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test, Endpoint, Endpoint_Status, \
+    Vulnerability_Id, Vulnerability_Id_Template
 from dojo.endpoint.utils import save_endpoints_to_add
 
 
@@ -25,6 +26,7 @@ ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=True)
 NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
 WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
 CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
+UNDER_REVIEW_QUERY = Q(under_review=True)
 
 
 # this signal is triggered just before a finding is getting saved
@@ -317,7 +319,6 @@ def finding_pre_delete(sender, instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
 
     instance.found_by.clear()
-    instance.status_finding.clear()
 
 
 def finding_delete(instance, **kwargs):
@@ -348,7 +349,6 @@ def finding_delete(instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
     logger.debug('finding delete: clearing found by')
     instance.found_by.clear()
-    instance.status_finding.clear()
 
 
 @receiver(post_delete, sender=Finding)
@@ -553,6 +553,44 @@ def add_endpoints(new_finding, form):
     for endpoint in new_finding.endpoints.all():
         eps, created = Endpoint_Status.objects.get_or_create(
             finding=new_finding,
-            endpoint=endpoint)
+            endpoint=endpoint, defaults={'date': form.cleaned_data['date'] or now})
         endpoint.endpoint_status.add(eps)
         new_finding.endpoint_status.add(eps)
+
+
+def save_vulnerability_ids(finding, vulnerability_ids):
+    # Remove duplicates
+    vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
+
+    previous_vulnerability_ids = set(Vulnerability_Id.objects.filter(finding=finding))
+    for vulnerability_id in vulnerability_ids:
+        obj, created = Vulnerability_Id.objects.get_or_create(
+            finding=finding, vulnerability_id=vulnerability_id)
+        if not created:
+            previous_vulnerability_ids.remove(obj)
+    for vulnerability_id in previous_vulnerability_ids:
+        vulnerability_id.delete()
+
+    if vulnerability_ids:
+        finding.cve = vulnerability_ids[0]
+    else:
+        finding.cve = None
+
+
+def save_vulnerability_ids_template(finding_template, vulnerability_ids):
+    # Remove duplicates
+    vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
+
+    previous_vulnerability_ids = set(Vulnerability_Id_Template.objects.filter(finding_template=finding_template))
+    for vulnerability_id in vulnerability_ids:
+        obj, created = Vulnerability_Id_Template.objects.get_or_create(
+            finding_template=finding_template, vulnerability_id=vulnerability_id)
+        if not created:
+            previous_vulnerability_ids.remove(obj)
+    for vulnerability_id in previous_vulnerability_ids:
+        vulnerability_id.delete()
+
+    if vulnerability_ids:
+        finding_template.cve = vulnerability_ids[0]
+    else:
+        finding_template.cve = None
