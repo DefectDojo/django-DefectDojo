@@ -140,7 +140,7 @@ class TestSnykParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("Low", finding.severity)
         self.assertEqual(
-            "SNYK-SLES153-P11KITTOOLS-2650307", finding.vuln_id_from_tool
+            "SNYK-SLES153-PERMISSIONS-2648113", finding.vuln_id_from_tool
         )
         self.assertEqual("", finding.cvssv3)
 
