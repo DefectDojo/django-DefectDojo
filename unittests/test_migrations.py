@@ -164,8 +164,7 @@ class TestEndpointMigration(MigratorTestCase):
         self.assertFalse(eps[0].mitigated)
 
 
-# TODO: These tests can be skipped in 2.11.x or later
-# @skip("Outdated - Any future changes of code should not affect these tests")
+@skip("Outdated - Any future changes of code should not affect these tests")
 class TestEndpointStatusMigration(MigratorTestCase):
     migrate_from = ('dojo', '0149_harmonize_user_format')
     migrate_to = ('dojo', '0151_index_endpoint_status')
@@ -283,8 +282,7 @@ class TestEndpointStatusMigration(MigratorTestCase):
             self.assertEqual(eps.count(), 2)
 
 
-# TODO: These tests can be skipped in 2.11.x or later
-# @skip("Outdated - Any future changes of code should not affect these tests")
+@skip("Outdated - Any future changes of code should not affect these tests")
 class TestEndpointStatusBroken(MigratorTestCase):
     migrate_from = ('dojo', '0158_vulnerability_id')
     migrate_to = ('dojo', '0160_set_notnull_endpoint_statuses')
