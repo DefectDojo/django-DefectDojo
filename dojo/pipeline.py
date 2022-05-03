@@ -121,7 +121,7 @@ def is_group_id(group):
 
 
 def cleanup_old_azureAD_groups_for_user(user, group_names):
-    for group_member in Dojo_Group_Member.objects.filter(group__is_azure=True).select_related('group').filter(user=user):
+    for group_member in Dojo_Group_Member.objects.select_related('group').filter(user=user):
         group = group_member.group
         if str(group) not in group_names:
             logger.debug("Deleting membership to azure ad group " + str(group))
