@@ -16,9 +16,9 @@ class DeletePreviewModelMixin:
     )
     @swagger_auto_schema(
         method='get',
-        responses={status.HTTP_200_OK: serializers.DeletePreviewSerializer(many=True)}
+        responses={'default': serializers.DeletePreviewSerializer(many=True)}
     )
-    @action(detail=True, methods=["get"], filter_backends=[])
+    @action(detail=True, methods=["get"], filter_backends=[], suffix='List')
     def delete_preview(self, request, pk=None):
         object = self.get_object()
 
