@@ -87,7 +87,6 @@ def get_item(vulnerability, service, test):
         cwe=cwe,
         cve=cve,
         cvssv3=cvssv3,
-        cvssv3_score=cvssv3_score,
         severity=severity,
         description=vulnerability['description'],
         test=test,
