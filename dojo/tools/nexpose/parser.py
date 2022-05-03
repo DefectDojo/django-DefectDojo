@@ -307,7 +307,7 @@ class NexposeParser(object):
             find.references = refs
             # update CVE
             if "CVE" in vuln.get('refs', {}):
-                find.cve = vuln['refs']['CVE']
+                find.unsaved_vulnerability_ids = [vuln['refs']['CVE']]
             find.unsaved_endpoints = list()
             dupes[dupe_key] = find
         return find

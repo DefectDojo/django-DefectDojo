@@ -56,8 +56,6 @@ class TestCheckmarxOsaParser(DojoTestCase):
         self.assertEqual("com.fasterxml.jackson.core:jackson-databind 2.10.2 | CVE-2020-25649", item.title)
         self.assertEqual(int, type(item.cwe))
         self.assertEqual(1035, item.cwe)
-        self.assertEqual(str, type(item.cve))
-        self.assertEqual("CVE-2020-25649", item.cve)
         self.assertEqual(float, type(item.cvssv3_score))
         self.assertEqual(7.5, item.cvssv3_score)
         self.assertEqual(datetime, type(item.publish_date))
@@ -86,6 +84,8 @@ class TestCheckmarxOsaParser(DojoTestCase):
         self.assertEqual("A flaw was found in FasterXML Jackson Databind before 2.6.7.4, 2.7.0 through 2.9.10.6, and 2.10.0 through 2.10.5, where it did not have entity expansion secured properly. This flaw makes it vulnerable to XML external entity (XXE) attacks. The highest threat from this vulnerability is data integrity.", item.description)
         self.assertEqual(int, type(item.scanner_confidence))
         self.assertEqual(1, item.scanner_confidence)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-25649", item.unsaved_vulnerability_ids[0])
 
     # ----------------------------------------------------------------------------
     # single finding false positive

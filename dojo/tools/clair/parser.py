@@ -56,7 +56,6 @@ def get_item(item_node, test):
                       references=item_node['link'],
                       component_name=item_node['featurename'],
                       component_version=item_node['featureversion'],
-                      cve=item_node['vulnerability'],
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,
@@ -64,5 +63,8 @@ def get_item(item_node, test):
                       static_finding=True,
                       dynamic_finding=False,
                       impact="No impact provided")
+
+    if item_node['vulnerability']:
+        finding.unsaved_vulnerability_ids = [item_node['vulnerability']]
 
     return finding

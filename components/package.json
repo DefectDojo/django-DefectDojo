@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "2.9.1",
+  "version": "2.10.0",
   "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
@@ -32,10 +32,10 @@
     "jquery.cookie": "1.4.1",
     "jquery.flot.tooltip": "^0.9.0",
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",
-    "jszip": "^3.9.0",
+    "jszip": "^3.9.1",
     "justgage": "^1.5.1",
     "metismenu": "~3.0.7",
-    "moment": "^2.29.2",
+    "moment": "^2.29.3",
     "morris.js": "morrisjs/morris.js",
     "pdfmake": "^0.2.5",
     "startbootstrap-sb-admin-2": "1.0.7"

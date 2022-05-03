@@ -393,7 +393,7 @@ class EngagementTest(BaseClass.SchemaTest):
 
         data = [
             {
-                "cve": 1,
+                "vulnerability_id": 1,
                 "justification": "test",
                 "accepted_by": "2"
             }
