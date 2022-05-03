@@ -192,6 +192,10 @@ class NessusXMLParser(object):
                     cwe = None
                     if item.findtext("cwe"):
                         cwe = item.find("cwe").text
+                    cvssv3 = None
+                    if item.findtext("cvss3_vector"):
+                        cvssv3 = CVSS3(item.findtext("cvss3_vector")).clean_vector()
+
                     title = item.attrib["pluginName"]
                     dupe_key = severity + title
 
@@ -207,7 +211,8 @@ class NessusXMLParser(object):
                                        mitigation=mitigation,
                                        impact=impact,
                                        references=references,
-                                       cwe=cwe)
+                                       cwe=cwe,
+                                       cvssv3=cvssv3)
                         find.unsaved_vulnerability_ids = list()
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
