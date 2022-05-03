@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='dojo_group',
             name='is_azure',
-            field=models.BooleanField(default=False, help_text='Group imported from AzureAD.', verbose_name='Is AzureAD Group'),
+            field=models.BooleanField(default=False, help_text='Group imported from Azure AD.', verbose_name='Is Azure AD Group'),
         ),
     ]
