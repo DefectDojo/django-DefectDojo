@@ -152,3 +152,20 @@ class TestNessusParser(DojoTestCase):
         self.assertEqual(7, len(finding.unsaved_vulnerability_ids))
         for vulnerability_id in finding.unsaved_vulnerability_ids:
             self.assertEqual('CVE-2005-1794', vulnerability_id)
+
+    def test_parse_some_findings_with_cvssv3(self):
+        """test with cvssv3"""
+        testfile = open(path.join(path.dirname(__file__), "../scans/nessus/nessus_with_cvssv3.nessus"))
+        parser = NessusXMLParser()
+        findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(48, len(findings))
+        finding = findings[3]
+        self.assertEqual("Medium", finding.severity)
+        self.assertIsNone(finding.cwe)
+        print(finding.unsaved_endpoints)
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual("http", endpoint.protocol)
+        self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
