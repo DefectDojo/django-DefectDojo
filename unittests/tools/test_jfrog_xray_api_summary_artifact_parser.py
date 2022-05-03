@@ -34,7 +34,6 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
         self.assertIsNone(item.references)
         self.assertIsNone(item.impact)
         self.assertEquals("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", item.cvssv3)
-        self.assertEquals("XRAY-124116 - 3.12:openssl:1.1.1k-r0", item.unique_id_from_tool)
 
     def test_parse_file_with_many_vulns(self):
         testfile = open("unittests/scans/jfrog_xray_api_summary_artifact/many_vulns.json")
