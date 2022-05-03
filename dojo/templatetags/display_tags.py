@@ -748,10 +748,46 @@ def cwe_url(cwe):
 
 
 @register.filter
-def cve_url(cve):
-    if not cve:
-        return ''
-    return 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(cve)
+def has_vulnerability_url(vulnerability_id):
+    if not vulnerability_id:
+        return False
+
+    for key in settings.VULNERABILITY_URLS:
+        if vulnerability_id.upper().startswith(key):
+            return True
+    return False
+
+
+@register.filter
+def vulnerability_url(vulnerability_id):
+    if not vulnerability_id:
+        return False
+
+    for key in settings.VULNERABILITY_URLS:
+        if vulnerability_id.upper().startswith(key):
+            return settings.VULNERABILITY_URLS[key] + str(vulnerability_id)
+    return ''
+
+
+@register.filter
+def first_vulnerability_id(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids:
+        return vulnerability_ids[0]
+    else:
+        return None
+
+
+@register.filter
+def additional_vulnerability_ids(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids and len(vulnerability_ids) > 1:
+        references = list()
+        for vulnerability_id in vulnerability_ids[1:]:
+            references.append(vulnerability_id)
+        return references
+    else:
+        return None
 
 
 @register.filter

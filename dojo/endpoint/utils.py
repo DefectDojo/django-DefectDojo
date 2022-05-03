@@ -306,6 +306,8 @@ def save_endpoints_to_add(endpoint_list, product):
 
 def endpoint_meta_import(file, product, create_endpoints, create_tags, create_meta, origin='UI', request=None):
     content = file.read()
+    sig = content.decode('utf-8-sig')
+    content = sig.encode("utf-8")
     if type(content) is bytes:
         content = content.decode('utf-8')
     reader = csv.DictReader(io.StringIO(content))

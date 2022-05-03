@@ -24,7 +24,8 @@ class TestTrivyParser(DojoTestCase):
         self.assertEqual(len(findings), 93)
         finding = findings[0]
         self.assertEqual("Low", finding.severity)
-        self.assertEqual("CVE-2011-3374", finding.cve)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2011-3374", finding.unsaved_vulnerability_ids[0])
         self.assertEqual(347, finding.cwe)
         self.assertEqual("apt", finding.component_name)
         self.assertEqual("1.8.2.2", finding.component_version)
@@ -45,7 +46,8 @@ class TestTrivyParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual('CVE-2020-15999 freetype 2.9.1-r2', finding.title)
-        self.assertEqual("CVE-2020-15999", finding.cve)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-15999", finding.unsaved_vulnerability_ids[0])
         self.assertEqual(787, finding.cwe)
         self.assertEqual("freetype", finding.component_name)
         self.assertEqual("2.9.1-r2", finding.component_version)
@@ -59,7 +61,8 @@ class TestTrivyParser(DojoTestCase):
         finding = findings[1]
         self.assertEqual("High", finding.severity)
         self.assertEqual('CVE-2020-28196 krb5-libs 1.15.5-r0', finding.title)
-        self.assertEqual("CVE-2020-28196", finding.cve)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-28196", finding.unsaved_vulnerability_ids[0])
         self.assertEqual(674, finding.cwe)
         self.assertEqual("krb5-libs", finding.component_name)
         self.assertEqual("1.15.5-r0", finding.component_version)
