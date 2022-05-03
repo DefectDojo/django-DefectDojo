@@ -120,7 +120,7 @@ class SnykParser(object):
 
         # CVSSv3 vector
         if 'CVSSv3' in vulnerability:
-            finding.cvssv3 = CVSS3(vulnerability['CVSSv3']).clean_vector()
+            finding.cvssv3 = CVSS3(vulnerability['CVSSv3']).clean_vector() if vulnerability['CVSSv3'] else ""
 
         # manage CVE and CWE with idnitifiers
         cve_references = ''
