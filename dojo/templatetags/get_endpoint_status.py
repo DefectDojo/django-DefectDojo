@@ -30,15 +30,19 @@ def get_mitigated_endpoints(finding):
 @register.filter
 def endpoint_display_status(endpoint, finding):
     status = Endpoint_Status.objects.get(endpoint=endpoint, finding=finding)
+    statuses = []
     if status.false_positive:
-        return "False Positive"
+        statuses.append("False Positive")
     if status.risk_accepted:
-        return "Risk Accepted"
+        statuses.append("Risk Accepted")
     if status.out_of_scope:
-        return "Out of Scope"
+        statuses.append("Out of Scope")
     if status.mitigated:
-        return "Mitigated"
-    return "Active"
+        statuses.append("Mitigated")
+    if statuses:
+        return ', '.join(statuses)
+    else:
+        return "Active"
 
 
 @register.filter

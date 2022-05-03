@@ -652,7 +652,6 @@
       "deduplication_on_engagement": true
     }
   },
-
   {
     "pk": 1,
     "model": "dojo.endpoint",
@@ -670,7 +669,7 @@
     "pk": 2,
     "model": "dojo.endpoint",
     "fields": {
-      "product": 1,
+      "product": 2,
       "protocol": "ftp",
       "fragment": null,
       "host": "localhost",
@@ -690,6 +689,58 @@
       "query": null,
       "path": null,
       "port": 22
+    }
+  },
+  {
+    "pk": 4,
+    "model": "dojo.endpoint",
+    "fields": {
+      "product": 1,
+      "protocol": "ftp",
+      "fragment": null,
+      "host": "foo.bar",
+      "query": null,
+      "path": null,
+      "port": 21
+    }
+  },
+  {
+    "pk": 5,
+    "model": "dojo.endpoint",
+    "fields": {
+      "product": 1,
+      "protocol": "http",
+      "fragment": null,
+      "host": "foo.bar",
+      "query": null,
+      "path": null,
+      "port": 80
+    }
+  },
+  {
+    "pk": 6,
+    "model": "dojo.endpoint",
+    "fields": {
+      "product": 1,
+      "protocol": "http",
+      "fragment": null,
+      "host": "bar.foo",
+      "query": null,
+      "path": null,
+      "port": 80
+    }
+  },
+  {
+    "pk": 7,
+    "model": "dojo.endpoint",
+    "fields": {
+      "product": 1,
+      "protocol": "https",
+      "fragment": null,
+      "host": "bar.foo",
+      "query": null,
+      "path": null,
+      "port": 443
     }
   },
   {

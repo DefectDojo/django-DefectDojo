@@ -245,3 +245,34 @@ class TestEndpointStatusBrokenModel(DojoTestCase):
             self.assertEqual(e.count(), 1)
             e = e.first()
             self.assertEqual(e.endpoint_status.count(), 0)
+
+
+class TestEndpointStatusModel(DojoTestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def test_str(self):
+        eps = Endpoint_Status.objects.get(id=1)
+        self.assertEqual(str(eps), "'High Impact Test Finding' on 'ftp://localhost'")
+
+    def test_dummy(self):
+        fs = Finding.objects.all()
+        for f in fs:
+            print(f.id, f.test.engagement.product.id, str(f))
+
+    def test_status_evaluation(self):
+        ep1 = Endpoint.objects.get(id=4)
+        ep2 = Endpoint.objects.get(id=5)
+        ep3 = Endpoint.objects.get(id=6)
+        ep4 = Endpoint.objects.get(id=7)
+
+        with self.subTest('Endpoint without statuses'):
+            self.assertTrue(ep1.mitigated)
+            self.assertFalse(ep1.vulnerable)
+            self.assertEqual(ep1.findings_count, 0)
+            self.assertEqual(ep1.active_findings_count, 0)
+
+        # with self.subTest('Endpoint with vulnerabilities but all of them are'):
+        #     self.assertTrue(ep2.mitigated)
+        #     self.assertFalse(ep2.vulnerable)
+        #     self.assertEqual(ep2.findings_count)
+        #     self.assertEqual(ep2.active_findings_count)

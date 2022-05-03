@@ -1480,14 +1480,14 @@ class Endpoint(models.Model):
         return self.host_mitigated_endpoints().count()
 
     def host_findings(self):
-        return Finding.objects.filter(endpoints__in=self.host_endpoints).distinct()
+        return Finding.objects.filter(endpoints__in=self.host_endpoints()).distinct()
 
     @property
     def host_findings_count(self):
         return self.host_finding().count()
 
     def host_active_findings(self):
-        findings = self.host_findings.filter(active=True,
+        findings = self.host_findings().filter(active=True,
                                         verified=True,
                                         out_of_scope=False,
                                         mitigated__isnull=True,
