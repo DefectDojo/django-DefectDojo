@@ -142,5 +142,6 @@ class TestSnykParser(DojoTestCase):
         self.assertEqual(
             "SNYK-SLES153-P11KITTOOLS-2650307", finding.vuln_id_from_tool
         )
+        self.assertEqual("", finding.cvssv3)
 
 
