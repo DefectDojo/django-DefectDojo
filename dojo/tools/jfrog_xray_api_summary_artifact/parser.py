@@ -74,12 +74,16 @@ def get_item(vulnerability, service, test):
     if len(impact_paths) > 0:
         impact_path = decode_impact_path(impact_paths[0])
 
+    # The unique_id_from_tool is set only when a given component (SHA) has a specific unique Finding (XRAY or CVE)
     if 'issue_id' in vulnerability:
         title = vulnerability['issue_id'] + " - " + impact_path.name + ":" + impact_path.version
+        unique_id_from_tool = vulnerability['issue_id'] + " " + impact_path.sha
     elif cve:
         title = str(cve) + " - " + impact_path.name + ":" + impact_path.version
+        unique_id_from_tool =  str(cve) + " " + impact_path.sha
     else:
         title = impact_path.name + ":" + impact_path.version
+        unique_id_from_tool = ""
 
     finding = Finding(
         service=service,
@@ -94,7 +98,8 @@ def get_item(vulnerability, service, test):
         component_name=impact_path.name,
         component_version=impact_path.version,
         static_finding=True,
-        dynamic_finding=False
+        dynamic_finding=False,
+        unique_id_from_tool=unique_id_from_tool
     )
 
     return finding
