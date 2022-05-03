@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0157_vulnerability_reference'),
+        ('dojo', '0160_set_notnull_endpoint_statuses'),
     ]
 
     operations = [
