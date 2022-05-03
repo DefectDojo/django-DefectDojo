@@ -133,16 +133,12 @@ class TestSnykParser(DojoTestCase):
             self.assertEqual(400, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L/E:P/RL:O/RC:C", finding.cvssv3)
 
-    def test_snykParser_finding_has_fields(self):
+    def test_snykParser_cvssscore_none(self):
         with open("unittests/scans/snyk/single_project_None_cvss.json") as testfile:
             parser = SnykParser()
             findings = parser.get_findings(testfile, Test())
         finding = findings[0]
         self.assertEqual("low", finding.severity)
-        self.assertEqual(
-            "## NVD Description\n_This vulnerability has not been analyzed by NVD yet._\n\n## Remediation\nUpgrade `SLES:15.3` `permissions` to version 20181225-23.9.1 or higher.\n## References\n- [E-Mail link for SUSE-SU-2021:4192-1](https://lists.suse.com/pipermail/sle-security-updates/2021-December/009953.html)\n- [Link for SUSE-SU-2021:4192-1](https://www.suse.com/support/update/announcement/2021/suse-su-20214192-1/)\n- [SUSE Bug 1174504](https://bugzilla.suse.com/1174504)\n- [SUSE Security Ratings](https://www.suse.com/support/security/rating/)\n",
-            finding.severity_justification,
-        )
         self.assertEqual(
             "SNYK-SLES153-P11KITTOOLS-2650307", finding.vuln_id_from_tool
         )
