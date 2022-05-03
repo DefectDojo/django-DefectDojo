@@ -5,7 +5,6 @@ from dojo.tools.snyk.parser import SnykParser
 
 class TestSnykParser(DojoTestCase):
 
-
     def test_snykParser_single_has_no_finding(self):
         testfile = open("unittests/scans/snyk/single_project_no_vulns.json")
         parser = SnykParser()
@@ -143,5 +142,3 @@ class TestSnykParser(DojoTestCase):
             "SNYK-SLES153-PERMISSIONS-2648113", finding.vuln_id_from_tool
         )
         self.assertEqual("", finding.cvssv3)
-
-
