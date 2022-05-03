@@ -359,7 +359,7 @@ class TestEndpointStatusBroken(MigratorTestCase):
     def test_broken_eps(self):
         Finding = self.new_state.apps.get_model('dojo', 'Finding')
         Endpoint = self.new_state.apps.get_model('dojo', 'Endpoint')
-        Endpoint_Status = self.old_state.apps.get_model('dojo', 'Endpoint_Status')
+        Endpoint_Status = self.new_state.apps.get_model('dojo', 'Endpoint_Status')
 
         with self.subTest('Stadnard eps for finding'):
             f = Finding.objects.filter(id=self.finding)
