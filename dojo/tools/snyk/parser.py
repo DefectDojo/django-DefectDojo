@@ -70,8 +70,10 @@ class SnykParser(object):
 
         # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss
         if 'cvssScore' in vulnerability:
+            if vulnerability['cvssScore'] is None:
+                severity = vulnerability['severity'].title()
             # If we're dealing with a license finding, there will be no cvssScore
-            if vulnerability['cvssScore'] <= 3.9:
+            elif vulnerability['cvssScore'] <= 3.9:
                 severity = "Low"
             elif vulnerability['cvssScore'] >= 4.0 and vulnerability['cvssScore'] <= 6.9:
                 severity = "Medium"
