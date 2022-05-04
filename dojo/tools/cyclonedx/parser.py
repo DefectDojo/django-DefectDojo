@@ -147,9 +147,6 @@ class CycloneDXParser(object):
             mitigation += f"{recommend.text}\n"
         if mitigation != "":
             finding.mitigation = mitigation
-        # manage if the ID is a CVE
-        if re.fullmatch("CVE-[0-9]+-[0-9]+", vuln_id):
-            finding.cve = vuln_id
 
         # manage CVSS
         for rating in vulnerability.findall("v:ratings/v:rating", namespaces=ns):
@@ -166,6 +163,13 @@ class CycloneDXParser(object):
             LOGGER.debug(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
         if len(cwes) > 0:
             finding.cwe = cwes[0]
+
+        vulnerability_ids = list()
+        # set id as first vulnerability id
+        if vuln_id:
+            vulnerability_ids.append(vuln_id)
+        if vulnerability_ids:
+            finding.unsaved_vulnerability_ids = vulnerability_ids
 
         return finding
 
@@ -198,10 +202,15 @@ class CycloneDXParser(object):
                 references += f'**URL:** {url}\n'
             references += '\n'
 
-        cve = None
+        vulnerability_ids = list()
+        # set id as first vulnerability id
+        if vuln_id:
+            vulnerability_ids.append(vuln_id)
+        # check references to see if we have other vulnerability ids
         for reference in vulnerability.findall("b:references/b:reference", namespaces=ns):
-            if re.fullmatch("CVE-[0-9]+-[0-9]+", str(reference.findtext("b:id", namespaces=ns))):
-                cve = reference.findtext("b:id", namespaces=ns)
+            vulnerability_id = reference.findtext("b:id", namespaces=ns)
+            if vulnerability_id:
+                vulnerability_ids.append(vulnerability_id)
 
         # for all component affected
         findings = []
@@ -215,7 +224,6 @@ class CycloneDXParser(object):
                 severity=severity,
                 mitigation=vulnerability.findtext("b:recommendation", namespaces=ns),
                 references=references,
-                cve=cve,
                 component_name=component_name,
                 component_version=component_version,
                 static_finding=True,
@@ -223,6 +231,10 @@ class CycloneDXParser(object):
                 vuln_id_from_tool=vuln_id,
                 nb_occurences=1,
             )
+
+            if vulnerability_ids:
+                finding.unsaved_vulnerability_ids = vulnerability_ids
+
             if report_date:
                 finding.date = report_date
 
@@ -325,13 +337,17 @@ class CycloneDXParser(object):
                             finding.cvssv3 = cvssv3.clean_vector()
                             finding.severity = cvssv3.severities()[0]
 
-                # check references to see if we have the CVE reference
+                vulnerability_ids = list()
+                # set id as first vulnerability id
+                if vulnerability.get('id'):
+                    vulnerability_ids.append(vulnerability.get('id'))
+                # check references to see if we have other vulnerability ids
                 for reference in vulnerability.get("references", []):
-                    if re.fullmatch("CVE-[0-9]+-[0-9]+", reference.get("id", "")):
-                        finding.cve = reference.get("id")
-                # check if the tool made the CVE as an id
-                if re.fullmatch("CVE-[0-9]+-[0-9]+", vulnerability.get("id", "")):
-                    finding.cve = vulnerability.get("id")
+                    vulnerability_id = reference.get("id")
+                    if vulnerability_id:
+                        vulnerability_ids.append(vulnerability_id)
+                if vulnerability_ids:
+                    finding.unsaved_vulnerability_ids = vulnerability_ids
 
                 findings.append(finding)
         return findings

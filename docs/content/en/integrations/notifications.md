@@ -16,9 +16,9 @@ and more.
 
 The following notification methods currently exist:
  - Email
- - Slack 
+ - Slack
  - Microsoft Teams
- - Alerts within DefectDojo
+ - Alerts within DefectDojo (default)
 
 You can set these notifications on a global scope (if you have
 administrator rights) or on a personal scope. For instance, an
@@ -26,6 +26,8 @@ administrator might want notifications of all upcoming engagements sent
 to a certain Slack channel, whereas an individual user wants email
 notifications to be sent to the user\'s specified email address when a
 report has finished generating.
+
+Users can define notifications on a product level as well, and these settings will be applied only for selected products.
 
 Microsoft Teams does not provide an easy way to send messages to a personal
 channel. Therefore, DefectDojo can only send system scope notifications
@@ -35,6 +37,8 @@ In order to identify and notify you about things like upcoming
 engagements, DefectDojo runs scheduled tasks for this purpose. These
 tasks are scheduled and run using Celery beat, so this needs to run for
 those notifications to work.
+
+DefectDojo allows `template` to be used, administrator can use this feature to define which notification should be received by newly created users.
 
 ### Slack
 
