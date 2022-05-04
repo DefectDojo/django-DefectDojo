@@ -80,10 +80,10 @@ def get_item(vulnerability, service, test):
         unique_id_from_tool = vulnerability['issue_id'] + " " + impact_path.sha
     elif cve:
         title = str(cve) + " - " + impact_path.name + ":" + impact_path.version
-        unique_id_from_tool =  str(cve) + " " + impact_path.sha
+        unique_id_from_tool = str(cve) + " " + impact_path.sha
     else:
         title = impact_path.name + ":" + impact_path.version
-        unique_id_from_tool = ""
+        unique_id_from_tool = None
 
     finding = Finding(
         service=service,
