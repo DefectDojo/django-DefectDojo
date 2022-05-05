@@ -102,22 +102,24 @@ class TrivyParser:
                     nvd = cvss.get('nvd', None)
                     if nvd is not None:
                         cvssv3 = nvd.get('V3Vector', None)
-                items.append(
-                    Finding(
-                        test=test,
-                        title=title,
-                        cve=vuln_id,
-                        cwe=cwe,
-                        severity=severity,
-                        references=references,
-                        description=description,
-                        mitigation=mitigation,
-                        component_name=package_name,
-                        component_version=package_version,
-                        cvssv3=cvssv3,
-                        static_finding=True,
-                        dynamic_finding=False,
-                        tags=[type],
-                    )
+                finding = Finding(
+                    test=test,
+                    title=title,
+                    cwe=cwe,
+                    severity=severity,
+                    references=references,
+                    description=description,
+                    mitigation=mitigation,
+                    component_name=package_name,
+                    component_version=package_version,
+                    cvssv3=cvssv3,
+                    static_finding=True,
+                    dynamic_finding=False,
+                    tags=[type],
                 )
+
+                if vuln_id:
+                    finding.unsaved_vulnerability_ids = [vuln_id]
+
+                items.append(finding)
         return items

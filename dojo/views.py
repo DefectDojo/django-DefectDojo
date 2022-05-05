@@ -76,7 +76,7 @@ def action_history(request, cid, oid):
 
     product_tab = None
     if product_id:
-        product_tab = Product_Tab(product_id, title="History", tab=active_tab)
+        product_tab = Product_Tab(get_object_or_404(Product, id=product_id), title="History", tab=active_tab)
         if active_tab == "engagements":
             if str(ct) == "engagement":
                 product_tab.setEngagement(object_value)
@@ -85,8 +85,8 @@ def action_history(request, cid, oid):
 
     history = LogEntry.objects.filter(content_type=ct,
                                       object_pk=obj.id).order_by('-timestamp')
-    history = LogEntryFilter(request.GET, queryset=history)
-    paged_history = get_page_items(request, history.qs, 25)
+    log_entry_filter = LogEntryFilter(request.GET, queryset=history)
+    paged_history = get_page_items(request, log_entry_filter.qs, 25)
 
     if not get_system_setting('enable_auditlog'):
         messages.add_message(
@@ -99,6 +99,7 @@ def action_history(request, cid, oid):
                   {"history": paged_history,
                    'product_tab': product_tab,
                    "filtered": history,
+                   "log_entry_filter": log_entry_filter,
                    "obj": obj,
                    "test": test,
                    "object_value": object_value,

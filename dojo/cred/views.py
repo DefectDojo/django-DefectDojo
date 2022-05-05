@@ -45,7 +45,7 @@ def all_cred_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     creds = Cred_Mapping.objects.filter(product=prod).order_by('cred_id__name')
 
-    product_tab = Product_Tab(prod.id, title="Credentials", tab="settings")
+    product_tab = Product_Tab(prod, title="Credentials", tab="settings")
     return render(request, 'dojo/view_cred_prod.html', {'product_tab': product_tab, 'creds': creds, 'prod': prod})
 
 
@@ -368,7 +368,7 @@ def edit_cred_product(request, pid, ttid):
     else:
         tform = CredMappingFormProd(instance=cred)
 
-    product_tab = Product_Tab(prod.id, title="Edit Product Credential", tab="settings")
+    product_tab = Product_Tab(prod, title="Edit Product Credential", tab="settings")
     return render(request, 'dojo/edit_cred_all.html', {
         'tform': tform,
         'product_tab': product_tab,
@@ -435,7 +435,7 @@ def new_cred_product(request, pid):
     else:
         tform = CredMappingFormProd()
 
-    product_tab = Product_Tab(pid, title="Add Credential Configuration", tab="settings")
+    product_tab = Product_Tab(prod, title="Add Credential Configuration", tab="settings")
 
     return render(request, 'dojo/new_cred_product.html', {
         'tform': tform,
@@ -662,19 +662,19 @@ def delete_cred_controller(request, destination_url, id, ttid):
     add_breadcrumb(title="Delete Credential", top_level=False, request=request)
     product_tab = None
     if id:
-        pid = None
+        product = None
         if destination_url == "all_cred_product":
-            pid = id
+            product = get_object_or_404(Product, id)
         elif destination_url == "view_engagement":
             engagement = get_object_or_404(Engagement, id=id)
-            pid = engagement.product.id
+            product = engagement.product
         elif destination_url == "view_test":
             test = get_object_or_404(Test, id=id)
-            pid = test.engagement.product.id
+            product = test.engagement.product
         elif destination_url == "view_finding":
             finding = get_object_or_404(Finding, id=id)
-            pid = finding.test.engagement.product.id
-        product_tab = Product_Tab(pid, title="Delete Credential Mapping", tab="settings")
+            product = finding.test.engagement.product
+        product_tab = Product_Tab(product, title="Delete Credential Mapping", tab="settings")
     return render(request, 'dojo/delete_cred_all.html', {
         'tform': tform,
         'product_tab': product_tab

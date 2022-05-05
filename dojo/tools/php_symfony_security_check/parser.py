@@ -58,7 +58,6 @@ def get_item(dependency_name, dependency_version, advisory, test):
                       description=advisory['title'],
                       # TODO Decide if the default '1035: vulnerable 3rd party component' is OK to use?
                       cwe=1035,
-                      cve=advisory['cve'],
                       mitigation='upgrade',
                       references=advisory['link'],
                       false_p=False,
@@ -70,5 +69,8 @@ def get_item(dependency_name, dependency_version, advisory, test):
                       dynamic_finding=False,
                       component_name=dependency_name,
                       component_version=dependency_version)
+
+    if advisory['cve']:
+        finding.unsaved_vulnerability_ids = [advisory['cve']]
 
     return finding

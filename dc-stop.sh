@@ -1,5 +1,8 @@
 #/bin/bash
 
+bash ./docker/docker-compose-check.sh
+if [[ $? -eq 1 ]]; then exit 1; fi
+
 if [ $# -eq 0 ]
 then
     echo "Stopping docker compose"
