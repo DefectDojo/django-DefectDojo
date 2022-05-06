@@ -26,7 +26,7 @@ humanize==4.1.0
 jira==3.0.1
 PyGithub==1.55
 lxml==4.8.0
-Markdown==3.3.6
+Markdown==3.3.7
 mysqlclient==2.1.0
 openpyxl==3.0.9
 xlrd==1.2.0
