@@ -100,9 +100,9 @@ class TestSonarqubeImporterOneSQToolConfig(DojoTestCase):
         finding = findings[0]
         self.assertEqual("AWKWIl8pZpu0CyehMfc4", finding.unique_id_from_tool)
         finding = findings[1]
-        self.assertEqual("AWKWIl8pZpu0CyehMfc3", finding.unique_id_from_tool)
-        finding = findings[2]
         self.assertEqual("AWKWIlkyZpu0CyehMfb7", finding.unique_id_from_tool)
+        finding = findings[2]
+        self.assertEqual("AWKWIl8pZpu0CyehMfc3", finding.unique_id_from_tool)
 
 
 class TestSonarqubeImporterMultipleSQToolConfig(DojoTestCase):
