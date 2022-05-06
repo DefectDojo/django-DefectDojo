@@ -32,7 +32,7 @@ openpyxl==3.0.9
 xlrd==1.2.0
 Pillow==9.1.0  # required by django-imagekit
 psycopg2-binary==2.9.3
-cryptography==37.0.1
+cryptography==37.0.2
 python-dateutil==2.8.2
 pytz==2022.1
 redis==4.2.2
