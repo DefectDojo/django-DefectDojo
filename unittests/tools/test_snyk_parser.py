@@ -136,9 +136,9 @@ class TestSnykParser(DojoTestCase):
         with open("unittests/scans/snyk/single_project_None_cvss.json") as testfile:
             parser = SnykParser()
             findings = parser.get_findings(testfile, Test())
-        finding = findings[0]
-        self.assertEqual("Low", finding.severity)
-        self.assertEqual(
-            "SNYK-SLES153-PERMISSIONS-2648113", finding.vuln_id_from_tool
-        )
-        self.assertEqual("", finding.cvssv3)
+            self.assertEqual(3, len(findings))
+            finding = findings[0]
+            self.assertEqual("Low", finding.severity)
+            self.assertEqual(
+                "SNYK-SLES153-PERMISSIONS-2648113", finding.vuln_id_from_tool
+            )
