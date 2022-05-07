@@ -49,7 +49,6 @@ spec:
               name: {{ .Values.mysql.auth.existingSecret }}
               key: {{ .Values.mysql.auth.secretKey }}
               {{- end }}
-              key: {{ if eq .Values.database "postgresql" }}{{ .Values.database }}-password{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.database }}-root-password{{ end }}
         - name: DD_DEBUG
           value: 'True'
         - name: DD_SECRET_KEY
