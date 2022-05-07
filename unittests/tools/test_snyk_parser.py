@@ -131,3 +131,14 @@ class TestSnykParser(DojoTestCase):
             self.assertEqual("CVE-2020-7608", finding.cve)
             self.assertEqual(400, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L/E:P/RL:O/RC:C", finding.cvssv3)
+
+    def test_snykParser_cvssscore_none(self):
+        with open("unittests/scans/snyk/single_project_None_cvss.json") as testfile:
+            parser = SnykParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual("Low", finding.severity)
+            self.assertEqual(
+                "SNYK-SLES153-PERMISSIONS-2648113", finding.vuln_id_from_tool
+            )
