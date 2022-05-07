@@ -97,6 +97,10 @@ class TestSonarqubeImporterOneSQToolConfig(DojoTestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
+        finding = findings[0]
+        self.assertEqual("AWKWIl8pZpu0CyehMfc4", finding.unique_id_from_tool)
+        finding = findings[1]
+        self.assertEqual("AWKWIlkyZpu0CyehMfb7", finding.unique_id_from_tool)
 
 
 class TestSonarqubeImporterMultipleSQToolConfig(DojoTestCase):
