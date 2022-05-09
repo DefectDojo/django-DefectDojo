@@ -250,8 +250,11 @@ django:
     # could be emptyDir (not for production) or pvc
     type: emptyDir
     # in case if pvc specified, should point to the already existing pvc
-    persistentVolumeClaim: media
-
+    persistentVolumeClaim:
+      size: 10Gi
+      accessModes:
+      - ReadWriteOnce
+      storageClassName:
 
 initializer:
   run: true
