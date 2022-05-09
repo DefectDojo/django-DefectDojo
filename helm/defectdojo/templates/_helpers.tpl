@@ -110,3 +110,14 @@ Create chart name and version as used by the chart label.
 {{ .Values.host }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+  Creates the persistentVolumeName
+*/}}
+{{- define "django.pvc_name" -}}
+{{- if .Values.django.mediaPersistentVolume.persistentVolumeClaim.create -}}
+{{- printf "%s-django-media" .Release.Name -}}
+{{- else -}}
+{{ .Values.django.mediaPersistentVolume.persistentVolumeClaim.name }}
+{{- end -}}
+{{- end -}}

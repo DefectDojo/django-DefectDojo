@@ -71,7 +71,7 @@ spec:
       - name: {{ .Values.django.mediaPersistentVolume.name }}
         {{- if eq .Values.django.mediaPersistentVolume.type "pvc"  }}
         persistentVolumeClaim:
-          claimName: {{ .Values.django.mediaPersistentVolume.persistentVolumeClaim }}
+          claimName: {{ include "django.pvc_name" $ }}
         {{ else }}
         emptyDir: {}
         {{- end }}

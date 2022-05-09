@@ -251,6 +251,9 @@ django:
     type: emptyDir
     # in case if pvc specified, should point to the already existing pvc
     persistentVolumeClaim:
+      # set to false if an external pvc is to be provided. Also set django.mediaPersistentVolume.persistentVolumeClaim.name
+      create: true 
+      name:
       size: 10Gi
       accessModes:
       - ReadWriteOnce

@@ -1,6 +1,6 @@
-{{- $fullName := include "defectdojo.fullname" $ -}}
+{{- $fullName := include "django.pvc_name" $ -}}
 {{ with .Values.django.mediaPersistentVolume }}
-{{- if and .enabled (eq .type "pvc")   }}
+{{- if and .enabled (eq .type "pvc") .persistentVolumeClaim.create   }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
