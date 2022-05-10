@@ -49,7 +49,7 @@ class BugCrowdParser(object):
             Description += 'Target name: ' + row.get('target_name') + '\n' if row.get('target_name', None) else ''
             Description += 'Target category: ' + row.get('target_category') + '\n' if row.get('target_category', None) else ''
             References = 'BugCrowd Reference Nubmer: ' + row.get('reference_number') + '\n' if row.get('reference_number', None) else ''
-            References += row.get('vulnerability_references', '')
+            References += row.get('vulnerability_ids', '')
 
             finding.title = row.get('title', '')
             finding.description = Description

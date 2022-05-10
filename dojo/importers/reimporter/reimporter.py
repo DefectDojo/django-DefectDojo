@@ -204,6 +204,8 @@ class DojoDefaultReImporter(object):
                         file_upload.save()
                         finding.files.add(file_upload)
 
+                importer_utils.handle_vulnerability_ids(finding)
+
                 # existing findings may be from before we had component_name/version fields
                 finding.component_name = finding.component_name if finding.component_name else component_name
                 finding.component_version = finding.component_version if finding.component_version else component_version

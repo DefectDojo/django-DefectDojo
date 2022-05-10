@@ -59,7 +59,7 @@ def get_item(vulnerability, test):
 
     cveIndex = highestCvssV3Index
 
-    cve = None
+    vulnerability_id = None
     cvss_v3 = "No CVSS v3 score."  # for justification field
     cvssv3 = None  # for actual cvssv3 field
     cvss_v2 = "No CVSS v2 score."
@@ -70,7 +70,7 @@ def get_item(vulnerability, test):
     if len(cves) > 0:
         worstCve = cves[cveIndex]
         if 'cve' in cves[cveIndex]:
-            cve = worstCve['cve']
+            vulnerability_id = worstCve['cve']
         if 'cvss_v3_vector' in worstCve:
             cvss_v3 = worstCve['cvss_v3_vector']
             cvssv3 = cvss_v3
@@ -105,7 +105,6 @@ def get_item(vulnerability, test):
     # create the finding object
     finding = Finding(
         title=title,
-        cve=cve,
         test=test,
         severity=severity,
         description=(vulnerability['description'] + "\n\n" + extra_desc).strip(),
@@ -122,5 +121,8 @@ def get_item(vulnerability, test):
         date=scan_time,
         unique_id_from_tool=vulnerability['issue_id'],
         tags=tags)
+
+    if vulnerability_id:
+        finding.unsaved_vulnerability_ids = [vulnerability_id]
 
     return finding

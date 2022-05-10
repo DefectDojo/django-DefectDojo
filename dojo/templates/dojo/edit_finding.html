@@ -58,7 +58,11 @@
                         {{finding.duplicate_finding.test.test_type}}
                     {% endif %}
                     {% if finding.duplicate_finding.cve %}
-                        <a href="{{finding.duplicate_finding.cve|cve_url}}">({{finding.duplicate_finding.cve}})</a>
+                        {% if finding.duplicate_finding.cve|has_vulnerability_url %}
+                            <a href="{{finding.duplicate_finding.cve|vulnerability_url}}">({{finding.duplicate_finding.cve}})</a>
+                        {% else %}
+                            {{ finding.duplicate_finding.cve }}
+                        {% endif %}
                     {% endif %}
                     {% if finding.duplicate_finding.cwe > 0 %}
                         <a href="{{finding.duplicate_finding.cwe|cwe_url}}">(CWE-{{finding.duplicate_finding.cwe}})</a>
@@ -166,7 +170,7 @@
                     elem.id = "req"
                 }
 
-                if (elem.name != 'endpoints_to_add') {
+                if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids') {
                     var mde = new EasyMDE({
                         spellChecker: false,
                         element: elem,

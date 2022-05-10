@@ -7,6 +7,7 @@ from threading import local
 from django.db import models
 from django.urls import reverse
 
+
 logger = logging.getLogger(__name__)
 
 EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip('/'))]
@@ -46,6 +47,14 @@ class LoginRequiredMiddleware:
                 return HttpResponseRedirect(fullURL)
 
         if request.user.is_authenticated:
+            logger.debug("Authenticated user: %s", str(request.user))
+            try:
+                uwsgi = __import__('uwsgi', globals(), locals(), ['set_logvar'], 0)
+                # this populates dd_user log var, so can appear in the uwsgi logs
+                uwsgi.set_logvar('dd_user', str(request.user))
+            except:
+                # to avoid unittests to fail
+                pass
             path = request.path_info.lstrip('/')
             from dojo.models import Dojo_User
             if Dojo_User.force_password_reset(request.user) and path != 'change_password':

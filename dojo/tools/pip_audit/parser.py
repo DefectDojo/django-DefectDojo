@@ -34,13 +34,8 @@ class PipAuditParser:
 
                     title = f'{vuln_id} in {component_name}:{component_version}'
 
-                    description = f'**Id:** {vuln_id}'
-                    description += f'\n**Description:** {vuln_description}'
-
-                    if vuln_id.startswith('CVE'):
-                        cve = vuln_id
-                    else:
-                        cve = None
+                    description = ''
+                    description += vuln_description
 
                     mitigation = None
                     if vuln_fix_versions:
@@ -51,21 +46,25 @@ class PipAuditParser:
                             for fix_version in vuln_fix_versions:
                                 mitigation += f'\n- {fix_version}'
 
-                    findings.append(
-                        Finding(
-                            test=test,
-                            title=title,
-                            cve=cve,
-                            cwe=1352,
-                            severity='Medium',
-                            description=description,
-                            mitigation=mitigation,
-                            component_name=component_name,
-                            component_version=component_version,
-                            vuln_id_from_tool=vuln_id,
-                            static_finding=True,
-                            dynamic_finding=False,
-                        )
+                    finding = Finding(
+                        test=test,
+                        title=title,
+                        cwe=1352,
+                        severity='Medium',
+                        description=description,
+                        mitigation=mitigation,
+                        component_name=component_name,
+                        component_version=component_version,
+                        vuln_id_from_tool=vuln_id,
+                        static_finding=True,
+                        dynamic_finding=False,
                     )
+                    vulnerability_ids = list()
+                    if vuln_id:
+                        vulnerability_ids.append(vuln_id)
+                    if vulnerability_ids:
+                        finding.unsaved_vulnerability_ids = vulnerability_ids
+
+                    findings.append(finding)
 
         return findings
