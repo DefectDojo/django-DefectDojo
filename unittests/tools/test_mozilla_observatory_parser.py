@@ -12,6 +12,11 @@ class TestMozillaObservatoryParser(DojoTestCase):
         # test that all findings are not active
         for finding in findings:
             self.assertFalse(finding.active)
+            if "strict-transport-security" == finding.vuln_id_from_tool:
+                with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
+                    self.assertEqual("Preloaded via the HTTP Strict Transport Security (HSTS) preloading process", finding.title)
+                    self.assertEqual("Info", finding.severity)
+                    self.assertIn("Preloaded via the HTTP Strict Transport Security (HSTS) preloading process", finding.description)
 
     def test_parse_file_with_two_vuln_has_two_findings(self):
         testfile = open("unittests/scans/mozilla_observatory/mozilla_gitlab_two_vuln.json")
@@ -162,6 +167,12 @@ class TestMozillaObservatoryParser(DojoTestCase):
                     self.assertEqual("Initial redirection from HTTP to HTTPS is to a different host, preventing HSTS", finding.title)
                     self.assertEqual("Low", finding.severity)
                     self.assertIn("Initial redirection from HTTP to HTTPS is to a different host, preventing HSTS", finding.description)
+            elif "referrer-policy-private" == finding.vuln_id_from_tool:
+                with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
+                    self.assertTrue(finding.active)
+                    self.assertEqual("Referrer-Policy header not implemented", finding.title)
+                    self.assertEqual("Info", finding.severity)
+                    self.assertIn("Referrer-Policy header not implemented", finding.description)
             else:
                 with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                     self.assertFalse(finding.active)
