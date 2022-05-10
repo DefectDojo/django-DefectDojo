@@ -30,5 +30,5 @@ entries:
       url: https://github.com/DefectDojo/django-DefectDojo
     name: defectdojo
     urls:
-    - https://raw.githubusercontent.com/doximity/django-DefectDojo/jg-experimentation/defectdojo-1.6.32.tgz
+    - https://github.com/doximity/django-DefectDojo/raw/jg-experimenting/defectdojo-1.6.32.tgz
     version: 1.6.32
