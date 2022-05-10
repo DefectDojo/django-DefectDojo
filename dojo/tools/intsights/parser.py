@@ -145,9 +145,6 @@ class IntSightsParser(object):
         else:
             raise ValueError('Filename extension not recognized. Use .json or .csv')
 
-        if not alerts:
-            raise ValueError('No alert in the report')
-
         for alert in alerts:
             dupe_key = alert['alert_id']
 
