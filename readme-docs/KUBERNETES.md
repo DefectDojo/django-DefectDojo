@@ -268,11 +268,13 @@ mediaPersistentVolume:
   name: media
   # could be emptyDir (not for production) or pvc
   type: pvc
-  # in case if pvc specified, should point to already existing pvc
-  persistentVolumeClaim: media
+  # if pvc is specified, django.mediaPersistentVolume.create should be set to true so that the chart creates the persistent volume claim. Else, the user has to externally create the pvc and pass it via django.mediaPersistentVolume.persistentVolumeClaim.name. 
+  persistentVolumeClaim:
+    create: true 
+    name:
 ```
 
-In the example above, we want that media content to be preserved to `pvc` named `media` as `persistentVolumeClaim` k8s resource.
+In the example above, we want the media content to be preserved to `pvc` as `persistentVolumeClaim` k8s resource and what we are basically doing is enabling the pvc to be created conditionally if the user wants to create it using the chart (in this case the pvc name 'defectdojo-media' will be inherited from template file used to deploy the pvc). By default the volume type is emptyDir which does not require a pvc. But when the type is set to pvc then we need a kubernetes Persistent Volume Claim and this is where the django.mediaPersistentVolume.persistentVolumeClaim.name comes into play.
 
 NOTE: PersistrentVolume needs to be prepared in front before helm installation/update is triggered.
 
