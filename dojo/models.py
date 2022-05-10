@@ -2151,15 +2151,20 @@ class Finding(models.Model):
 
         fields_to_hash = ''
         for hashcodeField in hash_code_fields:
-            if(hashcodeField != 'endpoints'):
-                # Generically use the finding attribute having the same name, converts to str in case it's integer
-                fields_to_hash = fields_to_hash + str(getattr(self, hashcodeField))
-                deduplicationLogger.debug(hashcodeField + ' : ' + str(getattr(self, hashcodeField)))
-            else:
+            if hashcodeField == 'endpoints':
                 # For endpoints, need to compute the field
                 myEndpoints = self.get_endpoints()
                 fields_to_hash = fields_to_hash + myEndpoints
                 deduplicationLogger.debug(hashcodeField + ' : ' + myEndpoints)
+            elif hashcodeField == 'vulnerability_ids':
+                # For vulnerability_ids, need to compute the field
+                my_vulnerability_ids = self.get_vulnerability_ids()
+                fields_to_hash = fields_to_hash + my_vulnerability_ids
+                deduplicationLogger.debug(hashcodeField + ' : ' + my_vulnerability_ids)
+            else:
+                # Generically use the finding attribute having the same name, converts to str in case it's integer
+                fields_to_hash = fields_to_hash + str(getattr(self, hashcodeField))
+                deduplicationLogger.debug(hashcodeField + ' : ' + str(getattr(self, hashcodeField)))
         deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
 
@@ -2167,6 +2172,35 @@ class Finding(models.Model):
         fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
         deduplicationLogger.debug("compute_hash_code_legacy - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
+
+    # Get vulnerability_ids to use for hash_code computation
+    def get_vulnerability_ids(self):
+        vulnerability_id_str = ''
+        if self.id is None:
+            if self.unsaved_vulnerability_ids:
+                deduplicationLogger.debug("get_vulnerability_ids before the finding was saved")
+                # convert list of unsaved vulnerability_ids to the list of their canonical representation
+                vulnerability_id_str_list = list(
+                    map(
+                        lambda vulnerability_id: str(vulnerability_id),
+                        self.unsaved_vulnerability_ids
+                    ))
+                # deduplicate (usually done upon saving finding) and sort endpoints
+                vulnerability_id_str = ''.join(sorted(list(dict.fromkeys(vulnerability_id_str_list))))
+            else:
+                deduplicationLogger.debug("finding has no unsaved vulnerability references")
+        else:
+            vulnerability_ids = Vulnerability_Id.objects.filter(finding=self)
+            deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
+            # convert list of vulnerability_ids to the list of their canonical representation
+            vulnerability_id_str_list = list(
+                map(
+                    lambda vulnerability_id: str(vulnerability_id),
+                    vulnerability_ids.all()
+                ))
+            # sort vulnerability_ids strings
+            vulnerability_id_str = ''.join(sorted(vulnerability_id_str_list))
+        return vulnerability_id_str
 
     # Get endpoints to use for hash_code computation
     # (This sometimes reports "None")
@@ -2635,6 +2669,9 @@ Finding.endpoints.through.__str__ = lambda \
 class Vulnerability_Id(models.Model):
     finding = models.ForeignKey(Finding, editable=False, on_delete=models.CASCADE)
     vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+
+    def __str__(self):
+        return self.vulnerability_id
 
 
 class Stub_Finding(models.Model):

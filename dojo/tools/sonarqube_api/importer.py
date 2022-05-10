@@ -145,6 +145,7 @@ class SonarQubeApiImporter(object):
                     impact="No impact provided",
                     static_finding=True,
                     sonarqube_issue=sonarqube_issue,
+                    unique_id_from_tool=issue.get('key'),
                 )
                 items.append(find)
 
@@ -221,6 +222,7 @@ class SonarQubeApiImporter(object):
                     static_finding=True,
                     scanner_confidence=scanner_confidence,
                     sonarqube_issue=sonarqube_issue,
+                    unique_id_from_tool=f"hotspot:{hotspot.get('key')}",
                 )
                 items.append(find)
 

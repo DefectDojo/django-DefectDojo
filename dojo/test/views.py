@@ -27,11 +27,11 @@ from dojo.forms import NoteForm, TestForm, \
     ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
 from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
+    Finding_Template, Cred_Mapping, System_Settings, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
 
 from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
-    Product_Tab, is_scan_file_too_large, get_words_for_field
+    Product_Tab, is_scan_file_too_large, get_words_for_field, get_setting, async_delete
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
@@ -43,6 +43,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.test.queries import get_authorized_tests
+from dojo.user.queries import get_authorized_users
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
 
 
@@ -272,10 +273,16 @@ def delete_test(request, tid):
             form = DeleteTestForm(request.POST, instance=test)
             if form.is_valid():
                 product = test.engagement.product
-                test.delete()
+                if get_setting("ASYNC_OBJECT_DELETE"):
+                    async_del = async_delete()
+                    async_del.delete(test)
+                    message = 'Test and relationships will be removed in the background.'
+                else:
+                    message = 'Test and relationships removed.'
+                    test.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Test and relationships removed.',
+                                     message,
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % test.title,
@@ -286,9 +293,12 @@ def delete_test(request, tid):
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([test])
-    rels = collector.nested()
+    rels = ['Previewing the relationships has been disabled.', '']
+    display_preview = get_setting('DELETE_PREVIEW')
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([test])
+        rels = collector.nested()
 
     product_tab = Product_Tab(test.engagement.product, title="Delete Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -322,7 +332,7 @@ def test_calendar(request):
         'caltype': 'tests',
         'leads': request.GET.getlist('lead', ''),
         'tests': tests,
-        'users': Dojo_User.objects.all()})
+        'users': get_authorized_users(Permissions.Test_View)})
 
 
 @user_is_authorized(Test, Permissions.Test_View, 'tid')

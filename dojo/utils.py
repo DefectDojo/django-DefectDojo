@@ -1439,6 +1439,10 @@ def get_system_setting(setting, default=None):
     return getattr(system_settings, setting, (default if default is not None else None))
 
 
+def get_setting(setting):
+    return getattr(settings, setting)
+
+
 @dojo_model_to_id
 @dojo_async_task
 @app.task
@@ -1447,6 +1451,7 @@ def calculate_grade(product, *args, **kwargs):
     system_settings = System_Settings.objects.get()
     if not product:
         logger.warning('ignoring calculate product for product None!')
+        return
 
     if system_settings.enable_product_grade:
         logger.debug('calculating product grade for %s:%s', product.id, product.name)
@@ -2130,6 +2135,81 @@ def get_enabled_notifications_list():
 def is_finding_groups_enabled():
     """Returns true is feature is enabled otherwise false"""
     return get_system_setting("enable_finding_groups")
+
+
+class async_delete():
+    def __init__(self, *args, **kwargs):
+        self.mapping = {
+            'Product_Type': [
+                (Endpoint, 'product__prod_type'),
+                (Finding, 'test__engagement__product__prod_type'),
+                (Test, 'engagement__product__prod_type'),
+                (Engagement, 'product__prod_type'),
+                (Product, 'prod_type')],
+            'Product': [
+                (Endpoint, 'product'),
+                (Finding, 'test__engagement__product'),
+                (Test, 'engagement__product'),
+                (Engagement, 'product')],
+            'Engagement': [
+                (Finding, 'test__engagement'),
+                (Test, 'engagement')],
+            'Test': [(Finding, 'test')]
+        }
+
+    @dojo_async_task
+    @app.task
+    def delete_chunk(self, objects, **kwargs):
+        for object in objects:
+            try:
+                object.delete()
+            except AssertionError:
+                logger.debug('ASYNC_DELETE: object has already been deleted elsewhere. Skipping')
+                # The id must be None
+                # The object has already been deleted elsewhere
+                pass
+
+    @dojo_async_task
+    @app.task
+    def delete(self, object, **kwargs):
+        logger.debug('ASYNC_DELETE: Deleting ' + self.get_object_name(object) + ': ' + str(object))
+        model_list = self.mapping.get(self.get_object_name(object), None)
+        if model_list:
+            # The object to be deleted was found in the object list
+            self.crawl(object, model_list)
+        else:
+            # The object is not supported in async delete, delete normally
+            logger.debug('ASYNC_DELETE: ' + self.get_object_name(object) + ' async delete not supported. Deleteing normally: ' + str(object))
+            object.delete()
+
+    @dojo_async_task
+    @app.task
+    def crawl(self, object, model_list, **kwargs):
+        logger.debug('ASYNC_DELETE: Crawling ' + self.get_object_name(object) + ': ' + str(object))
+        for model_info in model_list:
+            model = model_info[0]
+            model_query = model_info[1]
+            filter_dict = {model_query: object}
+            objects_to_delete = model.objects.filter(**filter_dict)
+            logger.debug('ASYNC_DELETE: Deleting ' + str(len(objects_to_delete)) + ' ' + self.get_object_name(model) + 's in chunks')
+            chunks = self.chunk_list(model, objects_to_delete)
+            for chunk in chunks:
+                print('deleting', len(chunk), self.get_object_name(model))
+                self.delete_chunk(chunk)
+        self.delete_chunk([object])
+        logger.debug('ASYNC_DELETE: Successfully deleted ' + self.get_object_name(object) + ': ' + str(object))
+
+    def chunk_list(self, model, list):
+        chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
+        # Break the list of objects into "chunk_size" lists
+        chunk_list = [list[i:i + chunk_size] for i in range(0, len(list), chunk_size)]
+        logger.debug('ASYNC_DELETE: Split ' + self.get_object_name(model) + ' into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_size))
+        return chunk_list
+
+    def get_object_name(self, object):
+        if object.__class__.__name__ == 'ModelBase':
+            return object.__name__
+        return object.__class__.__name__
 
 
 @receiver(user_logged_in)

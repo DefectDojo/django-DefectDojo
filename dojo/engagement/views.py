@@ -32,11 +32,11 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
-    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Product_API_Scan_Configuration
+    Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
-    get_system_setting, redirect_to_return_url_or_else, get_return_url
+    FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
+    get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
@@ -50,6 +50,7 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product.queries import get_authorized_products
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.user.queries import get_authorized_users
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 import dojo.notifications.helper as notifications_helper
@@ -83,7 +84,7 @@ def engagement_calendar(request):
             'caltype': 'engagements',
             'leads': request.GET.getlist('lead', ''),
             'engagements': engagements,
-            'users': Dojo_User.objects.all()
+            'users': get_authorized_users(Permissions.Engagement_View)
         })
 
 
@@ -289,11 +290,17 @@ def delete_engagement(request, eid):
             form = DeleteEngagementForm(request.POST, instance=engagement)
             if form.is_valid():
                 product = engagement.product
-                engagement.delete()
+                if get_setting("ASYNC_OBJECT_DELETE"):
+                    async_del = async_delete()
+                    async_del.delete(engagement)
+                    message = 'Engagement and relationships will be removed in the background.'
+                else:
+                    message = 'Engagement and relationships removed.'
+                    engagement.delete()
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Engagement and relationships removed.',
+                    message,
                     extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % engagement.name,
@@ -305,9 +312,12 @@ def delete_engagement(request, eid):
 
                 return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([engagement])
-    rels = collector.nested()
+    rels = ['Previewing the relationships has been disabled.', '']
+    display_preview = get_setting('DELETE_PREVIEW')
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([engagement])
+        rels = collector.nested()
 
     product_tab = Product_Tab(product, title="Delete Engagement", tab="engagements")
     product_tab.setEngagement(engagement)
