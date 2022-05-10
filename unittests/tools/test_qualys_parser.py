@@ -35,9 +35,11 @@ class TestQualysParser(DojoTestCase):
             finding.unsaved_endpoints[0].host, "demo13.s02.sjc01.qualys.com"
         )
         for finding in findings:
-            if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+            if finding.unsaved_endpoints[
+                    0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                 finding_cvssv3_score = finding
-            if finding.unsaved_endpoints[0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+            if finding.unsaved_endpoints[
+                    0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                 finding_cvssv3_vector = finding
         self.assertEqual(
             # CVSS_FINAL is defined without a cvssv3 vector
@@ -46,13 +48,11 @@ class TestQualysParser(DojoTestCase):
         self.assertEqual(
             finding_cvssv3_score.severity, "High"
         )
-        self.assertEqual(
-            finding_cvssv3_vector.cvssv3, "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H"
-        )
+        self.assertEqual(finding_cvssv3_vector.cvssv3,
+                         "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H")
         self.assertEqual(
             finding_cvssv3_vector.severity, "Critical"
         )
-
 
     def test_parse_file_with_no_vuln_has_no_findings_csv(self):
         testfile = open(
@@ -75,8 +75,8 @@ class TestQualysParser(DojoTestCase):
 
         finding = findings[0]
         self.assertEqual(
-            finding.title, "QID-105971 | EOL/Obsolete Software: Microsoft ASP.NET 1.0 Detected"
-        )
+            finding.title,
+            "QID-105971 | EOL/Obsolete Software: Microsoft ASP.NET 1.0 Detected")
         self.assertEqual(
             finding.severity, "Critical"
         )
@@ -85,9 +85,11 @@ class TestQualysParser(DojoTestCase):
         )
 
         for finding in findings:
-            if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+            if finding.unsaved_endpoints[
+                    0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                 finding_cvssv3_score = finding
-            if finding.unsaved_endpoints[0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+            if finding.unsaved_endpoints[
+                    0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                 finding_cvssv3_vector = finding
         self.assertEqual(
             # CVSS_FINAL is defined without a cvssv3 vector
@@ -97,8 +99,8 @@ class TestQualysParser(DojoTestCase):
             finding_cvssv3_score.severity, "Critical"
         )
         self.assertEqual(
-            finding_cvssv3_vector.cvssv3, "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:U/RC:C"
-        )
+            finding_cvssv3_vector.cvssv3,
+            "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:U/RC:C")
         self.assertEqual(
             finding_cvssv3_vector.severity, "Critical"
         )

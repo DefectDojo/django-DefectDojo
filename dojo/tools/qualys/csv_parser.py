@@ -121,10 +121,12 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
             return None
         if cvss_temporal:
             try:
-                cvss_temporal_vector = re.search(vector_pattern, cvss_temporal).group(1)
+                cvss_temporal_vector = re.search(
+                    vector_pattern, cvss_temporal).group(1)
                 return f'CVSS:3.0/{cvss_base_vector}/{cvss_temporal_vector}'
             except IndexError:
-                _logger.error(f'CVSS3 Temporal Vector not found in {cvss_base}')
+                _logger.error(
+                    f'CVSS3 Temporal Vector not found in {cvss_base}')
                 return f'CVSS:3.0/{cvss_base_vector}'
         else:
             return cvss_base_vector
@@ -132,7 +134,7 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
         return None
 
 
-def build_findings_from_dict(report_findings:[dict]) -> [Finding]:
+def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
     """
     Takes a list of Dictionaries built from CSV and creates a Finding object
     Args:
@@ -158,20 +160,30 @@ def build_findings_from_dict(report_findings:[dict]) -> [Finding]:
             title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
             mitigation=report_finding['Solution'],
             description=report_finding['Threat'],
-            severity=severity_lookup.get(report_finding['Severity'], 'Info'),
-            references=get_references(report_finding['CVE ID']),
+            severity=severity_lookup.get(
+                report_finding['Severity'],
+                'Info'),
+            references=get_references(
+                report_finding['CVE ID']),
             impact=report_finding['Impact'],
-            date=datetime.strptime(report_finding['Last Detected'], "%m/%d/%Y %H:%M:%S").date(),
+            date=datetime.strptime(
+                report_finding['Last Detected'],
+                "%m/%d/%Y %H:%M:%S").date(),
             vuln_id_from_tool=report_finding['QID'],
-            cvssv3=_extract_cvss_vectors(report_finding['CVSS3 Base'], report_finding['CVSS3 Temporal']))
+            cvssv3=_extract_cvss_vectors(
+                    report_finding['CVSS3 Base'],
+                report_finding['CVSS3 Temporal']))
 
         if report_finding['Date Last Fixed']:
-            finding.mitigated = datetime.strptime(report_finding['Date Last Fixed'], "%m/%d/%Y %H:%M:%S").date()
+            finding.mitigated = datetime.strptime(
+                report_finding['Date Last Fixed'],
+                "%m/%d/%Y %H:%M:%S").date()
             finding.is_Mitigated = True
         else:
             finding.is_Mitigated = False
 
-        finding.active = report_finding['Vuln Status'] in ('Active', 'Re-Opened', 'New')
+        finding.active = report_finding['Vuln Status'] in (
+            'Active', 'Re-Opened', 'New')
         finding.verified = True
         finding.unsaved_endpoints = [endpoint]
 
