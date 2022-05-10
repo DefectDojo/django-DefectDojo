@@ -64,6 +64,10 @@ spec:
             name: {{ $fullName }}
         - secretRef:
             name: {{ $fullName }}
+        {{- if .Values.extraConfigMapRef }}
+        - configMapRef:
+            name: {{ .Values.extraConfigMapRef }}
+        {{- end }}
         env:
         - name: DD_DATABASE_PASSWORD
           valueFrom:
