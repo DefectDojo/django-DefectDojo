@@ -252,7 +252,7 @@ django:
     # in case if pvc specified, should point to the already existing pvc
     persistentVolumeClaim:
       # set to true if django.mediaPersistentVolume.type is set to pvc
-      create: false 
+      create: false
       name:
       size: 10Gi
       accessModes:
