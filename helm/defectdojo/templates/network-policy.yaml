@@ -39,6 +39,10 @@ spec:
   ingress:
     - from: []
       ports:
-        - port: 8080
+        {{- if .if .Values.django.nginx.tls.enabled }}
+        - port: 8443
+        {{- else }}
+        - port: 8443
+        {{- end  }}
           protocol: TCP
 {{ end }}
