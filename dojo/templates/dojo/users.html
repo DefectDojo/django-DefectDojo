@@ -12,7 +12,7 @@
                         {{ name }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
-                            {% if request.user.is_superuser %}
+                            {% if "auth.add_user"|has_configuration_permission:"superuser" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -42,9 +42,7 @@
                     <table id="users"
                         class="tablesorter-bootstrap table table-condensed table-striped">
                         <tr>
-                            {% if request.user.is_staff %}
                             <th></th>
-                            {% endif %}
                             <th class="nowrap">{% dojo_sort request 'First Name' 'first_name' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Last Name' 'last_name' %}</th>
                             <th class="nowrap">{% dojo_sort request 'User Name' 'username' 'asc' %}</th>
@@ -52,15 +50,14 @@
                             <th class="nowrap">Title</th>
                             <th class="nowrap">Phone Number(s)</th>
                             <th class="nowrap, text-center">{% dojo_sort request 'Active' 'is_active' %}</th>
+                            {% if not 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
                             <th class="nowrap, text-center">{% dojo_sort request 'Staff' 'is_staff' %}</th>
-                            <th class="nowrap, text-center">{% dojo_sort request 'SuperUser' 'is_superuser' %}</th>
-                            {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
-                            <th class="nowrap">Global Role</th>
                             {% endif %}
+                            <th class="nowrap, text-center">{% dojo_sort request 'Superuser' 'is_superuser' %}</th>
+                            <th class="nowrap">Global Role</th>
                         </tr>
                         {% for u in users %}
                             <tr>
-                                {% if request.user.is_staff %}
                                 <td>
                                     <ul>
                                         <li class="dropdown" style="list-style:none;position:absolute">
@@ -70,7 +67,7 @@
                                                     <a class="" href="{% url 'view_user' u.id %}" id="viewUser">
                                                     <i class="fa fa-list-alt"></i> View</a>
                                                 </li>
-                                                {% if request.user.is_superuser %}
+                                                {% if "auth.change_user"|has_configuration_permission:"superuser" %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'edit_user' u.id %}"  id="editUser">
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
@@ -82,7 +79,7 @@
                                                       <i class="fa fa-history"></i> View History
                                                   </a>
                                                 </li>
-                                                {% if request.user.is_superuser and u.id != request.user.id %}
+                                                {% if "auth.delete_user"|has_configuration_permission:"superuser" and u.id != request.user.id %}
                                                 <li role="separator" class="divider"></li>
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'delete_user' u.id %}">
@@ -93,7 +90,6 @@
                                         </li>
                                     </ul>
                                 </td>
-                                {% endif %}
                                 <td><a href="{% url 'view_user' u.id %}">{{ u.first_name }}</a></td>
                                 <td><a href="{% url 'view_user' u.id %}">{{ u.last_name }}</a></td>
                                 <td><a href="{% url 'view_user' u.id %}">{{ u.username }}</a></td>
@@ -107,15 +103,15 @@
                                 <td class="text-center">{% if u.is_active %}
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
+                                {% if not 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
                                 <td class="text-center">{% if u.is_staff %}
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
+                                {% endif %}
                                 <td class="text-center">{% if u.is_superuser %}
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
-                                {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                 <td>{% if u.global_role.role %} {{ u.global_role.role }} {% endif %}</td>
-                                {% endif %}
                                 </tr>
                         {% endfor %}
                     </table>

@@ -7,6 +7,7 @@ import git
 import shutil
 from base_test_class import BaseTestCase
 from product_test import ProductTest
+from selenium.webdriver.common.by import By
 
 
 class ScannerTest(BaseTestCase):
@@ -77,44 +78,6 @@ class ScannerTest(BaseTestCase):
                 print(tool)
             print()
         assert len(missing_docs) == 0
-
-    def test_check_for_fixtures(self):
-        fixture_path = dir_path[:-5] + 'dojo/fixtures/test_type.json'
-        file = open(fixture_path, 'r+')
-        fixtures = file.readlines()
-        file.close()
-
-        fixtures = [fix.replace('\t', '').replace('\n', '').replace('.', '').replace('-', ' ').strip().lower() for fix in fixtures]
-        remove_items = ['{', '},', '}', '[', ']', '"fields": {', '"model": "dojotest_type",']
-        fixtures = [fix for fix in fixtures if fix not in remove_items]
-        remove_patterns = ['"', 'name: ', 'pk: ', ' scan', ' scanner']
-        for pattern in remove_patterns:
-            fixtures = [re.sub(pattern, '', fix) for fix in fixtures]
-        fixtures = fixtures[fixtures.index('100') - 1:]
-        fixtures = list(filter((re.compile(r'\D')).match, fixtures))
-
-        acronyms = []
-        for words in fixtures:
-            acronyms += ["".join(word[0] for word in words.split())]
-
-        missing_fixtures = []
-        for tool in self.tools:
-            reg = re.compile(tool.replace('_', ' '))
-            matches = list(filter(reg.search, fixtures)) + list(filter(reg.search, acronyms))
-            matches = [m.strip() for m in matches]
-            if len(matches) != 1:
-                if tool not in matches:
-                    missing_fixtures += [tool]
-
-        if len(missing_fixtures) > 0:
-            print('The following scanners are missing fixtures')
-            print('Names must match those listed in /dojo/tools')
-            print('Fixtures can be added here:')
-            print('https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/fixtures/test_type.json\n')
-            for tool in missing_fixtures:
-                print(tool)
-            print()
-        assert len(missing_fixtures) == 0
 
     def test_check_for_forms(self):
         forms_path = dir_path[:-5] + 'dojo/forms.py'
@@ -198,11 +161,11 @@ class ScannerTest(BaseTestCase):
     def test_engagement_import_scan_result(self):
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-        driver.find_element_by_link_text("Add New Engagement").click()
-        driver.find_element_by_id("id_name").send_keys('Scan type mapping')
-        driver.find_element_by_name('_Import Scan Results').click()
-        options_text = ''.join(driver.find_element_by_name('scan_type').text).split('\n')
+        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+        driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
+        driver.find_element(By.ID, "id_name").send_keys('Scan type mapping')
+        driver.find_element(By.NAME, '_Import Scan Results').click()
+        options_text = ''.join(driver.find_element(By.NAME, 'scan_type').text).split('\n')
         options_text = [scan.strip() for scan in options_text]
 
         mod_options = options_text
@@ -247,19 +210,19 @@ class ScannerTest(BaseTestCase):
                 failed_tests += [test.upper() + ': No test cases']
             for case in cases:
                 self.goto_product_overview(driver)
-                driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-                driver.find_element_by_link_text("Add New Engagement").click()
-                driver.find_element_by_id("id_name").send_keys(test + ' - ' + case)
-                driver.find_element_by_name('_Import Scan Results').click()
+                driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+                driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
+                driver.find_element(By.ID, "id_name").send_keys(test + ' - ' + case)
+                driver.find_element(By.NAME, '_Import Scan Results').click()
                 try:
-                    driver.find_element_by_id('id_active').get_attribute('checked')
-                    driver.find_element_by_id('id_verified').get_attribute('checked')
+                    driver.find_element(By.ID, 'id_active').get_attribute('checked')
+                    driver.find_element(By.ID, 'id_verified').get_attribute('checked')
                     scan_type = scan_map[test]
-                    Select(driver.find_element_by_id("id_scan_type")).select_by_visible_text(scan_type)
+                    Select(driver.find_element(By.ID, "id_scan_type")).select_by_visible_text(scan_type)
                     test_location = self.repo_path + '/' + test + '/' + case
-                    driver.find_element_by_id('id_file').send_keys(test_location)
-                    driver.find_element_by_css_selector("input.btn.btn-primary").click()
-                    EngagementTXT = ''.join(driver.find_element_by_tag_name("BODY").text).split('\n')
+                    driver.find_element(By.ID, 'id_file').send_keys(test_location)
+                    driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+                    EngagementTXT = ''.join(driver.find_element(By.TAG_NAME, "BODY").text).split('\n')
                     reg = re.compile('processed, a total of')
                     matches = list(filter(reg.search, EngagementTXT))
                     if len(matches) != 1:
@@ -292,7 +255,6 @@ def suite():
     suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(ScannerTest('test_check_test_file'))
     suite.addTest(ScannerTest('test_check_for_doc'))
-    suite.addTest(ScannerTest('test_check_for_fixtures'))
     suite.addTest(ScannerTest('test_check_for_forms'))
     suite.addTest(ScannerTest('test_check_for_options'))
     suite.addTest(ProductTest('test_create_product'))

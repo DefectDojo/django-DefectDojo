@@ -103,7 +103,7 @@
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
-                            <div id="opened_per_month" class="graph"></div>
+                            <div id="opened_per_month_2" class="graph"></div>
                         </div>
                         <!-- /.panel-body -->
                     </div>
@@ -120,10 +120,10 @@
         <div class="row">
             <div class="col-lg-12">
                 {% for prod in context.products %}
-                    {% if prod|product_findings %}
+                    {% if prod|product_findings:findings %}
                         <h3 id="findings">Findings in {{ prod.name}}</h3>
                     {% endif %}
-                    {% for finding in prod|product_findings %}
+                    {% for finding in prod|product_findings:findings %}
                         {% ifchanged finding.severity %}
                             <h4>{{ finding.severity|capfirst }}</h4>
                         {% endifchanged %}
@@ -293,17 +293,9 @@
     <script src="{{ host }}{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
     <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
+    <script src="{{ host }}{% static "dojo/js/metrics.js" %}"></script>
     <script type="text/javascript">
         $(function () {
-            open_findings();
-            {% if endpoint_opened_per_month %}
-                opened_per_month();
-            {% endif %}
-
-
-        });
-
-        function open_findings() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -342,166 +334,23 @@
             var d5 = [
                 [4, info],
             ];
+            open_findings(d1, d2, d3, d4, d5, ticks);
 
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#open_findings", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-        {% if endpoint_opened_per_month %}
-            function opened_per_month() {
-                var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
-
+            {% if endpoint_opened_per_month %}
+                critical = [];
+                high = [];
+                medium = [];
+                low = [];
+                info = [];
                 {% for month in endpoint_opened_per_month|slice:'1:' %}
                     critical.push([{{ month.0 }}, {{ month.2 }}]);
                     high.push([{{ month.0 }}, {{ month.3 }}]);
                     medium.push([{{ month.0 }}, {{ month.4 }}]);
                     low.push([{{ month.0 }}, {{ month.5 }}]);
                 {% endfor %}
-
-                var tick_count = critical.length < 7 ? critical.length : 7;
-                var options = {
-                    xaxis: {
-                        mode: "time",
-                        timeformat: "%m-%d-%Y",
-                        timezone: 'browser'
-                    },
-                    xaxes: [{
-                        ticks: tick_count
-                    }],
-                    yaxes: [{
-                        min: 0
-                    }],
-                    series: {
-                        stack: true,
-                        lines: {
-                            show: true
-                        },
-                        points: {
-                            show: true
-                        }
-                    },
-                    grid: {
-                        hoverable: true,
-                        borderWidth: 1,
-                        borderColor: '#e7e7e7'
-
-                    },
-                    tooltip: true
-                };
-                var plotObj = $.plot($("#opened_per_month"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-
-                        }],
-                        options);
-            }
-        {%  endif %}
+                opened_per_month_2(critical, high, medium, low);
+            {% endif %}
+        });
 
         {% if include_table_of_contents%}
             window.onload = function () {

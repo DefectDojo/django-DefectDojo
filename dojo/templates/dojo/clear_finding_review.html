@@ -23,11 +23,3 @@
         </div>
     </form>
 {% endblock %}
-{% block postscript %}
-    {{ block.super }}
-    <script type="application/javascript">
-        $(function () {
-            $('#id_reviewers').chosen({'placeholder_text_multiple': 'Select some reviewers...'});
-        });
-    </script>
-{% endblock %}

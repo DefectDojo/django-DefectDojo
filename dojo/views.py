@@ -3,7 +3,7 @@ import os
 from auditlog.models import LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.http import Http404, HttpResponseRedirect
 from django.conf import settings
 from django.urls import reverse
@@ -12,9 +12,8 @@ from dojo.models import Engagement, Test, Finding, Endpoint, Product, FileUpload
 from dojo.filters import LogEntryFilter
 from dojo.forms import ManageFileFormSet
 from dojo.utils import get_page_items, Product_Tab, get_system_setting
-from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403, user_has_configuration_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
-from dojo.user.helper import user_is_authorized
 
 
 logger = logging.getLogger(__name__)
@@ -24,11 +23,8 @@ def action_history(request, cid, oid):
     try:
         ct = ContentType.objects.get_for_id(cid)
         obj = ct.get_object_for_this_type(pk=oid)
-    except KeyError:
+    except (KeyError, ObjectDoesNotExist):
         raise Http404()
-
-    if not settings.FEATURE_AUTHORIZATION_V2 and not user_is_authorized(request.user, 'view', obj):
-        raise PermissionDenied
 
     product_id = None
     active_tab = None
@@ -36,42 +32,51 @@ def action_history(request, cid, oid):
     test = False
     object_value = None
 
-    if str(ct) == "product":
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Product_View)
+    if ct.model == "product":
+        user_has_permission_or_403(request.user, obj, Permissions.Product_View)
         product_id = obj.id
         active_tab = "overview"
         object_value = Product.objects.get(id=obj.id)
-    elif str(ct) == "engagement":
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
+    elif ct.model == "engagement":
+        user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
         object_value = Engagement.objects.get(id=obj.id)
         product_id = object_value.product.id
         active_tab = "engagements"
-    elif str(ct) == "test":
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Test_View)
+    elif ct.model == "test":
+        user_has_permission_or_403(request.user, obj, Permissions.Test_View)
         object_value = Test.objects.get(id=obj.id)
         product_id = object_value.engagement.product.id
         active_tab = "engagements"
         test = True
-    elif str(ct) == "finding":
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
+    elif ct.model == "finding":
+        user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
         object_value = Finding.objects.get(id=obj.id)
         product_id = object_value.test.engagement.product.id
         active_tab = "findings"
         finding = object_value
-    elif str(ct) == "endpoint":
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Endpoint_View)
+    elif ct.model == "endpoint":
+        user_has_permission_or_403(request.user, obj, Permissions.Endpoint_View)
         object_value = Endpoint.objects.get(id=obj.id)
         product_id = object_value.product.id
         active_tab = "endpoints"
+    elif ct.model == "risk_acceptance":
+        engagements = Engagement.objects.filter(risk_acceptance=obj)
+        authorized = False
+        for engagement in engagements:
+            if user_has_permission(request.user, engagement, Permissions.Engagement_View):
+                authorized = True
+                break
+        if not authorized:
+            raise PermissionDenied
+    elif ct.model == "user":
+        user_has_configuration_permission_or_403(request.user, 'auth.view_user', legacy='superuser')
+    else:
+        if not request.user.is_superuser:
+            raise PermissionDenied
 
     product_tab = None
     if product_id:
-        product_tab = Product_Tab(product_id, title="History", tab=active_tab)
+        product_tab = Product_Tab(get_object_or_404(Product, id=product_id), title="History", tab=active_tab)
         if active_tab == "engagements":
             if str(ct) == "engagement":
                 product_tab.setEngagement(object_value)
@@ -80,8 +85,8 @@ def action_history(request, cid, oid):
 
     history = LogEntry.objects.filter(content_type=ct,
                                       object_pk=obj.id).order_by('-timestamp')
-    history = LogEntryFilter(request.GET, queryset=history)
-    paged_history = get_page_items(request, history.qs, 25)
+    log_entry_filter = LogEntryFilter(request.GET, queryset=history)
+    paged_history = get_page_items(request, log_entry_filter.qs, 25)
 
     if not get_system_setting('enable_auditlog'):
         messages.add_message(
@@ -94,6 +99,7 @@ def action_history(request, cid, oid):
                   {"history": paged_history,
                    'product_tab': product_tab,
                    "filtered": history,
+                   "log_entry_filter": log_entry_filter,
                    "obj": obj,
                    "test": test,
                    "object_value": object_value,
@@ -102,23 +108,17 @@ def action_history(request, cid, oid):
 
 
 def manage_files(request, oid, obj_type):
-    if not settings.FEATURE_AUTHORIZATION_V2 and not request.user.is_staff:
-        raise PermissionDenied
-
     if obj_type == 'Engagement':
         obj = get_object_or_404(Engagement, pk=oid)
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Engagement_Edit)
+        user_has_permission_or_403(request.user, obj, Permissions.Engagement_Edit)
         obj_vars = ('view_engagement', 'engagement_set')
     elif obj_type == 'Test':
         obj = get_object_or_404(Test, pk=oid)
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Test_Edit)
+        user_has_permission_or_403(request.user, obj, Permissions.Test_Edit)
         obj_vars = ('view_test', 'test_set')
     elif obj_type == 'Finding':
         obj = get_object_or_404(Finding, pk=oid)
-        if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.Finding_Edit)
+        user_has_permission_or_403(request.user, obj, Permissions.Finding_Edit)
         obj_vars = ('view_finding', 'finding_set')
     else:
         raise Http404()

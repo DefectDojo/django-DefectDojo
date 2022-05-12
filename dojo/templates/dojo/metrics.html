@@ -109,7 +109,7 @@
     *border-left-color: #ffffff;
     }
 
-    #chart_div, #chart_div5, #chart_div2, #chart_div3, #chart_div4 {height: 300px}
+    #opened_per_month_2, #active_per_month, #accepted_per_month_2, #opened_per_week_2, #accepted_per_week_2 {height: 300px}
 {% endblock %}
 {% block content %}
     {{ block.super }}
@@ -208,7 +208,7 @@
                             </div>
                             <!-- /.panel-heading -->
                             <div class="panel-body">
-                                <div id="chart_div"></div>
+                                <div id="opened_per_month_2"></div>
                             </div>
                             <!-- /.panel-body -->
                         </div>
@@ -223,7 +223,7 @@
                             </div>
                             <!-- /.panel-heading -->
                             <div class="panel-body">
-                                <div id="chart_div5"></div>
+                                <div id="active_per_month"></div>
                             </div>
                             <!-- /.panel-body -->
                         </div>
@@ -239,7 +239,7 @@
                             </div>
                             <!-- /.panel-heading -->
                             <div class="panel-body">
-                                <div id="chart_div2"></div>
+                                <div id="accepted_per_month_2"></div>
                             </div>
                             <!-- /.panel-body -->
                         </div>
@@ -254,7 +254,7 @@
                             </div>
                             <!-- /.panel-heading -->
                             <div class="panel-body">
-                                <div id="chart_div3"></div>
+                                <div id="opened_per_week_2"></div>
                             </div>
                             <!-- /.panel-body -->
                         </div>
@@ -267,7 +267,7 @@
                             </div>
                             <!-- /.panel-heading -->
                             <div class="panel-body">
-                                <div id="chart_div4"></div>
+                                <div id="accepted_per_week_2"></div>
                             </div>
                             <!-- /.panel-body -->
                         </div>
@@ -335,7 +335,7 @@
                                                 <th>Description</th>
                                                 <th class="nowrap">Days<br/>Open</th>
                                                 <th class="nowrap">Status</th>
-                                                <th class="nowrap">Engineer</th>
+                                                <th class="nowrap">Reporter</th>
 
                                             </tr>
                                             {% for finding in findings.qs %}
@@ -647,7 +647,9 @@
     {% include "dojo/filter_js_snippet.html" %}
     <script src="{% static "justgage/raphael.min.js" %}"></script>
     <script src="{% static "justgage/justgage.js" %}"></script>
-
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
     <script>
         $('.gaugeloop').each(function () {
             j_obj = $(this);
@@ -666,344 +668,73 @@
             {% if not show_pt_filter %}
                 $('#id_test__engagement__product__prod_type').parents('p').remove();
             {% endif %}
-
+            
+            var critical = [];
+            var high = [];
+            var medium = [];
+            var low = [];
+            {% for month in opened_per_month|slice:'1:' %}
+                critical.push([{{ month.0 }}, {{ month.2 }}]);
+                high.push([{{ month.0 }}, {{ month.3 }}]);
+                medium.push([{{ month.0 }}, {{ month.4 }}]);
+                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% endfor %}
             {% if opened_per_month %}
-                chart_div();
+                opened_per_month_2(critical, high, medium, low);
             {% endif %}
+            
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            {% for month in active_per_month|slice:'1:' %}
+                critical.push([{{ month.0 }}, {{ month.2 }}]);
+                high.push([{{ month.0 }}, {{ month.3 }}]);
+                medium.push([{{ month.0 }}, {{ month.4 }}]);
+                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% endfor %}
             {% if active_per_month %}
-                chart_div5();
+                active_per_month(critical, high, medium, low);
             {% endif %}
+            
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            {% for month in accepted_per_month|slice:'1:' %}
+                critical.push([{{ month.0 }}, {{ month.2 }}]);
+                high.push([{{ month.0 }}, {{ month.3 }}]);
+                medium.push([{{ month.0 }}, {{ month.4 }}]);
+                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% endfor %}
             {%  if accepted_per_month %}
-                chart_div2();
+                accepted_per_month_2(critical, high, medium, low);
             {%  endif %}
-            {% if  not critical_prods %}
-                chart_div3();
-                chart_div4();
+
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            var critical1 = [];
+            var high1 = [];
+            var medium1 = [];
+            var low1 = [];
+            {% for month in opened_per_week|slice:'1:' %}
+                critical.push([{{ month.0 }}, {{ month.2 }}]);
+                high.push([{{ month.0 }}, {{ month.3 }}]);
+                medium.push([{{ month.0 }}, {{ month.4 }}]);
+                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% endfor %}
+            {% for month in accepted_per_week|slice:'1:' %}
+                critical1.push([{{ month.0 }}, {{ month.2 }}]);
+                high1.push([{{ month.0 }}, {{ month.3 }}]);
+                medium1.push([{{ month.0 }}, {{ month.4 }}]);
+                low1.push([{{ month.0 }}, {{ month.5 }}]);
+            {% endfor %}
+            {% if not critical_prods %}
+                opened_per_week_2(critical, high, medium, low);
+                accepted_per_week_2(critical1, high1, medium1, low1);
             {% endif %}
-
-            {% if opened_per_month %}
-                function chart_div() {
-                    var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
-
-                    {% for month in opened_per_month|slice:'1:' %}
-                        critical.push([{{ month.0 }}, {{ month.2 }}]);
-                        high.push([{{ month.0 }}, {{ month.3 }}]);
-                        medium.push([{{ month.0 }}, {{ month.4 }}]);
-                        low.push([{{ month.0 }}, {{ month.5 }}]);
-                    {% endfor %}
-
-                    var tick_count = critical.length < 7 ? critical.length : 7;
-                    var options = {
-                        xaxis: {
-                            mode: "time",
-                            timeformat: "%m-%d-%Y",
-                            timezone: 'browser'
-                        },
-                        xaxes: [{
-                            ticks: tick_count
-                        }],
-                        yaxes: [{
-                            min: 0
-                        }],
-                        series: {
-                            lines: {
-                                show: true
-                            },
-                            points: {
-                                show: true
-                            }
-                        },
-                        grid: {
-                            hoverable: true,
-                            borderWidth: 1,
-                            borderColor: '#e7e7e7'
-
-                        },
-                        tooltip: true
-                    };
-                    var plotObj = $.plot($("#chart_div"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-
-                        }],
-                        options);
-                }
-            {%  endif %}
-            {% if active_per_month %}
-                function chart_div5() {
-                    var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
-
-                    {% for month in active_per_month|slice:'1:' %}
-                        critical.push([{{ month.0 }}, {{ month.2 }}]);
-                        high.push([{{ month.0 }}, {{ month.3 }}]);
-                        medium.push([{{ month.0 }}, {{ month.4 }}]);
-                        low.push([{{ month.0 }}, {{ month.5 }}]);
-                    {% endfor %}
-
-                    var tick_count = critical.length < 7 ? critical.length : 7;
-                    var options = {
-                        xaxis: {
-                            mode: "time",
-                            timeformat: "%m-%d-%Y",
-                            timezone: 'browser'
-                        },
-                        xaxes: [{
-                            ticks: tick_count
-                        }],
-                        yaxes: [{
-                            min: 0
-                        }],
-                        series: {
-                            lines: {
-                                show: true
-                            },
-                            points: {
-                                show: true
-                            }
-                        },
-                        grid: {
-                            hoverable: true,
-                            borderWidth: 1,
-                            borderColor: '#e7e7e7'
-
-                        },
-                        tooltip: true
-                    };
-                    var plotObj = $.plot($("#chart_div5"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-
-                        }],
-                        options);
-                }
-            {%  endif %}
-
-            {%  if accepted_per_month %}
-                function chart_div2() {
-                    var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
-
-                    {% for month in accepted_per_month|slice:'1:' %}
-                        critical.push([{{ month.0 }}, {{ month.2 }}]);
-                        high.push([{{ month.0 }}, {{ month.3 }}]);
-                        medium.push([{{ month.0 }}, {{ month.4 }}]);
-                        low.push([{{ month.0 }}, {{ month.5 }}]);
-                    {% endfor %}
-
-
-                    var tick_count = critical.length < 7 ? critical.length : 7;
-                    var options = {
-                        xaxis: {
-                            mode: "time",
-                            timeformat: "%m-%d-%Y",
-                            timezone: 'browser'
-                        },
-                        xaxes: [{
-                            ticks: tick_count
-                        }],
-                        yaxes: [{
-                            min: 0
-                        }],
-                        series: {
-                            lines: {
-                                show: true
-                            },
-                            points: {
-                                show: true
-                            }
-                        },
-                        grid: {
-                            hoverable: true,
-                            borderWidth: 1,
-                            borderColor: '#e7e7e7'
-
-                        },
-                        tooltip: true
-                    };
-                    var plotObj = $.plot($("#chart_div2"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f"
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e'
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28'
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7'
-                        }],
-                        options);
-                }
-            {% endif %}
-
-            function chart_div3() {
-                var critical = [],
-                    high = [],
-                    medium = [],
-                    low = [];
-
-                {% for month in opened_per_week|slice:'1:' %}
-                    critical.push([{{ month.0 }}, {{ month.2 }}]);
-                    high.push([{{ month.0 }}, {{ month.3 }}]);
-                    medium.push([{{ month.0 }}, {{ month.4 }}]);
-                    low.push([{{ month.0 }}, {{ month.5 }}]);
-                {% endfor %}
-                var options = {
-                    xaxis: {
-                        mode: "time",
-                        timeformat: "%m-%d-%Y",
-                        timezone: 'browser'
-                    },
-                    xaxes: [{
-                        ticks: 7
-                    }],
-                    yaxes: [{
-                        min: 0
-                    }],
-                    series: {
-                        lines: {
-                            show: true
-                        },
-                        points: {
-                            show: true
-                        }
-                    },
-                    grid: {
-                        hoverable: true,
-                        borderWidth: 1,
-                        borderColor: '#e7e7e7'
-
-                    },
-                    tooltip: true
-                };
-
-
-                var plotObj = $.plot($("#chart_div3"), [{
-                        data: critical,
-                        label: " Critical",
-                        color: "#d9534f"
-                    }, {
-                        data: high,
-                        label: " High",
-                        color: '#f0ad4e'
-                    }, {
-                        data: medium,
-                        label: " Medium",
-                        color: '#f0de28'
-                    }, {
-                        data: low,
-                        label: " Low",
-                        color: '#337ab7'
-                    }],
-                    options);
-            }
-
-            function chart_div4() {
-                var critical = [],
-                    high = [],
-                    medium = [],
-                    low = [];
-
-                {% for month in accepted_per_week|slice:'1:' %}
-                    critical.push([{{ month.0 }}, {{ month.2 }}]);
-                    high.push([{{ month.0 }}, {{ month.3 }}]);
-                    medium.push([{{ month.0 }}, {{ month.4 }}]);
-                    low.push([{{ month.0 }}, {{ month.5 }}]);
-                {% endfor %}
-                var options = {
-                    xaxis: {
-                        mode: "time",
-                        timeformat: "%m-%d-%Y",
-                        timezone: 'browser'
-                    },
-                    xaxes: [{
-                        ticks: 7
-                    }],
-                    yaxes: [{
-                        min: 0
-                    }],
-                    series: {
-                        lines: {
-                            show: true
-                        },
-                        points: {
-                            show: true
-                        }
-                    },
-                    grid: {
-                        hoverable: true,
-                        borderWidth: 1,
-                        borderColor: '#e7e7e7'
-
-                    },
-                    tooltip: true
-                };
-
-
-                var plotObj = $.plot($("#chart_div4"), [{
-                        data: critical,
-                        label: " Critical",
-                        color: "#d9534f"
-                    }, {
-                        data: high,
-                        label: " High",
-                        color: '#f0ad4e'
-                    }, {
-                        data: medium,
-                        label: " Medium",
-                        color: '#f0de28'
-                    }, {
-                        data: low,
-                        label: " Low",
-                        color: '#337ab7'
-                    }],
-                    options);
-            }
         });
     </script>
 {% endblock %}

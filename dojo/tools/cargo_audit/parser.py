@@ -24,23 +24,38 @@ class CargoAuditParser(object):
             for item in data.get('vulnerabilities').get('list'):
                 advisory = item.get('advisory')
                 vuln_id = advisory.get('id')
-                title = advisory.get('title')
-                description = "\n".join([
-                    f"**Description:** `{advisory.get('description')}`",
-                    f"\n**Read more:** `{advisory.get('url')}`",
-                ])
+                vulnerability_ids = [advisory.get('id')]
+                if "categories" in advisory:
+                    categories = f"**Categories:** {', '.join(advisory['categories'])}"
+                else:
+                    categories = ''
+                description = categories + f"\n**Description:** `{advisory.get('description')}`"
+
+                if item["affected"] is not None and "functions" in item["affected"]:
+                    affected_func = [f'{func}: {", ".join(versions)}'
+                                     for func, versions in item["affected"]["functions"].items()]
+                    description += f"\n**Affected functions**: {', '.join(affected_func)}"
+
+                references = f"{advisory.get('url')}\n" + '\n'.join(advisory['references'])
                 date = advisory.get('date')
-                cve = advisory.get('aliases')[0]
+
+                for alias in advisory.get('aliases', []):
+                    vulnerability_ids.append(alias)
+
                 package_name = item.get('package').get('name')
                 package_version = item.get('package').get('version')
+                title = f"[{package_name} {package_version}] {advisory.get('title')}"
                 severity = "High"
                 if 'keywords' in advisory:
                     tags = advisory.get('keywords')
                 else:
                     tags = []
-
+                try:
+                    mitigation = f"**Update {package_name} to** {', '.join(item['versions']['patched'])}"
+                except KeyError:
+                    mitigation = "No information about patched version"
                 dupe_key = hashlib.sha256(
-                    (vuln_id + cve + date + package_name + package_version).encode('utf-8')
+                    (vuln_id + date + package_name + package_version).encode('utf-8')
                 ).hexdigest()
 
                 if dupe_key in dupes:
@@ -51,7 +66,6 @@ class CargoAuditParser(object):
                         title=title,
                         test=test,
                         severity=severity,
-                        cve=cve,
                         tags=tags,
                         description=description,
                         component_name=package_name,
@@ -59,6 +73,9 @@ class CargoAuditParser(object):
                         vuln_id_from_tool=vuln_id,
                         publish_date=date,
                         nb_occurences=1,
+                        references=references,
+                        mitigation=mitigation
                     )
+                    finding.unsaved_vulnerability_ids = vulnerability_ids
                     dupes[dupe_key] = finding
         return list(dupes.values())

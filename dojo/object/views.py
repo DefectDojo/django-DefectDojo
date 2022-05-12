@@ -1,17 +1,19 @@
 import logging
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import BadRequest
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from dojo.models import Product, Objects_Product, Objects_Engagement, Engagement
+from dojo.models import Product, Objects_Product
 from dojo.forms import ObjectSettingsForm, DeleteObjectsSettingsForm
 from dojo.utils import Product_Tab
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization_decorators import user_is_authorized
 
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Tracking_Files_Add, 'pid')
 def new_object(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -28,7 +30,7 @@ def new_object(request, pid):
             return HttpResponseRedirect(reverse('view_objects', args=(pid,)))
     else:
         tform = ObjectSettingsForm()
-        product_tab = Product_Tab(pid, title="Add Tracked Files to a Product", tab="settings")
+        product_tab = Product_Tab(prod, title="Add Tracked Files to a Product", tab="settings")
 
         return render(request, 'dojo/new_object.html',
                       {'tform': tform,
@@ -36,23 +38,27 @@ def new_object(request, pid):
                        'pid': prod.id})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Tracking_Files_View, 'pid')
 def view_objects(request, pid):
+    product = get_object_or_404(Product, id=pid)
     object_queryset = Objects_Product.objects.filter(product=pid).order_by('path', 'folder', 'artifact')
 
-    product_tab = Product_Tab(pid, title="Tracked Product Files, Paths and Artifacts", tab="settings")
+    product_tab = Product_Tab(product, title="Tracked Product Files, Paths and Artifacts", tab="settings")
     return render(request,
                   'dojo/view_objects.html',
                   {
                       'object_queryset': object_queryset,
                       'product_tab': product_tab,
-                      'pid': pid
+                      'product': product
                   })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Tracking_Files_Edit, 'pid')
 def edit_object(request, pid, ttid):
     object = Objects_Product.objects.get(pk=ttid)
+    product = get_object_or_404(Product, id=pid)
+    if object.product != product:
+        raise BadRequest(f'Product {pid} does not fit to product of Object {object.product.id}')
 
     if request.method == 'POST':
         tform = ObjectSettingsForm(request.POST, instance=object)
@@ -67,7 +73,7 @@ def edit_object(request, pid, ttid):
     else:
         tform = ObjectSettingsForm(instance=object)
 
-    product_tab = Product_Tab(pid, title="Edit Tracked Files", tab="settings")
+    product_tab = Product_Tab(product, title="Edit Tracked Files", tab="settings")
     return render(request,
                   'dojo/edit_object.html',
                   {
@@ -76,9 +82,12 @@ def edit_object(request, pid, ttid):
                   })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Tracking_Files_Delete, 'pid')
 def delete_object(request, pid, ttid):
     object = Objects_Product.objects.get(pk=ttid)
+    product = get_object_or_404(Product, id=pid)
+    if object.product != product:
+        raise BadRequest(f'Product {pid} does not fit to product of Object {object.product.id}')
 
     if request.method == 'POST':
         tform = ObjectSettingsForm(request.POST, instance=object)
@@ -91,25 +100,10 @@ def delete_object(request, pid, ttid):
     else:
         tform = DeleteObjectsSettingsForm(instance=object)
 
-    product_tab = Product_Tab(pid, title="Delete Product Tool Configuration", tab="settings")
+    product_tab = Product_Tab(product, title="Delete Product Tool Configuration", tab="settings")
     return render(request,
                   'dojo/delete_object.html',
                   {
                       'tform': tform,
                       'product_tab': product_tab
-                  })
-
-
-@user_passes_test(lambda u: u.is_staff)
-def view_object_eng(request, id):
-    object_queryset = Objects_Engagement.objects.filter(engagement=id).order_by('object_id__path', 'object_id__folder', 'object_id__artifact')
-    engagement = Engagement.objects.get(id=id)
-    product_tab = Product_Tab(engagement.product.id, title="Tracked Files, Folders and Artifacts on a Product", tab="engagements")
-    product_tab.setEngagement(engagement)
-    return render(request,
-                  'dojo/view_objects_eng.html',
-                  {
-                      'object_queryset': object_queryset,
-                      'product_tab': product_tab,
-                      'id': id
                   })

@@ -1,5 +1,6 @@
 import json
-from packageurl import PackageURL
+from cvss import parser as cvss_parser
+from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
 
@@ -11,10 +12,10 @@ class AnchoreGrypeParser(object):
     """
 
     def get_scan_types(self):
-        return ["anchore_grype"]
+        return ["Anchore Grype"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "anchore_grype"
+        return "Anchore Grype"
 
     def get_description_for_scan_types(self, scan_type):
         return "A vulnerability scanner for container images and filesystems. JSON report generated with '-o json' format"
@@ -23,39 +24,131 @@ class AnchoreGrypeParser(object):
         data = json.load(file)
         dupes = dict()
         for item in data.get("matches", []):
-            cve = item["vulnerability"]["id"]
-            severity = self._convert_severity(item["vulnerability"]["severity"])
-            purl = PackageURL.from_string(item["artifact"]["purl"])
-            description = ""
-            description += f"\n**CVE:** {cve}"
-            description += f'\n**Matcher:** {item["matchDetails"]["matcher"]}'
-            description += f"\n**PURL:** {purl}"
-            description += "\n**Paths:**\n"
-            for match_path in item["artifact"]["locations"]:
-                description += f'\n * {match_path["path"]}'
+            vulnerability = item['vulnerability']
+            vuln_id = vulnerability["id"]
+            vuln_namespace = vulnerability.get('namespace')
+            vuln_datasource = vulnerability.get('dataSource')
+            vuln_severity = self._convert_severity(vulnerability["severity"])
+            vuln_urls = vulnerability.get('urls')
+            vuln_description = vulnerability.get('description')
+            vuln_fix_versions = None
+            if 'fix' in vulnerability:
+                vuln_fix_versions = vulnerability['fix'].get('versions')
+            vuln_cvss = vulnerability.get('cvss')
 
-            dupe_key = cve
+            rel_datasource = None
+            rel_urls = None
+            rel_description = None
+            rel_cvss = None
+            vulnerability_ids = None
+            related_vulnerabilities = item.get('relatedVulnerabilities')
+            if related_vulnerabilities:
+                related_vulnerability = related_vulnerabilities[0]
+                rel_datasource = related_vulnerability.get('dataSource')
+                rel_urls = related_vulnerability.get('urls')
+                rel_description = related_vulnerability.get('description')
+                rel_cvss = related_vulnerability.get('cvss')
+            vulnerability_ids = self.get_vulnerability_ids(vuln_id, related_vulnerabilities)
+
+            matches = item['matchDetails']
+
+            artifact = item['artifact']
+            artifact_name = artifact.get('name')
+            artifact_version = artifact.get('version')
+            artifact_purl = artifact.get('purl')
+
+            finding_title = f'{vuln_id} in {artifact_name}:{artifact_version}'
+
+            finding_tags = None
+            finding_description = ''
+            if vuln_namespace:
+                finding_description += f'**Vulnerability Namespace:** {vuln_namespace}'
+            if vuln_description:
+                finding_description += f'\n**Vulnerability Description:** {vuln_description}'
+            if rel_description and rel_description != vuln_description:
+                finding_description += f'\n**Related Vulnerability Description:** {rel_description}'
+            if matches:
+                if type(item["matchDetails"]) is dict:
+                    finding_description += f"\n**Matcher:** {matches['matcher']}"
+                    finding_tags = [matches['matcher'].replace('-matcher', '')]
+                elif len(matches) == 1:
+                    finding_description += f"\n**Matcher:** {matches[0]['matcher']}"
+                    finding_tags = [matches[0]['matcher'].replace('-matcher', '')]
+                else:
+                    finding_description += '\n**Matchers:**'
+                    finding_tags = []
+                    for match in matches:
+                        finding_description += f"\n- {match['matcher']}"
+                        tag = match['matcher'].replace('-matcher', '')
+                        if tag not in finding_tags:
+                            finding_tags.append(tag)
+            if artifact_purl:
+                finding_description += f'\n**Package URL:** {artifact_purl}'
+
+            finding_mitigation = None
+            if vuln_fix_versions:
+                finding_mitigation = 'Upgrade to version:'
+                if len(vuln_fix_versions) == 1:
+                    finding_mitigation += f' {vuln_fix_versions[0]}'
+                else:
+                    for fix_version in vuln_fix_versions:
+                        finding_mitigation += f'\n- {fix_version}'
+
+            finding_references = ''
+            if vuln_datasource:
+                finding_references += f'**Vulnerability Datasource:** {vuln_datasource}\n'
+            if vuln_urls:
+                if len(vuln_urls) == 1:
+                    if vuln_urls[0] != vuln_datasource:
+                        finding_references += f'**Vulnerability URL:** {vuln_urls[0]}\n'
+                else:
+                    finding_references += '**Vulnerability URLs:**\n'
+                    for url in vuln_urls:
+                        if url != vuln_datasource:
+                            finding_references += f'- {url}\n'
+            if rel_datasource:
+                finding_references += f'**Related Vulnerability Datasource:** {rel_datasource}\n'
+            if rel_urls:
+                if len(rel_urls) == 1:
+                    if rel_urls[0] != vuln_datasource:
+                        finding_references += f'**Related Vulnerability URL:** {rel_urls[0]}\n'
+                else:
+                    finding_references += '**Related Vulnerability URLs:**\n'
+                    for url in rel_urls:
+                        if url != vuln_datasource:
+                            finding_references += f'- {url}\n'
+            if finding_references and finding_references[-1] == '\n':
+                finding_references = finding_references[:-1]
+
+            finding_cvss3 = None
+            if vuln_cvss:
+                finding_cvss3 = self.get_cvss(vuln_cvss)
+            if not finding_cvss3 and rel_cvss:
+                finding_cvss3 = self.get_cvss(rel_cvss)
+
+            dupe_key = finding_title
             if dupe_key in dupes:
-                find = dupes[dupe_key]
-                find.nb_occurences += 1
+                finding = dupes[dupe_key]
+                finding.nb_occurences += 1
             else:
                 dupes[dupe_key] = Finding(
-                    title=f"Vulnerable component ({purl.name}:{purl.version}) {cve}",
-                    description=description,
-                    cve=cve,
-                    severity=severity,
-                    impact="No impact provided",
-                    mitigation="No mitigation provided",
-                    references="[{}](https://nvd.nist.gov/vuln/detail/{})".format(
-                        cve, cve
-                    ),
-                    static_finding=True,
-                    dynamic_finding=False,
-                    component_name=purl.name,
-                    component_version=purl.version,
-                    vuln_id_from_tool=cve,
-                    nb_occurences=1,
-                )
+                            title=finding_title,
+                            description=finding_description,
+                            cwe=1352,
+                            cvssv3=finding_cvss3,
+                            severity=vuln_severity,
+                            mitigation=finding_mitigation,
+                            references=finding_references,
+                            component_name=artifact_name,
+                            component_version=artifact_version,
+                            vuln_id_from_tool=vuln_id,
+                            tags=finding_tags,
+                            static_finding=True,
+                            dynamic_finding=False,
+                            nb_occurences=1,
+                        )
+                dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
+
         return list(dupes.values())
 
     def _convert_severity(self, val):
@@ -65,3 +158,25 @@ class AnchoreGrypeParser(object):
             return "Info"
         else:
             return val.title()
+
+    def get_cvss(self, cvss):
+        if cvss:
+            for cvss_item in cvss:
+                vector = cvss_item['vector']
+                cvss_objects = cvss_parser.parse_cvss_from_text(vector)
+                if len(cvss_objects) > 0 and type(cvss_objects[0]) == CVSS3:
+                    return vector
+        return None
+
+    def get_vulnerability_ids(self, vuln_id, related_vulnerabilities):
+        vulnerability_ids = list()
+        if vuln_id:
+            vulnerability_ids.append(vuln_id)
+        if related_vulnerabilities:
+            for related_vulnerability in related_vulnerabilities:
+                if related_vulnerability.get('id'):
+                    vulnerability_ids.append(related_vulnerability.get('id'))
+        if vulnerability_ids:
+            return vulnerability_ids
+        else:
+            return None

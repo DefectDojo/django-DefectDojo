@@ -20,9 +20,10 @@ Set up your environment to use the debug environment, such as:
 
 `$ docker/setEnv.sh debug`
 
-Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md) for more details.
+Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) for more details.
 
 ### Docker images
+
 You'd want to build your docker images locally, and eventually pass in your local user's `uid` to be able to write to the image (handy for database migration files). Assuming your user's `uid` is `1000`, then:
 
 {{< highlight bash >}}
@@ -35,13 +36,64 @@ $ docker-compose build --build-arg uid=1000
 |-------                                        |--------
 |`dojo/tools/<parser_dir>/__init__.py`          | Empty file for class initialization
 |`dojo/tools/<parser_dir>/parser.py`            | The meat. This is where you write your actual parser. The class name must be the Python module name without underscores plus `Parser`. **Example:** When the name of the Python module is `dependency_check`, the class name shall be `DependencyCheckParser`
-|`dojo/unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
+|`unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
+|`unittests/tools/test_<parser_name>_parser.py` | Unit tests of the parser.
 |`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
 
+## Factory contract
+
+Parser are loaded dynamicaly with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
+
+1. your parser **MUST** be in a sub-module of module `dojo.tools`
+   - ex: `dojo.tools.my_tool.parser` module
+2. your parser **MUST** be a class in this sub-module.
+   - ex: `dojo.tools.my_tool.parser.MyToolParser`
+3. The name of this class **MUST** be the Python module name without underscores and with `Parser` suffix.
+   - ex: `dojo.tools.my_tool.parser.MyToolParser`
+4. This class **MUST** have an empty constructor or no constructor
+5. This class **MUST** implement 3 methods:
+   1. `def get_scan_types(self)` This function return a list of all the *scan_type* supported by your parser. This identifiers are used internally. Your parser can support more than one *scan_type*. For example some parsers use different identifier to modify the behavior of the parser (aggregate, filter, etc...)
+   2. `def get_label_for_scan_types(self, scan_type):` This function return a string used to provide some text in the UI (short label)
+   3. `def get_description_for_scan_types(self, scan_type):` This function return a string used to provide some text in the UI (long description)
+   4. `def get_findings(self, file, test)` This function return a list of findings
+6. If your parser have more than 1 scan_type (for detailled mode) you **MUST** implement `def set_mode(self, mode)` method
+
+Example:
+
+```Python
+
+class MyToolParser(object):
+    def get_scan_types(self):
+        return ["My Tool Scan", "My Tool Scan detailed"]
+
+    def get_label_for_scan_types(self, scan_type):
+        if scan_type == "My Tool Scan":
+            return "My Tool XML Scan aggregated by ..."
+        else:
+            return "My Tool XML Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Aggregates findings per cwe, title, description, file_path. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0"
+
+    def requires_file(self, scan_type):
+        return False
+
+    # mode:
+    # None (default): aggregates vulnerabilites per sink filename (legacy behavior)
+    # 'detailed' : No aggregation
+    mode = None
+
+    def set_mode(self, mode):
+        self.mode = mode
+
+    def get_findings(self, file, test):
+        <...>
+
+```
 
 ## Template Generator
 
-Utilze the [template](https://github.com/DefectDojo/cookiecutter-scanner-parser)  parser to quickly generate the files required. To get started you will need to install [cookiecutter](https://github.com/cookiecutter/cookiecutter).
+Use the [template](https://github.com/DefectDojo/cookiecutter-scanner-parser)  parser to quickly generate the files required. To get started you will need to install [cookiecutter](https://github.com/cookiecutter/cookiecutter).
 
 {{< highlight bash >}}
 $ pip install cookiecutter
@@ -62,7 +114,7 @@ Here is a list of advise that will make your parser future proof.
 ### Do not parse URLs by hand
 
 We use 2 modules to handle endpoints:
- - `hyperlink` 
+ - `hyperlink`
  - `dojo.models` with a specific class to handle processing around URLs to create endpoints `Endpoint`.
 
 All the existing parser use the same code to parse URL and create endpoints.
@@ -90,7 +142,7 @@ Very bad example:
 Parsers may have many fields, out of which many of them may be optional.
 It better to not set attribute if you don't have data instead of filling with values like `NA`, `No data` etc...
 
-Check class `dojo.models.Finding` 
+Check class `dojo.models.Finding`
 
 ### Data could be missing in the source report
 
@@ -208,17 +260,17 @@ MYSQL> flush privileges;
 This local command will launch the unit test for your new parser
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.tools.<your_unittest_py_file>.<main_class_name> -v2'
+$ docker-compose exec uwsgi bash -c 'python manage.py test unittests.tools.<your_unittest_py_file>.<main_class_name> -v2'
 {{< /highlight >}}
 
 Example for the blackduck hub parser:
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
+$ docker-compose exec uwsgi bash -c 'python manage.py test unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
 {{< /highlight >}}
 
 {{% alert title="Information" color="info" %}}
-If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests -v2'`
+If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
 {{% /alert %}}
 
 ### Endpoint validation
@@ -260,4 +312,4 @@ If you want to take a look at previous parsers that are now part of DefectDojo, 
 
 ## Update the import page documentation
 
-Please update [`docs/content/en/integrations/import.md`] with the details of your new parser.
+Please update [`docs/content/en/integrations/parsers.md`] with the details of your new parser.

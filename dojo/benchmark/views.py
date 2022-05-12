@@ -63,7 +63,7 @@ def score_asvs(product, benchmark_type):
     benchmark_product_summary.save()
 
 
-@user_is_authorized(Product, Permissions.Benchmark_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Benchmark_Edit, 'pid')
 def benchmark_view(request, pid, type, cat=None):
     product = get_object_or_404(Product, id=pid)
     benchmark_type = get_object_or_404(Benchmark_Type, id=type)
@@ -119,7 +119,7 @@ def benchmark_view(request, pid, type, cat=None):
 
     benchmark_summary_form = Benchmark_Product_SummaryForm(instance=benchmark_product_summary)
 
-    product_tab = Product_Tab(pid, title="Benchmarks", tab="benchmarks")
+    product_tab = Product_Tab(product, title="Benchmarks", tab="benchmarks")
 
     return render(request, 'dojo/benchmark.html',
                   {'benchmarks': benchmarks,
@@ -134,7 +134,7 @@ def benchmark_view(request, pid, type, cat=None):
                    'benchmark_category': benchmark_category})
 
 
-@user_is_authorized(Product, Permissions.Benchmark_Delete, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Benchmark_Delete, 'pid')
 def delete(request, pid, type):
     product = get_object_or_404(Product, id=pid)
     benchmark_type = get_object_or_404(Benchmark_Type, id=type)
@@ -154,7 +154,7 @@ def delete(request, pid, type):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('product'))
 
-    product_tab = Product_Tab(pid, title="Delete Benchmarks", tab="benchmarks")
+    product_tab = Product_Tab(product, title="Delete Benchmarks", tab="benchmarks")
     return render(request, 'dojo/delete_benchmark.html',
                   {'product': product,
                    'form': form,

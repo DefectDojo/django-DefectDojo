@@ -1,0 +1,13 @@
+{% if tags %}
+    {% if tags|length < 5 %}
+        <sup>
+    {% endif %}
+
+        {% for tag in tags %}
+            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
+        {% endfor %}
+        
+    {% if tags|length < 5 %}
+        </sup>
+    {% endif %}
+{% endif %}

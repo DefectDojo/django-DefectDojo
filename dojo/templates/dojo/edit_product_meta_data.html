@@ -3,14 +3,10 @@
 
 {% block content %}
     {{ block.super }}
-    <h3> Edit {{ product.name }} Metadata</h3>
-    <p>
-        Use the form below to edit the values in each of the metadata fields.  To remove a field, leave the value blank.
-    </p>
+    <h3> Edit Product ({{ product.name }}) Metadata</h3>
     <br/>
     <form class="form-horizontal" method="post">{% csrf_token %}
         {% for cf in product.product_meta.all %}
-
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="cfv_{{ cf.id }}">{{ cf.name }}</label>
                 <div class="col-sm-10">

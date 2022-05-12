@@ -3,6 +3,9 @@ import re
 
 import html2text
 from lxml import etree
+import textwrap
+from django.conf import settings
+from django.core.exceptions import ValidationError
 
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
@@ -18,7 +21,10 @@ class SonarQubeApiImporter(object):
     """
 
     def get_findings(self, filename, test):
-        return self.import_issues(test)
+        items = self.import_issues(test)
+        if settings.SONARQUBE_API_PARSER_HOTSPOTS:
+            items.extend(self.import_hotspots(test))
+        return items
 
     @staticmethod
     def is_confirmed(state):
@@ -40,26 +46,31 @@ class SonarQubeApiImporter(object):
         ]
 
     @staticmethod
+    def is_reviewed(state):
+        return state.lower() in [
+            'reviewed'
+        ]
+
+    @staticmethod
     def prepare_client(test):
         product = test.engagement.product
-        if test.sonarqube_config:
-            config = test.sonarqube_config  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
+        if test.api_scan_configuration:
+            config = test.api_scan_configuration  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
             # Double check of config
             if config.product != product:
-                raise Exception('Product SonarQube Configuration and "Product" mismatch')
+                raise ValidationError('Product API Scan Configuration and Product do not match.')
         else:
-            sqqs = product.sonarqube_product_set.filter(product=product)
+            sqqs = product.product_api_scan_configuration_set.filter(product=product, tool_configuration__tool_type__name='SonarQube')
             if sqqs.count() == 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 4
                 config = sqqs.first()
             elif sqqs.count() > 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 6
-                raise Exception(
-                    'It has configured more than one Product SonarQube Configuration but non of them has been choosen.\n'
-                    'Please specify at Test which one should be used.'
+                raise ValidationError(
+                    'More than one Product API Scan Configuration has been configured, but none of them has been chosen. Please specify which one should be used.'
                 )
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
                 config = None
 
-        return SonarQubeAPI(tool_config=config.sonarqube_tool_config if config else None), config
+        return SonarQubeAPI(tool_config=config.tool_configuration if config else None), config
 
     def import_issues(self, test):
 
@@ -69,8 +80,8 @@ class SonarQubeApiImporter(object):
 
             client, config = self.prepare_client(test)
 
-            if config and config.sonarqube_project_key:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-                component = client.get_project(config.sonarqube_project_key)
+            if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
+                component = client.get_project(config.service_key_1)
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
                 component = client.find_project(test.engagement.product.name)
 
@@ -93,10 +104,16 @@ class SonarQubeApiImporter(object):
                 line = issue.get('line')
                 rule_id = issue['rule']
                 rule = client.get_rule(rule_id)
-                severity = self.convert_sonar_severity(rule['severity'])
-                description = self.clean_rule_description_html(rule['htmlDesc'])
-                cwe = self.clean_cwe(rule['htmlDesc'])
-                references = self.get_references(rule['htmlDesc'])
+                severity = self.convert_sonar_severity(issue['severity'])
+                # custom (user defined) SQ rules may not have 'htmlDesc'
+                if 'htmlDesc' in rule:
+                    description = self.clean_rule_description_html(rule['htmlDesc'])
+                    cwe = self.clean_cwe(rule['htmlDesc'])
+                    references = self.get_references(rule['htmlDesc'])
+                else:
+                    description = ""
+                    cwe = None
+                    references = ""
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
                     key=issue['key'],
@@ -128,6 +145,7 @@ class SonarQubeApiImporter(object):
                     impact="No impact provided",
                     static_finding=True,
                     sonarqube_issue=sonarqube_issue,
+                    unique_id_from_tool=issue.get('key'),
                 )
                 items.append(find)
 
@@ -138,10 +156,88 @@ class SonarQubeApiImporter(object):
                 title='SonarQube API import issue',
                 description=e,
                 icon='exclamation-triangle',
-                source='SonarQube API'
+                source='SonarQube API',
+                obj=test.engagement.product
             )
 
         return items
+
+    def import_hotspots(self, test):
+        try:
+            items = list()
+            client, config = self.prepare_client(test)
+
+            if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
+                component = client.get_project(config.service_key_1)
+            else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
+                component = client.find_project(test.engagement.product.name)
+
+            hotspots = client.find_hotspots(component['key'])
+            logging.info('Found {} hotspots for project {}'.format(len(hotspots), component["key"]))
+
+            for hotspot in hotspots:
+                status = hotspot['status']
+
+                if self.is_reviewed(status):
+                    continue
+
+                type = 'SECURITY_HOTSPOT'
+                severity = 'Info'
+                title = textwrap.shorten(text=hotspot['message'], width=500)
+                component_key = hotspot['component']
+                line = hotspot.get('line')
+                rule_id = hotspot['key']
+                rule = client.get_hotspot_rule(rule_id)
+                scanner_confidence = self.convert_scanner_confidence(hotspot['vulnerabilityProbability'])
+                description = self.clean_rule_description_html(rule['vulnerabilityDescription'])
+                cwe = self.clean_cwe(rule['fixRecommendations'])
+                references = self.get_references(rule['riskDescription']) + self.get_references(rule['fixRecommendations'])
+
+                sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
+                    key=hotspot['key'],
+                    defaults={
+                        'status': status,
+                        'type': type
+                    }
+                )
+
+                # Only assign the SonarQube_issue to the first finding related to the issue
+                if Finding.objects.filter(sonarqube_issue=sonarqube_issue).exists():
+                    sonarqube_issue = None
+
+                find = Finding(
+                    title=title,
+                    cwe=cwe,
+                    description=description,
+                    test=test,
+                    severity=severity,
+                    references=references,
+                    file_path=component_key,
+                    line=line,
+                    active=True,
+                    verified=self.is_confirmed(status),
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    static_finding=True,
+                    scanner_confidence=scanner_confidence,
+                    sonarqube_issue=sonarqube_issue,
+                    unique_id_from_tool=f"hotspot:{hotspot.get('key')}",
+                )
+                items.append(find)
+
+            return items
+
+        except Exception as e:
+            logger.exception(e)
+            create_notification(
+                event='other',
+                title='SonarQube API import issue',
+                description=e,
+                icon='exclamation-triangle',
+                source='SonarQube API',
+                obj=test.engagement.product
+            )
 
     @staticmethod
     def clean_rule_description_html(raw_html):
@@ -171,6 +267,18 @@ class SonarQubeApiImporter(object):
             return "Low"
         else:
             return "Info"
+
+    @staticmethod
+    def convert_scanner_confidence(sonar_scanner_confidence):
+        sev = sonar_scanner_confidence.lower()
+        if sev == "high":
+            return 1
+        elif sev == "medium":
+            return 4
+        elif sev == "low":
+            return 7
+        else:
+            return 7
 
     @staticmethod
     def get_references(vuln_details):

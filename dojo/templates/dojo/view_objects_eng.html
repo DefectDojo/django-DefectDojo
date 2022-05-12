@@ -35,13 +35,7 @@
                     {% else %}
                     {{ object.object_id|tracked_object_value }}
                     {% endif %}
-                    {% if object.object_id.tags %}
-                         <sup>
-                             {% for tag in object.object_id.tags.all %}
-                             <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                             {% endfor %}
-                         </sup>
-                    {% endif %}
+                    {% include "dojo/snippets/tags.html" with tags=object.object_id.tags.all %}
                    </td>
                     <td>{{ object.object_id|tracked_object_type }}</td>
                     <td>{{ object.object_id.name|default_if_none:"" }}</td>

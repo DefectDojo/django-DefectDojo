@@ -147,7 +147,7 @@ class NiktoParser(object):
                 endpoint = Endpoint.from_uri(ip)
                 finding.unsaved_endpoints = [endpoint]
             except ValidationError:
-                logger.warn("Invalid iplink in the report")
+                logger.debug("Invalid iplink in the report")
 
             dupe_key = hashlib.sha256(description.encode("utf-8")).hexdigest()
 

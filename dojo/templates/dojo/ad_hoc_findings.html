@@ -8,7 +8,10 @@
 {% endblock %}
 {% block add_styles %}
     {{ block.super }}
-    .select2 .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    .chosen-container {
+    width: 70% !important;
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
     width: 70% !important;
     }
 {% endblock %}
@@ -69,20 +72,18 @@
                     elem.id = "req"
                 }
 
-                var mde = new EasyMDE({
-                    spellChecker: false,
-                    element: elem,
-                    autofocus: false,
-                    forceSync: true,
-                    hideIcons: ["side-by-side", "fullscreen"]
-                });
-                mde.render();
+                if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids') {
+                    var mde = new EasyMDE({
+                        spellChecker: false,
+                        element: elem,
+                        autofocus: false,
+                        forceSync: true,
+                        hideIcons: ["side-by-side", "fullscreen"]
+                    });
+                    mde.render();
+                }
             });
         });
-        $('#add_id_endpoints').attr('href', "{% url 'add_endpoint' pid %}?_popup");
-        {% if not form_error %}
-            $('#id_endpoints').find('option').remove();
-        {% endif %}
     </script>
 
 

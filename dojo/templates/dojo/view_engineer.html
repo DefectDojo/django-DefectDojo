@@ -581,278 +581,74 @@
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
     <script>
         $(function () {
+            var critical = [];
+            var high = [];
+            var medium = [];
+            var low = [];
+            var ticks = [];
+            {% for month in chart_data|slice:'1:' %}
+                month = {{month|safe}};
+                ttp = {{forloop.counter}};
+                ticks.push(month[0]);
+                critical.push([ttp, month[1]]);
+                high.push([ttp, month[2]]);
+                medium.push([ttp, month[3]]);
+                low.push([ttp, month[4]]);
+            {% endfor %}
+            open_bug_count_by_month(critical, high, medium, low, ticks);
 
-            chart_div();
-            chart_div2();
-            chart_div3();
-            chart_div4();
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            ticks = [];
+            {% for month in a_chart_data|slice:"1:" %}
+                month = {{month|safe}};
+                ttp = {{forloop.counter}}
+                        ticks.push(month[0]);
+                critical.push([ttp, month[1]]);
+                high.push([ttp, month[2]]);
+                medium.push([ttp, month[3]]);
+                low.push([ttp, month[4]]);
+            {% endfor %}
+            accepted_bug_count_by_month(critical, high, medium, low, ticks);
 
-            function chart_div() {
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            ticks = [];
+            {% for month in week_chart_data|slice:"1:" %}
+                month = {{month|safe}};
+                ttp = {{forloop.counter}}
+                        critical.push([ttp, month[1]]);
+                high.push([ttp, month[2]]);
+                medium.push([ttp, month[3]]);
+                low.push([ttp, month[4]]);
+                ticks.push(month[0].replace(' - ', '-'))
+            {% endfor %}
+            open_bug_count_by_week(critical, high, medium, low, ticks);
 
-
-                var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [],
-                        ticks = [];
-
-                {% for month in chart_data|slice:'1:' %}
-                    month = {{month|safe}};
-                    ttp = {{forloop.counter}};
-                    ticks.push(month[0]);
-                    critical.push([ttp, month[1]]);
-                    high.push([ttp, month[2]]);
-                    medium.push([ttp, month[3]]);
-                    low.push([ttp, month[4]]);
-                {% endfor %}
-                var options = {
-                    xaxis: {
-                        tickFormatter: function (x) {
-                            return ticks[x - 1];
-                        },
-                    },
-                    xaxes: [{
-                        ticks: ticks.length,
-                    }],
-                    yaxes: [{
-                        min: 0
-                    }],
-                    series: {
-                        lines: {
-                            show: true
-                        },
-                        points: {
-                            show: true
-                        }
-                    },
-                    grid: {
-                        hoverable: false,
-                        borderWidth: 1,
-                        borderColor: '#e7e7e7',
-
-                    },
-                    tooltip: false,
-                };
-                var plotObj = $.plot($("#chart_div"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-                        }],
-                        options);
-            }
-
-            function chart_div2() {
-
-                var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [],
-                        ticks = [];
-                {% for month in a_chart_data|slice:"1:" %}
-                    month = {{month|safe}};
-                    ttp = {{forloop.counter}}
-                            ticks.push(month[0]);
-                    critical.push([ttp, month[1]]);
-                    high.push([ttp, month[2]]);
-                    medium.push([ttp, month[3]]);
-                    low.push([ttp, month[4]]);
-                {% endfor %}
-
-                var options = {
-                    xaxis: {
-                        tickFormatter: function (x) {
-                            return ticks[x - 1];
-                        },
-                    },
-                    xaxes: [{
-                        ticks: ticks.length,
-                    }],
-                    yaxes: [{
-                        min: 0
-                    }],
-                    series: {
-                        lines: {
-                            show: true
-                        },
-                        points: {
-                            show: true
-                        }
-                    },
-                    grid: {
-                        hoverable: false,
-                        borderWidth: 1,
-                        borderColor: '#e7e7e7',
-
-                    },
-                    tooltip: false,
-                };
-                var plotObj = $.plot($("#chart_div2"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-                        }],
-                        options);
-            }
-
-            function chart_div3() {
-                var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [],
-                        ticks = [];
-
-
-                {% for month in week_chart_data|slice:"1:" %}
-                    month = {{month|safe}};
-                    ttp = {{forloop.counter}}
-                            critical.push([ttp, month[1]]);
-                    high.push([ttp, month[2]]);
-                    medium.push([ttp, month[3]]);
-                    low.push([ttp, month[4]]);
-                    ticks.push(month[0].replace(' - ', '-'))
-                {% endfor %}
-                var options = {
-                    xaxis: {
-                        tickFormatter: function (x) {
-                            return ticks[x - 1];
-                        },
-                    },
-                    xaxes: [{
-                        ticks: ticks.length,
-                    }],
-                    yaxes: [{
-                        min: 0
-                    }],
-                    series: {
-                        lines: {
-                            show: true
-                        },
-                        points: {
-                            show: true
-                        }
-                    },
-                    grid: {
-                        hoverable: false,
-                        borderWidth: 1,
-                        borderColor: '#e7e7e7',
-
-                    },
-                    tooltip: false,
-                };
-
-
-                var plotObj = $.plot($("#chart_div3"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-                        }],
-                        options);
-            }
-
-            function chart_div4() {
-                var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [],
-                        ticks = [];
-
-
-                {% for month in week_a_chart_data|slice:"1:" %}
-                    month = {{month|safe}};
-                    ttp = {{forloop.counter}}
-                            critical.push([ttp, month[1]]);
-                    high.push([ttp, month[2]]);
-                    medium.push([ttp, month[3]]);
-                    low.push([ttp, month[4]]);
-                    ticks.push(month[0].replace(' - ', '-'));
-                {% endfor %}
-                var options = {
-                    xaxis: {
-                        tickFormatter: function (x) {
-                            return ticks[x - 1];
-                        },
-                    },
-                    xaxes: [{
-                        ticks: ticks.length,
-                    }],
-                    yaxes: [{
-                        min: 0
-                    }],
-                    series: {
-                        lines: {
-                            show: true
-                        },
-                        points: {
-                            show: true
-                        }
-                    },
-                    grid: {
-                        hoverable: false,
-                        borderWidth: 1,
-                        borderColor: '#e7e7e7',
-
-                    },
-                    tooltip: false,
-                };
-
-
-                var plotObj = $.plot($("#chart_div4"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-                        }],
-                        options);
-            }
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            ticks = [];
+            {% for month in week_a_chart_data|slice:"1:" %}
+                month = {{month|safe}};
+                ttp = {{forloop.counter}}
+                        critical.push([ttp, month[1]]);
+                high.push([ttp, month[2]]);
+                medium.push([ttp, month[3]]);
+                low.push([ttp, month[4]]);
+                ticks.push(month[0].replace(' - ', '-'));
+            {% endfor %}
+            accepted_bug_count_by_week(critical, high, medium, low, ticks);
         });
 
     </script>

@@ -1,41 +1,29 @@
+from django.core.exceptions import ValidationError
+from django.core.exceptions import MultipleObjectsReturned
+from django.conf import settings
+from dojo.decorators import dojo_async_task
+from dojo.celery import app
+from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.utils import max_safe
-from dojo.tools.factory import import_parser_factory
-from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, Test_Import, Test_Import_Finding_Action
+from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, \
+    IMPORT_REACTIVATED_FINDING, IMPORT_UNTOUCHED_FINDING, Test_Import, Test_Import_Finding_Action, \
+    Endpoint_Status, Vulnerability_Id
 import logging
+
 
 logger = logging.getLogger(__name__)
 
 
-def parse_findings(scan, test, active, verified, scan_type):
-    try:
-        parser = import_parser_factory(scan,
-                                        test,
-                                        active,
-                                        verified,
-                                        scan_type)
-        parsed_findings = parser.get_findings(scan, test)
-        return parsed_findings
-    except SyntaxError as se:
-        logger.exception(se)
-        logger.warn("Error in parser: {}".format(str(se)))
-        raise
-    except ValueError as ve:
-        logger.exception(ve)
-        logger.warn("Error in parser: {}".format(str(ve)))
-        raise
-    except Exception as e:
-        logger.exception(e)
-        logger.warn("Error in parser: {}".format(str(e)))
-        raise
+def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date):
+    if not scan_date:
+        scan_date = now
 
-
-def update_timestamps(test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time):
     test.engagement.updated = now
     if test.engagement.engagement_type == 'CI/CD':
-        test.engagement.target_end = max_safe([scan_date_time.date(), test.engagement.target_end])
+        test.engagement.target_end = max_safe([scan_date.date(), test.engagement.target_end])
 
     test.updated = now
-    test.target_end = max_safe([scan_date_time, test.target_end])
+    test.target_end = max_safe([scan_date, test.target_end])
 
     if version:
         test.version = version
@@ -56,8 +44,8 @@ def update_timestamps(test, scan_date, version, branch_tag, build_id, commit_has
 
 def update_import_history(type, active, verified, tags, minimum_severity, endpoints_to_add, version, branch_tag,
                             build_id, commit_hash, push_to_jira, close_old_findings, test,
-                            new_findings=[], closed_findings=[], reactivated_findings=[]):
-    logger.debug("new: %d closed: %d reactivated: %d", len(new_findings), len(closed_findings), len(reactivated_findings))
+                            new_findings=[], closed_findings=[], reactivated_findings=[], untouched_findings=[]):
+    logger.debug("new: %d closed: %d reactivated: %d untouched: %d", len(new_findings), len(closed_findings), len(reactivated_findings), len(untouched_findings))
     # json field
     import_settings = {}
     import_settings['active'] = active
@@ -76,16 +64,21 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
 
     test_import_finding_action_list = []
     for finding in closed_findings:
-        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+        logger.debug('preparing Test_Import_Finding_Action for closed finding: %i', finding.id)
         test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
     for finding in new_findings:
-        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+        logger.debug('preparing Test_Import_Finding_Action for created finding: %i', finding.id)
         test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
     for finding in reactivated_findings:
-        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+        logger.debug('preparing Test_Import_Finding_Action for reactivated finding: %i', finding.id)
         test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_REACTIVATED_FINDING))
+    for finding in untouched_findings:
+        logger.debug('preparing Test_Import_Finding_Action for untouched finding: %i', finding.id)
+        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_UNTOUCHED_FINDING))
 
     Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
+
+    return test_import
 
 
 def construct_imported_message(scan_type, finding_count=0, new_finding_count=0, closed_finding_count=0, reactivated_finding_count=0, untouched_finding_count=0):
@@ -106,3 +99,98 @@ def construct_imported_message(scan_type, finding_count=0, new_finding_count=0, 
         message = 'No findings were added/updated/closed/reactivated as the findings in Defect Dojo are identical to those in the uploaded report.'
 
     return message
+
+
+def chunk_list(list):
+    chunk_size = settings.ASYNC_FINDING_IMPORT_CHUNK_SIZE
+    # Break the list of parsed findings into "chunk_size" lists
+    chunk_list = [list[i:i + chunk_size] for i in range(0, len(list), chunk_size)]
+    logger.debug('IMPORT_SCAN: Split endpoints into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_size))
+    return chunk_list
+
+
+def chunk_endpoints_and_disperse(finding, test, endpoints, **kwargs):
+    chunked_list = chunk_list(endpoints)
+    # If there is only one chunk, then do not bother with async
+    if len(chunked_list) < 2:
+        add_endpoints_to_unsaved_finding(finding, test, endpoints, sync=True)
+        return []
+    # First kick off all the workers
+    for endpoints_list in chunked_list:
+        add_endpoints_to_unsaved_finding(finding, test, endpoints_list, sync=False)
+
+
+# Since adding a model to a ManyToMany relationship does not require an additional
+# save, there is no need to keep track of when the task finishes.
+@dojo_async_task
+@app.task()
+def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
+    logger.debug('IMPORT_SCAN: Adding ' + str(len(endpoints)) + ' endpoints to finding:' + str(finding))
+    for endpoint in endpoints:
+        try:
+            endpoint.clean()
+        except ValidationError as e:
+            logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
+                            "{}".format(e))
+        ep = None
+        try:
+            ep, created = endpoint_get_or_create(
+                protocol=endpoint.protocol,
+                userinfo=endpoint.userinfo,
+                host=endpoint.host,
+                port=endpoint.port,
+                path=endpoint.path,
+                query=endpoint.query,
+                fragment=endpoint.fragment,
+                product=test.engagement.product)
+        except (MultipleObjectsReturned):
+            raise Exception("Endpoints in your database are broken. Please access {} and migrate them to new format or "
+                            "remove them.".format(reverse('endpoint_migrate')))
+
+        eps, created = Endpoint_Status.objects.get_or_create(
+            finding=finding,
+            endpoint=ep)
+        if created:
+            eps.date = finding.date
+            eps.save()
+
+        if ep and eps:
+            ep.endpoint_status.add(eps)
+            finding.endpoint_status.add(eps)
+            finding.endpoints.add(ep)
+    logger.debug('IMPORT_SCAN: ' + str(len(endpoints)) + ' imported')
+
+
+# This function is added to the async queue at the end of all finding import tasks
+# and after endpoint task, so this should only run after all the other ones are done
+@dojo_async_task
+@app.task()
+def update_test_progress(test, **kwargs):
+    test.percent_complete = 100
+    test.save()
+
+
+def handle_vulnerability_ids(finding):
+    # Synchronize the cve field with the unsaved_vulnerability_ids
+    # We do this to be as flexible as possible to handle the fields until
+    # the cve field is not needed anymore and can be removed.
+    if finding.unsaved_vulnerability_ids and finding.cve:
+        # Make sure the first entry of the list is the value of the cve field
+        finding.unsaved_vulnerability_ids.insert(0, finding.cve)
+    elif finding.unsaved_vulnerability_ids and not finding.cve:
+        # If the cve field is not set, use the first entry of the list to set it
+        finding.cve = finding.unsaved_vulnerability_ids[0]
+    elif not finding.unsaved_vulnerability_ids and finding.cve:
+        # If there is no list, make one with the value of the cve field
+        finding.unsaved_vulnerability_ids = [finding.cve]
+
+    if finding.unsaved_vulnerability_ids:
+        # Remove duplicates
+        finding.unsaved_vulnerability_ids = list(dict.fromkeys(finding.unsaved_vulnerability_ids))
+
+        # Add all vulnerability ids to the database
+        for vulnerability_id in finding.unsaved_vulnerability_ids:
+            Vulnerability_Id(
+                vulnerability_id=vulnerability_id,
+                finding=finding,
+            ).save()

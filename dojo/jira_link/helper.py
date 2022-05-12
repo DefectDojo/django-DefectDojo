@@ -478,26 +478,36 @@ def get_labels(obj):
     labels = []
     system_settings = System_Settings.objects.get()
     system_labels = system_settings.jira_labels
-    if system_labels is None:
-        return
-    else:
+    if system_labels:
         system_labels = system_labels.split()
-    if len(system_labels) > 0:
         for system_label in system_labels:
             labels.append(system_label)
-    # Update the label with the product name (underscore)
-    labels.append(prod_name(obj).replace(" ", "_"))
+        # Update the label with the product name (underscore)
+        labels.append(prod_name(obj).replace(" ", "_"))
     return labels
 
 
+def get_tags(obj):
+    # Update Label with system setttings label
+    tags = []
+    if isinstance(obj, Finding) or isinstance(obj, Engagement):
+        obj_tags = obj.tags.all()
+        if obj_tags:
+            for tag in obj_tags:
+                tags.append(str(tag.name))
+    return tags
+
+
 def jira_summary(obj):
+    summary = ''
+
     if type(obj) == Finding:
-        return obj.title
+        summary = obj.title
 
     if type(obj) == Finding_Group:
-        return obj.name
+        summary = obj.name
 
-    return None
+    return summary.replace('\r', '').replace('\n', '')[:255]
 
 
 def jira_description(obj):
@@ -647,9 +657,11 @@ def add_jira_issue(obj, *args, **kwargs):
                                 }
 
         labels = get_labels(obj)
-        if labels:
+        tags = get_tags(obj)
+        jira_labels = labels + tags
+        if jira_labels:
             if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
-                fields['labels'] = labels
+                fields['labels'] = jira_labels
 
         if System_Settings.objects.get().enable_finding_sla:
 
@@ -774,9 +786,11 @@ def update_jira_issue(obj, *args, **kwargs):
             meta = get_jira_meta(jira, jira_project)
 
         labels = get_labels(obj)
-        if labels:
+        tags = get_tags(obj)
+        jira_labels = labels + tags
+        if jira_labels:
             if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
-                fields['labels'] = labels
+                fields['labels'] = jira_labels
 
         if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
             fields['environment'] = jira_environment(obj)
@@ -802,7 +816,7 @@ def update_jira_issue(obj, *args, **kwargs):
                 # folder. Has this feature ever worked?
                 try:
                     jira_attachment(
-                        find, jira, new_issue,
+                        find, jira, issue,
                         settings.MEDIA_ROOT + '/' + pic)
                 except FileNotFoundError as e:
                     logger.info(e)
@@ -1014,7 +1028,7 @@ def jira_check_attachment(issue, source_file_name):
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Engagement)
-def close_epic(eng, push_to_jira):
+def close_epic(eng, push_to_jira, **kwargs):
     engagement = eng
     if not is_jira_enabled():
         return False
@@ -1056,7 +1070,7 @@ def close_epic(eng, push_to_jira):
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Engagement)
-def update_epic(engagement):
+def update_epic(engagement, **kwargs):
     logger.debug('trying to update jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
@@ -1087,7 +1101,7 @@ def update_epic(engagement):
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Engagement)
-def add_epic(engagement):
+def add_epic(engagement, **kwargs):
     logger.debug('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
@@ -1161,7 +1175,7 @@ def jira_get_issue(jira_project, issue_key):
 @app.task
 @dojo_model_from_id(model=Notes, parameter=1)
 @dojo_model_from_id
-def add_comment(obj, note, force_push=False):
+def add_comment(obj, note, force_push=False, **kwargs):
     if not is_jira_configured_and_enabled(obj):
         return False
 

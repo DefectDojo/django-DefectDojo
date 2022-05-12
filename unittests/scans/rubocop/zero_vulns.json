@@ -1,0 +1,2461 @@
+{
+    "metadata": {
+        "rubocop_version": "1.13.0",
+        "ruby_engine": "ruby",
+        "ruby_version": "3.0.3",
+        "ruby_patchlevel": "157",
+        "ruby_platform": "x86_64-linux"
+    },
+    "files": [
+        {
+            "path": "sample_rails_app-master/app/channels/application_cable/channel.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/channels/application_cable/connection.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/controllers/account_activations_controller.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Extra empty line detected at class body beginning.",
+                    "cop_name": "Layout/EmptyLinesAroundClassBody",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 1,
+                        "last_line": 3,
+                        "last_column": 0,
+                        "length": 1,
+                        "line": 2,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Assignment Branch Condition size for edit is too high. [<3, 17, 4> 17.72/17]",
+                    "cop_name": "Metrics/AbcSize",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 3,
+                        "start_column": 3,
+                        "last_line": 14,
+                        "last_column": 5,
+                        "length": 341,
+                        "line": 3,
+                        "column": 3
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 8,
+                        "start_column": 25,
+                        "last_line": 8,
+                        "last_column": 44,
+                        "length": 20,
+                        "line": 8,
+                        "column": 25
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 11,
+                        "start_column": 24,
+                        "last_line": 11,
+                        "last_column": 48,
+                        "length": 25,
+                        "line": 11,
+                        "column": 24
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/controllers/application_controller.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 7,
+                        "start_column": 1,
+                        "last_line": 7,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 7,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 7,
+                        "start_column": 5,
+                        "last_line": 13,
+                        "last_column": 7,
+                        "length": 155,
+                        "line": 7,
+                        "column": 5
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use a guard clause (`return if logged_in?`) instead of wrapping the code inside a conditional expression.",
+                    "cop_name": "Style/GuardClause",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 8,
+                        "start_column": 7,
+                        "last_line": 8,
+                        "last_column": 12,
+                        "length": 6,
+                        "line": 8,
+                        "column": 7
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 10,
+                        "start_column": 26,
+                        "last_line": 10,
+                        "last_column": 41,
+                        "length": 16,
+                        "line": 10,
+                        "column": 26
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/controllers/microposts_controller.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use `%i` or `%I` for an array of symbols.",
+                    "cop_name": "Style/SymbolArray",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 40,
+                        "last_line": 2,
+                        "last_column": 58,
+                        "length": 19,
+                        "line": 2,
+                        "column": 40
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Assignment Branch Condition size for create is too high. [<3, 20, 2> 20.32/17]",
+                    "cop_name": "Metrics/AbcSize",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 5,
+                        "start_column": 3,
+                        "last_line": 15,
+                        "last_column": 5,
+                        "length": 350,
+                        "line": 5,
+                        "column": 3
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 9,
+                        "start_column": 25,
+                        "last_line": 9,
+                        "last_column": 44,
+                        "length": 20,
+                        "line": 9,
+                        "column": 25
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 19,
+                        "start_column": 23,
+                        "last_line": 19,
+                        "last_column": 41,
+                        "length": 19,
+                        "line": 19,
+                        "column": 23
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 25,
+                        "start_column": 1,
+                        "last_line": 25,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 25,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 25,
+                        "start_column": 5,
+                        "last_line": 27,
+                        "last_column": 7,
+                        "length": 86,
+                        "line": 25,
+                        "column": 5
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 29,
+                        "start_column": 1,
+                        "last_line": 29,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 29,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 29,
+                        "start_column": 5,
+                        "last_line": 32,
+                        "last_column": 7,
+                        "length": 138,
+                        "line": 29,
+                        "column": 5
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/controllers/password_resets_controller.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use `%i` or `%I` for an array of symbols.",
+                    "cop_name": "Style/SymbolArray",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 42,
+                        "last_line": 2,
+                        "last_column": 57,
+                        "length": 16,
+                        "line": 2,
+                        "column": 42
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use `%i` or `%I` for an array of symbols.",
+                    "cop_name": "Style/SymbolArray",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 3,
+                        "start_column": 42,
+                        "last_line": 3,
+                        "last_column": 57,
+                        "length": 16,
+                        "line": 3,
+                        "column": 42
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use `%i` or `%I` for an array of symbols.",
+                    "cop_name": "Style/SymbolArray",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 4,
+                        "start_column": 42,
+                        "last_line": 4,
+                        "last_column": 57,
+                        "length": 16,
+                        "line": 4,
+                        "column": 42
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Put empty method definitions on a single line.",
+                    "cop_name": "Style/EmptyMethod",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 6,
+                        "start_column": 3,
+                        "last_line": 7,
+                        "last_column": 5,
+                        "length": 13,
+                        "line": 6,
+                        "column": 3
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 14,
+                        "start_column": 22,
+                        "last_line": 14,
+                        "last_column": 66,
+                        "length": 45,
+                        "line": 14,
+                        "column": 22
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 17,
+                        "start_column": 28,
+                        "last_line": 17,
+                        "last_column": 52,
+                        "length": 25,
+                        "line": 17,
+                        "column": 28
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Put empty method definitions on a single line.",
+                    "cop_name": "Style/EmptyMethod",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 22,
+                        "start_column": 3,
+                        "last_line": 23,
+                        "last_column": 5,
+                        "length": 14,
+                        "line": 22,
+                        "column": 3
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 31,
+                        "start_column": 25,
+                        "last_line": 31,
+                        "last_column": 50,
+                        "length": 26,
+                        "line": 31,
+                        "column": 25
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 40,
+                        "start_column": 1,
+                        "last_line": 40,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 40,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 40,
+                        "start_column": 5,
+                        "last_line": 42,
+                        "last_column": 7,
+                        "length": 93,
+                        "line": 40,
+                        "column": 5
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 46,
+                        "start_column": 1,
+                        "last_line": 46,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 46,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 46,
+                        "start_column": 5,
+                        "last_line": 48,
+                        "last_column": 7,
+                        "length": 70,
+                        "line": 46,
+                        "column": 5
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Do not prefix reader method names with `get_`.",
+                    "cop_name": "Naming/AccessorMethodName",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 46,
+                        "start_column": 9,
+                        "last_line": 46,
+                        "last_column": 16,
+                        "length": 8,
+                        "line": 46,
+                        "column": 9
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 51,
+                        "start_column": 1,
+                        "last_line": 51,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 51,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 51,
+                        "start_column": 5,
+                        "last_line": 56,
+                        "last_column": 7,
+                        "length": 161,
+                        "line": 51,
+                        "column": 5
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Don't use parentheses around the condition of an `unless`.",
+                    "cop_name": "Style/ParenthesesAroundCondition",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 52,
+                        "start_column": 14,
+                        "last_line": 53,
+                        "last_column": 56,
+                        "length": 86,
+                        "line": 52,
+                        "column": 14
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use safe navigation (`&.`) instead of checking if an object exists before calling the method.",
+                    "cop_name": "Style/SafeNavigation",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 52,
+                        "start_column": 15,
+                        "last_line": 52,
+                        "last_column": 39,
+                        "length": 25,
+                        "line": 52,
+                        "column": 15
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 59,
+                        "start_column": 1,
+                        "last_line": 59,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 59,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 59,
+                        "start_column": 5,
+                        "last_line": 64,
+                        "last_column": 7,
+                        "length": 175,
+                        "line": 59,
+                        "column": 5
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use a guard clause (`return unless @user.password_reset_expired?`) instead of wrapping the code inside a conditional expression.",
+                    "cop_name": "Style/GuardClause",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 60,
+                        "start_column": 7,
+                        "last_line": 60,
+                        "last_column": 8,
+                        "length": 2,
+                        "line": 60,
+                        "column": 7
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 61,
+                        "start_column": 26,
+                        "last_line": 61,
+                        "last_column": 54,
+                        "length": 29,
+                        "line": 61,
+                        "column": 26
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/controllers/relationships_controller.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/controllers/sessions_controller.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Extra empty line detected at class body beginning.",
+                    "cop_name": "Layout/EmptyLinesAroundClassBody",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 1,
+                        "last_line": 3,
+                        "last_column": 0,
+                        "length": 1,
+                        "line": 2,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Put empty method definitions on a single line.",
+                    "cop_name": "Style/EmptyMethod",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 3,
+                        "start_column": 3,
+                        "last_line": 4,
+                        "last_column": 5,
+                        "length": 13,
+                        "line": 3,
+                        "column": 3
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Assignment Branch Condition size for create is too high. [<5, 25, 7> 26.44/17]",
+                    "cop_name": "Metrics/AbcSize",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 6,
+                        "start_column": 3,
+                        "last_line": 23,
+                        "last_column": 5,
+                        "length": 589,
+                        "line": 6,
+                        "column": 3
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Method has too many lines. [16/10]",
+                    "cop_name": "Metrics/MethodLength",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 6,
+                        "start_column": 3,
+                        "last_line": 23,
+                        "last_column": 5,
+                        "length": 589,
+                        "line": 6,
+                        "column": 3
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use safe navigation (`&.`) instead of checking if an object exists before calling the method.",
+                    "cop_name": "Style/SafeNavigation",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 8,
+                        "start_column": 8,
+                        "last_line": 8,
+                        "last_column": 61,
+                        "length": 54,
+                        "line": 8,
+                        "column": 8
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 14,
+                        "start_column": 20,
+                        "last_line": 14,
+                        "last_column": 44,
+                        "length": 25,
+                        "line": 14,
+                        "column": 20
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 15,
+                        "start_column": 20,
+                        "last_line": 15,
+                        "last_column": 62,
+                        "length": 43,
+                        "line": 15,
+                        "column": 20
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/controllers/static_pages_controller.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Extra empty line detected at class body beginning.",
+                    "cop_name": "Layout/EmptyLinesAroundClassBody",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 1,
+                        "last_line": 3,
+                        "last_column": 0,
+                        "length": 1,
+                        "line": 2,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use a guard clause (`return unless logged_in?`) instead of wrapping the code inside a conditional expression.",
+                    "cop_name": "Style/GuardClause",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 4,
+                        "start_column": 5,
+                        "last_line": 4,
+                        "last_column": 6,
+                        "length": 2,
+                        "line": 4,
+                        "column": 5
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Trailing whitespace detected.",
+                    "cop_name": "Layout/TrailingWhitespace",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 9,
+                        "start_column": 1,
+                        "last_line": 9,
+                        "last_column": 2,
+                        "length": 2,
+                        "line": 9,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Put empty method definitions on a single line.",
+                    "cop_name": "Style/EmptyMethod",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 10,
+                        "start_column": 3,
+                        "last_line": 11,
+                        "last_column": 5,
+                        "length": 14,
+                        "line": 10,
+                        "column": 3
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Put empty method definitions on a single line.",
+                    "cop_name": "Style/EmptyMethod",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 13,
+                        "start_column": 3,
+                        "last_line": 14,
+                        "last_column": 5,
+                        "length": 15,
+                        "line": 13,
+                        "column": 3
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Put empty method definitions on a single line.",
+                    "cop_name": "Style/EmptyMethod",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 16,
+                        "start_column": 3,
+                        "last_line": 17,
+                        "last_column": 5,
+                        "length": 17,
+                        "line": 16,
+                        "column": 3
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/controllers/users_controller.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use `%i` or `%I` for an array of symbols.",
+                    "cop_name": "Style/SymbolArray",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 40,
+                        "last_line": 3,
+                        "last_column": 63,
+                        "length": 98,
+                        "line": 2,
+                        "column": 40
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use `%i` or `%I` for an array of symbols.",
+                    "cop_name": "Style/SymbolArray",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 4,
+                        "start_column": 40,
+                        "last_line": 4,
+                        "last_column": 55,
+                        "length": 16,
+                        "line": 4,
+                        "column": 40
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 24,
+                        "start_column": 22,
+                        "last_line": 24,
+                        "last_column": 72,
+                        "length": 51,
+                        "line": 24,
+                        "column": 22
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 38,
+                        "start_column": 25,
+                        "last_line": 38,
+                        "last_column": 41,
+                        "length": 17,
+                        "line": 38,
+                        "column": 25
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 47,
+                        "start_column": 23,
+                        "last_line": 47,
+                        "last_column": 36,
+                        "length": 14,
+                        "line": 47,
+                        "column": 23
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 52,
+                        "start_column": 14,
+                        "last_line": 52,
+                        "last_column": 24,
+                        "length": 11,
+                        "line": 52,
+                        "column": 14
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 59,
+                        "start_column": 14,
+                        "last_line": 59,
+                        "last_column": 24,
+                        "length": 11,
+                        "line": 59,
+                        "column": 14
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 67,
+                        "start_column": 1,
+                        "last_line": 67,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 67,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 67,
+                        "start_column": 5,
+                        "last_line": 70,
+                        "last_column": 7,
+                        "length": 143,
+                        "line": 67,
+                        "column": 5
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 75,
+                        "start_column": 1,
+                        "last_line": 75,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 75,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 75,
+                        "start_column": 5,
+                        "last_line": 78,
+                        "last_column": 7,
+                        "length": 117,
+                        "line": 75,
+                        "column": 5
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 81,
+                        "start_column": 1,
+                        "last_line": 81,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 81,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 81,
+                        "start_column": 5,
+                        "last_line": 83,
+                        "last_column": 7,
+                        "length": 77,
+                        "line": 81,
+                        "column": 5
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/helpers/account_activations_helper.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level module documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 6,
+                        "length": 6,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/helpers/application_helper.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level module documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 6,
+                        "length": 6,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Extra empty line detected at module body beginning.",
+                    "cop_name": "Layout/EmptyLinesAroundModuleBody",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 1,
+                        "last_line": 3,
+                        "last_column": 0,
+                        "length": 1,
+                        "line": 2,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 5,
+                        "start_column": 18,
+                        "last_line": 5,
+                        "last_column": 52,
+                        "length": 35,
+                        "line": 5,
+                        "column": 18
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer string interpolation to string concatenation.",
+                    "cop_name": "Style/StringConcatenation",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 9,
+                        "start_column": 7,
+                        "last_line": 9,
+                        "last_column": 37,
+                        "length": 31,
+                        "line": 9,
+                        "column": 7
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 9,
+                        "start_column": 20,
+                        "last_line": 9,
+                        "last_column": 24,
+                        "length": 5,
+                        "line": 9,
+                        "column": 20
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/helpers/microposts_helper.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level module documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 6,
+                        "length": 6,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/helpers/password_resets_helper.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level module documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 6,
+                        "length": 6,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/helpers/relationships_helper.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level module documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 6,
+                        "length": 6,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/helpers/sessions_helper.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level module documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 6,
+                        "length": 6,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Extra empty line detected at module body beginning.",
+                    "cop_name": "Layout/EmptyLinesAroundModuleBody",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 1,
+                        "last_line": 3,
+                        "last_column": 0,
+                        "length": 1,
+                        "line": 2,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use safe navigation (`&.`) instead of checking if an object exists before calling the method.",
+                    "cop_name": "Style/SafeNavigation",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 21,
+                        "start_column": 10,
+                        "last_line": 21,
+                        "last_column": 73,
+                        "length": 64,
+                        "line": 21,
+                        "column": 10
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Trailing whitespace detected.",
+                    "cop_name": "Layout/TrailingWhitespace",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 27,
+                        "start_column": 1,
+                        "last_line": 27,
+                        "last_column": 2,
+                        "length": 2,
+                        "line": 27,
+                        "column": 1
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/helpers/static_pages_helper.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level module documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 6,
+                        "length": 6,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/helpers/users_helper.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level module documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 6,
+                        "length": 6,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Extra empty line detected at module body beginning.",
+                    "cop_name": "Layout/EmptyLinesAroundModuleBody",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 1,
+                        "last_line": 3,
+                        "last_column": 0,
+                        "length": 1,
+                        "line": 2,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Do not use `::` for method calls.",
+                    "cop_name": "Style/ColonMethodCall",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 6,
+                        "start_column": 31,
+                        "last_line": 6,
+                        "last_column": 32,
+                        "length": 2,
+                        "line": 6,
+                        "column": 31
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 8,
+                        "start_column": 52,
+                        "last_line": 8,
+                        "last_column": 61,
+                        "length": 10,
+                        "line": 8,
+                        "column": 52
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/jobs/application_job.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/mailers/application_mailer.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 17,
+                        "last_line": 2,
+                        "last_column": 37,
+                        "length": 21,
+                        "line": 2,
+                        "column": 17
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/mailers/user_mailer.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Extra empty line detected at class body beginning.",
+                    "cop_name": "Layout/EmptyLinesAroundClassBody",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 1,
+                        "last_line": 3,
+                        "last_column": 0,
+                        "length": 1,
+                        "line": 2,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 5,
+                        "start_column": 35,
+                        "last_line": 5,
+                        "last_column": 54,
+                        "length": 20,
+                        "line": 5,
+                        "column": 35
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 10,
+                        "start_column": 35,
+                        "last_line": 10,
+                        "last_column": 50,
+                        "length": 16,
+                        "line": 10,
+                        "column": 35
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/models/application_record.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/models/micropost.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 8,
+                        "start_column": 48,
+                        "last_line": 8,
+                        "last_column": 77,
+                        "length": 30,
+                        "line": 8,
+                        "column": 48
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Align the keys of a hash literal if they span more than one line.",
+                    "cop_name": "Layout/HashAlignment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 10,
+                        "start_column": 31,
+                        "last_line": 10,
+                        "last_column": 66,
+                        "length": 36,
+                        "line": 10,
+                        "column": 31
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 10,
+                        "start_column": 42,
+                        "last_line": 10,
+                        "last_column": 66,
+                        "length": 25,
+                        "line": 10,
+                        "column": 42
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/models/relationship.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 2,
+                        "start_column": 37,
+                        "last_line": 2,
+                        "last_column": 42,
+                        "length": 6,
+                        "line": 2,
+                        "column": 37
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 3,
+                        "start_column": 37,
+                        "last_line": 3,
+                        "last_column": 42,
+                        "length": 6,
+                        "line": 3,
+                        "column": 37
+                    }
+                }
+            ]
+        },
+        {
+            "path": "sample_rails_app-master/app/models/user.rb",
+            "offenses": [
+                {
+                    "severity": "convention",
+                    "message": "Missing top-level class documentation comment.",
+                    "cop_name": "Style/Documentation",
+                    "corrected": false,
+                    "correctable": false,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 5,
+                        "length": 5,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Missing frozen string literal comment.",
+                    "cop_name": "Style/FrozenStringLiteralComment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 1,
+                        "start_column": 1,
+                        "last_line": 1,
+                        "last_column": 1,
+                        "length": 1,
+                        "line": 1,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Align the keys of a hash literal if they span more than one line.",
+                    "cop_name": "Layout/HashAlignment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 3,
+                        "start_column": 35,
+                        "last_line": 3,
+                        "last_column": 61,
+                        "length": 27,
+                        "line": 3,
+                        "column": 35
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 3,
+                        "start_column": 48,
+                        "last_line": 3,
+                        "last_column": 61,
+                        "length": 14,
+                        "line": 3,
+                        "column": 48
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 4,
+                        "start_column": 48,
+                        "last_line": 4,
+                        "last_column": 60,
+                        "length": 13,
+                        "line": 4,
+                        "column": 48
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Align the keys of a hash literal if they span more than one line.",
+                    "cop_name": "Layout/HashAlignment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 5,
+                        "start_column": 35,
+                        "last_line": 5,
+                        "last_column": 55,
+                        "length": 21,
+                        "line": 5,
+                        "column": 35
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Align the keys of a hash literal if they span more than one line.",
+                    "cop_name": "Layout/HashAlignment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 6,
+                        "start_column": 36,
+                        "last_line": 6,
+                        "last_column": 62,
+                        "length": 27,
+                        "line": 6,
+                        "column": 36
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 6,
+                        "start_column": 49,
+                        "last_line": 6,
+                        "last_column": 62,
+                        "length": 14,
+                        "line": 6,
+                        "column": 49
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Prefer single-quoted strings when you don't need string interpolation or special symbols.",
+                    "cop_name": "Style/StringLiterals",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 7,
+                        "start_column": 49,
+                        "last_line": 7,
+                        "last_column": 61,
+                        "length": 13,
+                        "line": 7,
+                        "column": 49
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Align the keys of a hash literal if they span more than one line.",
+                    "cop_name": "Layout/HashAlignment",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 8,
+                        "start_column": 36,
+                        "last_line": 8,
+                        "last_column": 56,
+                        "length": 21,
+                        "line": 8,
+                        "column": 36
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Add an empty line after attribute accessor.",
+                    "cop_name": "Layout/EmptyLinesAroundAttributeAccessor",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 11,
+                        "start_column": 3,
+                        "last_line": 11,
+                        "last_column": 64,
+                        "length": 62,
+                        "line": 11,
+                        "column": 3
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Freeze mutable objects assigned to constants.",
+                    "cop_name": "Style/MutableConstant",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 15,
+                        "start_column": 23,
+                        "last_line": 15,
+                        "last_column": 58,
+                        "length": 36,
+                        "line": 15,
+                        "column": 23
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use `self.digest` instead of `User.digest`.",
+                    "cop_name": "Style/ClassMethods",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 23,
+                        "start_column": 7,
+                        "last_line": 23,
+                        "last_column": 10,
+                        "length": 4,
+                        "line": 23,
+                        "column": 7
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Avoid multi-line ternary operators, use `if` or `unless` instead.",
+                    "cop_name": "Style/MultilineTernaryOperator",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 24,
+                        "start_column": 12,
+                        "last_line": 25,
+                        "last_column": 69,
+                        "length": 135,
+                        "line": 24,
+                        "column": 12
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use `self.new_token` instead of `User.new_token`.",
+                    "cop_name": "Style/ClassMethods",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 30,
+                        "start_column": 7,
+                        "last_line": 30,
+                        "last_column": 10,
+                        "length": 4,
+                        "line": 30,
+                        "column": 7
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Add empty line after guard clause.",
+                    "cop_name": "Layout/EmptyLineAfterGuardClause",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 43,
+                        "start_column": 5,
+                        "last_line": 43,
+                        "last_column": 31,
+                        "length": 27,
+                        "line": 43,
+                        "column": 5
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 105,
+                        "start_column": 1,
+                        "last_line": 105,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 105,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 105,
+                        "start_column": 5,
+                        "last_line": 107,
+                        "last_column": 7,
+                        "length": 60,
+                        "line": 105,
+                        "column": 5
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Use 2 (not 4) spaces for indentation.",
+                    "cop_name": "Layout/IndentationWidth",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 110,
+                        "start_column": 1,
+                        "last_line": 110,
+                        "last_column": 4,
+                        "length": 4,
+                        "line": 110,
+                        "column": 1
+                    }
+                },
+                {
+                    "severity": "convention",
+                    "message": "Inconsistent indentation detected.",
+                    "cop_name": "Layout/IndentationConsistency",
+                    "corrected": false,
+                    "correctable": true,
+                    "location": {
+                        "start_line": 110,
+                        "start_column": 5,
+                        "last_line": 113,
+                        "last_column": 7,
+                        "length": 143,
+                        "line": 110,
+                        "column": 5
+                    }
+                }
+            ]
+        }
+    ],
+    "summary": {
+        "offense_count": 145,
+        "target_file_count": 25,
+        "inspected_file_count": 25
+    }
+}

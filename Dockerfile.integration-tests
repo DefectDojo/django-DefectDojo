@@ -1,7 +1,7 @@
 
 # code: language=Dockerfile
 
-FROM python:3.8.11-slim-buster@sha256:9b0d7419e2811710aacee87c40a2c94693e2b6810c3e7e466b8c7fc5bde4cd66 as build
+FROM python:3.8.12-slim-bullseye@sha256:3d3edc52cfae3ed6fb8303559f10184f962a8069194b2dee93baaac66ebedeb5 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -30,6 +30,13 @@ RUN \
 
 RUN pip install --no-cache-dir selenium requests chromedriver-autoinstaller
 
+# Installing Chromedriver
+WORKDIR /opt/chrome-driver
+RUN \
+  python -c "import chromedriver_autoinstaller; chromedriver_autoinstaller.install(cwd=True)" && \
+  chmod -R 0755 .
+WORKDIR /app
+
 COPY docker/wait-for-it.sh \
   docker/entrypoint-integration-tests.sh \
   /
@@ -38,12 +45,8 @@ COPY tests/ ./tests/
 
 RUN chmod -R 0777 /app
 
-# These 2 lines are needed for the chromium driver 
-RUN chmod -R ugo+w /usr/local/lib/python3.8/site-packages
-RUN mkdir /.local
-RUN chmod -R ugo+w /.local
-
-USER 1001
+ARG uid=1001
+USER ${uid}
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_PASSWORD='' \

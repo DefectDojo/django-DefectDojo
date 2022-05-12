@@ -120,6 +120,14 @@ else
     fail $test
 fi
 
+test="Test notifications"
+echo "Running: $test"
+if python3 tests/notifications_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 

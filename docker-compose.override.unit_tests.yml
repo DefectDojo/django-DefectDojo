@@ -1,40 +1,70 @@
 ---
-version: '3.7'
+version: '3.8'
 services:
   nginx:
-    image: busybox:1.34.0-musl
+    image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'nginx']
     volumes:
-      - defectdojo_media_unittest:/usr/share/nginx/html/media
+      - defectdojo_media_unit_tests:/usr/share/nginx/html/media
   uwsgi:
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/app/docker/entrypoint-unit-tests-devDocker.sh']
+    build:
+      target: django-unittests
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/app/docker/entrypoint-unit-tests-devDocker.sh']
     volumes:
       - '.:/app:z'
-      - defectdojo_media_unittest:${DD_MEDIA_ROOT:-/app/media}
+      - "defectdojo_media_unit_tests:${DD_MEDIA_ROOT:-/app/media}"
     environment:
       DD_DEBUG: 'True'
-      DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
-      DD_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
+      DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME}
+      DD_DATABASE_NAME: ${DD_TEST_DATABASE_NAME}
+      DD_DATABASE_ENGINE: ${DD_DATABASE_ENGINE}
+      DD_DATABASE_HOST: ${DD_DATABASE_HOST}
+      DD_DATABASE_PORT: ${DD_DATABASE_PORT}
+      DD_DATABASE_USER: ${DD_DATABASE_USER}
+      DD_DATABASE_PASSWORD: ${DD_DATABASE_PASSWORD}
+      DD_CELERY_BROKER_SCHEME: 'sqla+sqlite'
+      DD_CELERY_BROKER_USER: ''
+      DD_CELERY_BROKER_PASSWORD: ''
+      DD_CELERY_BROKER_HOST: ''
+      DD_CELERY_BROKER_PORT: "-1"
+      DD_CELERY_BROKER_PATH: '/dojo.celerydb.sqlite'
+      DD_CELERY_BROKER_PARAMS: ''
   celerybeat:
-    image: busybox:1.34.0-musl
+    image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'celery beat']
   celeryworker:
-    image: busybox:1.34.0-musl
+    image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'celery worker']
   initializer:
-    image: busybox:1.34.0-musl
+    image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'initializer']
-
   mysql:
     ports:
-      - target: 3306
-        published: 3306
+      - target: ${DD_DATABASE_PORT}
+        published: ${DD_DATABASE_PORT}
         protocol: tcp
         mode: host
     environment:
-      MYSQL_DATABASE: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
+      MYSQL_DATABASE: ${DD_TEST_DATABASE_NAME}
     volumes:
-       - defectdojo_data_unittest:/var/lib/mysql
+      - defectdojo_data_unit_tests:/var/lib/mysql
+  postgres:
+    ports:
+      - target: ${DD_DATABASE_PORT}
+        published: ${DD_DATABASE_PORT}
+        protocol: tcp
+        mode: host
+    environment:
+      POSTGRES_DB: ${DD_TEST_DATABASE_NAME}
+    volumes:
+      - defectdojo_postgres_unit_tests:/var/lib/postgresql/data
+  rabbitmq:
+    image: busybox:1.35.0-musl
+    entrypoint: ['echo', 'skipping', 'rabbitmq']
+  redis:
+    image: busybox:1.35.0-musl
+    entrypoint: ['echo', 'skipping', 'redis']
 volumes:
-  defectdojo_data_unittest: {}
-  defectdojo_media_unittest: {}
+  defectdojo_data_unit_tests: {}
+  defectdojo_postgres_unit_tests: {}
+  defectdojo_media_unit_tests: {}

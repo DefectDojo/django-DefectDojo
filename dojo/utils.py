@@ -26,7 +26,7 @@ import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
     Dojo_User, Test, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule
+    Language_Type, Languages, Rule, Dojo_Group_Member, NOTIFICATION_CHOICES
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
 import logging
@@ -36,6 +36,7 @@ from django.http import HttpResponseRedirect
 import crum
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 
 
 logger = logging.getLogger(__name__)
@@ -92,6 +93,9 @@ def do_false_positive_history(new_finding, *args, **kwargs):
         new_finding.false_p = True
         new_finding.active = False
         new_finding.verified = True
+        # Remove the async user kwarg because save() really does not like it
+        # Would rather not add anything to Finding.save()
+        kwargs.pop('async_user')
         super(Finding, new_finding).save(*args, **kwargs)
 
 
@@ -117,26 +121,14 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
     if enabled:
         deduplicationLogger.debug('dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
-        # TODO use test.dedupe_algo and case statement
-        if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
-            scan_type = new_finding.test.test_type.name
-            deduplicationLogger.debug('scan_type for this finding is :' + scan_type)
-            # Default algorithm
-            deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
-            # Check for an override for this scan_type in the deduplication configuration
-            if (scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
-                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[scan_type]
-            deduplicationLogger.debug('deduplication algorithm: ' + deduplicationAlgorithm)
-            if(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL):
-                deduplicate_unique_id_from_tool(new_finding)
-            elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_HASH_CODE):
-                deduplicate_hash_code(new_finding)
-            elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE):
-                deduplicate_uid_or_hash_code(new_finding)
-            else:
-                logger.debug('dedupe legacy start')
-                deduplicate_legacy(new_finding)
-                logger.debug('dedupe legacy start.done.')
+        deduplicationAlgorithm = new_finding.test.deduplication_algorithm
+        deduplicationLogger.debug('deduplication algorithm: ' + deduplicationAlgorithm)
+        if deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
+            deduplicate_unique_id_from_tool(new_finding)
+        elif deduplicationAlgorithm == settings.DEDUPE_ALGO_HASH_CODE:
+            deduplicate_hash_code(new_finding)
+        elif deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
+            deduplicate_uid_or_hash_code(new_finding)
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
@@ -1244,7 +1236,7 @@ def handle_uploaded_selenium(f, cred):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def add_external_issue(find, external_issue_provider):
+def add_external_issue(find, external_issue_provider, **kwargs):
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
     logger.debug('adding external issue with provider: ' + external_issue_provider)
@@ -1257,7 +1249,7 @@ def add_external_issue(find, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def update_external_issue(find, old_status, external_issue_provider):
+def update_external_issue(find, old_status, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
@@ -1269,7 +1261,7 @@ def update_external_issue(find, old_status, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def close_external_issue(find, note, external_issue_provider):
+def close_external_issue(find, note, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
@@ -1281,7 +1273,7 @@ def close_external_issue(find, note, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def reopen_external_issue(find, note, external_issue_provider):
+def reopen_external_issue(find, note, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
@@ -1321,7 +1313,7 @@ def process_notifications(request, note, parent_url, parent_title):
         User.objects.filter(username=username).get()
         for username in usernames_to_check
         if User.objects.filter(is_active=True, username=username).exists()
-    ]  # is_staff also?
+    ]
 
     if len(note.entry) > 200:
         note.entry = note.entry[:200]
@@ -1447,6 +1439,10 @@ def get_system_setting(setting, default=None):
     return getattr(system_settings, setting, (default if default is not None else None))
 
 
+def get_setting(setting):
+    return getattr(settings, setting)
+
+
 @dojo_model_to_id
 @dojo_async_task
 @app.task
@@ -1455,6 +1451,7 @@ def calculate_grade(product, *args, **kwargs):
     system_settings = System_Settings.objects.get()
     if not product:
         logger.warning('ignoring calculate product for product None!')
+        return
 
     if system_settings.enable_product_grade:
         logger.debug('calculating product grade for %s:%s', product.id, product.name)
@@ -1501,8 +1498,8 @@ def get_celery_worker_status():
 
 # Used to display the counts and enabled tabs in the product view
 class Product_Tab():
-    def __init__(self, product_id, title=None, tab=None):
-        self.product = Product.objects.get(id=product_id)
+    def __init__(self, product, title=None, tab=None):
+        self.product = product
         self.title = title
         self.tab = tab
         self.engagement_count = Engagement.objects.filter(
@@ -1576,8 +1573,8 @@ def tab_view_count(product_id):
     return product, engagements, open_findings, endpoints, benchmark_type
 
 
-# Add a lanaguage to product
-def add_language(product, language):
+def add_language(product, language, files=1, code=1):
+    """Add a language to product"""
     prod_language = Languages.objects.filter(
         language__language__iexact=language, product=product)
 
@@ -1587,7 +1584,7 @@ def add_language(product, language):
                 language__iexact=language)
 
             if language_type:
-                lang = Languages(language=language_type, product=product)
+                lang = Languages(language=language_type, product=product, files=files, code=code)
                 lang.save()
         except Language_Type.DoesNotExist:
             pass
@@ -1641,14 +1638,40 @@ def get_site_url():
 
 
 @receiver(post_save, sender=Dojo_User)
-def set_default_notifications(sender, instance, created, **kwargs):
-    # for new user we create a Notifications object so the default 'alert' notifications work
-    # this needs to be a signal to make it also work for users created via ldap, oauth and other authentication backends
+def user_post_save(sender, instance, created, **kwargs):
+    # For new users we create a Notifications object so the default 'alert' notifications work and
+    # assign them to a default group if specified in the system settings.
+    # This needs to be a signal to make it also work for users created via ldap, oauth and other
+    # authentication backends
     if created:
-        logger.info('creating default set of notifications for: ' + str(instance))
-        notifications = Notifications()
-        notifications.user = instance
+        try:
+            notifications = Notifications.objects.get(template=True)
+            notifications.pk = None
+            notifications.template = False
+            notifications.user = instance
+            logger.info('creating default set (from template) of notifications for: ' + str(instance))
+        except Exception as err:
+            notifications = Notifications(user=instance)
+            logger.info('creating default set of notifications for: ' + str(instance))
+
         notifications.save()
+
+        system_settings = System_Settings.objects.get()
+        if system_settings.default_group and system_settings.default_group_role:
+            if (system_settings.default_group_email_pattern and re.fullmatch(system_settings.default_group_email_pattern, instance.email)) or \
+               not system_settings.default_group_email_pattern:
+                logger.info('setting default group for: ' + str(instance))
+                dojo_group_member = Dojo_Group_Member(
+                    group=system_settings.default_group,
+                    user=instance,
+                    role=system_settings.default_group_role)
+                dojo_group_member.save()
+
+    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+        # Superusers shall always be staff
+        if instance.is_superuser and not instance.is_staff:
+            instance.is_staff = True
+            instance.save()
 
 
 @receiver(post_save, sender=Engagement)
@@ -1936,6 +1959,34 @@ def get_object_or_none(klass, *args, **kwargs):
         return None
 
 
+def get_last_object_or_none(klass, *args, **kwargs):
+    """
+    Use last() to return an object, or return None
+    does not exist.
+    klass may be a Model, Manager, or QuerySet object. All other passed
+    arguments and keyword arguments are used in the get() query.
+    Like with QuerySet.get(), MultipleObjectsReturned is raised if more than
+    one object is found.
+    """
+    queryset = klass
+
+    if hasattr(klass, '_default_manager'):
+        queryset = klass._default_manager.all()
+
+    if not hasattr(queryset, 'get'):
+        klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
+        raise ValueError(
+            "First argument to get_last_object_or_None() must be a Model, Manager, "
+            "or QuerySet, not '%s'." % klass__name
+        )
+    try:
+        results = queryset.filter(*args, **kwargs).order_by('id')
+        logger.debug('last_object_or_none: %s', results.query)
+        return results.last()
+    except queryset.model.DoesNotExist:
+        return None
+
+
 def add_success_message_to_response(message):
     if get_current_request():
         messages.add_message(get_current_request(),
@@ -2070,3 +2121,121 @@ def get_file_images(obj, return_objects=False):
             else:
                 images.append(file_name)
     return images
+
+
+def get_enabled_notifications_list():
+    # Alerts need to enabled by default
+    enabled = ['alert']
+    for choice in NOTIFICATION_CHOICES:
+        if get_system_setting('enable_{}_notifications'.format(choice[0])):
+            enabled.append(choice[0])
+    return enabled
+
+
+def is_finding_groups_enabled():
+    """Returns true is feature is enabled otherwise false"""
+    return get_system_setting("enable_finding_groups")
+
+
+class async_delete():
+    def __init__(self, *args, **kwargs):
+        self.mapping = {
+            'Product_Type': [
+                (Endpoint, 'product__prod_type'),
+                (Finding, 'test__engagement__product__prod_type'),
+                (Test, 'engagement__product__prod_type'),
+                (Engagement, 'product__prod_type'),
+                (Product, 'prod_type')],
+            'Product': [
+                (Endpoint, 'product'),
+                (Finding, 'test__engagement__product'),
+                (Test, 'engagement__product'),
+                (Engagement, 'product')],
+            'Engagement': [
+                (Finding, 'test__engagement'),
+                (Test, 'engagement')],
+            'Test': [(Finding, 'test')]
+        }
+
+    @dojo_async_task
+    @app.task
+    def delete_chunk(self, objects, **kwargs):
+        for object in objects:
+            try:
+                object.delete()
+            except AssertionError:
+                logger.debug('ASYNC_DELETE: object has already been deleted elsewhere. Skipping')
+                # The id must be None
+                # The object has already been deleted elsewhere
+                pass
+
+    @dojo_async_task
+    @app.task
+    def delete(self, object, **kwargs):
+        logger.debug('ASYNC_DELETE: Deleting ' + self.get_object_name(object) + ': ' + str(object))
+        model_list = self.mapping.get(self.get_object_name(object), None)
+        if model_list:
+            # The object to be deleted was found in the object list
+            self.crawl(object, model_list)
+        else:
+            # The object is not supported in async delete, delete normally
+            logger.debug('ASYNC_DELETE: ' + self.get_object_name(object) + ' async delete not supported. Deleteing normally: ' + str(object))
+            object.delete()
+
+    @dojo_async_task
+    @app.task
+    def crawl(self, object, model_list, **kwargs):
+        logger.debug('ASYNC_DELETE: Crawling ' + self.get_object_name(object) + ': ' + str(object))
+        for model_info in model_list:
+            model = model_info[0]
+            model_query = model_info[1]
+            filter_dict = {model_query: object}
+            objects_to_delete = model.objects.filter(**filter_dict)
+            logger.debug('ASYNC_DELETE: Deleting ' + str(len(objects_to_delete)) + ' ' + self.get_object_name(model) + 's in chunks')
+            chunks = self.chunk_list(model, objects_to_delete)
+            for chunk in chunks:
+                print('deleting', len(chunk), self.get_object_name(model))
+                self.delete_chunk(chunk)
+        self.delete_chunk([object])
+        logger.debug('ASYNC_DELETE: Successfully deleted ' + self.get_object_name(object) + ': ' + str(object))
+
+    def chunk_list(self, model, list):
+        chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
+        # Break the list of objects into "chunk_size" lists
+        chunk_list = [list[i:i + chunk_size] for i in range(0, len(list), chunk_size)]
+        logger.debug('ASYNC_DELETE: Split ' + self.get_object_name(model) + ' into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_size))
+        return chunk_list
+
+    def get_object_name(self, object):
+        if object.__class__.__name__ == 'ModelBase':
+            return object.__name__
+        return object.__class__.__name__
+
+
+@receiver(user_logged_in)
+def log_user_login(sender, request, user, **kwargs):
+    # to cover more complex cases:
+    # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
+
+    logger.info('login user: {user} via ip: {ip}'.format(
+        user=user.username,
+        ip=request.META.get('REMOTE_ADDR')
+    ))
+
+
+@receiver(user_logged_out)
+def log_user_logout(sender, request, user, **kwargs):
+
+    logger.info('logout user: {user} via ip: {ip}'.format(
+        user=user.username,
+        ip=request.META.get('REMOTE_ADDR')
+    ))
+
+
+@receiver(user_login_failed)
+def log_user_login_failed(sender, credentials, request, **kwargs):
+
+    logger.warning('login failed for: {credentials} via ip: {ip}'.format(
+        credentials=credentials['username'],
+        ip=request.META['REMOTE_ADDR']
+    ))

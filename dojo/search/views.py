@@ -1,5 +1,6 @@
 import logging
 
+from django.utils.translation import gettext as _
 from django.shortcuts import render
 from watson import search as watson
 from django.db.models import Q
@@ -10,7 +11,7 @@ from dojo.utils import add_breadcrumb, get_page_items, get_words_for_field
 import re
 from dojo.finding.views import prefetch_for_findings
 from dojo.endpoint.views import prefetch_for_endpoints
-from dojo.filters import OpenFindingFilter
+from dojo.filters import FindingFilter
 from django.conf import settings
 import shlex
 import itertools
@@ -119,7 +120,7 @@ def simple_search(request):
             elif search_findings:
                 logger.debug('searching findings')
 
-                findings_filter = OpenFindingFilter(request.GET, queryset=findings, user=request.user, pid=None, prefix='finding')
+                findings_filter = FindingFilter(request.GET, queryset=findings, user=request.user, pid=None, prefix='finding')
                 # setting initial values for filters is not supported and discouraged: https://django-filter.readthedocs.io/en/stable/guide/tips.html#using-initial-values-as-defaults
                 # we could try to modify request.GET before generating the filter, but for now we'll leave it as is
 
@@ -303,7 +304,7 @@ def simple_search(request):
             logger.debug(form.errors)
             form = SimpleSearchForm()
 
-        add_breadcrumb(title="Simple Search", top_level=True, request=request)
+        add_breadcrumb(title=_("Simple Search"), top_level=True, request=request)
 
         activetab = 'findings' if findings \
             else 'products' if products \
@@ -332,7 +333,7 @@ def simple_search(request):
         'tagged_engagements': tagged_engagements,
         'engagements': engagements,
         'endpoints': endpoints,
-        'name': 'Simple Search',
+        'name': _('Simple Search'),
         'metric': False,
         'user': request.user,
         'form': form,

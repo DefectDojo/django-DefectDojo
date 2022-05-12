@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load get_config_setting %}
 {% load static %}
 {% block add_styles %}
@@ -14,7 +15,7 @@
         <div class="panel-heading">
             <div class="clearfix">
                 <h3 class="pull-left">Tracked Product Files, Paths and Artifacts</h3>
-
+                {% if product|has_object_permission:"Product_Tracking_Files_Add" %}
                 <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
@@ -23,12 +24,13 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
-                            <a href="{% url 'new_object' pid %}">
+                            <a href="{% url 'new_object' product.id %}">
                                 <i class="fa fa-pencil-square-o"></i> Add Tracked Files
                             </a>
                         </li>
                     </ul>
                 </div>
+                {% endif %}
             </div>
         </div>
         <div class="table-responsive">
@@ -43,23 +45,21 @@
                 {% for object in object_queryset %}
                 <tr>
                   <td>{{ object|tracked_object_value }}
-                     {% if object.tags %}
-                         <sup>
-                             {% for tag in object.tags.all %}
-                             <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                             {% endfor %}
-                         </sup>
-                     {% endif %}
+                     {% include "dojo/snippets/tags.html" with tags=object.tags.all %}
                    </td>
                     <td>{{ object|tracked_object_type }}</td>
                     <td>{{ object.name|default_if_none:"" }}</td>
                     <td>{{ object.review_status }}</td>
                     <td>
                        <div class="btn-group">
+                        {% if product|has_object_permission:"Product_Tracking_Files_Edit" %}
                            <a class="btn btn-sm btn-warning"
                               href="{% url 'edit_object' object.product.id object.id %}">Edit</a>
+                        {% endif %}
+                        {% if product|has_object_permission:"Product_Tracking_Files_Delete" %}
                            <a class="btn btn-sm btn-danger"
                               href="{% url 'delete_object' object.product.id object.id %}">Delete</a>
+                        {% endif %}
                        </div>
                    </td>
                 </tr>

@@ -18,19 +18,19 @@ from dojo.authorization.roles_permissions import Permissions
 logger = logging.getLogger(__name__)
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_View, 'fgid', 'view')
+@user_is_authorized(Finding_Group, Permissions.Finding_Group_View, 'fgid')
 def view_finding_group(request, fgid):
     logger.debug('view finding group: %s', fgid)
     return HttpResponse('Not implemented yet')
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid', 'change')
+@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid')
 def edit_finding_group(request, fgid):
     logger.debug('edit finding group: %s', fgid)
     return HttpResponse('Not implemented yet')
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_Delete, 'fgid', 'delete')
+@user_is_authorized(Finding_Group, Permissions.Finding_Group_Delete, 'fgid')
 @require_POST
 def delete_finding_group(request, fgid):
     logger.debug('delete finding group: %s', fgid)
@@ -59,7 +59,7 @@ def delete_finding_group(request, fgid):
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([finding_group])
     rels = collector.nested()
-    product_tab = Product_Tab(finding_group.test.engagement.product.id, title="Product", tab="settings")
+    product_tab = Product_Tab(finding_group.test.engagement.product, title="Product", tab="settings")
 
     return render(request, 'dojo/delete_finding_group.html',
                   {'finding_group': finding_group,
@@ -69,7 +69,7 @@ def delete_finding_group(request, fgid):
                    })
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid', 'change')
+@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid')
 @require_POST
 def unlink_jira(request, fgid):
     logger.debug('/finding_group/%s/jira/unlink', fgid)
@@ -104,7 +104,7 @@ def unlink_jira(request, fgid):
         return HttpResponse(status=400)
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid', 'change')
+@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid')
 @require_POST
 def push_to_jira(request, fgid):
     logger.debug('/finding_group/%s/jira/push', fgid)

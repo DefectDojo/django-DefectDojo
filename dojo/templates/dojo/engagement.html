@@ -10,8 +10,26 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Active Engagements
+                        {{ view }} Engagements
                         <div class="dropdown pull-right">
+                            &nbsp;
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="downloadMenu"
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="download">
+                                <span class="fa fa-download"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="downloadMenu">
+                            <li role="presentation">
+                                <a id="csv_export" href="{% url 'engagement_csv_export' %}?url={{ request.get_full_path }}">
+                                    <i class="fa fa-table"></i> CSV Export
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a id="excel_export" href="{% url 'engagement_excel_export' %}?url={{ request.get_full_path }}">
+                                    <i class="fa fa-file-excel-o"></i> Excel Export
+                                </a>
+                            </li>
+                            </ul>
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         </div>
                     </h3>
@@ -31,7 +49,8 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
                             <th>{% dojo_sort request 'Engagement' 'name' 'asc' %}</th>
-                            <th>Period</th>
+                            <th>{% dojo_sort request 'Period' 'target_start' 'asc' %}</th>
+                            <th>Status</th>
                             <th class="prod_name">{% dojo_sort request 'Product' 'product__name' 'asc' %}</th>
                             <th class="prod_name">{% dojo_sort request 'Product Type' 'product__prod_type__name' %}</th>
                             <th>{% dojo_sort request 'Lead' 'lead__first_name' %}</th>
@@ -44,15 +63,9 @@
                         {% for e in engagements %}
                             <tr>
                                 <td style="white-space: normal">
-                                     <a class="eng_link" href="{%url 'view_engagement' e.id %}">
-                                        {% if e.name %}{{ e.name }}{% endif %}
-                                    </a>
+                                    <a class="eng_link" href="{%url 'view_engagement' e.id %}">{% if e.name %}{{ e.name }}{% endif %}</a>
                                     <div>
-                                        {% for tag in e.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">
-                                                {{ tag }}
-                                            </a>
-                                        {% endfor %}
+                                        {% include "dojo/snippets/tags.html" with tags=e.tags.alll %}
                                     </div>
                                 </td>
                                 <td> {{ e.target_start }} - {{ e.target_end }}
@@ -62,18 +75,13 @@
                                          </span>
                                       {% endif %}
                                 </td>
+                                <td>{{ e.status }}</td>
                                 <td class="prod_name">
                                     <a href="{% url 'view_product' e.product.id %}">
                                         {{ e.product.name }}
                                     </a>
                                     {{ e.product|jira_project_tag }}
-                                    {% if e.product.tags.all %}
-                                        <div>
-                                            {% for tag in e.product.tags.all %}
-                                                <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
+                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.alll %}
                                 </td>
                                 <td class="prod_name">
                                     <a href="{% url 'product_type_metrics' e.product.prod_type.id %}">

@@ -33,6 +33,7 @@ class Permissions(IntEnum):
     Product_Type_Member_Add_Owner = 1005
     Product_Type_Edit = 1006
     Product_Type_Delete = 1007
+    Product_Type_Add = 1008
 
     Product_View = 1102
     Product_Member_Delete = 1103
@@ -107,6 +108,16 @@ class Permissions(IntEnum):
     Technology_Add = 2403
     Technology_Edit = 2406
     Technology_Delete = 2407
+
+    Product_API_Scan_Configuration_View = 2502
+    Product_API_Scan_Configuration_Add = 2503
+    Product_API_Scan_Configuration_Edit = 2506
+    Product_API_Scan_Configuration_Delete = 2507
+
+    Product_Tracking_Files_View = 2602
+    Product_Tracking_Files_Add = 2603
+    Product_Tracking_Files_Edit = 2606
+    Product_Tracking_Files_Delete = 2607
 
     @classmethod
     def has_value(cls, value):
@@ -184,6 +195,10 @@ class Permissions(IntEnum):
     def get_technology_permissions(cls):
         return {Permissions.Technology_View, Permissions.Technology_Edit, Permissions.Technology_Delete}
 
+    @classmethod
+    def get_product_api_scan_configuration_permissions(cls):
+        return {Permissions.Product_API_Scan_Configuration_View, Permissions.Product_API_Scan_Configuration_Edit, Permissions.Product_API_Scan_Configuration_Delete}
+
 
 def get_roles_with_permissions():
     return {
@@ -196,17 +211,22 @@ def get_roles_with_permissions():
             Permissions.Finding_Group_View,
             Permissions.Endpoint_View,
             Permissions.Component_View,
+            Permissions.Note_Add,
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
             Permissions.Group_View,
             Permissions.Language_View,
-            Permissions.Technology_View
+            Permissions.Technology_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
         },
         Roles.API_Importer: {
             Permissions.Product_Type_View,
             Permissions.Product_View,
             Permissions.Engagement_View,
+            Permissions.Engagement_Edit,
             Permissions.Test_View,
+            Permissions.Test_Edit,
             Permissions.Finding_View,
             Permissions.Finding_Group_View,
             Permissions.Endpoint_View,
@@ -263,7 +283,11 @@ def get_roles_with_permissions():
 
             Permissions.Technology_View,
             Permissions.Technology_Add,
-            Permissions.Technology_Edit
+            Permissions.Technology_Edit,
+
+            Permissions.Product_API_Scan_Configuration_View,
+
+            Permissions.Product_Tracking_Files_View,
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -338,7 +362,17 @@ def get_roles_with_permissions():
             Permissions.Technology_View,
             Permissions.Technology_Add,
             Permissions.Technology_Edit,
-            Permissions.Technology_Delete
+            Permissions.Technology_Delete,
+
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_API_Scan_Configuration_Add,
+            Permissions.Product_API_Scan_Configuration_Edit,
+            Permissions.Product_API_Scan_Configuration_Delete,
+
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Product_Tracking_Files_Add,
+            Permissions.Product_Tracking_Files_Edit,
+            Permissions.Product_Tracking_Files_Delete,
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -421,6 +455,30 @@ def get_roles_with_permissions():
             Permissions.Technology_View,
             Permissions.Technology_Add,
             Permissions.Technology_Edit,
-            Permissions.Technology_Delete
+            Permissions.Technology_Delete,
+
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_API_Scan_Configuration_Add,
+            Permissions.Product_API_Scan_Configuration_Edit,
+            Permissions.Product_API_Scan_Configuration_Delete,
+
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Product_Tracking_Files_Add,
+            Permissions.Product_Tracking_Files_Edit,
+            Permissions.Product_Tracking_Files_Delete,
+        }
+    }
+
+
+def get_global_roles_with_permissions():
+    """
+    Extra permissions for global roles, on top of the permissions granted to the "normal" roles above.
+    """
+    return {
+        Roles.Maintainer: {
+            Permissions.Product_Type_Add
+        },
+        Roles.Owner: {
+            Permissions.Product_Type_Add
         }
     }

@@ -1,8 +1,3 @@
-__author__ = 'bakalor'
-__maintainer__ = "Igor Bakalo"
-__email__ = "bigorigor.ua@gmail.com"
-__status__ = "Development"
-
 import re
 import html2text
 from defusedxml import ElementTree as ET
@@ -10,6 +5,7 @@ from dojo.models import Finding
 
 
 class SpotbugsParser(object):
+    """Parser for XML ouput file from Spotbugs (https://github.com/spotbugs/spotbugs)"""
 
     def get_scan_types(self):
         return ["SpotBugs Scan"]
@@ -86,41 +82,52 @@ class SpotbugsParser(object):
             for message in bug.itertext():
                 desc += message + '\n'
 
-            dupe_key = bug.get('instanceHash')
-
-            title = bug.find('ShortMessage').text
-            cwe = bug.get('cweid', default=0)
+            shortmessage_extract = bug.find('ShortMessage')
+            if shortmessage_extract is not None:
+                title = shortmessage_extract.text
+            else:
+                title = bug.get('type')
             severity = SEVERITY[bug.get('priority')]
             description = desc
-            mitigation = mitigation_patterns[bug.get('type')]
-            references = reference_patterns[bug.get('type')]
+
+            finding = Finding(
+                title=title,
+                cwe=int(bug.get('cweid', default=0)),
+                severity=severity,
+                description=description,
+                test=test,
+                static_finding=True,
+                dynamic_finding=False,
+                nb_occurences=1
+            )
 
             # find the source line and file on the buginstance
-            source_line = None
-            source_file = "N/A"
-
             source_extract = bug.find('SourceLine')
             if source_extract is not None:
-                source_file = source_extract.get("sourcepath")
-                source_line = int(source_extract.get("start"))
+                finding.file_path = source_extract.get("sourcepath")
+                finding.sast_source_object = source_extract.get("classname")
+                finding.sast_source_file_path = source_extract.get("sourcepath")
+                if 'start' in source_extract.attrib and source_extract.get("start").isdigit():
+                    finding.line = int(source_extract.get("start"))
+                    finding.sast_source_line = int(source_extract.get("start"))
+
+            if bug.get('type') in mitigation_patterns:
+                finding.mitigation = mitigation_patterns[bug.get('type')]
+                finding.references = reference_patterns[bug.get('type')]
+
+            if 'instanceHash' in bug.attrib:
+                dupe_key = bug.get('instanceHash')
+            else:
+                dupe_key = "|".join([
+                    'no_instance_hash',
+                    title,
+                    description,
+                ])
 
             if dupe_key in dupes:
-                finding = dupes[dupe_key]
+                find = dupes[dupe_key]
+                find.nb_occurences += 1
             else:
-                finding = Finding(
-                    title=title,
-                    cwe=cwe,
-                    severity=severity,
-                    description=description,
-                    mitigation=mitigation,
-                    references=references,
-                    test=test,
-                    static_finding=True,
-                    line=source_line,
-                    file_path=source_file,
-                    sast_source_line=source_line,
-                    sast_source_file_path=source_file
-                )
                 dupes[dupe_key] = finding
 
         return list(dupes.values())

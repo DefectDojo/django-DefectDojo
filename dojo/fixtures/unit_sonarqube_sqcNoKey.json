@@ -1,11 +1,11 @@
 [
   {
-    "model": "dojo.sonarqube_product",
+    "model": "dojo.product_api_scan_configuration",
     "pk": 1,
     "fields": {
       "product": 1,
-      "sonarqube_project_key": null,
-      "sonarqube_tool_config": 1
+      "service_key_1": null,
+      "tool_configuration": 1
     }
   }
 ]

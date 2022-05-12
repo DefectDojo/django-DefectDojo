@@ -12,7 +12,7 @@
                         {{ name }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
-                            {% if request.user.is_staff or product_tab and product_tab.product|has_object_permission:"Endpoint_Add" %}
+                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Add" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -46,12 +46,12 @@
                         <form action="{% url 'endpoints_bulk_all' %}" method="post" id="bulk_change_form">
                     {% endif %}
                         {% csrf_token %}
-                        {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
+                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
 						<button class="btn btn-sm btn-primary" type="submit" id="remedy_endpoint" title="Mitigate Endpoints">
                 Bulk Mitigate
             </button>
                         {% endif %}
-                        {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Endpoint_Delete" %}
+                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Delete" %}
 						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Endpoint">
 								<a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
 								<i class="fa fa-trash"></i>
@@ -69,7 +69,7 @@
                     <table id="endpoints"
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
-                            {% if user.is_staff or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
+                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
                             <th class="hidden-sm centered" title="Select all visible endpoint." id="bulk_edit">
                                 <form class="inline-form centered" action="#">
                                     <input type="checkbox" title="Select All" name="select_all" id="select_all"></input>
@@ -84,13 +84,13 @@
                             {% if not product_tab %}
                                 <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
                             {% endif %}
-							<th nowrap="nowrap">Open Findings</th>
+							<th class="text-center" nowrap="nowrap">Active Verified Findings</th>
 							<th>Status</th>
                         </tr>
 
                         {% for e in endpoints %}
                             <tr>
-                                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
+                                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
                                 <td class="hidden-sm centered">
                                     <form action="#">
                                         <input type="checkbox" title= "Select_{{ e.id }}" name="select_{{ e.id }}"
@@ -101,44 +101,31 @@
                                 {% if host_view %}
                                   <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
                                 {% else %}
-                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                <td>
+                                  <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
                                 {% endif %}
-                                  {% if e.tags %}
-                                      <sup>
-                                          {% for tag in e.tags.all %}
-                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                          {% endfor %}
-                                      </sup>
-                                  {% endif %}
+                                  {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
                                 {% if not product_tab %}
-                                  <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
-                                    <sup>
-                                        {% for tag in e.product.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                  <td>
+                                    <a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.alll %}
                                   </td>
                                 {% endif %}
-                                <td>
+                                <td class="text-center">
                                   {% if host_view %}
-                                    {% if e.host_active_findings_count > 0 %}
                                       {{ e.host_active_findings_count }}
-                                    {% else %}
-                                      No Open, Active Findings
-                                    {% endif %}
                                   {% else %}
                                     {% if e.active_findings_count > 0 %}
-                                      <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.active_findings_count }}</a>
+                                      <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">{{ e.active_findings_count }}</a>
                                     {% else %}
-                                      No Open, Active Findings
+                                      0
                                     {% endif %}
                                   {% endif %}
                                 </td>
                                 <td>
                                   {% if host_view %}
-                                    {{ e.host_mitigated_endpoints_count }} / {{ e.host_endpoints_count }} Mitigated Endpoints
+                                    {{ e.host_mitigated_endpoints_count }} / {{ e.host_endpoints_count }} mitigated endpoints
                                   {% else %}
                                     {% if e.mitigated %}
                                       Mitigated
@@ -146,7 +133,7 @@
                                       {% if e.active_findings_count > 0 %}
                                         Vulnerable
                                       {% else %}
-                                        No Open, Active Findings
+                                        No active verified findings
                                       {% endif %}
                                     {% endif %}
                                   {% endif %}
@@ -159,7 +146,11 @@
                     {% include "dojo/paging_snippet.html" with page=endpoints page_size=True %}
                 </div>
             {% else %}
-                <h5> No endpoints </h5>
+                {% if host_view %}
+                    <h5> No hosts </h5>
+                {% else %}
+                    <h5> No endpoints </h5>
+                {% endif %}
             {% endif %}
         </div>
     </div>

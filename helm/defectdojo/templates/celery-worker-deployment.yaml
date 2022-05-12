@@ -37,6 +37,19 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
+      volumes:
+      {{- range .Values.celery.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
+          path: {{ .hostPath }}
+          {{- end }}
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -50,7 +63,13 @@ spec:
         {{- if eq .Values.database "postgresql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
         {{- else if eq .Values.database "mysql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.master.service.port }}"
+        {{- end }}
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
         {{- end }}
       {{- end }}
       - name: celery
@@ -61,6 +80,13 @@ spec:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
         {{- end }}
         command: ['/entrypoint-celery-worker.sh']
+        volumeMounts:
+        {{- range .Values.celery.extraVolumes }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
@@ -71,8 +97,23 @@ spec:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
+            {{- if eq .Values.celery.broker "rabbitmq" }}
+            {{- if .Values.rabbitmq.enabled}}
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
+            {{- else }}
+              name: {{ .Values.rabbitmq.existingPasswordSecret }}
+              key: {{ .Values.rabbitmq.secretPasswordKey }}  
+            {{- end }}            
+            {{- else if eq .Values.celery.broker "redis" }}
+            {{- if .Values.redis.enabled }}
+              name: defectdojo-{{ .Values.celery.broker }}-specific
+              key: {{ .Values.celery.broker }}-password
+            {{- else }}
+              name: {{ .Values.redis.existingSecret }}
+              key: {{ .Values.redis.secretKey }}
+            {{- end }}  
+            {{- end }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -80,8 +121,8 @@ spec:
               name: {{ .Values.postgresql.existingSecret }}
               key: {{ .Values.postgresql.secretKey }}
               {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.existingSecret }}
-              key: {{ .Values.mysql.secretKey }}
+              name: {{ .Values.mysql.auth.existingSecret }}
+              key: {{ .Values.mysql.auth.secretKey }}
               {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -25,8 +26,12 @@
                         <tbody>
                         {% for question in questions %}
                             <tr>
-                                <td><a title="{{ question.text }}"
-                                                      href="{% url 'edit_question' question.id %}">{{ question.text }}</a>
+                                <td>
+                                    {% if "dojo.change_question"|has_configuration_permission:"staff" %}
+                                    <a title="{{ question.text }}" href="{% url 'edit_question' question.id %}">{{ question.text }}</a>
+                                    {% else %}
+                                    {{ question.text }}
+                                    {% endif %}
                                 </td>
                                 <td class="nowrap text-center">{{ question.optional|yesno|capfirst }}</td>
                                 <td class="nowrap text-center">{{ question|content_type_str|capfirst }} </td>
@@ -45,10 +50,10 @@
         <div class="col-md-2">
             <div class="panel panel-default filters">
                 {% if filtered.form %}
-                    {% if request.user.is_staff %}
+                    {% if "dojo.add_question"|has_configuration_permission:"staff" %}
                         <div class="panel-heading">Actions</div>
                         <div class="panel-body centered">
-                            <a class="btn btn-sm btn-primary" href="{% url 'create_question' %}">
+                            <a class="btn btn-sm btn-secondary" href="{% url 'create_question' %}">
                                 Create Question
                             </a>
                         </div>
@@ -57,7 +62,7 @@
                     <form method="get" class="panel-body">
                         {{ filtered.form.as_p }}
                         <div class="centered">
-                            <input type="submit" class="btn btn-primary inline top" label="submit" value="Apply"/><br/><br/>
+                            <input type="submit" class="btn btn-secondary inline top" label="submit" value="Apply"/><br/><br/>
                             <a href="{% url 'questions' %}"> [Clear Filters] </a>
                         </div>
                     </form>

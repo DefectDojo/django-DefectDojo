@@ -1,4 +1,6 @@
 from django.conf.urls import url, include
+from django.contrib.auth import views as auth_views
+from django.conf import settings
 
 from dojo.user import views
 
@@ -29,5 +31,22 @@ urlpatterns = [
     url(r'^user/(?P<uid>\d+)/add_product_member$', views.add_product_member,
         name='add_product_member_user'),
     url(r'^user/(?P<uid>\d+)/add_group_member$', views.add_group_member,
-        name='add_group_member_user')
+        name='add_group_member_user'),
+    url(r'^user/(?P<uid>\d+)/edit_permissions$', views.edit_permissions,
+        name='edit_user_permissions')
 ]
+if settings.FORGOT_PASSWORD:
+    urlpatterns.extend([
+        url(r'^password_reset/$', views.DojoPasswordResetView.as_view(
+            template_name='dojo/password_reset.html',
+        ), name="password_reset"),
+        url(r'^password_reset/done/$', auth_views.PasswordResetDoneView.as_view(
+            template_name='dojo/password_reset_done.html',
+        ), name='password_reset_done'),
+        url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,40})/$', auth_views.PasswordResetConfirmView.as_view(
+            template_name='dojo/password_reset_confirm.html',
+        ), name='password_reset_confirm'),
+        url(r'^reset/done/$', auth_views.PasswordResetCompleteView.as_view(
+            template_name='dojo/password_reset_complete.html',
+        ), name='password_reset_complete'),
+    ])
