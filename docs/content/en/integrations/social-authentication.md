@@ -5,6 +5,8 @@ draft: false
 weight: 3
 ---
 
+> For every case below, you need to rebuild your DefectDojo to apply any changes in authentication configuration.
+
 ## Auth0
 
 In the same way as with other identity providers, it's now possible to
