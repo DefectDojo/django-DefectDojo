@@ -1515,7 +1515,7 @@ class Endpoint(models.Model):
 
         return Endpoint(
             protocol=url.scheme if url.scheme != '' else None,
-            userinfo=':'.join(url.userinfo) if url.userinfo not in ['',(), ('',)] else None,
+            userinfo=':'.join(url.userinfo) if url.userinfo not in ['', (), ('',)] else None,
             host=url.host if url.host != '' else None,
             port=url.port,
             path='/'.join(url.path)[:500] if url.path not in [None, (), ('',)] else None,

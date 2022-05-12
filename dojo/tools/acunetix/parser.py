@@ -85,7 +85,7 @@ class AcunetixParser(object):
                         finding.unsaved_req_resp.append({"req": (request.text or ""), "resp": ""})
 
                 # manage the endpoint
-                url = hyperlink.parse(start_url, decoded=False)
+                url = hyperlink.parse(start_url)
                 endpoint = Endpoint(
                         host=url.host,
                         port=url.port,

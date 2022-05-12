@@ -34,7 +34,7 @@ class WFuzzParser(object):
 
         dupes = {}
         for item in data:
-            url = hyperlink.parse(item["url"], decoded=False)
+            url = hyperlink.parse(item["url"])
             payload = item["payload"]
             return_code = str(item["code"])
             severity = self.SEVERITY[return_code]
