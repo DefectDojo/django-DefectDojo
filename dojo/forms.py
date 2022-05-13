@@ -1329,7 +1329,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     risk_accept = forms.BooleanField(required=False)
     risk_unaccept = forms.BooleanField(required=False)
 
-    planned_remediation_date = forms.DateField(required=False)
+    planned_remediation_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'datepicker'}))
 
     finding_group = forms.BooleanField(required=False)
     finding_group_create = forms.BooleanField(required=False)

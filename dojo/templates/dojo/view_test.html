@@ -681,6 +681,7 @@
                             {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                                 <th>Group</th>
                             {% endif %}
+                            <th>Planned Remediation Date</th>
                         </tr>
                     </thead>
                 <tbody>
@@ -919,6 +920,11 @@
                                 {% endif %}
                             </td>
                         {% endif %}
+                        <td class="nowrap">
+                            {% if finding.planned_remediation_date %}
+                            {{ finding.planned_remediation_date }}
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -1197,6 +1203,7 @@
                   {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                     { "data": "grouped" },
                   {% endif %}
+                  { "data": "planned_remediation_date"}
               ];
 
             // Filter the list of items to display based on what is shown.

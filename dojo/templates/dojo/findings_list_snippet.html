@@ -223,6 +223,7 @@
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
                             {% endif %}
                             <th>Service</th>
+                            <th>Planned Remediation Date</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -395,6 +396,9 @@
                                     </a>
                                   {% endif %}
                                   {% include "dojo/snippets/tags.html" with tags=finding.tags.alll %}
+                                   {% if finding.planned_remediation_date %}
+                                    <i class="glyphicon glyphicon-calendar has-popover dojo-sup" data-trigger="hover" data-content="{{ finding.planned_remediation_date }}" data-placement="left" data-container="body" data-original-title="Planned Remediation Date" title=""></i>
+                                  {% endif %}
                                 </td>
                                 <td class="nowrap">
                                   {% if finding.cwe > 0 %}
@@ -484,6 +488,11 @@
                                     {{ finding.service }}
                                     {% endif %}
                                 </td>
+                                <td class="nowrap">
+                                    {% if finding.planned_remediation_date %}
+                                    {{ finding.planned_remediation_date }}
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -538,6 +547,7 @@
                     { "data": "product" },
                 {% endif %}
                 { "data": "service" },
+                { "data": "planned_remediation_date" },
               ];
 
             // Filter the list of items to display based on what is shown.

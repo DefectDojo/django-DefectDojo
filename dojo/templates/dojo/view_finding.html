@@ -236,6 +236,9 @@
                     {% if finding.publish_date %}
                         <th>Vuln Publish date</th>
                     {% endif %}
+                    {% if finding.planned_remediation_date %}
+                        <th>Planned Remediation Date</th>
+                    {% endif%}
                     <th>Reporter</th>
                     {% if finding.mitigated %}
                         <th>Date Mitigated</th>
@@ -358,6 +361,9 @@
                     <td>{{ finding.age }} days</td>
                     {% if finding.publish_date %}
                         <td>{{ finding.publish_date }}</td>
+                    {% endif %}
+                    {% if finding.planned_remediation_date %}
+                        <td>{{ finding.planned_remediation_date }}</td>
                     {% endif %}
                     <td>{{ finding.reporter }}</td>
                     {% if finding.mitigated %}
