@@ -1131,12 +1131,13 @@ class FindingForm(forms.ModelForm):
     mitigated_by = forms.ModelChoiceField(required=True, queryset=get_authorized_users(Permissions.Finding_View), initial=get_current_user)
 
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    planned_remediation_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
                    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
                    'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
-                   'out_of_scope', 'risk_accept', 'under_defect_review')
+                   'out_of_scope', 'risk_accept', 'under_defect_review', 'planned_remediation_date')
 
     def __init__(self, *args, **kwargs):
         req_resp = None
@@ -1328,6 +1329,8 @@ class FindingBulkUpdateForm(forms.ModelForm):
     risk_accept = forms.BooleanField(required=False)
     risk_unaccept = forms.BooleanField(required=False)
 
+    planned_remediation_date = forms.DateField(required=False)
+
     finding_group = forms.BooleanField(required=False)
     finding_group_create = forms.BooleanField(required=False)
     finding_group_create_name = forms.CharField(required=False)
@@ -1336,6 +1339,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     finding_group_remove = forms.BooleanField(required=False)
     finding_group_by = forms.BooleanField(required=False)
     finding_group_by_option = forms.CharField(required=False)
+
 
     push_to_jira = forms.BooleanField(required=False)
     # unlink_from_jira = forms.BooleanField(required=False)
@@ -1362,7 +1366,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = ('severity', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'is_mitigated')
+        fields = ('severity', 'planned_remediation_date', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'is_mitigated')
 
 
 class EditEndpointForm(forms.ModelForm):

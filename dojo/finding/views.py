@@ -1813,6 +1813,7 @@ def finding_bulk_update_all(request, pid=None):
                 finds = prefetch_for_findings(finds)
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
                     for find in finds:
+
                         if form.cleaned_data['severity']:
                             find.severity = form.cleaned_data['severity']
                             find.numerical_severity = Finding.get_numerical_severity(form.cleaned_data['severity'])
@@ -1835,6 +1836,11 @@ def finding_bulk_update_all(request, pid=None):
 
                     for prod in prods:
                         calculate_grade(prod)
+
+                if form.cleaned_data['planned_remediation_date']:
+                    for finding in finds:
+                        finding.planned_remediation_date = form.cleaned_data['planned_remediation_date']
+                        finding.save_no_options()
 
                 skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
