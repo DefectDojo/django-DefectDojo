@@ -112,26 +112,28 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
     """
 
     vector_pattern = r'^\d.\d \((.*)\)'
+    cvss_vector = 'CVSS:3.0/'
 
     if cvss_base:
         try:
-            cvss_base_vector = re.search(vector_pattern, cvss_base).group(1)
+            cvss_vector += re.search(vector_pattern, cvss_base).group(1)
         except IndexError:
             _logger.error(f'CVSS3 Base Vector not found in {cvss_base}')
-            return None
+        except AttributeError:
+            _logger.error(f'CVSS3 Base Vector not found in {cvss_base}')
         if cvss_temporal:
             try:
-                cvss_temporal_vector = re.search(
-                    vector_pattern, cvss_temporal).group(1)
-                return f'CVSS:3.0/{cvss_base_vector}/{cvss_temporal_vector}'
+                cvss_temporal_vector = re.search(vector_pattern, cvss_temporal).group(1)
+                cvss_vector += '/'
+                cvss_vector += cvss_temporal_vector
             except IndexError:
                 _logger.error(
                     f'CVSS3 Temporal Vector not found in {cvss_base}')
-                return f'CVSS:3.0/{cvss_base_vector}'
-        else:
-            return cvss_base_vector
-    else:
-        return None
+            except AttributeError:
+                                _logger.error(
+f'CVSS3 Temporal Vector not found in {cvss_base}')
+
+        return cvss_vector
 
 
 def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
@@ -171,7 +173,7 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                 "%m/%d/%Y %H:%M:%S").date(),
             vuln_id_from_tool=report_finding['QID'],
             cvssv3=_extract_cvss_vectors(
-                    report_finding['CVSS3 Base'],
+                report_finding['CVSS3 Base'],
                 report_finding['CVSS3 Temporal']))
 
         if report_finding['Date Last Fixed']:
