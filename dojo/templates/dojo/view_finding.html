@@ -118,6 +118,14 @@
                             {% endif %}
                             {% if finding|has_object_permission:"Finding_Edit" %}
                                 <li role="separator" class="divider"></li>
+                                    <li role="presentation">
+                                        <a href="{% url 'remediation_date' finding.id %}">
+                                            <i class="fa fa-calendar-check-o"></i> Add/Edit Planned Remediation Date
+                                        </a>
+                                    </li>
+                            {% endif %}
+                            {% if finding|has_object_permission:"Finding_Edit" %}
+                                <li role="separator" class="divider"></li>
                                 {% if finding.mitigated %}
                                     <li role="presentation">
                                         <a href="{% url 'reopen_finding' finding.id %}">

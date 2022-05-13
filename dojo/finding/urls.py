@@ -93,7 +93,8 @@ urlpatterns = [
         views.reset_finding_duplicate_status, name='reset_finding_duplicate_status'),
     url(r'^finding/(?P<finding_id>\d+)/original/(?P<new_original_id>\d+)$',
         views.set_finding_as_original, name='set_finding_as_original'),
-
+    url(r'^finding/(?P<fid>\d+)/remediation_date', views.remediation_date,
+        name='remediation_date'),
     # stub findings
     url(r'^stub_finding/(?P<tid>\d+)/add$',
         views.add_stub_finding, name='add_stub_finding'),

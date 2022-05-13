@@ -1535,6 +1535,24 @@ class CloseFindingForm(forms.ModelForm):
         model = Notes
         fields = ['note_type', 'entry']
 
+class EditPlannedRemediationDateFindingForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        finding = None
+        if 'finding' in kwargs:
+            finding = kwargs.pop('finding')
+
+        super(EditPlannedRemediationDateFindingForm, self).__init__(*args, **kwargs)
+
+        self.fields['planned_remediation_date'].required = True
+        self.fields['planned_remediation_date'].widget = forms.DateInput(attrs={'class': 'datepicker'})
+
+        if finding is not None:
+            self.fields['planned_remediation_date'].initial = finding.planned_remediation_date
+
+    class Meta:
+        model = Finding
+        fields = ['planned_remediation_date']
+
 
 class DefectFindingForm(forms.ModelForm):
     CLOSE_CHOICES = (("Close Finding", "Close Finding"), ("Not Fixed", "Not Fixed"))
