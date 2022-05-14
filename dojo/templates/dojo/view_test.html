@@ -849,9 +849,7 @@
                                 </a>
                              {% endif %}
                          {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
-                            {% if finding.planned_remediation_date %}
-                            <i class="glyphicon glyphicon-calendar has-popover dojo-sup" data-trigger="hover" data-content="{{ finding.planned_remediation_date }}" data-placement="left" data-container="body" data-original-title="Planned Remediation Date" title=""></i>
-                            {% endif %}
+
                         </td>
                         <td class="nowrap">
                         {% if finding.cwe > 0 %}
