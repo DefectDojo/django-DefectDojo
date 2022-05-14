@@ -1,9 +1,7 @@
 from django.db import migrations, models
-import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('dojo', '0160_set_notnull_endpoint_statuses')
     ]
