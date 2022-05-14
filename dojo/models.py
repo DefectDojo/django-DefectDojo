@@ -2067,6 +2067,7 @@ class Finding(models.Model):
                                                 verbose_name=_('Planned Remediation Date'),
                                                 help_text=_("The date the flaw is expected to be remediated."))
 
+
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add."))
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,

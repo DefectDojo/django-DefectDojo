@@ -38,6 +38,7 @@ A new DATE field in the Finding model to store a Planned Remediation Date. This 
 teams to inform the security teams when a Finding will be remediated in production (or the environment the Finding was
 discovered in).
 
+
 Custom Note Types are not validated for correct format so different users will enter different date formats, making
 parsing difficult.
 
