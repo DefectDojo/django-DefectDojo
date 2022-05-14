@@ -1,15 +1,16 @@
+import os
+import sys
+import time
+import unittest
+from pathlib import Path
+
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 
-import unittest
-import sys
-import os
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest, WaitForPageLoad
-from pathlib import Path
-import time
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -198,7 +199,8 @@ class FindingTest(BaseTestCase):
         Select(element).select_by_value(reviewer_option.get_attribute("value"))
         # Add Review notes
         driver.find_element(By.ID, "id_entry").clear()
-        driver.find_element(By.ID, "id_entry").send_keys("This is to be reveiwed critically. Make sure it is well handled.")
+        driver.find_element(By.ID, "id_entry").send_keys(
+            "This is to be reveiwed critically. Make sure it is well handled.")
         # Click 'Mark for reveiw'
         driver.find_element(By.NAME, "submit").click()
         # Query the site to determine if the finding has been added
@@ -362,7 +364,8 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Finding template added successfully. You may edit it here.'))
+        self.assertTrue(
+            self.is_success_message_present(text='Finding template added successfully. You may edit it here.'))
 
     def test_apply_template_to_a_finding(self):
         driver = self.driver
