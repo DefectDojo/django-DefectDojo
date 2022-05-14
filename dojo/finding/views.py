@@ -993,7 +993,7 @@ def request_finding_review(request, fid):
                                 title='Finding review requested',
                                 finding=finding,
                                 description='User %s has requested that users %s review the finding "%s" for accuracy:\n\n%s' % (
-                                user, reviewers, finding.title, new_note),
+                                    user, reviewers, finding.title, new_note),
                                 icon='check',
                                 url=reverse("view_finding", args=(finding.id,)))
 
@@ -1485,7 +1485,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
                     template.save()
                     new_note = Notes()
                     new_note.entry = 'CWE remediation text applied to finding for CWE: %s using template: %s.' % (
-                    template.cwe, template.title)
+                        template.cwe, template.title)
                     new_note.author, created = User.objects.get_or_create(username='System')
                     new_note.save()
                     finding.notes.add(new_note)
@@ -1810,7 +1810,7 @@ def merge_finding_product(request, pid):
 
     product_tab = Product_Tab(finding.test.engagement.product, title="Merge Findings", tab="findings")
     custom_breadcrumb = {"Open Findings": reverse('product_open_findings', args=(
-    finding.test.engagement.product.id,)) + '?test__engagement__product=' + str(finding.test.engagement.product.id)}
+        finding.test.engagement.product.id,)) + '?test__engagement__product=' + str(finding.test.engagement.product.id)}
 
     return render(request, 'dojo/merge_findings.html', {
         'form': form,
@@ -1964,7 +1964,7 @@ def finding_bulk_update_all(request, pid=None):
                     if skipped:
                         add_success_message_to_response(
                             'Skipped %s findings when adding to finding group %s, findings already part of another group' % (
-                            skipped, finding_group.name))
+                                skipped, finding_group.name))
 
                     # refresh findings from db
                     finds = finds.all()
@@ -1975,7 +1975,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     if removed:
                         add_success_message_to_response('Removed %s findings from finding groups %s' % (
-                        removed, ','.join([finding_group.name for finding_group in finding_groups])))
+                            removed, ','.join([finding_group.name for finding_group in finding_groups])))
 
                     if skipped:
                         add_success_message_to_response(
@@ -1997,12 +1997,12 @@ def finding_bulk_update_all(request, pid=None):
                     if grouped:
                         add_success_message_to_response(
                             'Grouped %d findings into %d (%d newly created) finding groups' % (
-                            grouped, len(finding_groups), groups_created))
+                                grouped, len(finding_groups), groups_created))
 
                     if skipped:
                         add_success_message_to_response(
                             'Skipped %s findings when grouping by %s as these findings were already in an existing group' % (
-                            skipped, finding_group_by_option))
+                                skipped, finding_group_by_option))
 
                     # refresh findings from db
                     finds = finds.all()
