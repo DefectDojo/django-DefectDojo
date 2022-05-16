@@ -11,7 +11,7 @@ dependencies:
     version: 7.12.5
     repository: "@bitnami"
     alias: postgresqlha
-    condition: postgresql-ha.enabled
+    condition: postgresqlha.enabled
   - name: rabbitmq
     version: 8.24.2
     repository: "@bitnami"
