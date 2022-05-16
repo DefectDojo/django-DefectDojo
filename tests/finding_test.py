@@ -1,15 +1,16 @@
+import os
+import sys
+import time
+import unittest
+from pathlib import Path
+
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 
-import unittest
-import sys
-import os
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest, WaitForPageLoad
-from pathlib import Path
-import time
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -505,6 +506,7 @@ class FindingTest(BaseTestCase):
         driver = self.driver
         self.goto_component_overview(driver)
         self.assertTrue(self.is_element_by_css_selector_present("table"))
+
 
 def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase('test_login'))

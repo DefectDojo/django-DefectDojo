@@ -3367,7 +3367,7 @@ class JIRA_Project(models.Model):
 
     def __str__(self):
         return ('%s: ' + self.project_key + '(%s)') % (
-        str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
+            str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
 
 
 # declare form here as we can't import forms.py due to circular imports not even locally
@@ -3452,7 +3452,7 @@ class Notifications(models.Model):
         'Triggered whenever an (re-)import has been done that created/updated/closed findings.'))
     jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
                                    verbose_name=_("JIRA problems"), help_text=_(
-            "JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
+                                        "JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
     stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
     auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
