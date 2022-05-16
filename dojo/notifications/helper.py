@@ -333,7 +333,7 @@ def get_slack_user_id(user_email):
     if user:
         if 'error' in user:
             logger.error("Slack is complaining. See error message below.")
-            logger.error(users)
+            logger.error(user)
             raise RuntimeError('Error getting user list from Slack: ' + res.text)
         else:
             if "email" in user["user"]["profile"]:
