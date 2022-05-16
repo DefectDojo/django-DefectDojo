@@ -76,3 +76,21 @@ class TestTestsslParser(DojoTestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
         self.assertEqual(3, len(findings))
+
+    def test_parse_file_with_one_vuln_has_overall_medium(self):
+        testfile = open("unittests/scans/testssl/overall_medium.csv")
+        parser = TestsslParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(2, len(findings))
+
+    def test_parse_file_with_one_vuln_has_overall_critical(self):
+        testfile = open("unittests/scans/testssl/overall_critical.csv")
+        parser = TestsslParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(145, len(findings))
