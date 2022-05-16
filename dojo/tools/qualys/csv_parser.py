@@ -1,10 +1,10 @@
 import csv
 import io
 import logging
-from datetime import datetime
 import re
+from datetime import datetime
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 _logger = logging.getLogger(__name__)
 
@@ -130,8 +130,8 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
                 _logger.error(
                     f'CVSS3 Temporal Vector not found in {cvss_base}')
             except AttributeError:
-                                _logger.error(
-f'CVSS3 Temporal Vector not found in {cvss_base}')
+                _logger.error(
+                    f'CVSS3 Temporal Vector not found in {cvss_base}')
 
         return cvss_vector
 

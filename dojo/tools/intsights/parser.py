@@ -41,19 +41,13 @@ class IntSightsParser(object):
             alert['description'] = original_alert['Details']['Description']
             alert['severity'] = original_alert['Details']['Severity']
             alert['type'] = original_alert['Details']['Type']
-            alert['source_date'] = original_alert['Details']['Source'].get(
-                "Date", "None provided")
-            alert['report_date'] = original_alert.get(
-                "FoundDate", "None provided")
-            alert['network_type'] = original_alert['Details']['Source'].get(
-                'NetworkType')
-            alert['source_url'] = original_alert['Details']['Source'].get(
-                'URL')
-            alert['assets'] = ','.join([item.get('Value')
-                                       for item in original_alert['Assets']])
+            alert['source_date'] = original_alert['Details']['Source'].get("Date", "None provided")
+            alert['report_date'] = original_alert.get("FoundDate", "None provided")
+            alert['network_type'] = original_alert['Details']['Source'].get('NetworkType')
+            alert['source_url'] = original_alert['Details']['Source'].get('URL')
+            alert['assets'] = ','.join([item.get('Value') for item in original_alert['Assets']])
             alert['tags'] = original_alert['Details'].get('Tags')
-            alert['status'] = 'Closed' if original_alert['Closed'].get(
-                'IsClosed') else 'Open'
+            alert['status'] = 'Closed' if original_alert['Closed'].get('IsClosed') else 'Open'
             alert[
                 'alert_link'] = f'https://dashboard.intsights.com/#/threat-command/alerts?search=' \
                                 f'{original_alert["_id"]}'
@@ -72,26 +66,10 @@ class IntSightsParser(object):
             A list of alerts [dict()]
 
         """
-        default_keys = [
-            'Alert ID',
-            'Title',
-            'Description',
-            'Severity',
-            'Type',
-            'Source Date (UTC)',
-            'Report Date (UTC)',
-            'Network Type',
-            'Source URL',
-            'Source Name',
-            'Assets',
-            'Tags',
-            'Assignees',
-            'Remediation',
-            'Status',
-            'Closed Reason',
-            'Additional Info',
-            'Rating',
-            'Alert Link']
+        default_keys = ['Alert ID', 'Title', 'Description', 'Severity', 'Type', 'Source Date (UTC)',
+                        'Report Date (UTC)', 'Network Type', 'Source URL', 'Source Name', 'Assets', 'Tags',
+                        'Assignees', 'Remediation', 'Status', 'Closed Reason', 'Additional Info', 'Rating',
+                        'Alert Link']
 
         # These keys require a value. If one ore more of the values is null or empty, the entire Alert is ignored.
         # This is to avoid attempting to import incomplete Findings.
@@ -101,16 +79,12 @@ class IntSightsParser(object):
         invalid_alerts = []
 
         content = csv_file.read()
-        if isinstance(content, bytes):
+        if type(content) is bytes:
             content = content.decode('utf-8')
-        csv_reader = csv.DictReader(
-            io.StringIO(content),
-            delimiter=',',
-            quotechar='"')
+        csv_reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
 
         # Don't bother parsing if the keys don't match exactly what's expected
-        if collections.Counter(default_keys) == collections.Counter(
-                csv_reader.fieldnames):
+        if collections.Counter(default_keys) == collections.Counter(csv_reader.fieldnames):
             default_valud = 'None provided'
             for alert in csv_reader:
                 alert['alert_id'] = alert.pop('Alert ID')
@@ -118,12 +92,9 @@ class IntSightsParser(object):
                 alert['description'] = alert.pop('Description')
                 alert['severity'] = alert.pop('Severity')
                 alert['type'] = alert.pop('Type', )
-                alert['source_date'] = alert.pop(
-                    'Source Date (UTC)', default_valud)
-                alert['report_date'] = alert.pop(
-                    'Report Date (UTC)', default_valud)
-                alert['network_type'] = alert.pop(
-                    'Network Type', default_valud)
+                alert['source_date'] = alert.pop('Source Date (UTC)', default_valud)
+                alert['report_date'] = alert.pop('Report Date (UTC)', default_valud)
+                alert['network_type'] = alert.pop('Network Type', default_valud)
                 alert['source_url'] = alert.pop('Source URL', default_valud)
                 alert['assets'] = alert.pop('Assets', default_valud)
                 alert['tags'] = alert.pop('Tags', default_valud)
@@ -140,8 +111,7 @@ class IntSightsParser(object):
                 if alert not in invalid_alerts:
                     alerts.append(alert)
         else:
-            self._LOGGER.error(
-                'The CSV file has one or more missing or unexpected header values')
+            self._LOGGER.error('The CSV file has one or more missing or unexpected header values')
 
         return alerts
 
@@ -173,23 +143,24 @@ class IntSightsParser(object):
         elif file.name.lower().endswith('.csv'):
             alerts = self._parse_csv(file)
         else:
-            raise ValueError(
-                'Filename extension not recognized. Use .json or .csv')
+            raise ValueError('Filename extension not recognized. Use .json or .csv')
+
+        if not alerts:
+            raise ValueError('No alert in the report')
 
         for alert in alerts:
             dupe_key = alert['alert_id']
 
-            alert = Finding(
-                title=alert['title'],
-                test=test,
-                active=False if alert['status'] == 'Closed' else True,
-                verified=True,
-                description=self._build_finding_description(alert),
-                severity=alert['severity'],
-                references=alert["alert_link"],
-                static_finding=False,
-                dynamic_finding=True,
-                unique_id_from_tool=alert['alert_id'])
+            alert = Finding(title=alert['title'],
+                            test=test,
+                            active=False if alert['status'] == 'Closed' else True,
+                            verified=True,
+                            description=self._build_finding_description(alert),
+                            severity=alert['severity'],
+                            references=alert["alert_link"],
+                            static_finding=False,
+                            dynamic_finding=True,
+                            unique_id_from_tool=alert['alert_id'])
 
             duplicates[dupe_key] = alert
 
