@@ -1,43 +1,43 @@
 import base64
+import copy
 import hashlib
 import logging
 import os
 import re
-import copy
-from typing import Dict, Set, Optional
+from typing import Dict, Optional, Set
 from uuid import uuid4
-from django.conf import settings
+
+import hyperlink
+import tagulous.admin
 from auditlog.registry import auditlog
+from cvss import CVSS3
+from dateutil.relativedelta import relativedelta
+from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.db.models.expressions import Case, When
-from django.urls import reverse
-from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
-from django.db import models, connection
-from django.db.models import Q, Count
+from django.core.validators import RegexValidator, validate_ipv46_address
+from django.db import connection, models
+from django.db.models import Count, JSONField, Q
+from django.db.models.expressions import Case, When
 from django.db.models.functions import Lower
-from django_extensions.db.models import TimeStampedModel
-from django.utils.deconstruct import deconstructible
-from django.utils.timezone import now
-from django.utils.functional import cached_property
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
+from django.utils.functional import cached_property
 from django.utils.html import escape
-from pytz import all_timezones
-from polymorphic.models import PolymorphicModel
-from multiselectfield import MultiSelectField
-from django import forms
+from django.utils.timezone import now
 from django.utils.translation import gettext as _
-from dateutil.relativedelta import relativedelta
-from tagulous.models import TagField
-import tagulous.admin
-from django.db.models import JSONField
-import hyperlink
-from cvss import CVSS3
-from dojo.settings.settings import SLA_BUSINESS_DAYS
+from django_extensions.db.models import TimeStampedModel
+from multiselectfield import MultiSelectField
 from numpy import busday_count
+from polymorphic.models import PolymorphicModel
+from pytz import all_timezones
+from tagulous.models import TagField
 
+from dojo.settings.settings import SLA_BUSINESS_DAYS
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -488,6 +488,8 @@ class System_Settings(models.Model):
     objects = System_Settings_Manager()
 
 
+
+
 class SystemSettingsFormAdmin(forms.ModelForm):
     product_grade = forms.CharField(widget=forms.Textarea)
 
@@ -935,6 +937,32 @@ class Product(models.Model):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
 
+class SLA_Group(models.Model):
+
+    name = models.CharField(
+        blank=False,
+        verbose_name=_('Custom SLA Name'),
+        help_text=_('A unique name for the set of SLAs.')
+    )
+
+    sla_critical = models.IntegerField(default=7,
+                                          verbose_name=_('Critical Finding SLA Days'),
+                                          help_text=_('# of days to remediate a critical finding.'))
+
+    sla_high = models.IntegerField(default=30,
+                                          verbose_name=_('High Finding SLA Days'),
+                                          help_text=_('# of days to remediate a high finding.'))
+    sla_medium = models.IntegerField(default=90,
+                                          verbose_name=_('Medium Finding SLA Days'),
+                                          help_text=_('# of days to remediate a medium finding.'))
+
+    sla_low = models.IntegerField(default=120,
+                                          verbose_name=_('Low Finding SLA Days'),
+                                          help_text=_('# of days to remediate a low finding.'))
+
+class Product_SLA(models.Model):
+    product_id = models.ForeignKey(Product, related_name='id', null=False, blank=False, on_delete=models.CASCADE)
+    sla_id = models.ForeignKey(SLA_Group, related_name='id', null=False, blank=False, on_delete=models.CASCADE)
 
 class Product_Member(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
