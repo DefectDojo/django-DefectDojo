@@ -314,10 +314,10 @@ def deduplicate_unique_id_from_tool(new_finding):
             continue
         try:
             set_duplicate(new_finding, find)
+            break
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-        break
 
 
 def deduplicate_hash_code(new_finding):
@@ -346,10 +346,10 @@ def deduplicate_hash_code(new_finding):
         try:
             if are_endpoints_duplicates(new_finding, find):
                 set_duplicate(new_finding, find)
+                break
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-        break
 
 
 def deduplicate_uid_or_hash_code(new_finding):
