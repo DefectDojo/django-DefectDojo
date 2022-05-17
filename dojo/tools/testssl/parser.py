@@ -28,6 +28,10 @@ class TestsslParser(object):
             # possible values: LOW|MEDIUM|HIGH|CRITICAL + WARN|OK|INFO
             if row['severity'] in ['OK']:
                 continue
+            if row['id'] in ['rating_spec', 'rating_doc', 'protocol_support_score', 'protocol_support_score_weighted', 'key_exchange_score', 'key_exchange_score_weighted', 'cipher_strength_score', 'cipher_strength_score_weighted', 'final_score', 'overall_grade']:
+                continue
+            if 'grade_cap_reason_' in row['id']:
+                continue
             # convert severity
             severity = row['severity'].lower().capitalize()
             if severity == 'Warn':
