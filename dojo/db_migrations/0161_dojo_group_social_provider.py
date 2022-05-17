@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0156_migrate_finding_groups_setting'),
+        ('dojo', '0160_set_notnull_endpoint_statuses'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='dojo_group',
             name='social_provider',
-            field=models.CharField(max_length=10, blank=True, null=True, help_text='Group imported from Azure AD.', verbose_name='Social Authentication Provider'),
+            field=models.CharField(max_length=10, blank=True, null=True, help_text='Group imported from social provider.', verbose_name='Social Authentication Provider'),
         ),
     ]
