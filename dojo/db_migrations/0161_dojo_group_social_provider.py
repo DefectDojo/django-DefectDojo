@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='dojo_group',
             name='social_provider',
-            field=models.CharField(max_length=10, blank=True, null=True, help_text='Group imported from social provider.', verbose_name='Social Authentication Provider'),
+            field=models.CharField(blank=True, choices=[('AzureAD', 'AzureAD')], help_text='Group imported from a social provider.', max_length=10, null=True, verbose_name='Social Authentication Provider'),
         ),
     ]
