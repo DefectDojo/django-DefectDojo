@@ -366,8 +366,6 @@ postgresqlha:
   service:
     port: 5432
 
-
-
 # Google CloudSQL support in GKE via gce-proxy
 cloudsql:
   # To use CloudSQL in GKE set 'enable: true'
