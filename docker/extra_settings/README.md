@@ -3,7 +3,7 @@ This folders is ignore by git and docker.
 
 If a file if placed here, it will be copied on startup to `dojo/settings/local_settings.py`.
 
-For an example, see [template-local_settings](../dojo/settings/template-local_settings)
+For an example, see [template-local_settings](../../dojo/settings/template-local_settings)
 
 Please note this copy action could fail if you have mounted the full `dojo/` folder, but that is owned by a different user/group.
 That's why this copy action only happens in docker-compose release mode, and not in dev/debug/unit_tests/integration_tests modes.

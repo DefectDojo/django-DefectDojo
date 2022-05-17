@@ -5,6 +5,20 @@ draft: false
 weight: 5
 ---
 
+{{% alert title="Deprecation notice" color="warning" %}}
+Legacy authorization for changing configurations based on staff users will be
+removed with version 2.12.0 / 5. July 2022. If you have set
+`FEATURE_CONFIGURATION_AUTHORIZATION` to `False` in your local configuration,
+remove this local setting and start using the new authorization as described
+in [Configuration permissions]({{< ref "/usage/permissions#configuration-permissions" >}}).
+
+To support the transition, you can run a migration script with ``./manage.py migrate_staff_users``. This script:
+
+* creates a group for all staff users,
+* sets all configuration permissions that staff users had and
+* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to `True`.
+{{% /alert %}}
+
 Docker-compose
 --------------
 
@@ -61,9 +75,17 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.10.x.
+
+**Breaking change for Findings:** The field `cve` will be replaced by a list of Vulnerability Ids, which can store references to security advisories associated with this finding. These can be Common Vulnerabilities and Exposures (CVE) or from other sources, eg. GitHub Security Advisories. Although the field does still exist in the code, the API and the UI have already been changed to use the list of Vulnerability Ids. Other areas like hash code calculation, search and parsers will be migrated step by step in later stages.
+
+This change also causes an API change for the endpoint `/engagements/{id}/accept_risks/`.
+
+
 ## Upgrading to DefectDojo Version 2.9.x.
 
 **Breaking change for APIv2:** `configuration_url` was removed from API endpoint `/api/v2/tool_configurations/` due to redundancy.
+
 
 ## Upgrading to DefectDojo Version 2.8.x.
 

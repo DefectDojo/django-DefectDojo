@@ -164,11 +164,11 @@ class TestEndpointMigration(MigratorTestCase):
         self.assertFalse(eps[0].mitigated)
 
 
-# TODO: These tests can be skipped in 2.10.x or later
+# TODO: These tests can be skipped in 2.11.x or later
 # @skip("Outdated - Any future changes of code should not affect these tests")
 class TestEndpointStatusMigration(MigratorTestCase):
     migrate_from = ('dojo', '0149_harmonize_user_format')
-    migrate_to = ('dojo', '0150_dedupe_endpoint_status')
+    migrate_to = ('dojo', '0151_index_endpoint_status')
 
     def prepare(self):
         Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
@@ -218,6 +218,34 @@ class TestEndpointStatusMigration(MigratorTestCase):
                 finding_id=self.finding,
                 endpoint_id=self.endpoint
             ).pk,
+            'empty_endpoint_1': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=self.finding,
+                endpoint_id=None
+            ).pk,
+            'empty_endpoint_2': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=self.finding,
+                endpoint_id=None
+            ).pk,
+            'empty_finding_1': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=None,
+                endpoint_id=self.endpoint
+            ).pk,
+            'empty_finding_2': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=None,
+                endpoint_id=self.endpoint
+            ).pk,
         }
 
         self.another_finding = Finding.objects.create(test=self.test, reporter_id=user).pk
@@ -234,21 +262,133 @@ class TestEndpointStatusMigration(MigratorTestCase):
         Endpoint = self.new_state.apps.get_model('dojo', 'Endpoint')
         Endpoint_Status = self.new_state.apps.get_model('dojo', 'Endpoint_Status')
 
-        eps = Endpoint_Status.objects.filter(
-            finding_id=self.finding,
-            endpoint_id=self.endpoint
-        )
-        self.assertEqual(eps.count(), 1)
-        self.assertTrue(eps[0].mitigated)
-        self.assertEqual(eps[0].date, datetime.datetime(2021, 1, 1, tzinfo=timezone.utc))
-        self.assertEqual(eps[0].last_modified, datetime.datetime(2021, 5, 1, tzinfo=timezone.utc))
+        with self.subTest("Standard usecase"):
+            eps = Endpoint_Status.objects.filter(
+                finding_id=self.finding,
+                endpoint_id=self.endpoint
+            )
+            self.assertEqual(eps.count(), 1)
+            self.assertTrue(eps[0].mitigated)
+            self.assertEqual(eps[0].date, datetime.datetime(2021, 1, 1, tzinfo=timezone.utc))
+            self.assertEqual(eps[0].last_modified, datetime.datetime(2021, 5, 1, tzinfo=timezone.utc))
 
-        eps = Endpoint_Status.objects.filter(pk=self.another_endpoint_status)
-        self.assertEqual(eps.count(), 1)
+            eps = Endpoint_Status.objects.filter(pk=self.another_endpoint_status)
+            self.assertEqual(eps.count(), 1)
+
+        with self.subTest("Broken endpoint_statuses"):
+            eps = Endpoint_Status.objects.filter(endpoint_id=None, finding_id=self.finding)
+            self.assertEqual(eps.count(), 2)
+
+            eps = Endpoint_Status.objects.filter(endpoint_id=self.endpoint, finding_id=None)
+            self.assertEqual(eps.count(), 2)
 
 
-# TODO: These tests can be skipped in 2.10.x or later
+# TODO: These tests can be skipped in 2.11.x or later
 # @skip("Outdated - Any future changes of code should not affect these tests")
+class TestEndpointStatusBroken(MigratorTestCase):
+    migrate_from = ('dojo', '0158_vulnerability_id')
+    migrate_to = ('dojo', '0160_set_notnull_endpoint_statuses')
+
+    def prepare(self):
+        Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
+        Product = self.old_state.apps.get_model('dojo', 'Product')
+        Engagement = self.old_state.apps.get_model('dojo', 'Engagement')
+        Test = self.old_state.apps.get_model('dojo', 'Test')
+        Finding = self.old_state.apps.get_model('dojo', 'Finding')
+        Endpoint = self.old_state.apps.get_model('dojo', 'Endpoint')
+        Endpoint_Status = self.old_state.apps.get_model('dojo', 'Endpoint_Status')
+
+        self.prod_type = Product_Type.objects.create()
+        self.product = Product.objects.create(prod_type=self.prod_type)
+        self.engagement = Engagement.objects.create(
+            product_id=self.product.pk,
+            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc)
+        )
+        self.test = Test.objects.create(
+            engagement_id=self.engagement.pk,
+            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
+            test_type_id=1
+        )
+        from django.contrib.auth import get_user_model
+        user = get_user_model().objects.create().pk
+        self.finding = Finding.objects.create(test=self.test, reporter_id=user).pk
+        self.endpoint = Endpoint.objects.create(protocol='http', host='foo.bar.eps', product_id=self.product.pk).pk
+        self.another_finding = Finding.objects.create(test=self.test, reporter_id=user).pk
+        self.another_endpoint = Endpoint.objects.create(protocol='http', host='bar.foo.eps',
+                                                        product_id=self.product.pk).pk
+        self.endpoint_status = {
+            'standard': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 3, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 4, 1, tzinfo=timezone.utc),
+                mitigated=False,
+                finding_id=self.finding,
+                endpoint_id=self.endpoint
+            ).pk,
+            'removed_endpoint': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=self.another_finding,
+                endpoint_id=None
+            ).pk,
+            'removed_finding': Endpoint_Status.objects.create(
+                date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=None,
+                endpoint_id=self.another_endpoint
+            ).pk,
+        }
+
+        Finding.objects.get(id=self.finding).endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['standard'])
+        )
+        Finding.objects.get(id=self.another_finding).endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['removed_endpoint'])
+        )
+
+        Endpoint.objects.get(id=self.endpoint).endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['standard'])
+        )
+        Endpoint.objects.get(id=self.another_endpoint).endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status['removed_finding'])
+        )
+
+    def test_broken_eps(self):
+        Finding = self.new_state.apps.get_model('dojo', 'Finding')
+        Endpoint = self.new_state.apps.get_model('dojo', 'Endpoint')
+        Endpoint_Status = self.new_state.apps.get_model('dojo', 'Endpoint_Status')
+
+        with self.subTest('Stadnard eps for finding'):
+            f = Finding.objects.filter(id=self.finding)
+            self.assertEqual(f.count(), 1)
+            f = f.first()
+            self.assertEqual(f.endpoint_status.count(), 1)
+            self.assertEqual(f.endpoint_status.first().pk, self.endpoint_status['standard'])
+
+        with self.subTest('Broken eps for finding'):
+            f = Finding.objects.filter(id=self.another_finding)
+            self.assertEqual(f.count(), 1)
+            f = f.first()
+            self.assertEqual(f.endpoint_status.count(), 0)
+
+        with self.subTest('Stadnard eps for endpoint'):
+            e = Endpoint.objects.filter(id=self.endpoint)
+            self.assertEqual(e.count(), 1)
+            e = e.first()
+            self.assertEqual(e.endpoint_status.count(), 1)
+            self.assertEqual(e.endpoint_status.first().pk, self.endpoint_status['standard'])
+
+        with self.subTest('Broken eps for endpoint'):
+            e = Endpoint.objects.filter(id=self.another_endpoint)
+            self.assertEqual(e.count(), 1)
+            e = e.first()
+            self.assertEqual(e.endpoint_status.count(), 0)
+
+
+@skip("Outdated - Any future changes of code should not affect these tests")
 class TestRemoveEndpointMitigatedMigration(MigratorTestCase):
     migrate_from = ('dojo', '0152_notifications_template')
     migrate_to = ('dojo', '0153_migrate_endpoint_mitigated')

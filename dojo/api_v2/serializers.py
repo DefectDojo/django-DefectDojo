@@ -18,7 +18,8 @@ from dojo.models import IMPORT_ACTIONS, SEVERITIES, STATS_FIELDS, Dojo_User, Fin
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
-    Network_Locations, UserContactInfo, Product_API_Scan_Configuration, DEFAULT_NOTIFICATION
+    Network_Locations, UserContactInfo, Product_API_Scan_Configuration, DEFAULT_NOTIFICATION, \
+    Vulnerability_Id, Vulnerability_Id_Template
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from dojo.utils import is_scan_file_too_large
@@ -39,6 +40,7 @@ from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
 
 
 logger = logging.getLogger(__name__)
@@ -1055,6 +1057,12 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
         return JIRAIssueSerializer(read_only=True).to_representation(issue)
 
 
+class VulnerabilityReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vulnerability_Id
+        fields = ['vulnerability_id']
+
+
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
@@ -1069,10 +1077,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     jira_change = serializers.SerializerMethodField(read_only=True)
     display_status = serializers.SerializerMethodField()
     finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
+    vulnerability_ids = VulnerabilityReferenceSerializer(source='vulnerability_id_set', many=True, required=False)
 
     class Meta:
         model = Finding
-        fields = '__all__'
+        exclude = ['cve']
 
     @extend_schema_field(serializers.DateTimeField())
     @swagger_serializer_method(serializers.DateTimeField())
@@ -1108,6 +1117,15 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         # pop push_to_jira so it won't get send to the model as a field
         # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
         push_to_jira = validated_data.pop('push_to_jira') or jira_helper.is_push_all_issues(instance)
+
+        # Save vulnerability ids and pop them
+        if 'vulnerability_id_set' in validated_data:
+            vulnerability_id_set = validated_data.pop('vulnerability_id_set')
+            vulnerability_ids = list()
+            if vulnerability_id_set:
+                for vulnerability_id in vulnerability_id_set:
+                    vulnerability_ids.append(vulnerability_id['vulnerability_id'])
+            save_vulnerability_ids(instance, vulnerability_ids)
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
 
@@ -1188,10 +1206,11 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         default=None)
     tags = TagListSerializerField(required=False)
     push_to_jira = serializers.BooleanField(default=False)
+    vulnerability_ids = VulnerabilityReferenceSerializer(source='vulnerability_id_set', many=True, required=False)
 
     class Meta:
         model = Finding
-        fields = '__all__'
+        exclude = ['cve']
         extra_kwargs = {
             'active': {'required': True},
             'verified': {'required': True},
@@ -1206,8 +1225,22 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # pop push_to_jira so it won't get send to the model as a field
         push_to_jira = validated_data.pop('push_to_jira')
 
+        # Save vulnerability ids and pop them
+        if 'vulnerability_id_set' in validated_data:
+            vulnerability_id_set = validated_data.pop('vulnerability_id_set')
+        else:
+            vulnerability_id_set = None
+
         # first save, so we have an instance to get push_all_to_jira from
         new_finding = super(TaggitSerializer, self).create(validated_data)
+
+        if vulnerability_id_set:
+            vulnerability_ids = list()
+            for vulnerability_id in vulnerability_id_set:
+                vulnerability_ids.append(vulnerability_id['vulnerability_id'])
+            validated_data['cve'] = vulnerability_ids[0]
+            save_vulnerability_ids(new_finding, vulnerability_ids)
+            new_finding.save()
 
         # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
         push_to_jira = push_to_jira or jira_helper.is_push_all_issues(new_finding)
@@ -1242,12 +1275,50 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         return data
 
 
+class VulnerabilityReferenceTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vulnerability_Id_Template
+        fields = ['vulnerability_id']
+
+
 class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
+    vulnerability_ids = VulnerabilityReferenceTemplateSerializer(source='vulnerability_id_template_set', many=True, required=False)
 
     class Meta:
         model = Finding_Template
-        fields = '__all__'
+        exclude = ['cve']
+
+    def create(self, validated_data):
+        # Save vulnerability ids and pop them
+        if 'vulnerability_id_template_set' in validated_data:
+            vulnerability_id_set = validated_data.pop('vulnerability_id_template_set')
+        else:
+            vulnerability_id_set = None
+
+        new_finding_template = super(TaggitSerializer, self).create(validated_data)
+
+        if vulnerability_id_set:
+            vulnerability_ids = list()
+            for vulnerability_id in vulnerability_id_set:
+                vulnerability_ids.append(vulnerability_id['vulnerability_id'])
+            validated_data['cve'] = vulnerability_ids[0]
+            save_vulnerability_ids_template(new_finding_template, vulnerability_ids)
+            new_finding_template.save()
+
+        return new_finding_template
+
+    def update(self, instance, validated_data):
+        # Save vulnerability ids and pop them
+        if 'vulnerability_id_template_set' in validated_data:
+            vulnerability_id_set = validated_data.pop('vulnerability_id_template_set')
+            vulnerability_ids = list()
+            if vulnerability_id_set:
+                for vulnerability_id in vulnerability_id_set:
+                    vulnerability_ids.append(vulnerability_id['vulnerability_id'])
+            save_vulnerability_ids_template(instance, vulnerability_ids)
+
+        return super(TaggitSerializer, self).update(instance, validated_data)
 
 
 class StubFindingSerializer(serializers.ModelSerializer):

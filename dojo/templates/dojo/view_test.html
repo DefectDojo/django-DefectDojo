@@ -308,7 +308,7 @@
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>Findings</th>
-                            <th>CVEs</th>
+                            <th>Vulnerability Ids</th>
                             <th>Components</th>
                             <th>Date</th>
                             <th>Age</th>
@@ -377,7 +377,18 @@
                             </i>
                         </td>
                         <td>
-                            {% for find in group.findings.all %}{% if find.cve%}<a target="_blank" href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}
+                            {% for find in group.findings.all %}
+                                {% with find|first_vulnerability_id as first_vulnerability_id %}
+                                {% if first_vulnerability_id %}
+                                    {% if first_vulnerability_id|has_vulnerability_url%}
+                                        <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">{{ first_vulnerability_id }}</a>
+                                    {% else %}
+                                        {{ first_vulnerability_id }}
+                                    {% endif %}
+                                    {% if not forloop.last %}, {% endif %}
+                                {% endif %}
+                                {% endwith %}
+                            {% endfor %}
                         </td>
                         <td>
                             {{ group.components }}
@@ -571,7 +582,7 @@
                             <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label><br/>
                             <label style="font-size: 80%; font-weight: normal; display: block">
                                 <input id="id_bulk_finding_group_create" name="finding_group_create" class="finding_group_option" type="checkbox" disabled/> <span>Create</span>
-                                <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 90%;"/>
+                                <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 100%;/* border-color: #ccc; *//* border-width: 1px; */border: 1px solid #ccc;"/>
                             </label>
                             <span>
                                 <label style="font-size: 80%; font-weight: normal;">
@@ -604,6 +615,8 @@
                             <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA" title="Push_To_Jira"/><br/>
 
                         {% endif %}
+                        <label style="display: block">Notes</label>
+                        {{ bulk_edit_form.notes }}
                         <label style="display: block">Tags</label>
                         {% comment %}
                             Quick hack to make bulk edit work without refactoring the whole bulk edit form
@@ -647,7 +660,7 @@
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>CWE</th>
-                            <th>CVE</th>
+                            <th>Vulnerability Id</th>
                             <th>Date</th>
                             <th>Age</th>
                             {% if system_settings.enable_finding_sla %}
@@ -841,11 +854,17 @@
                         {% endif %}
                         </td>
                         <td class="nowrap">
-                            {% if finding.cve %}
-                              <a target="_blank" href="{{ finding.cve|cve_url }}">
-                                  <i class="fa fa-external-link"></i> {{ finding.cve|default:"" }}
-                              </a>
+                            {% with finding|first_vulnerability_id as first_vulnerability_id %}
+                            {% if first_vulnerability_id %}
+                                {% if first_vulnerability_id|has_vulnerability_url %}
+                                <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                                    <i class="fa fa-external-link"></i> {{ first_vulnerability_id|default:"" }}
+                                </a>
+                                {% else %}
+                                    {{ first_vulnerability_id }}
+                                {% endif %}
                             {% endif %}
+                            {% endwith %}
                         </td>
                         <td class="nowrap">{{ finding.date }}</td>
                         <td>{{ finding.age }}</td>

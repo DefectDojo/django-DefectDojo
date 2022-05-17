@@ -42,3 +42,6 @@ class TestGitlabDepScanParser(DojoTestCase):
         parser = GitlabDepScanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertTrue(len(findings) > 2)
+
+        self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-29652", findings[0].unsaved_vulnerability_ids[0])
