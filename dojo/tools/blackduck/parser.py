@@ -33,7 +33,7 @@ class BlackduckParser(object):
     def ingest_findings(self, normalized_findings, test):
         dupes = dict()
         for i in normalized_findings:
-            cve = i.vuln_id
+            vulnerability_id = i.vuln_id
             cwe = 0  # need a way to automaticall retrieve that see #1119
             title = self.format_title(i)
             description = self.format_description(i)
@@ -50,14 +50,13 @@ class BlackduckParser(object):
                 finding = dupes[dupe_key]
                 if finding.description:
                     finding.description += "Vulnerability ID: {}\n {}\n".format(
-                        cve, i.vuln_source)
+                        vulnerability_id, i.vuln_source)
                 dupes[dupe_key] = finding
             else:
                 dupes[dupe_key] = True
 
                 finding = Finding(title=title,
                                   cwe=int(cwe),
-                                  cve=cve,
                                   test=test,
                                   description=description,
                                   severity=severity,
@@ -70,6 +69,8 @@ class BlackduckParser(object):
                                   component_version=i.component_version,
                                   static_finding=True
                                   )
+                if vulnerability_id:
+                    finding.unsaved_vulnerability_ids = [vulnerability_id]
 
                 dupes[dupe_key] = finding
 
