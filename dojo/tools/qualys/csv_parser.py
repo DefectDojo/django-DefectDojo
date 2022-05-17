@@ -17,53 +17,14 @@ def parse_csv(csv_file) -> [Finding]:
     Returns:
     """
 
-    default_keys = [
-        'IP',
-        'Network',
-        'DNS',
-        'NetBIOS',
-        'Tracking Method',
-        'OS',
-        'IP Status',
-        'QID',
-        'Title',
-        'Vuln Status',
-        'Type',
-        'Severity',
-        'Port',
-        'Protocol',
-        'FQDN',
-        'SSL',
-        'First Detected',
-        'Last Detected',
-        'Times Detected',
-        'Date Last Fixed',
-        'CVE ID',
-        'Vendor Reference',
-        'Bugtraq ID',
-        'CVSS3',
-        'CVSS3 Base',
-        'CVSS3 Temporal',
-        'Threat',
-        'Impact',
-        'Solution',
-        'Exploitability',
-        'Associated Malware',
-        'PCI Vuln',
-        'Ticket State',
-        'Instance',
-        'OS CPE',
-        'Category',
-        'Associated Tags']
-
     content = csv_file.read()
     if isinstance(content, bytes):
         content = content.decode('utf-8')
     csv_reader = csv.DictReader(
         io.StringIO(content),
         delimiter=',',
-        quotechar='"',
-        fieldnames=default_keys)
+        quotechar='"'
+    )
 
     report_findings = get_report_findings(csv_reader)
     dojo_findings = build_findings_from_dict(report_findings)
@@ -88,14 +49,6 @@ def get_report_findings(csv_reader) -> [dict]:
             report_findings.append(row)
 
     return report_findings
-
-
-def get_references(cve_list):
-    if cve_list:
-        return '\n'.join(
-            [f'https://cve.mitre.org/cgi-bin/cvename.cgi?name={cve.strip()}' for cve in cve_list.split(',')])
-    else:
-        return None
 
 
 def _extract_cvss_vectors(cvss_base, cvss_temporal):
@@ -165,8 +118,6 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
             severity=severity_lookup.get(
                 report_finding['Severity'],
                 'Info'),
-            references=get_references(
-                report_finding['CVE ID']),
             impact=report_finding['Impact'],
             date=datetime.strptime(
                 report_finding['Last Detected'],
@@ -175,6 +126,10 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
             cvssv3=_extract_cvss_vectors(
                 report_finding['CVSS3 Base'],
                 report_finding['CVSS3 Temporal']))
+
+        cve_data = report_finding.get('CVE ID')
+
+        finding.unsaved_vulnerability_ids = cve_data.split(',') if ',' in cve_data else [cve_data]
 
         if report_finding['Date Last Fixed']:
             finding.mitigated = datetime.strptime(
