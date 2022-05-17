@@ -103,7 +103,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
                     logger.debug("Skipping group " + group_name + " due to AZUREAD_TENANT_OAUTH2_GROUPS_FILTER " + settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER)
                     continue
 
-                group, created_group = Dojo_Group.objects.get_or_create(name=group_name, is_azure=True)
+                group, created_group = Dojo_Group.objects.get_or_create(name=group_name, social_provider=Dojo_Group.SOCIAL_CHOICES.AZURE)
                 group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(group=group, user=user, defaults={
                     'role': Role.objects.get(id=Roles.Maintainer)})
             except:
