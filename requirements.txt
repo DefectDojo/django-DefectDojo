@@ -14,7 +14,7 @@ django-multiselectfield==0.1.12
 django-polymorphic==3.1.0
 django-crispy-forms==1.14.0
 django_extensions==3.1.5
-django-slack==5.17.6
+django-slack==5.17.7
 django-tagging==0.5.0
 django-watson==1.6.2
 django-prometheus==2.2.0
@@ -65,7 +65,7 @@ vcrpy==4.1.1
 vcrpy-unittest==0.1.7
 django-tagulous==1.3.3
 PyJWT==2.4.0
-cvss==2.3
+cvss==2.4
 django-fieldsignals==0.7.0
 hyperlink==21.0.0
 numpy==1.22.3
