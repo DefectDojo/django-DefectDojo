@@ -36,7 +36,8 @@ from dojo.models import Answered_Survey, App_Analysis, Benchmark_Product, Benchm
     GITHUB_Issue, GITHUB_PKey, General_Survey, Global_Role, JIRA_Instance, JIRA_Issue, JIRA_Project, Note_Type, Notes, \
     Notifications, Objects_Product, Product, Product_API_Scan_Configuration, Product_Group, Product_Member, \
     Product_Type, Product_Type_Group, Product_Type_Member, Question, Regulation, Risk_Acceptance, Rule, \
-    SEVERITY_CHOICES, SLA_Group, Stub_Finding, System_Settings, Test, Test_Type, TextAnswer, TextQuestion, \
+    SEVERITY_CHOICES, SLA_Configuration, Stub_Finding, System_Settings, Test, Test_Type, TextAnswer, \
+    TextQuestion, \
     Tool_Configuration, Tool_Product_Settings, Tool_Type, User, UserContactInfo
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
@@ -242,9 +243,9 @@ class ProductForm(forms.ModelForm):
                                        queryset=Product_Type.objects.none(),
                                        required=True)
 
-    sla_group = forms.ModelChoiceField(label='SLA Group',
-                                       queryset=SLA_Group.objects.none(),
-                                       required=True)
+    sla_config = forms.ModelChoiceField(label='SLA Configuration',
+                                        queryset=SLA_Configuration.objects.none(),
+                                        required=True)
 
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
@@ -256,7 +257,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'sla_group', 'regulations',
+        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'sla_config', 'regulations',
                 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
                 'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
@@ -2276,6 +2277,12 @@ class ToolConfigForm(forms.ModelForm):
                 code='invalid')
 
         return form_data
+
+
+class SLAConfigForm(forms.ModelForm):
+    class Meta:
+        model = SLA_Configuration
+        fields = ['name', 'description', 'critical', 'high', 'medium', 'low']
 
 
 class DeleteObjectsSettingsForm(forms.ModelForm):
