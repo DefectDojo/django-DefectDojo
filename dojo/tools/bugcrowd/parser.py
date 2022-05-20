@@ -57,7 +57,9 @@ class BugCrowdParser(object):
             finding.impact = pre_description.get('impact', '') + '\n' + row.get('vrt_lineage', '')
             finding.steps_to_reproduce = pre_description.get('steps_to_reproduce', None)
             finding.references = References
-            finding.severity = self.convert_severity(int(row.get('priority', 0)))
+            priority = row.get('priority', 0)
+            priority = priority if priority != '' else 0
+            finding.severity = self.convert_severity(int(priority))
 
             if url:
                 finding.unsaved_endpoints = list()
@@ -121,17 +123,18 @@ class BugCrowdParser(object):
         ret['description'] = ''
         for item in split_des:
             lines = [line.strip() for line in ''.join(item.split('#')).splitlines() if line != '']
-            first = lines[0].strip()
-            if first == 'Impact':
-                ret['impact'] = item
-            elif first == 'Steps to reproduce':
-                ret['steps_to_reproduce'] = item
-            elif first == 'How to fix' or first == 'Fix':
-                ret['mitigation'] = item
-            elif first == 'PoC code':
-                ret['poc'] = item
-            else:
-                ret['description'] += ret['description'] + item
+            if lines:
+                first = lines[0].strip()
+                if first == 'Impact':
+                    ret['impact'] = item
+                elif first == 'Steps to reproduce':
+                    ret['steps_to_reproduce'] = item
+                elif first == 'How to fix' or first == 'Fix':
+                    ret['mitigation'] = item
+                elif first == 'PoC code':
+                    ret['poc'] = item
+                else:
+                    ret['description'] += ret['description'] + item
 
         ret = self.description_parse(ret)
 
@@ -153,4 +156,5 @@ class BugCrowdParser(object):
         return severity
 
     def get_endpoint(self, url):
-        return Endpoint.from_uri(url)
+        endpoint = Endpoint.from_uri(url.strip())
+        return endpoint
