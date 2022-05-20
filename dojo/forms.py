@@ -243,8 +243,8 @@ class ProductForm(forms.ModelForm):
                                        queryset=Product_Type.objects.none(),
                                        required=True)
 
-    sla_config = forms.ModelChoiceField(label='SLA Configuration',
-                                        queryset=SLA_Configuration.objects.none(),
+    sla_configuration = forms.ModelChoiceField(label='SLA Configuration',
+                                        queryset=SLA_Configuration.objects.all(),
                                         required=True)
 
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
@@ -257,7 +257,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'sla_config', 'regulations',
+        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'sla_configuration', 'regulations',
                 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
                 'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 

@@ -750,6 +750,9 @@ class SLA_Configuration(models.Model):
     def __str__(self):
         return self.name
 
+    def get_summary(self):
+        return f'{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}'
+
 
 
 class Product(models.Model):
@@ -819,7 +822,12 @@ class Product(models.Model):
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
                                   null=False, blank=False, on_delete=models.CASCADE)
 
-    sla_configuration = models.ForeignKey(SLA_Configuration, related_name='sla_config',null=True, blank=True, on_delete=models.CASCADE)
+    sla_configuration = models.ForeignKey(SLA_Configuration,
+                                          related_name='sla_config',
+                                          null=False,
+                                          blank=False,
+                                          default=1,
+                                          on_delete=models.RESTRICT)
 
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
@@ -2388,6 +2396,10 @@ class Finding(models.Model):
     def age(self):
         return self._age(self.date)
 
+    def get_sla_periods(self):
+        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
+        return sla_configuration
+
     def get_sla_start_date(self):
         if self.sla_start_date:
             return self.sla_start_date
@@ -2400,9 +2412,9 @@ class Finding(models.Model):
 
     def sla_days_remaining(self):
         sla_calculation = None
-        severity = self.severity
-        from dojo.utils import get_system_setting
-        sla_age = get_system_setting('sla_' + self.severity.lower())
+
+        sla_periods = self.get_sla_periods()
+        sla_age = sla_periods.__getattribute__(self.severity.lower())
         if sla_age:
             sla_calculation = sla_age - self.sla_age
         return sla_calculation

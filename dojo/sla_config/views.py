@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.forms import SLAConfigForm
-from dojo.models import SLA_Configuration
+from dojo.models import SLA_Configuration, System_Settings
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
@@ -57,9 +57,12 @@ def edit_sla_config(request, ttid):
 
 @user_is_configuration_authorized('dojo.view_sla_configuration', 'superuser')
 def sla_config(request):
+    settings = System_Settings.objects.all()
+
     confs = SLA_Configuration.objects.all().order_by('name')
     add_breadcrumb(title="SLA Configurations", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/sla_config.html',
                   {'confs': confs,
+                   'settings': settings
                    })
