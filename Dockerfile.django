@@ -104,6 +104,7 @@ RUN \
     chown ${appuser} /var/run/${appuser} && \
 	  chmod g=u /var/run/${appuser} && \
     mkdir -p media/threat && chown -R ${uid} media
+USER ${uid}
 ENV \
   # Only variables that are not defined in settings.dist.py
   DD_ADMIN_USER=admin \
