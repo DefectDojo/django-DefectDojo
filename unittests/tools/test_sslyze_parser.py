@@ -41,6 +41,12 @@ class TestSslyzeJSONParser(DojoTestCase):
 
         self.assertEqual(4, len(findings))
 
+        self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
+        self.assertEqual('CVE-2014-0160', findings[0].unsaved_vulnerability_ids[0])
+
+        self.assertEqual(1, len(findings[1].unsaved_vulnerability_ids))
+        self.assertEqual('CVE-2014-0224', findings[1].unsaved_vulnerability_ids[0])
+
     def test_parse_json_file_with_two_target_has_many_vuln_old(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/two_targets_two_vuln_old.json"))
         parser = SslyzeParser()
