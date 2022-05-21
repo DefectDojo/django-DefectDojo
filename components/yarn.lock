@@ -311,10 +311,10 @@ datatables.net-colreorder@^1.5.6:
     datatables.net ">=1.11.3"
     jquery ">=1.7"
 
-datatables.net-dt@>=1.11.3, datatables.net-dt@^1.12.0:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/datatables.net-dt/-/datatables.net-dt-1.12.0.tgz#8760cf822bd0d0af8fa1459ca64e7cbdd472ae96"
-  integrity sha512-V9t7RjcV+kSRBNIj61RYPN+nZuoodVPOdEUIcoelgRzsoR2XC0a1sU5Naevc/vE9CnJhaAyC3hfnW7njL5CWKQ==
+datatables.net-dt@>=1.11.3, datatables.net-dt@^1.12.1:
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/datatables.net-dt/-/datatables.net-dt-1.12.1.tgz#43aa00adb1ea9a3adbffae4a0b6baf56ec74ccd9"
+  integrity sha512-HYsHbSYqOqlgsgjKMH/kkCB5455t51GmmtXRxgnDMRbjPLEIKo5CZmAlUe5mdD/RVPRtAUaj5K3SDlkEZ1bUmw==
   dependencies:
     datatables.net ">=1.11.3"
     jquery ">=1.7"
