@@ -99,7 +99,7 @@ class DojoGroupViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.DojoGroupSerializer
     queryset = Dojo_Group.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'name')
+    filter_fields = ('id', 'name', 'social_provider')
     swagger_schema = prefetch.get_prefetch_schema(["dojo_groups_list", "dojo_groups_read"],
         serializers.DojoGroupSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupPermission)
