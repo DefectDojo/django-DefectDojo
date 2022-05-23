@@ -251,12 +251,12 @@ django:
     type: emptyDir
     # in case if pvc specified, should point to the already existing pvc
     persistentVolumeClaim:
-      # set to true if django.mediaPersistentVolume.type is set to pvc
+      # set to true to create a new pvc and if django.mediaPersistentVolume.type is set to pvc
       create: false
       name:
-      size: 10Gi
+      size: 5Gi
       accessModes:
-      - ReadWriteOnce
+      - ReadWriteMany
       storageClassName:
 
 initializer:
