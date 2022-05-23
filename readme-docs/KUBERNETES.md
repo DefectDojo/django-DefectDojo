@@ -272,9 +272,15 @@ mediaPersistentVolume:
   persistentVolumeClaim:
     create: true 
     name:
+    size: 5Gi
+    accessModes:
+    - ReadWriteMany
+    storageClassName:
 ```
 
 In the example above, we want the media content to be preserved to `pvc` as `persistentVolumeClaim` k8s resource and what we are basically doing is enabling the pvc to be created conditionally if the user wants to create it using the chart (in this case the pvc name 'defectdojo-media' will be inherited from template file used to deploy the pvc). By default the volume type is emptyDir which does not require a pvc. But when the type is set to pvc then we need a kubernetes Persistent Volume Claim and this is where the django.mediaPersistentVolume.persistentVolumeClaim.name comes into play.
+
+The accessMode is set to ReadWriteMany by default to accommodate using more than one replica. Ensure storage support ReadWriteMany before setting this option, otherwise set accessMode to ReadWriteOnce.
 
 NOTE: PersistrentVolume needs to be prepared in front before helm installation/update is triggered.
 
