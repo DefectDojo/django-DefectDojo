@@ -129,6 +129,9 @@ spec:
             secretKeyRef:
               name: {{ $fullName }}
               key: DD_SECRET_KEY
+        {{- if .Values.extraEnv }}
+        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- end }}
         resources:
           {{- toYaml .Values.celery.worker.resources | nindent 10 }}
       {{- with .Values.celery.worker.nodeSelector }}
