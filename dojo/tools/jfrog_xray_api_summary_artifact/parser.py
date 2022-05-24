@@ -1,3 +1,4 @@
+import hashlib
 import json
 import re
 
@@ -8,7 +9,8 @@ from dojo.models import Finding
 
 class JFrogXrayApiSummaryArtifactParser(object):
 
-    # This function return a list of all the scan_type supported by your parser. This identifiers are used internally. Your parser can support more than one scan_type
+    # This function return a list of all the scan_type supported by your parser. This identifiers are used internally.
+    # Your parser can support more than one scan_type
     # For example some parsers use different identifier to modify the behavior of the parser (aggregate, filter, etc…)
     def get_scan_types(self):
         return ["JFrog Xray API Summary Artifact Scan"]
@@ -46,7 +48,6 @@ def get_item(vulnerability, service, test):
     cve = None
     cwe = None
     cvssv3 = None
-    cvssv3_score = 0.0
     unique_id_from_tool = None
     impact_paths = None
     impact_path = ImpactPath("", "", "")
@@ -74,7 +75,7 @@ def get_item(vulnerability, service, test):
     if len(impact_paths) > 0:
         impact_path = decode_impact_path(impact_paths[0])
 
-    # The unique_id_from_tool is set only when a given component (SHA) has a specific unique Finding (XRAY or CVE)
+    # The unique_id_from_tool is a combo of the identifier (XRAY, CVE or SHA of description) and the component SHA
     if 'issue_id' in vulnerability:
         title = vulnerability['issue_id'] + " - " + impact_path.name + ":" + impact_path.version
         unique_id_from_tool = vulnerability['issue_id'] + " " + impact_path.sha
@@ -83,7 +84,7 @@ def get_item(vulnerability, service, test):
         unique_id_from_tool = str(cve) + " " + impact_path.sha
     else:
         title = impact_path.name + ":" + impact_path.version
-        unique_id_from_tool = None
+        unique_id_from_tool = hashlib.sha256(vulnerability['description'].encode('utf-8')).hexdigest() + " " + impact_path.sha
 
     finding = Finding(
         service=service,
