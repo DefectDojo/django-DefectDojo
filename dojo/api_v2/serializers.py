@@ -1946,3 +1946,9 @@ class UserProfileSerializer(serializers.Serializer):
     dojo_group_member = DojoGroupMemberSerializer(many=True)
     product_type_member = ProductTypeMemberSerializer(many=True)
     product_member = ProductMemberSerializer(many=True)
+
+
+class DeletePreviewSerializer(serializers.Serializer):
+    model = serializers.CharField(read_only=True)
+    id = serializers.IntegerField(read_only=True, allow_null=True)
+    name = serializers.CharField(read_only=True)
