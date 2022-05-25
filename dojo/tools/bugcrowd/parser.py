@@ -57,9 +57,7 @@ class BugCrowdParser(object):
             finding.impact = pre_description.get('impact', '') + '\n' + row.get('vrt_lineage', '')
             finding.steps_to_reproduce = pre_description.get('steps_to_reproduce', None)
             finding.references = References
-            priority = row.get('priority', 0)
-            priority = priority if priority != '' else 0
-            finding.severity = self.convert_severity(int(priority))
+            finding.severity = self.convert_severity(row.get('priority', 0))
 
             if url:
                 finding.unsaved_endpoints = list()
@@ -144,6 +142,11 @@ class BugCrowdParser(object):
         return ret
 
     def convert_severity(self, sev_num):
+        # Attempt to convert to an int
+        try:
+            sev_num = int(sev_num)
+        except ValueError:
+            sev_num = 0
         severity = 'Info'
         if sev_num == 1:
             severity = 'Critical'
@@ -153,6 +156,9 @@ class BugCrowdParser(object):
             severity = 'Medium'
         elif sev_num == 4:
             severity = 'Low'
+        else:
+            # If the arg is an unexpected value, leave it as "Info"
+            pass
         return severity
 
     def get_endpoint(self, url):
