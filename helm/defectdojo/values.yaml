@@ -256,7 +256,7 @@ django:
       name:
       size: 5Gi
       accessModes:
-      - ReadWriteMany # check KUBERNETES.md doc first for option to choose
+      - ReadWriteMany  # check KUBERNETES.md doc first for option to choose
       storageClassName:
 
 initializer:
