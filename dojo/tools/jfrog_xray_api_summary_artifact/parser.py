@@ -61,8 +61,8 @@ def get_item(vulnerability, service, test):
 
     # Some entries have no CVE entries, despite they exist. Example CVE-2017-1000502.
     cves = vulnerability.get('cves', [])
+    vulnerability_ids = list()
     if cves:
-        vulnerability_ids = list()
         for item in cves:
             if 'cve' in item:
                 vulnerability_ids.append(item['cve'])
