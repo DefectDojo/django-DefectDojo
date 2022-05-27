@@ -2450,29 +2450,6 @@ class Finding(models.Model):
     def has_finding_group(self):
         return self.finding_group is not None
 
-    def long_desc(self):
-        long_desc = ''
-        long_desc += '*' + self.title + '*\n\n'
-        long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
-        long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
-        long_desc += '*CVSS v3:* ' + str(self.cvssv3) + '\n\n'
-        long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
-        if self.test.engagement.branch_tag:
-            long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
-        if self.test.engagement.build_id:
-            long_desc += '*BuildID:* ' + self.test.engagement.build_id + '\n\n'
-        if self.test.engagement.commit_hash:
-            long_desc += '*Commit hash:* ' + self.test.engagement.commit_hash + '\n\n'
-        long_desc += '*Systems*: \n\n'
-
-        for e in self.endpoints.all():
-            long_desc += str(e) + '\n\n'
-        long_desc += '*Description*: \n' + str(self.description) + '\n\n'
-        long_desc += '*Mitigation*: \n' + str(self.mitigation) + '\n\n'
-        long_desc += '*Impact*: \n' + str(self.impact) + '\n\n'
-        long_desc += '*References*:' + str(self.references)
-        return long_desc
-
     def save_no_options(self, *args, **kwargs):
         return self.save(dedupe_option=False, false_history=False, rules_option=False, product_grading_option=False,
              issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)

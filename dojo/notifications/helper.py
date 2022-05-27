@@ -327,25 +327,23 @@ def get_slack_user_id(user_email):
         url='https://slack.com/api/users.lookupByEmail',
         data={'token': get_system_setting('slack_token'), 'email': user_email})
 
-    users = json.loads(res.text)
+    user = json.loads(res.text)
 
     slack_user_is_found = False
-    if users:
-        if 'error' in users:
+    if user:
+        if 'error' in user:
             logger.error("Slack is complaining. See error message below.")
-            logger.error(users)
+            logger.error(user)
             raise RuntimeError('Error getting user list from Slack: ' + res.text)
         else:
-            for member in users["members"]:
-                if "email" in member["profile"]:
-                    if user_email == member["profile"]["email"]:
-                        if "id" in member:
-                            user_id = member["id"]
-                            logger.debug("Slack user ID is {}".format(user_id))
-                            slack_user_is_found = True
-                            break
-                    else:
-                        logger.warning("A user with email {} could not be found in this Slack workspace.".format(user_email))
+            if "email" in user["user"]["profile"]:
+                if user_email == user["user"]["profile"]["email"]:
+                    if "id" in user["user"]:
+                        user_id = user["user"]["id"]
+                        logger.debug("Slack user ID is {}".format(user_id))
+                        slack_user_is_found = True
+                else:
+                    logger.warning("A user with email {} could not be found in this Slack workspace.".format(user_email))
 
             if not slack_user_is_found:
                 logger.warning("The Slack user was not found.")
