@@ -735,10 +735,7 @@ class EngagementDirectFilter(DojoFilter):
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
-    tag = CharFilter(
-        field_name='tags__name',
-        lookup_expr='icontains',
-        label='Tag name contains')
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     not_tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
