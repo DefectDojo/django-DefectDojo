@@ -1521,14 +1521,6 @@ class Endpoint(models.Model):
         query = query_string[:1000] if query_string is not None and query_string != '' else None
         fragment = url.fragment[:500] if url.fragment is not None and url.fragment != '' else None
 
-        # Attempt to fix urls that look like subdomain.domain.com:7273
-        # The protocol would be sub.domain.com
-        # The path would be 7273
-        # I am nervous to tamper with the path to extract the port, so leaving it as is
-        if protocol and len(protocol) > 20 and not host:
-            host = protocol
-            protocol = None
-
         return Endpoint(
             protocol=protocol,
             userinfo=userinfo,

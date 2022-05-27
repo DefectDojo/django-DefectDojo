@@ -162,5 +162,9 @@ class BugCrowdParser(object):
         return severity
 
     def get_endpoint(self, url):
-        endpoint = Endpoint.from_uri(url.strip())
+        stripped_url = url.strip()
+        if '://' in stripped_url:  # is the host full uri? 
+            endpoint = Endpoint.from_uri(stripped_url) 
+        else: 
+            endpoint = Endpoint.from_uri('//' + stripped_url) 
         return endpoint
