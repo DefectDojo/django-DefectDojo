@@ -1,48 +1,52 @@
-import logging
 import os
-import pickle
 import re
-from datetime import date, datetime
-
-import tagulous
-from crispy_forms.bootstrap import InlineCheckboxes, InlineRadios
+from datetime import datetime, date
+import pickle
+from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
-from crum import get_current_user
+from django.db.models import Count, Q
 from dateutil.relativedelta import relativedelta
 from django import forms
-from django.conf import settings
-from django.contrib.auth.models import Permission
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.models import Permission
 from django.core import validators
 from django.core.exceptions import ValidationError
-from django.db.models import Count, Q
-from django.forms import modelformset_factory, utils as form_utils
-from django.forms.widgets import Select, Widget
-from django.urls import reverse
-from django.utils import timezone
+from django.forms import modelformset_factory
+from django.forms import utils as form_utils
+from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
-from tagulous.forms import TagField
+from django.utils import timezone
+import tagulous
 
+from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
+    validate_endpoints_to_add
+from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
+    Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
+    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
+    JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
+    Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
+    App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
+    Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, \
+    Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
+    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
+    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, \
+    Product_API_Scan_Configuration
+
+from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
+from django.urls import reverse
+from tagulous.forms import TagField
+import logging
+from crum import get_current_user
+from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled
+from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
-from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
-from dojo.finding.queries import get_authorized_findings
-from dojo.group.queries import get_authorized_groups, get_group_member_roles
-from dojo.models import Answered_Survey, App_Analysis, Benchmark_Product, Benchmark_Product_Summary, \
-    Benchmark_Requirement, Check_List, Child_Rule, Choice, ChoiceAnswer, ChoiceQuestion, Cred_Mapping, Cred_User, \
-    Development_Environment, DojoMeta, Dojo_Group, Dojo_Group_Member, Dojo_User, Endpoint, Engagement, \
-    Engagement_Presets, Engagement_Survey, FileUpload, Finding, Finding_Group, Finding_Template, GITHUB_Conf, \
-    GITHUB_Issue, GITHUB_PKey, General_Survey, Global_Role, JIRA_Instance, JIRA_Issue, JIRA_Project, Note_Type, Notes, \
-    Notifications, Objects_Product, Product, Product_API_Scan_Configuration, Product_Group, Product_Member, \
-    Product_Type, Product_Type_Group, Product_Type_Member, Question, Regulation, Risk_Acceptance, Rule, \
-    SEVERITY_CHOICES, Stub_Finding, System_Settings, Test, Test_Type, TextAnswer, TextQuestion, Tool_Configuration, \
-    Tool_Product_Settings, Tool_Type, User, UserContactInfo
-from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
-from dojo.tools.factory import get_choices_sorted, requires_file, requires_tool_type
-from dojo.user.queries import get_authorized_users, get_authorized_users_for_product_and_product_type
-from dojo.utils import get_product, get_system_setting, is_finding_groups_enabled
+from dojo.product.queries import get_authorized_products
+from dojo.finding.queries import get_authorized_findings
+from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users
+from dojo.group.queries import get_authorized_groups, get_group_member_roles
 
 logger = logging.getLogger(__name__)
 
@@ -183,8 +187,7 @@ class Add_Product_Type_MemberForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
-        current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list(
-            'user', flat=True)
+        current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
@@ -196,13 +199,11 @@ class Add_Product_Type_MemberForm(forms.ModelForm):
 
 
 class Add_Product_Type_Member_UserForm(forms.ModelForm):
-    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True,
-                                                   label='Product Types')
+    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True, label='Product Types')
 
     def __init__(self, *args, **kwargs):
         super(Add_Product_Type_Member_UserForm, self).__init__(*args, **kwargs)
-        current_members = Product_Type_Member.objects.filter(user=self.initial['user']).values_list('product_type',
-                                                                                                    flat=True)
+        current_members = Product_Type_Member.objects.filter(user=self.initial['user']).values_list('product_type', flat=True)
         self.fields['product_types'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
             .exclude(id__in=current_members)
         self.fields['user'].disabled = True
@@ -1129,10 +1130,8 @@ class FindingForm(forms.ModelForm):
     mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
     mitigated_by = forms.ModelChoiceField(required=True, queryset=get_authorized_users(Permissions.Finding_View), initial=get_current_user)
 
-    publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}),
-                                   required=False)
-    planned_remediation_date = forms.DateField(
-        widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    planned_remediation_date = forms.DateField( widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
@@ -1303,9 +1302,7 @@ class FindingTemplateForm(forms.ModelForm):
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
-    field_order = ['title', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact',
-                   'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title',
-                   'apply_to_findings']
+    field_order = ['title', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
 
     def __init__(self, *args, **kwargs):
         super(FindingTemplateForm, self).__init__(*args, **kwargs)
@@ -1588,6 +1585,7 @@ class ClearFindingReviewForm(forms.ModelForm):
 
 
 class ReviewFindingForm(forms.Form):
+
     reviewers = forms.MultipleChoiceField(help_text="Select all users who can review Finding.")
     entry = forms.CharField(
         required=True, max_length=2400,
@@ -1913,8 +1911,8 @@ class ChangePasswordForm(forms.Form):
 
 class AddDojoUserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput,
-                               required=False, validators=[validate_password],
-                               help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
+        required=False, validators=[validate_password],
+        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
                    and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?). Leave blank to set an unusable password for this user.')  # noqa W605
 
     class Meta:
@@ -1922,8 +1920,7 @@ class AddDojoUserForm(forms.ModelForm):
         if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
             fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
         else:
-            fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_staff',
-                      'is_superuser']
+            fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_staff', 'is_superuser']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -2122,6 +2119,7 @@ JIRA_TEMPLATE_CHOICES = sorted(get_jira_issue_template_dir_choices())
 
 
 class JIRA_IssueForm(forms.ModelForm):
+
     class Meta:
         model = JIRA_Issue
         exclude = ['product']
