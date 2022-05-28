@@ -1,12 +1,14 @@
+import os
+import re
+import unittest
+
 from selenium import webdriver
+from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
-import unittest
-import os
-import re
+
 # import time
 
 
@@ -61,7 +63,7 @@ class BaseTestCase(unittest.TestCase):
             dd_driver_options = Options()
 
             # headless means no UI, if you want to see what is happening remove headless. Adding detach will leave the window open after the test
-            dd_driver_options.add_argument("--headless")
+            dd_driver_options.add_argument("--detach")
             # dd_driver_options.add_experimental_option("detach", True)
 
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
