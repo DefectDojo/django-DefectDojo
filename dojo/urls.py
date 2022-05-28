@@ -20,7 +20,8 @@ from dojo.api_v2.views import AppAnalysisViewSet, DevelopmentEnvironmentViewSet,
     LanguageTypeViewSet, LanguageViewSet, NetworkLocationsViewset, NoteTypeViewSet, NotesViewSet, NotificationsViewSet, \
     ProductAPIScanConfigurationViewSet, ProductGroupViewSet, ProductMemberViewSet, ProductTypeGroupViewSet, \
     ProductTypeMemberViewSet, ProductTypeViewSet, ProductViewSet, ReImportScanView, RegulationsViewSet, RoleViewSet, \
-    SonarqubeIssueTransitionViewSet, SonarqubeIssueViewSet, StubFindingsViewSet, SystemSettingsViewSet, \
+    SLAConfigurationViewset, SonarqubeIssueTransitionViewSet, SonarqubeIssueViewSet, StubFindingsViewSet, \
+    SystemSettingsViewSet, \
     TestImportViewSet, TestTypesViewSet, TestsViewSet, ToolConfigurationsViewSet, ToolProductSettingsViewSet, \
     ToolTypesViewSet, UserContactInfoViewSet, UserProfileView, UsersViewSet
 from dojo.banner.urls import urlpatterns as banner_urls
@@ -88,6 +89,7 @@ v2_api.register(r'product_type_groups', ProductTypeGroupViewSet)
 v2_api.register(r'product_groups', ProductGroupViewSet)
 v2_api.register(r'roles', RoleViewSet)
 v2_api.register(r'global_roles', GlobalRoleViewSet)
+v2_api.register(f'sla_configurations', SLAConfigurationViewset)
 v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
 v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
 v2_api.register(r'product_api_scan_configurations', ProductAPIScanConfigurationViewSet)

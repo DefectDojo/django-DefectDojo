@@ -1,65 +1,64 @@
-from rest_framework.generics import GenericAPIView
-from drf_spectacular.types import OpenApiTypes
-from crum import get_current_user
-from django.http import HttpResponse, Http404
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from django.core.exceptions import ValidationError
-from django.utils.decorators import method_decorator
-from drf_yasg.inspectors.base import NotHandled
-from drf_yasg.inspectors.query import CoreAPICompatInspector
-from rest_framework import viewsets, mixins, status
-from rest_framework.response import Response
-from django.db import IntegrityError
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
-from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
-from django_filters.rest_framework import DjangoFilterBackend
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
-from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
-from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
-    User, Stub_Finding, Finding_Template, Notes, \
-    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
-    Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, \
-    BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
-    Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations, \
-    UserContactInfo, Product_API_Scan_Configuration
+import logging
+from datetime import datetime
 
-from dojo.endpoint.views import get_endpoint_ids
-from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
-from dojo.finding.views import set_finding_as_original_internal, reset_finding_duplicate_status_internal, \
-    duplicate_cluster
-from dojo.filters import ReportFindingFilter, \
-    ApiFindingFilter, ApiProductFilter, ApiEngagementFilter, ApiEndpointFilter, \
-    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter
-from dojo.risk_acceptance import api as ra_api
+import tagulous
+from crum import get_current_user
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from datetime import datetime
-from dojo.utils import get_period_counts_legacy, get_system_setting, get_setting, async_delete
-from dojo.api_v2 import serializers, permissions, prefetch, schema, mixins as dojo_mixins
-import dojo.jira_link.helper as jira_helper
-import logging
-import tagulous
-from dojo.product_type.queries import get_authorized_product_types, get_authorized_product_type_members, \
-    get_authorized_product_type_groups
-from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta, \
-    get_authorized_product_members, get_authorized_product_groups, get_authorized_languages, \
-    get_authorized_engagement_presets, get_authorized_product_api_scan_configurations
-from dojo.engagement.queries import get_authorized_engagements
-from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
-from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
-from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
-from dojo.group.queries import get_authorized_groups, get_authorized_group_members
-from dojo.jira_link.queries import get_authorized_jira_projects, get_authorized_jira_issues
-from dojo.tool_product.queries import get_authorized_tool_product_settings
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
+from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
+from drf_yasg import openapi
+from drf_yasg.inspectors.base import NotHandled
+from drf_yasg.inspectors.query import CoreAPICompatInspector
+from drf_yasg.utils import no_body, swagger_auto_schema
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.generics import GenericAPIView
+from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
+from rest_framework.response import Response
+
+import dojo.jira_link.helper as jira_helper
+from dojo.api_v2 import mixins as dojo_mixins, permissions, prefetch, schema, serializers
 from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.queries import get_authorized_endpoint_status, get_authorized_endpoints
+from dojo.endpoint.views import get_endpoint_ids
+from dojo.engagement.queries import get_authorized_engagements
+from dojo.engagement.services import close_engagement, reopen_engagement
+from dojo.filters import ApiAppAnalysisFilter, ApiEndpointFilter, ApiEngagementFilter, ApiFindingFilter, \
+    ApiProductFilter, ApiTemplateFindingFilter, ApiTestFilter, ReportFindingFilter
+from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
+from dojo.finding.views import duplicate_cluster, reset_finding_duplicate_status_internal, \
+    set_finding_as_original_internal
+from dojo.group.queries import get_authorized_group_members, get_authorized_groups
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, \
+    get_target_test_if_exists
+from dojo.jira_link.queries import get_authorized_jira_issues, get_authorized_jira_projects
+from dojo.models import App_Analysis, BurpRawRequestResponse, Development_Environment, DojoMeta, Dojo_Group, \
+    Dojo_Group_Member, Dojo_User, Endpoint, Endpoint_Status, Engagement, Engagement_Presets, FileUpload, Finding, \
+    Finding_Template, Global_Role, JIRA_Instance, JIRA_Issue, JIRA_Project, Language_Type, Languages, Network_Locations, \
+    Note_Type, Notes, Notifications, Product, Product_API_Scan_Configuration, Product_Group, Product_Member, \
+    Product_Type, Product_Type_Group, Product_Type_Member, Regulation, Role, SLA_Configuration, Sonarqube_Issue, \
+    Sonarqube_Issue_Transition, Stub_Finding, System_Settings, Test, Test_Import, Test_Type, Tool_Configuration, \
+    Tool_Product_Settings, Tool_Type, User, UserContactInfo
+from dojo.product.queries import get_authorized_app_analysis, get_authorized_dojo_meta, \
+    get_authorized_engagement_presets, get_authorized_languages, get_authorized_product_api_scan_configurations, \
+    get_authorized_product_groups, get_authorized_product_members, get_authorized_products
+from dojo.product_type.queries import get_authorized_product_type_groups, get_authorized_product_type_members, \
+    get_authorized_product_types
+from dojo.reports.views import prefetch_related_findings_for_report, report_url_resolver
+from dojo.risk_acceptance import api as ra_api
+from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
+from dojo.tool_product.queries import get_authorized_tool_product_settings
+from dojo.utils import async_delete, get_period_counts_legacy, get_setting, get_system_setting
 
 logger = logging.getLogger(__name__)
 
@@ -2539,6 +2538,19 @@ class NetworkLocationsViewset(mixins.ListModelMixin,
                               dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.NetworkLocationsSerializer
     queryset = Network_Locations.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'location')
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+class SLAConfigurationViewset(mixins.ListModelMixin,
+                              mixins.RetrieveModelMixin,
+                              mixins.UpdateModelMixin,
+                              mixins.DestroyModelMixin,
+                              mixins.CreateModelMixin,
+                              viewsets.GenericViewSet,
+                              dojo_mixins.DeletePreviewModelMixin):
+    serializer_class = serializers.SLAConfigurationSerializer
+    queryset = SLA_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'location')
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
