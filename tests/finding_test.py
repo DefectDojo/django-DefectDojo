@@ -1,15 +1,16 @@
+import os
+import sys
+import time
+import unittest
+from pathlib import Path
+
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 
-import unittest
-import sys
-import os
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest, WaitForPageLoad
-from pathlib import Path
-import time
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -117,7 +118,7 @@ class FindingTest(BaseTestCase):
         # finding Vulnerability Ids
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("\nREF-3\nREF-4\n")
         # "Click" the Done button to Edit the finding
-        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+        driver.find_element(By.NAME, '_Finished').click()
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
