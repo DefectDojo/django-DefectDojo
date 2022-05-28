@@ -1,8 +1,8 @@
 # requirements.txt for DefectDojo using Python 3.x
-asteval==0.9.26
+asteval==0.9.27
 bleach==4.1.0
 celery==5.2.6
-coverage==6.3.3
+coverage==6.4
 defusedxml==0.7.1
 django_celery_results==2.3.1
 django-auditlog==2.0.0
@@ -50,7 +50,7 @@ Python-jose==3.3.0
 gitpython==3.1.27
 debugpy==1.6.0
 python-gitlab==3.4.0
-google-api-python-client==2.48.0
+google-api-python-client==2.49.0
 google-auth==2.6.6
 google-auth-oauthlib==0.5.1
 drf_yasg==1.20.0

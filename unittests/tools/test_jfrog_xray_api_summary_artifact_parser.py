@@ -41,3 +41,6 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(15, len(findings))
+        finding = findings[0]
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual('CVE-2021-42385', finding.unsaved_vulnerability_ids[0])
