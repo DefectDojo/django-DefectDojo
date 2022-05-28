@@ -98,4 +98,3 @@ def get_authorized_product_type_groups(permission):
 
     product_types = get_authorized_product_types(permission)
     return Product_Type_Group.objects.filter(product_type__in=product_types).select_related('role')
-
