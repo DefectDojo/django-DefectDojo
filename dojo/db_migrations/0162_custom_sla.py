@@ -23,7 +23,7 @@ def save_existing_sla(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0160_set_notnull_endpoint_statuses'),
+        ('dojo', '0161_alter_dojo_group_social_provider'),
     ]
 
     operations = [
