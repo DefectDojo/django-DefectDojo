@@ -63,7 +63,7 @@ class BaseTestCase(unittest.TestCase):
             dd_driver_options = Options()
 
             # headless means no UI, if you want to see what is happening remove headless. Adding detach will leave the window open after the test
-            dd_driver_options.add_argument("--headless")
+            dd_driver_options.add_argument("--detach")
             # dd_driver_options.add_experimental_option("detach", True)
 
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
