@@ -723,7 +723,7 @@ def new_product(request, ptid=None, slaid=None):
     if ptid is not None:
         prod_type = get_object_or_404(Product_Type, pk=ptid)
         sla_config = get_object_or_404(SLA_Configuration, pk=slaid)
-        initial = {'prod_type': prod_type, 'sla_config':sla_config}
+        initial = {'prod_type': prod_type, 'sla_config': sla_config}
 
     form = ProductForm(initial=initial)
 

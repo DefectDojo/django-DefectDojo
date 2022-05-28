@@ -16,12 +16,12 @@ def save_existing_sla(apps, schema_editor):
     SLA_Configuration.medium = system_settings.sla_medium
     SLA_Configuration.low = system_settings.sla_low
 
-    SLA_Configuration.objects.create(name='Default', description='',critical=system_settings.sla_critical,
+    SLA_Configuration.objects.create(name='Default', description='', critical=system_settings.sla_critical,
                                      high=system_settings.sla_high, medium=system_settings.sla_medium,
                                      low=system_settings.sla_low)
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
         ('dojo', '0160_set_notnull_endpoint_statuses'),
     ]
@@ -31,12 +31,17 @@ class Migration(migrations.Migration):
             name='SLA_Configuration',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='A unique name for the set of SLAs.', max_length=128, unique=True, verbose_name='Custom SLA Name')),
+                ('name', models.CharField(help_text='A unique name for the set of SLAs.', max_length=128, unique=True,
+                                          verbose_name='Custom SLA Name')),
                 ('description', models.CharField(blank=True, max_length=512, null=True)),
-                ('critical', models.IntegerField(default=7, help_text='# of days to remediate a critical finding.', verbose_name='Critical Finding SLA Days')),
-                ('high', models.IntegerField(default=30, help_text='# of days to remediate a high finding.', verbose_name='High Finding SLA Days')),
-                ('medium', models.IntegerField(default=90, help_text='# of days to remediate a medium finding.', verbose_name='Medium Finding SLA Days')),
-                ('low', models.IntegerField(default=120, help_text='# of days to remediate a low finding.', verbose_name='Low Finding SLA Days')),
+                ('critical', models.IntegerField(default=7, help_text='# of days to remediate a critical finding.',
+                                                 verbose_name='Critical Finding SLA Days')),
+                ('high', models.IntegerField(default=30, help_text='# of days to remediate a high finding.',
+                                             verbose_name='High Finding SLA Days')),
+                ('medium', models.IntegerField(default=90, help_text='# of days to remediate a medium finding.',
+                                               verbose_name='Medium Finding SLA Days')),
+                ('low', models.IntegerField(default=120, help_text='# of days to remediate a low finding.',
+                                            verbose_name='Low Finding SLA Days')),
             ],
             options={
                 'ordering': ['name'],
@@ -64,6 +69,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='product',
             name='sla_configuration',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.RESTRICT, related_name='sla_config', to='dojo.sla_configuration'),
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.RESTRICT, related_name='sla_config',
+                                    to='dojo.sla_configuration'),
         ),
     ]

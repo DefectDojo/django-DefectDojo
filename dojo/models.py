@@ -734,6 +734,7 @@ class DojoMeta(models.Model):
                            ('endpoint', 'name'),
                            ('finding', 'name'))
 
+
 class SLA_Configuration(models.Model):
     name = models.CharField(max_length=128, unique=True, blank=False, verbose_name=_('Custom SLA Name'),
         help_text=_('A unique name for the set of SLAs.')
@@ -757,7 +758,6 @@ class SLA_Configuration(models.Model):
 
     def get_summary(self):
         return f'{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}'
-
 
 
 class Product(models.Model):
