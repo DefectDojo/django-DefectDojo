@@ -1026,7 +1026,6 @@ class PromoteFindingForm(forms.ModelForm):
                    'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
 
-
     def __init__(self, *args, **kwargs):
         product = None
         if 'product' in kwargs:
