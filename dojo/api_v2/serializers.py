@@ -1939,7 +1939,6 @@ class SLAConfigurationSerializer(serializers.ModelSerializer):
         model = SLA_Configuration
         fields = '__all__'
 
-
 class UserProfileSerializer(serializers.Serializer):
     user = UserSerializer(many=False)
     user_contact_info = UserContactInfoSerializer(many=False)

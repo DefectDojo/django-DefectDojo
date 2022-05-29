@@ -2547,10 +2547,9 @@ class SLAConfigurationViewset(mixins.ListModelMixin,
                               mixins.UpdateModelMixin,
                               mixins.DestroyModelMixin,
                               mixins.CreateModelMixin,
-                              viewsets.GenericViewSet,
-                              dojo_mixins.DeletePreviewModelMixin):
+                              viewsets.GenericViewSet):
     serializer_class = serializers.SLAConfigurationSerializer
     queryset = SLA_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'location')
+    # filter_fields = ('id')
     permission_classes = (IsAuthenticated, DjangoModelPermissions)

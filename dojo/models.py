@@ -390,26 +390,6 @@ class System_Settings(models.Model):
         verbose_name=_("Enable Finding SLA's"),
         help_text=_("Enables Finding SLA's for time to remediate."))
 
-    # sla_critical = models.IntegerField(default=7,
-    #                                    blank=False,
-    #                                    null=False,
-    #                                    verbose_name=_('Critical Finding SLA Days'),
-    #                                    help_text=_('# of days to remediate a critical finding.'))
-    # sla_high = models.IntegerField(default=30,
-    #                                blank=False,
-    #                                null=False,
-    #                                verbose_name=_('High Finding SLA Days'),
-    #                                help_text=_('# of days to remediate a high finding.'))
-    # sla_medium = models.IntegerField(default=90,
-    #                                  blank=False,
-    #                                  null=False,
-    #                                  verbose_name=_('Medium Finding SLA Days'),
-    #                                  help_text=_('# of days to remediate a medium finding.'))
-    #
-    # sla_low = models.IntegerField(default=120, blank=False,
-    #                               null=False,
-    #                               verbose_name=_('Low Finding SLA Days'),
-    #                               help_text=_('# of days to remediate a low finding.'))
     allow_anonymous_survey_repsonse = models.BooleanField(
         default=False,
         blank=False,
@@ -742,19 +722,35 @@ class SLA_Configuration(models.Model):
 
     description = models.CharField(max_length=512, null=True, blank=True)
     critical = models.IntegerField(default=7, verbose_name=_('Critical Finding SLA Days'),
-                                          help_text=_('# of days to remediate a critical finding.'))
+                                          help_text=_('number of days to remediate a critical finding.'))
     high = models.IntegerField(default=30, verbose_name=_('High Finding SLA Days'),
-                                          help_text=_('# of days to remediate a high finding.'))
+                                          help_text=_('number of days to remediate a high finding.'))
     medium = models.IntegerField(default=90, verbose_name=_('Medium Finding SLA Days'),
-                                          help_text=_('# of days to remediate a medium finding.'))
+                                          help_text=_('number of days to remediate a medium finding.'))
     low = models.IntegerField(default=120, verbose_name=_('Low Finding SLA Days'),
-                                          help_text=_('# of days to remediate a low finding.'))
+                                          help_text=_('number of days to remediate a low finding.'))
+
+    def clean(self):
+
+        sla_days = [self.critical, self.high, self.medium, self.low]
+
+        for sla_day in sla_days:
+            if sla_day < 1:
+                raise ValidationError('SLA Days must be at least 1')
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         ordering = ['name']
 
-    def __str__(self):
-        return self.name
+    def delete(self, *args, **kwargs):
+        logger.debug('%d sla configuration delete', self.id)
+
+        if self.id != 1:
+            super().delete(*args, **kwargs)
+        else:
+            raise ValidationError("Unable to delete default SLA Configuration")
 
     def get_summary(self):
         return f'{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}'
@@ -3945,6 +3941,7 @@ admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
+admin.site.register(SLA_Configuration)
 admin.site.register(CWE)
 admin.site.register(Regulation)
 admin.site.register(Global_Role)
