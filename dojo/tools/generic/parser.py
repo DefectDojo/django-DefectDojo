@@ -73,7 +73,7 @@ class GenericParser(object):
             if finding.cve:
                 finding.unsaved_vulnerability_ids = [finding.cve]
             if unsaved_vulnerability_ids:
-                if unsaved_vulnerability_ids:
+                if finding.unsaved_vulnerability_ids:
                     finding.unsaved_vulnerability_ids.append(unsaved_vulnerability_ids)
                 else:
                     finding.unsaved_vulnerability_ids = unsaved_vulnerability_ids
