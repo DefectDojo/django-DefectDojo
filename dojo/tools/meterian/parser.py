@@ -68,7 +68,7 @@ class MeterianParser(object):
 
                 if 'cve' in advisory:
                     if "N/A" != advisory["cve"]:
-                        finding.cve = advisory["cve"]
+                        finding.unsaved_vulnerability_ids = [advisory["cve"]]
 
                 if "cwe" in advisory:
                     finding.cwe = int(advisory["cwe"].replace("CWE-", ""))

@@ -123,16 +123,12 @@ class SnykParser(object):
             finding.cvssv3 = CVSS3(vulnerability['CVSSv3']).clean_vector()
 
         # manage CVE and CWE with idnitifiers
-        cve_references = ''
         cwe_references = ''
         if 'identifiers' in vulnerability:
             if 'CVE' in vulnerability['identifiers']:
-                cves = vulnerability['identifiers']['CVE']
-                if cves:
-                    # Per the current json format, if several CVEs listed, take the first one.
-                    finding.cve = cves[0]
-                    if len(cves) > 1:
-                        cve_references = ', '.join(cves)
+                vulnerability_ids = vulnerability['identifiers']['CVE']
+                if vulnerability_ids:
+                    finding.unsaved_vulnerability_ids = vulnerability_ids
 
             if 'CWE' in vulnerability['identifiers']:
                 cwes = vulnerability['identifiers']['CWE']
@@ -148,9 +144,8 @@ class SnykParser(object):
         if 'id' in vulnerability:
             references = "**SNYK ID**: https://app.snyk.io/vuln/{}\n\n".format(vulnerability['id'])
 
-        if cve_references or cwe_references:
-            references += "Several CVEs or CWEs were reported: \n\n{}\n{}\n".format(
-                cve_references, cwe_references)
+        if cwe_references:
+            references += "Several CWEs were reported: \n\n{}\n".format(cwe_references)
 
         # Append vuln references to references section
         for item in vulnerability.get('references', []):
