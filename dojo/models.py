@@ -1,43 +1,43 @@
 import base64
-import copy
 import hashlib
 import logging
 import os
 import re
-from typing import Dict, Optional, Set
+import copy
+from typing import Dict, Set, Optional
 from uuid import uuid4
-
-import hyperlink
-import tagulous.admin
-from auditlog.registry import auditlog
-from cvss import CVSS3
-from dateutil.relativedelta import relativedelta
-from django import forms
 from django.conf import settings
+from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator, validate_ipv46_address
-from django.db import connection, models
-from django.db.models import Count, JSONField, Q
 from django.db.models.expressions import Case, When
-from django.db.models.functions import Lower
 from django.urls import reverse
-from django.utils import timezone
-from django.utils.deconstruct import deconstructible
-from django.utils.functional import cached_property
-from django.utils.html import escape
-from django.utils.timezone import now
-from django.utils.translation import gettext as _
+from django.core.validators import RegexValidator, validate_ipv46_address
+from django.core.exceptions import ValidationError
+from django.db import models, connection
+from django.db.models import Q, Count
+from django.db.models.functions import Lower
 from django_extensions.db.models import TimeStampedModel
-from multiselectfield import MultiSelectField
-from numpy import busday_count
-from polymorphic.models import PolymorphicModel
+from django.utils.deconstruct import deconstructible
+from django.utils.timezone import now
+from django.utils.functional import cached_property
+from django.utils import timezone
+from django.utils.html import escape
 from pytz import all_timezones
+from polymorphic.models import PolymorphicModel
+from multiselectfield import MultiSelectField
+from django import forms
+from django.utils.translation import gettext as _
+from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
-
+import tagulous.admin
+from django.db.models import JSONField
+import hyperlink
+from cvss import CVSS3
 from dojo.settings.settings import SLA_BUSINESS_DAYS
+from numpy import busday_count
+
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -822,14 +822,12 @@ class Product(models.Model):
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
                                   null=False, blank=False, on_delete=models.CASCADE)
-
     sla_configuration = models.ForeignKey(SLA_Configuration,
                                           related_name='sla_config',
                                           null=False,
                                           blank=False,
                                           default=1,
                                           on_delete=models.RESTRICT)
-
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     members = models.ManyToManyField(Dojo_User, through='Product_Member', related_name='product_members', blank=True)
@@ -2413,7 +2411,6 @@ class Finding(models.Model):
 
     def sla_days_remaining(self):
         sla_calculation = None
-
         sla_periods = self.get_sla_periods()
         sla_age = sla_periods.__getattribute__(self.severity.lower())
         if sla_age:

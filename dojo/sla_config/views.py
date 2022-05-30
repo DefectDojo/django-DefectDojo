@@ -54,7 +54,7 @@ def edit_sla_config(request, slaid):
         else:
             messages.add_message(request,
                                  messages.ERROR,
-                                 'The Default SLA Configuration cannot be deleted',
+                                 'The Default SLA Configuration cannot be deleted.',
                                  extra_tags='alert-danger')
             return HttpResponseRedirect(reverse('sla_config', ))
 

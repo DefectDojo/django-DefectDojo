@@ -1,43 +1,48 @@
-import json
-import logging
-from datetime import datetime
 from typing import List
-
-import six
-import tagulous
-from django.conf import settings
-from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.utils import IntegrityError
-from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
-from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.fields import DictField, MultipleChoiceField
+from datetime import datetime
+from dojo.endpoint.utils import endpoint_filter
+from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
+    get_target_product_if_exists, get_target_test_if_exists
+from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIELDS, Dojo_User, Finding_Group, Product, \
+    Engagement, Test, Finding, \
+    User, Stub_Finding, Risk_Acceptance, \
+    Finding_Template, Test_Type, Development_Environment, NoteHistory, \
+    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
+    Product_Type, JIRA_Instance, Endpoint, JIRA_Project, \
+    Notes, DojoMeta, Note_Type, App_Analysis, Endpoint_Status, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, \
+    Regulation, System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
+    Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
+    Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
+    Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
+    Network_Locations, UserContactInfo, Product_API_Scan_Configuration, DEFAULT_NOTIFICATION, \
+    Vulnerability_Id, Vulnerability_Id_Template
 
+from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
+from dojo.utils import is_scan_file_too_large
+from django.conf import settings
+from rest_framework import serializers
+from django.core.exceptions import ValidationError, PermissionDenied
+from django.contrib.auth.password_validation import validate_password
+from django.utils import timezone
+from django.db.utils import IntegrityError
+import six
+from django.utils.translation import ugettext_lazy as _
+import json
 import dojo.jira_link.helper as jira_helper
-from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.roles_permissions import Permissions
-from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
-from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
+import logging
+import tagulous
+from dojo.endpoint.utils import endpoint_meta_import
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
-from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, \
-    get_target_product_by_id_if_exists, \
-    get_target_product_if_exists, get_target_test_if_exists
-from dojo.models import App_Analysis, DEFAULT_NOTIFICATION, Development_Environment, DojoMeta, Dojo_Group, \
-    Dojo_Group_Member, Dojo_User, Endpoint, Endpoint_Status, Engagement, Engagement_Presets, FileUpload, Finding, \
-    Finding_Group, Finding_Template, Global_Role, IMPORT_ACTIONS, JIRA_Instance, JIRA_Issue, JIRA_Project, \
-    Language_Type, Languages, NOTIFICATION_CHOICES, Network_Locations, NoteHistory, Note_Type, Notes, Notifications, \
-    Product, Product_API_Scan_Configuration, Product_Group, Product_Member, Product_Type, Product_Type_Group, \
-    Product_Type_Member, Regulation, Risk_Acceptance, Role, SEVERITIES, SEVERITY_CHOICES, SLA_Configuration, \
-    STATS_FIELDS, Sonarqube_Issue, Sonarqube_Issue_Transition, Stub_Finding, System_Settings, Test, Test_Import, \
-    Test_Import_Finding_Action, Test_Type, Tool_Configuration, Tool_Product_Settings, Tool_Type, User, UserContactInfo, \
-    Vulnerability_Id, Vulnerability_Id_Template
-from dojo.tools.factory import get_choices_sorted, requires_file, requires_tool_type
-from dojo.utils import is_scan_file_too_large
+from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
+
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

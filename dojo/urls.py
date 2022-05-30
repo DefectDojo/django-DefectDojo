@@ -1,65 +1,66 @@
-import logging
-
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.http import HttpResponse
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
-from rest_framework import permissions
-from rest_framework.authtoken import views as tokenviews
 from rest_framework.routers import DefaultRouter
-
+from rest_framework.authtoken import views as tokenviews
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from django.http import HttpResponse
 from dojo import views
-from dojo.api_v2.views import AppAnalysisViewSet, DevelopmentEnvironmentViewSet, DojoGroupMemberViewSet, \
-    DojoGroupViewSet, DojoMetaViewSet, EndPointViewSet, EndpointMetaImporterView, EndpointStatusViewSet, \
-    EngagementPresetsViewset, EngagementViewSet, FindingTemplatesViewSet, FindingViewSet, GlobalRoleViewSet, \
-    ImportLanguagesView, ImportScanView, JiraInstanceViewSet, JiraIssuesViewSet, JiraProjectViewSet, \
-    LanguageTypeViewSet, LanguageViewSet, NetworkLocationsViewset, NoteTypeViewSet, NotesViewSet, NotificationsViewSet, \
-    ProductAPIScanConfigurationViewSet, ProductGroupViewSet, ProductMemberViewSet, ProductTypeGroupViewSet, \
-    ProductTypeMemberViewSet, ProductTypeViewSet, ProductViewSet, ReImportScanView, RegulationsViewSet, RoleViewSet, \
-    SLAConfigurationViewset, SonarqubeIssueTransitionViewSet, SonarqubeIssueViewSet, StubFindingsViewSet, \
-    SystemSettingsViewSet, \
-    TestImportViewSet, TestTypesViewSet, TestsViewSet, ToolConfigurationsViewSet, ToolProductSettingsViewSet, \
-    ToolTypesViewSet, UserContactInfoViewSet, UserProfileView, UsersViewSet
-from dojo.banner.urls import urlpatterns as banner_urls
-from dojo.benchmark.urls import urlpatterns as benchmark_urls
-from dojo.components.urls import urlpatterns as component_urls
-from dojo.cred.urls import urlpatterns as cred_urls
+from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
+    FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
+    SLAConfigurationViewset, StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
+    ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
+    UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
+    DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
+    AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
+    RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
+    DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
+    DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
+    NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset, UserContactInfoViewSet, \
+    ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView
+
+from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
-from dojo.github_issue_link.urls import urlpatterns as github_urls
-from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
-from dojo.group.urls import urlpatterns as group_urls
 from dojo.home.urls import urlpatterns as home_urls
-from dojo.jira_link.urls import urlpatterns as jira_urls
 from dojo.metrics.urls import urlpatterns as metrics_urls
-from dojo.note_type.urls import urlpatterns as note_type_urls
-from dojo.notes.urls import urlpatterns as notes_urls
-from dojo.notifications.urls import urlpatterns as notifications_urls
-from dojo.object.urls import urlpatterns as object_urls
 from dojo.product.urls import urlpatterns as prod_urls
 from dojo.product_type.urls import urlpatterns as pt_urls
-from dojo.regulations.urls import urlpatterns as regulations
 from dojo.reports.urls import urlpatterns as reports_urls
-from dojo.rules.urls import urlpatterns as rule_urls
 from dojo.search.urls import urlpatterns as search_urls
-from dojo.sla_config.urls import urlpatterns as sla_urls
-from dojo.survey.urls import urlpatterns as survey_urls
-from dojo.system_settings.urls import urlpatterns as system_settings_urls
 from dojo.test.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
+from dojo.user.urls import urlpatterns as user_urls
+from dojo.group.urls import urlpatterns as group_urls
+from dojo.jira_link.urls import urlpatterns as jira_urls
+from dojo.github_issue_link.urls import urlpatterns as github_urls
+from dojo.tool_type.urls import urlpatterns as tool_type_urls
 from dojo.tool_config.urls import urlpatterns as tool_config_urls
 from dojo.tool_product.urls import urlpatterns as tool_product_urls
-from dojo.tool_type.urls import urlpatterns as tool_type_urls
-from dojo.user.urls import urlpatterns as user_urls
-from dojo.utils import get_system_setting
+from dojo.cred.urls import urlpatterns as cred_urls
+from dojo.sla_config.urls import urlpatterns as sla_urls
+from dojo.system_settings.urls import urlpatterns as system_settings_urls
+from dojo.notifications.urls import urlpatterns as notifications_urls
+from dojo.object.urls import urlpatterns as object_urls
+from dojo.benchmark.urls import urlpatterns as benchmark_urls
+from dojo.rules.urls import urlpatterns as rule_urls
+from dojo.notes.urls import urlpatterns as notes_urls
+from dojo.note_type.urls import urlpatterns as note_type_urls
+from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
+from dojo.banner.urls import urlpatterns as banner_urls
+from dojo.survey.urls import urlpatterns as survey_urls
+from dojo.components.urls import urlpatterns as component_urls
+from dojo.regulations.urls import urlpatterns as regulations
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+import logging
 logger = logging.getLogger(__name__)
 
 admin.autodiscover()

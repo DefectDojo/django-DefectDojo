@@ -1,51 +1,49 @@
 # #  product
-import base64
 import calendar as tcalendar
 import logging
+import base64
 from collections import OrderedDict
-from datetime import date, datetime, timedelta
+from datetime import datetime, date, timedelta
 from math import ceil
-
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.contrib.admin.utils import NestedObjects
-from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import ValidationError
-from django.db import DEFAULT_DB_ALIAS, connection
-from django.db.models import Count, F, Max, OuterRef, Prefetch, Q, Subquery, Sum
-from django.db.models.query import QuerySet
-from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
-from github import Github
+from django.db.models import Sum, Count, Q, Max
+from django.contrib.admin.utils import NestedObjects
+from django.db import DEFAULT_DB_ALIAS, connection
 
-import dojo.finding.helper as finding_helper
+from dojo.templatetags.display_tags import get_level
+from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
+                       EngagementPresetsForm, DeleteEngagementPresetsForm, ProductNotificationsForm, \
+                       GITHUB_Product_Form, GITHUBFindingForm, AppAnalysisForm, JIRAEngagementForm, Add_Product_MemberForm, \
+                       Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm, \
+                       DeleteAppAnalysisForm, Product_API_Scan_ConfigurationForm, DeleteProduct_API_Scan_ConfigurationForm
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, SLA_Configuration, Test, GITHUB_PKey, \
+    Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
+    Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
+    Product_Group, Product_API_Scan_Configuration
+from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, async_delete, \
+                       get_system_setting, get_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, get_enabled_notifications_list
+
+from dojo.notifications.helper import create_notification
+from django.db.models import Prefetch, F, OuterRef, Subquery
+from django.db.models.query import QuerySet
+from github import Github
+from django.contrib.postgres.aggregates import StringAgg
+from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.components.sql_group_concat import Sql_GroupConcat
-from dojo.filters import EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter, \
-    ProductEngagementFilter, ProductFilter
-from dojo.forms import AdHocFindingForm, Add_Product_GroupForm, Add_Product_MemberForm, AppAnalysisForm, \
-    DeleteAppAnalysisForm, DeleteEngagementPresetsForm, DeleteProductForm, DeleteProduct_API_Scan_ConfigurationForm, \
-    Delete_Product_GroupForm, Delete_Product_MemberForm, DojoMetaDataForm, Edit_Product_Group_Form, \
-    Edit_Product_MemberForm, EngForm, EngagementPresetsForm, GITHUBFindingForm, GITHUB_Product_Form, JIRAEngagementForm, \
-    JIRAFindingForm, JIRAProjectForm, ProductForm, ProductNotificationsForm, Product_API_Scan_ConfigurationForm
-from dojo.models import App_Analysis, Benchmark_Product_Summary, Benchmark_Type, BurpRawRequestResponse, DojoMeta, \
-    Endpoint, Endpoint_Status, Engagement, Engagement_Presets, Finding, GITHUB_PKey, Languages, Note_Type, \
-    Notifications, Product, Product_API_Scan_Configuration, Product_Group, Product_Member, Product_Type, \
-    SLA_Configuration, System_Settings, Test, Test_Type
-from dojo.notifications.helper import create_notification
-from dojo.product.queries import get_authorized_groups_for_product, get_authorized_members_for_product, \
-    get_authorized_products
-from dojo.product_type.queries import get_authorized_groups_for_product_type, get_authorized_members_for_product_type
-from dojo.templatetags.display_tags import get_level
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
+from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
 from dojo.tool_config.factory import create_API
-from dojo.utils import Product_Tab, add_breadcrumb, add_error_message_to_response, add_external_issue, \
-    add_field_errors_to_response, async_delete, get_enabled_notifications_list, get_page_items, get_punchcard_data, \
-    get_setting, get_system_setting, is_title_in_breadcrumbs, queryset_check
+import dojo.finding.helper as finding_helper
 
 logger = logging.getLogger(__name__)
 
@@ -149,9 +147,7 @@ def view_product(request, pid):
     benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
     benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True,
                                                           benchmark_type__enabled=True).order_by('benchmark_type__name')
-
     sla = SLA_Configuration.objects.filter(id=prod.sla_configuration_id).first()
-
     benchAndPercent = []
     for i in range(0, len(benchmarks)):
         benchAndPercent.append([benchmarks[i].benchmark_type, get_level(benchmarks[i])])
@@ -166,8 +162,6 @@ def view_product(request, pid):
                                            duplicate=False,
                                            out_of_scope=False).order_by('numerical_severity').values(
         'severity').annotate(count=Count('severity'))
-
-    logger.error(prod.sla_configuration_id, sla.name)
 
     critical = 0
     high = 0

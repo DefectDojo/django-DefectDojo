@@ -1,14 +1,12 @@
-import os
-import re
-import unittest
-
 from selenium import webdriver
-from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
+from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
+import unittest
+import os
+import re
 # import time
 
 
