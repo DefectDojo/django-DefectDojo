@@ -43,9 +43,7 @@ class Migration(migrations.Migration):
                 'ordering': ['name'],
             },
         ),
-
         migrations.RunPython(save_existing_sla),
-
         migrations.RemoveField(
             model_name='system_settings',
             name='sla_critical',
