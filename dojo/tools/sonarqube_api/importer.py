@@ -191,7 +191,7 @@ class SonarQubeApiImporter(object):
                 scanner_confidence = self.convert_scanner_confidence(hotspot.get('vulnerabilityProbability', ''))
                 description = self.clean_rule_description_html(rule.get('vulnerabilityDescription', 'No description provided.'))
                 cwe = self.clean_cwe(rule.get('fixRecommendations', ''))
-                references = self.get_references(rule.get('riskDescription', '')) + self.get_references.get(rule('fixRecommendations', ''))
+                references = self.get_references(rule.get('riskDescription', '')) + self.get_references(rule.get('fixRecommendations', ''))
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
                     key=hotspot['key'],
