@@ -1518,14 +1518,22 @@ class Endpoint(models.Model):
                 query_parts.append(u"=".join([k, v]))
         query_string = u"&".join(query_parts)
 
+        protocol = url.scheme if url.scheme != '' else None
+        userinfo = ':'.join(url.userinfo) if url.userinfo not in [(), ('',)] else None
+        host = url.host if url.host != '' else None
+        port = url.port
+        path = '/'.join(url.path)[:500] if url.path not in [None, (), ('',)] else None
+        query = query_string[:1000] if query_string is not None and query_string != '' else None
+        fragment = url.fragment[:500] if url.fragment is not None and url.fragment != '' else None
+
         return Endpoint(
-            protocol=url.scheme if url.scheme != '' else None,
-            userinfo=':'.join(url.userinfo) if url.userinfo not in [(), ('',)] else None,
-            host=url.host if url.host != '' else None,
-            port=url.port,
-            path='/'.join(url.path)[:500] if url.path not in [None, (), ('',)] else None,
-            query=query_string[:1000] if query_string is not None and query_string != '' else None,
-            fragment=url.fragment[:500] if url.fragment is not None and url.fragment != '' else None
+            protocol=protocol,
+            userinfo=userinfo,
+            host=host,
+            port=port,
+            path=path,
+            query=query,
+            fragment=fragment,
         )
 
     def get_absolute_url(self):
