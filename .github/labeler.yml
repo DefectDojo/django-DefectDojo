@@ -7,10 +7,6 @@ docker:
 - docker**
 - Docker*
 
-helm:
-- helm/defectdojo/*
-- helm/defectdojo/**/*
-
 "New Migration":
 - dojo/db_migrations/*
 
