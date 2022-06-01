@@ -4,7 +4,6 @@ Parser for Aquasecurity trivy (https://github.com/aquasecurity/trivy) Docker ima
 
 import json
 import logging
-from weakref import ref
 
 from dojo.models import Finding
 
