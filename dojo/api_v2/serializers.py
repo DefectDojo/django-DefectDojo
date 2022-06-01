@@ -1057,7 +1057,7 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
         return JIRAIssueSerializer(read_only=True).to_representation(issue)
 
 
-class VulnerabilityReferenceSerializer(serializers.ModelSerializer):
+class VulnerabilityIdSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vulnerability_Id
         fields = ['vulnerability_id']
@@ -1077,7 +1077,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     jira_change = serializers.SerializerMethodField(read_only=True)
     display_status = serializers.SerializerMethodField()
     finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
-    vulnerability_ids = VulnerabilityReferenceSerializer(source='vulnerability_id_set', many=True, required=False)
+    vulnerability_ids = VulnerabilityIdSerializer(source='vulnerability_id_set', many=True, required=False)
 
     class Meta:
         model = Finding
@@ -1206,7 +1206,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         default=None)
     tags = TagListSerializerField(required=False)
     push_to_jira = serializers.BooleanField(default=False)
-    vulnerability_ids = VulnerabilityReferenceSerializer(source='vulnerability_id_set', many=True, required=False)
+    vulnerability_ids = VulnerabilityIdSerializer(source='vulnerability_id_set', many=True, required=False)
 
     class Meta:
         model = Finding
@@ -1275,7 +1275,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         return data
 
 
-class VulnerabilityReferenceTemplateSerializer(serializers.ModelSerializer):
+class VulnerabilityIdTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vulnerability_Id_Template
         fields = ['vulnerability_id']
@@ -1283,7 +1283,7 @@ class VulnerabilityReferenceTemplateSerializer(serializers.ModelSerializer):
 
 class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
-    vulnerability_ids = VulnerabilityReferenceTemplateSerializer(source='vulnerability_id_template_set', many=True, required=False)
+    vulnerability_ids = VulnerabilityIdTemplateSerializer(source='vulnerability_id_template_set', many=True, required=False)
 
     class Meta:
         model = Finding_Template

@@ -894,6 +894,8 @@ def csv_export(request):
                     vulnerability_ids_value += '...'
                     break
                 vulnerability_ids_value += f'{str(vulnerability_id)}; '
+            if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
+                vulnerability_ids_value += finding.cve
             if vulnerability_ids_value.endswith('; '):
                 vulnerability_ids_value = vulnerability_ids_value[:-2]
             fields.append(vulnerability_ids_value)
@@ -987,6 +989,8 @@ def excel_export(request):
                     vulnerability_ids_value += '...'
                     break
                 vulnerability_ids_value += f'{str(vulnerability_id)}; \n'
+            if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
+                vulnerability_ids_value += finding.cve
             if vulnerability_ids_value.endswith('; \n'):
                 vulnerability_ids_value = vulnerability_ids_value[:-3]
             worksheet.cell(row=row_num, column=col_num, value=vulnerability_ids_value)
