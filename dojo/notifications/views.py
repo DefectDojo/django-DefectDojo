@@ -43,7 +43,7 @@ def personal_notifications(request):
 
     add_breadcrumb(title=_("Personal notification settings"), top_level=False, request=request)
 
-    return render(request, form, 'personal')
+    return render_page(request, form, 'personal')
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -87,4 +87,4 @@ def template_notifications(request):
 
     add_breadcrumb(title=_("Template notification settings"), top_level=False, request=request)
 
-    return render(request, form, 'template')
+    return render_page(request, form, 'template')
