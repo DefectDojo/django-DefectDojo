@@ -4,6 +4,7 @@ Parser for Aquasecurity trivy (https://github.com/aquasecurity/trivy) Docker ima
 
 import json
 import logging
+from weakref import ref
 
 from dojo.models import Finding
 
@@ -19,11 +20,23 @@ TRIVY_SEVERITIES = {
 }
 
 DESCRIPTION_TEMPLATE = """{title}
-Target: {target}
-Type: {type}
-Fixed version: {fixed_version}
+**Target:** {target}
+**Type:** {type}
+**Fixed version:** {fixed_version}
 
 {description_text}
+"""
+
+MISC_DESCRIPTION_TEMPLATE = """**Target:** {target}
+**Type:** {type}
+
+{description}
+{message}
+"""
+
+SECRET_DESCRIPTION_TEMPLATE = """{title}
+**Category:** {category}
+**Match:** {match}
 """
 
 
@@ -65,6 +78,11 @@ class TrivyParser:
             if not isinstance(target_data, dict) or 'Target' not in target_data:
                 continue
             target = target_data['Target']
+
+            target_target = target_data.get('Target')
+            target_class = target_data.get('Class')
+            target_type = target_data.get('Type')
+
             vulnerabilities = target_data.get('Vulnerabilities', []) or []
             for vuln in vulnerabilities:
                 if not isinstance(vuln, dict):
@@ -115,11 +133,84 @@ class TrivyParser:
                     cvssv3=cvssv3,
                     static_finding=True,
                     dynamic_finding=False,
-                    tags=[type],
+                    tags=[type, target_class],
                 )
 
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]
 
                 items.append(finding)
+
+            misconfigurations = target_data.get('Misconfigurations', [])
+            for misconfiguration in misconfigurations:
+                misc_type = misconfiguration.get('Type')
+                misc_id = misconfiguration.get('ID')
+                misc_title = misconfiguration.get('Title')
+                misc_description = misconfiguration.get('Description')
+                misc_message = misconfiguration.get('Message')
+                misc_resolution = misconfiguration.get('Resolution')
+                misc_severity = misconfiguration.get('Severity')
+                misc_primary_url = misconfiguration.get('PrimaryURL')
+                misc_references = misconfiguration.get('References', [])
+
+                title = f'{misc_id} - {misc_title}'
+                description = MISC_DESCRIPTION_TEMPLATE.format(
+                    target=target_target,
+                    type=misc_type,
+                    description=misc_description,
+                    message=misc_message,
+                )
+                severity = TRIVY_SEVERITIES[misc_severity]
+                references = None
+                if misc_primary_url:
+                    references = f'{misc_primary_url}\n'
+                if misc_primary_url in misc_references:
+                    misc_references.remove(misc_primary_url) 
+                if references:
+                    references += '\n'.join(misc_references)
+                else:
+                    references = '\n'.join(misc_references)
+
+                finding = Finding(
+                    test=test,
+                    title=title,
+                    severity=severity,
+                    references=references,
+                    description=description,
+                    mitigation=misc_resolution,
+                    static_finding=True,
+                    dynamic_finding=False,
+                    tags=[target_type, target_class],
+                )
+                items.append(finding)
+
+            secrets = target_data.get('Secrets', [])
+            for secret in secrets:
+                secret_category = secret.get('Category')
+                secret_title = secret.get('Title')
+                secret_severity = secret.get('Severity')
+                secret_match = secret.get('Match')
+                secret_start_line = secret.get('StartLine')
+
+                title = f'Secret detected in {target_target} - {secret_title}'
+                description = SECRET_DESCRIPTION_TEMPLATE.format(
+                    title=secret_title,
+                    category=secret_category,
+                    match=secret_match,
+                )
+                severity = TRIVY_SEVERITIES[secret_severity]
+
+                finding = Finding(
+                    test=test,
+                    title=title,
+                    severity=severity,
+                    description=description,
+                    file_path=target_target,
+                    line=secret_start_line,
+                    static_finding=True,
+                    dynamic_finding=False,
+                    tags=[target_class],
+                )
+                items.append(finding)
+
         return items

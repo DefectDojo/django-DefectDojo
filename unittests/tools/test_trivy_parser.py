@@ -72,3 +72,39 @@ class TestTrivyParser(DojoTestCase):
         self.assertIsNone(finding.cvssv3)
         self.assertTrue(finding.static_finding)
         self.assertFalse(finding.dynamic_finding)
+
+    def test_misconfigurations_and_secrets(self):
+        test_file = open(sample_path("misconfigurations_and_secrets.json"))
+        parser = TrivyParser()
+        findings = parser.get_findings(test_file, Test())
+
+        self.assertEqual(len(findings), 5)
+
+        finding = findings[2]
+        self.assertEqual('DS002 - Image user should not be \'root\'', finding.title)
+        self.assertEqual('High', finding.severity)
+        description = '''**Target:** Dockerfile
+**Type:** Dockerfile Security Check
+
+Running containers with 'root' user can lead to a container escape situation. It is a best practice to run containers as non-root users, which can be done by adding a 'USER' statement to the Dockerfile.
+Specify at least 1 USER command in Dockerfile with non-root user as argument
+'''
+        self.assertEqual(description, finding.description)
+        self.assertEqual('Add \'USER <non root user name>\' line to the Dockerfile', finding.mitigation)
+        references = '''https://avd.aquasec.com/misconfig/ds002
+https://docs.docker.com/develop/develop-images/dockerfile_best-practices/'''
+        self.assertEqual(references, finding.references)
+        self.assertEqual(['config', 'dockerfile'], finding.tags)
+
+        finding = findings[3]
+        self.assertEqual('Secret detected in Dockerfile - GitHub Personal Access Token', finding.title)
+        self.assertEqual('Critical', finding.severity)
+        description = '''GitHub Personal Access Token
+**Category:** GitHub
+**Match:** ENV GITHUB_PAT=*****
+'''
+        self.assertEqual(description, finding.description)
+        self.assertEqual('Dockerfile', finding.file_path)
+        self.assertEqual(24, finding.line)
+        self.assertEqual(['secret'], finding.tags)
+
