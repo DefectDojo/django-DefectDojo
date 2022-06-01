@@ -119,7 +119,7 @@ def benchmark_view(request, pid, type, cat=None):
 
     benchmark_summary_form = Benchmark_Product_SummaryForm(instance=benchmark_product_summary)
 
-    product_tab = Product_Tab(pid, title="Benchmarks", tab="benchmarks")
+    product_tab = Product_Tab(product, title="Benchmarks", tab="benchmarks")
 
     return render(request, 'dojo/benchmark.html',
                   {'benchmarks': benchmarks,
@@ -154,7 +154,7 @@ def delete(request, pid, type):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('product'))
 
-    product_tab = Product_Tab(pid, title="Delete Benchmarks", tab="benchmarks")
+    product_tab = Product_Tab(product, title="Delete Benchmarks", tab="benchmarks")
     return render(request, 'dojo/delete_benchmark.html',
                   {'product': product,
                    'form': form,

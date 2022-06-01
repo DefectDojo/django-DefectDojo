@@ -17,5 +17,6 @@ class TestDsopParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEquals(len(findings), 4)
         finding = findings[0]
-        self.assertEqual("CVE-2019-15587", finding.cve)
         self.assertEqual("Low", finding.severity)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2019-15587", finding.unsaved_vulnerability_ids[0])

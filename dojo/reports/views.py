@@ -334,7 +334,7 @@ def product_endpoint_report(request, pid):
         else:
             raise Http404()
 
-    product_tab = Product_Tab(product.id, "Product Endpoint Report", tab="endpoints")
+    product_tab = Product_Tab(product, "Product Endpoint Report", tab="endpoints")
     return render(request,
                   'dojo/request_endpoint_report.html',
                   {"endpoints": paged_endpoints,
@@ -648,18 +648,18 @@ def generate_report(request, obj, host_view=False):
 
     product_tab = None
     if engagement:
-        product_tab = Product_Tab(engagement.product.id, title="Engagement Report", tab="engagements")
+        product_tab = Product_Tab(engagement.product, title="Engagement Report", tab="engagements")
         product_tab.setEngagement(engagement)
     elif test:
-        product_tab = Product_Tab(test.engagement.product.id, title="Test Report", tab="engagements")
+        product_tab = Product_Tab(test.engagement.product, title="Test Report", tab="engagements")
         product_tab.setEngagement(test.engagement)
     elif product:
-        product_tab = Product_Tab(product.id, title="Product Report", tab="findings")
+        product_tab = Product_Tab(product, title="Product Report", tab="findings")
     elif endpoints:
         if host_view:
-            product_tab = Product_Tab(endpoint.product.id, title="Endpoint Host Report", tab="endpoints")
+            product_tab = Product_Tab(endpoint.product, title="Endpoint Host Report", tab="endpoints")
         else:
-            product_tab = Product_Tab(endpoint.product.id, title="Endpoint Report", tab="endpoints")
+            product_tab = Product_Tab(endpoint.product, title="Endpoint Report", tab="endpoints")
 
     return render(request, 'dojo/request_report.html',
                   {'product_type': product_type,

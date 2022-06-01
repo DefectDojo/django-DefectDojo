@@ -23,7 +23,7 @@ class DependencyCheckParser(object):
 
     def add_finding(self, finding, dupes):
         key_str = '|'.join([
-            str(finding.cve),
+            str(finding.title),
             str(finding.cwe),
             str(finding.file_path).lower()
         ])
@@ -137,11 +137,11 @@ class DependencyCheckParser(object):
         # I need the notes field since this is how the suppression is documented.
         notes = vulnerability.findtext(f'.//{namespace}notes')
 
-        cve = name[:28]
-        if cve and not cve.startswith('CVE'):
+        vulnerability_id = name[:28]
+        if vulnerability_id and not vulnerability_id.startswith('CVE'):
             # for vulnerability sources which have a CVE, it is the start of the 'name'.
             # for other sources, we have to set it to None
-            cve = None
+            vulnerability_id = None
 
         # Use CWE-1035 as fallback
         cwe = 1035  # Vulnerable Third Party Component
@@ -219,12 +219,11 @@ class DependencyCheckParser(object):
             description += '\n**Filepath:** ' + str(dependency_filepath)
             active = True
 
-        return Finding(
+        finding = Finding(
             title=f'{component_name}:{component_version} | {name}',
             file_path=dependency_filename,
             test=test,
             cwe=cwe,
-            cve=cve,
             description=description,
             severity=severity,
             mitigation=mitigation,
@@ -236,6 +235,11 @@ class DependencyCheckParser(object):
             component_name=component_name,
             component_version=component_version,
         )
+
+        if vulnerability_id:
+            finding.unsaved_vulnerability_ids = [vulnerability_id]
+
+        return finding
 
     def get_scan_types(self):
         return ["Dependency Check Scan"]

@@ -48,6 +48,10 @@ class CheckmarxParser(object):
 
         dupes = dict()
         language_list = dict()
+        #  Dictionary to hold the vuln_id_from_tool values:
+        #  - key: the concatenated aggregate keys
+        #  - value: a list of vuln_id_from_tool
+        vuln_ids_from_tool = dict()
         for query in root.findall('Query'):
             name, cwe, categories, queryId = self.getQueryElements(query)
             language = ''
@@ -84,15 +88,20 @@ class CheckmarxParser(object):
                 if self.mode == 'detailed':
                     self._process_result_detailed(test, dupes, findingdetail, query, result, find_date)
                 else:
-                    self._process_result_file_name_aggregated(test, dupes, findingdetail, query, result, find_date)
+                    self._process_result_file_name_aggregated(test, dupes, vuln_ids_from_tool, findingdetail, query, result, find_date)
                 findingdetail = ''
 
+            # consolidate vuln_ids_from_tool values
+            if self.mode != 'detailed':
+                for key in list(dupes):
+                    vuln_ids_from_tool[key].sort
+                    dupes[key].vuln_id_from_tool = ','.join(vuln_ids_from_tool[key])[:500]
         for lang in language_list:
             add_language(test.engagement.product, lang, files=language_list[lang])
 
         return list(dupes.values())
 
-    def _process_result_file_name_aggregated(self, test, dupes, findingdetail, query, result, find_date):
+    def _process_result_file_name_aggregated(self, test, dupes, vuln_ids_from_tool, findingdetail, query, result, find_date):
         """Process one result = one pathId for default "Checkmarx Scan"
         Create the finding and add it into the dupes list
         If a vuln with the same file_path was found before, updates the description
@@ -127,9 +136,10 @@ class CheckmarxParser(object):
                            # No line number because we have aggregated different vulnerabilities that may have different line numbers
                            date=find_date,
                            static_finding=True,
-                           nb_occurences=1,
-                           vuln_id_from_tool=queryId)
+                           nb_occurences=1)
             dupes[aggregateKeys] = find
+            # a list containing the vuln_id_from_tool values. They are formatted once we have analysed all the findings
+            vuln_ids_from_tool[aggregateKeys] = [queryId]
         else:
             # We have already created a finding for this aggregate: updates the description and the nb_occurences
             find = dupes[aggregateKeys]
@@ -137,7 +147,8 @@ class CheckmarxParser(object):
             if find.nb_occurences == 2:
                 find.description = "### 1. {}\n{}".format(find.title, find.description)
             find.description = "{}\n\n-----\n### {}. {}\n{}\n{}".format(find.description, find.nb_occurences, title, findingdetail, description)
-            find.vuln_id_from_tool = "{},{}".format(find.vuln_id_from_tool, queryId)
+            if queryId not in vuln_ids_from_tool[aggregateKeys]:
+                vuln_ids_from_tool[aggregateKeys].append(queryId)
             # If at least one of the findings in the aggregate is exploitable, the defectdojo finding should not be "false positive"
             if(false_p == "False"):
                 dupes[aggregateKeys].false_p = False
