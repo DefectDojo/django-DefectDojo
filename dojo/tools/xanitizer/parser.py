@@ -65,12 +65,14 @@ class XanitizerParser(object):
                 title=self.generate_title(finding, line),
                 description=description,
                 cwe=self.resolve_cwe(finding),
-                cve=self.find_cve(description),
                 severity=self.resolve_severity(finding),
                 file_path=self.generate_file_path(finding),
                 line=line,
                 date=date,
                 static_finding=True)
+            vulnerability_id = self.find_cve(description)
+            if vulnerability_id:
+                dojofinding.unsaved_vulnerability_ids = [vulnerability_id]
 
             items.append(dojofinding)
 
