@@ -711,7 +711,7 @@ class TestDuplicationLogic(DojoTestCase):
         # create identical copy, change some fields
         finding_new, finding_124 = self.copy_and_reset_finding(id=124)
         finding_new.title = 'another title'
-        finding_new.cve = 'CVE-2020-12345'
+        finding_new.unsaved_vulnerability_ids = ['CVE-2020-12345']
         finding_new.cwe = '456'
         finding_new.description = 'useless finding'
         finding_new.save()
@@ -723,7 +723,7 @@ class TestDuplicationLogic(DojoTestCase):
         # create identical copy, change some fields
         finding_new, finding_124 = self.copy_and_reset_finding(id=124)
         finding_new.title = 'another title'
-        finding_new.cve = 'CVE-2020-12345'
+        finding_new.unsaved_vulnerability_ids = ['CVE-2020-12345']
         finding_new.cwe = '456'
         finding_new.description = 'useless finding'
         finding_new.unique_id_from_tool = '9999'
@@ -865,7 +865,7 @@ class TestDuplicationLogic(DojoTestCase):
         # create identical copy, change some fields
         finding_new, finding_224 = self.copy_and_reset_finding(id=224)
         finding_new.title = 'another title'
-        finding_new.cve = 'CVE-2020-12345'
+        finding_new.unsaved_vulnerability_ids = ['CVE-2020-12345']
         finding_new.cwe = '456'
         finding_new.description = 'useless finding'
         finding_new.save()
@@ -877,7 +877,7 @@ class TestDuplicationLogic(DojoTestCase):
         # create identical copy, change some fields
         finding_new, finding_224 = self.copy_and_reset_finding(id=224)
         finding_new.title = 'another title'
-        finding_new.cve = 'CVE-2020-12345'
+        finding_new.unsaved_vulnerability_ids = ['CVE-2020-12345']
         finding_new.cwe = '456'
         finding_new.description = 'useless finding'
         finding_new.unique_id_from_tool = '9999'
@@ -1298,7 +1298,7 @@ class TestDuplicationLogic(DojoTestCase):
         hash_code_at_creation = finding_new.hash_code
 
         finding_new.title = 'new_title'
-        finding_new.cve = 999
+        finding_new.unsaved_vulnerability_ids = [999]
 
         # both title and cve affect hash_code for ZAP scans, but not here because hash_code was already calculated
         finding_new.save()
@@ -1324,14 +1324,14 @@ class TestDuplicationLogic(DojoTestCase):
         # expect: not marked as duplicate with dedupe_option-False
         finding_new, finding_24 = self.copy_and_reset_finding(id=24)
         finding_new.title = 'new_title'
-        finding_new.cve = 999
+        finding_new.unsaved_vulnerability_ids = [999]
         finding_new.save(dedupe_option=True)
         self.assert_finding(finding_new, not_pk=24, duplicate=False, not_hash_code=None)
 
         # now when we change the title and cve back the same as finding_24, it should be marked as duplicate
         # howwever defect dojo does NOT recalculate the hash_code, so it will not mark this finding as duplicate. feature or BUG?
         finding_new.title = finding_24.title
-        finding_new.cve = finding_24.cve
+        finding_new.unsaved_vulnerability_ids = finding_24.unsaved_vulnerability_ids
         finding_new.save(dedupe_option=True)
         self.assert_finding(finding_new, not_pk=24, duplicate=False, not_hash_code=None)
 
