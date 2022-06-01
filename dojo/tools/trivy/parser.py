@@ -164,7 +164,7 @@ class TrivyParser:
                 if misc_primary_url:
                     references = f'{misc_primary_url}\n'
                 if misc_primary_url in misc_references:
-                    misc_references.remove(misc_primary_url) 
+                    misc_references.remove(misc_primary_url)
                 if references:
                     references += '\n'.join(misc_references)
                 else:
