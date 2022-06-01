@@ -155,7 +155,7 @@ class NmapParser(object):
 
                 # manage if CVE is in metadata
                 if "type" in vuln_attributes and "cve" == vuln_attributes["type"]:
-                    finding.cve = vuln_attributes["id"]
+                    finding.unsaved_vulnerability_ids = [vuln_attributes["id"]]
 
                 if report_date:
                     finding.date = report_date

@@ -32,7 +32,8 @@ class TestVeracodeScannerParser(SimpleTestCase):
         finding = findings[2]
         self.assertEqual("High", finding.severity)
         self.assertIsNone(finding.cwe)
-        self.assertEqual("CVE-1234-1234", finding.cve)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-1234-1234", finding.unsaved_vulnerability_ids[0])
         self.assertEqual("Vulnerable component: library:1234", finding.title)
         self.assertFalse(finding.is_mitigated)
 
@@ -57,12 +58,14 @@ class TestVeracodeScannerParser(SimpleTestCase):
         finding = findings[2]
         self.assertEqual("High", finding.severity)
         self.assertIsNone(finding.cwe)
-        self.assertEqual("CVE-1234-1234", finding.cve)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-1234-1234", finding.unsaved_vulnerability_ids[0])
         self.assertEqual("Vulnerable component: library:1234", finding.title)
         self.assertFalse(finding.is_mitigated)
         finding = findings[3]
         self.assertEqual("High", finding.severity)
-        self.assertEqual("CVE-5678-5678", finding.cve)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-5678-5678", finding.unsaved_vulnerability_ids[0])
         self.assertEqual("Vulnerable component: library1:1234", finding.title)
         self.assertFalse(finding.is_mitigated)
 
@@ -86,7 +89,8 @@ class TestVeracodeScannerParser(SimpleTestCase):
         # finding 6
         finding = findings[6]
         self.assertEqual("Medium", finding.severity)
-        self.assertEqual("CVE-2012-6153", finding.cve)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2012-6153", finding.unsaved_vulnerability_ids[0])
         self.assertEqual(20, finding.cwe)
         self.assertEqual("commons-httpclient", finding.component_name)
         self.assertEqual("3.1", finding.component_version)
