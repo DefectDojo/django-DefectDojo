@@ -133,7 +133,7 @@ def findings(request, pid=None, eid=None, view=None, filter_name=None, order_by=
         product = get_object_or_404(Product, id=pid)
         user_has_permission_or_403(request.user, product, Permissions.Product_View)
         show_product_column = False
-        product_tab = Product_Tab(pid, title="Findings", tab="findings")
+        product_tab = Product_Tab(product, title="Findings", tab="findings")
         jira_project = jira_helper.get_jira_project(product)
         github_config = GITHUB_PKey.objects.filter(product=pid).first()
 
@@ -141,7 +141,7 @@ def findings(request, pid=None, eid=None, view=None, filter_name=None, order_by=
         engagement = get_object_or_404(Engagement, id=eid)
         user_has_permission_or_403(request.user, engagement, Permissions.Engagement_View)
         show_product_column = False
-        product_tab = Product_Tab(engagement.product_id, title=engagement.name, tab="engagements")
+        product_tab = Product_Tab(engagement.product, title=engagement.name, tab="engagements")
         jira_project = jira_helper.get_jira_project(engagement)
         github_config = GITHUB_PKey.objects.filter(product__engagement=eid).first()
     else:
@@ -366,7 +366,7 @@ def view_finding(request, fid):
     for similar_finding in similar_findings:
         similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
 
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="View Finding", tab="findings")
+    product_tab = Product_Tab(finding.test.engagement.product, title="View Finding", tab="findings")
 
     can_be_pushed_to_jira, can_be_pushed_to_jira_error, error_code = jira_helper.can_be_pushed_to_jira(finding)
 
@@ -471,7 +471,7 @@ def close_finding(request, fid):
     else:
         form = CloseFindingForm(missing_note_types=missing_note_types)
 
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Close", tab="findings")
+    product_tab = Product_Tab(finding.test.engagement.product, title="Close", tab="findings")
 
     return render(request, 'dojo/close_finding.html', {
         'finding': finding,
@@ -553,7 +553,7 @@ def defect_finding_review(request, fid):
     else:
         form = DefectFindingForm()
 
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Jira Status Review", tab="findings")
+    product_tab = Product_Tab(finding.test.engagement.product, title="Jira Status Review", tab="findings")
 
     return render(request, 'dojo/defect_finding_review.html', {
         'finding': finding,
@@ -855,7 +855,7 @@ def edit_finding(request, fid):
             if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
                 gform = GITHUBFindingForm(enabled=github_enabled, prefix='githubform')
 
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
+    product_tab = Product_Tab(finding.test.engagement.product, title="Edit Finding", tab="findings")
 
     return render(request, 'dojo/edit_finding.html', {
         'product_tab': product_tab,
@@ -937,13 +937,15 @@ def request_finding_review(request, fid):
             finding.save()
             reviewers = ""
             for suser in form.cleaned_data['reviewers']:
-                reviewers += str(suser) + ", "
+                full_user = Dojo_User.generate_full_name(Dojo_User.objects.get(id=suser))
+                logger.debug("Asking %s for review", full_user)
+                reviewers += str(full_user) + ", "
             reviewers = reviewers[:-2]
 
             create_notification(event='review_requested',
                                 title='Finding review requested',
                                 finding=finding,
-                                description='User %s has requested that users %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
+                                description='User %s has requested that user(s) %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
                                 icon='check',
                                 url=reverse("view_finding", args=(finding.id,)))
 
@@ -958,7 +960,7 @@ def request_finding_review(request, fid):
     else:
         form = ReviewFindingForm(finding=finding)
 
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Review Finding", tab="findings")
+    product_tab = Product_Tab(finding.test.engagement.product, title="Review Finding", tab="findings")
 
     return render(request, 'dojo/review_finding.html', {
         'finding': finding,
@@ -1013,7 +1015,7 @@ def clear_finding_review(request, fid):
     else:
         form = ClearFindingReviewForm(instance=finding)
 
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Clear Finding Review", tab="findings")
+    product_tab = Product_Tab(finding.test.engagement.product, title="Clear Finding Review", tab="findings")
 
     return render(request, 'dojo/clear_finding_review.html', {
         'finding': finding,
@@ -1090,7 +1092,7 @@ def find_template_to_apply(request, fid):
 
     # just query all templates as this weird ordering above otherwise breaks Django ORM
     title_words = get_words_for_field(Finding_Template, 'title')
-    product_tab = Product_Tab(test.engagement.product.id, title="Apply Template to Finding", tab="findings")
+    product_tab = Product_Tab(test.engagement.product, title="Apply Template to Finding", tab="findings")
     return render(
         request, 'dojo/templates.html', {
             'templates': paged_templates,
@@ -1114,7 +1116,7 @@ def choose_finding_template_options(request, tid, fid):
     data['vulnerability_ids'] = '\n'.join(finding.vulnerability_ids)
 
     form = ApplyFindingTemplateForm(data=data, template=template)
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Finding Template Options", tab="findings")
+    product_tab = Product_Tab(finding.test.engagement.product, title="Finding Template Options", tab="findings")
     return render(request, 'dojo/apply_finding_template.html', {
         'finding': finding,
         'product_tab': product_tab,
@@ -1157,7 +1159,7 @@ def apply_template_to_finding(request, fid, tid):
                 'There appears to be errors on the form, please correct below.',
                 extra_tags='alert-danger')
             # form_error = True
-            product_tab = Product_Tab(finding.test.engagement.product.id, title="Apply Finding Template", tab="findings")
+            product_tab = Product_Tab(finding.test.engagement.product, title="Apply Finding Template", tab="findings")
             return render(request, 'dojo/apply_finding_template.html', {
                 'finding': finding,
                 'product_tab': product_tab,
@@ -1249,7 +1251,7 @@ def promote_to_finding(request, fid):
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     jform = None
     use_jira = jira_helper.get_jira_project(finding) is not None
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
+    product_tab = Product_Tab(finding.test.engagement.product, title="Promote Finding", tab="findings")
 
     if request.method == 'POST':
         form = PromoteFindingForm(request.POST, product=test.engagement.product)
@@ -1741,7 +1743,7 @@ def merge_finding_product(request, pid):
                                      'Unable to merge findings. Required fields were not selected.',
                                      extra_tags='alert-danger')
 
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Merge Findings", tab="findings")
+    product_tab = Product_Tab(finding.test.engagement.product, title="Merge Findings", tab="findings")
     custom_breadcrumb = {"Open Findings": reverse('product_open_findings', args=(finding.test.engagement.product.id, )) + '?test__engagement__product=' + str(finding.test.engagement.product.id)}
 
     return render(request, 'dojo/merge_findings.html', {

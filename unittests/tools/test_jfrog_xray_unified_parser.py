@@ -23,7 +23,8 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
 
         self.assertEquals("XRAY-139239 - This affects the package", item.title[:38])
         self.assertEquals(" memory.", item.title[-8:])
-        self.assertEquals("CVE-2020-28493", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-28493", item.unsaved_vulnerability_ids[0])
         self.assertEquals("Medium", item.severity)
         self.assertEquals("This affects the package", item.description[:24])
         self.assertEquals(" memory.", item.description[-8:])
@@ -59,105 +60,123 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
 
         # blank cvss2
         item = [i for i in findings if i.title[:11] == "XRAY-106730"][-1]
-        self.assertEquals("CVE-2018-10754", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2018-10754", item.unsaved_vulnerability_ids[0])
         self.assertIsNotNone(item.severity_justification)
         self.assertGreater(len(item.severity_justification), 0)
 
         # blank cvss3
         item = [i for i in findings if i.title[:11] == "XRAY-100538"][-1]
-        self.assertEquals("CVE-2015-2716", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2015-2716", item.unsaved_vulnerability_ids[0])
         self.assertIsNotNone(item.severity_justification)
         self.assertGreater(len(item.severity_justification), 0)
 
         # 0 references
         item = [i for i in findings if i.title[:11] == "XRAY-100015"][-1]
-        self.assertEquals("CVE-2020-13790", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-13790", item.unsaved_vulnerability_ids[0])
         self.assertIsNotNone(item.references)
         self.assertEquals(len(item.references), 0)
 
         # 1 reference
         item = [i for i in findings if i.title[:11] == "XRAY-101489"][-1]
-        self.assertEquals("CVE-2020-14040", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-14040", item.unsaved_vulnerability_ids[0])
         self.assertIsNotNone(item.references)
         self.assertGreater(len(item.references), 0)
 
         # many references
         item = [i for i in findings if i.title[:11] == "XRAY-100092"][-1]
-        self.assertEquals("CVE-2020-12723", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-12723", item.unsaved_vulnerability_ids[0])
         self.assertIsNotNone(item.references)
         self.assertGreater(len(item.references), 50)
 
         # multiple cvss scores - all have cvss3
         item = [i for i in findings if i.title[:10] == "XRAY-96518"][-1]
-        self.assertEquals("CVE-2016-10745", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2016-10745", item.unsaved_vulnerability_ids[0])
         self.assertEquals("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N", item.cvssv3)
 
         # multiiple cvss scores, some cvss2 missing
         item = [i for i in findings if i.title[:11] == "XRAY-128854"][-1]
-        self.assertEquals("CVE-2019-17006", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2019-17006", item.unsaved_vulnerability_ids[0])
         self.assertEquals("CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H", item.cvssv3)
 
         # multiiple cvss scores, some cvss3 missing
         item = [i for i in findings if i.title[:11] == "XRAY-135206"][-1]
-        self.assertEquals("CVE-2019-17006", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2019-17006", item.unsaved_vulnerability_ids[0])
         self.assertEquals("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", item.cvssv3)
 
         # 0 fixed verisons
         item = [i for i in findings if i.title[:11] == "XRAY-100015"][-1]
-        self.assertEquals("CVE-2020-13790", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-13790", item.unsaved_vulnerability_ids[0])
         self.assertIsNone(item.mitigation)
 
         # 1 fixed version
         item = [i for i in findings if i.title[:11] == "XRAY-100646"][-1]
-        self.assertEquals("CVE-2020-14062", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-14062", item.unsaved_vulnerability_ids[0])
         self.assertIsNotNone(item.mitigation)
         self.assertGreater(len(item.mitigation), 0)
 
         # multiple fixed versions
         item = [i for i in findings if i.title[:11] == "XRAY-127258"][-1]
-        self.assertEquals("CVE-2020-27216", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-27216", item.unsaved_vulnerability_ids[0])
         self.assertIsNotNone(item.mitigation)
         self.assertGreater(len(item.mitigation), 50)
 
         # fixed versions with weird characters
         item = [i for i in findings if i.title[:11] == "XRAY-128876"][-1]
-        self.assertEquals("CVE-2020-8623", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-8623", item.unsaved_vulnerability_ids[0])
         self.assertIsNotNone(item.mitigation)
         self.assertGreater(len(item.mitigation), 0)
 
         # severity unknown
         item = [i for i in findings if i.title[:11] == "XRAY-119297"][-1]
-        self.assertEquals("CVE-2020-12403", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-12403", item.unsaved_vulnerability_ids[0])
         self.assertEquals("Info", item.severity)
         self.assertEquals("Info", item.impact)
 
         # severity low
         item = [i for i in findings if i.title[:11] == "XRAY-100046"][-1]
-        self.assertEquals("CVE-2020-13871", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-13871", item.unsaved_vulnerability_ids[0])
         self.assertEquals("Low", item.severity)
         self.assertEquals("Low", item.impact)
 
         # severity medium
         item = [i for i in findings if i.title[:11] == "XRAY-100757"][-1]
-        self.assertEquals("CVE-2020-14155", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-14155", item.unsaved_vulnerability_ids[0])
         self.assertEquals("Medium", item.severity)
         self.assertEquals("Medium", item.impact)
 
         # severity high
         item = [i for i in findings if i.title[:11] == "XRAY-109517"][-1]
-        self.assertEquals("CVE-2019-5827", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2019-5827", item.unsaved_vulnerability_ids[0])
         self.assertEquals("High", item.severity)
         self.assertEquals("High", item.impact)
 
         # external severity in details
         item = [i for i in findings if i.title[:11] == "XRAY-111224"][-1]
-        self.assertEquals("CVE-2015-8385", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2015-8385", item.unsaved_vulnerability_ids[0])
         self.assertEquals("Red Hat Severity: Important", item.description[-27:])
 
         # **various packages**
         # alpine
         item = [i for i in findings if i.title[:11] == "XRAY-100301"][-1]
-        self.assertEquals("CVE-2020-13871", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-13871", item.unsaved_vulnerability_ids[0])
         self.assertEquals("XRAY-100301 - SQLite 3.32.2 has a use", item.title[:37])
         self.assertEquals(" is too late.", item.title[-13:])
         self.assertEquals("Medium", item.severity)
@@ -179,7 +198,8 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
 
         # debian
         item = [i for i in findings if i.title[:11] == "XRAY-137237"][-1]
-        self.assertEquals("CVE-2020-1971", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-1971", item.unsaved_vulnerability_ids[0])
         self.assertEquals("XRAY-137237 - The X.509 GeneralName", item.title[:35])
         self.assertEquals("(Affected 1.0.2-1.0.2w).", item.title[-24:])
         self.assertEquals("High", item.severity)
@@ -201,7 +221,8 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
 
         # go
         item = [i for i in findings if i.title[:10] == "XRAY-86054"][-1]
-        self.assertEquals("CVE-2014-0047", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2014-0047", item.unsaved_vulnerability_ids[0])
         self.assertEquals("XRAY-86054 - Docker before 1.5 allows", item.title[:37])
         self.assertEquals("/tmp usage.", item.title[-11:])
         self.assertEquals("Medium", item.severity)
@@ -224,7 +245,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
 
         # maven
         item = [i for i in findings if i.title[:11] == "XRAY-126663"][-1]
-        self.assertIsNone(item.cve)  # has cvss score but no cve??
+        self.assertIsNone(item.unsaved_vulnerability_ids)  # has cvss score but no cve??
         self.assertEquals("XRAY-126663 - FasterXML jackson", item.title[:31])
         self.assertEquals("Expansion Remote Issue", item.title[-22:])
         self.assertEquals("High", item.severity)
@@ -246,7 +267,8 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
 
         # npm
         item = [i for i in findings if i.title[:10] == "XRAY-97245"][-1]
-        self.assertEquals("CVE-2020-11023", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-11023", item.unsaved_vulnerability_ids[0])
         self.assertEquals("XRAY-97245 - In jQuery versions great", item.title[:37])
         self.assertEquals("patched in jQuery 3.5.0.", item.title[-24:])
         self.assertEquals("Medium", item.severity)
@@ -269,7 +291,8 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
 
         # pypi
         item = [i for i in findings if i.title[:10] == "XRAY-97724"][-1]
-        self.assertEquals("CVE-2018-20225", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2018-20225", item.unsaved_vulnerability_ids[0])
         self.assertEquals("XRAY-97724 - An issue was discovered", item.title[:36])
         self.assertEquals("an arbitrary version number).", item.title[-29:])
         self.assertEquals("Medium", item.severity)
@@ -292,7 +315,8 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
 
         # rpm
         item = [i for i in findings if i.title[:11] == "XRAY-106044"][-1]
-        self.assertEquals("CVE-2019-19645", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2019-19645", item.unsaved_vulnerability_ids[0])
         self.assertEquals("XRAY-106044 - CVE-2019-19645 sqlite: infinite", item.title[:45])
         self.assertEquals("TABLE statements", item.title[-16:])
         self.assertEquals("Medium", item.severity)

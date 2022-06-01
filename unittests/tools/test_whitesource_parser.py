@@ -16,6 +16,9 @@ class TestWhitesourceParser(DojoTestCase):
         parser = WhitesourceParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
+        finding = list(findings)[0]
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("WS-2009-0001", finding.unsaved_vulnerability_ids[0])
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         testfile = open("unittests/scans/whitesource_sample/okhttp_many_vuln.json")

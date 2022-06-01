@@ -36,10 +36,19 @@ When running the application without building images, the application will run b
 
 The Docker Compose setup supports 2 different databases (MySQL and PostgreSQL) and 2 different celery brokers (RabbitMQ and Redis). To make this possible, docker-compose needs to be started with the parameter `--profile` with one of these choices:
 
-- mysql-rabbitmq
+- mysql-rabbitmq*
 - mysql-redis
 - postgres-rabbitmq
 - postgres-redis
+
+e.g. 
+```zsh
+./dc-up.sh mysql-redis
+```
+
+A default profile can be set with the environment variable `DD_PROFILE`. If this environment variable is set when starting the containers, the parameter for the profile needs not to be given for the start scripts.
+
+When DD_PROFILE or command-line profile is not specified, the command will run "mysql-rabbitmq" as the default profile. 
 
 The environment variables needed for the different profiles are prepared in files, which need to be included additionally with the parameter `--env-file` with a choices that fits to the profile:
 
@@ -59,7 +68,6 @@ The environment variables needed for the different profiles are prepared in file
 - `./dc-down.sh` - Stop and remove the docker containers, it can take one additional parameter to be used in the stop and remove process.
 - `./dc-unittest.sh` - Utility script to aid in running a specific unit test class.  Requires a profile and test case as parameters.
 
-A default profile can be set with the environment variable `DD_PROFILE`. If this environment variable is set when starting the containers, the parameter for the profile needs not to be given for the start scripts .
 
 # Setup via Docker Compose - Building and running the application
 
@@ -89,7 +97,7 @@ To run the application based on previously built image (or based on dockerhub im
 
 ```zsh
 docker/setEnv.sh release
-./dc-up.sh
+./dc-up.sh postgres-redis # or an other profile
 ```
 
 This will run the application based on docker-compose.yml only.
@@ -104,7 +112,7 @@ For development, use:
 ```zsh
 docker/setEnv.sh dev
 ./dc-build.sh
-./dc-up.sh
+./dc-up.sh postgres-redis # or an other profile
 ```
 
 This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.dev.yml.

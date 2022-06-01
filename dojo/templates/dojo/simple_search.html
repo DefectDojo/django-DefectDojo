@@ -1,17 +1,18 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load event_tags %}
 {% load display_tags %}
 
 {% block content %}
     {{ block.super }}
     <h2> {{ name }} <i class="fa fa-question-circle has-popover" data-trigger="hover"
-                       data-content="This simple search function will return results whose findings or finding templates
+                       data-content="{% blocktrans %}This simple search function will return results whose findings or finding templates
                                      title, URL, description, endpoints, tags, references, languages or technologies contain the search query and products whose
                                      name, tags or description contain the search query.</br> Advanced search operators: (Restrict results to a certain type) product:,
                                      engagement:, finding:, endpoint:, tag:, language: or technology:.
                                      test-tags shows findings in tests that are tagged with provided tag, similar for engagement-tags and product-tags.
                                      After submitting the search query, tabbed results will be displayed. The findings tab will have the possibility to
-                                     to perform more finegrained filtering on status fields, test type, etc."
+                                     to perform more finegrained filtering on status fields, test type, etc.{% endblocktrans %}"
                        data-placement="right" data-container="body" data-original-title="" title="">
                     </i>
         </h2>

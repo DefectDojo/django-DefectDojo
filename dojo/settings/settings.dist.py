@@ -103,6 +103,9 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=(bool, False),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER=(str, ''),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS=(bool, True),
     DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS=(bool, False),
@@ -215,8 +218,16 @@ env = environ.Env(
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
     # when enabled, finding importing will occur asynchronously, default False
     DD_ASYNC_FINDING_IMPORT=(bool, False),
-    # The number fo findings to be processed per celeryworker
+    # The number of findings to be processed per celeryworker
     DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE=(int, 100),
+    # When enabled, deleting objects will be occur from the bottom up. In the example of deleting an engagement
+    # The objects will be deleted as follows Endpoints -> Findings -> Tests -> Engagement
+    DD_ASYNC_OBJECT_DELETE=(bool, False),
+    # The number of objects to be deleted per celeryworker
+    DD_ASYNC_OBEJECT_DELETE_CHUNK_SIZE=(int, 100),
+    # When enabled, display the preview of objects to be deleted. This can take a long time to render
+    # for very large objects
+    DD_DELETE_PREVIEW=(bool, True),
     # Feature toggle for new authorization for configurations
     DD_FEATURE_CONFIGURATION_AUTHORIZATION=(bool, True),
 )
@@ -447,6 +458,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
+    'dojo.pipeline.update_azure_groups',
     'dojo.pipeline.update_product_access',
 )
 
@@ -480,6 +492,9 @@ SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET')
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID')
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE')
+AZUREAD_TENANT_OAUTH2_GET_GROUPS = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS')
+AZUREAD_TENANT_OAUTH2_GROUPS_FILTER = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER')
+AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS')
 
 GITLAB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED')
 GITLAB_PROJECT_AUTO_IMPORT = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT')
@@ -1045,43 +1060,43 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # Including the severity in the hash_code keeps those findings not duplicate
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
-    'Aqua Scan': ['severity', 'cve', 'component_name', 'component_version'],
+    'Aqua Scan': ['severity', 'vulnerability_ids', 'component_name', 'component_version'],
     'Bandit Scan': ['file_path', 'line', 'vuln_id_from_tool'],
-    'CargoAudit Scan': ['cve', 'severity', 'component_name', 'component_version', 'vuln_id_from_tool'],
+    'CargoAudit Scan': ['vulnerability_ids', 'severity', 'component_name', 'component_version', 'vuln_id_from_tool'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
-    'Checkmarx OSA': ['cve', 'component_name'],
+    'Checkmarx OSA': ['vulnerability_ids', 'component_name'],
     'Cloudsploit Scan': ['title', 'description'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube API Import': ['title', 'file_path', 'line'],
-    'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
+    'Dependency Check Scan': ['vulnerability_ids', 'cwe', 'file_path'],
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'vulnerability_ids'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
-    'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
-    'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],
+    'Nessus Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
+    'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
-    'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
+    'NPM Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
-    'Yarn Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
-    # possible improvement: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
+    'Yarn Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
+    # possible improvement: in the scanner put the library name into file_path, then dedup on vulnerability_ids + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['title', 'cwe', 'severity'],
     'Qualys Scan': ['title', 'severity'],
     # 'Qualys Webapp Scan': ['title', 'unique_id_from_tool'],
-    'PHP Symfony Security Check': ['title', 'cve'],
-    'Clair Scan': ['title', 'cve', 'description', 'severity'],
+    'PHP Symfony Security Check': ['title', 'vulnerability_ids'],
+    'Clair Scan': ['title', 'vulnerability_ids', 'description', 'severity'],
     'Clair Klar Scan': ['title', 'description', 'severity'],
     # for backwards compatibility because someone decided to rename this scanner:
-    'Symfony Security Check': ['title', 'cve'],
-    'DSOP Scan': ['cve'],
+    'Symfony Security Check': ['title', 'vulnerability_ids'],
+    'DSOP Scan': ['vulnerability_ids'],
     'Acunetix Scan': ['title', 'description'],
     'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
-    'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
+    'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
-    'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
+    'GitLab Dependency Scanning Report': ['title', 'vulnerability_ids', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
-    'JFrog Xray Unified Scan': ['cve', 'file_path', 'component_name', 'component_version'],
+    'JFrog Xray Unified Scan': ['vulnerability_ids', 'file_path', 'component_name', 'component_version'],
     'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
@@ -1098,6 +1113,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Rusty Hog Scan': ['title', 'description'],
     'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'Hydra Scan': ['title', 'description'],
+    'DrHeader JSON Importer': ['title', 'description'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1137,7 +1153,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'vulnerability_ids', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
 
 # Adding fields to the hash_code calculation regardless of the previous settings
 HASH_CODE_FIELDS_ALWAYS = ['service']
@@ -1155,6 +1171,17 @@ DEDUPE_ALGO_HASH_CODE = 'hash_code'
 # unique_id_from_tool or hash_code
 # Makes it possible to deduplicate on a technical id (same parser) and also on some functional fields (cross-parsers deduplication)
 DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code'
+
+# Allows to deduplicate with endpoints if endpoints is not included in the hashcode.
+# Possible values are: scheme, host, port, path, query, fragment, userinfo, and user. For a details description see https://hyperlink.readthedocs.io/en/latest/api.html#attributes.
+# Example:
+# Finding A and B have the same hashcode. Finding A has endpoint http://defectdojo.com and finding B has endpoint https://defectdojo.com/finding.
+# - An empyt list ([]) means, no fields are used. B is marked as duplicated of A.
+# - Host (['host']) means: B is marked as duplicate of A because the host (defectdojo.com) is the same.
+# - Host and path (['host', 'path']) means: A and B stay untouched because the path is different.
+#
+# If a finding has more than one endpoint, only one endpoint pair must match to mark the finding as duplicate.
+DEDUPE_ALGO_ENDPOINT_FIELDS = ['host', 'path']
 
 # Choice of deduplication algorithm per parser
 # Key = the scan_type from factory.py (= the test_type)
@@ -1230,6 +1257,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Harbor Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Rusty Hog Scan': DEDUPE_ALGO_HASH_CODE,
     'Hydra Scan': DEDUPE_ALGO_HASH_CODE,
+    'DrHeader JSON Importer': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1411,8 +1439,16 @@ SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
 
 # when enabled, finding importing will occur asynchronously, default False
 ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")
-# The number fo findings to be processed per celeryworker
+# The number of findings to be processed per celeryworker
 ASYNC_FINDING_IMPORT_CHUNK_SIZE = env("DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE")
+# When enabled, deleting objects will be occur from the bottom up. In the example of deleting an engagement
+# The objects will be deleted as follows Endpoints -> Findings -> Tests -> Engagement
+ASYNC_OBJECT_DELETE = env("DD_ASYNC_OBJECT_DELETE")
+# The number of objects to be deleted per celeryworker
+ASYNC_OBEJECT_DELETE_CHUNK_SIZE = env("DD_ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
+# When enabled, display the preview of objects to be deleted. This can take a long time to render
+# for very large objects
+DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
 # Feature toggle for new authorization for configurations
 FEATURE_CONFIGURATION_AUTHORIZATION = env("DD_FEATURE_CONFIGURATION_AUTHORIZATION")
 
@@ -1426,4 +1462,5 @@ VULNERABILITY_URLS = {
     'OSV': 'https://osv.dev/vulnerability/',
     'PYSEC': 'https://osv.dev/vulnerability/',
     'SNYK': 'https://snyk.io/vuln/',
+    'RUSTSEC': 'https://rustsec.org/advisories/',
 }

@@ -46,8 +46,14 @@ class TestYarnAuditParser(DojoTestCase):
         testfile.close()
         self.assertEqual(3, len(findings))
         self.assertEqual(findings[0].cwe, 1333)
+        self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2021-3803", findings[0].unsaved_vulnerability_ids[0])
         self.assertEqual(findings[1].cwe, 173)
+        self.assertEqual(1, len(findings[1].unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2022-0235", findings[1].unsaved_vulnerability_ids[0])
         self.assertEqual(findings[2].cwe, 1035)
+        self.assertEqual(1, len(findings[2].unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2021-3807", findings[2].unsaved_vulnerability_ids[0])
 
     def test_yarn_audit_parser_with_multiple_cwes_per_finding_list(self):
         # cwes formatted as proper list: "cwe": ["CWE-918","CWE-1333"],
