@@ -107,4 +107,3 @@ https://docs.docker.com/develop/develop-images/dockerfile_best-practices/'''
         self.assertEqual('Dockerfile', finding.file_path)
         self.assertEqual(24, finding.line)
         self.assertEqual(['secret'], finding.tags)
-
