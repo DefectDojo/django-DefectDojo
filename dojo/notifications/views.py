@@ -11,7 +11,6 @@ from dojo.utils import get_enabled_notifications_list
 from dojo.utils import add_breadcrumb
 from dojo.forms import NotificationsForm
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,7 +34,7 @@ def personal_notifications(request):
     if request.method == 'POST':
         form = NotificationsForm(request.POST, instance=notifications_obj)
         if form.is_valid():
-            new_settings = form.save()
+            form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  _('Settings saved.'),
@@ -57,7 +56,7 @@ def system_notifications(request):
     if request.method == 'POST':
         form = NotificationsForm(request.POST, instance=notifications_obj)
         if form.is_valid():
-            new_settings = form.save()
+            form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  _('Settings saved.'),
@@ -79,7 +78,7 @@ def template_notifications(request):
     if request.method == 'POST':
         form = NotificationsForm(request.POST, instance=notifications_obj)
         if form.is_valid():
-            new_settings = form.save()
+            form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  _('Settings saved.'),
