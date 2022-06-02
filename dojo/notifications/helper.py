@@ -1,15 +1,18 @@
-import requests
 import logging
+import requests
+
 from django.core.mail import EmailMessage
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from django.db.models import Q, Count, Prefetch
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
-from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
-from dojo.celery import app
-from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
+from django.utils.translation import gettext as _
+
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
+from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -113,11 +116,11 @@ def create_notification(event=None, **kwargs):
 def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
         if event == 'product_added':
-            kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
+            kwargs["description"] = _('Product %(title)s has been created successfully.' % {'title': kwargs['title']})
         elif event == 'product_type_added':
-            kwargs["description"] = "Product Type " + kwargs['title'] + " has been created successfully."
+            kwargs["description"] = _('Product Type %(title)s has been created successfully.' % {'title': kwargs['title']})
         else:
-            kwargs["description"] = "Event " + str(event) + " has occurred."
+            kwargs["description"] = _('Event %(event)s  has occurred.' % {'event': str(event)})
 
     return kwargs["description"]
 
