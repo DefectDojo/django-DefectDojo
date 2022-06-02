@@ -30,7 +30,7 @@ Markdown==3.3.6
 mysqlclient==2.1.0
 openpyxl==3.0.9
 xlrd==1.2.0
-Pillow==9.1.0  # required by django-imagekit
+Pillow==9.1.1  # required by django-imagekit
 psycopg2-binary==2.9.3
 cryptography==37.0.1
 python-dateutil==2.8.2
