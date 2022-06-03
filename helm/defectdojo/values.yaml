@@ -16,6 +16,19 @@ createPostgresqlSecret: false
 # - enabled, enables tracking configuration changes based on SHA256
 # trackConfig: disabled
 
+# Enables application network policy
+# For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/
+networkPolicy:
+  enabled: false
+  egress: []
+  # egress:
+  # - to:
+  #   - ipBlock:
+  #       cidr: 10.0.0.0/24
+  #   ports:
+  #   - protocol: TCP
+  #     port: 443
+
 # Configuration value to select database type
 # Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
