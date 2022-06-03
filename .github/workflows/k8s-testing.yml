@@ -189,6 +189,7 @@ jobs:
       - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
         run: |-
              helm install \
+               --timeout 600s \
                defectdojo \
                ./helm/defectdojo \
                --set django.ingress.enabled=true \
