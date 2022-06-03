@@ -7,7 +7,6 @@ on:
       - dev
       - release/**
       - hotfix/**
-      - fix/bitnami
 
 env:
   DD_DOCKER_REPO: defectdojo
