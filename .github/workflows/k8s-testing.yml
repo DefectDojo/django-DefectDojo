@@ -40,7 +40,7 @@ env:
     --set database=postgresqlha \
     --set postgresql.enabled=false \
     --set mysql.enabled=false \
-    --set postgresql-ha.enabled=true \
+    --set postgresqlha.enabled=true \
     --set createPostgresqlHaSecret=true \
     --set createPostgresqlHaPgpoolSecret=true \
    "
