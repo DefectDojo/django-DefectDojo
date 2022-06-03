@@ -36,6 +36,14 @@ env:
     --set mysql.enabled=false \
     --set createPostgresqlSecret=true \
    "
+  HELM_PGHA_DATABASE_SETTINGS: " \
+    --set database=postgresqlha \
+    --set postgresql.enabled=false \
+    --set mysql.enabled=false \
+    --set postgresql-ha.enabled=true \
+    --set createPostgresqlHaSecret=true \
+    --set createPostgresqlHaPgpoolSecret=true \
+   "
 jobs:
   build:
     name: Build Image
