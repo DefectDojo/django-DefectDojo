@@ -62,6 +62,12 @@ class TestBurpGraphQLParser(DojoTestCase):
                 parser = BurpGraphQLParser()
                 findings = parser.get_findings(test_file, Test())
 
+    def test_burp_null_request_segments(self):
+        with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_request_segments.json")) as test_file:
+            parser = BurpGraphQLParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(1, len(findings))
+
     def test_burp_null_data(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_data.json")) as test_file:
             parser = BurpGraphQLParser()
