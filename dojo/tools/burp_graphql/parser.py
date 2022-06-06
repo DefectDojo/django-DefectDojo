@@ -156,7 +156,7 @@ class BurpGraphQLParser(object):
 
             request = ""
             request_dict = evidence[i]
-            
+
             if request_dict.get('request_segments'):
                 for data in request_dict.get('request_segments'):
                     if data.get('data_html'):
