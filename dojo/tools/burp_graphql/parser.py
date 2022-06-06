@@ -156,12 +156,13 @@ class BurpGraphQLParser(object):
 
             request = ""
             request_dict = evidence[i]
-
-            for data in request_dict.get('request_segments', []):
-                if data.get('data_html'):
-                    request += html2text.html2text(data.get('data_html')).strip()
-                elif data.get('highlight_html'):
-                    request += html2text.html2text(data.get('highlight_html')).strip()
+            
+            if request_dict.get('request_segments'):
+                for data in request_dict.get('request_segments'):
+                    if data.get('data_html'):
+                        request += html2text.html2text(data.get('data_html')).strip()
+                    elif data.get('highlight_html'):
+                        request += html2text.html2text(data.get('highlight_html')).strip()
 
             if (i + 1) < evidence_len and evidence[i + 1].get('response_segments') and \
                     evidence[i + 1].get('response_index') == request_dict.get('request_index'):
@@ -169,7 +170,7 @@ class BurpGraphQLParser(object):
                 response = ""
                 response_dict = evidence[i + 1]
 
-                for data in response_dict.get('response_segments', []):
+                for data in response_dict.get('response_segments'):
                     if data.get('data_html'):
                         response += html2text.html2text(data.get('data_html')).strip()
                     elif data.get('highlight_html'):
