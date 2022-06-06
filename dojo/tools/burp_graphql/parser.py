@@ -79,11 +79,12 @@ class BurpGraphQLParser(object):
 
     def combine_findings(self, finding, issue):
 
-        description = html2text.html2text(issue.get('description_html'))
+        if issue.get('description_html'):
+            description = html2text.html2text(issue.get('description_html'))
 
-        if description:
-            if not finding['Description'].count(description) > 0:
-                finding['Description'] += description + "\n\n"
+            if description:
+                if not finding['Description'].count(description) > 0:
+                    finding['Description'] += description + "\n\n"
 
         if issue.get('evidence'):
             finding['Evidence'] = finding['Evidence'] + self.parse_evidence(issue.get('evidence'))
@@ -156,8 +157,7 @@ class BurpGraphQLParser(object):
             request = ""
             request_dict = evidence[i]
 
-            for data in request_dict.get('request_segments'):
-
+            for data in request_dict.get('request_segments', []):
                 if data.get('data_html'):
                     request += html2text.html2text(data.get('data_html')).strip()
                 elif data.get('highlight_html'):
@@ -169,7 +169,7 @@ class BurpGraphQLParser(object):
                 response = ""
                 response_dict = evidence[i + 1]
 
-                for data in response_dict.get('response_segments'):
+                for data in response_dict.get('response_segments', []):
                     if data.get('data_html'):
                         response += html2text.html2text(data.get('data_html')).strip()
                     elif data.get('highlight_html'):
