@@ -46,8 +46,8 @@
     {% if url is not None %}
         More information on this event can be found here: {{ url|full_url }}
     {% endif %}
-    {% if system_settings.disclaimer|length %}
-
+    {% if system_settings.disclaimer is not None %}
+        
         Disclaimer:
         {{ system_settings.disclaimer }}
     {% endif %}

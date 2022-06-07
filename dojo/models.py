@@ -220,15 +220,10 @@ class UserContactInfo(models.Model):
 
 
 class Dojo_Group(models.Model):
-    AZURE = 'AzureAD'
-    SOCIAL_CHOICES = (
-        (AZURE, _('AzureAD')),
-    )
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
     auth_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
-    social_provider = models.CharField(max_length=10, choices=SOCIAL_CHOICES, blank=True, null=True, help_text='Group imported from a social provider.', verbose_name='Social Authentication Provider')
 
     def __str__(self):
         return self.name
@@ -1518,22 +1513,14 @@ class Endpoint(models.Model):
                 query_parts.append(u"=".join([k, v]))
         query_string = u"&".join(query_parts)
 
-        protocol = url.scheme if url.scheme != '' else None
-        userinfo = ':'.join(url.userinfo) if url.userinfo not in [(), ('',)] else None
-        host = url.host if url.host != '' else None
-        port = url.port
-        path = '/'.join(url.path)[:500] if url.path not in [None, (), ('',)] else None
-        query = query_string[:1000] if query_string is not None and query_string != '' else None
-        fragment = url.fragment[:500] if url.fragment is not None and url.fragment != '' else None
-
         return Endpoint(
-            protocol=protocol,
-            userinfo=userinfo,
-            host=host,
-            port=port,
-            path=path,
-            query=query,
-            fragment=fragment,
+            protocol=url.scheme if url.scheme != '' else None,
+            userinfo=':'.join(url.userinfo) if url.userinfo not in [(), ('',)] else None,
+            host=url.host if url.host != '' else None,
+            port=url.port,
+            path='/'.join(url.path)[:500] if url.path not in [None, (), ('',)] else None,
+            query=query_string[:1000] if query_string is not None and query_string != '' else None,
+            fragment=url.fragment[:500] if url.fragment is not None and url.fragment != '' else None
         )
 
     def get_absolute_url(self):
@@ -2452,6 +2439,29 @@ class Finding(models.Model):
     @cached_property
     def has_finding_group(self):
         return self.finding_group is not None
+
+    def long_desc(self):
+        long_desc = ''
+        long_desc += '*' + self.title + '*\n\n'
+        long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
+        long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
+        long_desc += '*CVSS v3:* ' + str(self.cvssv3) + '\n\n'
+        long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
+        if self.test.engagement.branch_tag:
+            long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
+        if self.test.engagement.build_id:
+            long_desc += '*BuildID:* ' + self.test.engagement.build_id + '\n\n'
+        if self.test.engagement.commit_hash:
+            long_desc += '*Commit hash:* ' + self.test.engagement.commit_hash + '\n\n'
+        long_desc += '*Systems*: \n\n'
+
+        for e in self.endpoints.all():
+            long_desc += str(e) + '\n\n'
+        long_desc += '*Description*: \n' + str(self.description) + '\n\n'
+        long_desc += '*Mitigation*: \n' + str(self.mitigation) + '\n\n'
+        long_desc += '*Impact*: \n' + str(self.impact) + '\n\n'
+        long_desc += '*References*:' + str(self.references)
+        return long_desc
 
     def save_no_options(self, *args, **kwargs):
         return self.save(dedupe_option=False, false_history=False, rules_option=False, product_grading_option=False,

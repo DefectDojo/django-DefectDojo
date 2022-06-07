@@ -97,7 +97,7 @@ To run the application based on previously built image (or based on dockerhub im
 
 ```zsh
 docker/setEnv.sh release
-./dc-up.sh postgres-redis # or an other profile
+./dc-up.sh
 ```
 
 This will run the application based on docker-compose.yml only.
@@ -112,7 +112,7 @@ For development, use:
 ```zsh
 docker/setEnv.sh dev
 ./dc-build.sh
-./dc-up.sh postgres-redis # or an other profile
+./dc-up.sh
 ```
 
 This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.dev.yml.

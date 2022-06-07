@@ -850,9 +850,8 @@ def finding_extended_title(finding):
         return ''
     result = finding.title
 
-    vulnerability_ids = finding.vulnerability_ids
-    if vulnerability_ids:
-        result += ' (' + vulnerability_ids[0] + ')'
+    if finding.cve:
+        result += ' (' + finding.cve + ')'
 
     if finding.cwe:
         result += ' (CWE-' + str(finding.cwe) + ')'

@@ -5,7 +5,6 @@ from defusedxml import ElementTree as etree
 from cvss import CVSS3
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.qualys import csv_parser
 
 logger = logging.getLogger(__name__)
 
@@ -253,7 +252,4 @@ class QualysParser(object):
         return "Qualys WebGUI output files can be imported in XML format."
 
     def get_findings(self, file, test):
-        if file.name.lower().endswith('.csv'):
-            return csv_parser.parse_csv(file)
-        else:
-            return qualys_parser(file)
+        return qualys_parser(file)
