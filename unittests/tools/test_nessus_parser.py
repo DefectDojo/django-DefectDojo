@@ -69,7 +69,7 @@ class TestNessusParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Info", finding.severity)
-        self.assertIsNone(finding.cve)
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
         self.assertEqual(0, finding.cwe)
         self.assertEqual("HTTP Server Type and Version", finding.title)
         finding = findings[25]
@@ -91,7 +91,7 @@ class TestNessusParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Info", finding.severity)
-        self.assertIsNone(finding.cve)
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
         self.assertEqual(0, finding.cwe)
         self.assertEqual("HTTP Server Type and Version", finding.title)
         finding = findings[25]

@@ -821,7 +821,8 @@ def get_excludes():
     return ['SEVERITIES', 'age', 'github_issue', 'jira_issue', 'objects', 'risk_acceptance',
     'test__engagement__product__authorized_group', 'test__engagement__product__member',
     'test__engagement__product__prod_type__authorized_group', 'test__engagement__product__prod_type__member',
-    'unsaved_endpoints']
+    'unsaved_endpoints', 'unsaved_vulnerability_ids', 'unsaved_files', 'unsaved_request', 'unsaved_response',
+    'unsaved_tags', 'vulnerability_ids', 'cve']
 
 
 def get_foreign_keys():
@@ -851,6 +852,7 @@ def csv_export(request):
             fields.append('product_id')
             fields.append('product')
             fields.append('endpoints')
+            fields.append('vulnerability_ids')
 
             writer.writerow(fields)
 
@@ -883,6 +885,20 @@ def csv_export(request):
             if endpoint_value.endswith('; '):
                 endpoint_value = endpoint_value[:-2]
             fields.append(endpoint_value)
+
+            vulnerability_ids_value = ''
+            num_vulnerability_ids = 0
+            for vulnerability_id in finding.vulnerability_ids:
+                num_vulnerability_ids += 1
+                if num_vulnerability_ids > 5:
+                    vulnerability_ids_value += '...'
+                    break
+                vulnerability_ids_value += f'{str(vulnerability_id)}; '
+            if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
+                vulnerability_ids_value += finding.cve
+            if vulnerability_ids_value.endswith('; '):
+                vulnerability_ids_value = vulnerability_ids_value[:-2]
+            fields.append(vulnerability_ids_value)
 
             writer.writerow(fields)
 
@@ -925,6 +941,9 @@ def excel_export(request):
             col_num += 1
             cell = worksheet.cell(row=row_num, column=col_num, value='endpoints')
             cell.font = font_bold
+            col_num += 1
+            cell = worksheet.cell(row=row_num, column=col_num, value='vulnerability_ids')
+            cell.font = font_bold
 
             row_num = 2
         if row_num > 1:
@@ -960,6 +979,21 @@ def excel_export(request):
             if endpoint_value.endswith('; \n'):
                 endpoint_value = endpoint_value[:-3]
             worksheet.cell(row=row_num, column=col_num, value=endpoint_value)
+            col_num += 1
+
+            vulnerability_ids_value = ''
+            num_vulnerability_ids = 0
+            for vulnerability_id in finding.vulnerability_ids:
+                num_vulnerability_ids += 1
+                if num_vulnerability_ids > 5:
+                    vulnerability_ids_value += '...'
+                    break
+                vulnerability_ids_value += f'{str(vulnerability_id)}; \n'
+            if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
+                vulnerability_ids_value += finding.cve
+            if vulnerability_ids_value.endswith('; \n'):
+                vulnerability_ids_value = vulnerability_ids_value[:-3]
+            worksheet.cell(row=row_num, column=col_num, value=vulnerability_ids_value)
 
         row_num += 1
 
