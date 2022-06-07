@@ -221,7 +221,7 @@ class VeracodeParser(object):
 
         # Report values
         finding.severity = cls.__cvss_to_severity(float(xml_node.attrib['cvss_score']))
-        finding.cve = xml_node.attrib['cve_id']
+        finding.unsaved_vulnerability_ids = [xml_node.attrib['cve_id']]
         finding.cwe = cls._get_cwe(xml_node.attrib['cwe_id'])
         finding.title = "Vulnerable component: {0}:{1}".format(library, version)
         finding.component_name = library

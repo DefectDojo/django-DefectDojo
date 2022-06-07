@@ -14,14 +14,16 @@ class TestBundlerAuditParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEquals("Gem rack: Possible XSS vulnerability in Rack [CVE-2018-16471]", finding.title)
                 self.assertEquals("Medium", finding.severity)
-                self.assertEquals("CVE-2018-16471", finding.cve)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEquals("CVE-2018-16471", finding.unsaved_vulnerability_ids[0])
                 self.assertEquals("rack", finding.component_name)
                 self.assertEquals("1.4.7", finding.component_version)
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEquals("Gem sprockets: Path Traversal in Sprockets [CVE-2018-3760]", finding.title)
                 self.assertEquals("Medium", finding.severity)
-                self.assertEquals("CVE-2018-3760", finding.cve)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEquals("CVE-2018-3760", finding.unsaved_vulnerability_ids[0])
                 self.assertEquals("sprockets", finding.component_name)
                 self.assertEquals("2.2.3", finding.component_version)
 
@@ -34,20 +36,23 @@ class TestBundlerAuditParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEquals("Gem rack: Directory traversal in Rack::Directory app bundled with Rack [CVE-2020-8161]", finding.title)
                 self.assertEquals("Medium", finding.severity)
-                self.assertEquals("CVE-2020-8161", finding.cve)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEquals("CVE-2020-8161", finding.unsaved_vulnerability_ids[0])
                 self.assertEquals("rack", finding.component_name)
                 self.assertEquals("1.6.13", finding.component_version)
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEquals("Gem rack: Percent-encoded cookies can be used to overwrite existing prefixed cookie names [CVE-2020-8184]", finding.title)
                 self.assertEquals("Medium", finding.severity)
-                self.assertEquals("CVE-2020-8184", finding.cve)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEquals("CVE-2020-8184", finding.unsaved_vulnerability_ids[0])
                 self.assertEquals("rack", finding.component_name)
                 self.assertEquals("1.6.13", finding.component_version)
             with self.subTest(i=2):
                 finding = findings[2]
                 self.assertEquals("Gem sprockets: Path Traversal in Sprockets [CVE-2018-3760]", finding.title)
                 self.assertEquals("Medium", finding.severity)
-                self.assertEquals("CVE-2018-3760", finding.cve)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEquals("CVE-2018-3760", finding.unsaved_vulnerability_ids[0])
                 self.assertEquals("sprockets", finding.component_name)
                 self.assertEquals("2.2.3", finding.component_version)

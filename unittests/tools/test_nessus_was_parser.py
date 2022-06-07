@@ -62,7 +62,7 @@ class TestNessusWASParser(DojoTestCase):
             finding = findings[i]
             self.assertIn(finding.severity, Finding.SEVERITIES)
             self.assertEqual('google.com', finding.unsaved_endpoints[0].host)
-            self.assertIsNone(finding.cve)
+            self.assertIsNone(finding.unsaved_vulnerability_ids)
         finding = findings[0]
         self.assertEqual('7.1', finding.cvssv3_score)
         self.assertEqual('High', finding.severity)
@@ -79,7 +79,7 @@ class TestNessusWASParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual('google.com', finding.unsaved_endpoints[0].host)
-        self.assertIsNone(finding.cve)
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
         self.assertEqual('7.1', finding.cvssv3_score)
         self.assertEqual('High', finding.severity)
         self.assertEqual('http', finding.unsaved_endpoints[0].protocol)
