@@ -20,7 +20,8 @@ createPostgresqlSecret: false
 # For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/
 networkPolicy:
   enabled: false
-  ingressExtend: [] # if additional label need to be allowed (e.g. prometheus scraper)
+  # if additional labels need to be allowed (e.g. prometheus scraper)
+  ingressExtend: []
   # ingressExtend:
   #  - podSelector:
   #      matchLabels:
