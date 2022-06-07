@@ -124,7 +124,7 @@ def get_item(vuln):
         mitigation = vuln['solution']
 
     cwe = None
-    vulnerability_id = None
+    cve = None
     references = ''
     if 'identifiers' in vuln:
         for identifier in vuln['identifiers']:
@@ -134,7 +134,7 @@ def get_item(vuln):
                 elif identifier['value'].isdigit():
                     cwe = int(identifier['value'])
             elif identifier['type'].lower() == 'cve':
-                vulnerability_id = identifier['value']
+                cve = identifier['value']
             else:
                 references += 'Identifier type: {}\n'.format(identifier['type'])
                 references += 'Name: {}\n'.format(identifier['name'])
@@ -157,10 +157,9 @@ def get_item(vuln):
                       sast_source_file_path=file_path,
                       sast_source_line=sast_source_line,
                       cwe=cwe,
+                      cve=cve,
                       static_finding=True,
                       dynamic_finding=False)
-    if vulnerability_id:
-        finding.unsaved_vulnerability_ids = [vulnerability_id]
 
     return finding
 

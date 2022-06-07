@@ -55,7 +55,7 @@ class TrustwaveParser(object):
                 finding.severity = severity_mapping[row['Severity']]
             else:
                 finding.severity = 'Low'
-            finding.unsaved_vulnerability_ids = [row.get('CVE')]
+            finding.cve = row.get('CVE')
 
             dupes_key = hashlib.sha256("|".join([
                 finding.severity,

@@ -66,15 +66,13 @@ class TestNmapParser(DojoTestCase):
         self.assertEqual(3, len(findings))
 
         self.assertEqual("Medium", findings[0].severity)
-        self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
-        self.assertEqual("CVE-2018-15919", findings[0].unsaved_vulnerability_ids[0])
+        self.assertEqual("CVE-2018-15919", findings[0].cve)
         self.assertEqual("openssh", findings[0].component_name)
         self.assertEqual("7.4", findings[0].component_version)
         self.assertEqual(datetime.datetime(2020, 2, 17, 9, 7, 25), findings[0].date)
 
         self.assertEqual("Medium", findings[1].severity)
-        self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
-        self.assertEqual("CVE-2017-15906", findings[1].unsaved_vulnerability_ids[0])
+        self.assertEqual("CVE-2017-15906", findings[1].cve)
         self.assertEqual("openssh", findings[1].component_name)
         self.assertEqual("7.4", findings[1].component_version)
         self.assertEqual(datetime.datetime(2020, 2, 17, 9, 7, 25), findings[1].date)
@@ -100,8 +98,7 @@ class TestNmapParser(DojoTestCase):
         with self.subTest(i=22):
             finding = findings[22]
             self.assertEqual("Medium", finding.severity)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-            self.assertEqual("CVE-2019-6111", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("CVE-2019-6111", finding.cve)
             self.assertEqual("openssh", finding.component_name)
             self.assertEqual("7.4", finding.component_version)
             self.assertEqual(datetime.datetime(2021, 4, 29, 9, 26, 36), finding.date)

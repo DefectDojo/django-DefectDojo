@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load humanize %}
+{% load static %}
 {% block content %}
     {{ block.super }}
-    <h3>{% trans "Note History" %}</h3><br />
+    <h3>Note History</h3><br></br>
     <form class="form-horizontal" action="{% url 'note_history' note.id page objid %}" method="post">{% csrf_token %}
         {% for entry in history %}
             <div>
@@ -11,15 +12,15 @@
                     <div class="row-sm-2">
                         <strong>{{ entry.current_editor }}</strong> 
                         {% if forloop.first %}
-                            <span class="text-muted">{% blocktranslate %}commented {{ entry.time }}{% endblocktranslate %}</span>
+                            <span class="text-muted">commented {{ entry.time }}</span>
                         {% else %}
-                            <span class="text-muted">{% blocktranslate %}made changes on {{ entry.time }}{% endblocktranslate %}</span>
+                            <span class="text-muted">made changes on {{ entry.time }}</span>
                         {% endif %}
                     </div>
                 </div>
                 <div class="panel-body">
                   {% if note.note_type != None %}
-                    <strong>{% trans "Note type:" %} {{ note.note_type }}</strong><br>
+                    <strong>Note type : {{ note.note_type }}</strong><br>
                   {% endif %}
                   {{ entry.data }}
                 </div>
@@ -28,7 +29,7 @@
         {% endfor %}
         <div class="form-group">
             <div class="col-sm-5">
-                <input class="btn btn-primary" aria-label="Return" type="submit" value="{% trans "Return" %}"/>
+                <input class="btn btn-primary" aria-label="Return" type="submit" value="Return"/>
             </div>
         </div>
     </form>

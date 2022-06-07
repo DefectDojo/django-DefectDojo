@@ -54,9 +54,13 @@ class NessusWASCSVParser(object):
             # get severity from 'Risk' column and manage columns with no 'Risk' value
             severity = self._convert_severity(row.get('Risk'))
             if 'CVE' in row:
-                vulnerability_ids = self._format_cve(str(row.get('CVE')))
-            else:
-                vulnerability_ids = None
+                detected_cve = self._format_cve(str(row.get('CVE')))
+            cve = None
+            if detected_cve:
+                # FIXME support more than one CVE in Nessus WAS CSV parser
+                cve = detected_cve[0]
+                if len(detected_cve) > 1:
+                    LOGGER.warning("more than one CVE for a finding. NOT supported by Nessus CSV parser")
 
             # manage multiple columns falling under one category (e.g. description being synopsis + plugin output)
             dupe_key = severity + title + row.get('Host', 'No host') + str(row.get('Port', 'No port')) + row.get('Synopsis', 'No synopsis')
@@ -69,6 +73,7 @@ class NessusWASCSVParser(object):
                     description = description + str(row.get('Plugin Output'))
                 find = Finding(title=title,
                                 test=test,
+                                cve=cve,
                                 description=description,
                                 severity=severity,
                                 mitigation=mitigation,
@@ -76,8 +81,7 @@ class NessusWASCSVParser(object):
                                 references=references)
                 if cvssv3:
                     find.cvssv3_score = cvssv3
-                if vulnerability_ids:
-                    find.unsaved_vulnerability_ids = vulnerability_ids
+
                 find.unsaved_endpoints = list()
                 dupes[dupe_key] = find
             # manage endpoints
@@ -151,9 +155,9 @@ class NessusWASXMLParser(object):
                     for xref in item.iter("xref"):
                         references += xref.text + "\n"
 
-                    vunerability_id = None
+                    cve = None
                     if item.findtext("cve"):
-                        vunerability_id = item.find("cve").text
+                        cve = item.find("cve").text
                     cwe = None
                     if item.findtext("cwe"):
                         cwe = item.find("cwe").text
@@ -172,9 +176,8 @@ class NessusWASXMLParser(object):
                                        mitigation=mitigation,
                                        impact=impact,
                                        references=references,
-                                       cwe=cwe)
-                        if vunerability_id:
-                            find.unsaved_vulnerability_ids = [vunerability_id]
+                                       cwe=cwe,
+                                       cve=cve)
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
