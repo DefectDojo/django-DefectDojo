@@ -789,6 +789,10 @@ Import the JSON format for the \"Security Export\" file. Use this importer for X
 
 Import the JSON format for the \"Security & Compliance | Reports\" export. Jfrog's Xray tool is an add-on to their Artifactory repository that does Software Composition Analysis, see https://www.jfrog.com/confluence/display/JFROG/JFrog+Xray for more information. \"Xray Unified\" refers to Xray Version 3.0 and later.
 
+### JFrog Xray API Summary Artifact Scan
+
+Import the JSON format from the Arifact Summary API call https://www.jfrog.com/confluence/display/JFROG/Xray+REST+API#XrayRESTAPI-ArtifactSummary  
+
 ### Kiuwan Scanner
 
 Import Kiuwan Scan in CSV format. Export as CSV Results on Kiuwan.
@@ -911,6 +915,18 @@ see
 
 Qualys output files can be imported in API XML format. Qualys output
 files can be imported in WebGUI XML format.
+
+A CSV formatted Qualys Scan Report can also be used. Ensure the following values are checked in the Scan Report Template config:
+
+`CVSS Version = CVSSv3`
+
+* Vulnerability Details
+  * Threat
+  * Impact
+* Solution
+  * Patches and Workarounds
+  * Virtual Patches and Mitigating Controls
+* Results
 
 ### Qualys Webapp Scan
 

@@ -57,7 +57,8 @@ class TestMeterianParser(DojoTestCase):
             "expression involved in parsing which can be exploited to to cause a denial " +
             "of service. This is fixed in version 0.14.2.", finding.description)
         self.assertEqual("7be36211-b569-30c0-8851-26b4bb8740ca", finding.unique_id_from_tool)
-        self.assertEqual("CVE-2020-26289", finding.cve)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-26289", finding.unsaved_vulnerability_ids[0])
         self.assertEqual(400, finding.cwe)
         self.assertTrue(finding.mitigation.startswith("## Remediation"))
         self.assertTrue("Upgrade date-and-time to version 0.14.2 or higher." in finding.mitigation)

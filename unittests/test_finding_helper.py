@@ -193,7 +193,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
             )
 
 
-class TestSaveVulnerabilityReferences(DojoTestCase):
+class TestSaveVulnerabilityIds(DojoTestCase):
 
     @patch('dojo.finding.helper.Vulnerability_Id.objects.filter')
     @patch('dojo.finding.helper.Vulnerability_Id.objects.get_or_create')
@@ -274,7 +274,7 @@ class TestSaveVulnerabilityReferences(DojoTestCase):
         mock_delete.assert_not_called()
 
 
-class TestSaveVulnerabilityReferencesTemplate(DojoTestCase):
+class TestSaveVulnerabilityIdsTemplate(DojoTestCase):
 
     @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.filter')
     @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.get_or_create')
