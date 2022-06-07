@@ -1,13 +1,8 @@
-__guide__ = 'aaronweaver'
-__author__ = 'Rajarshi333'
-
 
 import logging
 import re
 
-from dateutil import parser
 from defusedxml import ElementTree
-
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
@@ -29,12 +24,6 @@ class FortifyParser(object):
         root = fortify_scan.getroot()
 
         language_list = []
-        # Get Date
-        date_string = root[5][1][2].text
-        date_list = date_string.split()[1:4]
-        date_list = [item.replace(',', '') for item in date_list]
-        date_act = ".".join(date_list)
-        find_date = parser.parse(date_act)
         # Get Language
         lang_string = root[8][4][2].text
         lang_need_string = re.findall("^.*com.fortify.sca.Phase0HigherOrder.Languages.*$",
@@ -120,7 +109,6 @@ class FortifyParser(object):
                     line=int(issue['LineStart']),
                     static_finding=True,
                     test=test,
-                    date=find_date,
                     description=self.format_description(issue, cat_meta),
                     mitigation=self.format_mitigation(issue, cat_meta),
                     unique_id_from_tool=issue_key

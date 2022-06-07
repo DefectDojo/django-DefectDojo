@@ -47,7 +47,7 @@ class EdgescanParser(object):
         if vulnerability["cwes"]:
             finding.cwe = int(vulnerability["cwes"][0][4:])
         if vulnerability["cves"]:
-            finding.cve = vulnerability["cves"][0]
+            finding.unsaved_vulnerability_ids = vulnerability["cves"]
         if vulnerability["cvss_version"] == 3:
             if vulnerability["cvss_vector"]:
                 finding.cvssv3 = vulnerability["cvss_vector"]

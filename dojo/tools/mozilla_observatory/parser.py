@@ -55,7 +55,7 @@ class MozillaObservatoryParser(object):
         return findings
 
     def get_severity(self, num_severity):
-        if num_severity >= -10:
+        if 0 > num_severity >= -10:
             return "Low"
         elif -11 >= num_severity > -26:
             return "Medium"
