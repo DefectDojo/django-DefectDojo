@@ -34,6 +34,7 @@ class TwistlockCSVParser(object):
 
         finding = Finding(
             title=textwrap.shorten(title, width=255, placeholder="..."),
+            cve=data_vulnerability_id,
             test=test,
             severity=convert_severity(data_severity),
             description=data_description + "<p> Vulnerable Package: " +
@@ -48,9 +49,8 @@ class TwistlockCSVParser(object):
             mitigated=None,
             severity_justification="(CVSS v3 base score: {})".format(data_cvss),
             impact=data_severity)
+
         finding.description = finding.description.strip()
-        if data_vulnerability_id:
-            finding.unsaved_vulnerability_ids = [data_vulnerability_id]
 
         return finding
 
@@ -113,6 +113,7 @@ def get_item(vulnerability, test):
     # create the finding object
     finding = Finding(
         title=vulnerability['id'] + ": " + vulnerability['packageName'] + " - " + vulnerability['packageVersion'],
+        cve=vulnerability['id'],
         test=test,
         severity=severity,
         description=vulnerability['description'] + "<p> Vulnerable Package: " +
@@ -128,7 +129,7 @@ def get_item(vulnerability, test):
         mitigated=None,
         severity_justification="{} (CVSS v3 base score: {})\n\n{}".format(vector, cvss, riskFactors),
         impact=severity)
-    finding.unsaved_vulnerability_ids = [vulnerability['id']]
+
     finding.description = finding.description.strip()
 
     return finding

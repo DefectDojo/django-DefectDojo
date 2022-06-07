@@ -96,13 +96,13 @@ def get_item(vuln, test):
     description = vuln["classification"]
     cves = "no match"
     if "CVE-NO-MATCH" not in vuln["kb"]["cves"]:
-        finding.unsaved_vulnerability_ids = vuln["kb"]["cves"]
+        finding.cve = vuln["kb"]["cves"][0]
         cves = ""
         for cve in vuln["kb"]["cves"]:
             cves += f"{cve}, "
         cves = cves[: len(cves) - 2]  # removing the comma and the blank space
 
-    finding.description = description
+    finding.description = description + "; CVEs: " + cves
     finding.severity = vuln["severity"].title()
 
     # Date

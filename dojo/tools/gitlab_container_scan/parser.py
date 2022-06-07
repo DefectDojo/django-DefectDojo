@@ -48,15 +48,12 @@ class GitlabContainerScanParser(object):
             )
 
             # Add component fields if not empty
-            unsaved_vulnerability_ids = list()
             for id in vulnerability["identifiers"]:
                 if "type" in id:
                     if id.get("type") == "cve":
-                        unsaved_vulnerability_ids.append(id["value"])
+                        finding.cve = id["value"]
                     if id.get("type") == "cwe":
                         finding.cwe = id["value"]
-            if unsaved_vulnerability_ids:
-                finding.unsaved_vulnerability_ids = unsaved_vulnerability_ids
 
             # Check package key before name as both is optional on GitLab schema
             if "package" in dependency:

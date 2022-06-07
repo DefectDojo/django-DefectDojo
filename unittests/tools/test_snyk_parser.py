@@ -65,8 +65,7 @@ class TestSnykParser(DojoTestCase):
         self.assertEqual(
             "SNYK-JAVA-ORGAPACHESANTUARIO-460281", finding.vuln_id_from_tool
         )
-        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-        self.assertEqual("CVE-2019-12400", finding.unsaved_vulnerability_ids[0])
+        self.assertEqual("CVE-2019-12400", finding.cve)
         self.assertEqual(611, finding.cwe)
         self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L", finding.cvssv3)
         self.assertEqual(
@@ -111,8 +110,7 @@ class TestSnykParser(DojoTestCase):
             self.assertEqual("Microsoft.AspNetCore", finding.component_name)
             self.assertEqual("2.2.0", finding.component_version)
             self.assertEqual("SNYK-DOTNET-MICROSOFTASPNETCORE-174184", finding.vuln_id_from_tool)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-            self.assertEqual("CVE-2019-0815", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("CVE-2019-0815", finding.cve)
             self.assertEqual(200, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", finding.cvssv3)
         with self.subTest(i=40):
@@ -121,8 +119,7 @@ class TestSnykParser(DojoTestCase):
             self.assertEqual("lodash", finding.component_name)
             self.assertEqual("4.17.11", finding.component_version)
             self.assertEqual("SNYK-JS-LODASH-1040724", finding.vuln_id_from_tool)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-            self.assertEqual("CVE-2021-23337", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("CVE-2021-23337", finding.cve)
             self.assertEqual(78, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H/E:P/RL:U/RC:C", finding.cvssv3)
         with self.subTest(i=81):
@@ -131,18 +128,6 @@ class TestSnykParser(DojoTestCase):
             self.assertEqual("yargs-parser", finding.component_name)
             self.assertEqual("5.0.0", finding.component_version)
             self.assertEqual("SNYK-JS-YARGSPARSER-560381", finding.vuln_id_from_tool)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-            self.assertEqual("CVE-2020-7608", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("CVE-2020-7608", finding.cve)
             self.assertEqual(400, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L/E:P/RL:O/RC:C", finding.cvssv3)
-
-    def test_snykParser_cvssscore_none(self):
-        with open("unittests/scans/snyk/single_project_None_cvss.json") as testfile:
-            parser = SnykParser()
-            findings = parser.get_findings(testfile, Test())
-            self.assertEqual(1, len(findings))
-            finding = findings[0]
-            self.assertEqual("Low", finding.severity)
-            self.assertEqual(
-                "SNYK-SLES153-PERMISSIONS-2648113", finding.vuln_id_from_tool
-            )

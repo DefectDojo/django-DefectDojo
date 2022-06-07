@@ -40,11 +40,6 @@ class GenericParser(object):
             if "files" in item:
                 unsaved_files = item["files"]
                 del item["files"]
-            # remove vulnerability_ids of the dictionnary
-            unsaved_vulnerability_ids = None
-            if "vulnerability_ids" in item:
-                unsaved_vulnerability_ids = item["vulnerability_ids"]
-                del item["vulnerability_ids"]
 
             finding = Finding(**item)
             # manage active/verified overrride
@@ -70,13 +65,6 @@ class GenericParser(object):
 
             if unsaved_files:
                 finding.unsaved_files = unsaved_files
-            if finding.cve:
-                finding.unsaved_vulnerability_ids = [finding.cve]
-            if unsaved_vulnerability_ids:
-                if finding.unsaved_vulnerability_ids:
-                    finding.unsaved_vulnerability_ids.append(unsaved_vulnerability_ids)
-                else:
-                    finding.unsaved_vulnerability_ids = unsaved_vulnerability_ids
             findings.append(finding)
         return findings
 
@@ -116,14 +104,8 @@ class GenericParser(object):
             if 'FalsePositive' in row:
                 finding.false_p = self._convert_bool(row.get('FalsePositive', 'FALSE'))  # bool False by default
             # manage CVE
-            if 'CVE' in row and [row['CVE']]:
-                finding.unsaved_vulnerability_ids = [row['CVE']]
-            # manage Vulnerability Id
-            if 'Vulnerability Id' in row and row['Vulnerability Id']:
-                if finding.unsaved_vulnerability_ids:
-                    finding.unsaved_vulnerability_ids.append(row['Vulnerability Id'])
-                else:
-                    finding.unsaved_vulnerability_ids = [row['Vulnerability Id']]
+            if 'CVE' in row:
+                finding.cve = row['CVE']
             # manage CWE
             if 'CweId' in row:
                 finding.cwe = int(row['CweId'])
@@ -155,10 +137,6 @@ class GenericParser(object):
             if key in dupes:
                 find = dupes[key]
                 find.unsaved_endpoints.extend(finding.unsaved_endpoints)
-                if find.unsaved_vulnerability_ids:
-                    find.unsaved_vulnerability_ids.extend(finding.unsaved_vulnerability_ids)
-                else:
-                    find.unsaved_vulnerability_ids = finding.unsaved_vulnerability_ids
                 find.nb_occurences += 1
             else:
                 dupes[key] = finding

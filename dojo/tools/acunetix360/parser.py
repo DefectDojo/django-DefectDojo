@@ -24,13 +24,7 @@ class Acunetix360Parser(object):
         for item in data["Vulnerabilities"]:
             title = item["Name"]
             findingdetail = html2text.html2text(item.get("Description", ""))
-            if "Cwe" in item["Classification"]:
-                try:
-                    cwe = int(item["Classification"]["Cwe"].split(',')[0])
-                except:
-                    cwe = None
-            else:
-                cwe = None
+            cwe = int(item["Classification"]["Cwe"]) if "Cwe" in item["Classification"] else None
             sev = item["Severity"]
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'

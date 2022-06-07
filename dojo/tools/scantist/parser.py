@@ -42,14 +42,14 @@ class ScantistParser(object):
             vuln : input vulnerable node
             test :
             """
-            vulnerability_id = vuln.get("Public ID")
+            cve = vuln.get("Public ID")
             # default use OWASP a9 until the Scantist output report includes
             cwe = 1035
 
             component_name = vuln.get("Library")
             component_version = vuln.get("Library Version")
 
-            title = vulnerability_id + '|' + component_name
+            title = cve + '|' + component_name
             description = vuln.get("Description")
 
             file_path = vuln.get("File Path", "")
@@ -63,6 +63,7 @@ class ScantistParser(object):
                 test=test,
                 description=description,
                 severity=severity,
+                cve=cve,
                 cwe=cwe,
                 mitigation=mitigation,
                 references=vuln.get('references'),
@@ -72,8 +73,7 @@ class ScantistParser(object):
                 severity_justification=vuln.get('severity_justification'),
                 dynamic_finding=True
             )
-            if vulnerability_id:
-                finding.unsaved_vulnerability_ids = [vulnerability_id]
+
             return finding
 
         items = dict()

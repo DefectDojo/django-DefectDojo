@@ -48,11 +48,12 @@ class AnchoreEnterpriseParser:
                                     policyname = policy_name(evaluation['detail']['policy']['policies'], policyid)
                                     gate = row[3]
                                     triggerid = row[2]
-                                    vulnerability_id = extract_vulnerability_id(triggerid)
+                                    cve = extract_cve(triggerid)
                                     title = policyname + ' - gate|' + gate + ' - trigger|' + triggerid
                                     find = Finding(
                                         title=title,
                                         test=test,
+                                        cve=cve,
                                         description=description,
                                         severity=severity,
                                         references="Policy ID: {}\nTrigger ID: {}".format(policyid, triggerid),
@@ -62,8 +63,6 @@ class AnchoreEnterpriseParser:
                                         date=find_date,
                                         static_finding=True,
                                         dynamic_finding=False)
-                                    if vulnerability_id:
-                                        find.unsaved_vulnerability_ids = [vulnerability_id]
                                     items.append(find)
                             except (KeyError, IndexError) as err:
                                 raise Exception("Invalid format: {} key not found".format(err))
@@ -90,14 +89,14 @@ def policy_name(policies, policy_id):
     return "unknown"
 
 
-def extract_vulnerability_id(trigger_id):
+def extract_cve(trigger_id):
     try:
-        vulnerability_id, _ = trigger_id.split('+', 2)
-        if vulnerability_id.startswith('CVE'):
-            return vulnerability_id
-        return None
+        cve, _ = trigger_id.split('+', 2)
+        if cve.startswith('CVE'):
+            return cve
+        return ""
     except ValueError:
-        return None
+        return ""
 
 
 def search_filepath(text):

@@ -49,10 +49,10 @@ def get_item(vulnerability, test):
         main_finding = vulnerability['securityData']['securityIssues'][0]
 
         if main_finding.get("source") == "cve":
-            vulnerability_id = main_finding.get("reference")
+            cve = main_finding.get("reference")
         else:
             # if sonatype of else, will not match Finding model today
-            vulnerability_id = None
+            cve = None
 
         if main_finding['severity'] <= 3.9:
             severity = "Low"
@@ -108,6 +108,7 @@ def get_item(vulnerability, test):
         # create the finding object
         finding = Finding(
             title=finding_title,
+            cve=cve,
             test=test,
             severity=severity,
             description=finding_description,
@@ -121,8 +122,7 @@ def get_item(vulnerability, test):
             impact=threat_category,
             static_finding=True
         )
-        if vulnerability_id:
-            finding.unsaved_vulnerability_ids = [vulnerability_id]
+
         finding.description = finding.description.strip()
 
         return finding
