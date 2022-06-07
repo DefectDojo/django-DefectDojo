@@ -145,7 +145,6 @@ class SonarQubeApiImporter(object):
                     impact="No impact provided",
                     static_finding=True,
                     sonarqube_issue=sonarqube_issue,
-                    unique_id_from_tool=issue.get('key'),
                 )
                 items.append(find)
 
@@ -183,15 +182,15 @@ class SonarQubeApiImporter(object):
 
                 type = 'SECURITY_HOTSPOT'
                 severity = 'Info'
-                title = textwrap.shorten(text=hotspot.get('message', ''), width=500)
-                component_key = hotspot.get('component')
+                title = textwrap.shorten(text=hotspot['message'], width=500)
+                component_key = hotspot['component']
                 line = hotspot.get('line')
-                rule_id = hotspot.get('key', '')
+                rule_id = hotspot['key']
                 rule = client.get_hotspot_rule(rule_id)
-                scanner_confidence = self.convert_scanner_confidence(hotspot.get('vulnerabilityProbability', ''))
-                description = self.clean_rule_description_html(rule.get('vulnerabilityDescription', 'No description provided.'))
-                cwe = self.clean_cwe(rule.get('fixRecommendations', ''))
-                references = self.get_references(rule.get('riskDescription', '')) + self.get_references(rule.get('fixRecommendations', ''))
+                scanner_confidence = self.convert_scanner_confidence(hotspot['vulnerabilityProbability'])
+                description = self.clean_rule_description_html(rule['vulnerabilityDescription'])
+                cwe = self.clean_cwe(rule['fixRecommendations'])
+                references = self.get_references(rule['riskDescription']) + self.get_references(rule['fixRecommendations'])
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
                     key=hotspot['key'],
@@ -222,7 +221,6 @@ class SonarQubeApiImporter(object):
                     static_finding=True,
                     scanner_confidence=scanner_confidence,
                     sonarqube_issue=sonarqube_issue,
-                    unique_id_from_tool=f"hotspot:{hotspot.get('key')}",
                 )
                 items.append(find)
 

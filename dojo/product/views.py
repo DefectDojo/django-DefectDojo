@@ -7,7 +7,7 @@ from datetime import datetime, date, timedelta
 from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
@@ -41,7 +41,7 @@ from dojo.authorization.authorization import user_has_permission, user_has_permi
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
-from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type, get_authorized_product_types
+from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
 from dojo.tool_config.factory import create_API
 import dojo.finding.helper as finding_helper
 
@@ -709,9 +709,6 @@ def import_scan_results_prod(request, pid=None):
 
 
 def new_product(request, ptid=None):
-    if get_authorized_product_types(Permissions.Product_Type_Add_Product).count() == 0:
-        raise PermissionDenied()
-
     jira_project_form = None
     error = False
     initial = None

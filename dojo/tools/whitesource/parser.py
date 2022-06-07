@@ -115,6 +115,7 @@ class WhitesourceParser(object):
                                 test=test,
                                 description=vuln.get('description'),
                                 severity=vuln.get('severity'),
+                                cve=vuln.get('cve'),
                                 cwe=vuln.get('cwe'),
                                 mitigation=vuln.get('mitigation'),
                                 references=vuln.get('references'),
@@ -123,8 +124,7 @@ class WhitesourceParser(object):
                                 component_version=vuln.get('component_version'),
                                 severity_justification=vuln.get('severity_justification'),
                                 dynamic_finding=True)
-                if vuln.get('cve'):
-                    finding.unsaved_vulnerability_ids = [vuln.get('cve')]
+
                 dupes[dupe_key] = finding
 
         output = []

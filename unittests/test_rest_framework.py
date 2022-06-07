@@ -33,7 +33,6 @@ from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
 from rest_framework.mixins import \
     ListModelMixin, RetrieveModelMixin, CreateModelMixin, \
     DestroyModelMixin, UpdateModelMixin
-from dojo.api_v2.mixins import DeletePreviewModelMixin
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from drf_spectacular.settings import spectacular_settings
 import logging
@@ -430,35 +429,6 @@ class BaseClass():
 
             self.check_schema_response('put', '200', response, detail=True)
 
-        @skipIfNotSubclass(DeletePreviewModelMixin)
-        def test_delete_preview(self):
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/delete_preview/' % current_objects['results'][0]['id']
-            response = self.client.get(relative_url)
-            # print('delete_preview response.data')
-
-            self.assertEqual(200, response.status_code, response.content[:1000])
-
-            self.check_schema_response('get', '200', response, detail=True)
-
-            self.assertFalse('push_to_jira' in response.data)
-            self.assertFalse('password' in response.data)
-            self.assertFalse('ssh' in response.data)
-            self.assertFalse('api_key' in response.data)
-
-            self.assertIsInstance(response.data['results'], list)
-            self.assertTrue(len(response.data['results']) > 0, "Length: {}".format(len(response.data['results'])))
-
-            for obj in response.data['results']:
-                self.assertIsInstance(obj, dict)
-                self.assertTrue(len(obj), 3)
-                self.assertIsInstance(obj['model'], str)
-                if obj['id']:  # It needs to be None or int
-                    self.assertIsInstance(obj['id'], int)
-                self.assertIsInstance(obj['name'], str)
-
-            self.assertEqual(self.deleted_objects, len(response.data['results']), response.content[:1000])
-
         @skipIfNotSubclass(PrefetchRetrieveMixin)
         def test_detail_prefetch(self):
             # print("=======================================================")
@@ -768,7 +738,6 @@ class AppAnalysisTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Technology_Add
         self.permission_update = Permissions.Technology_Edit
         self.permission_delete = Permissions.Technology_Delete
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -795,7 +764,6 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Endpoint_Edit
         self.permission_update = Permissions.Endpoint_Edit
         self.permission_delete = Permissions.Endpoint_Edit
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create_unsuccessful(self):
@@ -874,7 +842,6 @@ class EndpointTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Endpoint_Add
         self.permission_update = Permissions.Endpoint_Edit
         self.permission_delete = Permissions.Endpoint_Delete
-        self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -905,7 +872,6 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Engagement_Add
         self.permission_update = Permissions.Engagement_Edit
         self.permission_delete = Permissions.Engagement_Delete
-        self.deleted_objects = 24
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1019,7 +985,6 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Finding_Add
         self.permission_update = Permissions.Finding_Edit
         self.permission_delete = Permissions.Finding_Delete
-        self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_duplicate(self):
@@ -1059,7 +1024,6 @@ class FindingMetadataTest(BaseClass.RESTEndpointTest):
         self.viewset = FindingViewSet
         self.payload = {}
         self.test_type = TestType.STANDARD
-        self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def setUp(self):
@@ -1130,7 +1094,6 @@ class FindingTemplatesTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'references': 'some reference'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1160,7 +1123,6 @@ class JiraInstancesTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'epic_name_id': 1}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1183,7 +1145,6 @@ class JiraIssuesTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Finding_Edit
         self.permission_update = Permissions.Finding_Edit
         self.permission_delete = Permissions.Finding_Edit
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1210,7 +1171,6 @@ class JiraProjectTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Product_Edit
         self.permission_update = Permissions.Product_Edit
         self.permission_delete = Permissions.Product_Edit
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1229,7 +1189,6 @@ class SonarqubeIssueTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'key': 'AREwS5n5TxsFUNm31CxP'}
         self.test_type = TestType.STANDARD
-        self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1271,7 +1230,6 @@ class Product_API_Scan_ConfigurationTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Product_API_Scan_Configuration_Add
         self.permission_update = Permissions.Product_API_Scan_Configuration_Edit
         self.permission_delete = Permissions.Product_API_Scan_Configuration_Delete
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1298,7 +1256,6 @@ class ProductTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Product_Type_Add_Product
         self.permission_update = Permissions.Product_Edit
         self.permission_delete = Permissions.Product_Delete
-        self.deleted_objects = 17
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1324,7 +1281,6 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Finding_Add
         self.permission_update = Permissions.Finding_Edit
         self.permission_delete = Permissions.Finding_Delete
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1358,7 +1314,6 @@ class TestsTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Test_Add
         self.permission_update = Permissions.Test_Edit
         self.permission_delete = Permissions.Test_Delete
-        self.deleted_objects = 19
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1384,7 +1339,6 @@ class ToolConfigurationsTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'ssh': 'test string'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1410,7 +1364,6 @@ class ToolProductSettingsTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Product_Edit
         self.permission_update = Permissions.Product_Edit
         self.permission_delete = Permissions.Product_Edit
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1428,7 +1381,6 @@ class ToolTypesTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'description': 'changed description'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1449,7 +1401,6 @@ class NoteTypesTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'description': 'changed description'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1489,7 +1440,6 @@ class UsersTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {"first_name": "test changed"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 17
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1510,7 +1460,6 @@ class UserContactInfoTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {"title": "Lady"}
         self.test_type = TestType.STANDARD
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2162,7 +2111,6 @@ class ProductTypeTest(BaseClass.RESTEndpointTest):
         self.permission_check_class = Product_Type
         self.permission_update = Permissions.Product_Type_Edit
         self.permission_delete = Permissions.Product_Type_Delete
-        self.deleted_objects = 21
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create_object_not_authorized(self):
@@ -2201,7 +2149,6 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
         self.permission_check_class = Dojo_Group
         self.permission_update = Permissions.Group_Edit
         self.permission_delete = Permissions.Group_Delete
-        self.deleted_objects = 4
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_list_object_not_authorized(self):
@@ -2244,7 +2191,6 @@ class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
         self.permission_create = Permissions.Group_Manage_Members
         self.permission_update = Permissions.Group_Manage_Members
         self.permission_delete = Permissions.Group_Member_Delete
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2274,7 +2220,6 @@ class GlobalRolesTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'role': 3}
         self.test_type = TestType.STANDARD
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2297,7 +2242,6 @@ class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
         self.permission_create = Permissions.Product_Type_Manage_Members
         self.permission_update = Permissions.Product_Type_Manage_Members
         self.permission_delete = Permissions.Product_Type_Member_Delete
-        self.deleted_objects = 1
         BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2320,7 +2264,6 @@ class ProductMemberTest(BaseClass.MemberEndpointTest):
         self.permission_create = Permissions.Product_Manage_Members
         self.permission_update = Permissions.Product_Manage_Members
         self.permission_delete = Permissions.Product_Member_Delete
-        self.deleted_objects = 1
         BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2343,7 +2286,6 @@ class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
         self.permission_create = Permissions.Product_Type_Group_Add
         self.permission_update = Permissions.Product_Type_Group_Edit
         self.permission_delete = Permissions.Product_Type_Group_Delete
-        self.deleted_objects = 1
         BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2366,7 +2308,6 @@ class ProductGroupTest(BaseClass.MemberEndpointTest):
         self.permission_create = Permissions.Product_Group_Add
         self.permission_update = Permissions.Product_Group_Edit
         self.permission_delete = Permissions.Product_Group_Delete
-        self.deleted_objects = 1
         BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2385,7 +2326,6 @@ class LanguageTypeTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'color': 'blue'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2413,7 +2353,6 @@ class LanguageTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Language_Add
         self.permission_update = Permissions.Language_Edit
         self.permission_delete = Permissions.Language_Delete
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2471,7 +2410,6 @@ class NotificationsTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'product_added': ["alert", "msteams"]}
         self.test_type = TestType.STANDARD
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2517,7 +2455,6 @@ class DevelopmentEnvironmentTest(BaseClass.AuthenticatedViewTest):
         }
         self.update_fields = {'name': 'Test_2'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_delete(self):
@@ -2540,5 +2477,4 @@ class TestTypeTest(BaseClass.AuthenticatedViewTest):
         }
         self.update_fields = {'name': 'Test_2'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

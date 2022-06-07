@@ -8,7 +8,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
-from django.utils.translation import gettext as _
 
 # Local application/library imports
 from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
@@ -47,12 +46,12 @@ def delete_note(request, id, page, objid):
         note.delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             _('Note deleted.'),
+                             'Note deleted.',
                              extra_tags='alert-success')
     else:
         messages.add_message(request,
                              messages.SUCCESS,
-                             _('Note was not succesfully deleted.'),
+                             'Note was not succesfully deleted.',
                              extra_tags='alert-danger')
 
     return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
@@ -62,9 +61,6 @@ def edit_note(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
     object_id = None
-
-    if page is None:
-        raise PermissionDenied
 
     if page == "engagement":
         object = get_object_or_404(Engagement, id=objid)
@@ -79,6 +75,8 @@ def edit_note(request, id, page, objid):
         object_id = object.id
         reverse_url = "view_finding"
 
+    if page is None:
+        raise PermissionDenied
     if str(request.user) != note.author.username:
         user_has_permission_or_403(request.user, object, Permissions.Note_Edit)
 
@@ -114,13 +112,13 @@ def edit_note(request, id, page, objid):
             form = NoteForm()
             messages.add_message(request,
                                 messages.SUCCESS,
-                                _('Note edited.'),
+                                'Note edited.',
                                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
         else:
             messages.add_message(request,
                                 messages.SUCCESS,
-                                _('Note was not succesfully edited.'),
+                                'Note was not succesfully edited.',
                                 extra_tags='alert-danger')
     else:
         if note_type_activation:

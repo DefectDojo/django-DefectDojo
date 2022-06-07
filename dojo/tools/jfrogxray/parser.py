@@ -62,7 +62,7 @@ def get_item(vulnerability, test):
     else:
         severity = "Info"
 
-    vulnerability_ids = list()
+    cve = None
     cwe = None
     cvssv3 = None
     cvss_v3 = "No CVSS v3 score."
@@ -71,9 +71,8 @@ def get_item(vulnerability, test):
     # Some entries have no CVE entries, despite they exist. Example CVE-2017-1000502.
     cves = vulnerability['component_versions']['more_details'].get('cves', [])
     if len(cves) > 0:
-        for item in cves:
-            if item.get('cve'):
-                vulnerability_ids.append(item.get('cve'))
+        if 'cve' in cves[0]:
+            cve = cves[0]['cve']
         # take only the first one for now, limitation of DD model.
         if len(cves[0].get('cwe', [])) > 0:
             cwe = decode_cwe_number(cves[0].get('cwe', [])[0])
@@ -98,20 +97,17 @@ def get_item(vulnerability, test):
     component_version = vulnerability.get('source_comp_id')[len(vulnerability.get('source_id', '')) + 1:]
 
     # The 'id' field is empty? (at least in my sample file)
-    if vulnerability_ids:
-        if vulnerability['id']:
-            title = vulnerability['id'] + " - " + str(vulnerability_ids[0]) + " - " + component_name + ":" + component_version
-        else:
-            title = str(vulnerability_ids[0]) + " - " + component_name + ":" + component_version
+    if vulnerability['id']:
+        title = vulnerability['id'] + " - " + str(cve) + " - " + component_name + component_version
+    elif cve:
+        title = str(cve) + " - " + component_name + ":" + component_version
     else:
-        if vulnerability['id']:
-            title = vulnerability['id'] + " - " + component_name + ":" + component_version
-        else:
-            title = "No CVE - " + component_name + ":" + component_version
+        title = "No CVE - " + component_name + ":" + component_version
 
     # create the finding object
     finding = Finding(
         title=title,
+        cve=cve,
         cwe=cwe,
         test=test,
         severity=severity,
@@ -123,6 +119,5 @@ def get_item(vulnerability, test):
         static_finding=True,
         dynamic_finding=False,
         cvssv3=cvssv3)
-    if vulnerability_ids:
-        finding.unsaved_vulnerability_ids = vulnerability_ids
+
     return finding
