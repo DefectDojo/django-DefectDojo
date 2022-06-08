@@ -2568,3 +2568,15 @@ class ConfigurationPermissionViewSet(mixins.RetrieveModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'codename')
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+class SLAConfigurationViewset(mixins.ListModelMixin,
+                              mixins.RetrieveModelMixin,
+                              mixins.UpdateModelMixin,
+                              mixins.DestroyModelMixin,
+                              mixins.CreateModelMixin,
+                              viewsets.GenericViewSet):
+    serializer_class = serializers.SLAConfigurationSerializer
+    queryset = SLA_Configuration.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    # filter_fields = ('id')
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
