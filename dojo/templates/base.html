@@ -546,6 +546,13 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
+                                                {% if system_settings.enable_finding_sla %}
+                                                    <li>
+                                                        <a href="{% url 'sla_config' %}">
+                                                            {% trans "SLA Configuration" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                                 {% if request.user.is_superuser %}
                                                     <li>
                                                         <a href="{% url 'system_settings' %}">

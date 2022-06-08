@@ -390,20 +390,6 @@ class System_Settings(models.Model):
         verbose_name=_("Enable Finding SLA's"),
         help_text=_("Enables Finding SLA's for time to remediate."))
 
-    sla_critical = models.IntegerField(default=7,
-                                          verbose_name=_('Critical Finding SLA Days'),
-                                          help_text=_('# of days to remediate a critical finding.'))
-
-    sla_high = models.IntegerField(default=30,
-                                          verbose_name=_('High Finding SLA Days'),
-                                          help_text=_('# of days to remediate a high finding.'))
-    sla_medium = models.IntegerField(default=90,
-                                          verbose_name=_('Medium Finding SLA Days'),
-                                          help_text=_('# of days to remediate a medium finding.'))
-
-    sla_low = models.IntegerField(default=120,
-                                          verbose_name=_('Low Finding SLA Days'),
-                                          help_text=_('# of days to remediate a low finding.'))
     allow_anonymous_survey_repsonse = models.BooleanField(
         default=False,
         blank=False,
@@ -729,6 +715,47 @@ class DojoMeta(models.Model):
                            ('finding', 'name'))
 
 
+class SLA_Configuration(models.Model):
+    name = models.CharField(max_length=128, unique=True, blank=False, verbose_name=_('Custom SLA Name'),
+        help_text=_('A unique name for the set of SLAs.')
+    )
+
+    description = models.CharField(max_length=512, null=True, blank=True)
+    critical = models.IntegerField(default=7, verbose_name=_('Critical Finding SLA Days'),
+                                          help_text=_('number of days to remediate a critical finding.'))
+    high = models.IntegerField(default=30, verbose_name=_('High Finding SLA Days'),
+                                          help_text=_('number of days to remediate a high finding.'))
+    medium = models.IntegerField(default=90, verbose_name=_('Medium Finding SLA Days'),
+                                          help_text=_('number of days to remediate a medium finding.'))
+    low = models.IntegerField(default=120, verbose_name=_('Low Finding SLA Days'),
+                                          help_text=_('number of days to remediate a low finding.'))
+
+    def clean(self):
+
+        sla_days = [self.critical, self.high, self.medium, self.low]
+
+        for sla_day in sla_days:
+            if sla_day < 1:
+                raise ValidationError('SLA Days must be at least 1')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+
+    def delete(self, *args, **kwargs):
+        logger.debug('%d sla configuration delete', self.id)
+
+        if self.id != 1:
+            super().delete(*args, **kwargs)
+        else:
+            raise ValidationError("Unable to delete default SLA Configuration")
+
+    def get_summary(self):
+        return f'{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}'
+
+
 class Product(models.Model):
     WEB_PLATFORM = 'web'
     IOT = 'iot'
@@ -795,6 +822,12 @@ class Product(models.Model):
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
                                   null=False, blank=False, on_delete=models.CASCADE)
+    sla_configuration = models.ForeignKey(SLA_Configuration,
+                                          related_name='sla_config',
+                                          null=False,
+                                          blank=False,
+                                          default=1,
+                                          on_delete=models.RESTRICT)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     members = models.ManyToManyField(Dojo_User, through='Product_Member', related_name='product_members', blank=True)
@@ -2370,6 +2403,10 @@ class Finding(models.Model):
     def age(self):
         return self._age(self.date)
 
+    def get_sla_periods(self):
+        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
+        return sla_configuration
+
     def get_sla_start_date(self):
         if self.sla_start_date:
             return self.sla_start_date
@@ -2382,9 +2419,8 @@ class Finding(models.Model):
 
     def sla_days_remaining(self):
         sla_calculation = None
-        severity = self.severity
-        from dojo.utils import get_system_setting
-        sla_age = get_system_setting('sla_' + self.severity.lower())
+        sla_periods = self.get_sla_periods()
+        sla_age = sla_periods.__getattribute__(self.severity.lower())
         if sla_age:
             sla_calculation = sla_age - self.sla_age
         return sla_calculation
@@ -3910,6 +3946,7 @@ admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
+admin.site.register(SLA_Configuration)
 admin.site.register(CWE)
 admin.site.register(Regulation)
 admin.site.register(Global_Role)
