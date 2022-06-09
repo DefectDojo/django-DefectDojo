@@ -177,8 +177,8 @@ def get_heartbleed(node, test, endpoint):
             if vulnerable:
                 title = 'Heartbleed'
                 description = get_url(endpoint) + ' is vulnerable to heartbleed'
-                cve = 'CVE-2014-0160'
-                return get_finding(title, description, cve, None, test, endpoint)
+                vulnerability_id = 'CVE-2014-0160'
+                return get_finding(title, description, vulnerability_id, None, test, endpoint)
         elif 'result' in heartbleed:
             hb_result = heartbleed['result']
             if 'is_vulnerable_to_heartbleed' in hb_result:
@@ -186,8 +186,8 @@ def get_heartbleed(node, test, endpoint):
                 if vulnerable:
                     title = 'Heartbleed'
                     description = get_url(endpoint) + ' is vulnerable to heartbleed'
-                    cve = 'CVE-2014-0160'
-                    return get_finding(title, description, cve, None, test, endpoint)
+                    vulnerability_id = 'CVE-2014-0160'
+                    return get_finding(title, description, vulnerability_id, None, test, endpoint)
         return None
     return None
 
@@ -203,8 +203,8 @@ def get_ccs(node, test, endpoint):
             if vulnerable:
                 title = 'CCS injection'
                 description = get_url(endpoint) + ' is vulnerable to OpenSSL CCS injection'
-                cve = 'CVE-2014-0224'
-                return get_finding(title, description, cve, None, test, endpoint)
+                vulnerability_id = 'CVE-2014-0224'
+                return get_finding(title, description, vulnerability_id, None, test, endpoint)
 
         elif 'result' in ccs_injection:
             ccs_result = ccs_injection['result']
@@ -213,8 +213,8 @@ def get_ccs(node, test, endpoint):
                 if vulnerable:
                     title = 'CCS injection'
                     description = get_url(endpoint) + ' is vulnerable to OpenSSL CCS injection'
-                    cve = 'CVE-2014-0224'
-                    return get_finding(title, description, cve, None, test, endpoint)
+                    vulnerability_id = 'CVE-2014-0224'
+                    return get_finding(title, description, vulnerability_id, None, test, endpoint)
         return None
     return None
 
@@ -379,18 +379,19 @@ def get_certificate_information(node, test, endpoint):
     return None
 
 
-def get_finding(title, description, cve, references, test, endpoint):
+def get_finding(title, description, vulnerability_id, references, test, endpoint):
     title += ' (' + get_url(endpoint) + ')'
     severity = 'Medium'
     finding = Finding(
         title=title,
         test=test,
-        cve=cve,
         description=description,
         severity=severity,
         references=references,
         dynamic_finding=False,
         static_finding=True)
+    if vulnerability_id:
+        finding.unsaved_vulnerability_ids = [vulnerability_id]
     if endpoint is not None:
         finding.unsaved_endpoints = list()
         finding.unsaved_endpoints.append(endpoint)

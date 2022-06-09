@@ -80,6 +80,8 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.ID, "downloadMenu").click()
         driver.find_element(By.ID, "csv_export").click()
 
+        time.sleep(5)
+
         self.check_file(f'{self.export_path}/findings.csv')
 
     def test_excel_export(self):
@@ -88,6 +90,8 @@ class FindingTest(BaseTestCase):
 
         driver.find_element(By.ID, "downloadMenu").click()
         driver.find_element(By.ID, "excel_export").click()
+
+        time.sleep(5)
 
         self.check_file(f'{self.export_path}/findings.xlsx')
 
@@ -519,9 +523,8 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(FindingTest('test_list_findings_all'))
     suite.addTest(FindingTest('test_list_findings_open'))
     suite.addTest(FindingTest('test_quick_report'))
-    # Export tests are not stable and therefore disabled
-    # suite.addTest(FindingTest('test_csv_export'))
-    # suite.addTest(FindingTest('test_excel_export'))
+    suite.addTest(FindingTest('test_csv_export'))
+    suite.addTest(FindingTest('test_excel_export'))
     suite.addTest(FindingTest('test_list_components'))
     suite.addTest(FindingTest('test_edit_finding'))
     suite.addTest(FindingTest('test_add_note_to_finding'))

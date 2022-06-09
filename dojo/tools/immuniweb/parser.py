@@ -45,7 +45,7 @@ class ImmuniwebParser(object):
                 cwe = cwe
             else:
                 cwe = None
-            cve = vulnerability.find('CVE-ID').text
+            vulnerability_id = vulnerability.find('CVE-ID').text
             steps_to_reproduce = vulnerability.find('PoC').text
             # just to make sure severity is in the recognised sentence casing form
             severity = vulnerability.find('Risk').text.capitalize()
@@ -67,7 +67,6 @@ class ImmuniwebParser(object):
                 # create finding
                 finding = Finding(title=title,
                     test=test,
-                    cve=cve,
                     description=description,
                     severity=severity,
                     steps_to_reproduce=steps_to_reproduce,
@@ -76,7 +75,8 @@ class ImmuniwebParser(object):
                     impact=impact,
                     references=reference,
                     dynamic_finding=True)
-
+                if vulnerability_id:
+                    finding.unsaved_vulnerability_ids = [vulnerability_id]
                 finding.unsaved_endpoints = list()
                 dupes[dupe_key] = finding
 

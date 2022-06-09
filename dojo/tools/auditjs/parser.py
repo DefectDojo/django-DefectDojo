@@ -49,7 +49,7 @@ class AuditJSParser(object):
             if dependency['vulnerabilities']:
                 # Get vulnerability data from JSON and setup variables
                 for vulnerability in dependency['vulnerabilities']:
-                    unique_id_from_tool = title = description = cvss_score = cvss_vector = cve = cwe = references = severity = None
+                    unique_id_from_tool = title = description = cvss_score = cvss_vector = vulnerability_id = cwe = references = severity = None
                     # Check mandatory
                     if "id" in vulnerability and 'title' in vulnerability and 'description' in vulnerability:
                         unique_id_from_tool = vulnerability["id"]
@@ -77,14 +77,13 @@ class AuditJSParser(object):
                         # If there is no vector, calculate severity based on score and CVSS V3 (AuditJS does not always include it)
                         severity = self.get_severity(cvss_score)
                     if 'cve' in vulnerability:
-                        cve = vulnerability['cve']
+                        vulnerability_id = vulnerability['cve']
                     if 'reference' in vulnerability:
                         references = vulnerability['reference']
 
                     finding = Finding(
                         title=title,
                         test=test,
-                        cve=cve,
                         cwe=cwe,
                         cvssv3=cvss_vector,
                         cvssv3_score=cvss_score,
@@ -98,6 +97,8 @@ class AuditJSParser(object):
                         dynamic_finding=False,
                         unique_id_from_tool=unique_id_from_tool,
                     )
+                    if vulnerability_id:
+                        finding.unsaved_vulnerability_ids = [vulnerability_id]
 
                     # internal de-duplication
                     dupe_key = unique_id_from_tool
