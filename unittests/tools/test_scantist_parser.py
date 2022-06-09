@@ -18,7 +18,7 @@ class TestScantistParser(DojoTestCase):
         self.assertEqual(1, len(findings))
 
         findings = findings[0]
-        self.assertEqual(findings.title, findings.cve + "|" + findings.component_name)
+        self.assertEqual(findings.title, findings.unsaved_vulnerability_ids[0] + "|" + findings.component_name)
         self.assertEqual(
             findings.description,
             "Integer overflow in the crypt_raw method in the key-stretching implementation in jBCrypt before 0.4 "
@@ -35,4 +35,5 @@ class TestScantistParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(17, len(findings))
         finding = findings[0]
-        self.assertEqual("CVE-2018-12432", finding.cve)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2018-12432", finding.unsaved_vulnerability_ids[0])
