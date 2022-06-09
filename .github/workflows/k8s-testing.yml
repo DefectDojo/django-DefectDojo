@@ -151,7 +151,7 @@ jobs:
           minikube version: 'v1.24.0'
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
-          start args: '--addons=ingress'
+          start args: '--addons=ingress --cni calico'
 
       - name: Status of minikube
         run: |-
@@ -169,7 +169,7 @@ jobs:
 
       - name: Configure HELM repos
         run: |-
-             helm repo add bitnami https://charts.bitnami.com/bitnami
+             helm repo add bitnami https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami/
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
 

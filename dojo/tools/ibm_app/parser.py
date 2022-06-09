@@ -46,9 +46,7 @@ class IbmAppParser(object):
                     name = issue_data['name']
                     # advisory = issue_data['advisory']
 
-                    cve = None
-                    if "cve" in issue_data:
-                        cve = issue_data['cve']
+                    vulnerability_id = issue_data.get('cve')
 
                     url = self.get_url(root, item.find('url/ref').text)
 
@@ -77,14 +75,14 @@ class IbmAppParser(object):
                         # create finding
                         finding = Finding(title=name,
                                           test=test,
-                                          cve=cve,
                                           description=issue_description,
                                           severity=severity,
                                           mitigation=recommendation_data,
                                           impact=impact,
                                           references=ref_link,
                                           dynamic_finding=True)
-
+                        if vulnerability_id:
+                            finding.unsaved_vulnerability_ids = [vulnerability_id]
                         finding.unsaved_endpoints = list()
                         dupes[dupe_key] = finding
 

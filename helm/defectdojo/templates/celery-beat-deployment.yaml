@@ -115,8 +115,8 @@ spec:
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
             {{- else }}
-              name: {{ .Values.redis.existingSecret }}
-              key: {{ .Values.redis.secretKey }}
+              name: {{ .Values.redis.auth.existingSecret }}
+              key: {{ .Values.redis.auth.existingSecretPasswordKey }}
             {{- end }}  
             {{- end }}
         - name: DD_DATABASE_PASSWORD
@@ -137,6 +137,9 @@ spec:
             secretKeyRef:
               name: {{ $fullName }}
               key: DD_SECRET_KEY
+        {{- if .Values.extraEnv }}
+        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- end }}
         resources:
           {{- toYaml .Values.celery.beat.resources | nindent 10 }}
       {{- with .Values.celery.beat.nodeSelector }}
