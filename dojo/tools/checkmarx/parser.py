@@ -1,4 +1,5 @@
 
+import json
 import logging
 
 from dateutil import parser
@@ -10,17 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class CheckmarxParser(object):
-    """
-    ----------------------------------------
-    Structure of the checkmarx xml report:
-    ----------------------------------------
-    - Query:
-    the kind of vulnerabilities. Contains for example cweId
-    - Result: One vulnerability in checkmarx = 1 pathId
-    Includes filename and linenumber from source of vulnerability (start of the attack vector)
-    - Path: There should be only one.Parent tag of Pathnodes
-    - Pathnode: all the calls from the source (start) to the sink (end) of the attack vector
-    """
 
     def get_scan_types(self):
         return ["Checkmarx Scan", "Checkmarx Scan detailed"]
@@ -30,9 +20,9 @@ class CheckmarxParser(object):
 
     def get_description_for_scan_types(self, scan_type):
         if scan_type == "Checkmarx Scan":
-            return "Detailed XML Report. Aggregates vulnerabilities per categories, cwe, name, sinkFilename"
+            return "Simple Report. Aggregates vulnerabilities per categories, cwe, name, sinkFilename"
         else:
-            return "Detailed XML Report. Import all vulnerabilities from checkmarx without aggregation"
+            return "Detailed Report. Import all vulnerabilities from checkmarx without aggregation"
 
     # mode:
     # None (default): aggregates vulnerabilites per sink filename (legacy behavior)
@@ -42,7 +32,18 @@ class CheckmarxParser(object):
     def set_mode(self, mode):
         self.mode = mode
 
-    def get_findings(self, filename, test):
+    def _get_findings_xml(self, filename, test):
+        """
+        ----------------------------------------
+        Structure of the checkmarx xml report:
+        ----------------------------------------
+        - Query:
+        the kind of vulnerabilities. Contains for example cweId
+        - Result: One vulnerability in checkmarx = 1 pathId
+        Includes filename and linenumber from source of vulnerability (start of the attack vector)
+        - Path: There should be only one.Parent tag of Pathnodes
+        - Pathnode: all the calls from the source (start) to the sink (end) of the attack vector
+        """
         cxscan = ElementTree.parse(filename)
         root = cxscan.getroot()
 
@@ -277,3 +278,46 @@ class CheckmarxParser(object):
         # Confirmed, urgent
         verifiedStates = ["2", "3"]
         return state in verifiedStates
+
+    def get_findings(self, file, test):
+        if file.name.strip().lower().endswith(".json"):
+            return self._get_findings_json(file, test)
+        else:
+            return self._get_findings_xml(file, test)
+
+    def _get_findings_json(self, file, test):
+        """"""
+        data = json.load(file)
+        findings = []
+        results = data.get("scanResults", [])
+        for result_type in results:
+            for language in results[result_type].get("languages"):
+                for query in language.get("queries", []):
+                    descriptiondetails = query.get("description", "")
+                    group = ""
+                    title = query.get("queryName").replace("_", " ")
+                    if query.get('groupName'):
+                        group = query.get('groupName').replace('_', ' ')
+                    for vulnerability in query.get("vulnerabilities", []):
+                        finding = Finding(
+                            description=descriptiondetails,
+                            title=title,
+                            date=parser.parse(vulnerability.get("firstFoundDate")),
+                            active=(vulnerability.get("status") != "Not exploitable"),
+                            verified=(vulnerability.get("status") != "To verify"),
+                            test=test,
+                            cwe=vulnerability.get("cweId"),
+                            static_finding=(result_type == "sast"),
+                            unique_id_from_tool=vulnerability.get("id"),
+                        )
+                        if vulnerability.get("severity"):
+                            finding.severity = vulnerability.get("severity").title()
+                        # get the last node and set some values
+                        if vulnerability.get('nodes'):
+                            last_node = vulnerability['nodes'][-1]
+                            finding.file_path = last_node.get("fileName")
+                            finding.line = last_node.get("line")
+                        finding.unsaved_tags = [result_type]
+                        finding.unsaved_vulnerability_ids = [query.get('queryName')]
+                        findings.append(finding)
+        return findings
