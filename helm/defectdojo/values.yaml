@@ -315,7 +315,9 @@ postgresql:
     database: defectdojo
     existingSecret: defectdojo-postgresql-specific
     secretKeys:
+      adminPasswordKey: postgresql-postgres-password
       userPasswordKey: postgresql-password
+      replicationPasswordKey: postgresql-replication-password
   architecture: standalone
   primary:
     persistence:
@@ -336,7 +338,7 @@ postgresql:
     affinity: {}
     nodeSelector: {}
   volumePermissions:
-    enabled: true
+    enabled: false
     # if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above
     containerSecurityContext:
       runAsUser: 1001
