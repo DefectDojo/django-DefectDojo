@@ -301,7 +301,7 @@ mysql:
     secretKey: mysql-password
   primary:
     service:
-      ports: 
+      ports:
         mysql: 3306
   # To use an external mySQL instance, set enabled to false and uncomment
   # the line below / add external address:
@@ -321,7 +321,7 @@ postgresql:
     persistence:
       enabled: true
     service:
-      ports: 
+      ports:
         postgresql: 5432
     podSecurityContext:
       # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
