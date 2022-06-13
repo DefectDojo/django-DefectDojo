@@ -10,7 +10,7 @@ maintainers:
     url: https://github.com/DefectDojo/django-DefectDojo
 dependencies:
   - name: mysql
-    version: 8.8.12
+    version: 9.1.7
     repository: "@bitnami"
     condition: mysql.enabled
   - name: postgresql

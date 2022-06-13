@@ -65,7 +65,7 @@ spec:
         {{- if eq .Values.database "postgresql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
         {{- else if eq .Values.database "mysql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.master.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.primary.service.ports.mysql }}"
         {{- end }}
         {{- if .Values.cloudsql.enable_iam_login }}
         - "-enable_iam_login"
