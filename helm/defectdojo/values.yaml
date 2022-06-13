@@ -308,33 +308,36 @@ mysql:
 
 postgresql:
   enabled: true
-  serviceAccount:
-    enabled: true
-  postgresqlUsername: defectdojo
-  postgresqlPassword: ""
-  postgresqlDatabase: defectdojo
-  existingSecret: defectdojo-postgresql-specific
-  secretKey: postgresql-password
-  persistence:
-    enabled: true
-  replication:
-    enabled: false
-  service:
-    port: 5432
-  securityContext:
-    # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
-    enabled: true
-    # fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
-    fsGroup: 1001
-  containerSecurityContext:
-    # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
-    enabled: true
-    # runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
-    runAsUser: 1001
+  auth:
+    username: defectdojo
+    password: ""
+    database: defectdojo
+    existingSecret: defectdojo-postgresql-specific
+    secretKeys:
+      userPasswordKey: postgresql-password
+  architecture: standalone
+  primary:
+    persistence:
+      enabled: true
+    service:
+      ports: 
+        postgresql: 5432
+    podSecurityContext:
+      # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+      enabled: true
+      # fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+      fsGroup: 1001
+    containerSecurityContext:
+      # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+      enabled: true
+      # runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+      runAsUser: 1001
+    affinity: {}
+    nodeSelector: {}
   volumePermissions:
     enabled: true
     # if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above
-    securityContext:
+    containerSecurityContext:
       runAsUser: 1001
   shmVolume:
     chmod:
@@ -343,12 +346,6 @@ postgresql:
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
   # postgresServer: "127.0.0.1"
-  master:
-    affinity: {}
-    nodeSelector: {}
-  slave:
-    affinity: {}
-    nodeSelector: {}
 
 postgresqlha:
   enabled: false
@@ -439,7 +436,10 @@ rabbitmq:
   podSecurityContext:
     enabled: true
     fsGroup: 1001
+  containerSecurityContext:
+    enabled: true
     runAsUser: 1001
+    runAsNonRoot: true
 
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
 redis:
