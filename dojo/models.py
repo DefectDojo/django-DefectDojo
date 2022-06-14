@@ -2420,7 +2420,7 @@ class Finding(models.Model):
     def sla_days_remaining(self):
         sla_calculation = None
         sla_periods = self.get_sla_periods()
-        sla_age = sla_periods.__getattribute__(self.severity.lower())
+        sla_age = getattr(sla_periods, self.severity.lower(), None)
         if sla_age:
             sla_calculation = sla_age - self.sla_age
         return sla_calculation
