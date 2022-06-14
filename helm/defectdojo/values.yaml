@@ -356,7 +356,7 @@ postgresqlha:
     pgpool:
       existingSecret: defectdojo-postgresql-ha-pgpool
   serviceAccount:
-    enabled: true
+    create: true
   postgresql:
     replicaCount: 3
     username: defectdojo
@@ -383,7 +383,8 @@ postgresqlha:
   persistence:
     enabled: true
   service:
-    port: 5432
+    ports: 
+      postgresql: 5432
 
 # Google CloudSQL support in GKE via gce-proxy
 cloudsql:
