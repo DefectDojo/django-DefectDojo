@@ -10,6 +10,10 @@ createRedisSecret: false
 createMysqlSecret: false
 # create postgresql secret in defectdojo chart, outside of postgresql chart
 createPostgresqlSecret: false
+# create postgresql-ha secret in defectdojo chart, outside of postgresql-ha chart
+createPostgresqlHaSecret: false
+# create postgresql-ha-pgpool secret in defectdojo chart, outside of postgresql-ha chart
+createPostgresqlHaPgpoolSecret: false
 # Track configuration (trackConfig): will automatically respin application pods in case of config changes detection
 # can be:
 # - disabled, default
@@ -346,6 +350,41 @@ postgresql:
     affinity: {}
     nodeSelector: {}
 
+postgresqlha:
+  enabled: false
+  global:
+    pgpool:
+      existingSecret: defectdojo-postgresql-ha-pgpool
+  serviceAccount:
+    enabled: true
+  postgresql:
+    replicaCount: 3
+    username: defectdojo
+    password: ""
+    repmgrPassword: ""
+    database: defectdojo
+    existingSecret: defectdojo-postgresql-ha-specific
+    securityContext:
+      enabled: true
+      fsGroup: 1001
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1001
+  pgpool:
+    replicaCount: 3
+    adminPassword: ""
+    securityContext:
+      enabled: true
+      fsGroup: 1001
+  volumePermissions:
+    enabled: true
+    securityContext:
+      runAsUser: 1001
+  persistence:
+    enabled: true
+  service:
+    port: 5432
+
 # Google CloudSQL support in GKE via gce-proxy
 cloudsql:
   # To use CloudSQL in GKE set 'enable: true'
@@ -355,7 +394,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.30.1
+    tag: 1.31.0
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
