@@ -383,7 +383,7 @@ postgresqlha:
   persistence:
     enabled: true
   service:
-    ports: 
+    ports:
       postgresql: 5432
 
 # Google CloudSQL support in GKE via gce-proxy
