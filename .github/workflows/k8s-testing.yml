@@ -36,6 +36,14 @@ env:
     --set mysql.enabled=false \
     --set createPostgresqlSecret=true \
    "
+  HELM_PGHA_DATABASE_SETTINGS: " \
+    --set database=postgresqlha \
+    --set postgresql.enabled=false \
+    --set mysql.enabled=false \
+    --set postgresqlha.enabled=true \
+    --set createPostgresqlHaSecret=true \
+    --set createPostgresqlHaPgpoolSecret=true \
+   "
 jobs:
   build:
     name: Build Image
@@ -124,6 +132,9 @@ jobs:
           - databases: mysql
             brokers: redis
             k8s: 'v1.22.0'
+          - databases: pgsqlha
+            brokers: rabbit
+            k8s: 'v1.22.0'
 
     steps:
 #      - name: Login to DockerHub
@@ -166,6 +177,7 @@ jobs:
         id: set
         run: |-
               echo ::set-output name=pgsql:: "${{ env.HELM_PG_DATABASE_SETTINGS }}"
+              echo ::set-output name=pgsqlha:: "${{ env.HELM_PGHA_DATABASE_SETTINGS }}"
               echo ::set-output name=mysql:: "${{ env.HELM_MYSQL_DATABASE_SETTINGS }}"
               echo ::set-output name=redis:: "${{ env.HELM_REDIS_BROKER_SETTINGS }}"
               echo ::set-output name=rabbit:: "${{ env.HELM_RABBIT_BROKER_SETTINGS }}"
@@ -177,6 +189,7 @@ jobs:
       - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
         run: |-
              helm install \
+               --timeout 800s \
                defectdojo \
                ./helm/defectdojo \
                --set django.ingress.enabled=true \
