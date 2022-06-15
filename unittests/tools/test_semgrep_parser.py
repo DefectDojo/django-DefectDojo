@@ -93,3 +93,18 @@ class TestSemgrepParser(DojoTestCase):
         self.assertEqual(33, finding.line)
         self.assertEqual(1236, finding.cwe)
         self.assertEqual("python.lang.security.unquoted-csv-writer.unquoted-csv-writer", finding.vuln_id_from_tool)
+
+    def test_parse_cwe_list(self):
+        testfile = open("unittests/scans/semgrep/cwe_list.json")
+        parser = SemgrepParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("Info", finding.severity)
+        self.assertEqual("index.js", finding.file_path)
+        self.assertEqual(12, finding.line)
+        self.assertEqual(352, finding.cwe)
+        self.assertEqual("javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage", finding.vuln_id_from_tool)
+        self.assertIn("const app = express();", finding.description)
+        self.assertIn("A CSRF middleware was not detected in your express application. Ensure you are either using one  such as `csurf` or `csrf` (see rule references) and/or you are properly doing CSRF validation in your routes with a token or cookies.", finding.description)
