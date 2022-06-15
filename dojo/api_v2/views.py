@@ -2544,6 +2544,7 @@ class NetworkLocationsViewset(mixins.ListModelMixin,
     filter_fields = ('id', 'location')
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
+
 class SLAConfigurationViewset(mixins.ListModelMixin,
                               mixins.RetrieveModelMixin,
                               mixins.UpdateModelMixin,
@@ -2553,5 +2554,4 @@ class SLAConfigurationViewset(mixins.ListModelMixin,
     serializer_class = serializers.SLAConfigurationSerializer
     queryset = SLA_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    # filter_fields = ('id')
     permission_classes = (IsAuthenticated, DjangoModelPermissions)

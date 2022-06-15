@@ -16,6 +16,7 @@ def save_existing_sla(apps, schema_editor):
                                      medium=90,
                                      low=120)
 
+
 class Migration(migrations.Migration):
     dependencies = [
         ('dojo', '0161_alter_dojo_group_social_provider'),

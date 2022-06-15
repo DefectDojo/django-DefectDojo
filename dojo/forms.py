@@ -2288,6 +2288,7 @@ class SLAConfigForm(forms.ModelForm):
         model = SLA_Configuration
         fields = ['name', 'description', 'critical', 'high', 'medium', 'low']
 
+
 class DeleteSLAConfigForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -2295,6 +2296,7 @@ class DeleteSLAConfigForm(forms.ModelForm):
     class Meta:
         model = SLA_Configuration
         fields = ['id']
+
 
 class DeleteObjectsSettingsForm(forms.ModelForm):
     id = forms.IntegerField(required=True,

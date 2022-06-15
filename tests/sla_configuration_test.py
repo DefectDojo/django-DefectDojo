@@ -63,6 +63,7 @@ class SLAConfigurationTest(BaseTestCase):
         driver.find_element(By.ID, "delete").click()
         self.assertTrue(self.is_error_message_present(text='The Default SLA Configuration cannot be deleted.'))
 
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
