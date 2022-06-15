@@ -2030,10 +2030,6 @@ class NetworkLocationsSerializer(serializers.ModelSerializer):
         model = Network_Locations
         fields = '__all__'
 
-class SLAConfigurationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SLA_Configuration
-        fields = '__all__'
 
 class SLAConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
