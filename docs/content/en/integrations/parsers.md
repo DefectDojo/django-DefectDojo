@@ -311,6 +311,12 @@ That will generate three files, two of which are needed for defectdojo. Build th
 
 From: https://github.com/aquasecurity/cloudsploit . Import the JSON output.
 
+### CSAF (Common Security Advisory Format)
+
+From: <https://www.oasis-open.org/committees/csaf/> . Import the JSON output.
+
+All findings are imported for the product that the import is executed for. Product definitions from the CSAF file are ignored as mappings from CSAF to DefectDojo products aren't always existent.
+
 ### CycloneDX
 
 CycloneDX is a lightweight software bill of materials (SBOM) standard designed for use in application security contexts and supply chain component analysis.
@@ -388,9 +394,9 @@ Follow these steps to setup API importing:
 2.  In the Product settings select "Add API Scan Configuration" and select the
     previously added Edgescan Tool Configuration. Provide the ID
     of the asset from which to import findings in the field *Service key 1*.
-3.  After this is done, you can import the findings by selecting 
-    "Edgescan Scan" as the scan type. If you have more than one asset 
-    configured, you must also select which Edgescan API Scan Configuration to 
+3.  After this is done, you can import the findings by selecting
+    "Edgescan Scan" as the scan type. If you have more than one asset
+    configured, you must also select which Edgescan API Scan Configuration to
     use.
 
 ### ESLint
@@ -791,7 +797,7 @@ Import the JSON format for the \"Security & Compliance | Reports\" export. Jfrog
 
 ### JFrog Xray API Summary Artifact Scan
 
-Import the JSON format from the Arifact Summary API call https://www.jfrog.com/confluence/display/JFROG/Xray+REST+API#XrayRESTAPI-ArtifactSummary  
+Import the JSON format from the Arifact Summary API call https://www.jfrog.com/confluence/display/JFROG/Xray+REST+API#XrayRESTAPI-ArtifactSummary
 
 ### Kiuwan Scanner
 
