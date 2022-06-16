@@ -439,11 +439,6 @@ class BaseClass():
 
             self.assertEqual(200, response.status_code, response.content[:1000])
 
-            print('--------------------------------------------')
-            print(self.url + '%s/delete_preview/' % current_objects['results'][0]['id'])
-            print(response.data)
-            print('--------------------------------------------')
-
             self.check_schema_response('get', '200', response, detail=True)
 
             self.assertFalse('push_to_jira' in response.data)
