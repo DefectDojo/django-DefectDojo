@@ -303,6 +303,7 @@ class CheckmarxParser(object):
                             description=descriptiondetails,
                             title=title,
                             date=parser.parse(vulnerability.get("firstFoundDate")),
+                            severity=vulnerability.get("severity").title(),
                             active=(vulnerability.get("status") != "Not exploitable"),
                             verified=(vulnerability.get("status") != "To verify"),
                             test=test,
@@ -310,14 +311,11 @@ class CheckmarxParser(object):
                             static_finding=(result_type == "sast"),
                             unique_id_from_tool=vulnerability.get("id"),
                         )
-                        if vulnerability.get("severity"):
-                            finding.severity = vulnerability.get("severity").title()
                         # get the last node and set some values
                         if vulnerability.get('nodes'):
                             last_node = vulnerability['nodes'][-1]
                             finding.file_path = last_node.get("fileName")
                             finding.line = last_node.get("line")
                         finding.unsaved_tags = [result_type]
-                        finding.unsaved_vulnerability_ids = [query.get('queryName')]
                         findings.append(finding)
         return findings
