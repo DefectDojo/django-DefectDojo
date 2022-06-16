@@ -1491,7 +1491,7 @@ class UsersTest(BaseClass.RESTEndpointTest):
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 17
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
+# TODO
 
 class UserContactInfoTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
@@ -2203,7 +2203,7 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
         self.permission_delete = Permissions.Group_Delete
         self.deleted_objects = 4
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
+# TODO
     def test_list_object_not_authorized(self):
         self.setUp_not_authorized()
 
