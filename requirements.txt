@@ -14,7 +14,7 @@ django-multiselectfield==0.1.12
 django-polymorphic==3.1.0
 django-crispy-forms==1.14.0
 django_extensions==3.1.5
-django-slack==5.17.7
+django-slack==5.17.8
 django-tagging==0.5.0
 django-watson==1.6.2
 django-prometheus==2.2.0
