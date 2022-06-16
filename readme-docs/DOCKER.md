@@ -309,7 +309,7 @@ ln -s docker-compose.override.https.yml docker-compose.override.yml
 ```
 
 ## Create credentials on the fly
-* you can generate a Certificate on the fly (without valid domainname etc.)
+* You can generate a Certificate on the fly (without valid domainname etc.)
 
 * Run defectDojo with:
 ```
