@@ -1053,12 +1053,9 @@ def edit_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
     form = AppAnalysisForm(instance=technology)
     if request.method == 'POST':
-        form = AppAnalysisForm(request.POST)
+        form = AppAnalysisForm(request.POST, instance=technology)
         if form.is_valid():
-            tech = form.save(commit=False)
-            tech.id = technology.id
-            tech.product_id = technology.product.id
-            tech.save()
+            form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Technology changed successfully.',
