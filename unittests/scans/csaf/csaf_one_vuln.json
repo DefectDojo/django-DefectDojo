@@ -1,0 +1,63 @@
+{
+  "document": {
+    "category": "csaf_security_advisory",
+    "csaf_version": "2.0",
+    "publisher": {
+      "category": "user",
+      "name": "test_publisher",
+      "namespace": "http://www.foo.de"
+    },
+    "title": "A very serious vulnerability for testing",
+    "tracking": {
+      "current_release_date": "2022-06-01T10:00:00.000Z",
+      "id": "Example Vulnerability - Testing Company",
+      "initial_release_date": "2022-06-01T10:00:00.000Z",
+      "revision_history": [
+        {
+          "date": "2022-06-01T10:00:00.000Z",
+          "number": "1.0.0",
+          "summary": "first version"
+        }
+      ],
+      "status": "final",
+      "version": "1.0.0",
+      "generator": {
+        "date": "2022-06-16T15:58:59.682Z",
+        "engine": {
+          "version": "1.14.0",
+          "name": "Secvisogram"
+        }
+      }
+    }
+  },
+  "vulnerabilities": [
+    {
+      "cwe": {
+        "id": "CWE-77",
+        "name": "Improper Neutralization of Special Elements used in a Command ('Command Injection')"
+      },
+      "discovery_date": "2022-06-01T10:00:00.000Z",
+      "title": "A vulnerability",
+      "cve": "CVE-2008-5027",
+      "notes": [
+        {
+          "category": "description",
+          "text": "This is a description"
+        }
+      ],
+      "product_status": {
+        "first_affected": [
+          "CSAFPID-1337"
+        ]
+      }
+    }
+  ],
+  "product_tree": {
+    "full_product_names": [
+      {
+        "product_id": "CSAFPID-1337",
+        "name": "A very cool product"
+      }
+    ]
+  }
+}
