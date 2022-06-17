@@ -16,7 +16,7 @@ class GenericParser(object):
         return scan_type  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import Generic findings in CSV format."
+        return "Import Generic findings in CSV or JSON format."
 
     def get_findings(self, filename, test, active=None, verified=None):
         if filename.name.lower().endswith(".csv"):
