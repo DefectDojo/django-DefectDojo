@@ -59,7 +59,7 @@ The environment variables needed for the different profiles are prepared in file
 
 ## Scripts
 
-5 shell scripts make life easier and avoid typing long commands:
+6 shell scripts make life easier and avoid typing long commands:
 
 - `./dc-build.sh` - Build the docker images, it can take one additional parameter to be used in the build process, e.g. `./dc-build.sh --no-cache`.
 - `./dc-up.sh` - Start the docker containers in the foreground, it needs one of the profile names as a parameter, e.g. `./dc-up.sh postgres-redis`.
@@ -309,7 +309,7 @@ ln -s docker-compose.override.https.yml docker-compose.override.yml
 ```
 
 ## Create credentials on the fly
-* you can generate a Certificate on the fly (without valid domainname etc.)
+* You can generate a Certificate on the fly (without valid domainname etc.)
 
 * Run defectDojo with:
 ```
