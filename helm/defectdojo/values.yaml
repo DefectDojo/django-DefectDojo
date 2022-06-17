@@ -197,6 +197,8 @@ django:
   replicas: 1
   tolerations: []
   uwsgi:
+    env:
+      DD_SITE_URL: 'http://localhost:8080'
     livenessProbe:
       # Enable liveness checks on uwsgi container. Those values are use on nginx readiness checks as well.
       enabled: true
