@@ -197,8 +197,6 @@ django:
   replicas: 1
   tolerations: []
   uwsgi:
-    env:
-      DD_SITE_URL: 'http://localhost:8080'
     livenessProbe:
       # Enable liveness checks on uwsgi container. Those values are use on nginx readiness checks as well.
       enabled: true
@@ -430,7 +428,8 @@ redis:
 # NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
 # extraSecrets:
 #   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
-extraConfigs: {}
+extraConfigs:
+  DD_SITE_URL: 'http://localhost:8080' # You will likely want to replace this to your domain where DD is deployed, it also affects links in Jira
 
 # To add (or override) extra variables which need to be pulled from another configMap, you can
 # use extraEnv. For example:
