@@ -153,8 +153,6 @@ spec:
             name: {{ $fullName }}-extrasecrets
             optional: true
         env:
-        - name: DD_SITE_URL
-          value: {{ .Values.extraConfigs.DD_SITE_URL }}
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
