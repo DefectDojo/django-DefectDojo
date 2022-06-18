@@ -2105,7 +2105,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     batch = []
     total_pages = (total_count // page_size) + 2
     # logger.info('pages to process: %d', total_pages)
-    logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
+    logger.debug('%s%s out of %s models processed ...', log_prefix, i, total_count)
     for p in range(1, total_pages):
         # logger.info('page: %d', p)
         if order == 'asc':
@@ -2129,7 +2129,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
                 if fields:
                     model_type.objects.bulk_update(batch, fields)
                 batch = []
-                logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
+                logger.debug('%s%s out of %s models processed ...', log_prefix, i, total_count)
 
     if fields:
         model_type.objects.bulk_update(batch, fields)
