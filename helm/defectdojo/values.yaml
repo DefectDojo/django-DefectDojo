@@ -468,7 +468,8 @@ redis:
 # extraSecrets:
 #   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
 extraConfigs:
-  DD_SITE_URL: 'http://localhost:8080' # You will likely want to replace this to your domain where DD is deployed, it also affects links in Jira
+  DD_SITE_URL: 'http://localhost:8080'
+  # You will likely want to replace this to your domain where DD is deployed, it also affects links in Jira
 
 # To add (or override) extra variables which need to be pulled from another configMap, you can
 # use extraEnv. For example:
