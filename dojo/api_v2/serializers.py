@@ -411,7 +411,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         # This will create only Permissions from category "configuration_permissions". There are no other Permissions.
         if new_configuration_permissions:
-            instance.user_permissions.set(new_configuration_permissions)
+            user.user_permissions.set(new_configuration_permissions)
 
         user.save()
         return user
