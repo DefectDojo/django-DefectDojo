@@ -2,7 +2,7 @@
 asteval==0.9.27
 bleach==4.1.0
 celery==5.2.7
-coverage==6.4
+coverage==6.4.1
 defusedxml==0.7.1
 django_celery_results==2.3.1
 django-auditlog==2.0.0
@@ -25,7 +25,7 @@ html2text==2020.1.16
 humanize==4.1.0
 jira==3.0.1
 PyGithub==1.55
-lxml==4.8.0
+lxml==4.9.0
 Markdown==3.3.7
 mysqlclient==2.1.0
 openpyxl==3.0.10
@@ -35,9 +35,9 @@ psycopg2-binary==2.9.3
 cryptography==37.0.2
 python-dateutil==2.8.2
 pytz==2022.1
-redis==4.3.1
+redis==4.3.3
 requests==2.27.1
-sqlalchemy==1.4.36  # Required by Celery broker transport
+sqlalchemy==1.4.37  # Required by Celery broker transport
 supervisor==4.2.4
 urllib3==1.26.9
 uWSGI==2.0.20
