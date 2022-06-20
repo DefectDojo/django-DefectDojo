@@ -5,8 +5,7 @@ from django.shortcuts import render
 from watson import search as watson
 from django.db.models import Q
 from dojo.forms import SimpleSearchForm
-from dojo.models import Finding, Finding_Template, Product, Test, Engagement, Languages, \
-    App_Analysis
+from dojo.models import Finding, Finding_Template, Product, Test, Engagement, Languages
 from dojo.utils import add_breadcrumb, get_page_items, get_words_for_field
 import re
 from dojo.finding.views import prefetch_for_findings
