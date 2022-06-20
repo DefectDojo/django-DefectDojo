@@ -117,7 +117,7 @@
                             <tr>
                                 <td>
                                     <a class="search-finding" href="{% url 'view_product' product.id %}">{{ product.name }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=product.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=product.tags.all %}
                                 </td>
                                 <td>{{ product.description|truncatechars_html:150|markdown_render }}</td>
                             </tr>
@@ -145,11 +145,11 @@
                             <tr>
                                 <td>
                                     <a class="search-finding" href="{% url 'view_engagement' engagement.id %}">{{ engagement.name }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=engagement.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=engagement.tags.all %}
                                 </td>
                                 <td>
                                     <a href="{% url 'view_product' engagement.product.id %}">{{ engagement.product.name }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=engagement.product.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=engagement.product.tags.all %}
                                 </td>
                                 <td>{{ engagement.target_start|date }} - {{ engagement.target_end|date }}</td>
                                 <td>{{ engagement.status }}</td>
@@ -179,7 +179,7 @@
                             <tr>
                                 <td>
                                     <a class="search-finding" href="{% url 'view_test' test.id %}">{{ test }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=test.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=test.tags.all %}
                                 </td>
                                 <td>
                                     <a href="{% url 'view_product' test.engagement.product.id %}">{{ test.engagement.product.name }}</a>
