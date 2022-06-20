@@ -426,7 +426,7 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.active = new_finding.active
     existing_finding.verified = new_finding.verified
     existing_finding.notes.create(author=existing_finding.reporter,
-                                    entry="This finding has been automatically re-openend as it was found in recent scans.")
+                                    entry="This finding has been automatically re-opened as it was found in recent scans.")
     existing_finding.save()
 
 
