@@ -12,7 +12,7 @@ from google.oauth2 import service_account
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.urls import reverse
+from django.urls import reverse, Resolver404
 from django.db.models import Q, QuerySet, Count
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -314,6 +314,10 @@ def delete_test(request, tid):
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def test_calendar(request):
+
+    if not get_system_setting('enable_calendar'):
+        raise Resolver404()
+
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         tests = get_authorized_tests(Permissions.Test_View)
     else:

@@ -465,6 +465,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_('Enable Finding Groups'),
         help_text=_("With this setting turned off, the Finding Groups will be disabled."))
+    enable_calendar = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_('Enable Calendar'),
+        help_text=_("With this setting turned off, the Calendar will be disabled in the user interface."))
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
