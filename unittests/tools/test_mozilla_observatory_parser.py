@@ -216,7 +216,7 @@ class TestMozillaObservatoryParser(DojoTestCase):
                     self.assertIn("X-Content-Type-Options header not implemented", finding.description)
             elif "subresource-integrity" == finding.vuln_id_from_tool:
                 with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
-                    self.assertTrue(finding.active)
+                    self.assertFalse(finding.active)
                     self.assertEqual("Subresource Integrity (SRI) not implemented, but all scripts are loaded from a similar origin", finding.title)
                     self.assertEqual("Info", finding.severity)
                     self.assertIn("Subresource Integrity (SRI) not implemented", finding.description)
