@@ -94,6 +94,8 @@ spec:
             name: {{ $fullName }}-extrasecrets
             optional: true
         env:
+        - name: DD_SITE_URL
+          valueFrom: '{{ .Values.site_url }}'
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
