@@ -371,8 +371,8 @@ It's possible to enable Nginx prometheus exporter by setting `--set monitoring.e
 ## Useful stuff
 
 ### Setting your own domain
-The DD_SITE_URL controls what domain is configured in Django, and also what the celery workers will put as links in Jira tickets for example.
-Set this to your `https://<yourdomain>` in values.yaml under `extraConfigs`, as it is already set with the default value
+The `site_url` in values.yaml controls what domain is configured in Django, and also what the celery workers will put as links in Jira tickets for example.
+Set this to your `https://<yourdomain>` in values.yaml
 
 ### Multiple Hostnames
 Django requires a list of all hostnames that are valid for requests.
