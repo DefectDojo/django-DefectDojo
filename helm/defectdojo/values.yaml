@@ -46,6 +46,9 @@ database: postgresql
 # Primary hostname of instance
 host: defectdojo.default.minikube.local
 
+# The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira
+# site_url: 'https://<yourdomain>'
+
 # optional list of alternative hostnames to use that gets appended to
 # DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match
 # the global hostname.
@@ -467,9 +470,7 @@ redis:
 # NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
 # extraSecrets:
 #   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
-extraConfigs:
-  DD_SITE_URL: 'http://localhost:8080'
-  # You will likely want to replace this to your domain where DD is deployed, it also affects links in Jira
+extraConfigs: {}
 
 # To add (or override) extra variables which need to be pulled from another configMap, you can
 # use extraEnv. For example:
