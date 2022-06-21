@@ -2668,6 +2668,10 @@ class Vulnerability_Id(models.Model):
     def __str__(self):
         return self.vulnerability_id
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_finding', args=[str(self.finding.id)])
+
 
 class Stub_Finding(models.Model):
     title = models.TextField(max_length=1000, blank=False, null=False)
