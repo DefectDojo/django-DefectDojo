@@ -40,14 +40,14 @@
 
 
 {% if finding.component_name %}
-Vulnerable Component: {{finding.component_name }} - {{ finding.component_version }}
+*Vulnerable Component*: {{finding.component_name }} - {{ finding.component_version }}
 
 {% endif %}
 {% if finding.sast_source_object %}
-Source Object: {{ finding.sast_source_object }}
-Source File: {{ finding.sast_source_file_path }}
-Source Line: {{ finding.sast_source_line }}
-Sink Object: {{ finding.sast_sink_object }}
+*Source Object*: {{ finding.sast_source_object }}
+*Source File*: {{ finding.sast_source_file_path }}
+*Source Line*: {{ finding.sast_source_line }}
+*Sink Object*: {{ finding.sast_sink_object }}
 {% endif %}
 
 *Description*:
