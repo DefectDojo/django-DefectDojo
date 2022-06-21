@@ -17,6 +17,7 @@ class DependencyCheckParser(object):
         'info': 'Info',
         'low': 'Low',
         'moderate': 'Medium',
+        'medium': 'Medium',
         'high': 'High',
         'critical': 'Critical'
     }
@@ -178,12 +179,15 @@ class DependencyCheckParser(object):
 
         # handle if the severity have something not in the mapping
         # default to 'Medium' and produce warnings in logs
-        if severity.strip().lower() not in self.SEVERITY_MAPPING:
-            logger.warn(f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value")
-            severity = "Medium"
+        if severity:
+            if severity.strip().lower() not in self.SEVERITY_MAPPING:
+                logger.warn(f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value")
+                severity = "Medium"
+            else:
+                severity = self.SEVERITY_MAPPING[severity.strip().lower()]
         else:
-            severity = self.SEVERITY_MAPPING[severity.strip().lower()]
-
+            severity = "Medium"
+        
         reference_detail = None
         references_node = vulnerability.find(namespace + 'references')
 
@@ -281,20 +285,20 @@ class DependencyCheckParser(object):
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
 
+                            relatedDependencies = dependency.find(namespace + 'relatedDependencies')
+                                if relatedDependencies:
+                                    for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
+                                        finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
+                                        if finding:  # could be None
+                                            if scan_date:
+                                                finding.date = scan_date
+                                            self.add_finding(finding, dupes)
+
                     for suppressedVulnerability in vulnerabilities.findall(namespace + 'suppressedVulnerability'):
                         if suppressedVulnerability:
                             finding = self.get_finding_from_vulnerability(dependency, None, suppressedVulnerability, test, namespace)
                             if scan_date:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
-
-                    relatedDependencies = dependency.find(namespace + 'relatedDependencies')
-                    if relatedDependencies:
-                        for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
-                            finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
-                            if finding:  # could be None
-                                if scan_date:
-                                    finding.date = scan_date
-                                self.add_finding(finding, dupes)
 
         return list(dupes.values())
