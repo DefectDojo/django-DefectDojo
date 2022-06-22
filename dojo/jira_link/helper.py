@@ -719,6 +719,13 @@ def add_jira_issue(obj, *args, **kwargs):
         issue = jira.issue(new_issue.id)
 
         logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
+
+        # Add any notes that already exist in the finding to the JIRA
+        for find in findings:
+            if find.notes.all():
+                for note in find.notes.all().reverse():
+                    add_comment(obj, note)
+
         return True
     except TemplateDoesNotExist as e:
         logger.exception(e)
