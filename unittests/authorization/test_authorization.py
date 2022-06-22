@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.test.utils import override_settings
 from ..dojo_test_case import DojoTestCase
 from unittest.mock import patch
 from dojo.models import Dojo_User, Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
