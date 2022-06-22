@@ -233,7 +233,7 @@ class VeracodeParser(object):
 
         _description = 'This library has known vulnerabilities.\n'
         _description += \
-                "**CVE: [{0}](https://nvd.nist.gov/vuln/detail/{0})** ({1})\n" \
+                "**CVE:** {0} ({1})\n" \
                 "CVS Score: {2} ({3})\n" \
                 "Summary: \n>{4}" \
                 "\n\n-----\n\n".format(
