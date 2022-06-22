@@ -7,7 +7,7 @@ import traceback
 
 import social_core.pipeline.user
 from django.conf import settings
-from dojo.models import Product, Product_Member, Product_Type, System_Settings, Role, Dojo_Group, Dojo_Group_Member
+from dojo.models import Product, Product_Member, Product_Type, Role, Dojo_Group, Dojo_Group_Member
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
 from dojo.authorization.roles_permissions import Permissions, Roles

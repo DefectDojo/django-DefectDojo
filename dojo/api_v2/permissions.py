@@ -1,6 +1,5 @@
 import re
 from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
-from django.conf import settings
 from dojo.api_v2.serializers import get_import_meta_data_from_dict, get_product_id_from_dict
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists,  \
