@@ -2,19 +2,25 @@
 import calendar as tcalendar
 import logging
 import base64
+
 from collections import OrderedDict
 from datetime import datetime, date, timedelta
-from math import ceil
 from dateutil.relativedelta import relativedelta
+from github import Github
+from math import ceil
+
 from django.contrib import messages
+from django.contrib.admin.utils import NestedObjects
+from django.contrib.postgres.aggregates import StringAgg
+from django.db import DEFAULT_DB_ALIAS, connection
+from django.db.models import Sum, Count, Q, Max, Prefetch, F, OuterRef, Subquery
+from django.db.models.query import QuerySet
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
-from django.db.models import Sum, Count, Q, Max
-from django.contrib.admin.utils import NestedObjects
-from django.db import DEFAULT_DB_ALIAS, connection
+from django.utils.translation import gettext as _
 
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter
@@ -31,19 +37,16 @@ from dojo.utils import add_external_issue, add_error_message_to_response, add_fi
                        get_system_setting, get_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, get_enabled_notifications_list
 
 from dojo.notifications.helper import create_notification
-from django.db.models import Prefetch, F, OuterRef, Subquery
-from django.db.models.query import QuerySet
-from github import Github
-from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
-import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type, get_authorized_product_types
 from dojo.tool_config.factory import create_API
+
 import dojo.finding.helper as finding_helper
+import dojo.jira_link.helper as jira_helper
 
 logger = logging.getLogger(__name__)
 
@@ -72,13 +75,14 @@ def product(request):
 
     # print(prod_list.object_list.explain)
 
-    add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
-    return render(request,
-                  'dojo/product.html',
-                  {'prod_list': prod_list,
-                   'prod_filter': prod_filter,
-                   'name_words': sorted(set(name_words)),
-                   'user': request.user})
+    add_breadcrumb(title=_("Product List"), top_level=not len(request.GET), request=request)
+
+    return render(request, 'dojo/product.html', {
+                  'prod_list': prod_list,
+                  'prod_filter': prod_filter,
+                  'name_words': sorted(set(name_words)),
+                  'user': request.user
+    })
 
 
 def prefetch_for_product(prods):
@@ -182,7 +186,7 @@ def view_product(request, pid):
 
     total = critical + high + medium + low + info
 
-    product_tab = Product_Tab(prod, title="Product", tab="overview")
+    product_tab = Product_Tab(prod, title=_("Product"), tab="overview")
     return render(request, 'dojo/view_product_details.html', {
         'prod': prod,
         'product_tab': product_tab,
@@ -211,7 +215,7 @@ def view_product(request, pid):
 @user_is_authorized(Product, Permissions.Component_View, 'pid')
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
-    product_tab = Product_Tab(prod, title="Product", tab="components")
+    product_tab = Product_Tab(prod, title=_("Product"), tab="components")
     separator = ', '
 
     # Get components ordered by component_name and concat component versions to the same row
@@ -403,7 +407,7 @@ def endpoint_querys(request, prod):
         endpoints_qs = queryset_check(endpoints)
         messages.add_message(request,
                              messages.ERROR,
-                             'All objects have been filtered away. Displaying all objects',
+                             _('All objects have been filtered away. Displaying all objects'),
                              extra_tags='alert-danger')
 
     try:
@@ -590,7 +594,7 @@ def view_product_metrics(request, pid):
             test_data[t.test_type.name] += t.verified_finding_count
         else:
             test_data[t.test_type.name] = t.verified_finding_count
-    product_tab = Product_Tab(prod, title="Product", tab="metrics")
+    product_tab = Product_Tab(prod, title=_("Product"), tab="metrics")
 
     return render(request,
                   'dojo/product_metrics.html',
@@ -650,9 +654,7 @@ def view_engagements(request, pid):
     result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="inactive_engs")
     result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list, recent_test_day_count)
 
-    title = "All Engagements"
-
-    product_tab = Product_Tab(prod, title=title, tab="engagements")
+    product_tab = Product_Tab(prod, title=_("All Engagements"), tab="engagements")
     return render(request,
                   'dojo/view_engagements.html',
                   {'prod': prod,
@@ -736,7 +738,7 @@ def new_product(request, ptid=None):
             product = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Product added successfully.',
+                                 _('Product added successfully.'),
                                  extra_tags='alert-success')
             success, jira_project_form = jira_helper.process_jira_project_form(request, product=product)
             error = not success
@@ -757,17 +759,17 @@ def new_product(request, ptid=None):
                             g = Github(github_pkey.git_conf.api_key)
                             repo = g.get_repo(github_pkey.git_project)
                             repo.create_label(name="security", color="FF0000",
-                                              description="This label is automatically applied to all issues created by DefectDojo")
+                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
                             repo.create_label(name="security / info", color="00FEFC",
-                                              description="This label is automatically applied to all issues created by DefectDojo")
+                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
                             repo.create_label(name="security / low", color="B7FE00",
-                                              description="This label is automatically applied to all issues created by DefectDojo")
+                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
                             repo.create_label(name="security / medium", color="FEFE00",
-                                              description="This label is automatically applied to all issues created by DefectDojo")
+                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
                             repo.create_label(name="security / high", color="FE9A00",
-                                              description="This label is automatically applied to all issues created by DefectDojo")
+                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
                             repo.create_label(name="security / critical", color="FE2200",
-                                              description="This label is automatically applied to all issues created by DefectDojo")
+                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
                         except:
                             logger.info('Labels cannot be created - they may already exists')
 
@@ -789,7 +791,7 @@ def new_product(request, ptid=None):
         else:
             gform = None
 
-    add_breadcrumb(title="New Product", top_level=False, request=request)
+    add_breadcrumb(title=_("New Product"), top_level=False, request=request)
     return render(request, 'dojo/new_product.html',
                   {'form': form,
                    'jform': jira_project_form,
@@ -822,7 +824,7 @@ def edit_product(request, pid):
             tags = request.POST.getlist('tags')
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Product updated successfully.',
+                                 _('Product updated successfully.'),
                                  extra_tags='alert-success')
 
             success, jform = jira_helper.process_jira_project_form(request, instance=jira_project, product=product)
@@ -843,7 +845,7 @@ def edit_product(request, pid):
                     new_conf.save()
                     messages.add_message(request,
                                          messages.SUCCESS,
-                                         'GITHUB information updated successfully.',
+                                         _('GITHUB information updated successfully.'),
                                          extra_tags='alert-success')
 
             if not error:
@@ -865,7 +867,7 @@ def edit_product(request, pid):
         else:
             gform = None
 
-    product_tab = Product_Tab(product, title="Edit Product", tab="settings")
+    product_tab = Product_Tab(product, title=_("Edit Product"), tab="settings")
     return render(request,
                   'dojo/edit_product.html',
                   {'form': form,
@@ -890,9 +892,9 @@ def delete_product(request, pid):
                 if get_setting("ASYNC_OBJECT_DELETE"):
                     async_del = async_delete()
                     async_del.delete(product)
-                    message = 'Product and relationships will be removed in the background.'
+                    message = _('Product and relationships will be removed in the background.')
                 else:
-                    message = 'Product and relationships removed.'
+                    message = _('Product and relationships removed.')
                     product.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -919,7 +921,7 @@ def delete_product(request, pid):
         collector.collect([product])
         rels = collector.nested()
 
-    product_tab = Product_Tab(product, title="Product", tab="settings")
+    product_tab = Product_Tab(product, title=_("Product"), tab="settings")
 
     logger.debug('delete_product: GET RENDER')
 
