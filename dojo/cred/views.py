@@ -18,7 +18,7 @@ from dojo.cred.queries import get_authorized_cred_mappings
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('dojo.add_cred_user', 'superuser')
+@user_is_configuration_authorized('dojo.add_cred_user')
 def new_cred(request):
     if request.method == 'POST':
         tform = CredUserForm(request.POST)
@@ -49,7 +49,7 @@ def all_cred_product(request, pid):
     return render(request, 'dojo/view_cred_prod.html', {'product_tab': product_tab, 'creds': creds, 'prod': prod})
 
 
-@user_is_configuration_authorized('dojo.change_cred_user', 'superuser')
+@user_is_configuration_authorized('dojo.change_cred_user')
 def edit_cred(request, ttid):
     tool_config = Cred_User.objects.get(pk=ttid)
     if request.method == 'POST':
@@ -81,7 +81,7 @@ def edit_cred(request, ttid):
     })
 
 
-@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
+@user_is_configuration_authorized('dojo.view_cred_user')
 def view_cred_details(request, ttid):
     cred = Cred_User.objects.get(pk=ttid)
     notes = cred.notes.all()
@@ -118,7 +118,7 @@ def view_cred_details(request, ttid):
     })
 
 
-@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
+@user_is_configuration_authorized('dojo.view_cred_user')
 def cred(request):
     confs = Cred_User.objects.all().order_by('name', 'environment', 'username')
     add_breadcrumb(title="Credential Manager", top_level=True, request=request)
@@ -128,7 +128,7 @@ def cred(request):
 
 
 @user_is_authorized(Product, Permissions.Product_View, 'pid')
-@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
+@user_is_configuration_authorized('dojo.view_cred_user')
 def view_cred_product(request, pid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -184,7 +184,7 @@ def view_cred_product(request, pid, ttid):
 
 
 @user_is_authorized(Product, Permissions.Endpoint_View, 'eid')
-@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
+@user_is_configuration_authorized('dojo.view_cred_user')
 def view_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -238,7 +238,7 @@ def view_cred_product_engagement(request, eid, ttid):
 
 
 @user_is_authorized(Product, Permissions.Test_View, 'tid')
-@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
+@user_is_configuration_authorized('dojo.view_cred_user')
 def view_cred_engagement_test(request, tid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -294,7 +294,7 @@ def view_cred_engagement_test(request, tid, ttid):
 
 
 @user_is_authorized(Product, Permissions.Finding_View, 'fid')
-@user_is_configuration_authorized('dojo.view_cred_user', 'superuser')
+@user_is_configuration_authorized('dojo.view_cred_user')
 def view_cred_finding(request, fid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -681,7 +681,7 @@ def delete_cred_controller(request, destination_url, id, ttid):
     })
 
 
-@user_is_configuration_authorized('dojo.delete_cred_user', 'superuser')
+@user_is_configuration_authorized('dojo.delete_cred_user')
 def delete_cred(request, ttid):
     return delete_cred_controller(request, "cred", 0, ttid)
 

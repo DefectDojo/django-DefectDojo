@@ -46,9 +46,9 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
 class UserHasDojoGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'GET':
-            return user_has_configuration_permission(request.user, 'auth.view_group', 'staff')
+            return user_has_configuration_permission(request.user, 'auth.view_group')
         elif request.method == 'POST':
-            return user_has_configuration_permission(request.user, 'auth.add_group', 'staff')
+            return user_has_configuration_permission(request.user, 'auth.add_group')
         else:
             return True
 
@@ -56,7 +56,7 @@ class UserHasDojoGroupPermission(permissions.BasePermission):
         if request.method == 'GET':
             # Users need to be authorized to view groups in general and only the groups they are a member of
             # because with the group they can see user information that might be considered as confidential
-            return user_has_configuration_permission(request.user, 'auth.view_group', 'staff') and user_has_permission(request.user, obj, Permissions.Group_View)
+            return user_has_configuration_permission(request.user, 'auth.view_group') and user_has_permission(request.user, obj, Permissions.Group_View)
         else:
             return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Edit, Permissions.Group_Delete)
 
@@ -538,10 +538,7 @@ class UserHasConfigurationPermissionStaff(permissions.DjangoModelPermissions):
     }
 
     def has_permission(self, request, view):
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            return super().has_permission(request, view)
-        else:
-            return request.user.is_staff
+        return super().has_permission(request, view)
 
 
 class UserHasConfigurationPermissionSuperuser(permissions.DjangoModelPermissions):
@@ -558,7 +555,4 @@ class UserHasConfigurationPermissionSuperuser(permissions.DjangoModelPermissions
     }
 
     def has_permission(self, request, view):
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            return super().has_permission(request, view)
-        else:
-            return request.user.is_superuser
+        return super().has_permission(request, view)

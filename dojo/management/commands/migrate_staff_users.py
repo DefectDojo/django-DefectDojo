@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     """
     This management command creates a group for staff users with all configuration
-    permissions staff users had in previous releases and global owner role if
-    AUTHORIZATION_STAFF_OVERRIDE is set to True.
+    permissions staff users had in previous releases.
     """
     help = 'Usage: manage.py migrate_staff_users'
 
@@ -55,11 +54,6 @@ class Command(BaseCommand):
                     role=reader_role,
                 )
                 member.save()
-
-        # If AUTHORIZATION_STAFF_OVERRIDE is True, then the group is made a global owner
-        if settings.AUTHORIZATION_STAFF_OVERRIDE:
-            global_role = Global_Role(group=group, role=owner_role)
-            global_role.save()
 
         permissions_list = Permission.objects.all()
         permissions = {}

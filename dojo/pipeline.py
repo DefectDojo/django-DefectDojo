@@ -63,18 +63,6 @@ def social_uid(backend, details, response, *args, **kwargs):
             return {'uid': response.get('preferred_username')}
 
 
-def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
-    # if user doesn't exist then user is None
-    if user is not None and kwargs.get('is_new'):
-        system_settings = System_Settings.objects.get()
-        if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            if system_settings.staff_user_email_pattern is not None and \
-               re.fullmatch(system_settings.staff_user_email_pattern, user.email) is not None:
-                user.is_staff = True
-            else:
-                user.is_staff = False
-
-
 def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
     if settings.AZUREAD_TENANT_OAUTH2_ENABLED and settings.AZUREAD_TENANT_OAUTH2_GET_GROUPS and isinstance(backend, AzureADTenantOAuth2):
         soc = user.social_auth.get()
