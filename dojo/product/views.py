@@ -23,26 +23,33 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
-                       EngagementPresetsForm, DeleteEngagementPresetsForm, ProductNotificationsForm, \
-                       GITHUB_Product_Form, GITHUBFindingForm, AppAnalysisForm, JIRAEngagementForm, Add_Product_MemberForm, \
-                       Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm, \
-                       DeleteAppAnalysisForm, Product_API_Scan_ConfigurationForm, DeleteProduct_API_Scan_ConfigurationForm
+from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, \
+    MetricsFindingFilter, ProductComponentFilter
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, \
+    AdHocFindingForm, \
+    EngagementPresetsForm, DeleteEngagementPresetsForm, ProductNotificationsForm, \
+    GITHUB_Product_Form, GITHUBFindingForm, AppAnalysisForm, JIRAEngagementForm, Add_Product_MemberForm, \
+    Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, \
+    Delete_Product_GroupForm, \
+    DeleteAppAnalysisForm, Product_API_Scan_ConfigurationForm, DeleteProduct_API_Scan_ConfigurationForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, \
-                        Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-                        Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
-                        Product_Group, Product_API_Scan_Configuration
-from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, async_delete, \
-                       get_system_setting, get_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, get_enabled_notifications_list
+    Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
+    Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
+    Product_Group, Product_API_Scan_Configuration
+from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, \
+    add_breadcrumb, async_delete, \
+    get_system_setting, get_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, \
+    get_enabled_notifications_list
 
 from dojo.notifications.helper import create_notification
 from dojo.components.sql_group_concat import Sql_GroupConcat
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
-from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type, get_authorized_product_types
+from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, \
+    get_authorized_groups_for_product
+from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type, \
+    get_authorized_product_types
 from dojo.tool_config.factory import create_API
 
 import dojo.finding.helper as finding_helper
@@ -78,11 +85,10 @@ def product(request):
     add_breadcrumb(title=_("Product List"), top_level=not len(request.GET), request=request)
 
     return render(request, 'dojo/product.html', {
-                  'prod_list': prod_list,
-                  'prod_filter': prod_filter,
-                  'name_words': sorted(set(name_words)),
-                  'user': request.user
-    })
+        'prod_list': prod_list,
+        'prod_filter': prod_filter,
+        'name_words': sorted(set(name_words)),
+        'user': request.user})
 
 
 def prefetch_for_product(prods):
@@ -102,10 +108,11 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id',
                                                                                 filter=Q(
                                                                                     engagement__test__finding__active=True)))
-        prefetched_prods = prefetched_prods.annotate(active_verified_finding_count=Count('engagement__test__finding__id',
-                                                                                filter=Q(
-                                                                                    engagement__test__finding__active=True,
-                                                                                    engagement__test__finding__verified=True)))
+        prefetched_prods = prefetched_prods.annotate(
+            active_verified_finding_count=Count('engagement__test__finding__id',
+                                                filter=Q(
+                                                    engagement__test__finding__active=True,
+                                                    engagement__test__finding__verified=True)))
         prefetched_prods = prefetched_prods.prefetch_related('jira_project_set__jira_instance')
         prefetched_prods = prefetched_prods.prefetch_related('members')
         prefetched_prods = prefetched_prods.prefetch_related('prod_type__members')
@@ -119,7 +126,7 @@ def prefetch_for_product(prods):
         if get_system_setting('enable_github'):
             prefetched_prods = prefetched_prods.prefetch_related(
                 Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'),
-                        to_attr='github_confs'))
+                         to_attr='github_confs'))
 
     else:
         logger.debug('unable to prefetch because query was already executed')
@@ -136,8 +143,8 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 @user_is_authorized(Product, Permissions.Product_View, 'pid')
 def view_product(request, pid):
     prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager') \
-                                      .prefetch_related('members') \
-                                      .prefetch_related('prod_type__members')
+        .prefetch_related('members') \
+        .prefetch_related('prod_type__members')
     prod = get_object_or_404(prod_query, id=pid)
     product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
     product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)
@@ -276,7 +283,7 @@ def finding_querys(request, prod):
     filters = dict()
 
     findings_query = Finding.objects.filter(test__engagement__product=prod,
-                                      severity__in=('Critical', 'High', 'Medium', 'Low', 'Info'))
+                                            severity__in=('Critical', 'High', 'Medium', 'Low', 'Info'))
 
     # prefetch only what's needed to avoid lots of repeated queries
     findings_query = findings_query.prefetch_related(
@@ -640,19 +647,22 @@ def view_engagements(request, pid):
     active_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='active')
     result_active_engs = get_page_items(request, active_engs_filter.qs, default_page_num, prefix="engs")
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list, recent_test_day_count)
+    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list,
+                                                                   recent_test_day_count)
 
     # Engagements that are queued because they haven't started or paused
     engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True).order_by('-updated')
     queued_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='queued')
     result_queued_engs = get_page_items(request, queued_engs_filter.qs, default_page_num, prefix="queued_engs")
-    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list, recent_test_day_count)
+    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list,
+                                                                   recent_test_day_count)
 
     # Cancelled or Completed Engagements
     engs = Engagement.objects.filter(product=prod, active=False).order_by('-target_end')
     inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='closed')
     result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="inactive_engs")
-    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list, recent_test_day_count)
+    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list,
+                                                                     recent_test_day_count)
 
     product_tab = Product_Tab(prod, title=_("All Engagements"), tab="engagements")
     return render(request,
@@ -683,13 +693,14 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
                     updated__gte=timezone.now() - timedelta(days=recent_test_day_count)
                 ).values_list('id', flat=True)
             ))
-        ),
+                 ),
         'test_set__test_type',
     ).annotate(
         count_tests=Count('test', distinct=True),
         count_findings_all=Count('test__finding__id'),
         count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)),
-        count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),
+        count_findings_open_verified=Count('test__finding__id',
+                                           filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),
         count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_mitigated=True)),
         count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)),
         count_findings_accepted=Count('test__finding__id', filter=Q(test__finding__risk_accepted=True)),
@@ -759,17 +770,23 @@ def new_product(request, ptid=None):
                             g = Github(github_pkey.git_conf.api_key)
                             repo = g.get_repo(github_pkey.git_project)
                             repo.create_label(name="security", color="FF0000",
-                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
+                                              description=_(
+                                                  "This label is automatically applied to all issues created by DefectDojo"))
                             repo.create_label(name="security / info", color="00FEFC",
-                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
+                                              description=_(
+                                                  "This label is automatically applied to all issues created by DefectDojo"))
                             repo.create_label(name="security / low", color="B7FE00",
-                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
+                                              description=_(
+                                                  "This label is automatically applied to all issues created by DefectDojo"))
                             repo.create_label(name="security / medium", color="FEFE00",
-                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
+                                              description=_(
+                                                  "This label is automatically applied to all issues created by DefectDojo"))
                             repo.create_label(name="security / high", color="FE9A00",
-                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
+                                              description=_(
+                                                  "This label is automatically applied to all issues created by DefectDojo"))
                             repo.create_label(name="security / critical", color="FE2200",
-                                              description=_("This label is automatically applied to all issues created by DefectDojo"))
+                                              description=_(
+                                                  "This label is automatically applied to all issues created by DefectDojo"))
                         except:
                             logger.info('Labels cannot be created - they may already exists')
 
@@ -1004,7 +1021,7 @@ def new_eng_for_app(request, pid, cicd=False):
     else:
         form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(),
                                 'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd,
-                    product=product, user=request.user)
+                       product=product, user=request.user)
 
         if get_system_setting('enable_jira'):
             jira_project = jira_helper.get_jira_project(product)
@@ -1080,9 +1097,9 @@ def delete_technology(request, tid):
         technology = form.instance
         technology.delete()
         messages.add_message(request,
-                            messages.SUCCESS,
-                            'Technology deleted successfully.',
-                            extra_tags='alert-success')
+                             messages.SUCCESS,
+                             'Technology deleted successfully.',
+                             extra_tags='alert-success')
         return HttpResponseRedirect(reverse('view_product', args=(technology.product.id,)))
 
     product_tab = Product_Tab(technology.product, title="Delete Technology", tab="settings")
@@ -1437,11 +1454,12 @@ def add_product_member(request, pid):
     if request.method == 'POST':
         memberform = Add_Product_MemberForm(request.POST, initial={'product': product.id})
         if memberform.is_valid():
-            if memberform.cleaned_data['role'].is_owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
+            if memberform.cleaned_data['role'].is_owner and not user_has_permission(request.user, product,
+                                                                                    Permissions.Product_Member_Add_Owner):
                 messages.add_message(request,
-                                    messages.WARNING,
-                                    'You are not permitted to add users as owners.',
-                                    extra_tags='alert-warning')
+                                     messages.WARNING,
+                                     'You are not permitted to add users as owners.',
+                                     extra_tags='alert-warning')
             else:
                 if 'users' in memberform.cleaned_data and len(memberform.cleaned_data['users']) > 0:
                     for user in memberform.cleaned_data['users']:
@@ -1453,10 +1471,10 @@ def add_product_member(request, pid):
                             product_member.role = memberform.cleaned_data['role']
                             product_member.save()
                 messages.add_message(request,
-                                    messages.SUCCESS,
-                                    'Product members added successfully.',
-                                    extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_product', args=(pid, )))
+                                     messages.SUCCESS,
+                                     'Product members added successfully.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     product_tab = Product_Tab(product, title="Add Product Member", tab="settings")
     return render(request, 'dojo/new_product_member.html', {
         'product': product,
@@ -1472,21 +1490,22 @@ def edit_product_member(request, memberid):
     if request.method == 'POST':
         memberform = Edit_Product_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
-            if member.role.is_owner and not user_has_permission(request.user, member.product, Permissions.Product_Member_Add_Owner):
+            if member.role.is_owner and not user_has_permission(request.user, member.product,
+                                                                Permissions.Product_Member_Add_Owner):
                 messages.add_message(request,
-                                    messages.WARNING,
-                                    'You are not permitted to make users to owners.',
-                                    extra_tags='alert-warning')
+                                     messages.WARNING,
+                                     'You are not permitted to make users to owners.',
+                                     extra_tags='alert-warning')
             else:
                 memberform.save()
                 messages.add_message(request,
-                                    messages.SUCCESS,
-                                    'Product member updated successfully.',
-                                    extra_tags='alert-success')
+                                     messages.SUCCESS,
+                                     'Product member updated successfully.',
+                                     extra_tags='alert-success')
                 if is_title_in_breadcrumbs('View User'):
-                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id,)))
                 else:
-                    return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+                    return HttpResponseRedirect(reverse('view_product', args=(member.product.id,)))
     product_tab = Product_Tab(member.product, title="Edit Product Member", tab="settings")
     return render(request, 'dojo/edit_product_member.html', {
         'memberid': memberid,
@@ -1505,16 +1524,16 @@ def delete_product_member(request, memberid):
         user = member.user
         member.delete()
         messages.add_message(request,
-                            messages.SUCCESS,
-                            'Product member deleted successfully.',
-                            extra_tags='alert-success')
+                             messages.SUCCESS,
+                             'Product member deleted successfully.',
+                             extra_tags='alert-success')
         if is_title_in_breadcrumbs('View User'):
-            return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+            return HttpResponseRedirect(reverse('view_user', args=(member.user.id,)))
         else:
             if user == request.user:
                 return HttpResponseRedirect(reverse('product'))
             else:
-                return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+                return HttpResponseRedirect(reverse('view_product', args=(member.product.id,)))
     product_tab = Product_Tab(member.product, title="Delete Product Member", tab="settings")
     return render(request, 'dojo/delete_product_member.html', {
         'memberid': memberid,
@@ -1525,7 +1544,6 @@ def delete_product_member(request, memberid):
 
 @user_is_authorized(Product, Permissions.Product_API_Scan_Configuration_Add, 'pid')
 def add_api_scan_configuration(request, pid):
-
     product = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
         form = Product_API_Scan_ConfigurationForm(request.POST)
@@ -1570,7 +1588,6 @@ def add_api_scan_configuration(request, pid):
 
 @user_is_authorized(Product, Permissions.Product_View, 'pid')
 def view_api_scan_configurations(request, pid):
-
     product_api_scan_configurations = Product_API_Scan_Configuration.objects.filter(product=pid)
 
     product_tab = Product_Tab(get_object_or_404(Product, id=pid), title="API Scan Configurations", tab="settings")
@@ -1585,10 +1602,10 @@ def view_api_scan_configurations(request, pid):
 
 @user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Edit, 'pascid')
 def edit_api_scan_configuration(request, pid, pascid):
-
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 
-    if product_api_scan_configuration.product.pk != int(pid):  # user is trying to edit Tool Configuration from another product (trying to by-pass auth)
+    if product_api_scan_configuration.product.pk != int(
+            pid):  # user is trying to edit Tool Configuration from another product (trying to by-pass auth)
         raise Http404()
 
     if request.method == 'POST':
@@ -1630,10 +1647,10 @@ def edit_api_scan_configuration(request, pid, pascid):
 
 @user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Delete, 'pascid')
 def delete_api_scan_configuration(request, pid, pascid):
-
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 
-    if product_api_scan_configuration.product.pk != int(pid):  # user is trying to delete Tool Configuration from another product (trying to by-pass auth)
+    if product_api_scan_configuration.product.pk != int(
+            pid):  # user is trying to delete Tool Configuration from another product (trying to by-pass auth)
         raise Http404()
 
     if request.method == 'POST':
@@ -1665,7 +1682,8 @@ def edit_product_group(request, groupid):
     if request.method == 'POST':
         groupform = Edit_Product_Group_Form(request.POST, instance=group)
         if groupform.is_valid():
-            if group.role.is_owner and not user_has_permission(request.user, group.product, Permissions.Product_Group_Add_Owner):
+            if group.role.is_owner and not user_has_permission(request.user, group.product,
+                                                               Permissions.Product_Group_Add_Owner):
                 messages.add_message(request,
                                      messages.WARNING,
                                      'You are not permitted to make groups owners.',
@@ -1677,9 +1695,9 @@ def edit_product_group(request, groupid):
                                      'Product group updated successfully.',
                                      extra_tags='alert-success')
                 if is_title_in_breadcrumbs('View Group'):
-                    return HttpResponseRedirect(reverse('view_group', args=(group.group.id, )))
+                    return HttpResponseRedirect(reverse('view_group', args=(group.group.id,)))
                 else:
-                    return HttpResponseRedirect(reverse('view_product', args=(group.product.id, )))
+                    return HttpResponseRedirect(reverse('view_product', args=(group.product.id,)))
 
     product_tab = Product_Tab(group.product, title="Edit Product Group", tab="settings")
     return render(request, 'dojo/edit_product_group.html', {
@@ -1703,11 +1721,11 @@ def delete_product_group(request, groupid):
                              'Product group deleted successfully.',
                              extra_tags='alert-success')
         if is_title_in_breadcrumbs('View Group'):
-            return HttpResponseRedirect(reverse('view_group', args=(group.group.id, )))
+            return HttpResponseRedirect(reverse('view_group', args=(group.group.id,)))
         else:
             # TODO: If user was in the group that was deleted and no longer has access, redirect back to product listing
             #  page
-            return HttpResponseRedirect(reverse('view_product', args=(group.product.id, )))
+            return HttpResponseRedirect(reverse('view_product', args=(group.product.id,)))
 
     product_tab = Product_Tab(group.product, title="Delete Product Group", tab="settings")
     return render(request, 'dojo/delete_product_group.html', {
@@ -1725,7 +1743,8 @@ def add_product_group(request, pid):
     if request.method == 'POST':
         group_form = Add_Product_GroupForm(request.POST, initial={'product': product.id})
         if group_form.is_valid():
-            if group_form.cleaned_data['role'].is_owner and not user_has_permission(request.user, product, Permissions.Product_Group_Add_Owner):
+            if group_form.cleaned_data['role'].is_owner and not user_has_permission(request.user, product,
+                                                                                    Permissions.Product_Group_Add_Owner):
                 messages.add_message(request,
                                      messages.WARNING,
                                      'You are not permitted to add groups as owners.',
@@ -1741,10 +1760,10 @@ def add_product_group(request, pid):
                             product_group.role = group_form.cleaned_data['role']
                             product_group.save()
                 messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'Product groups added successfully.',
-                                         extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_product', args=(pid, )))
+                                     messages.SUCCESS,
+                                     'Product groups added successfully.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     product_tab = Product_Tab(product, title="Edit Product Group", tab="settings")
     return render(request, 'dojo/new_product_group.html', {
         'product': product,
