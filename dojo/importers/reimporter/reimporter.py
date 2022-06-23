@@ -83,8 +83,8 @@ class DojoDefaultReImporter(object):
                 if finding.false_p or finding.out_of_scope or finding.risk_accepted:
                     logger.debug('%i: skipping existing finding (it is marked as false positive:%s and/or out of scope:%s or is a risk accepted:%s): %i:%s:%s:%s', i, finding.false_p, finding.out_of_scope, finding.risk_accepted, finding.id, finding, finding.component_name, finding.component_version)
                 elif finding.mitigated or finding.is_mitigated:
-                    logger.debug("item mitigated time: "+str(item.mitigated.timestamp()))
-                    logger.debug("finding mitigated time: "+str(finding.mitigated.timestamp()))
+                    logger.debug("item mitigated time: " + str(item.mitigated.timestamp()))
+                    logger.debug("finding mitigated time: " + str(finding.mitigated.timestamp()))
                     if item.mitigated:
                         if item.mitigated.timestamp() == finding.mitigated.timestamp():
                             logger.debug("New imported finding and already existing finding have the same mitigation date, will skip as they are the same.")
