@@ -40,7 +40,7 @@ class DojoDefaultReImporter(object):
         unchanged_count = 0
         unchanged_items = []
 
-        deduplicationLogger.debug('starting reimport of %i items.', len(items) if items else 0)
+        logger.debug('starting reimport of %i items.', len(items) if items else 0)
         from dojo.importers.reimporter.utils import (
             match_new_finding_to_existing_finding,
             update_endpoint_status,
@@ -83,13 +83,13 @@ class DojoDefaultReImporter(object):
                 if finding.false_p or finding.out_of_scope or finding.risk_accepted:
                     logger.debug('%i: skipping existing finding (it is marked as false positive:%s and/or out of scope:%s or is a risk accepted:%s): %i:%s:%s:%s', i, finding.false_p, finding.out_of_scope, finding.risk_accepted, finding.id, finding, finding.component_name, finding.component_version)
                 elif finding.mitigated or finding.is_mitigated:
-                    deduplicationLogger.debug("item mitigated time: "+str(item.mitigated.timestamp()))
-                    deduplicationLogger.debug("finding mitigated time: "+str(finding.mitigated.timestamp()))
+                    logger.debug("item mitigated time: "+str(item.mitigated.timestamp()))
+                    logger.debug("finding mitigated time: "+str(finding.mitigated.timestamp()))
                     if item.mitigated:
                         if item.mitigated.timestamp() == finding.mitigated.timestamp():
-                            deduplicationLogger.debug("New imported finding and already existing finding have the same mitigation date, will skip as they are the same.")
+                            logger.debug("New imported finding and already existing finding have the same mitigation date, will skip as they are the same.")
                             continue
-                    deduplicationLogger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                    logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                     finding.mitigated = None
                     finding.is_mitigated = False
                     finding.mitigated_by = None
@@ -117,7 +117,7 @@ class DojoDefaultReImporter(object):
                         # If there is only one chunk, then do not bother with async
                         if len(chunk_list) < 2:
                             reactivate_endpoint_status(endpoint_statuses, sync=True)
-                        deduplicationLogger.debug('IMPORT_SCAN: Split endpoints into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_list[0]))
+                        logger.debug('IMPORT_SCAN: Split endpoints into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_list[0]))
                         # First kick off all the workers
                         for endpoint_status_list in chunk_list:
                             reactivate_endpoint_status(endpoint_status_list, sync=False)
@@ -129,7 +129,7 @@ class DojoDefaultReImporter(object):
                     reactivated_count += 1
                 else:
                     # existing findings may be from before we had component_name/version fields
-                    deduplicationLogger.debug('%i: updating existing finding: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                    logger.debug('%i: updating existing finding: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                     if not finding.component_name or not finding.component_version:
                         finding.component_name = finding.component_name if finding.component_name else component_name
                         finding.component_version = finding.component_version if finding.component_version else component_version
@@ -139,7 +139,7 @@ class DojoDefaultReImporter(object):
                     unchanged_items.append(finding)
                     unchanged_count += 1
                 if finding.dynamic_finding:
-                    deduplicationLogger.debug("Re-import found an existing dynamic finding for this new finding. Checking the status of endpoints")
+                    logger.debug("Re-import found an existing dynamic finding for this new finding. Checking the status of endpoints")
                     update_endpoint_status(finding, item, user)
             else:
                 # no existing finding found
