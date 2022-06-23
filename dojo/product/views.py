@@ -603,36 +603,35 @@ def view_product_metrics(request, pid):
             test_data[t.test_type.name] = t.verified_finding_count
     product_tab = Product_Tab(prod, title=_("Product"), tab="metrics")
 
-    return render(request,
-                  'dojo/product_metrics.html',
-                  {'prod': prod,
-                   'product_tab': product_tab,
-                   'engs': engs,
-                   'inactive_engs': inactive_engs_page,
-                   'view': view,
-                   'verified_objs': filters.get('verified', None),
-                   'open_objs': filters.get('open', None),
-                   'inactive_objs': filters.get('inactive', None),
-                   'closed_objs': filters.get('closed', None),
-                   'false_positive_objs': filters.get('false_positive', None),
-                   'out_of_scope_objs': filters.get('out_of_scope', None),
-                   'accepted_objs': filters.get('accepted', None),
-                   'new_objs': filters.get('new_verified', None),
-                   'all_objs': filters.get('all', None),
-                   'form': filters.get('form', None),
-                   'reset_link': reverse('view_product_metrics', args=(prod.id,)) + '?type=' + view,
-                   'open_vulnerabilities': open_vulnerabilities,
-                   'all_vulnerabilities': all_vulnerabilities,
-                   'start_date': start_date,
-                   'punchcard': punchcard,
-                   'ticks': ticks,
-                   'open_close_weekly': open_close_weekly,
-                   'severity_weekly': severity_weekly,
-                   'critical_weekly': critical_weekly,
-                   'high_weekly': high_weekly,
-                   'medium_weekly': medium_weekly,
-                   'test_data': test_data,
-                   'user': request.user})
+    return render(request, 'dojo/product_metrics.html', {
+        'prod': prod,
+        'product_tab': product_tab,
+        'engs': engs,
+        'inactive_engs': inactive_engs_page,
+        'view': view,
+        'verified_objs': filters.get('verified', None),
+        'open_objs': filters.get('open', None),
+        'inactive_objs': filters.get('inactive', None),
+        'closed_objs': filters.get('closed', None),
+        'false_positive_objs': filters.get('false_positive', None),
+        'out_of_scope_objs': filters.get('out_of_scope', None),
+        'accepted_objs': filters.get('accepted', None),
+        'new_objs': filters.get('new_verified', None),
+        'all_objs': filters.get('all', None),
+        'form': filters.get('form', None),
+        'reset_link': reverse('view_product_metrics', args=(prod.id,)) + '?type=' + view,
+        'open_vulnerabilities': open_vulnerabilities,
+        'all_vulnerabilities': all_vulnerabilities,
+        'start_date': start_date,
+        'punchcard': punchcard,
+        'ticks': ticks,
+        'open_close_weekly': open_close_weekly,
+        'severity_weekly': severity_weekly,
+        'critical_weekly': critical_weekly,
+        'high_weekly': high_weekly,
+        'medium_weekly': medium_weekly,
+        'test_data': test_data,
+        'user': request.user})
 
 
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid')
@@ -665,21 +664,20 @@ def view_engagements(request, pid):
                                                                      recent_test_day_count)
 
     product_tab = Product_Tab(prod, title=_("All Engagements"), tab="engagements")
-    return render(request,
-                  'dojo/view_engagements.html',
-                  {'prod': prod,
-                   'product_tab': product_tab,
-                   'engs': result_active_engs,
-                   'engs_count': result_active_engs.paginator.count,
-                   'engs_filter': active_engs_filter,
-                   'queued_engs': result_queued_engs,
-                   'queued_engs_count': result_queued_engs.paginator.count,
-                   'queued_engs_filter': queued_engs_filter,
-                   'inactive_engs': result_inactive_engs,
-                   'inactive_engs_count': result_inactive_engs.paginator.count,
-                   'inactive_engs_filter': inactive_engs_filter,
-                   'recent_test_day_count': recent_test_day_count,
-                   'user': request.user})
+    return render(request, 'dojo/view_engagements.html', {
+        'prod': prod,
+        'product_tab': product_tab,
+        'engs': result_active_engs,
+        'engs_count': result_active_engs.paginator.count,
+        'engs_filter': active_engs_filter,
+        'queued_engs': result_queued_engs,
+        'queued_engs_count': result_queued_engs.paginator.count,
+        'queued_engs_filter': queued_engs_filter,
+        'inactive_engs': result_inactive_engs,
+        'inactive_engs_count': result_inactive_engs.paginator.count,
+        'inactive_engs_filter': inactive_engs_filter,
+        'recent_test_day_count': recent_test_day_count,
+        'user': request.user})
 
 
 def prefetch_for_view_engagements(engagements, recent_test_day_count):
@@ -762,31 +760,27 @@ def new_product(request, ptid=None):
                         github_pkey.save()
                         messages.add_message(request,
                                              messages.SUCCESS,
-                                             'GitHub information added successfully.',
+                                             _('GitHub information added successfully.'),
                                              extra_tags='alert-success')
                         # Create appropriate labels in the repo
                         logger.info('Create label in repo: ' + github_pkey.git_project)
+
+                        description = _("This label is automatically applied to all issues created by DefectDojo")
                         try:
                             g = Github(github_pkey.git_conf.api_key)
                             repo = g.get_repo(github_pkey.git_project)
                             repo.create_label(name="security", color="FF0000",
-                                              description=_(
-                                                  "This label is automatically applied to all issues created by DefectDojo"))
+                                              description=description)
                             repo.create_label(name="security / info", color="00FEFC",
-                                              description=_(
-                                                  "This label is automatically applied to all issues created by DefectDojo"))
+                                              description=description)
                             repo.create_label(name="security / low", color="B7FE00",
-                                              description=_(
-                                                  "This label is automatically applied to all issues created by DefectDojo"))
+                                              description=description)
                             repo.create_label(name="security / medium", color="FEFE00",
-                                              description=_(
-                                                  "This label is automatically applied to all issues created by DefectDojo"))
+                                              description=description)
                             repo.create_label(name="security / high", color="FE9A00",
-                                              description=_(
-                                                  "This label is automatically applied to all issues created by DefectDojo"))
+                                              description=description)
                             repo.create_label(name="security / critical", color="FE2200",
-                                              description=_(
-                                                  "This label is automatically applied to all issues created by DefectDojo"))
+                                              description=description)
                         except:
                             logger.info('Labels cannot be created - they may already exists')
 
@@ -918,9 +912,10 @@ def delete_product(request, pid):
                                      message,
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                    title='Deletion of %s' % product.name,
+                                    title=_('Deletion of %(name)s') % {'name': product.name},
                                     product_type=product_type,
-                                    description='The product "%s" was deleted by %s' % (product.name, request.user),
+                                    description=_('The product "%(name)s" was deleted by %(user)s') % {
+                                        'name': product.name, 'user': request.user},
                                     url=request.build_absolute_uri(reverse('product')),
                                     icon="exclamation-triangle")
                 logger.debug('delete_product: POST RETURN')
@@ -942,12 +937,11 @@ def delete_product(request, pid):
 
     logger.debug('delete_product: GET RENDER')
 
-    return render(request, 'dojo/delete_product.html',
-                  {'product': product,
-                   'form': form,
-                   'product_tab': product_tab,
-                   'rels': rels,
-                   })
+    return render(request, 'dojo/delete_product.html', {
+        'product': product,
+        'form': form,
+        'product_tab': product_tab,
+        'rels': rels})
 
 
 @user_is_authorized(Product, Permissions.Engagement_Add, 'pid')
@@ -996,13 +990,14 @@ def new_eng_for_app(request, pid, cicd=False):
             success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)
             error = error or not success
 
-            create_notification(event='engagement_added', title=engagement.name + " for " + product.name,
+            create_notification(event='engagement_added',
+                                title=_("%(engagement)s for %(product)s") % {'engagement': engagement.name, 'product': product.name},
                                 engagement=engagement, url=reverse('view_engagement', args=(engagement.id,)),
                                 objowner=engagement.lead)
 
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Engagement added successfully.',
+                                 _('Engagement added successfully.'),
                                  extra_tags='alert-success')
 
             if not error:
@@ -1031,18 +1026,17 @@ def new_eng_for_app(request, pid, cicd=False):
             jira_epic_form = JIRAEngagementForm()
 
     if cicd:
-        title = 'New CI/CD Engagement'
+        title = _('New CI/CD Engagement')
     else:
-        title = 'New Interactive Engagement'
+        title = _('New Interactive Engagement')
 
     product_tab = Product_Tab(product, title=title, tab="engagements")
-    return render(request, 'dojo/new_eng.html',
-                  {'form': form,
-                   'title': title,
-                   'product_tab': product_tab,
-                   'jira_epic_form': jira_epic_form,
-                   'jira_project_form': jira_project_form,
-                   })
+    return render(request, 'dojo/new_eng.html', {
+        'form': form,
+        'title': title,
+        'product_tab': product_tab,
+        'jira_epic_form': jira_epic_form,
+        'jira_project_form': jira_project_form})
 
 
 @user_is_authorized(Product, Permissions.Technology_Add, 'pid')
@@ -1055,12 +1049,12 @@ def new_tech_for_prod(request, pid):
             tech.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Technology added successfully.',
+                                 _('Technology added successfully.'),
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
 
     form = AppAnalysisForm(initial={'user': request.user})
-    product_tab = Product_Tab(get_object_or_404(Product, id=pid), title="Add Technology", tab="settings")
+    product_tab = Product_Tab(get_object_or_404(Product, id=pid), title=_("Add Technology"), tab="settings")
     return render(request, 'dojo/new_tech.html',
                   {'form': form,
                    'product_tab': product_tab,
@@ -1077,11 +1071,11 @@ def edit_technology(request, tid):
             form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Technology changed successfully.',
+                                 _('Technology changed successfully.'),
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_product', args=(technology.product.id,)))
 
-    product_tab = Product_Tab(technology.product, title="Edit Technology", tab="settings")
+    product_tab = Product_Tab(technology.product, title=_("Edit Technology"), tab="settings")
     return render(request, 'dojo/edit_technology.html',
                   {'form': form,
                    'product_tab': product_tab,
@@ -1098,11 +1092,11 @@ def delete_technology(request, tid):
         technology.delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             'Technology deleted successfully.',
+                             _('Technology deleted successfully.'),
                              extra_tags='alert-success')
         return HttpResponseRedirect(reverse('view_product', args=(technology.product.id,)))
 
-    product_tab = Product_Tab(technology.product, title="Delete Technology", tab="settings")
+    product_tab = Product_Tab(technology.product, title=_("Delete Technology"), tab="settings")
     return render(request, 'dojo/delete_technology.html', {
         'technology': technology,
         'form': form,
@@ -1125,7 +1119,7 @@ def add_meta_data(request, pid):
             form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Metadata added successfully.',
+                                 _('Metadata added successfully.'),
                                  extra_tags='alert-success')
             if 'add_another' in request.POST:
                 return HttpResponseRedirect(reverse('add_meta_data', args=(pid,)))
@@ -1134,10 +1128,9 @@ def add_meta_data(request, pid):
     else:
         form = DojoMetaDataForm()
 
-    product_tab = Product_Tab(prod, title="Add Metadata", tab="settings")
+    product_tab = Product_Tab(prod, title=_("Add Metadata"), tab="settings")
 
-    return render(request,
-                  'dojo/add_product_meta_data.html',
+    return render(request, 'dojo/add_product_meta_data.html',
                   {'form': form,
                    'product_tab': product_tab,
                    'product': prod,
@@ -1163,13 +1156,12 @@ def edit_meta_data(request, pid):
 
         messages.add_message(request,
                              messages.SUCCESS,
-                             'Metadata edited successfully.',
+                             _('Metadata edited successfully.'),
                              extra_tags='alert-success')
         return HttpResponseRedirect(reverse('view_product', args=(pid,)))
 
-    product_tab = Product_Tab(prod, title="Edit Metadata", tab="settings")
-    return render(request,
-                  'dojo/edit_product_meta_data.html',
+    product_tab = Product_Tab(prod, title=_("Edit Metadata"), tab="settings")
+    return render(request, 'dojo/edit_product_meta_data.html',
                   {'product': prod,
                    'product_tab': product_tab,
                    })
@@ -1178,10 +1170,10 @@ def edit_meta_data(request, pid):
 @user_is_authorized(Product, Permissions.Finding_Add, 'pid')
 def ad_hoc_finding(request, pid):
     prod = Product.objects.get(id=pid)
-    test_type, _ = Test_Type.objects.get_or_create(name="Pen Test")
+    test_type, res = Test_Type.objects.get_or_create(name=_("Pen Test"))
     test = None
     try:
-        eng = Engagement.objects.get(product=prod, name="Ad Hoc Engagement")
+        eng = Engagement.objects.get(product=prod, name=_("Ad Hoc Engagement"))
         tests = Test.objects.filter(engagement=eng)
 
         if len(tests) != 0:
@@ -1191,7 +1183,7 @@ def ad_hoc_finding(request, pid):
                         target_start=timezone.now(), target_end=timezone.now())
             test.save()
     except:
-        eng = Engagement(name="Ad Hoc Engagement", target_start=timezone.now(),
+        eng = Engagement(name=_("Ad Hoc Engagement"), target_start=timezone.now(),
                          target_end=timezone.now(), active=False, product=prod)
         eng.save()
         test = Test(engagement=eng, test_type=test_type,
