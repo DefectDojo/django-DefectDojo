@@ -1,7 +1,7 @@
 import json
-import datetime
 import html2text
 
+from dateutil import parser
 from dojo.models import Finding, Endpoint
 
 
@@ -19,7 +19,7 @@ class Acunetix360Parser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = dict()
-        scan_date = datetime.datetime.strptime(data["Generated"], "%d/%m/%Y %H:%M %p").date()
+        scan_date = parser.parse(data["Generated"])
         text_maker = html2text.HTML2Text()
         text_maker.body_width = 0
 
@@ -64,6 +64,10 @@ class Acunetix360Parser(object):
 
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+
+            if item.get("FirstSeenDate"):
+                parseddate = parser.parse(item["FirstSeenDate"])
+                finding.date = parseddate
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
