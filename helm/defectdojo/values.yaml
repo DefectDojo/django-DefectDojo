@@ -309,6 +309,8 @@ mysql:
 
 postgresql:
   enabled: true
+  image:
+    tag: 11.16.0-debian-11-r9
   auth:
     username: defectdojo
     password: ""
