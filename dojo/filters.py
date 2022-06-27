@@ -1239,6 +1239,8 @@ class FindingFilter(FindingFilterWithTags):
 
     endpoints__host = CharFilter(lookup_expr='icontains', label="Endpoint Host")
 
+    service = CharFilter(lookup_expr='icontains')
+
     test = ModelMultipleChoiceFilter(
         queryset=Test.objects.none(),
         label="Test")
@@ -1337,6 +1339,7 @@ class FindingFilter(FindingFilterWithTags):
             ('title', 'title'),
             ('test__engagement__product__name',
              'test__engagement__product__name'),
+            ('service', 'service'),
         ),
         field_labels={
             'numerical_severity': 'Severity',

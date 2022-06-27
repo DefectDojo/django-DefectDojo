@@ -30,6 +30,7 @@ env = environ.Env(
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
     DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
+    DD_CSRF_TRUSTED_ORIGINS=(list, []),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
@@ -621,6 +622,12 @@ SESSION_COOKIE_SECURE = env('DD_SESSION_COOKIE_SECURE')
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 
+# A list of trusted origins for unsafe requests (e.g. POST).
+# Use comma-separated list of domains, they will be split to list automatically
+# DefectDojo is running on Django version 3.2. Format of DD_CSRF_TRUSTED_ORIGINS may change in future when it will be upgraded to Django version 4.0
+# Please see: https://docs.djangoproject.com/en/4.0/ref/settings/#std-setting-CSRF_TRUSTED_ORIGINS
+CSRF_TRUSTED_ORIGINS = env('DD_CSRF_TRUSTED_ORIGINS')
+
 if env('DD_SECURE_PROXY_SSL_HEADER'):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -1070,7 +1077,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'SonarQube API Import': ['title', 'file_path', 'line'],
     'Dependency Check Scan': ['vulnerability_ids', 'cwe', 'file_path'],
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'vulnerability_ids'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
     'Nessus Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
@@ -1171,6 +1178,17 @@ DEDUPE_ALGO_HASH_CODE = 'hash_code'
 # unique_id_from_tool or hash_code
 # Makes it possible to deduplicate on a technical id (same parser) and also on some functional fields (cross-parsers deduplication)
 DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code'
+
+# Allows to deduplicate with endpoints if endpoints is not included in the hashcode.
+# Possible values are: scheme, host, port, path, query, fragment, userinfo, and user. For a details description see https://hyperlink.readthedocs.io/en/latest/api.html#attributes.
+# Example:
+# Finding A and B have the same hashcode. Finding A has endpoint http://defectdojo.com and finding B has endpoint https://defectdojo.com/finding.
+# - An empyt list ([]) means, no fields are used. B is marked as duplicated of A.
+# - Host (['host']) means: B is marked as duplicate of A because the host (defectdojo.com) is the same.
+# - Host and path (['host', 'path']) means: A and B stay untouched because the path is different.
+#
+# If a finding has more than one endpoint, only one endpoint pair must match to mark the finding as duplicate.
+DEDUPE_ALGO_ENDPOINT_FIELDS = ['host', 'path']
 
 # Choice of deduplication algorithm per parser
 # Key = the scan_type from factory.py (= the test_type)

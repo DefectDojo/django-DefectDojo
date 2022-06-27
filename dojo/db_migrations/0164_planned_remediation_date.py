@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0161_alter_dojo_group_social_provider'),
+        ('dojo', '0163_system_settings_enable_calendar'),
     ]
 
     operations = [

@@ -10,8 +10,6 @@ class TestSarifParser(DojoTestCase):
     def common_checks(self, finding):
         self.assertLessEqual(len(finding.title), 250)
         self.assertIn(finding.severity, Finding.SEVERITIES)
-        if finding.cve:
-            self.assertIsInstance(finding.cve, str)
         if finding.cwe:
             self.assertIsInstance(finding.cwe, int)
         self.assertEqual(True, finding.static_finding)  # by specification
@@ -139,7 +137,8 @@ class TestSarifParser(DojoTestCase):
             item.title,
         )
         self.assertEqual("Critical", item.severity)
-        self.assertEqual("CVE-2019-11358", item.cve)
+        self.assertEqual(1, len(item.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2019-11358", item.unsaved_vulnerability_ids[0])
         for finding in findings:
             self.common_checks(finding)
 
@@ -154,7 +153,7 @@ class TestSarifParser(DojoTestCase):
             "file:///home/damien/dd/docker/setEnv.sh",
             item.file_path,
         )
-        self.assertIsNone(item.cve)
+        self.assertIsNone(item.unsaved_vulnerability_ids)
         self.assertEqual(datetime.datetime(2021, 3, 8, 15, 39, 40, tzinfo=datetime.timezone.utc), item.date)
         # finding 6
         item = findings[6]
@@ -163,7 +162,7 @@ class TestSarifParser(DojoTestCase):
             item.title,
         )
         self.assertEqual("Info", item.severity)
-        self.assertIsNone(item.cve)
+        self.assertIsNone(item.unsaved_vulnerability_ids)
         for finding in findings:
             self.common_checks(finding)
 
@@ -178,7 +177,7 @@ class TestSarifParser(DojoTestCase):
             "file:///home/damien/dd/dojo/tools/veracode/parser.py",
             item.file_path,
         )
-        self.assertIsNone(item.cve)
+        self.assertIsNone(item.unsaved_vulnerability_ids)
         self.assertEqual(datetime.datetime(2021, 3, 8, 15, 46, 16, tzinfo=datetime.timezone.utc), item.date)
         # finding 2
         item = findings[2]
@@ -194,7 +193,7 @@ class TestSarifParser(DojoTestCase):
             item.title,
         )
         self.assertEqual("Critical", item.severity)
-        self.assertIsNone(item.cve)
+        self.assertIsNone(item.unsaved_vulnerability_ids)
         for finding in findings:
             self.common_checks(finding)
 
@@ -210,7 +209,7 @@ class TestSarifParser(DojoTestCase):
             "file:///src/index.js",
             finding.file_path,
         )
-        self.assertIsNone(finding.cve)
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
         self.assertEqual(datetime.datetime(2021, 3, 23, 0, 10, 48, tzinfo=datetime.timezone.utc), finding.date)
         self.assertEqual(327, finding.cwe)
         # finding 1

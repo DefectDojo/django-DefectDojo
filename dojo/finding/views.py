@@ -968,13 +968,15 @@ def request_finding_review(request, fid):
             finding.save()
             reviewers = ""
             for suser in form.cleaned_data['reviewers']:
-                reviewers += str(suser) + ", "
+                full_user = Dojo_User.generate_full_name(Dojo_User.objects.get(id=suser))
+                logger.debug("Asking %s for review", full_user)
+                reviewers += str(full_user) + ", "
             reviewers = reviewers[:-2]
 
             create_notification(event='review_requested',
                                 title='Finding review requested',
                                 finding=finding,
-                                description='User %s has requested that users %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
+                                description='User %s has requested that user(s) %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
                                 icon='check',
                                 url=reverse("view_finding", args=(finding.id,)))
 
@@ -1680,7 +1682,7 @@ def merge_finding_product(request, pid):
                                 finding_descriptions = "{}\n**File Path:** {}\n".format(finding_descriptions, finding.file_path)
 
                         # If checked merge the Reference
-                        if form.cleaned_data['append_reference']:
+                        if form.cleaned_data['append_reference'] and finding.references is not None:
                             finding_references = "{}\n{}".format(finding_references, finding.references)
 
                         # if checked merge the endpoints

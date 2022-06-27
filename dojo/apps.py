@@ -30,7 +30,7 @@ class DojoAppConfig(AppConfig):
         watson.register(self.get_model('Test'), fields=get_model_fields_with_extra(self.get_model('Test'), ('id', 'engagement__product__name', )), store=('engagement__product__name', ))  # test_type__name?
 
         watson.register(self.get_model('Finding'), fields=get_model_fields_with_extra(self.get_model('Finding'), ('id', 'url', 'unique_id_from_tool', 'test__engagement__product__name', 'jira_issue__jira_key', )),
-                        store=('cve', 'status', 'jira_issue__jira_key', 'test__engagement__product__name', 'severity', 'severity_display', 'latest_note'))
+                        store=('status', 'jira_issue__jira_key', 'test__engagement__product__name', 'severity', 'severity_display', 'latest_note'))
 
         # some thoughts on Finding fields that are not indexed yet:
         # CWE can't be indexed as it is an integer
@@ -62,6 +62,7 @@ class DojoAppConfig(AppConfig):
         watson.register(self.get_model('Endpoint'), store=('product__name', ))  # add product name also?
         watson.register(self.get_model('Engagement'), fields=get_model_fields_with_extra(self.get_model('Engagement'), ('id', 'product__name', )), store=('product__name', ))
         watson.register(self.get_model('App_Analysis'))
+        watson.register(self.get_model('Vulnerability_Id'), store=('finding__test__engagement__product__name', ))
 
         # YourModel = self.get_model("YourModel")
         # watson.register(YourModel)

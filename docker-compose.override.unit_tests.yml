@@ -39,6 +39,7 @@ services:
     image: busybox:1.35.0-musl
     entrypoint: ['echo', 'skipping', 'initializer']
   mysql:
+    platform: linux/amd64
     ports:
       - target: ${DD_DATABASE_PORT}
         published: ${DD_DATABASE_PORT}

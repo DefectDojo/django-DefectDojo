@@ -24,13 +24,13 @@ jobs:
         with:
           version: v3.4.0
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.7
 
       - name: Configure Helm repos
         run: |-
-             helm repo add bitnami https://charts.bitnami.com/bitnami
+             helm repo add bitnami https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami/
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
 

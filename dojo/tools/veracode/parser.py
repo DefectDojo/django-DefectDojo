@@ -221,7 +221,7 @@ class VeracodeParser(object):
 
         # Report values
         finding.severity = cls.__cvss_to_severity(float(xml_node.attrib['cvss_score']))
-        finding.cve = xml_node.attrib['cve_id']
+        finding.unsaved_vulnerability_ids = [xml_node.attrib['cve_id']]
         finding.cwe = cls._get_cwe(xml_node.attrib['cwe_id'])
         finding.title = "Vulnerable component: {0}:{1}".format(library, version)
         finding.component_name = library
@@ -233,7 +233,7 @@ class VeracodeParser(object):
 
         _description = 'This library has known vulnerabilities.\n'
         _description += \
-                "**CVE: [{0}](https://nvd.nist.gov/vuln/detail/{0})** ({1})\n" \
+                "**CVE:** {0} ({1})\n" \
                 "CVS Score: {2} ({3})\n" \
                 "Summary: \n>{4}" \
                 "\n\n-----\n\n".format(
