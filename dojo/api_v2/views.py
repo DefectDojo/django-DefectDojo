@@ -2558,6 +2558,7 @@ class SLAConfigurationViewset(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
+
 # Authorization: superuser
 class ConfigurationPermissionViewSet(mixins.RetrieveModelMixin,
                                      mixins.ListModelMixin,
