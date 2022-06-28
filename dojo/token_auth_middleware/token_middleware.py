@@ -12,7 +12,6 @@ class TokenAuthMiddleware:
     def _add_user_from_token(self, request):
         token_auth = TokenAuthentication().authenticate(request)
         if token_auth:
-            print(f"Adding user {token_auth[0]} to request.user.")
             request.user = token_auth[0]
 
     def __call__(self, request):
