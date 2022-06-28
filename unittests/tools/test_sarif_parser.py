@@ -485,3 +485,17 @@ class TestSarifParser(DojoTestCase):
         self.assertEqual(description, item.description)
         for finding in findings:
             self.common_checks(finding)
+
+    def test_severity_cvss_from_grype(self):
+        testfile = open(path.join(path.dirname(__file__), "../scans/sarif/cxf-3.4.6.sarif"))
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(22, len(findings))
+        # finding 0
+        item = findings[0]
+        self.assertEqual("Low", item.severity)
+        self.assertEqual(2.1, item.cvssv3_score)
+        # finding 6
+        item = findings[6]
+        self.assertEqual("High", item.severity)
+        self.assertEqual(7.8, item.cvssv3_score)
