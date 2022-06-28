@@ -827,13 +827,13 @@ class Product(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
                                   null=False, blank=False, on_delete=models.CASCADE)
+    updated = models.DateTimeField(auto_now=True, null=True)
     sla_configuration = models.ForeignKey(SLA_Configuration,
                                           related_name='sla_config',
                                           null=False,
                                           blank=False,
                                           default=1,
                                           on_delete=models.RESTRICT)
-    updated = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     members = models.ManyToManyField(Dojo_User, through='Product_Member', related_name='product_members', blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Group', related_name='product_groups', blank=True)
