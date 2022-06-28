@@ -2569,7 +2569,6 @@ class ConfigurationPermissionViewSet(mixins.RetrieveModelMixin,
     filter_fields = ('id', 'name', 'codename')
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
-
 class SLAConfigurationViewset(mixins.ListModelMixin,
                               mixins.RetrieveModelMixin,
                               mixins.UpdateModelMixin,
