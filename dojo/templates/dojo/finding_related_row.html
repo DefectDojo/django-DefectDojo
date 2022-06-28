@@ -22,7 +22,7 @@
         <a title="{{ similar_finding.title }}" href="{% url 'view_finding' similar_finding.id %}">{{ similar_finding.title|truncatechars_html:80 }}</a>
         {% if similar_finding.tags %}
         <small>
-            {% include "dojo/snippets/tags.html" with tags=similar_finding.tags.alll %}
+            {% include "dojo/snippets/tags.html" with tags=similar_finding.tags.all %}
         </small>
         {% endif %}
         {% with similar_finding.notes.count as note_count %}

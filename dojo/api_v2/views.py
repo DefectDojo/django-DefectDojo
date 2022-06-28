@@ -4,6 +4,7 @@ from crum import get_current_user
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
 from drf_yasg.inspectors.base import NotHandled
@@ -61,6 +62,7 @@ from dojo.jira_link.queries import get_authorized_jira_projects, get_authorized_
 from dojo.tool_product.queries import get_authorized_tool_product_settings
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from dojo.authorization.roles_permissions import Permissions
+from dojo.user.utils import get_configuration_permissions_codenames
 
 logger = logging.getLogger(__name__)
 
@@ -2555,3 +2557,13 @@ class SLAConfigurationViewset(mixins.ListModelMixin,
     queryset = SLA_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+# Authorization: superuser
+class ConfigurationPermissionViewSet(mixins.RetrieveModelMixin,
+                                     mixins.ListModelMixin,
+                                     viewsets.GenericViewSet):
+    serializer_class = serializers.ConfigurationPermissionSerializer
+    queryset = Permission.objects.filter(codename__in=get_configuration_permissions_codenames())
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'codename')
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)

@@ -447,12 +447,14 @@
                                                 </ul>
                                             </li>
                                         {% endif %}
+                                        {% if system_settings.enable_calendar %}
                                         <li>
                                             <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
                                                 <i class="fa fa-calendar fa-fw"></i>
                                                 <span>{% trans "Calendar" %}</span>
                                             </a>
                                         </li>
+                                        {% endif %}
                                         {% if system_settings.enable_questionnaires %}
                                             {% if "dojo.view_engagement_survey"|has_configuration_permission:"staff" or "dojo.view_question"|has_configuration_permission:"staff" %}
                                                 <li>

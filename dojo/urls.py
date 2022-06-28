@@ -21,7 +21,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
     NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset, UserContactInfoViewSet, \
-    ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView
+    ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView, \
+    ConfigurationPermissionViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -68,6 +69,7 @@ admin.autodiscover()
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
 v2_api.register(r'technologies', AppAnalysisViewSet)
+v2_api.register(r'configuration_permissions', ConfigurationPermissionViewSet)
 v2_api.register(r'endpoints', EndPointViewSet)
 v2_api.register(r'endpoint_meta_import', EndpointMetaImporterView, basename='endpointmetaimport')
 v2_api.register(r'endpoint_status', EndpointStatusViewSet)

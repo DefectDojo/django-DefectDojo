@@ -21,10 +21,12 @@ from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, En
     DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
     ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
-    NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet
+    NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet, \
+    ConfigurationPermissionViewSet
 from json import dumps
 from enum import Enum
 from django.urls import reverse
+from django.contrib.auth.models import Permission
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -1486,11 +1488,35 @@ class UsersTest(BaseClass.RESTEndpointTest):
             "last_name": "user",
             "email": "example@email.com",
             "is_active": True,
+            "configuration_permissions": [217, 218]
         }
-        self.update_fields = {"first_name": "test changed"}
+        self.update_fields = {"first_name": "test changed", "configuration_permissions": [219, 220]}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 17
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create_user_with_non_configuration_permissions(self):
+        payload = self.payload.copy()
+        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        response = self.client.post(self.url, payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('object does not exist', response.data['message'])
+
+    def test_update_user_with_non_configuration_permissions(self):
+        payload = {}
+        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        response = self.client.patch(self.url + '3/', payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('object does not exist', response.data['message'])
+
+    def test_update_user_other_permissions_will_not_leak_and_stay_untouched(self):
+        payload = {}
+        payload['configuration_permissions'] = [217, 218, 219]
+        response = self.client.patch(self.url + '6/', payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['configuration_permissions'], payload['configuration_permissions'])
+        user_permissions = User.objects.get(username='user5').user_permissions.all().values_list('id', flat=True)
+        self.assertEqual(set(user_permissions), set(payload['configuration_permissions'] + [26, 28]))
 
 
 class UserContactInfoTest(BaseClass.RESTEndpointTest):
@@ -2195,8 +2221,9 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
         self.payload = {
             "name": "Test Group",
             "description": "Test",
+            "configuration_permissions": [217, 218],
         }
-        self.update_fields = {'description': "changed"}
+        self.update_fields = {'description': "changed", "configuration_permissions": [219, 220]}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Dojo_Group
         self.permission_update = Permissions.Group_Edit
@@ -2223,6 +2250,31 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
 
         response = self.client.post(self.url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_create_group_with_non_configuration_permissions(self):
+        payload = self.payload.copy()
+        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        response = self.client.post(self.url, payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('object does not exist', response.data['message'])
+
+    def test_update_group_with_non_configuration_permissions(self):
+        payload = {}
+        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        response = self.client.patch(self.url + '2/', payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('object does not exist', response.data['message'])
+
+    def test_update_group_other_permissions_will_not_leak_and_stay_untouched(self):
+        Dojo_Group.objects.get(name='Group 1 Testdata').auth_group.permissions.set([218, 220, 26, 28])  # I was trying to set this in 'dojo_testdata.json' but it hasn't sucessful
+        payload = {}
+        payload['configuration_permissions'] = [217, 218, 219]
+        response = self.client.patch(self.url + '1/', payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['configuration_permissions'], payload['configuration_permissions'])
+        permissions = Dojo_Group.objects.get(name='Group 1 Testdata').auth_group.permissions.all().values_list('id', flat=True)
+        self.assertEqual(set(permissions), set(payload['configuration_permissions'] + [26, 28]))
+        Dojo_Group.objects.get(name='Group 1 Testdata').auth_group.permissions.clear()
 
 
 class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
@@ -2541,4 +2593,16 @@ class TestTypeTest(BaseClass.AuthenticatedViewTest):
         self.update_fields = {'name': 'Test_2'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ConfigurationPermissionTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Permission
+        self.endpoint_path = 'configuration_permissions'
+        self.viewname = 'permission'
+        self.viewset = ConfigurationPermissionViewSet
+        self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
