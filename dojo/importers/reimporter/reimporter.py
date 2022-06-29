@@ -82,19 +82,24 @@ class DojoDefaultReImporter(object):
                 finding = findings[0]
                 if finding.false_p or finding.out_of_scope or finding.risk_accepted:
                     logger.debug('%i: skipping existing finding (it is marked as false positive:%s and/or out of scope:%s or is a risk accepted:%s): %i:%s:%s:%s', i, finding.false_p, finding.out_of_scope, finding.risk_accepted, finding.id, finding, finding.component_name, finding.component_version)
-                elif finding.mitigated or finding.is_mitigated:
-                    logger.debug("item mitigated time: " + str(item.mitigated.timestamp()))
-                    logger.debug("finding mitigated time: " + str(finding.mitigated.timestamp()))
+                elif finding.mitigated and finding.is_mitigated:
                     if item.mitigated:
+                        logger.debug("item mitigated time: " + str(item.mitigated.timestamp()))
+                        logger.debug("finding mitigated time: " + str(finding.mitigated.timestamp()))
                         if item.mitigated.timestamp() == finding.mitigated.timestamp():
                             logger.debug("New imported finding and already existing finding have the same mitigation date, will skip as they are the same.")
                             continue
-                    logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                    finding.mitigated = None
-                    finding.is_mitigated = False
-                    finding.mitigated_by = None
-                    finding.active = True
-                    finding.verified = verified
+                        if item.mitigated.timestamp() != finding.mitigated.timestamp():
+                            logger.debug("New imported finding and already existing finding have different dates")
+
+
+                    if not item.mitigated:
+                        logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                        finding.mitigated = None
+                        finding.is_mitigated = False
+                        finding.mitigated_by = None
+                        finding.active = True
+                        finding.verified = verified
 
                     # existing findings may be from before we had component_name/version fields
                     finding.component_name = finding.component_name if finding.component_name else component_name
@@ -130,6 +135,15 @@ class DojoDefaultReImporter(object):
                 else:
                     # existing findings may be from before we had component_name/version fields
                     logger.debug('%i: updating existing finding: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                    if not (finding.mitigated and finding.is_mitigated):
+                        logger.debug('Item matches a finding that is currently open.')
+                        if item.mitigated:
+                            logger.debug('%i: closing: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                            finding.mitigated = item.mitigated
+                            finding.is_mitigated = True
+                            finding.mitigated_by = None
+                            finding.active = False
+                            finding.verified = verified
                     if not finding.component_name or not finding.component_version:
                         finding.component_name = finding.component_name if finding.component_name else component_name
                         finding.component_version = finding.component_version if finding.component_version else component_version
