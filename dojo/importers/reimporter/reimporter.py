@@ -92,7 +92,6 @@ class DojoDefaultReImporter(object):
                         if item.mitigated.timestamp() != finding.mitigated.timestamp():
                             logger.debug("New imported finding and already existing finding have different dates")
 
-
                     if not item.mitigated:
                         logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                         finding.mitigated = None
