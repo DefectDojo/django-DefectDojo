@@ -175,6 +175,8 @@ class VeracodeParser(object):
         _sast_source_obj = xml_node.attrib.get('functionprototype')
         finding.sast_source_object = _sast_source_obj if _sast_source_obj else None
 
+        finding.unsaved_tags = ["sast"]
+
         return finding
 
     @classmethod
@@ -185,6 +187,8 @@ class VeracodeParser(object):
 
         url_host = xml_node.attrib.get('url')
         finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
+
+        finding.unsaved_tags = ["dast"]
 
         return finding
 
@@ -245,5 +249,7 @@ class VeracodeParser(object):
                     cls.vc_severity_mapping.get(int(xml_node.attrib['severity']), 'Info'),
                     xml_node.attrib['cve_summary'])
         finding.description = _description
+
+        finding.unsaved_tags = ["sca"]
 
         return finding
