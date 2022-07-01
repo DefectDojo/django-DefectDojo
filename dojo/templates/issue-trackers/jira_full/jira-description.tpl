@@ -58,6 +58,9 @@
 *Source File*: {{ finding.sast_source_file_path }}
 *Source Line*: {{ finding.sast_source_line }}
 *Sink Object*: {{ finding.sast_sink_object }}
+{% elif finding.static_finding %}
+*Source File*: {{ finding.file_path }}
+*Source Line*: {{ finding.line }}
 {% endif %}
 
 *Description*:
