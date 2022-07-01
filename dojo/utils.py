@@ -2130,6 +2130,8 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
                     model_type.objects.bulk_update(batch, fields)
                 batch = []
                 logger.debug('%s%s out of %s models processed ...', log_prefix, i, total_count)
+    
+        logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
 
     if fields:
         model_type.objects.bulk_update(batch, fields)
