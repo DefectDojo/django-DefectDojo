@@ -63,12 +63,12 @@ class HorusecParser(object):
             severity=data["vulnerabilities"]["severity"].title(),
             description=description,
             file_path=data["vulnerabilities"]["file"],
-            line=_line(data["vulnerabilities"]["line"]),
+            line=self._vulnerability_parser_line(data["vulnerabilities"]["line"]),
             scanner_confidence=self.CONDIFDENCE[data["vulnerabilities"]["confidence"]],
         )
         return finding
 
-    def _line(value):
+    def _vulnerability_parser_line(value):
         try:
             return int(value)
         except:
