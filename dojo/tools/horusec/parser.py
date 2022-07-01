@@ -47,6 +47,7 @@ class HorusecParser(object):
         return [test]
 
     def _get_finding(self, data, date):
+
         description = "\n".join(
             [
                 data["vulnerabilities"]["details"].split("\n")[-1],
@@ -62,7 +63,13 @@ class HorusecParser(object):
             severity=data["vulnerabilities"]["severity"].title(),
             description=description,
             file_path=data["vulnerabilities"]["file"],
-            line=int(data["vulnerabilities"]["line"]),
+            line=_line(data["vulnerabilities"]["line"]),
             scanner_confidence=self.CONDIFDENCE[data["vulnerabilities"]["confidence"]],
         )
         return finding
+
+    def _line(value):
+        try:
+            return int(value)
+        except:
+            return 0
