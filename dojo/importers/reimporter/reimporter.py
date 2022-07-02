@@ -140,7 +140,7 @@ class DojoDefaultReImporter(object):
                             logger.debug('%i: closing: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                             finding.mitigated = item.mitigated
                             finding.is_mitigated = True
-                            finding.mitigated_by = None
+                            finding.mitigated_by = item.mitigated_by
                             finding.active = False
                             finding.verified = verified
                     if not finding.component_name or not finding.component_version:
