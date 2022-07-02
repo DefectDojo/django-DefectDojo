@@ -51,7 +51,7 @@ gitpython==3.1.27
 debugpy==1.6.0
 python-gitlab==3.5.0
 google-api-python-client==2.52.0
-google-auth==2.8.0
+google-auth==2.9.0
 google-auth-oauthlib==0.5.2
 drf_yasg==1.20.0
 cpe==1.2.1
