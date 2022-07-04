@@ -95,6 +95,7 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertEqual("commons-httpclient", finding.component_name)
         self.assertEqual("3.1", finding.component_version)
         self.assertEqual("CVE-2012-6153", finding.unique_id_from_tool)
+        self.assertEqual(4.3, finding.cvssv3_score)
 
     def test_parse_file_with_mitigated_finding(self):
         testfile = open("unittests/scans/veracode/mitigated_finding.xml")
