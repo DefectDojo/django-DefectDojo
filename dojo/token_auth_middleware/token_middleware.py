@@ -13,6 +13,8 @@ class TokenAuthMiddleware:
         token_auth = TokenAuthentication().authenticate(request)
         if token_auth:
             request.user = token_auth[0]
+            # Disable CSRF since apparently a valid Token header was provided
+            setattr(request, '_dont_enforce_csrf_checks', True)
 
     def __call__(self, request):
         if (
