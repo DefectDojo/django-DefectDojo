@@ -1,11 +1,11 @@
 import datetime
 
-from django.test import SimpleTestCase
+from ..dojo_test_case import DojoTestCase
 from dojo.tools.veracode.parser import VeracodeParser
 from dojo.models import Test
 
 
-class TestVeracodeScannerParser(SimpleTestCase):
+class TestVeracodeScannerParser(DojoTestCase):
 
     def test_parse_file_with_one_finding(self):
         testfile = open("unittests/scans/veracode/one_finding.xml")
@@ -51,10 +51,12 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertEqual("sourcefilepathMyApp.java", finding.file_path)
         self.assertEqual(2, finding.line)
         self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
+        self.assertIn('sast', finding.unsaved_tags)
         finding = findings[1]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual(456, finding.cwe)
         self.assertTrue(finding.dynamic_finding)
+        self.assertIn('dast', finding.unsaved_tags)
         finding = findings[2]
         self.assertEqual("High", finding.severity)
         self.assertIsNone(finding.cwe)
@@ -62,12 +64,14 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertEqual("CVE-1234-1234", finding.unsaved_vulnerability_ids[0])
         self.assertEqual("Vulnerable component: library:1234", finding.title)
         self.assertFalse(finding.is_mitigated)
+        self.assertIn('sca', finding.unsaved_tags)
         finding = findings[3]
         self.assertEqual("High", finding.severity)
         self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
         self.assertEqual("CVE-5678-5678", finding.unsaved_vulnerability_ids[0])
         self.assertEqual("Vulnerable component: library1:1234", finding.title)
         self.assertFalse(finding.is_mitigated)
+        self.assertIn('sca', finding.unsaved_tags)
 
     def test_parse_file_with_multiple_finding2(self):
         testfile = open("unittests/scans/veracode/veracode_scan.xml")
@@ -121,6 +125,7 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertEqual("Description", finding.description)
         self.assertFalse(finding.is_mitigated)
         self.assertEqual(datetime.datetime(2021, 9, 3, 10, 0, 0), finding.date)
+        self.assertIn('dast', finding.unsaved_tags)
         self.assertEqual(1, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual('https', endpoint.protocol)
