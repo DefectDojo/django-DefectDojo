@@ -16,14 +16,16 @@
 
 {% if finding.cwe > 0 %}
 *CWE:* [CWE-{{ finding.cwe }}|{{ finding.cwe|cwe_url }}]
-{% else %}
-*CWE:* Unknown
 {% endif %}
 
 {% if finding.cve %}
 *CVE:* [{{ finding.cve }}|{{ finding.cve|vulnerability_url }}]
 {% else %}
 *CVE:* Unknown
+{% endif %}
+
+{% if finding.cvssv3_score %}
+*CVSSv3 Score:* {{ finding.cvssv3_score }}
 {% endif %}
 
 *Product/Engagement/Test:* [{{ finding.test.engagement.product.name }}|{{ product_url|full_url }}] / [{{ finding.test.engagement.name }}|{{ engagement_url|full_url }}] / [{{ finding.test }}|{{ test_url|full_url }}]
@@ -59,8 +61,12 @@
 *Source Line*: {{ finding.sast_source_line }}
 *Sink Object*: {{ finding.sast_sink_object }}
 {% elif finding.static_finding %}
+{% if finding.file_path %}
 *Source File*: {{ finding.file_path }}
+{% endif %}
+{% if finding.line %}
 *Source Line*: {{ finding.line }}
+{% endif %}
 {% endif %}
 
 *Description*:
