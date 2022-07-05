@@ -1,0 +1,35 @@
+docs:
+- docs/**/*
+- readme-docs/**/*
+
+docker:
+- docker/**/*
+- docker**
+- Docker*
+
+helm:
+- helm/defectdojo/*
+- helm/defectdojo/**/*
+
+"New Migration":
+- dojo/db_migrations/*
+
+unittests:
+- unittests/**/*
+
+integration_tests:
+- tests/**/*
+
+settings_changes:
+- dojo/settings/settings.dist.py
+
+apiv2:
+- dojo/api_v2/**/*
+
+ui:
+  - dojo/static/**/*
+  - dojo/templates/**/*
+  - dojo/templatetags/**/*
+
+parser:
+  - dojo/tools/**/*

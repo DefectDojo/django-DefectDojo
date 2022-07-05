@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='finding',
             name='duplicate_finding',
-            field=models.ForeignKey(blank=True, editable=False, help_text='Link to the original finding if this finding is a duplicate.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='original_finding', to='dojo.Finding', verbose_name='Duplicate Finding'),
+            field=models.ForeignKey(blank=True, editable=False, help_text='Link to the original finding if this finding is a duplicate.', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='original_finding', to='dojo.Finding', verbose_name='Duplicate Finding'),
         ),
         migrations.AlterField(
             model_name='finding',

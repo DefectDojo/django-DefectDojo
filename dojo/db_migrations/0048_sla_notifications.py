@@ -24,6 +24,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jira_pkey',
             name='product_jira_sla_notification',
-            field=models.BooleanField(default=True, verbose_name='Send SLA notifications as comment?'),
+            field=models.BooleanField(blank=True, default=False, verbose_name='Send SLA notifications as comment?'),
         ),
     ]

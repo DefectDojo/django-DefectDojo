@@ -1,20 +1,21 @@
+import re
 from datetime import datetime
 
-from lxml import etree
+from defusedxml import ElementTree
 
 from dojo.models import Finding
+from dojo.models import Endpoint
+
+XML_NAMESPACE = {'x': 'https://www.veracode.com/schema/reports/export/1.0'}
 
 
-def truncate_str(value: str, maxlen: int):
-    if len(value) > maxlen:
-        return value[:maxlen - 12] + " (truncated)"
-    return value
-
-
-# This parser is written for Veracode Detailed XML reports, version 1.5.
-# Version is annotated in the report, `detailedreport/@report_format_version`.
 class VeracodeParser(object):
-    ns = {'x': 'https://www.veracode.com/schema/reports/export/1.0'}
+    """This parser is written for Veracode Detailed XML reports, version 1.5.
+
+    Version is annotated in the report, `detailedreport/@report_format_version`.
+    see https://help.veracode.com/r/t_download_XML_report
+    """
+
     vc_severity_mapping = {
         1: 'Info',
         2: 'Low',
@@ -33,56 +34,56 @@ class VeracodeParser(object):
         return "Detailed XML Report"
 
     def get_findings(self, filename, test):
-        if filename is None:
-            return list()
-        xml = etree.parse(filename, etree.XMLParser(resolve_entities=False))
+        root = ElementTree.parse(filename).getroot()
 
-        ns = self.ns
-        report_node = xml.xpath('/x:detailedreport', namespaces=self.ns)[0]
-
-        if report_node is None:
-            raise ValueError(
-                'This version of Veracode report is not supported.  '
-                'Please make sure the export is formatted using the '
-                'https://www.veracode.com/schema/reports/export/1.0 schema.')
+        app_id = root.attrib['app_id']
+        report_date = datetime.strptime(root.attrib['last_update_time'], '%Y-%m-%d %H:%M:%S %Z')
 
         dupes = dict()
 
         # Get SAST findings
-        # This assumes `<category/>` only exists with the `<severity/>` nodes.
-        for category_node in report_node.xpath('//x:category', namespaces=ns):
+        # This assumes `<category/>` only exists within the `<severity/>` nodes.
+        for category_node in root.findall('x:severity/x:category', namespaces=XML_NAMESPACE):
 
             # Mitigation text.
             mitigation_text = ''
-            mitigation_text += category_node.xpath('string(x:recommendations/x:para/@text)', namespaces=ns) + "\n\n"
+            mitigation_text += category_node.find('x:recommendations/x:para', namespaces=XML_NAMESPACE).get('text') + "\n\n"
             # Bullet list of recommendations:
             mitigation_text += ''.join(list(map(
-                lambda x: '    * ' + x + '\n',
-                category_node.xpath('x:recommendations/x:para/x:bulletitem/@text', namespaces=ns))))
+                lambda x: '    * ' + x.get('text') + '\n',
+                category_node.findall('x:recommendations/x:para/x:bulletitem', namespaces=XML_NAMESPACE))))
 
-            for flaw_node in category_node.xpath('.//x:staticflaws/x:flaw', namespaces=ns):
-                dupe_key = self.__xml_flaw_to_unique_id(flaw_node)
+            for flaw_node in category_node.findall('x:cwe/x:staticflaws/x:flaw', namespaces=XML_NAMESPACE):
+                dupe_key = flaw_node.attrib['issueid']
 
                 # Only process if we didn't do that before.
                 if dupe_key not in dupes:
                     # Add to list.
-                    dupes[dupe_key] = self.__xml_flaw_to_finding(flaw_node, mitigation_text, test)
+                    dupes[dupe_key] = self.__xml_static_flaw_to_finding(app_id, flaw_node, mitigation_text, test)
+
+            for flaw_node in category_node.findall('x:cwe/x:dynamicflaws/x:flaw', namespaces=XML_NAMESPACE):
+                dupe_key = flaw_node.attrib['issueid']
+
+                if dupe_key not in dupes:
+                    dupes[dupe_key] = self.__xml_dynamic_flaw_to_finding(app_id, flaw_node, mitigation_text, test)
 
         # Get SCA findings
-        for vulnerable_lib_node in xml.xpath('/x:detailedreport/x:software_composition_analysis/x:vulnerable_components'
-                                             '/x:component[@vulnerabilities > 0]', namespaces=ns):
-            dupe_key = self.__xml_sca_flaw_to_dupekey(vulnerable_lib_node)
+        for component in root.findall('x:software_composition_analysis/x:vulnerable_components'
+                                             '/x:component', namespaces=XML_NAMESPACE):
+            _library = component.attrib['library']
+            _vendor = component.attrib['vendor']
+            _version = component.attrib['version']
 
-            # Only process if we didn't do that before.
-            if dupe_key not in dupes:
-                dupes[dupe_key] = self.__xml_sca_flaw_to_finding(vulnerable_lib_node, test)
+            for vulnerability in component.findall('x:vulnerabilities/x:vulnerability', namespaces=XML_NAMESPACE):
+                dupe_key = vulnerability.attrib['cve_id']
+                # Only process if we didn't do that before.
+                if dupe_key not in dupes:
+                    dupes[dupe_key] = self.__xml_sca_flaw_to_finding(test, report_date, _vendor, _library, _version, vulnerability)
 
         return list(dupes.values())
 
     @classmethod
-    def __xml_flaw_to_unique_id(cls, xml_node):
-        ns = cls.ns
-        app_id = xml_node.xpath('string(ancestor::x:detailedreport/@app_id)', namespaces=ns)
+    def __xml_flaw_to_unique_id(cls, app_id, xml_node):
         issue_id = xml_node.attrib['issueid']
         return 'app-' + app_id + '_issue-' + issue_id
 
@@ -91,22 +92,17 @@ class VeracodeParser(object):
         return cls.vc_severity_mapping.get(int(xml_node.attrib['severity']), 'Info')
 
     @classmethod
-    def __xml_flaw_to_finding(cls, xml_node, mitigation_text, test):
-        ns = cls.ns
-
+    def __xml_flaw_to_finding(cls, app_id, xml_node, mitigation_text, test):
         # Defaults
         finding = Finding()
         finding.test = test
         finding.mitigation = mitigation_text
-        finding.verified = False
-        finding.active = False
         finding.static_finding = True
         finding.dynamic_finding = False
-        finding.unique_id_from_tool = cls.__xml_flaw_to_unique_id(xml_node)
+        finding.unique_id_from_tool = cls.__xml_flaw_to_unique_id(app_id, xml_node)
 
         # Report values
         finding.severity = cls.__xml_flaw_to_severity(xml_node)
-        finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
         finding.cwe = int(xml_node.attrib['cweid'])
         finding.title = xml_node.attrib['categoryname']
         finding.impact = 'CIA Impact: ' + xml_node.attrib['cia_impact'].upper()
@@ -138,13 +134,10 @@ class VeracodeParser(object):
                 xml_node.attrib["mitigation_status"].lower() == "accepted"):
             # This happens if any mitigation (including 'Potential false positive')
             # was accepted in VC.
-            _is_mitigated = True
-            raw_mitigated_date = xml_node.xpath('string(.//x:mitigations/x:mitigation[last()]/@date)', namespaces=ns)
-            if raw_mitigated_date:
-                _mitigated_date = datetime.strptime(raw_mitigated_date, '%Y-%m-%d %H:%M:%S %Z')
-            else:
-                _mitigated_date = None
-        finding.is_Mitigated = _is_mitigated
+            for mitigation in xml_node.findall("x:mitigations/x:mitigation", namespaces=XML_NAMESPACE):
+                _is_mitigated = True
+                _mitigated_date = datetime.strptime(mitigation.attrib['date'], '%Y-%m-%d %H:%M:%S %Z')
+        finding.is_mitigated = _is_mitigated
         finding.mitigated = _mitigated_date
         finding.active = not _is_mitigated
 
@@ -154,96 +147,96 @@ class VeracodeParser(object):
         # level, not on the finding-level.
         _false_positive = False
         if _is_mitigated:
-            _remediation_status = xml_node.xpath('string(@remediation_status)', namespaces=ns).lower()
+            _remediation_status = xml_node.attrib['remediation_status'].lower()
             if "false positive" in _remediation_status or "falsepositive" in _remediation_status:
                 _false_positive = True
         finding.false_p = _false_positive
 
-        _line_number = xml_node.xpath('string(@line)')
-        finding.line = _line_number if _line_number else None
-        finding.line_number = finding.line
-        finding.sast_source_line = finding.line
+        return finding
 
-        _source_file = xml_node.xpath('string(@sourcefile)')
-        finding.file_path = _source_file if _source_file else None
-        finding.sourcefile = finding.file_path
-        finding.sast_source_file_path = finding.file_path
+    @classmethod
+    def __xml_static_flaw_to_finding(cls, app_id, xml_node, mitigation_text, test):
+        finding = cls.__xml_flaw_to_finding(app_id, xml_node, mitigation_text, test)
+        finding.static_finding = True
+        finding.dynamic_finding = False
 
-        _component = xml_node.xpath('string(@module)') + ': ' + xml_node.xpath('string(@scope)')
-        finding.component_name = truncate_str(_component, 200) if _component != ': ' else None
+        _line_number = xml_node.attrib['line']
+        _functionrelativelocation = xml_node.attrib['functionrelativelocation']
+        if (_line_number is not None and _line_number.isdigit() and
+                _functionrelativelocation is not None and _functionrelativelocation.isdigit()):
+            finding.line = int(_line_number) + int(_functionrelativelocation)
+            finding.sast_source_line = finding.line
 
-        _sast_source_obj = xml_node.xpath('string(@functionprototype)')
+        _source_file = xml_node.attrib.get('sourcefile')
+        _sourcefilepath = xml_node.attrib.get('sourcefilepath')
+        finding.file_path = _sourcefilepath + _source_file
+        finding.sast_source_file_path = _sourcefilepath + _source_file
+
+        _sast_source_obj = xml_node.attrib.get('functionprototype')
         finding.sast_source_object = _sast_source_obj if _sast_source_obj else None
+
+        finding.unsaved_tags = ["sast"]
 
         return finding
 
     @classmethod
-    def __xml_sca_flaw_to_dupekey(cls, xml_node):
-        return 'sca_' + xml_node.attrib['vendor'] + xml_node.attrib['library'] + xml_node.attrib['version']
+    def __xml_dynamic_flaw_to_finding(cls, app_id, xml_node, mitigation_text, test):
+        finding = cls.__xml_flaw_to_finding(app_id, xml_node, mitigation_text, test)
+        finding.static_finding = False
+        finding.dynamic_finding = True
 
-    @classmethod
-    def __cvss_to_severity(cls, cvss):
-        if cvss >= 9:
-            return cls.vc_severity_mapping.get(5)
-        elif cvss >= 7:
-            return cls.vc_severity_mapping.get(4)
-        elif cvss >= 4:
-            return cls.vc_severity_mapping.get(3)
-        elif cvss > 0:
-            return cls.vc_severity_mapping.get(2)
+        url_host = xml_node.attrib.get('url')
+        finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
+
+        finding.unsaved_tags = ["dast"]
+
+        return finding
+
+    @staticmethod
+    def _get_cwe(val):
+        # Match only the first CWE!
+        cweSearch = re.search("CWE-(\\d+)", val, re.IGNORECASE)
+        if cweSearch:
+            return int(cweSearch.group(1))
         else:
-            return cls.vc_severity_mapping.get(1)
+            return None
 
     @classmethod
-    def __xml_sca_flaw_to_finding(cls, xml_node, test):
-        ns = cls.ns
-
+    def __xml_sca_flaw_to_finding(cls, test, report_date, vendor, library, version, xml_node):
         # Defaults
         finding = Finding()
         finding.test = test
-        finding.mitigation = "Make sure to upgrade this component."
-        finding.verified = False
-        finding.active = False
         finding.static_finding = True
         finding.dynamic_finding = False
-        finding.unique_id_from_tool = cls.__xml_sca_flaw_to_dupekey(xml_node)
-
-        _library = xml_node.xpath('string(@library)', namespaces=ns)
-        _vendor = xml_node.xpath('string(@vendor)', namespaces=ns)
-        _version = xml_node.xpath('string(@version)', namespaces=ns)
-        _cvss = xml_node.xpath('number(@max_cvss_score)', namespaces=ns)
-        _file = xml_node.xpath('string(@file_name)', namespaces=ns)
-        _file_path = xml_node.xpath('string(x:file_paths/x:file_path/@value)', namespaces=ns)
+        finding.unique_id_from_tool = xml_node.attrib['cve_id']
 
         # Report values
-        finding.severity = cls.__cvss_to_severity(_cvss)
-        finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
-        finding.cwe = 937
-        finding.title = "Vulnerable component: {0}:{1}".format(_library, _version)
-        finding.component_name = _vendor + " / " + _library + ":" + _version
-        finding.file_path = _file
+        cvss_score = float(xml_node.attrib['cvss_score'])
+        finding.cvssv3_score = cvss_score
+        finding.severity = cls.__xml_flaw_to_severity(xml_node)
+        finding.unsaved_vulnerability_ids = [xml_node.attrib['cve_id']]
+        finding.cwe = cls._get_cwe(xml_node.attrib['cwe_id'])
+        finding.title = "Vulnerable component: {0}:{1}".format(library, version)
+        finding.component_name = library
+        finding.component_version = version
 
         # Use report-date, otherwise DD doesn't
         # overwrite old matching SCA findings.
-        finding.date = datetime.strptime(
-            xml_node.xpath('string(//x:component/ancestor::x:detailedreport/@last_update_time)', namespaces=ns),
-            '%Y-%m-%d %H:%M:%S %Z')
+        finding.date = report_date
 
         _description = 'This library has known vulnerabilities.\n'
-        _description += 'Full component path: ' + _file_path + '\n'
-        _description += 'Vulnerabilities:\n\n'
-        for vuln_node in xml_node.xpath('x:vulnerabilities/x:vulnerability', namespaces=ns):
-            _description += \
-                "**CVE: [{0}](https://nvd.nist.gov/vuln/detail/{0})** ({1})\n" \
+        _description += \
+                "**CVE:** {0} ({1})\n" \
                 "CVS Score: {2} ({3})\n" \
                 "Summary: \n>{4}" \
                 "\n\n-----\n\n".format(
-                    vuln_node.xpath('string(@cve_id)', namespaces=ns),
-                    datetime.strptime(vuln_node.xpath('string(@first_found_date)', namespaces=ns),
-                                      '%Y-%m-%d %H:%M:%S %Z').strftime("%Y/%m"),
-                    vuln_node.xpath('string(@cvss_score)', namespaces=ns),
-                    cls.vc_severity_mapping.get(int(vuln_node.xpath('string(@severity)', namespaces=ns)), 'Info'),
-                    vuln_node.xpath('string(@cve_summary)', namespaces=ns))
+                    xml_node.attrib['cve_id'],
+                    xml_node.attrib.get('first_found_date'),
+                    xml_node.attrib['cvss_score'],
+                    cls.vc_severity_mapping.get(int(xml_node.attrib['severity']), 'Info'),
+                    xml_node.attrib['cve_summary'])
         finding.description = _description
+
+        finding.unsaved_tags = ["sca"]
 
         return finding

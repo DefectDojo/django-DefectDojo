@@ -1,7 +1,7 @@
 
 # code: language=Dockerfile
 
-FROM python:3.6.12-slim-buster@sha256:e5259113df5a7c4dae16ad37c2ca53b1cf722e051cfd5f624e7b76aa72389e0c as build
+FROM python:3.8.13-slim-bullseye@sha256:0e07cc072353e6b10de910d8acffa020a42467112ae6610aa90d6a3c56a74911 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -28,14 +28,14 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 
-RUN pip install --no-cache-dir selenium requests
+RUN pip install --no-cache-dir selenium requests chromedriver-autoinstaller
 
-# Installing Chromium Driver and Selenium for test automation
-RUN LATEST_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
-    wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$LATEST_VERSION/chromedriver_linux64.zip && \
-    unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/ && \
-    rm /tmp/chromedriver.zip && \
-    chmod 777 /usr/local/bin/chromedriver;
+# Installing Chromedriver
+WORKDIR /opt/chrome-driver
+RUN \
+  python -c "import chromedriver_autoinstaller; chromedriver_autoinstaller.install(cwd=True)" && \
+  chmod -R 0755 .
+WORKDIR /app
 
 COPY docker/wait-for-it.sh \
   docker/entrypoint-integration-tests.sh \
@@ -44,7 +44,9 @@ COPY docker/wait-for-it.sh \
 COPY tests/ ./tests/
 
 RUN chmod -R 0777 /app
-USER 1001
+
+ARG uid=1001
+USER ${uid}
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_PASSWORD='' \

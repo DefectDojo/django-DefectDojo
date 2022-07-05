@@ -89,6 +89,20 @@ function sidebar() {  // minimize side nav bar
     return false;
 }
 
+//methods removed in django 3.1. we copy them here to keep this popup thing working
+// but this definately needs a rework, but with UI v2 in the works this is acceptable
+function id_to_windowname(text) {
+    text = text.replace(/\./g, '__dot__');
+    text = text.replace(/\-/g, '__dash__');
+    return text;
+}
+
+function windowname_to_id(text) {
+    text = text.replace(/__dot__/g, '.');
+    text = text.replace(/__dash__/g, '-');
+    return text;
+}
+
 function emptyEndpoints(win) {
     var name = windowname_to_id(win.name);
     var elem = document.getElementById(name);

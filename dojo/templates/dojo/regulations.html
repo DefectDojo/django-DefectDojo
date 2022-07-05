@@ -1,12 +1,15 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load authorization_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         Regulations
+                        {% if "dojo.add_regulation"|has_configuration_permission:"superuser" %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -22,6 +25,7 @@
                                     </li>
                             </ul>
                         </div>
+                        {% endif %}
                     </h3>
                 </div>
 
@@ -48,7 +52,11 @@
                         {% for conf in confs %}
                             <tr>
                                 <td>
+                                    {% if "dojo.change_regulation"|has_configuration_permission:"superuser" %}
                                     <a href="{% url 'edit_regulations' conf.id %}"><b>{{ conf.name }}</b></a>
+                                    {% else %}
+                                    {{ conf.name }}
+                                    {% endif %}
                                 </td>
                                 <td>
                                         {{ conf.acronym }}
@@ -81,5 +89,6 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

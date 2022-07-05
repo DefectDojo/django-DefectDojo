@@ -6,7 +6,6 @@ urlpatterns = [
     url(r'^cred/(?P<ttid>\d+)/view$', views.view_cred_details, name='view_cred_details'),
     url(r'^cred/(?P<ttid>\d+)/edit$', views.edit_cred, name='edit_cred'),
     url(r'^cred/(?P<ttid>\d+)/delete$', views.delete_cred, name='delete_cred'),
-    url(r'^cred/(?P<ttid>\d+)/selenium$', views.view_selenium, name='view_selenium'),
     url(r'^cred$', views.cred, name='cred'),
     url(r'^product/(?P<pid>\d+)/cred/add$', views.new_cred_product, name='new_cred_product'),
     url(r'^product/(?P<pid>\d+)/cred/all$', views.all_cred_product, name='all_cred_product'),

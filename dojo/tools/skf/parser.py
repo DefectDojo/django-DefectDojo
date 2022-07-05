@@ -3,9 +3,7 @@ import hashlib
 import io
 from datetime import datetime
 
-from django.contrib.auth.models import User
-
-from dojo.models import Finding, Notes
+from dojo.models import Finding
 
 
 class ColumnMappingStrategy(object):
@@ -66,22 +64,6 @@ class MitigationColumnMappingStrategy(ColumnMappingStrategy):
         finding.mitigation = column_value
 
 
-class NotesColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'notes'
-        super(NotesColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        if (column_value != ""):
-            user = User.objects.all().first()
-            note = Notes(entry=column_value, author=user)
-            note.save()
-            finding.reporter = user.id
-            finding.save()
-            finding.notes.add(note)
-
-
 class SKFParser(object):
 
     def get_scan_types(self):
@@ -98,56 +80,50 @@ class SKFParser(object):
         title_column_strategy = TitleColumnMappingStrategy()
         description_column_strategy = DescriptionColumnMappingStrategy()
         mitigation_column_strategy = MitigationColumnMappingStrategy()
-        notes_strategy = NotesColumnMappingStrategy()
 
-        mitigation_column_strategy.successor = notes_strategy
         description_column_strategy.successor = mitigation_column_strategy
         title_column_strategy.successor = description_column_strategy
         date_column_strategy.successor = title_column_strategy
 
-        self.chain = date_column_strategy
+        return date_column_strategy
 
-    def read_column_names(self, row):
+    def read_column_names(self, column_names, row):
         index = 0
         for column in row:
-            self.column_names[index] = column
+            column_names[index] = column
             index += 1
 
     def get_findings(self, filename, test):
-        self.chain = None
-        self.column_names = dict()
-        self.dupes = dict()
-        self.items = ()
-        self.create_chain()
+        content = filename.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
 
-        if filename is None:
-            self.items = ()
-            return
-
-        content = filename.read().decode('utf-8')
+        column_names = dict()
+        chain = self.create_chain()
 
         row_number = 0
         reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"', escapechar='\\')
+        dupes = dict()
         for row in reader:
             finding = Finding(test=test)
             finding.severity = 'Info'
 
             if row_number == 0:
-                self.read_column_names(row)
+                self.read_column_names(column_names, row)
                 row_number += 1
                 continue
 
             column_number = 0
             for column in row:
-                self.chain.process_column(self.column_names[column_number], column, finding)
+                chain.process_column(column_names[column_number], column, finding)
                 column_number += 1
 
             if finding is not None:
-                key = hashlib.md5(str(finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
+                key = hashlib.sha256(str(finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
-                if key not in self.dupes:
-                    self.dupes[key] = finding
+                if key not in dupes:
+                    dupes[key] = finding
 
             row_number += 1
 
-        self.items = list(self.dupes.values())
+        return list(dupes.values())

@@ -2,6 +2,7 @@
 {% load event_tags %}
 
 {% block content %}
+    {{ block.super }}
     <h2> {{ name }}</h2>
     <hr/>
     <p>Your current API key is <code>{{ key.key }}</code></p>
@@ -35,9 +36,8 @@ headers = {'content-type': 'application/json',
            'Authorization': 'Token {{ key.key }}'}
 r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
 
-for key, value in r.__dict__.iteritems():
-  print key
-  print value
-  print '------------------'
+for key, value in r.__dict__.items():
+  print(f"'{key}': '{value}'")
+  print('------------------')
 	</pre>
 {% endblock %}

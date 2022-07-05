@@ -3,23 +3,23 @@ import logging
 
 # Third party imports
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
-
+from django.utils.translation import gettext as _
 
 # Local application/library imports
 from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
 from dojo.models import Notes, Engagement, Test, Finding, NoteHistory, Note_Type
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
-def delete_issue(request, id, page, objid):
+def delete_note(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
     object_id = None
@@ -38,30 +38,32 @@ def delete_issue(request, id, page, objid):
         reverse_url = "view_finding"
     form = DeleteNoteForm(request.POST, instance=note)
 
-    if page is None or str(request.user) != note.author.username and not request.user.is_staff:
+    if page is None:
         raise PermissionDenied
+    if str(request.user) != note.author.username:
+        user_has_permission_or_403(request.user, object, Permissions.Note_Delete)
 
     if form.is_valid():
         note.delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             'Note deleted.',
+                             _('Note deleted.'),
                              extra_tags='alert-success')
     else:
         messages.add_message(request,
                              messages.SUCCESS,
-                             'Note was not succesfully deleted.',
+                             _('Note was not succesfully deleted.'),
                              extra_tags='alert-danger')
 
     return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
 
 
-def edit_issue(request, id, page, objid):
+def edit_note(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
     object_id = None
 
-    if page is None or str(request.user) != note.author.username and not request.user.is_staff:
+    if page is None:
         raise PermissionDenied
 
     if page == "engagement":
@@ -76,6 +78,9 @@ def edit_issue(request, id, page, objid):
         object = get_object_or_404(Finding, id=objid)
         object_id = object.id
         reverse_url = "view_finding"
+
+    if str(request.user) != note.author.username:
+        user_has_permission_or_403(request.user, object, Permissions.Note_Edit)
 
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
@@ -109,13 +114,13 @@ def edit_issue(request, id, page, objid):
             form = NoteForm()
             messages.add_message(request,
                                 messages.SUCCESS,
-                                'Note edited.',
+                                _('Note edited.'),
                                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
         else:
             messages.add_message(request,
                                 messages.SUCCESS,
-                                'Note was not succesfully edited.',
+                                _('Note was not succesfully edited.'),
                                 extra_tags='alert-danger')
     else:
         if note_type_activation:
@@ -132,7 +137,6 @@ def edit_issue(request, id, page, objid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
 def note_history(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
@@ -150,6 +154,11 @@ def note_history(request, id, page, objid):
         object = get_object_or_404(Finding, id=objid)
         object_id = object.id
         reverse_url = "view_finding"
+
+    if page is None:
+        raise PermissionDenied
+    if str(request.user) != note.author.username:
+        user_has_permission_or_403(request.user, object, Permissions.Note_View_History)
 
     history = note.history.all()
 

@@ -4,6 +4,7 @@
 {% load display_tags %}
 
 {% block content %}
+    {{ block.super }}
       <div class="panel panel-default">
           <div class="panel-heading">
               <div class="clearfix">
@@ -95,6 +96,7 @@
 </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         function highlight_level(desired_level) {
             $( ".level2_select" ).removeClass("level2");

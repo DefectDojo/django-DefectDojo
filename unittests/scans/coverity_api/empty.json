@@ -1,0 +1,93 @@
+{
+  "viewContentsV1": {
+    "offset": 0,
+    "totalRows": 0,
+    "columns": [
+      {
+        "name": "cid",
+        "label": "CID"
+      },
+      {
+        "name": "displayType",
+        "label": "Type"
+      },
+      {
+        "name": "displayImpact",
+        "label": "Impact"
+      },
+      {
+        "name": "status",
+        "label": "Status"
+      },
+      {
+        "name": "firstDetected",
+        "label": "First Detected"
+      },
+      {
+        "name": "owner",
+        "label": "Owner"
+      },
+      {
+        "name": "classification",
+        "label": "Classification"
+      },
+      {
+        "name": "severity",
+        "label": "Severity"
+      },
+      {
+        "name": "action",
+        "label": "Action"
+      },
+      {
+        "name": "displayComponent",
+        "label": "Component"
+      },
+      {
+        "name": "displayCategory",
+        "label": "Category"
+      },
+      {
+        "name": "displayFile",
+        "label": "File"
+      },
+      {
+        "name": "displayFunction",
+        "label": "Function"
+      },
+      {
+        "name": "displayIssueKind",
+        "label": "Issue Kind"
+      },
+      {
+        "name": "lastDetected",
+        "label": "Last Snapshot Date"
+      },
+      {
+        "name": "checker",
+        "label": "Checker"
+      },
+      {
+        "name": "occurrenceCount",
+        "label": "Count"
+      },
+      {
+        "name": "cwe",
+        "label": "CWE"
+      },
+      {
+        "name": "lastTriaged",
+        "label": "Last Triaged"
+      },
+      {
+        "name": "externalReference",
+        "label": "External Reference"
+      },
+      {
+        "name": "lastDetectedTarget",
+        "label": "Last Snapshot Target"
+      }
+    ],
+    "rows": []
+  }
+}

@@ -1,0 +1,381 @@
+{
+	"files_scanned": 15,
+	"files_parsed": 14,
+	"files_failed_to_scan": 0,
+	"queries_total": 834,
+	"queries_failed_to_execute": 0,
+	"queries_failed_to_compute_similarity_id": 0,
+	"queries": [
+		{
+			"query_name": "Passwords And Secrets In Infrastructure Code",
+			"query_id": "f996f3cb-00fc-480c-8973-8ab04d44a8cc",
+			"query_url": "https://kics.io/",
+			"severity": "HIGH",
+			"platform": "Common",
+			"files": [
+				{
+					"file_name": "test/charts/example/terraform/main.tf",
+					"similarity_id": "70d28c075a7cda7f4b6b4a9b7f5c48a7d2213c8a4fc1332b8eabd5805a8f177a",
+					"line": 25,
+					"issue_type": "RedundantAttribute",
+					"search_key": "module.aws_reverse_proxy.basic_auth_password",
+					"search_value": "",
+					"expected_value": "Hardcoded secret key should not appear in source",
+					"actual_value": "",
+					"value": null
+				}
+			],
+			"category": "Secret Management",
+			"description": "Query to find passwords and secrets in infrastructure code."
+		},
+		{
+			"query_name": "S3 Bucket Access to Any Principal",
+			"query_id": "7af43613-6bb9-4a0e-8c4d-1314b799425e",
+			"query_url": "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy",
+			"severity": "HIGH",
+			"platform": "Terraform",
+			"files": [
+				{
+					"file_name": "test/charts/example/terraform/s3.tf",
+					"similarity_id": "da1423e225c92e2941862ed75eacd8f807f8aa7bc003d490faeb8e56a7264ea9",
+					"line": 36,
+					"issue_type": "IncorrectValue",
+					"search_key": "aws_s3_bucket_policy[this].policy",
+					"search_value": "",
+					"expected_value": "aws_s3_bucket_policy[this].policy.Principal is not equal to, nor does it contain '*'",
+					"actual_value": "aws_s3_bucket_policy[this].policy.Principal is equal to or contains '*'",
+					"value": null
+				}
+			],
+			"category": "Access Control",
+			"description": "S3 Buckets must not allow Actions From All Principals, as to prevent leaking private information to the entire internet or allow unauthorized data tampering / deletion. This means the 'Effect' must not be 'Allow' when there are All Principals"
+		},
+		{
+			"query_name": "S3 Bucket Allows Get Action From All Principals",
+			"query_id": "1df37f4b-7197-45ce-83f8-9994d2fcf885",
+			"query_url": "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy",
+			"severity": "HIGH",
+			"platform": "Terraform",
+			"files": [
+				{
+					"file_name": "test/charts/example/terraform/s3.tf",
+					"similarity_id": "7910e1c3672e9049846855a58621decd2ee3c215781806fb44a8096079c1d5ca",
+					"line": 43,
+					"issue_type": "IncorrectValue",
+					"search_key": "aws_s3_bucket_policy[this].policy.Action",
+					"search_value": "",
+					"expected_value": "aws_s3_bucket_policy[this].policy.Action is not a 'Get' action",
+					"actual_value": "aws_s3_bucket_policy[this].policy.Action is a 'Get' action",
+					"value": null
+				}
+			],
+			"category": "Access Control",
+			"description": "S3 Buckets must not allow Get Action From All Principals, as to prevent leaking private information to the entire internet or allow unauthorized data tampering / deletion. This means the 'Effect' must not be 'Allow' when the 'Action' is Get, for all Principals."
+		},
+		{
+			"query_name": "S3 Bucket Without Server-side-encryption",
+			"query_id": "6726dcc0-5ff5-459d-b473-a780bef7665c",
+			"query_url": "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket",
+			"severity": "HIGH",
+			"platform": "Terraform",
+			"files": [
+				{
+					"file_name": "test/charts/example/terraform/s3.tf",
+					"similarity_id": "72ad8bc1b24185d51ea18399e1849e0b27a989f52e5004871618a799743ddc3a",
+					"line": 5,
+					"issue_type": "MissingAttribute",
+					"search_key": "aws_s3_bucket[this]",
+					"search_value": "",
+					"expected_value": "'aws_s3_bucket.server_side_encryption_configuration' exists",
+					"actual_value": "'aws_s3_bucket.server_side_encryption_configuration' is missing",
+					"value": null
+				}
+			],
+			"category": "Encryption",
+			"description": "S3 bucket should have encryption defined"
+		},
+		{
+			"query_name": "S3 Static Website Host Enabled",
+			"query_id": "42bb6b7f-6d54-4428-b707-666f669d94fb",
+			"query_url": "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket#website",
+			"severity": "HIGH",
+			"platform": "Terraform",
+			"files": [
+				{
+					"file_name": "test/charts/example/terraform/s3.tf",
+					"similarity_id": "202031c49623173b3aa28482af8cc94d01ba167c1474efec44a157f096e1c588",
+					"line": 19,
+					"issue_type": "IncorrectValue",
+					"search_key": "resource.aws_s3_bucket[this].website",
+					"search_value": "",
+					"expected_value": "resource.aws_s3_bucket[this].website doesn't have static websites inside",
+					"actual_value": "resource.aws_s3_bucket[this].website does have static websites inside",
+					"value": null
+				}
+			],
+			"category": "Insecure Configurations",
+			"description": "Checks if any static websties are hosted on buckets"
+		},
+		{
+			"query_name": "CPU Limits Not Set",
+			"query_id": "4ac0e2b7-d2d2-4af7-8799-e8de6721ccda",
+			"query_url": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+			"severity": "MEDIUM",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/example/templates/example.yaml",
+					"similarity_id": "617aa050f1330042e30c448968c0bcbd3b005dcd5844ba0ebdd6392e69b9190f",
+					"line": 62,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{example}}.spec.template.spec.containers.name={{example}}.resources.limits",
+					"search_value": "",
+					"expected_value": "spec.template.spec.containers.name=example has CPU limits",
+					"actual_value": "spec.template.spec.containers.name=example doesn't have CPU limits",
+					"value": null
+				}
+			],
+			"category": "Resource Management",
+			"description": "CPU limits should be set because if the system has CPU time free, a container is guaranteed to be allocated as much CPU as it requests"
+		},
+		{
+			"query_name": "Liveness Probe Is Not Defined",
+			"query_id": "ade74944-a674-4e00-859e-c6eab5bde441",
+			"query_url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-tcp-liveness-probe",
+			"severity": "MEDIUM",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/example/templates/example.yaml",
+					"similarity_id": "5e1956885d2b7dae4a0753cca96201a955906fea13a611e6b7af0ed66acea769",
+					"line": 62,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{example}}.spec.template.spec.containers.name={{example}}",
+					"search_value": "",
+					"expected_value": "metadata.name={{example}}.spec.containers.name={{example}}.livenessProbe is defined",
+					"actual_value": "metadata.name={{example}}.spec.containers.name={{example}}.livenessProbe is undefined",
+					"value": null
+				}
+			],
+			"category": "Availability",
+			"description": "Liveness Probe must be defined."
+		},
+		{
+			"query_name": "S3 Bucket Without Versioning",
+			"query_id": "568a4d22-3517-44a6-a7ad-6a7eed88722c",
+			"query_url": "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket#versioning",
+			"severity": "MEDIUM",
+			"platform": "Terraform",
+			"files": [
+				{
+					"file_name": "test/charts/example/terraform/s3.tf",
+					"similarity_id": "542169d5d54c096a84aa861f36ce7ac1e10d9c6955de07f4cad11021f3fb1814",
+					"line": 5,
+					"issue_type": "MissingAttribute",
+					"search_key": "aws_s3_bucket[this]",
+					"search_value": "",
+					"expected_value": "'versioning' is equal 'true'",
+					"actual_value": "'versioning' is missing",
+					"value": null
+				}
+			],
+			"category": "Observability",
+			"description": "S3 bucket without versioning"
+		},
+		{
+			"query_name": "Seccomp Profile Is Not Configured",
+			"query_id": "f377b83e-bd07-4f48-a591-60c82b14a78b",
+			"query_url": "https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp",
+			"severity": "MEDIUM",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/example/templates/example.yaml",
+					"similarity_id": "8bddf13aa202c8acaf7b88210b12d2078886cf14af63b254bda1da293c49904e",
+					"line": 19,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{example}}.spec.template.metadata",
+					"search_value": "",
+					"expected_value": "'spec.template.metadata.annotations' is set",
+					"actual_value": "'spec.template.metadata.annotations' is undefined",
+					"value": null
+				}
+			],
+			"category": "Insecure Configurations",
+			"description": "Check if any resource does not configure Seccomp default profile properly"
+		},
+		{
+			"query_name": "Service Account Token Automount Not Disabled",
+			"query_id": "48471392-d4d0-47c0-b135-cdec95eb3eef",
+			"query_url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-the-default-service-account-to-access-the-api-server",
+			"severity": "MEDIUM",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/example/templates/example.yaml",
+					"similarity_id": "1b914d3920f3c99e85247670be40fc93d3227be27061977e3cd98d3c1b4b23be",
+					"line": 22,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{example}}.spec.template.spec",
+					"search_value": "",
+					"expected_value": "'spec.template.spec.automountServiceAccountToken' is false",
+					"actual_value": "'spec.template.spec.automountServiceAccountToken' is undefined",
+					"value": null
+				}
+			],
+			"category": "Insecure Defaults",
+			"description": "Service Account Tokens are automatically mounted even if not necessary"
+		},
+		{
+			"query_name": "No Drop Capabilities for Containers",
+			"query_id": "268ca686-7fb7-4ae9-b129-955a2a89064e",
+			"query_url": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/",
+			"severity": "LOW",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/example/templates/example.yaml",
+					"similarity_id": "0115b24f0aa5809c26d3c3a95b4fd42260f9e6ad1781e6fa9ed788ce947aa94a",
+					"line": 62,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{example}}.spec.containers.name=example",
+					"search_value": "",
+					"expected_value": "metadata.name={{example}}.spec.containers.name=example.securityContext is set",
+					"actual_value": "metadata.name={{example}}.spec.containers.name=example.securityContext is undefined",
+					"value": null
+				}
+			],
+			"category": "Best Practices",
+			"description": "Sees if Kubernetes Drop Capabilities exists to ensure containers security context"
+		},
+		{
+			"query_name": "Permissive Access to Create Pods",
+			"query_id": "592ad21d-ad9b-46c6-8d2d-fad09d62a942",
+			"query_url": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#privilege-escalation-prevention-and-bootstrapping",
+			"severity": "LOW",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/example/templates/rbac.yaml",
+					"similarity_id": "23fa1a536877428292013cd7186ddddaa4bca8f0a5fb7440a831d6c5808de3ec",
+					"line": 20,
+					"issue_type": "IncorrectValue",
+					"search_key": "metadata.name={{example}}.rules.verbs.*",
+					"search_value": "",
+					"expected_value": "metadata.name=example.rules.verbs should not contain a wildcard value when metadata.name=example.rules.resources contains a wildcard value",
+					"actual_value": "metadata.name=example.rules.verbs contains a wildcard value and metadata.name=example.rules.resources contains a wildcard value",
+					"value": null
+				}
+			],
+			"category": "Access Control",
+			"description": "The permission to create pods in a cluster should be restricted because it allows privilege escalation."
+		},
+		{
+			"query_name": "Pod or Container Without Security Context",
+			"query_id": "a97a340a-0063-418e-b3a1-3028941d0995",
+			"query_url": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+			"severity": "LOW",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/example/templates/example.yaml",
+					"similarity_id": "95c48ae90aabaf7440f0323cb16618c67e51d736bcdb55b889b02ba2248e032a",
+					"line": 62,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{example}}.spec.template.spec.containers.name=example",
+					"search_value": "",
+					"expected_value": "spec.template.spec.containers.name=example has a security context",
+					"actual_value": "spec.template.spec.containers.name=example does not have a security context",
+					"value": null
+				}
+			],
+			"category": "Insecure Configurations",
+			"description": "A security context defines privilege and access control settings for a Pod or Container"
+		},
+		{
+			"query_name": "RBAC Wildcard In Rule",
+			"query_id": "6b896afb-ca07-467a-b256-1a0077a1c08e",
+			"query_url": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/",
+			"severity": "LOW",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/example/templates/rbac.yaml",
+					"similarity_id": "493c98bdbbe21a2412788a2f73c170d000bb35977156ff5ac15942f402248574",
+					"line": 20,
+					"issue_type": "IncorrectValue",
+					"search_key": "metadata.name={{example}}.rules",
+					"search_value": "",
+					"expected_value": "metadata.name={{example}}.rules[0].apiGroups shouldn't contain value: '*'",
+					"actual_value": "metadata.name={{example}}.rules[0].apiGroups contains value: '*'",
+					"value": null
+				},
+				{
+					"file_name": "test/charts/example/templates/rbac.yaml",
+					"similarity_id": "493c98bdbbe21a2412788a2f73c170d000bb35977156ff5ac15942f402248574",
+					"line": 20,
+					"issue_type": "IncorrectValue",
+					"search_key": "metadata.name={{example}}.rules",
+					"search_value": "",
+					"expected_value": "metadata.name={{example}}.rules[0].resources shouldn't contain value: '*'",
+					"actual_value": "metadata.name={{example}}.rules[0].resources contains value: '*'",
+					"value": null
+				},
+				{
+					"file_name": "test/charts/example/templates/rbac.yaml",
+					"similarity_id": "493c98bdbbe21a2412788a2f73c170d000bb35977156ff5ac15942f402248574",
+					"line": 20,
+					"issue_type": "IncorrectValue",
+					"search_key": "metadata.name={{example}}.rules",
+					"search_value": "",
+					"expected_value": "metadata.name={{example}}.rules[0].verbs shouldn't contain value: '*'",
+					"actual_value": "metadata.name={{example}}.rules[0].verbs contains value: '*'",
+					"value": null
+				},
+				{
+					"file_name": "test/charts/example/templates/rbac.yaml",
+					"similarity_id": "493c98bdbbe21a2412788a2f73c170d000bb35977156ff5ac15942f402248574",
+					"line": 20,
+					"issue_type": "IncorrectValue",
+					"search_key": "metadata.name={{example}}.rules",
+					"search_value": "",
+					"expected_value": "metadata.name={{example}}.rules[1].verbs shouldn't contain value: '*'",
+					"actual_value": "metadata.name={{example}}.rules[1].verbs contains value: '*'",
+					"value": null
+				}
+			],
+			"category": "Access Control",
+			"description": "Kubernetes Roles and ClusterRoles should not use wildcards in rules (objects or actions)"
+		},
+		{
+			"query_name": "S3 Bucket Logging Disabled",
+			"query_id": "f861041c-8c9f-4156-acfc-5e6e524f5884",
+			"query_url": "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket",
+			"severity": "LOW",
+			"platform": "Terraform",
+			"files": [
+				{
+					"file_name": "test/charts/example/terraform/s3.tf",
+					"similarity_id": "aba3fc87ed600d871ee4f367b1b24e8867c94ac521c7a57bd34c1750c41e0361",
+					"line": 5,
+					"issue_type": "MissingAttribute",
+					"search_key": "aws_s3_bucket[this].logging",
+					"search_value": "",
+					"expected_value": "'logging' exists",
+					"actual_value": "'logging' is missing",
+					"value": null
+				}
+			],
+			"category": "Observability",
+			"description": "S3 bucket without logging"
+		}
+	],
+	"scan_id": "console",
+	"severity_counters": {
+		"HIGH": 5,
+		"INFO": 0,
+		"LOW": 8,
+		"MEDIUM": 5
+	},
+	"total_counter": 18
+}

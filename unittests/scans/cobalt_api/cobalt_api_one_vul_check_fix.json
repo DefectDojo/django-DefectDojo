@@ -1,0 +1,41 @@
+{
+  "data": [
+    {
+      "resource": {
+        "id": "vu_3wXY4bq",
+        "tag": "#PT3334_38",
+        "title": "Cross Site Scripting",
+        "description": "A XSS injection attack...",
+        "type_category": "XSS",
+        "labels": [],
+        "impact": 3,
+        "likelihood": 4,
+        "severity": "medium",
+        "affected_targets": [
+          "https://example.org"
+        ],
+        "proof_of_concept": "Do this...",
+        "suggested_fix": "Ensure that...",
+        "pentest_id": "pt_NR5CDkK",
+        "asset_id": "as_cwrsqsL",
+        "log": [
+          {
+            "action": "created",
+            "timestamp": "2021-05-11T15:13:24.322Z"
+          },
+          {
+            "action": "state_changed",
+            "value": "check_fix",
+            "timestamp": "2021-05-12T15:14:57.845Z"
+          }
+        ],
+        "state": "check_fix"
+      },
+      "links": {
+        "ui": {
+          "url": "https://api.cobalt.io/links/long-web-app-redirect-to-this-finding"
+        }
+      }
+    }
+  ]
+}

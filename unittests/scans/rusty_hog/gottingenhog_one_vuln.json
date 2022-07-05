@@ -1,0 +1,11 @@
+[
+  {
+    "stringsFound": [
+      "password: jeans"
+    ],
+    "issue_id": "TEST-123",
+    "reason": "password",
+    "url": "https://jira.com/browse/TEST-123",
+    "location": "Issue Description"
+  }
+]

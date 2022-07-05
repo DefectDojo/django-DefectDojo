@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% load authorization_tags %}
+{% block content %}
+    {% load display_tags %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        {{ name }}
+                        <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            {% if "auth.add_group"|has_configuration_permission:"staff" %}
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a href="{% url 'add_group' %}">
+                                            <i class="fa fa-plus"></i> New Group
+                                        </a>
+                                    </li>
+                            </ul>
+                            {% endif %}
+                        </div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form.has_changed %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                </div>
+            </div>
+            {% if groups %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=groups page_size=True %}
+                </div>
+                <div class="panel panel-default table-responsive">
+                    <table id="groups" class="tablesorter-bootstrap table table-condensed table-striped">
+                        <tr>
+                            <th></th>
+                            <th class="nowrap">{% dojo_sort request 'Group Name' 'name' %}</th>
+                            <th class="nowrap">{% dojo_sort request 'Group Description' 'description' %}</th>
+                            <th class="nowrap">{% dojo_sort request 'Number of Users' 'users|length' %}</th>
+                            <th class="nowrap">Global Role</th>
+                        </tr>
+                        {% for g in groups %}
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li class="dropdown" style="list-style:none;position:absolute">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuGroup">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuGroup">
+                                            <li role="presentation">
+                                                <a class="" href="{% url 'view_group' g.id %}" id ="viewGroup">
+                                                    <i class="fa fa-list-alt"></i> View
+                                                </a>
+                                            </li>
+                                            {% if g|has_object_permission:"Group_Edit" %}
+                                            <li role="presentation">
+                                                <a class="" href="{% url 'edit_group' g.id %}" id="editGroup">
+                                                    <i class="fa fa-pencil-square-o"></i> Edit </a>
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                            {% if g|has_object_permission:"Group_Delete" %}
+                                            <li role="separator" class="divider"></li>
+                                            <li role="presentation">
+                                                <a class="" href="{% url 'delete_group' g.id %}" id="deleteGroup">
+                                                    <i class="fa fa-trash"></i> Delete
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </td>
+                            <td><a href="{% url 'view_group' g.id %}">{{ g.name }}</a></td>
+                            <td>{{ g.description }}</td>
+                            <td>{{ g.users.all|length }}</td>
+                            <td>{% if g.global_role.role %} {{ g.global_role.role }} {% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=groups page_size=True %}
+                </div>
+            {% else %}
+                <h5> No Groups </h5>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

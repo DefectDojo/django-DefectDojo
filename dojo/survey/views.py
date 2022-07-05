@@ -1,20 +1,13 @@
-'''
-Created on Feb 18, 2015
-
-@author: jay7958
-'''
 import pickle
 from datetime import date
 
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.http.response import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils.html import escape
-from pytz import timezone
 from datetime import timedelta
 from django.utils import timezone as tz
 
@@ -26,12 +19,12 @@ from dojo.forms import Add_Questionnaire_Form, Delete_Questionnaire_Form, Create
     CreateChoiceQuestionForm, EditTextQuestionForm, EditChoiceQuestionForm, AddChoicesForm, \
     AddEngagementForm, AddGeneralQuestionnaireForm, DeleteGeneralQuestionnaireForm
 from dojo.models import Answered_Survey, Engagement_Survey, Answer, TextQuestion, ChoiceQuestion, Choice, General_Survey, Question
-from dojo.user.helper import check_auth_users_list
+from dojo.authorization.authorization import user_has_permission_or_403, user_has_permission, user_has_configuration_permission
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 
-localtz = timezone('America/Chicago')
 
-
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def delete_engagement_survey(request, eid, sid):
     engagement = get_object_or_404(Engagement, id=eid)
     survey = get_object_or_404(Answered_Survey, id=sid)
@@ -73,16 +66,15 @@ def answer_questionnaire(request, eid, sid):
     survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
     prod = engagement.product
-    settings = System_Settings.objects.all()[0]
+    system_settings = System_Settings.objects.all()[0]
 
-    if not settings.allow_anonymous_survey_repsonse:
-        auth = request.user.is_staff or check_auth_users_list(request.user, prod)
+    if not system_settings.allow_anonymous_survey_repsonse:
+        auth = user_has_permission(request.user, engagement, Permissions.Engagement_Edit)
         if not auth:
             messages.add_message(request,
                                  messages.ERROR,
-                                 'You must be logged in to answer questionnaire. Otherwise, enable anonymous response in system settings.',
+                                 'You must be authorized to answer questionnaire. Otherwise, enable anonymous response in system settings.',
                                  extra_tags='alert-danger')
-            # will render 403
             raise PermissionDenied
 
     questions = get_answered_questions(survey=survey, read_only=False)
@@ -130,15 +122,10 @@ def answer_questionnaire(request, eid, sid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def assign_questionnaire(request, eid, sid):
     survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
-    prod = engagement.product
-    auth = request.user.is_staff or check_auth_users_list(request.user, prod)
-    if not auth:
-        # will render 403
-        raise PermissionDenied
 
     form = AssignUserForm(instance=survey)
     if request.method == 'POST':
@@ -156,7 +143,7 @@ def assign_questionnaire(request, eid, sid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def view_questionnaire(request, eid, sid):
     survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
@@ -189,7 +176,7 @@ def get_answered_questions(survey=None, read_only=False):
     return questions
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def add_questionnaire(request, eid):
     user = request.user
     engagement = get_object_or_404(Engagement, id=eid)
@@ -227,7 +214,7 @@ def add_questionnaire(request, eid):
                    'engagement': engagement})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.change_engagement_survey', 'staff')
 def edit_questionnaire(request, sid):
     survey = get_object_or_404(Engagement_Survey, id=sid)
     old_name = survey.name
@@ -276,7 +263,7 @@ def edit_questionnaire(request, sid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.delete_engagement_survey', 'staff')
 def delete_questionnaire(request, sid):
     survey = get_object_or_404(Engagement_Survey, id=sid)
     form = Delete_Eng_Survey_Form(instance=survey)
@@ -306,7 +293,7 @@ def delete_questionnaire(request, sid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_engagement_survey', 'staff')
 def create_questionnaire(request):
     form = CreateQuestionnaireForm()
     survey = None
@@ -337,9 +324,12 @@ def create_questionnaire(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# complex permission check inside the function
 def edit_questionnaire_questions(request, sid):
     survey = get_object_or_404(Engagement_Survey, id=sid)
+    if not user_has_configuration_permission(request.user, 'dojo.add_engagement_survey', 'staff') and \
+            not user_has_configuration_permission(request.user, 'dojo.change_engagement_survey', 'staff'):
+        raise PermissionDenied()
 
     answered_surveys = Answered_Survey.objects.filter(survey=survey)
     reverted = False
@@ -380,7 +370,7 @@ def edit_questionnaire_questions(request, sid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.view_engagement_survey', 'staff')
 def questionnaire(request):
     user = request.user
     surveys = Engagement_Survey.objects.all()
@@ -394,33 +384,32 @@ def questionnaire(request):
     messages.add_message(request,
                                  messages.INFO,
                                  'Surveys have migrated to core DefectDojo! Please run python3 manage.py migrate_surveys to retrieve data. ' +
-                                 'For docker-compose, run `docker ps -a` to find the uwsgi container name then `docker exec -it <conainter_name> ./manage.py migrate_sruveys`',
+                                 'For docker-compose, run `docker ps -a` to find the uwsgi container name then `docker exec -it <conainter_name> ./manage.py migrate_surveys`',
                                  extra_tags='alert-info')
 
-    add_breadcrumb(title="All Questionnaires", top_level=True, request=request)
+    add_breadcrumb(title="Questionnaires", top_level=True, request=request)
     return render(request, 'defectDojo-engagement-survey/list_surveys.html',
                   {"surveys": paged_surveys,
                    "filtered": surveys,
                    "general": general_surveys,
-                   "name": "All Surveys",
+                   "name": "Questionnaires",
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.view_question', 'staff')
 def questions(request):
-    user = request.user
     questions = Question.objects.all()
     questions = QuestionFilter(request.GET, queryset=questions)
     paged_questions = get_page_items(request, questions.qs, 25)
-    add_breadcrumb(title="All Questions", top_level=False, request=request)
+    add_breadcrumb(title="Questions", top_level=False, request=request)
     return render(request, 'defectDojo-engagement-survey/list_questions.html',
                   {"questions": paged_questions,
                    "filtered": questions,
-                   "name": "All Questions",
+                   "name": "Questions",
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_question', 'staff')
 def create_question(request):
     error = False
     form = CreateQuestionForm()
@@ -490,7 +479,7 @@ def create_question(request):
         'choiceForm': choiceQuestionFrom})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.change_question', 'staff')
 def edit_question(request, qid):
     error = False
 
@@ -498,6 +487,7 @@ def edit_question(request, qid):
     survey = Engagement_Survey.objects.filter(questions__in=[question])
     reverted = False
 
+    answered = []
     if survey:
         answered = Answered_Survey.objects.filter(survey__in=survey)
         if answered.count() > 0:
@@ -509,17 +499,17 @@ def edit_question(request, qid):
 
     type = str(ContentType.objects.get_for_model(question))
 
-    if type == 'text question':
+    if type == 'dojo | text question':
         form = EditTextQuestionForm(instance=question)
-    elif type == 'choice question':
+    elif type == 'dojo | choice question':
         form = EditChoiceQuestionForm(instance=question)
     else:
         raise Http404()
 
     if request.method == 'POST':
-        if type == 'text question':
+        if type == 'dojo | text question':
             form = EditTextQuestionForm(request.POST, instance=question)
-        elif type == 'choice question':
+        elif type == 'dojo | choice question':
             form = EditChoiceQuestionForm(request.POST, instance=question)
         else:
             raise Http404()
@@ -551,7 +541,7 @@ def edit_question(request, qid):
         'form': form})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.change_question', 'staff')
 def add_choices(request):
     form = AddChoicesForm()
     if request.method == 'POST':
@@ -577,7 +567,7 @@ def add_choices(request):
 
 
 # Empty questionnaire functions
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_engagement_survey', 'staff')
 def add_empty_questionnaire(request):
     user = request.user
     surveys = Engagement_Survey.objects.all()
@@ -611,7 +601,7 @@ def add_empty_questionnaire(request):
                    'engagement': engagement})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.view_engagement_survey', 'staff')
 def view_empty_survey(request, esid):
     survey = get_object_or_404(Answered_Survey, id=esid)
     engagement = None
@@ -627,7 +617,7 @@ def view_empty_survey(request, esid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.delete_engagement_survey', 'staff')
 def delete_empty_questionnaire(request, esid):
     engagement = None
     survey = get_object_or_404(Answered_Survey, id=esid)
@@ -665,7 +655,7 @@ def delete_empty_questionnaire(request, esid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.delete_engagement_survey', 'staff')
 def delete_general_questionnaire(request, esid):
     engagement = None
     questions = None
@@ -704,14 +694,13 @@ def answer_empty_survey(request, esid):
     settings = System_Settings.objects.all()[0]
 
     if not settings.allow_anonymous_survey_repsonse:
-        auth = request.user.is_staff
-        if not auth:
+        if not request.user.is_authenticated:
             messages.add_message(request,
                                  messages.ERROR,
                                  'You must be logged in to answer questionnaire. Otherwise, enable anonymous response in system settings.',
                                  extra_tags='alert-danger')
             # will render 403
-            raise PermissionDenied
+            raise PermissionDenied()
 
     questions = [q.get_form()(prefix=str(q.id),
                               engagement_survey=engagement_survey,
@@ -776,23 +765,13 @@ def answer_empty_survey(request, esid):
 def engagement_empty_survey(request, esid):
     survey = get_object_or_404(Answered_Survey, id=esid)
     engagement = None
-    settings = System_Settings.objects.all()[0]
     form = AddEngagementForm()
-
-    if not settings.allow_anonymous_survey_repsonse:
-        auth = request.user.is_staff
-        if not auth:
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 'You must be logged in to answer questionnaire. Otherwise, enable anonymous response in system settings.',
-                                 extra_tags='alert-danger')
-            # will render 403
-            raise PermissionDenied
 
     if request.method == 'POST':
         form = AddEngagementForm(request.POST)
         if form.is_valid():
             product = form.cleaned_data.get('product')
+            user_has_permission_or_403(request.user, product, Permissions.Engagement_Add)
             engagement = Engagement(product_id=product.id,
                                     target_start=tz.now().date(),
                                     target_end=tz.now().date() + timedelta(days=7))
@@ -809,6 +788,6 @@ def engagement_empty_survey(request, esid):
                                  messages.ERROR,
                                  'Questionnaire could not be added.',
                                  extra_tags='alert-danger')
-    add_breadcrumb(title="Add Empty Questionnaire", top_level=False, request=request)
+    add_breadcrumb(title="Link Questionnaire to new Engagement", top_level=False, request=request)
     return render(request, 'defectDojo-engagement-survey/add_engagement.html',
                   {'form': form})

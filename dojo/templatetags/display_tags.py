@@ -7,16 +7,14 @@ from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
-from dojo.utils import prepare_for_view, get_system_setting, get_full_url
-from dojo.user.helper import user_is_authorized
-from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, Product, Dojo_User
+from dojo.utils import prepare_for_view, get_system_setting, get_full_url, get_file_images
+import dojo.utils
+from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
 import dateutil.relativedelta
 import datetime
-from ast import literal_eval
-from urllib.parse import urlparse
 import bleach
 import git
 from django.conf import settings
@@ -39,16 +37,21 @@ markdown_tags = [
     "img",
     "a",
     "sub", "sup",
+    "center",
 ]
 
 markdown_attrs = {
     "*": ["id"],
-    "img": ["src", "alt", "title"],
+    "img": ["src", "alt", "title", "width", "height", "style"],
     "a": ["href", "alt", "target", "title"],
     "span": ["class"],  # used for code highlighting
     "pre": ["class"],  # used for code highlighting
     "div": ["class"],  # used for code highlighting
 }
+
+markdown_styles = [
+    "background-color"
+]
 
 finding_related_action_classes_dict = {
     'reset_finding_duplicate_status': 'fa fa-eraser',
@@ -79,24 +82,12 @@ def markdown_render(value):
                                                       'markdown.extensions.fenced_code',
                                                       'markdown.extensions.toc',
                                                       'markdown.extensions.tables'])
-        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs))
-
-
-@register.filter(name='ports_open')
-def ports_open(value):
-    count = 0
-    for ipscan in value.ipscan_set.all():
-        count += len(literal_eval(ipscan.services))
-    return count
+        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs, markdown_styles))
 
 
 @register.filter(name='url_shortner')
 def url_shortner(value):
     return_value = str(value)
-    url = urlparse(return_value)
-
-    if url.path and len(url.path) != 1:
-        return_value = url.path
     if len(return_value) > 50:
         return_value = "..." + return_value[-47:]
 
@@ -243,6 +234,18 @@ def version_num(value):
     return version
 
 
+@register.filter(name='group_sla')
+def group_sla(group):
+    if not get_system_setting('enable_finding_sla'):
+        return ""
+
+    if not group.findings.all():
+        return ""
+
+    # if there is at least 1 finding, there will be date, severity etc to calculate sla
+    return finding_sla(group)
+
+
 @register.filter(name='finding_sla')
 def finding_sla(finding):
     if not get_system_setting('enable_finding_sla'):
@@ -314,8 +317,7 @@ def action_log_entry(value, autoescape=None):
     text = ''
     for k in history.keys():
         text += k.capitalize() + ' changed from "' + \
-                history[k][0] + '" to "' + history[k][1] + '"'
-
+                history[k][0] + '" to "' + history[k][1] + '"\n'
     return text
 
 
@@ -410,20 +412,14 @@ def colgroup(parser, token):
 def pic_token(context, image, size):
     user_id = context['user_id']
     user = User.objects.get(id=user_id)
-    token = FindingImageAccessToken(user=user, image=image, size=size)
+    token = FileAccessToken(user=user, file=image, size=size)
     token.save()
     return reverse('download_finding_pic', args=[token.token])
 
 
-@register.simple_tag
-def severity_value(value):
-    try:
-        if get_system_setting('s_finding_severity_naming'):
-            value = Finding.get_numerical_severity(value)
-    except:
-        pass
-
-    return value
+@register.filter
+def file_images(obj):
+    return get_file_images(obj, return_objects=True)
 
 
 @register.simple_tag
@@ -705,6 +701,12 @@ def setting_enabled(name):
     return getattr(settings, name, False)
 
 
+# this filter checks value directly against of function in utils
+@register.filter
+def system_setting_enabled(name):
+    return getattr(dojo.utils, name)()
+
+
 @register.filter
 def finding_display_status(finding):
     # add urls for some statuses
@@ -739,22 +741,6 @@ def finding_display_status(finding):
 
 
 @register.filter
-def is_authorized_for_change(user, obj):
-    return user_is_authorized(user, 'change', obj)
-
-
-@register.filter
-def is_authorized_for_delete(user, obj):
-    return user_is_authorized(user, 'delete', obj)
-
-
-@register.filter
-def is_authorized_for_staff(user, obj):
-    result = user_is_authorized(user, 'staff', obj)
-    return result
-
-
-@register.filter
 def cwe_url(cwe):
     if not cwe:
         return ''
@@ -762,10 +748,46 @@ def cwe_url(cwe):
 
 
 @register.filter
-def cve_url(cve):
-    if not cve:
-        return ''
-    return 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(cve)
+def has_vulnerability_url(vulnerability_id):
+    if not vulnerability_id:
+        return False
+
+    for key in settings.VULNERABILITY_URLS:
+        if vulnerability_id.upper().startswith(key):
+            return True
+    return False
+
+
+@register.filter
+def vulnerability_url(vulnerability_id):
+    if not vulnerability_id:
+        return False
+
+    for key in settings.VULNERABILITY_URLS:
+        if vulnerability_id.upper().startswith(key):
+            return settings.VULNERABILITY_URLS[key] + str(vulnerability_id)
+    return ''
+
+
+@register.filter
+def first_vulnerability_id(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids:
+        return vulnerability_ids[0]
+    else:
+        return None
+
+
+@register.filter
+def additional_vulnerability_ids(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids and len(vulnerability_ids) > 1:
+        references = list()
+        for vulnerability_id in vulnerability_ids[1:]:
+            references.append(vulnerability_id)
+        return references
+    else:
+        return None
 
 
 @register.filter
@@ -774,6 +796,15 @@ def jiraencode(value):
         return value
     # jira can't handle some characters inside [] tag for urls https://jira.atlassian.com/browse/CONFSERVER-4009
     return value.replace("|", "").replace("@", "")
+
+
+@register.filter
+def jiraencode_component(value):
+    if not value:
+        return value
+    # component names can be long and won't wrap causing everything to look messy
+    # add some spaces around semicolon
+    return value.replace("|", "").replace(":", " : ").replace("@", " @ ").replace("?", " ? ").replace("#", " # ")
 
 
 @register.filter
@@ -819,8 +850,9 @@ def finding_extended_title(finding):
         return ''
     result = finding.title
 
-    if finding.cve:
-        result += ' (' + finding.cve + ')'
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids:
+        result += ' (' + vulnerability_ids[0] + ')'
 
     if finding.cwe:
         result += ' (CWE-' + str(finding.cwe) + ')'
@@ -844,8 +876,8 @@ def finding_related_action_title(related_action):
 
 
 @register.filter
-def product_findings(product):
-    return Finding.objects.filter(test__engagement__product=product)
+def product_findings(product, findings):
+    return findings.filter(test__engagement__product=product).order_by('numerical_severity')
 
 
 @register.filter
@@ -922,14 +954,14 @@ def import_settings_tag(test_import, autoescape=True):
     <i class="fa %s has-popover %s"
         title="<i class='fa %s'></i> <b>Import Settings</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
         data-content="
+            <b>ID:</b> %s<br/>
             <b>Active:</b> %s<br/>
             <b>Verified:</b> %s<br/>
             <b>Minimum Severity:</b> %s<br/>
             <b>Close Old Findings:</b> %s<br/>
             <b>Push to jira:</b> %s<br/>
             <b>Tags:</b> %s<br/>
-            <b>Endpoint:</b> %s<br/>
-            <b>Version:</b> %s<br/>
+            <b>Endpoints:</b> %s<br/>
         "
     </i>
     """
@@ -938,14 +970,14 @@ def import_settings_tag(test_import, autoescape=True):
     color = ''
 
     return mark_safe(html % (icon, color, icon,
+                                esc(test_import.id),
                                 esc(test_import.import_settings.get('active', None)),
                                 esc(test_import.import_settings.get('verified', None)),
                                 esc(test_import.import_settings.get('minimum_severity', None)),
                                 esc(test_import.import_settings.get('close_old_findings', None)),
                                 esc(test_import.import_settings.get('push_to_jira', None)),
                                 esc(test_import.import_settings.get('tags', None)),
-                                esc(test_import.import_settings.get('endpoint', None)),
-                                esc(test_import.import_settings.get('version', None))))
+                                esc(test_import.import_settings.get('endpoints', test_import.import_settings.get('endpoint', None)))))
 
 
 @register.filter(needs_autoescape=True)
@@ -958,6 +990,7 @@ def import_history(finding, autoescape=True):
     else:
         esc = lambda x: x
 
+    # prefetched, so no filtering here
     status_changes = finding.test_import_finding_action_set.all()
 
     if not status_changes or len(status_changes) < 2:

@@ -8,6 +8,7 @@ from xml.dom import NamespaceErr
 from cpe import CPE
 from cvss import CVSS3
 from defusedxml import ElementTree
+from hyperlink._url import SCHEME_PORT_MAP
 
 from dojo.models import Endpoint, Finding, Test
 
@@ -73,12 +74,6 @@ class NessusCSVParser(object):
             dupe_key = severity + title + row.get('Host', 'No host') + str(row.get('Port', 'No port')) + row.get('Synopsis', 'No synopsis')
 
             detected_cve = self._format_cve(str(row.get('CVE')))
-            cve = None
-            if detected_cve:
-                # FIXME support more than one CVE in Nessus CSV parser
-                cve = detected_cve[0]
-                if len(detected_cve) > 1:
-                    LOGGER.warning("more than one CVE for a finding. NOT supported by Nessus CSV parser")
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -89,15 +84,13 @@ class NessusCSVParser(object):
                     description = description + str(row.get('Plugin Output'))
                 find = Finding(title=title,
                                 test=test,
-                                active=False,
-                                cve=cve,
-                                verified=False,
                                 description=description,
                                 severity=severity,
-                                numerical_severity=Finding.get_numerical_severity(severity),
                                 mitigation=mitigation,
                                 impact=impact,
                                 references=references)
+                if detected_cve:
+                    find.unsaved_vulnerability_ids = detected_cve
 
                 # manage CVSS vector (only v3.x for now)
                 if 'CVSS V3 Vector' in row and '' != row.get('CVSS V3 Vector'):
@@ -107,7 +100,7 @@ class NessusCSVParser(object):
                 if detected_cpe:
                     # FIXME support more than one CPE in Nessus CSV parser
                     if len(detected_cpe) > 1:
-                        LOGGER.warning("more than one CPE for a finding. NOT supported by Nessus CSV parser")
+                        LOGGER.debug("more than one CPE for a finding. NOT supported by Nessus CSV parser")
                     cpe_decoded = CPE(detected_cpe[0])
                     find.component_name = cpe_decoded.get_product()[0] if len(cpe_decoded.get_product()) > 0 else None
                     find.component_version = cpe_decoded.get_version()[0] if len(cpe_decoded.get_version()) > 0 else None
@@ -115,14 +108,15 @@ class NessusCSVParser(object):
                 find.unsaved_endpoints = list()
                 dupes[dupe_key] = find
             # manage endpoints
-            endpoint = Endpoint(host='localhost')
-            if 'Host' in row:
-                endpoint.host = row.get('Host')
-            elif 'IP Address' in row:
-                endpoint.host = row.get('IP Address')
-            endpoint.port = row.get('Port')
-            if 'Protocol' in row:
-                endpoint.protocol = row.get('Protocol').lower()
+            host = row.get('Host', row.get('DNS Name'))
+            if len(host) == 0:
+                host = row.get('IP Address', 'localhost')
+
+            endpoint = Endpoint(
+                          protocol=row.get('Protocol').lower() if 'Protocol' in row else None,
+                          host=host,
+                          port=row.get('Port')
+                        )
             find.unsaved_endpoints.append(endpoint)
         return list(dupes.values())
 
@@ -151,8 +145,12 @@ class NessusXMLParser(object):
                         port = item.attrib["port"]
 
                     protocol = None
-                    if str(item.attrib["protocol"]):
-                        protocol = item.attrib["protocol"]
+                    if str(item.attrib["svc_name"]):
+                        protocol = re.sub(r'[^A-Za-z0-9\-\+]+', "", item.attrib["svc_name"])
+                        if protocol == 'www':
+                            protocol = 'http'
+                        if protocol not in SCHEME_PORT_MAP:
+                            protocol = re.sub(r'[^A-Za-z0-9\-\+]+', "", item.attrib["protocol"])
 
                     description = ""
                     plugin_output = None
@@ -188,12 +186,16 @@ class NessusXMLParser(object):
                     for xref in item.iter("xref"):
                         references += xref.text + "\n"
 
-                    cve = None
+                    vulnerability_id = None
                     if item.findtext("cve"):
-                        cve = item.find("cve").text
+                        vulnerability_id = item.find("cve").text
                     cwe = None
                     if item.findtext("cwe"):
                         cwe = item.find("cwe").text
+                    cvssv3 = None
+                    if item.findtext("cvss3_vector"):
+                        cvssv3 = CVSS3(item.findtext("cvss3_vector")).clean_vector()
+
                     title = item.attrib["pluginName"]
                     dupe_key = severity + title
 
@@ -204,24 +206,30 @@ class NessusXMLParser(object):
                     else:
                         find = Finding(title=title,
                                        test=test,
-                                       active=False,
-                                       verified=False,
                                        description=description,
                                        severity=severity,
-                                       numerical_severity=Finding.get_numerical_severity(severity),
                                        mitigation=mitigation,
                                        impact=impact,
                                        references=references,
                                        cwe=cwe,
-                                       cve=cve)
+                                       cvssv3=cvssv3)
+                        find.unsaved_vulnerability_ids = list()
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
-                    find.unsaved_endpoints.append(Endpoint(host=ip + (":" + port if port is not None else ""),
-                                                           protocol=protocol))
-                    if fqdn is not None:
-                        find.unsaved_endpoints.append(Endpoint(host=fqdn,
-                                                               protocol=protocol))
+                    if vulnerability_id:
+                        find.unsaved_vulnerability_ids.append(vulnerability_id)
+
+                    if fqdn and '://' in fqdn:
+                        endpoint = Endpoint.from_uri(fqdn)
+                    else:
+                        if protocol == 'general':
+                            endpoint = Endpoint(host=fqdn if fqdn else ip)
+                        else:
+                            endpoint = Endpoint(protocol=protocol,
+                                                host=fqdn if fqdn else ip,
+                                                port=port)
+                    find.unsaved_endpoints.append(endpoint)
 
         return list(dupes.values())
 
@@ -252,9 +260,9 @@ class NessusParser(object):
 
     def get_findings(self, filename, test):
 
-        if filename.name.lower().endswith('.xml'):
+        if filename.name.lower().endswith('.xml') or filename.name.lower().endswith('.nessus'):
             return NessusXMLParser().get_findings(filename, test)
         elif filename.name.lower().endswith('.csv'):
             return NessusCSVParser().get_findings(filename, test)
         else:
-            raise ValueError('Unknown File Format')
+            raise ValueError('Filename extension not recognized. Use .xml, .nessus or .csv')

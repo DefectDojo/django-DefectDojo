@@ -97,8 +97,6 @@ def get_item(item_node, test):
                       description=description,
                       mitigation=mitigation,
                       references=link,
-                      active=False,
-                      verified=False,
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,

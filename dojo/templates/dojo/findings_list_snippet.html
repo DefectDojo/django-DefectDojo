@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load get_endpoint_status %}
 {% load static %}
 {% block findings_list %}
@@ -10,7 +11,30 @@
                     <h3 class="has-filters">
                         {{ filter_name }} Findings
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            &nbsp;
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="downloadMenu"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-download"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="downloadMenu">
+                            <li role="presentation">
+                                <a id="report" href="{% url 'quick_report' %}?url={{ request.get_full_path }}">
+                                    <i class="fa fa-file-text-o"></i> Report
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a id="csv_export" href="{% url 'csv_export' %}?url={{ request.get_full_path }}">
+                                    <i class="fa fa-table"></i> CSV Export
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a id="excel_export" href="{% url 'excel_export' %}?url={{ request.get_full_path }}">
+                                    <i class="fa fa-file-excel-o"></i> Excel Export
+                                </a>
+                            </li>
+                        </ul>
+                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         </div>
                     </h3>
                 </div>
@@ -22,116 +46,127 @@
                 <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
                 </div>
-            {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled%}
-            <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
-                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-                  <div class="btn-group mr-2" role="group" aria-label="Second group">
-                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
+            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+            <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
+                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+                    <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Bulk Edit
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
-                        <li class="dropdown-header">Choose wisely...</li>
-                        <li style="padding-left: 8px;">
-                          {% if product_tab %}
-                            <form action="{% url 'finding_bulk_update_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
-                          {% else %}
-                            <form action="{% url 'finding_bulk_update_all' %}" method="post" id="bulk_change_form">
-                          {% endif %}
-                                {% csrf_token %}
-                                <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                <label style="display: block" for="severity">Severity</label>
-                                <select name="severity" id="severity" style="font-size: 80%">
-                                    <option value="">Choose...</option>
-                                    <option value="Info">Info</option>
-                                    <option value="Low">Low</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="High">High</option>
-                                    <option value="Critical">Critical</option>
-                                </select><br/><br/>
-
-                                <label><b>Status</b><input id="id_bulk_status" name="status" type="checkbox" alt="Select to enable"/></label><br/>
-
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_active" name="active" type="checkbox" disabled/> <span>Active</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
-                                    <span>Out of scope</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
-                                    <span>Mitigated</span>
-                                </label>
-                                <br/>
-
-                                <label><b>Risk Acceptance</b><input id="id_bulk_risk_acceptance" name="risk_acceptance" type="checkbox" alt="Select to enable"/></label><br/>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_risk_accept" name="risk_accept" type="checkbox" disabled/> <span>Accept</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
-                                </label>
-
-                                <br>
-                                {% if system_settings.enable_jira %}
-                                <label style="font-size: 80%; font-weight: bold; display: block">Push to Jira
-                                  <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/>
-                                </label>
-                                {% comment %} <label style="font-size: 80%; font-weight: bold; display: block">Unlink JIRA issues
-                                  <input id="unlink_from_jira" name="unlink_from_jira" type="checkbox" alt="Select to unlink JIRA issues from Defect Dojo findings"/>
-                                </label> {% endcomment %}
-                                {% endif %}
-                                {% if system_settings.enable_github %}
-                                <label style="font-size: 80%; font-weight: bold; display: block">Push to GitHub
-                                  <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to GitHub"/>
-                                </label>
-                                <br/>
-                                {% endif %}
-                                <label style="display: block">Tags</label>
-                                {% comment %}
-                                    Quick hack to make bulk edit work without refactoring the whole bulk edit form
-                                    {{ bulk_edit_form.media.css }}
-                                    {{ bulk_edit_form.media.js }}
-                                {% endcomment %}
-                                {{ bulk_edit_form.tags }}
-                                <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
-                            </form>
-                        </li>
-                    </ul>
-                  </div>
-                  {% endif %}
-                  <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
+                {% endif %}
+                <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
                     {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
-                    <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
+                    <button type="button" id="merge_findings" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                       <a class="white-color merge" href="#" alt="Merge Findings">
                         <i class="fa fa-compress"></i>
                       </a>
                     </button>
                     {% endif %}
-                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+                    {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Delete" %}
                     <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                       <a class="white-color delete-bulk" href="#" alt="Delete Findings">
                         <i class="fa fa-trash"></i>
                       </a>
                     </button>
                     {% endif %}
-                  </div>
                 </div>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
+                    <li class="dropdown-header">Choose wisely...</li>
+                    <li style="padding-left: 8px;">
+                        {% if product_tab %}
+                        <form action="{% url 'finding_bulk_update_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
+                        {% else %}
+                        <form action="{% url 'finding_bulk_update_all' %}" method="post" id="bulk_change_form">
+                        {% endif %}
+                            {% csrf_token %}
+                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                            <label style="display: block" for="severity">Severity</label>
+                            <select name="severity" id="severity" style="font-size: 80%">
+                                <option value="">Choose...</option>
+                                <option value="Info">Info</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select><br/><br/>
+
+                            <label><b>Status</b><input id="id_bulk_status" name="status" type="checkbox" alt="Select to enable"/></label><br/>
+
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_active" name="active" type="checkbox" disabled/> <span>Active</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
+                                <span>Out of scope</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_is_mitigated" name="is_mitigated" type="checkbox" disabled/>
+                                <span>Mitigated</span>
+                            </label>
+                            <br/>
+
+                            <label><b>Risk Acceptance</b><input id="id_bulk_risk_acceptance" name="risk_acceptance" type="checkbox" alt="Select to enable"/></label><br/>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_risk_accept" name="risk_accept" type="checkbox" disabled/> <span>Accept</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
+                            </label>
+
+                            {% if 'is_finding_groups_enabled'|system_setting_enabled %}
+                            <label><b>Group</b></label>
+                            <span style="font-size: 80%;">(Only available in per test for now)</span><br/>
+                            {% endif %}
+
+                            <br>
+                            {% if system_settings.enable_jira %}
+                            <label style="font-size: 80%; font-weight: bold; display: block">Push to Jira
+                                <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/>
+                            </label>
+                            {% comment %} <label style="font-size: 80%; font-weight: bold; display: block">Unlink JIRA issues
+                                <input id="unlink_from_jira" name="unlink_from_jira" type="checkbox" alt="Select to unlink JIRA issues from Defect Dojo findings"/>
+                            </label> {% endcomment %}
+                            {% endif %}
+                            {% if system_settings.enable_github %}
+                            <label style="font-size: 80%; font-weight: bold; display: block">Push to GitHub
+                                <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to GitHub"/>
+                            </label>
+                            <br/>
+                            {% endif %}
+                            <label style="display: block">Notes</label>
+                            {% comment %}
+                                Quick hack to make bulk edit work without refactoring the whole bulk edit form
+                                {{ bulk_edit_form.media.css }}
+                                {{ bulk_edit_form.media.js }}
+                            {% endcomment %}
+                            {{ bulk_edit_form.notes }}
+                            <label style="display: block">Tags</label>
+                            {% comment %}
+                                Quick hack to make bulk edit work without refactoring the whole bulk edit form
+                                {{ bulk_edit_form.media.css }}
+                                {{ bulk_edit_form.media.js }}
+                            {% endcomment %}
+                            {{ bulk_edit_form.tags }}
+                            <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
+                        </form>
+                    </li>
+                </ul>
             </div>
+            {% endif %}
+
                 <div class="panel panel-default table-responsive">
                     <table id="open_findings"
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
-                          {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled%}
+                          {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                           <th class="hidden-sm centered" title="Select all visible findings.">
                               <div class="dropdown">
                                   <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -157,7 +192,7 @@
                             <th class="nowrap centered">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th>CWE</th>
-                            <th>CVE</th>
+                            <th>Vulnerability Id</th>
                             {% if filter_name == 'Closed' %}
                             <th class="nowrap">{% dojo_sort request 'Closed Date' 'mitigated'%}</th>
                             {% else %}
@@ -177,15 +212,19 @@
                                 <th>JIRA Change</th>
                               {% endif %}
                             {% endif%}
+                            {% if 'is_finding_groups_enabled'|system_setting_enabled %}
+                                <th>Group</th>
+                            {% endif %}
                             {% if show_product_column and product_tab is None %}
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
                             {% endif %}
+                            <th>Service</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for finding in findings %}
                             <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
-                                {% if user|is_authorized_for_staff:finding %}
+                                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                                   <td class="hidden-sm centered">
                                     <form action="#">
                                         <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"
@@ -203,20 +242,15 @@
                                             <i class="fa fa-arrow-circle-right"></i> View
                                           </a>
                                        </li>
-                                       {% if user|is_authorized_for_change:finding %}
+                                       {% if finding|has_object_permission:"Finding_Edit" %}
                                        <li>
                                           <a class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                           <i class="fa fa-pencil-square-o"></i> Edit
                                           </a>
                                        </li>
                                        {% endif %}
-                                       <li class="divider"></li>
-                                       {% if user|is_authorized_for_staff:finding %}
-                                          <li role="presentation">
-                                              <a href="{% url 'manage_images' finding.id %}">
-                                                  <i class="fa fa-file-image-o"></i> Manage Images
-                                              </a>
-                                          </li>
+                                       {% if finding|has_object_permission:"Finding_Edit" %}
+                                          <li class="divider"></li>
                                           {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
                                               <li role="presentation">
                                                   <a href="{% url 'clear_finding_review' finding.id %}">
@@ -231,26 +265,28 @@
                                               </li>
                                           {% endif %}
                                        {% endif %}
-                                       {% if user|is_authorized_for_change:finding %}
+                                       {% if finding|has_object_permission:"Finding_Edit" %}
                                           <li role="presentation">
                                               <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                   <i class="fa fa-clock-o"></i> Touch Finding
                                               </a>
                                           </li>
                                        {% endif %}
-                                       {% if user.is_staff %}
+                                       {% if "dojo.add_finding_template"|has_configuration_permission:"staff" %}
                                           <li role="presentation">
                                               <a href="{% url 'mktemplate' finding.id %}">
                                                   <i class="fa fa-copy"></i> Make Finding a Template
                                               </a>
                                           </li>
+                                       {% endif %}
+                                       {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission:"staff" %}
                                           <li role="presentation">
                                               <a href="{% url 'find_template_to_apply' finding.id %}">
                                                   <i class="fa fa-copy"></i> Apply Template to Finding
                                               </a>
                                           </li>
                                        {% endif %}
-                                       {% if user|is_authorized_for_change:finding %}
+                                       {% if finding|has_object_permission:"Finding_Edit" %}
                                         {% if finding.active %}
                                             <li role="presentation">
                                                 <a href="{% url 'close_finding' finding.id %}">
@@ -266,7 +302,7 @@
                                         {% endif %}
                                        {% endif %}
                                        <li class="divider"></li>
-                                        {% if user|is_authorized_for_staff:finding %}
+                                        {% if finding|has_object_permission:"Risk_Acceptance" %}
                                           {% if finding.risk_accepted %}
                                               <li role="presentation">
                                               <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
@@ -274,19 +310,21 @@
                                               </a>
                                               </li>
                                           {% else %}
-                                              {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
-                                                <li role="presentation">
-                                                    <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                        <i class="fa fa-exclamation-circle"></i> Accept Risk
-                                                    </a>
-                                                </li>
-                                              {% endif %}
-                                              {% if finding.test.engagement.product.enable_full_risk_acceptance %}
-                                                <li role="presentation">
-                                                    <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
-                                                        <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
-                                                    </a>
-                                                </li>
+                                              {% if not finding.duplicate %}
+                                                {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
+                                                    <li role="presentation">
+                                                        <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                            <i class="fa fa-exclamation-circle"></i> Accept Risk
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                                {% if finding.test.engagement.product.enable_full_risk_acceptance %}
+                                                    <li role="presentation">
+                                                        <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                            <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                               {% endif %}
                                           {% endif %}
                                         {% endif %}
@@ -295,7 +333,8 @@
                                                <i class="fa fa-history"></i> View History
                                            </a>
                                        </li>
-                                       {% if user|is_authorized_for_delete:finding %}
+                                       {% if finding|has_object_permission:"Finding_Delete" %}
+                                          <li class="divider"></li>
                                           <li>
                                             <form method="post" action="{% url 'delete_finding' finding.id %}"
                                                   style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
@@ -351,11 +390,7 @@
                                         ({{ finding.notes.count }})
                                     </a>
                                   {% endif %}
-                                  <sup>
-                                      {% for tag in finding.tags.all %}
-                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                      {% endfor %}
-                                  </sup>
+                                  {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                 </td>
                                 <td class="nowrap">
                                   {% if finding.cwe > 0 %}
@@ -365,11 +400,17 @@
                                   {% endif %}
                                 </td>
                                 <td class="nowrap">
-                                  {% if finding.cve %}
-                                    <a target="_blank" href="{{ finding.cve|cve_url }}">
-                                        <i class="fa fa-external-link"></i> {{ finding.cve|default:"" }}
-                                    </a>
+                                    {% with finding|first_vulnerability_id as first_vulnerability_id %}
+                                    {% if first_vulnerability_id %}  
+                                    {% if first_vulnerability_id|has_vulnerability_url %}
+                                        <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                                            <i class="fa fa-external-link"></i> {{ first_vulnerability_id }}
+                                        </a>
+                                    {% else %}
+                                        {{ first_vulnerability_id }}
+                                    {% endif %}
                                   {% endif %}
+                                  {% endwith %}
                                 </td>
                                 {% if filter_name == 'Closed' %}
                                   <td class="nowrap">{{ finding.mitigated|date }}</td>
@@ -397,18 +438,36 @@
                                 {% if system_settings.enable_jira %}
                                   {% if jira_project and product_tab or not product_tab %}
                                     <td class="nowrap">
-                                      {% if finding.has_jira_issue %}
+                                        {% if finding.has_jira_group_issue %}
+                                            <a href="{{ finding.finding_group | jira_issue_url }}" target="_blank"
+                                                alt="Jira Bug - {{finding.finding_group | jira_key}} (group)" data-toggle="tooltip" data-placement="bottom" title="{{finding.finding_group | jira_key}} (group)">{{finding.finding_group | jira_key}}</a>
+                                        {% elif finding.has_jira_issue %}
                                         <a href="{{ finding | jira_issue_url }}" target="_blank"
                                             alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}">{{finding | jira_key}}</a>
                                       {% endif %}
                                     </td>
                                     <td class="nowrap">
-                                      {{ finding | jira_creation | timesince }}
+                                        {% if finding.has_jira_group_issue %}
+                                            {{ finding.finding_group | jira_creation | timesince }}
+                                        {% else %}
+                                            {{ finding | jira_creation | timesince }}
+                                        {% endif %}
                                     </td>
                                     <td class="nowrap">
-                                      {{ finding | jira_change | timesince }}
+                                        {% if finding.has_jira_group_issue %}
+                                            {{ finding.finding_group | jira_change | timesince }}
+                                        {% else %}
+                                            {{ finding | jira_change | timesince }}
+                                        {% endif %}
                                     </td>
                                   {% endif %}
+                                {% endif %}
+                                {% if 'is_finding_groups_enabled'|system_setting_enabled %}
+                                <td class="centered">
+                                    {% if finding.has_finding_group %}
+                                    <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
+                                    {% endif %}
+                                </td>
                                 {% endif %}
                                 {% if show_product_column and product_tab is None %}
                                 <td><a
@@ -416,6 +475,11 @@
                                         title="{{ finding.test.engagement }}" alt="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                                 </td>
                                 {% endif %}
+                                <td>
+                                    {% if finding.service %}
+                                    {{ finding.service }}
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -440,9 +504,7 @@
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
             var columns = [
-                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
                 { "data": "checkbox" },
-                {% endif %}
                 { "data": "action" },
                 { "data": "severity" },
                 { "data": "finding" , render: function (data, type, row) {
@@ -465,9 +527,13 @@
                     { "data": "jira_change" },
                   {% endif %}
                 {% endif %}
+                {% if 'is_finding_groups_enabled'|system_setting_enabled %}
+                  { "data": "grouped" },
+                {% endif %}
                 {% if show_product_column and product_tab is None %}
                     { "data": "product" },
                 {% endif %}
+                { "data": "service" },
               ];
 
             // Filter the list of items to display based on what is shown.
@@ -521,14 +587,6 @@
                         extend: 'copy'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'excel',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csv'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
                         extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
@@ -566,13 +624,64 @@
                 $('#bulk_edit_menu #id_bulk_verified').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', !checked);
             })
 
-            $('#id_bulk_risk_acceptance').on('click', function (e) {
+            $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_is_mitigated').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_false_p').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', checked);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_accepted').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_out_of_scope').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_acceptance').on('click', function (e) {
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('disabled', !checked);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_accept').on('click', function (e) {
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_unaccept').on('click', function (e) {
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_accept').prop('checked', false);
             })
 
             // Keep the dropdown menu open for selecting severity status
@@ -720,4 +829,5 @@
 
     </script>
     {% include "dojo/filter_js_snippet.html" %}
+    {% include "dojo/snippets/selectpicker_in_dropdown.html" %}
 {% endblock %}

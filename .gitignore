@@ -76,12 +76,13 @@ dojo/uploads/risk/*
 dojo/uploads/reports/*
 dojo/scans/scan*
 dojo/uploads/threat/*
-dojo/fixtures/initial_surveys.json
+# dojo/fixtures/initial_surveys.json
 .idea
 *.sqlite
 *.db
 celerybeat.pid
 *.env*
+!docker/environments/*.env
 
 weekly.txt
 Monthly.txt
@@ -130,4 +131,6 @@ docker/extra_settings/*
 helm/defectdojo/charts
 
 # generates files for github pages
-public
+docs/public
+docs/node_modules
+docs/resources

@@ -3,7 +3,7 @@ import logging
 from django.utils import timezone
 
 from dojo.models import Finding, Risk_Acceptance
-from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
+from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
 import dojo.risk_acceptance.helper as ra_helper
 
 logger = logging.getLogger(__name__)
@@ -29,12 +29,9 @@ class SonarQubeApiUpdaterFromSource(object):
         if not sonarqube_issue:
             return
 
-        product = finding.test.engagement.product
-        config = product.sonarqube_product_set.all().first()
+        client, _ = SonarQubeApiImporter.prepare_client(finding.test)
+        # we don't care about config, each finding knows which config was used during import
 
-        client = SonarQubeAPI(
-            tool_config=config.sonarqube_tool_config if config else None
-        )
         issue = client.get_issue(sonarqube_issue.key)
         if issue:  # Issue could have disappeared in SQ because a previous scan has resolved the issue as fixed
             current_status = issue.get('resolution') or issue.get('status')
@@ -52,7 +49,7 @@ class SonarQubeApiUpdaterFromSource(object):
         target_status = None
         if finding.false_p:
             target_status = 'FALSE-POSITIVE'
-        elif finding.mitigated or finding.is_Mitigated:
+        elif finding.mitigated or finding.is_mitigated:
             target_status = 'FIXED'
         elif finding.risk_accepted:
             target_status = 'WONTFIX'
@@ -70,7 +67,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.verified = False
             finding.false_p = False
             finding.mitigated = None
-            finding.is_Mitigated = False
+            finding.is_mitigated = False
             ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         elif sonarqube_status == 'CONFIRMED':
@@ -78,7 +75,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.verified = True
             finding.false_p = False
             finding.mitigated = None
-            finding.is_Mitigated = False
+            finding.is_mitigated = False
             ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         elif sonarqube_status == 'FIXED':
@@ -86,7 +83,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.verified = True
             finding.false_p = False
             finding.mitigated = timezone.now()
-            finding.is_Mitigated = True
+            finding.is_mitigated = True
             ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         elif sonarqube_status == 'WONTFIX':
@@ -94,7 +91,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.verified = True
             finding.false_p = False
             finding.mitigated = None
-            finding.is_Mitigated = False
+            finding.is_mitigated = False
             Risk_Acceptance.objects.create(
                 owner=finding.reporter,
             ).accepted_findings.set([finding])
@@ -104,7 +101,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.verified = False
             finding.false_p = True
             finding.mitigated = None
-            finding.is_Mitigated = False
+            finding.is_mitigated = False
             ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         finding.save(issue_updater_option=False, dedupe_option=False)

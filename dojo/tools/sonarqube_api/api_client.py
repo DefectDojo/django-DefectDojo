@@ -12,20 +12,20 @@ class SonarQubeAPI:
 
         tool_type, _ = Tool_Type.objects.get_or_create(name='SonarQube')
 
-        if not tool_config:
+        if not tool_config:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
             try:
-                tool_config = Tool_Configuration.objects.get(tool_type=tool_type)
-            except Tool_Configuration.DoesNotExist:
+                tool_config = Tool_Configuration.objects.get(tool_type=tool_type)  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 2
+            except Tool_Configuration.DoesNotExist:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 1
                 raise Exception(
                     'No SonarQube tool is configured. \n'
                     'Create a new Tool at Settings -> Tool Configuration'
                 )
-            except Tool_Configuration.MultipleObjectsReturned:
+            except Tool_Configuration.MultipleObjectsReturned:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 3
                 raise Exception(
-                    'It has configured more than one SonarQube tool. \n'
+                    'More than one Tool Configuration for SonarQube exists. \n'
                     'Please specify at Product configuration which one should be used.'
                 )
-
+        self.extras = tool_config.extras
         self.session = requests.Session()
         self.sonar_api_url = tool_config.url
         if tool_config.authentication_type == "Password":
@@ -67,7 +67,7 @@ class SonarQubeAPI:
 
         else:
             raise Exception("Unable to find the project {} due to {} - {}".format(
-                project_name, response.status_code, response.content
+                project_name, response.status_code, response.content.decode("utf-8")
             ))
 
     def get_project(self, project_key):
@@ -91,7 +91,7 @@ class SonarQubeAPI:
             return response.json().get('component')
         else:
             raise Exception("Unable to find the project {} due to {} - {}".format(
-                project_key, response.status_code, response.content
+                project_key, response.status_code, response.content.decode("utf-8")
             ))
 
     def find_issues(self, component_key, types='VULNERABILITY'):
@@ -104,6 +104,10 @@ class SonarQubeAPI:
         :param types: issue types (comma separated values). e.g. BUG,VULNERABILITY,CODE_SMELL
         :return:
         """
+
+        if self.extras is not None:
+            types = self.extras
+
         page = 1
         max_page = 100
         issues = list()
@@ -132,11 +136,50 @@ class SonarQubeAPI:
             else:
                 raise Exception(
                     "Unable to find the issues for component {} due to {} - {}".format(
-                        component_key, response.status_code, response.content
+                        component_key, response.status_code, response.content.decode("utf-8")
                     )
                 )
 
         return issues
+
+    def find_hotspots(self, project_key):
+        """
+        Search for hotspots.
+        :param project_key: project key
+        :return:
+        """
+        page = 1
+        max_page = 100
+        hotspots = list()
+
+        while page <= max_page:
+            request_filter = {
+                'projectKey': project_key,
+                'p': page
+            }
+            response = self.session.get(
+                url='{}/hotspots/search'.format(self.sonar_api_url),
+                params=request_filter,
+                headers={
+                    'User-Agent': 'DefectDojo'
+                },
+            )
+
+            if response.ok:
+                hotspots_page = response.json().get('hotspots')
+                if not hotspots_page:
+                    break
+                hotspots.extend(hotspots_page)
+                page += 1
+
+            else:
+                raise Exception(
+                    "Unable to find the hotspots for project {} due to {} - {}".format(
+                        project_key, response.status_code, response.content
+                    )
+                )
+
+        return hotspots
 
     def get_issue(self, issue_key):
         """
@@ -174,7 +217,7 @@ class SonarQubeAPI:
         else:
             raise Exception(
                 "Unable to get issue {} due to {} - {}".format(
-                    issue_key, response.status_code, response.content
+                    issue_key, response.status_code, response.content.decode("utf-8")
                 )
             )
 
@@ -198,6 +241,30 @@ class SonarQubeAPI:
                 self.rules_cache.update({rule_id: rule})
             else:
                 raise Exception("Unable to get the rule {} due to {} - {}".format(
+                    rule_id, response.status_code, response.content.decode("utf-8")
+                ))
+        return rule
+
+    def get_hotspot_rule(self, rule_id):
+        """
+        Get detailed information about a hotspot
+        :param rule_id:
+        :return:
+        """
+        rule = self.rules_cache.get(rule_id)
+        if not rule:
+            response = self.session.get(
+                url='{}/hotspots/show'.format(self.sonar_api_url),
+                params={'hotspot': rule_id},
+                headers={
+                    'User-Agent': 'DefectDojo'
+                },
+            )
+            if response.ok:
+                rule = response.json()['rule']
+                self.rules_cache.update({rule_id: rule})
+            else:
+                raise Exception("Unable to get the hotspot rule {} due to {} - {}".format(
                     rule_id, response.status_code, response.content
                 ))
         return rule
@@ -242,7 +309,7 @@ class SonarQubeAPI:
         if not response.ok:
             raise Exception(
                 "Unable to transition {} the issue {} due to {} - {}".format(
-                    transition, issue_key, response.status_code, response.content
+                    transition, issue_key, response.status_code, response.content.decode("utf-8")
                 )
             )
 
@@ -267,6 +334,34 @@ class SonarQubeAPI:
         if not response.ok:
             raise Exception(
                 "Unable to add a comment into issue {} due to {} - {}".format(
-                    issue_key, response.status_code, response.content
+                    issue_key, response.status_code, response.content.decode("utf-8")
                 )
             )
+
+    def test_connection(self):
+        """
+        Returns number of components (projects) or raise error.
+        """
+        response = self.session.get(
+            url='{}/components/search'.format(self.sonar_api_url),
+            params={
+                'qualifiers': 'TRK'
+            },
+            headers={
+                'User-Agent': 'DefectDojo'
+            },
+        )
+
+        if response.ok:
+            num_projects = response.json()['paging']['total']
+            return f'You have access to {num_projects} projects'
+
+        else:
+            raise Exception("Unable to connect and search in SonarQube due to {} - {}".format(
+                response.status_code, response.content.decode("utf-8")
+            ))
+
+    def test_product_connection(self, api_scan_configuration):
+        project = self.get_project(api_scan_configuration.service_key_1)
+        project_name = project.get('name')
+        return f'You have access to project {project_name}'

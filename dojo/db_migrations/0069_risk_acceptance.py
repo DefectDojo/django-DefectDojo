@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jira_project',
             name='risk_acceptance_expiration_notification',
-            field=models.BooleanField(default=False, verbose_name='Send Risk Acceptance expiration notifications as comment?'),
+            field=models.BooleanField(blank=True, default=False, verbose_name='Send Risk Acceptance expiration notifications as comment?'),
         ),
         migrations.AddField(
             model_name='notifications',
@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='product',
             name='enable_full_risk_acceptance',
-            field=models.BooleanField(default=True, help_text='Allows full risk acceptanc using a risk acceptance form, expiration date, uploaded proof, etc.'),
+            field=models.BooleanField(default=True, help_text='Allows full risk acceptance using a risk acceptance form, expiration date, uploaded proof, etc.'),
         ),
         migrations.AddField(
             model_name='product',

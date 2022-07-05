@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load authorization_tags %}
+{% load i18n %}
+
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Tool Type Configuration
+                        {% trans "Tool Types" %}
+                        {% if "dojo.add_tool_type"|has_configuration_permission:"superuser" %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -17,11 +22,12 @@
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a href="{% url 'add_tool_type' %}">
-                                            <i class="fa fa-plus"></i> Add Tool Configuration
+                                            <i class="fa fa-plus"></i> {% trans "Add Tool Type" %}
                                         </a>
                                     </li>
                             </ul>
                         </div>
+                        {% endif %}
                     </h3>
                 </div>
 
@@ -33,10 +39,10 @@
                 </div>
                 <div class="panel panel-default table-responsive">
                     <table id="products"
-                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                           class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Tool Type Category</th>
+                            <th>Name</th>
                             <th>Description</th>
                         </tr>
                         </thead>
@@ -44,10 +50,13 @@
                         {% for conf in confs %}
                             <tr>
                                 <td>
+                                    {% if "dojo.change_tool_type"|has_configuration_permission:"superuser" %}
                                     <a href="{% url 'edit_tool_type' conf.id %}"><b>{{ conf.name }}</b></a>
+                                    {% else %}
+                                    {{ conf.name }}
+                                    {% endif %}
                                 </td>
-                                <td>
-                                        {{ conf.description }}
+                                <td>{% if conf.description %}{{ conf.description }}{% endif %}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -58,11 +67,12 @@
                     {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
                 </div>
             {% else %}
-                <p class="text-center">No tool type configurations found.</p>
+                <p class="text-center">{% trans "No tool types found" %}</p>
             {% endif %}
         </div>
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

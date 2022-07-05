@@ -4,15 +4,20 @@ from typing import Dict
 
 from dateutil.relativedelta import relativedelta
 
+from django.conf import settings
+from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import render
 from django.utils import timezone
 
-from dojo.models import Finding, Engagement
 from django.db.models import Count, Q
 from dojo.utils import add_breadcrumb, get_punchcard_data
 from dojo.models import Answered_Survey
+from dojo.authorization.roles_permissions import Permissions
+from dojo.engagement.queries import get_authorized_engagements
+from dojo.finding.queries import get_authorized_findings
+from dojo.authorization.authorization import user_has_configuration_permission
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -20,18 +25,8 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 def dashboard(request: HttpRequest) -> HttpResponse:
-    if request.user.is_staff:
-        engagements = Engagement.objects.all()
-        findings = Finding.objects.all()
-    else:
-        engagements = Engagement.objects.filter(
-            Q(product__authorized_users=request.user) |
-            Q(product__prod_type__authorized_users=request.user)
-        ).distinct()
-        findings = Finding.objects.filter(
-            Q(test__engagement__product__authorized_users=request.user) |
-            Q(test__engagement__product__prod_type__authorized_users=request.user)
-        ).distinct()
+    engagements = get_authorized_engagements(Permissions.Engagement_View).distinct()
+    findings = get_authorized_findings(Permissions.Finding_View).distinct()
 
     findings = findings.filter(duplicate=False)
 
@@ -54,7 +49,18 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     severity_count_by_month = get_severities_by_month(findings, today)
     punchcard, ticks = get_punchcard_data(findings, today - relativedelta(weeks=26), 26)
 
-    unassigned_surveys = Answered_Survey.objects.filter(assignee_id__isnull=True, completed__gt=0)
+    if user_has_configuration_permission(request.user, 'dojo.view_engagement_survey', 'staff'):
+        unassigned_surveys = Answered_Survey.objects.filter(assignee_id__isnull=True, completed__gt=0, ) \
+            .filter(Q(engagement__isnull=True) | Q(engagement__in=engagements))
+    else:
+        unassigned_surveys = None
+
+    if request.user.is_superuser and not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+        message = '''Legacy authorization for changing configurations based on staff users will be
+                     removed with version 2.12.0 / 5. July 2022. If you have set
+                     `FEATURE_CONFIGURATION_AUTHORIZATION` to `False` in your local configuration,
+                     remove this local setting and start using the new authorization.'''
+        messages.add_message(request, messages.WARNING, message, extra_tags='alert-warning')
 
     add_breadcrumb(request=request, clear=True)
     return render(request, 'dojo/dashboard.html', {

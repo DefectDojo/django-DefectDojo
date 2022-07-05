@@ -1,0 +1,137 @@
+{
+  "results": {
+    "scan_errors": [
+      {
+        "iac_type": "kustomize",
+        "directory": "terrascan-test",
+        "errMsg": "kustomization.y(a)ml file not found in the directory terrascan-test"
+      },
+      {
+        "iac_type": "helm",
+        "directory": "terrascan-test",
+        "errMsg": "no helm charts found in directory terrascan-test"
+      }
+    ],
+    "violations": [
+      {
+        "rule_name": "gkeControlPlaneNotPublic",
+        "description": "Ensure GKE Control Plane is not public.",
+        "rule_id": "accurics.gcp.NS.109",
+        "severity": "HIGH",
+        "category": "Infrastructure Security",
+        "resource_name": "k8s_cluster",
+        "resource_type": "google_container_cluster",
+        "file": "cluster.tf",
+        "plan_root": "./",
+        "line": 52
+      },
+      {
+        "rule_name": "autoNodeRepairEnabled",
+        "description": "Ensure 'Automatic node repair' is enabled for Kubernetes Clusters.",
+        "rule_id": "accurics.gcp.OPS.144",
+        "severity": "MEDIUM",
+        "category": "Security Best Practices",
+        "resource_name": "k8s_cluster_node_pool",
+        "resource_type": "google_container_node_pool",
+        "file": "cluster.tf",
+        "plan_root": "./",
+        "line": 14
+      },
+      {
+        "rule_name": "checkRequireSSLEnabled",
+        "description": "Ensure that Cloud SQL database instance requires all incoming connections to use SSL",
+        "rule_id": "accurics.gcp.EKM.141",
+        "severity": "HIGH",
+        "category": "Infrastructure Security",
+        "resource_name": "master",
+        "resource_type": "google_sql_database_instance",
+        "file": "db.tf",
+        "plan_root": "./",
+        "line": 5
+      },
+      {
+        "rule_name": "stackDriverLoggingEnabled",
+        "description": "Ensure Stackdriver Logging is enabled on Kubernetes Engine Clusters.",
+        "rule_id": "accurics.gcp.LOG.100",
+        "severity": "HIGH",
+        "category": "Logging and Monitoring",
+        "resource_name": "k8s_cluster",
+        "resource_type": "google_container_cluster",
+        "file": "cluster.tf",
+        "plan_root": "./",
+        "line": 52
+      },
+      {
+        "rule_name": "stackDriverMonitoringEnabled",
+        "description": "Ensure Stackdriver Monitoring is enabled on Kubernetes Engine Clusters.",
+        "rule_id": "accurics.gcp.MON.143",
+        "severity": "HIGH",
+        "category": "Logging and Monitoring",
+        "resource_name": "k8s_cluster",
+        "resource_type": "google_container_cluster",
+        "file": "cluster.tf",
+        "plan_root": "./",
+        "line": 52
+      },
+      {
+        "rule_name": "checkRotation365Days",
+        "description": "Ensure Encryption keys are rotated within a period of 365 days.",
+        "rule_id": "accurics.gcp.EKM.007",
+        "severity": "HIGH",
+        "category": "Security Best Practices",
+        "resource_name": "crypto_key",
+        "resource_type": "google_kms_crypto_key",
+        "file": "vault.tf",
+        "plan_root": "./",
+        "line": 18
+      },
+      {
+        "rule_name": "networkPolicyEnabled",
+        "description": "Ensure Network policy is enabled on Kubernetes Engine Clusters.",
+        "rule_id": "accurics.gcp.NS.103",
+        "severity": "HIGH",
+        "category": "Infrastructure Security",
+        "resource_name": "k8s_cluster",
+        "resource_type": "google_container_cluster",
+        "file": "cluster.tf",
+        "plan_root": "./",
+        "line": 52
+      },
+      {
+        "rule_name": "checkRotation90Days",
+        "description": "Ensure Encryption keys are rotated within a period of 90 days.",
+        "rule_id": "accurics.gcp.EKM.139",
+        "severity": "MEDIUM",
+        "category": "Security Best Practices",
+        "resource_name": "crypto_key",
+        "resource_type": "google_kms_crypto_key",
+        "file": "vault.tf",
+        "plan_root": "./",
+        "line": 18
+      },
+      {
+        "rule_name": "autoNodeUpgradeEnabled",
+        "description": "Ensure 'Automatic node upgrade' is enabled for Kubernetes Clusters.",
+        "rule_id": "accurics.gcp.OPS.101",
+        "severity": "HIGH",
+        "category": "Security Best Practices",
+        "resource_name": "k8s_cluster_node_pool",
+        "resource_type": "google_container_node_pool",
+        "file": "cluster.tf",
+        "plan_root": "./",
+        "line": 14
+      }
+    ],
+    "skipped_violations": null,
+    "scan_summary": {
+      "file/folder": "terrascan-test",
+      "iac_type": "all",
+      "scanned_at": "2021-05-19 13:13:06.083208 +0000 UTC",
+      "policies_validated": 607,
+      "violated_policies": 9,
+      "low": 0,
+      "medium": 2,
+      "high": 7
+    }
+  }
+}

@@ -1,0 +1,576 @@
+{
+  "database": {
+    "advisory-count": 302,
+    "last-commit": "7e4cbf6107145306ebb5002d66bcb98606a757fe",
+    "last-updated": "2021-05-12T01:59:58Z"
+  },
+  "lockfile": {
+    "dependency-count": 441
+  },
+  "settings": {
+    "target_arch": null,
+    "target_os": null,
+    "severity": null,
+    "ignore": [],
+    "informational_warnings": [
+      "unmaintained"
+    ],
+    "package_scope": null
+  },
+  "vulnerabilities": {
+    "found": true,
+    "count": 4,
+    "list": [
+      {
+        "advisory": {
+          "id": "RUSTSEC-2020-0091",
+          "package": "arc-swap",
+          "title": "Dangling reference in `access::Map` with Constant",
+          "description": "Using the `arc_swap::access::Map` with the `Constant` test helper (or with\nuser-provided implementation of the `Access` trait) could sometimes lead to the\nmap returning dangling references.\n\nReplaced by implementation without `unsafe`, at the cost of added `Clone` bound\non the closure and small penalty on performance.",
+          "date": "2020-12-10",
+          "aliases": [
+            "CVE-2020-35711"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "memory-corruption"
+          ],
+          "keywords": [
+            "dangling reference"
+          ],
+          "cvss": null,
+          "informational": null,
+          "url": "https://github.com/vorner/arc-swap/issues/45",
+          "references": [],
+          "yanked": false
+        },
+        "versions": {
+          "patched": [
+            ">=1.1.0",
+            ">=0.4.8"
+          ],
+          "unaffected": [
+            "<0.4.2"
+          ]
+        },
+        "affected": {
+          "arch": [],
+          "os": [],
+          "functions": {
+            "arc_swap::access::MapGuard::deref": [
+              "<1.1.0"
+            ]
+          }
+        },
+        "package": {
+          "name": "arc-swap",
+          "version": "0.4.7",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "4d25d88fd6b8041580a654f9d0c581a047baee2b3efee13275f2fc392fc75034",
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2021-0020",
+          "package": "hyper",
+          "title": "Multiple Transfer-Encoding headers misinterprets request payload",
+          "description": "hyper's HTTP server code had a flaw that incorrectly understands some requests\nwith multiple transfer-encoding headers to have a chunked payload, when it\nshould have been rejected as illegal. This combined with an upstream HTTP proxy\nthat understands the request payload boundary differently can result in\n\"request smuggling\" or \"desync attacks\".",
+          "date": "2021-02-05",
+          "aliases": [
+            "CVE-2021-21299"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "format-injection"
+          ],
+          "keywords": [
+            "http",
+            "request-smuggling"
+          ],
+          "cvss": null,
+          "informational": null,
+          "url": "https://github.com/hyperium/hyper/security/advisories/GHSA-6hfq-h8hq-87mf",
+          "references": [],
+          "yanked": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.14.3",
+            ">=0.13.10, <0.14.0",
+            ">=0.12.36, <0.13.0"
+          ],
+          "unaffected": [
+            "<0.12.0"
+          ]
+        },
+        "affected": null,
+        "package": {
+          "name": "hyper",
+          "version": "0.13.9",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "f6ad767baac13b44d4529fcf58ba2cd0995e36e7b435bc5b039de6f47e880dbf",
+          "dependencies": [
+            {
+              "name": "bytes",
+              "version": "0.5.6",
+              "source": null
+            },
+            {
+              "name": "futures-channel",
+              "version": "0.3.8",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "futures-core",
+              "version": "0.3.8",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "futures-util",
+              "version": "0.3.8",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "h2",
+              "version": "0.2.7",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "http",
+              "version": "0.2.1",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "http-body",
+              "version": "0.3.1",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "httparse",
+              "version": "1.3.4",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "httpdate",
+              "version": "0.3.2",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "itoa",
+              "version": "0.4.6",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "pin-project",
+              "version": "1.0.2",
+              "source": null
+            },
+            {
+              "name": "socket2",
+              "version": "0.3.17",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "tokio",
+              "version": "0.2.23",
+              "source": null
+            },
+            {
+              "name": "tower-service",
+              "version": "0.3.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "tracing",
+              "version": "0.1.22",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "want",
+              "version": "0.3.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2021-0003",
+          "package": "smallvec",
+          "title": "Buffer overflow in SmallVec::insert_many",
+          "description": "A bug in the `SmallVec::insert_many` method caused it to allocate a buffer that was smaller than needed.  It then wrote past the end of the buffer, causing a buffer overflow and memory corruption on the heap.\n\nThis bug was only triggered if the iterator passed to `insert_many` yielded more items than the lower bound returned from its `size_hint` method.\n \nThe flaw was corrected in smallvec 0.6.14 and 1.6.1, by ensuring that additional space is always reserved for each item inserted.  The fix also simplified the implementation of `insert_many` to use less unsafe code, so it is easier to verify its correctness.\n\nThank you to Yechan Bae (@Qwaz) and the Rust group at Georgia Tech’s SSLab for finding and reporting this bug.",
+          "date": "2021-01-08",
+          "aliases": [
+            "CVE-2021-25900"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "memory-corruption"
+          ],
+          "keywords": [
+            "buffer-overflow",
+            "heap-overflow",
+            "unsound"
+          ],
+          "cvss": null,
+          "informational": null,
+          "url": "https://github.com/servo/rust-smallvec/issues/252",
+          "references": [],
+          "yanked": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.6.14, <1.0.0",
+            ">=1.6.1"
+          ],
+          "unaffected": [
+            "<0.6.3"
+          ]
+        },
+        "affected": {
+          "arch": [],
+          "os": [],
+          "functions": {
+            "smallvec::SmallVec::insert_many": [
+              ">=0.6.3, <0.6.14",
+              ">=1.0.0, <1.6.1"
+            ]
+          }
+        },
+        "package": {
+          "name": "smallvec",
+          "version": "0.6.13",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "f7b0758c52e15a8b5e3691eae6cc559f08eee9406e548a4477ba4e67770a82b6",
+          "dependencies": [
+            {
+              "name": "maybe-uninit",
+              "version": "2.0.0",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        }
+      },
+      {
+        "advisory": {
+          "id": "RUSTSEC-2021-0003",
+          "package": "smallvec",
+          "title": "Buffer overflow in SmallVec::insert_many",
+          "description": "A bug in the `SmallVec::insert_many` method caused it to allocate a buffer that was smaller than needed.  It then wrote past the end of the buffer, causing a buffer overflow and memory corruption on the heap.\n\nThis bug was only triggered if the iterator passed to `insert_many` yielded more items than the lower bound returned from its `size_hint` method.\n \nThe flaw was corrected in smallvec 0.6.14 and 1.6.1, by ensuring that additional space is always reserved for each item inserted.  The fix also simplified the implementation of `insert_many` to use less unsafe code, so it is easier to verify its correctness.\n\nThank you to Yechan Bae (@Qwaz) and the Rust group at Georgia Tech’s SSLab for finding and reporting this bug.",
+          "date": "2021-01-08",
+          "aliases": [
+            "CVE-2021-25900"
+          ],
+          "related": [],
+          "collection": "crates",
+          "categories": [
+            "memory-corruption"
+          ],
+          "keywords": [
+            "buffer-overflow",
+            "heap-overflow",
+            "unsound"
+          ],
+          "cvss": null,
+          "informational": null,
+          "url": "https://github.com/servo/rust-smallvec/issues/252",
+          "references": [],
+          "yanked": false
+        },
+        "versions": {
+          "patched": [
+            ">=0.6.14, <1.0.0",
+            ">=1.6.1"
+          ],
+          "unaffected": [
+            "<0.6.3"
+          ]
+        },
+        "affected": {
+          "arch": [],
+          "os": [],
+          "functions": {
+            "smallvec::SmallVec::insert_many": [
+              ">=0.6.3, <0.6.14",
+              ">=1.0.0, <1.6.1"
+            ]
+          }
+        },
+        "package": {
+          "name": "smallvec",
+          "version": "1.5.0",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "7acad6f34eb9e8a259d3283d1e8c1d34d7415943d4895f65cc73813c7396fc85",
+          "replace": null
+        }
+      }
+    ]
+  },
+  "warnings": {
+    "unmaintained": [
+      {
+        "kind": "unmaintained",
+        "package": {
+          "name": "cpuid-bool",
+          "version": "0.1.2",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "8aebca1129a03dc6dc2b127edd729435bbc4a37e1d5f4d7513165089ceb02634",
+          "replace": null
+        },
+        "advisory": {
+          "id": "RUSTSEC-2021-0064",
+          "package": "cpuid-bool",
+          "title": "`cpuid-bool` has been renamed to `cpufeatures`",
+          "description": "Please use the `cpufeatures`` crate going forward:\n\n<https://github.com/RustCrypto/utils/tree/master/cpufeatures>\n\nThere will be no further releases of `cpuid-bool`.",
+          "date": "2021-05-06",
+          "aliases": [],
+          "related": [],
+          "collection": "crates",
+          "categories": [],
+          "keywords": [],
+          "cvss": null,
+          "informational": "unmaintained",
+          "url": "https://github.com/RustCrypto/utils/pull/381",
+          "references": [],
+          "yanked": false
+        },
+        "versions": {
+          "patched": [],
+          "unaffected": []
+        }
+      },
+      {
+        "kind": "unmaintained",
+        "package": {
+          "name": "net2",
+          "version": "0.2.35",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "3ebc3ec692ed7c9a255596c67808dee269f64655d8baf7b4f0638e51ba1d6853",
+          "dependencies": [
+            {
+              "name": "cfg-if",
+              "version": "0.1.10",
+              "source": null
+            },
+            {
+              "name": "libc",
+              "version": "0.2.92",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "winapi",
+              "version": "0.3.9",
+              "source": null
+            }
+          ],
+          "replace": null
+        },
+        "advisory": {
+          "id": "RUSTSEC-2020-0016",
+          "package": "net2",
+          "title": "`net2` crate has been deprecated; use `socket2` instead",
+          "description": "The [`net2`](https://crates.io/crates/net2) crate has been deprecated\nand users are encouraged to considered [`socket2`](https://crates.io/crates/socket2) instead.",
+          "date": "2020-05-01",
+          "aliases": [],
+          "related": [],
+          "collection": "crates",
+          "categories": [],
+          "keywords": [],
+          "cvss": null,
+          "informational": "unmaintained",
+          "url": "https://github.com/deprecrated/net2-rs/commit/3350e3819adf151709047e93f25583a5df681091",
+          "references": [],
+          "yanked": false
+        },
+        "versions": {
+          "patched": [],
+          "unaffected": []
+        }
+      },
+      {
+        "kind": "unmaintained",
+        "package": {
+          "name": "stdweb",
+          "version": "0.4.20",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "d022496b16281348b52d0e30ae99e01a73d737b2f45d38fed4edf79f9325a1d5",
+          "dependencies": [
+            {
+              "name": "discard",
+              "version": "1.0.4",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "rustc_version",
+              "version": "0.2.3",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "stdweb-derive",
+              "version": "0.5.3",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "stdweb-internal-macros",
+              "version": "0.2.9",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "stdweb-internal-runtime",
+              "version": "0.1.5",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "wasm-bindgen",
+              "version": "0.2.68",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        },
+        "advisory": {
+          "id": "RUSTSEC-2020-0056",
+          "package": "stdweb",
+          "title": "stdweb is unmaintained",
+          "description": "The author of the `stdweb` crate is unresponsive.\n\nMaintained alternatives:\n\n- [`wasm-bindgen`](https://github.com/rustwasm/wasm-bindgen)\n- [`js-sys`](https://github.com/rustwasm/wasm-bindgen/tree/master/crates/js-sys)\n- [`web-sys`](https://github.com/rustwasm/wasm-bindgen/tree/master/crates/web-sys)",
+          "date": "2020-05-04",
+          "aliases": [],
+          "related": [],
+          "collection": "crates",
+          "categories": [],
+          "keywords": [],
+          "cvss": null,
+          "informational": "unmaintained",
+          "url": "https://github.com/koute/stdweb/issues/403",
+          "references": [],
+          "yanked": false
+        },
+        "versions": {
+          "patched": [],
+          "unaffected": [
+            ">0.4.20"
+          ]
+        }
+      }
+    ],
+    "yanked": [
+      {
+        "kind": "yanked",
+        "package": {
+          "name": "arc-swap",
+          "version": "0.4.7",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "4d25d88fd6b8041580a654f9d0c581a047baee2b3efee13275f2fc392fc75034",
+          "replace": null
+        },
+        "advisory": null,
+        "versions": null
+      },
+      {
+        "kind": "yanked",
+        "package": {
+          "name": "bytecount",
+          "version": "0.6.1",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "c39a773ba75db12126d8d383f1bdbf7eb92ea47ec27dd0557aff1fedf172764c",
+          "replace": null
+        },
+        "advisory": null,
+        "versions": null
+      },
+      {
+        "kind": "yanked",
+        "package": {
+          "name": "miow",
+          "version": "0.2.1",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "8c1f2f3b1cf331de6896aabf6e9d55dca90356cc9960cca7eaaf408a355ae919",
+          "dependencies": [
+            {
+              "name": "kernel32-sys",
+              "version": "0.2.2",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "net2",
+              "version": "0.2.35",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "winapi",
+              "version": "0.2.8",
+              "source": null
+            },
+            {
+              "name": "ws2_32-sys",
+              "version": "0.2.1",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            }
+          ],
+          "replace": null
+        },
+        "advisory": null,
+        "versions": null
+      },
+      {
+        "kind": "yanked",
+        "package": {
+          "name": "net2",
+          "version": "0.2.35",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "3ebc3ec692ed7c9a255596c67808dee269f64655d8baf7b4f0638e51ba1d6853",
+          "dependencies": [
+            {
+              "name": "cfg-if",
+              "version": "0.1.10",
+              "source": null
+            },
+            {
+              "name": "libc",
+              "version": "0.2.92",
+              "source": "registry+https://github.com/rust-lang/crates.io-index"
+            },
+            {
+              "name": "winapi",
+              "version": "0.3.9",
+              "source": null
+            }
+          ],
+          "replace": null
+        },
+        "advisory": null,
+        "versions": null
+      },
+      {
+        "kind": "yanked",
+        "package": {
+          "name": "pin-project-lite",
+          "version": "0.1.11",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "c917123afa01924fc84bb20c4c03f004d9c38e5127e3c039bbf7f4b9c76a2f6b",
+          "replace": null
+        },
+        "advisory": null,
+        "versions": null
+      },
+      {
+        "kind": "yanked",
+        "package": {
+          "name": "pin-project-lite",
+          "version": "0.2.0",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "checksum": "6b063f57ec186e6140e2b8b6921e5f1bd89c7356dda5b33acc5401203ca6131c",
+          "replace": null
+        },
+        "advisory": null,
+        "versions": null
+      }
+    ]
+  }
+}

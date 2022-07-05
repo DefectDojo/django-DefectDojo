@@ -57,22 +57,6 @@
   },
   {
     "fields": {
-      "model": "apiaccess",
-      "app_label": "tastypie"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 8
-  },
-  {
-    "fields": {
-      "model": "apikey",
-      "app_label": "tastypie"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 9
-  },
-  {
-    "fields": {
       "model": "logentry",
       "app_label": "auditlog"
     },
@@ -129,38 +113,6 @@
   },
   {
     "fields": {
-      "model": "scansettings",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 17
-  },
-  {
-    "fields": {
-      "model": "scan",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 18
-  },
-  {
-    "fields": {
-      "model": "ipscan",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 19
-  },
-  {
-    "fields": {
-      "model": "engagement_type",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 20
-  },
-  {
-    "fields": {
       "model": "engagement",
       "app_label": "dojo"
     },
@@ -206,14 +158,6 @@
     },
     "model": "contenttypes.contenttype",
     "pk": 26
-  },
-  {
-    "fields": {
-      "model": "va",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 27
   },
   {
     "fields": {
@@ -270,22 +214,6 @@
     },
     "model": "contenttypes.contenttype",
     "pk": 34
-  },
-  {
-    "fields": {
-      "model": "findingimage",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 35
-  },
-  {
-    "fields": {
-      "model": "findingimageaccesstoken",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 36
   },
   {
     "fields": {
@@ -1829,114 +1757,6 @@
   },
   {
     "fields": {
-      "codename": "add_scansettings",
-      "name": "Can add scan settings",
-      "content_type": 17
-    },
-    "model": "auth.permission",
-    "pk": 52
-  },
-  {
-    "fields": {
-      "codename": "change_scansettings",
-      "name": "Can change scan settings",
-      "content_type": 17
-    },
-    "model": "auth.permission",
-    "pk": 53
-  },
-  {
-    "fields": {
-      "codename": "delete_scansettings",
-      "name": "Can delete scan settings",
-      "content_type": 17
-    },
-    "model": "auth.permission",
-    "pk": 54
-  },
-  {
-    "fields": {
-      "codename": "add_scan",
-      "name": "Can add scan",
-      "content_type": 18
-    },
-    "model": "auth.permission",
-    "pk": 55
-  },
-  {
-    "fields": {
-      "codename": "change_scan",
-      "name": "Can change scan",
-      "content_type": 18
-    },
-    "model": "auth.permission",
-    "pk": 56
-  },
-  {
-    "fields": {
-      "codename": "delete_scan",
-      "name": "Can delete scan",
-      "content_type": 18
-    },
-    "model": "auth.permission",
-    "pk": 57
-  },
-  {
-    "fields": {
-      "codename": "add_ipscan",
-      "name": "Can add ip scan",
-      "content_type": 19
-    },
-    "model": "auth.permission",
-    "pk": 58
-  },
-  {
-    "fields": {
-      "codename": "change_ipscan",
-      "name": "Can change ip scan",
-      "content_type": 19
-    },
-    "model": "auth.permission",
-    "pk": 59
-  },
-  {
-    "fields": {
-      "codename": "delete_ipscan",
-      "name": "Can delete ip scan",
-      "content_type": 19
-    },
-    "model": "auth.permission",
-    "pk": 60
-  },
-  {
-    "fields": {
-      "codename": "add_engagement_type",
-      "name": "Can add engagement_ type",
-      "content_type": 20
-    },
-    "model": "auth.permission",
-    "pk": 61
-  },
-  {
-    "fields": {
-      "codename": "change_engagement_type",
-      "name": "Can change engagement_ type",
-      "content_type": 20
-    },
-    "model": "auth.permission",
-    "pk": 62
-  },
-  {
-    "fields": {
-      "codename": "delete_engagement_type",
-      "name": "Can delete engagement_ type",
-      "content_type": 20
-    },
-    "model": "auth.permission",
-    "pk": 63
-  },
-  {
-    "fields": {
       "codename": "add_engagement",
       "name": "Can add engagement",
       "content_type": 21
@@ -2096,33 +1916,6 @@
     },
     "model": "auth.permission",
     "pk": 81
-  },
-  {
-    "fields": {
-      "codename": "add_va",
-      "name": "Can add va",
-      "content_type": 27
-    },
-    "model": "auth.permission",
-    "pk": 82
-  },
-  {
-    "fields": {
-      "codename": "change_va",
-      "name": "Can change va",
-      "content_type": 27
-    },
-    "model": "auth.permission",
-    "pk": 83
-  },
-  {
-    "fields": {
-      "codename": "delete_va",
-      "name": "Can delete va",
-      "content_type": 27
-    },
-    "model": "auth.permission",
-    "pk": 84
   },
   {
     "fields": {
@@ -2312,60 +2105,6 @@
     },
     "model": "auth.permission",
     "pk": 105
-  },
-  {
-    "fields": {
-      "codename": "add_findingimage",
-      "name": "Can add finding image",
-      "content_type": 35
-    },
-    "model": "auth.permission",
-    "pk": 106
-  },
-  {
-    "fields": {
-      "codename": "change_findingimage",
-      "name": "Can change finding image",
-      "content_type": 35
-    },
-    "model": "auth.permission",
-    "pk": 107
-  },
-  {
-    "fields": {
-      "codename": "delete_findingimage",
-      "name": "Can delete finding image",
-      "content_type": 35
-    },
-    "model": "auth.permission",
-    "pk": 108
-  },
-  {
-    "fields": {
-      "codename": "add_findingimageaccesstoken",
-      "name": "Can add finding image access token",
-      "content_type": 36
-    },
-    "model": "auth.permission",
-    "pk": 109
-  },
-  {
-    "fields": {
-      "codename": "change_findingimageaccesstoken",
-      "name": "Can change finding image access token",
-      "content_type": 36
-    },
-    "model": "auth.permission",
-    "pk": 110
-  },
-  {
-    "fields": {
-      "codename": "delete_findingimageaccesstoken",
-      "name": "Can delete finding image access token",
-      "content_type": 36
-    },
-    "model": "auth.permission",
-    "pk": 111
   },
   {
     "fields": {
@@ -3526,11 +3265,7 @@
       "prod_type": 1,
       "name": "Bodgeit",
       "created": null,
-      "authorized_users": [],
-      "manager": "Aaron Weaver",
-      "tech_contact": "Jeffrey Williams",
       "tid": 0,
-      "prod_manager": "John Smith",
       "description": "The BodgeIt Store is a vulnerable web application which is currently aimed at people who are new to pen testing.",
       "tags": [
           "java",
@@ -3546,11 +3281,7 @@
       "prod_type": 1,
       "name": "Gruyere",
       "created": null,
-      "authorized_users": [],
-      "manager": "0",
-      "tech_contact": "0",
       "tid": 0,
-      "prod_manager": "0",
       "description": "Vulnerable Application written by Google"
     },
     "model": "dojo.product",
@@ -3574,7 +3305,6 @@
       "reason": null,
       "requester": null,
       "risk_path": "none",
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2016-08-31",
@@ -3604,7 +3334,6 @@
       "reason": null,
       "requester": null,
       "risk_path": "none",
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2016-09-30",
@@ -3621,7 +3350,7 @@
       "last_reviewed_by": 1,
       "thread_id": 0,
       "references": "No references given",
-      "images": [],
+      "files": [],
       "impact": "No impact provided",
       "false_p": false,
       "verified": true,
@@ -3658,7 +3387,7 @@
       "last_reviewed_by": 1,
       "thread_id": 0,
       "references": "  * [X-Frame-Options](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options)\n\n",
-      "images": [],
+      "files": [],
       "impact": "No impact provided",
       "false_p": false,
       "verified": false,
@@ -3707,7 +3436,7 @@
       "last_reviewed_by": 1,
       "thread_id": 0,
       "references": "  * [Using Burp to Find XSS issues](https://support.portswigger.net/customer/portal/articles/1965737-Methodology_XSS.html)\r\n\r\n",
-      "images": [],
+      "files": [],
       "impact": "No impact provided",
       "false_p": false,
       "verified": true,
@@ -3743,7 +3472,7 @@
       "last_reviewed_by": 1,
       "thread_id": 0,
       "references": "  * [Marking HTTP as non-secure](https://www.chromium.org/Home/chromium-security/marking-http-as-non-secure)\r\n  * [Configuring Server-Side SSL/TLS](https://wiki.mozilla.org/Security/Server_Side_TLS)\r\n  * [HTTP Strict Transport Security](https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security)\r\n\r\n",
-      "images": [],
+      "files": [],
       "impact": "No impact provided",
       "false_p": false,
       "verified": true,
@@ -3778,7 +3507,7 @@
       "last_reviewed_by": 1,
       "thread_id": 0,
       "references": "",
-      "images": [],
+      "files": [],
       "impact": "No impact provided",
       "false_p": false,
       "verified": false,
@@ -3813,7 +3542,7 @@
       "last_reviewed_by": 1,
       "thread_id": 0,
       "references": "No references given",
-      "images": [],
+      "files": [],
       "impact": "No impact provided",
       "false_p": false,
       "verified": true,
@@ -3855,7 +3584,7 @@
       "last_reviewed_by": 1,
       "thread_id": 0,
       "references": "  * [Using Burp to Test for Cross-Site Request Forgery](https://support.portswigger.net/customer/portal/articles/1965674-using-burp-to-test-for-cross-site-request-forgery-csrf-)\n  * [The Deputies Are Still Confused](https://media.blackhat.com/eu-13/briefings/Lundeen/bh-eu-13-deputies-still-confused-lundeen-wp.pdf)\n\n",
-      "images": [],
+      "files": [],
       "impact": "No impact provided",
       "false_p": false,
       "verified": false,
@@ -3890,7 +3619,7 @@
       "last_reviewed_by": 1,
       "thread_id": 0,
       "references": "  * [Using Burp to Test for Injection Flaws](https://support.portswigger.net/customer/portal/articles/1965677-using-burp-to-test-for-injection-flaws)\r\n  * [SQL Injection Cheat Sheet](http://websec.ca/kb/sql_injection)\r\n  * [SQL Injection Prevention Cheat Sheet](https://www.owasp.org/index.php/SQL_Injection_Prevention_Cheat_Sheet)\r\n\r\n",
-      "images": [],
+      "files": [],
       "impact": "No impact provided",
       "false_p": false,
       "verified": true,
@@ -3927,7 +3656,7 @@
       "last_reviewed_by": 1,
       "thread_id": 0,
       "references": "  * [Detecting and exploiting path-relative stylesheet import (PRSSI) vulnerabilities](http://blog.portswigger.net/2015/02/prssi.html)\n\n",
-      "images": [],
+      "files": [],
       "impact": "No impact provided",
       "false_p": false,
       "verified": false,
@@ -3976,7 +3705,7 @@
       "last_reviewed_by": 1,
       "thread_id": 0,
       "references": "No references given",
-      "images": [],
+      "files": [],
       "impact": "No impact provided",
       "false_p": false,
       "verified": true,

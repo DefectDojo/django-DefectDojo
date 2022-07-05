@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+    {{ block.super }}
     <form method="GET" id="calfilter" action="/calendar">
         <div class="container-fluid chosen-container side-by-side">
             <div class="row">
@@ -21,7 +22,7 @@
                     </select>
                 </div>
                 <div class="col-lg-6">
-                    <button class="btn btn-primary" type="submit">Apply</button>
+                    <input class="btn btn-primary" type="submit" value="Apply" />
                 </div>
             </div>
         </div>
@@ -31,13 +32,17 @@
     <br/><br/>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
           $(function () {
-            $('#caltype').change(function() { $('#calfilter').attr('action', '/calendar/' + $(this).val()); });
-            $(".chosen-select").chosen({disable_search_threshold: 10});
-            $('#caltype').val('{{ caltype }}'); $('#caltype').trigger('change');
+            $('#caltype').change(function() {
+                 $('#calfilter').attr('action', '/calendar/' + $(this).val());
+            });
+            if (caltype) {
+                $('#caltype').val('{{ caltype }}');
+                $('#caltype').trigger('change');
+            }
             $('#lead').val([{% for lead in leads %} '{{ lead }}', {% endfor %}]);
-            $('.chosen-select').trigger('chosen:updated');
             $('#calendar').fullCalendar({
                 header: {
                     left: 'prev,next today',
@@ -57,7 +62,7 @@
                                 color: {%  if t.engagement.active %}'#337ab7'{% else %}'#b9b9b9'{% endif %},
                                 overlap: true
                             },
-                        {%  endfor %}                    
+                        {%  endfor %}
                     {% else %}
                         {% for e in engagements %}
                             {

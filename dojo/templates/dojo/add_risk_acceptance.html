@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block add_styles %}
+    {{ block.super }}
     .chosen-container {
     width: 70% !important;
     }
@@ -10,9 +11,11 @@
     }
 {% endblock %}
 {% block add_css %}
+    {{ block.super }}
     <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}">
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> Risk acceptance</h3>
     <div id="risk_acceptance">
         <p>
@@ -36,6 +39,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 <script type="application/javascript" src="{% static 'easymde/dist/easymde.min.js' %}"></script>
 <script type="text/javascript">
     $("#add_risk_acceptance textarea").each(function (index, elem) {

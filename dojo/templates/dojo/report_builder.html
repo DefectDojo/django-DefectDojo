@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
+{% load display_tags %}
 {% block content %}
+    {{ block.super }}
     <link href="{% static "google-code-prettify/src/prettify.css" %}" rel="stylesheet"/>
     <div class="row">
         <div class="col-md-8">
@@ -8,7 +10,6 @@
                 <div class="panel-heading">
                     <div class="clearfix">
                         <h4 class="pull-left">Report Format</h4>
-                        <a class="btn btn-success disabled pull-right run_report" href="#">Save and Run</a>
                     </div>
                 </div>
                 <div class="panel-body in-use-widgets">
@@ -22,7 +23,7 @@
                 </div>
                 <div class="panel-footer">
                     <div class="clearfix">
-                        <a class="btn btn-success disabled pull-right run_report" href="#">Save and Run</a>
+                        <a class="btn btn-success disabled pull-right run_report" href="#">Run</a>
                     </div>
                 </div>
             </div>
@@ -52,6 +53,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script src="{% static "google-code-prettify/src/prettify.js" %}"></script>
     <script src="{% static "bootstrap-wysiwyg/src/bootstrap-wysiwyg.js" %}"></script>
@@ -215,7 +217,8 @@
                 var valid = true;
 
                 $('.in-use-widgets .form-control').not('#finding-list .form-control')
-                        .not('#endpoint-list .form-control').not('#wysiwyg-content .form-control').each(function () {
+                        .not('#endpoint-list .form-control').not('#wysiwyg-content .form-control')
+                        .not('.bs-searchbox .form-control').not('div').each(function () {
                     if ($(this).val() === '')
                         valid = false;
                 });

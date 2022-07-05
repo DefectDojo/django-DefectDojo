@@ -3,6 +3,7 @@
 <head>
 </head>
 {% block content %}
+    {{ block.super }}
     <h3>Checklist</h3>
     <form class="form-horizontal" action="{% url 'complete_checklist' eid %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}

@@ -44,6 +44,15 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 {{- end -}}
 {{- end -}}
+{{- define "postgresqlha.hostname" -}}
+{{- if eq .Values.database "postgresqlha" -}}
+{{- if .Values.postgresqlha.enabled -}}
+{{- printf "%s-%s" .Release.Name "postgresqlha-pgpool" | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s" .Values.postgresqlha.postgresServer -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
 {{- define "mysql.hostname" -}}
 {{- if eq .Values.database "mysql" -}}
 {{- if .Values.mysql.enabled -}}
@@ -97,4 +106,16 @@ Create chart name and version as used by the chart label.
 
 {{- define "initializer.jobname" -}}
 {{ .Release.Name }}-initializer-{{- printf "%s" now | date "2006-01-02-15-04" -}}
+{{- end -}}
+
+{{/*
+  Creates the array for DD_ALLOWED_HOSTS in configmap
+*/}}
+{{- define "django.allowed_hosts" -}}
+{{- if .Values.alternativeHosts -}}
+{{- $hosts := .Values.host -}}
+{{- printf "%s,%s" $hosts (join "," .Values.alternativeHosts) -}}
+{{- else -}}
+{{ .Values.host }}
+{{- end -}}
 {{- end -}}

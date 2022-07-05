@@ -1,9 +1,7 @@
 import functools
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from dojo.authorization.authorization import user_has_permission
-from dojo.user.helper import user_is_authorized as legacy_check
+from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403, user_has_configuration_permission
 
 
 def user_is_authorized(model, permission, arg, lookup="pk", func=None):
@@ -27,16 +25,41 @@ def user_is_authorized(model, permission, arg, lookup="pk", func=None):
         # object must exist
         obj = get_object_or_404(model.objects.filter(**{lookup: lookup_value}))
 
-        if settings.FEATURE_NEW_AUTHORIZATION:
-            if not user_has_permission(request.user, obj, permission) and not request.user.is_superuser:
-                raise PermissionDenied()
-        else:
-            if permission.name.endswith("View"):
-                if not legacy_check(request.user, 'view', obj):
-                    raise PermissionDenied()
-            elif not request.user.is_staff:
-                raise PermissionDenied()
+        user_has_permission_or_403(request.user, obj, permission)
 
+        return func(request, *args, **kwargs)
+
+    return _wrapped
+
+
+def user_has_global_permission(permission, func=None):
+    """Decorator for functions that ensures the user has a (global) permission
+    """
+
+    if func is None:
+        return functools.partial(user_has_global_permission, permission)
+
+    @functools.wraps(func)
+    def _wrapped(request, *args, **kwargs):
+        user_has_global_permission_or_403(request.user, permission)
+        return func(request, *args, **kwargs)
+
+    return _wrapped
+
+
+def user_is_configuration_authorized(permission, legacy, func=None):
+    """
+    Decorator for views that checks whether a user has a particular permission enabled.
+    """
+
+    if func is None:
+        return functools.partial(user_is_configuration_authorized, permission, legacy)
+
+    @functools.wraps(func)
+    def _wrapped(request, *args, **kwargs):
+
+        if not user_has_configuration_permission(request.user, permission, legacy):
+            raise PermissionDenied
         return func(request, *args, **kwargs)
 
     return _wrapped

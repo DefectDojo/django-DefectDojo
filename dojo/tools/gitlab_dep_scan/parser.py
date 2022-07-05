@@ -90,7 +90,7 @@ def get_item(vuln, test):
         # In that case we set it as Info and specify the initial severity in the title
         title = '[{} severity] {}'.format(severity, title)
         severity = 'Info'
-    numerical_severity = Finding.get_numerical_severity(severity)
+
     # Dependency Scanning analyzers doesn't provide confidence property
     # See https://docs.gitlab.com/ee/user/application_security/dependency_scanning/analyzers.html#analyzers-data
     scanner_confidence = False
@@ -100,14 +100,14 @@ def get_item(vuln, test):
         mitigation = vuln['solution']
 
     cwe = None
-    cve = None
+    vulnerability_id = None
     references = ''
     if 'identifiers' in vuln:
         for identifier in vuln['identifiers']:
             if identifier['type'].lower() == 'cwe':
                 cwe = identifier['value']
             elif identifier['type'].lower() == 'cve':
-                cve = identifier['value']
+                vulnerability_id = identifier['value']
             else:
                 references += 'Identifier type: {}\n'.format(identifier['type'])
                 references += 'Name: {}\n'.format(identifier['name'])
@@ -116,13 +116,10 @@ def get_item(vuln, test):
                     references += 'URL: {}\n'.format(identifier['url'])
                 references += '\n'
 
-    finding = Finding(title=cve + ": " + title if cve else title,
+    finding = Finding(title=vulnerability_id + ": " + title if vulnerability_id else title,
                       test=test,
-                      active=False,
-                      verified=False,
                       description=description,
                       severity=severity,
-                      numerical_severity=numerical_severity,
                       scanner_confidence=scanner_confidence,
                       mitigation=mitigation,
                       unique_id_from_tool=unique_id_from_tool,
@@ -131,8 +128,10 @@ def get_item(vuln, test):
                       component_name=component_name,
                       component_version=component_version,
                       cwe=cwe,
-                      cve=cve,
                       static_finding=True,
                       dynamic_finding=False)
+
+    if vulnerability_id:
+        finding.unsaved_vulnerability_ids = [vulnerability_id]
 
     return finding

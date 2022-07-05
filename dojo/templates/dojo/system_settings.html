@@ -2,12 +2,14 @@
 {% load static %}
 
 {% block add_styles %}
+    {{ block.super }}
 .chosen-container {
     width: 70% !important;
 }
 {% endblock %}
 
 {% block content %}
+    {{ block.super }}
 <div class="row">
     <h3> System Status </h3>
     <br>
@@ -43,6 +45,7 @@
 Django forms are very rigid so without crispy-forms we're forced to use javascript to add some flavour...
 {endcomment}
 {% block postscript %}
+    {{ block.super }}
     <script>
         function updatenotificationsgroup(group) {
            if ($('#id_enable_' + group + "_notifications").is(':checked')) {

@@ -1,4 +1,5 @@
 {% load display_tags %}
+{% load authorization_tags %}
 {% load static %}
 {% load get_endpoint_status %}
 
@@ -22,7 +23,7 @@
                                 <tbody>
                                     {% for endpoint in endpoints %}
                                         <tr>
-                                            <td>{{ endpoint }}</td>
+                                            <td>{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</td>
                                             <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
                                             <td>{{ endpoint|endpoint_date:finding|date }}</td>
                                             <td>{{ endpoint|endpoint_update_time:finding|date}}</td>
@@ -54,7 +55,7 @@
                                 <tbody>
                                     {% for endpoint in endpoints %}
                                         <tr>
-                                            <td>{{ endpoint }}</td>
+                                            <td>{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</td>
                                             <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
                                             <td>{{ endpoint|endpoint_mitigated_time:finding|date }}</td>
                                             <td>{{ endpoint|endpoint_mitigator:finding|safe }}</td>
@@ -108,7 +109,7 @@
 
                         <table id="vuln_endpoints" class="table-striped table table-hover">
                             <thead>
-                                {% if user|is_authorized_for_change:finding %}
+                                {% if finding|has_object_permission:"Finding_Edit" %}
                                     <th class="hidden-sm" title="Select all vulnerable endpoints." style="width: 10%;">
                                         <form class="inline-form" action="#">
                                             <input type="checkbox" label="select_all_vulnerable" name="select_all_vulnerable" id="select_all_vulnerable"/>
@@ -124,7 +125,7 @@
                             <tbody>
                                 {% for endpoint in endpoints %}
                                     <tr>
-                                        {% if user|is_authorized_for_change:endpoint %}
+                                        {% if finding|has_object_permission:"Finding_Edit" %}
                                             <td class="hidden-sm">
                                                 <form action="#">
                                                     <input type="checkbox" label="select_vulnerable_{{ endpoint.id }}" name="select_vulnerable_{{ endpoint.id }}" id="{{ endpoint.id }}"
@@ -133,14 +134,8 @@
                                             </td>
                                         {% endif %}
                                         <td>
-                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}</a>
-                                            {% if item.tags %}
-                                                <sup>
-                                                    {% for tag in item.tags.all %}
-                                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                                    {% endfor %}
-                                                </sup>
-                                            {% endif %}
+                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                            {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
                                         </td>
                                         <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
                                         <td>{{ endpoint|endpoint_date:finding|date }}</td>
@@ -168,7 +163,7 @@
                         </div>
                         <table id="remd_endpoints" class="table-striped table table-hover">
                             <thead>
-                                {% if user|is_authorized_for_change:finding %}
+                                {% if finding|has_object_permission:"Finding_Edit" %}
                                     <th class="hidden-sm" title="Select all mitigated endpoints." style="width: 10%;">
                                         <form class="inline-form" action="#">
                                             <input type="checkbox" label="select_all_mitigated" name="select_all_mitigated" id="select_all_mitigated"/>
@@ -184,7 +179,7 @@
                             <tbody>
                                 {% for endpoint in endpoints %}
                                     <tr>
-                                        {% if user|is_authorized_for_change:endpoint %}
+                                        {% if finding|has_object_permission:"Finding_Edit" %}
                                             <td class="hidden-sm">
                                                 <form action="#">
                                                     <input type="checkbox" label="select_mitigated_{{ endpoint.id }}" name="select_mitigated_{{ endpoint.id }}" id="{{ endpoint.id }}"
@@ -193,14 +188,8 @@
                                             </td>
                                         {% endif %}
                                         <td>
-                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}</a>
-                                            {% if item.tags %}
-                                                <sup>
-                                                    {% for tag in item.tags.all %}
-                                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                                    {% endfor %}
-                                                </sup>
-                                            {% endif %}
+                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                            {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
                                         </td>
                                         <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
                                         <td>{{ endpoint|endpoint_mitigated_time:finding|date }}</td>

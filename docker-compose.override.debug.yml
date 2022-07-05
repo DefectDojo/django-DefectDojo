@@ -1,0 +1,59 @@
+---
+version: '3.8'
+services:
+  uwsgi:
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
+    volumes:
+      - '.:/app:z'
+    environment:
+      DD_DEBUG: 'True'
+      DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
+      DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
+      DD_EMAIL_URL: "smtp://mailhog:1025"
+    ports:
+      - target: ${DD_DEBUG_PORT:-3000}
+        published: ${DD_DEBUG_PORT:-3000}
+        protocol: tcp
+        mode: host
+  celeryworker:
+    volumes:
+      - '.:/app:z'
+    environment:
+      DD_EMAIL_URL: "smtp://mailhog:1025"
+  celerybeat:
+    volumes:
+      - '.:/app:z'
+  initializer:
+    volumes:
+      - '.:/app:z'
+    environment:
+      DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
+      DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
+  nginx:
+    volumes:
+      - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
+  mysql:
+    ports:
+      - target: ${DD_DATABASE_PORT}
+        published: ${DD_DATABASE_PORT}
+        protocol: tcp
+        mode: host
+  postgres:
+    ports:
+      - target: ${DD_DATABASE_PORT}
+        published: ${DD_DATABASE_PORT}
+        protocol: tcp
+        mode: host
+  mailhog:
+    image: mailhog/mailhog:v1.0.1@sha256:8d76a3d4ffa32a3661311944007a415332c4bb855657f4f6c57996405c009bea
+    entrypoint: [ "/bin/sh", "-c", "MailHog &>/dev/null" ]
+    # inspired by https://github.com/mailhog/MailHog/issues/56#issuecomment-291968642
+    ports:
+      - target: 1025
+        published: 1025
+        protocol: tcp
+        mode: host
+      - target: 8025
+        published: 8025
+        protocol: tcp
+        mode: host

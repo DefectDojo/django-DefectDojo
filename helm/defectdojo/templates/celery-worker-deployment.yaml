@@ -26,11 +26,29 @@ spec:
       {{- with .Values.celery.worker.annotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if eq (.Values.trackConfig | default "disabled") "enabled" }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/esecret: {{ include (print $.Template.BasePath "/extra-secret.yaml") . | sha256sum }}
+      {{- end }}
     spec:
       serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
+      volumes:
+      {{- range .Values.celery.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
+          path: {{ .hostPath }}
+          {{- end }}
       {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
@@ -43,9 +61,15 @@ spec:
         args:
         - "-verbose={{ .Values.cloudsql.verbose }}"
         {{- if eq .Values.database "postgresql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
         {{- else if eq .Values.database "mysql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.primary.service.ports.mysql }}"
+        {{- end }}
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
         {{- end }}
       {{- end }}
       - name: celery
@@ -54,8 +78,15 @@ spec:
         {{- if .Values.securityContext.enabled }}
         securityContext:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
-        {{- end }}        
+        {{- end }}
         command: ['/entrypoint-celery-worker.sh']
+        volumeMounts:
+        {{- range .Values.celery.extraVolumes }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
@@ -66,23 +97,44 @@ spec:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
+            {{- if eq .Values.celery.broker "rabbitmq" }}
+            {{- if .Values.rabbitmq.enabled}}
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
+            {{- else }}
+              name: {{ .Values.rabbitmq.existingPasswordSecret }}
+              key: {{ .Values.rabbitmq.secretPasswordKey }}  
+            {{- end }}            
+            {{- else if eq .Values.celery.broker "redis" }}
+            {{- if .Values.redis.enabled }}
+              name: defectdojo-{{ .Values.celery.broker }}-specific
+              key: {{ .Values.celery.broker }}-password
+            {{- else }}
+              name: {{ .Values.redis.auth.existingSecret }}
+              key: {{ .Values.redis.auth.existingSecretPasswordKey }}
+            {{- end }}  
+            {{- end }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
-              name: {{ .Values.postgresql.existingSecret }}
-              key: {{ .Values.postgresql.secretKey }}
+              name: {{ .Values.postgresql.auth.existingSecret }}
+              key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
+              {{- else if eq .Values.database "postgresqlha" }}
+              name: {{ .Values.postgresqlha.postgresql.existingSecret }}
+              key: postgresql-postgres-password
               {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.existingSecret }}
-              key: {{ .Values.mysql.secretKey }}
+              name: {{ .Values.mysql.auth.existingSecret }}
+              key: {{ .Values.mysql.auth.secretKey }}
               {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:
             secretKeyRef:
               name: {{ $fullName }}
               key: DD_SECRET_KEY
+        {{- if .Values.extraEnv }}
+        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- end }}
         resources:
           {{- toYaml .Values.celery.worker.resources | nindent 10 }}
       {{- with .Values.celery.worker.nodeSelector }}

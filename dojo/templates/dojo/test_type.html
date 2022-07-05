@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load authorization_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -9,6 +11,7 @@
                         Test Type List
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            {% if "dojo.add_test_type"|has_configuration_permission:"staff" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -16,13 +19,12 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                {% if request.user.is_staff %}
                                     <li role="presentation">
                                         <a href="{%  url 'add_test_type' %}">
                                             <i class="fa fa-plus"></i> New Test Type </a>
                                     </li>
-                                {% endif %}
                             </ul>
+                            {% endif %}
                         </div>
                     </h3>
                 </div>
@@ -45,7 +47,7 @@
                         <tbody>
                         {% for tt in tts %}
                             <tr>
-                                {% if user.is_staff %}
+                                {% if "dojo.change_test_type"|has_configuration_permission:"staff" %}
                                     <td><a href="{% url 'edit_test_type' tt.id %}"> {{ tt.name }} </a></td>
                                 {% else %}
                                     <td> {{ tt.name }} </a> </td>
@@ -65,6 +67,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         $(function () {
             var availableTags = [

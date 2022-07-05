@@ -40,15 +40,9 @@
                     <tbody>
                     {% for finding in findings %}
                         <tr>
-                            <td><a title="{{ finding.title }}"
-                                   href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
-                                    {% if finding.tags %}
-                                    <sup>
-                                        {% for tag in finding.tags.all %}
-                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
-                                    {% endif %}
+                            <td>
+                                <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                                {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                             </td>
                             <td class="nowrap">{{ finding.date }}</td>
                             <td>{{ finding.severity }}</td>

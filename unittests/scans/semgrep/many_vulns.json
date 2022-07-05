@@ -1,0 +1,1489 @@
+{
+  "results": [
+    {
+      "check_id": "python.lang.correctness.tempfile.flush.tempfile-without-flush",
+      "path": "tasks.py",
+      "start": {
+        "line": 186,
+        "col": 39
+      },
+      "end": {
+        "line": 186,
+        "col": 48
+      },
+      "extra": {
+        "message": "Using 'temp.name' without '.flush()' or '.close()' may cause an error because the file may not exist when 'temp.name' is used. Use '.flush()' or close the file before using 'temp.name'.",
+        "metavars": {
+          "$F": {
+            "start": {
+              "line": 186,
+              "col": 39,
+              "offset": 7814
+            },
+            "end": {
+              "line": 186,
+              "col": 43,
+              "offset": 7818
+            },
+            "abstract_content": "temp",
+            "unique_id": {
+              "type": "id",
+              "value": "temp",
+              "kind": "Local",
+              "sid": 76
+            }
+          }
+        },
+        "metadata": {},
+        "severity": "ERROR",
+        "is_ignored": false,
+        "lines": "                   'xsl-style-sheet': temp.name}"
+      }
+    },
+    {
+      "check_id": "python.lang.correctness.useless-eqeq.useless-eqeq",
+      "path": "finding/views.py",
+      "start": {
+        "line": 2047,
+        "col": 8
+      },
+      "end": {
+        "line": 2047,
+        "col": 68
+      },
+      "extra": {
+        "message": "This expression is always True: `new_original.test.engagement == new_original.test.engagement` or `new_original.test.engagement != new_original.test.engagement`. If testing for floating point NaN, use `math.isnan(new_original.test.engagement)`, or `cmath.isnan(new_original.test.engagement)` if the number is complex.",
+        "metavars": {
+          "$X": {
+            "start": {
+              "line": 2047,
+              "col": 8,
+              "offset": 94292
+            },
+            "end": {
+              "line": 2047,
+              "col": 36,
+              "offset": 94320
+            },
+            "abstract_content": "new_original.test.engagement",
+            "unique_id": {
+              "type": "AST",
+              "md5sum": "99639016192ea79c9e25222d8e522d55"
+            }
+          }
+        },
+        "metadata": {},
+        "severity": "ERROR",
+        "is_ignored": false,
+        "lines": "    if new_original.test.engagement != new_original.test.engagement:"
+      }
+    },
+    {
+      "check_id": "python.lang.maintainability.useless-ifelse.useless-if-conditional",
+      "path": "utils.py",
+      "start": {
+        "line": 503,
+        "col": 13
+      },
+      "end": {
+        "line": 520,
+        "col": 42
+      },
+      "extra": {
+        "message": "if block checks for the same condition on both branches (`f.mitigated is None and f.date <= end_of_period.date()`)",
+        "metavars": {
+          "$X": {
+            "start": {
+              "line": 503,
+              "col": 18,
+              "offset": 22886
+            },
+            "end": {
+              "line": 503,
+              "col": 72,
+              "offset": 22940
+            },
+            "abstract_content": "f.mitigated is None and f.date<=end_of_period.date()",
+            "unique_id": {
+              "type": "AST",
+              "md5sum": "dd078224722acf959a6d0ac6e5dc5939"
+            }
+          }
+        },
+        "metadata": {},
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            elif f.mitigated is None and f.date <= end_of_period.date():\n                if f.severity == 'Critical':\n                    o_count['zero'] += 1\n                elif f.severity == 'High':\n                    o_count['one'] += 1\n                elif f.severity == 'Medium':\n                    o_count['two'] += 1\n                elif f.severity == 'Low':\n                    o_count['three'] += 1\n            elif f.mitigated is None and f.date <= end_of_period.date():\n                if f.severity == 'Critical':\n                    a_count['zero'] += 1\n                elif f.severity == 'High':\n                    a_count['one'] += 1\n                elif f.severity == 'Medium':\n                    a_count['two'] += 1\n                elif f.severity == 'Low':\n                    a_count['three'] += 1"
+      }
+    },
+    {
+      "check_id": "python.lang.maintainability.useless-ifelse.useless-if-conditional",
+      "path": "cred/views.py",
+      "start": {
+        "line": 624,
+        "col": 13
+      },
+      "end": {
+        "line": 632,
+        "col": 39
+      },
+      "extra": {
+        "message": "if block checks for the same condition on both branches (`cred_lookup.exists() is False`)",
+        "metavars": {
+          "$X": {
+            "start": {
+              "line": 624,
+              "col": 16,
+              "offset": 22027
+            },
+            "end": {
+              "line": 624,
+              "col": 45,
+              "offset": 22056
+            },
+            "abstract_content": "cred_lookup.exists()is False",
+            "unique_id": {
+              "type": "AST",
+              "md5sum": "ddd9b7a3fdaa99c416850a0de0b473f7"
+            }
+          }
+        },
+        "metadata": {},
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            if cred_lookup.exists() is False:\n                cred_lookup = Cred_Mapping.objects.filter(\n                    cred_id=cred.cred_id).exclude(finding__isnull=True)\n                message = \"Credential is associated with finding(s). Remove the finding(s) before this credential can be deleted.\"\n                if cred_lookup.exists() is False:\n                    delete_cred = True\n            else:\n                if cred_lookup.exists() is False:\n                    delete_cred = True"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/sslyze/parser_xml.py",
+      "start": {
+        "line": 124,
+        "col": 32
+      },
+      "end": {
+        "line": 124,
+        "col": 85
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                    dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/skf/parser.py",
+      "start": {
+        "line": 146,
+        "col": 23
+      },
+      "end": {
+        "line": 146,
+        "col": 123
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                key = hashlib.md5(str(finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/retirejs/parser.py",
+      "start": {
+        "line": 35,
+        "col": 38
+      },
+      "end": {
+        "line": 35,
+        "col": 107
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                        unique_key = hashlib.md5((item.title + item.references + encrypted_file).encode()).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/nikto/parser.py",
+      "start": {
+        "line": 73,
+        "col": 24
+      },
+      "end": {
+        "line": 73,
+        "col": 64
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            dupe_key = hashlib.md5(description.encode(\"utf-8\")).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/huskyci/parser.py",
+      "start": {
+        "line": 55,
+        "col": 38
+      },
+      "end": {
+        "line": 56,
+        "col": 55
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                        unique_key = hashlib.md5(\n                            str(vuln).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/ibm_app/parser.py",
+      "start": {
+        "line": 89,
+        "col": 32
+      },
+      "end": {
+        "line": 89,
+        "col": 101
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                    dupe_key = hashlib.md5(str(issue_description + name + severity).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/h1/parser.py",
+      "start": {
+        "line": 77,
+        "col": 24
+      },
+      "end": {
+        "line": 77,
+        "col": 76
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            dupe_key = hashlib.md5(str(references + title).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/ccvs/parser.py",
+      "start": {
+        "line": 53,
+        "col": 34
+      },
+      "end": {
+        "line": 54,
+        "col": 51
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                    unique_key = hashlib.md5(\n                        str(vuln).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/twistlock/parser.py",
+      "start": {
+        "line": 71,
+        "col": 23
+      },
+      "end": {
+        "line": 71,
+        "col": 120
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/vcg/parser.py",
+      "start": {
+        "line": 114,
+        "col": 23
+      },
+      "end": {
+        "line": 114,
+        "col": 120
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/vcg/parser.py",
+      "start": {
+        "line": 174,
+        "col": 23
+      },
+      "end": {
+        "line": 174,
+        "col": 120
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/immuniweb/parser.py",
+      "start": {
+        "line": 71,
+        "col": 24
+      },
+      "end": {
+        "line": 71,
+        "col": 88
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/acunetix/parser.py",
+      "start": {
+        "line": 39,
+        "col": 24
+      },
+      "end": {
+        "line": 39,
+        "col": 130
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            dupe_key = hashlib.md5((acunetix_defectdojo_finding.title + acunetix_defectdojo_finding.description).encode(\"utf-8\")).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/wpscan/parser.py",
+      "start": {
+        "line": 66,
+        "col": 28
+      },
+      "end": {
+        "line": 66,
+        "col": 80
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                dupe_key = hashlib.md5(str(references + title).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/trufflehog/parser.py",
+      "start": {
+        "line": 51,
+        "col": 24
+      },
+      "end": {
+        "line": 51,
+        "col": 68
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            dupe_key = hashlib.md5((file + reason).encode(\"utf-8\")).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/scantist/parser.py",
+      "start": {
+        "line": 85,
+        "col": 28
+      },
+      "end": {
+        "line": 86,
+        "col": 97
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                hash_key = hashlib.md5(\n                    node.get('Public ID').encode('utf-8') + node.get('Library').encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/openscap/parser.py",
+      "start": {
+        "line": 71,
+        "col": 28
+      },
+      "end": {
+        "line": 71,
+        "col": 67
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                dupe_key = hashlib.md5(references.encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/kiuwan/parser.py",
+      "start": {
+        "line": 88,
+        "col": 23
+      },
+      "end": {
+        "line": 88,
+        "col": 120
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode(\"utf-8\")).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/microfocus_webinspect/parser.py",
+      "start": {
+        "line": 72,
+        "col": 28
+      },
+      "end": {
+        "line": 72,
+        "col": 92
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/gitleaks/parser.py",
+      "start": {
+        "line": 55,
+        "col": 24
+      },
+      "end": {
+        "line": 55,
+        "col": 72
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            dupe_key = hashlib.md5((issue[\"offender\"]).encode(\"utf-8\")).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/dependency_check/parser.py",
+      "start": {
+        "line": 22,
+        "col": 19
+      },
+      "end": {
+        "line": 22,
+        "col": 55
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            key = hashlib.md5(key_str.encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/cobalt/parser.py",
+      "start": {
+        "line": 56,
+        "col": 23
+      },
+      "end": {
+        "line": 56,
+        "col": 95
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                key = hashlib.md5((finding.title + '|' + finding.description).encode(\"utf-8\")).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/bugcrowd/parser.py",
+      "start": {
+        "line": 73,
+        "col": 23
+      },
+      "end": {
+        "line": 73,
+        "col": 95
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                key = hashlib.md5((finding.title + '|' + finding.description).encode(\"utf-8\")).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/bundler_audit/parser.py",
+      "start": {
+        "line": 62,
+        "col": 24
+      },
+      "end": {
+        "line": 62,
+        "col": 64
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            dupe_key = hashlib.md5(fingerprint.encode(\"utf-8\")).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/blackduck/parser.py",
+      "start": {
+        "line": 45,
+        "col": 24
+      },
+      "end": {
+        "line": 46,
+        "col": 34
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            dupe_key = hashlib.md5(\"{} | {}\".format(title, i.vuln_source)\n                .encode(\"utf-8\")) \\"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/wapiti/parser.py",
+      "start": {
+        "line": 75,
+        "col": 28
+      },
+      "end": {
+        "line": 75,
+        "col": 92
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/whitesource/parser.py",
+      "start": {
+        "line": 104,
+        "col": 24
+      },
+      "end": {
+        "line": 104,
+        "col": 112
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            dupe_key = hashlib.md5(vuln.get('description').encode('utf-8') + vuln.get('title').encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/testssl/parser.py",
+      "start": {
+        "line": 61,
+        "col": 32
+      },
+      "end": {
+        "line": 61,
+        "col": 85
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                    dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/openvas_csv/parser.py",
+      "start": {
+        "line": 348,
+        "col": 23
+      },
+      "end": {
+        "line": 348,
+        "col": 140
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                key = hashlib.md5((finding.url + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/ort/parser.py",
+      "start": {
+        "line": 55,
+        "col": 26
+      },
+      "end": {
+        "line": 55,
+        "col": 78
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            unique_key = hashlib.md5((item.title + item.references).encode()).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/mozilla_observatory/parser.py",
+      "start": {
+        "line": 55,
+        "col": 28
+      },
+      "end": {
+        "line": 55,
+        "col": 81
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/generic/parser.py",
+      "start": {
+        "line": 345,
+        "col": 23
+      },
+      "end": {
+        "line": 345,
+        "col": 120
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode(\"utf-8\")).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
+      "path": "tools/contrast/parser.py",
+      "start": {
+        "line": 43,
+        "col": 24
+      },
+      "end": {
+        "line": 43,
+        "col": 112
+      },
+      "extra": {
+        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
+        "metavars": {},
+        "metadata": {
+          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
+          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+          "owasp": "A3: Sensitive Data Exposure",
+          "bandit-code": "B303",
+          "references": [
+            "https://tools.ietf.org/html/rfc6151",
+            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
+            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+          ]
+        },
+        "severity": "WARNING",
+        "is_ignored": false,
+        "lines": "            dupe_key = hashlib.md5(category.encode('utf-8') + str(cwe).encode('utf-8') + title.encode('utf-8')).hexdigest()"
+      }
+    },
+    {
+      "check_id": "python.lang.security.unquoted-csv-writer.unquoted-csv-writer",
+      "path": "management/commands/csv_findings_export.py",
+      "start": {
+        "line": 33,
+        "col": 18
+      },
+      "end": {
+        "line": 33,
+        "col": 50
+      },
+      "extra": {
+        "message": "Found an unquoted CSV writer. This is susceptible to injection. Use 'quoting=csv.QUOTE_ALL'.",
+        "metavars": {},
+        "metadata": {
+          "cwe": "CWE-1236: Improper Neutralization of Formula Elements in a CSV File",
+          "owasp": "A1: Injection",
+          "references": [
+            "https://affinity-it-security.com/how-to-prevent-csv-injection/"
+          ]
+        },
+        "severity": "ERROR",
+        "fix_regex": {
+          "regex": "(.*)\\)",
+          "replacement": "\\1, quoting=csv.QUOTE_ALL)"
+        },
+        "is_ignored": false,
+        "lines": "        writer = csv.writer(open(file_path, 'w'))"
+      }
+    },
+    {
+      "check_id": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tools/immuniweb/parser.py",
+      "start": {
+        "line": 3,
+        "col": 1
+      },
+      "end": {
+        "line": 3,
+        "col": 33
+      },
+      "extra": {
+        "message": "Found use of the native Python XML libraries, which is vulnerable to XML external entity (XXE)\nattacks. The Python documentation recommends the 'defusedxml' library instead. Use 'defusedxml'.\nSee https://github.com/tiran/defusedxml for more information.\n",
+        "metavars": {},
+        "metadata": {
+          "owasp": "A4: XML External Entities (XXE)",
+          "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+          "references": [
+            "https://docs.python.org/3/library/xml.html",
+            "https://github.com/tiran/defusedxml"
+          ]
+        },
+        "severity": "ERROR",
+        "fix_regex": {
+          "regex": "xml",
+          "replacement": "defusedxml"
+        },
+        "is_ignored": false,
+        "lines": "from xml.dom import NamespaceErr"
+      }
+    },
+    {
+      "check_id": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tools/appspider/parser.py",
+      "start": {
+        "line": 2,
+        "col": 1
+      },
+      "end": {
+        "line": 2,
+        "col": 33
+      },
+      "extra": {
+        "message": "Found use of the native Python XML libraries, which is vulnerable to XML external entity (XXE)\nattacks. The Python documentation recommends the 'defusedxml' library instead. Use 'defusedxml'.\nSee https://github.com/tiran/defusedxml for more information.\n",
+        "metavars": {},
+        "metadata": {
+          "owasp": "A4: XML External Entities (XXE)",
+          "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+          "references": [
+            "https://docs.python.org/3/library/xml.html",
+            "https://github.com/tiran/defusedxml"
+          ]
+        },
+        "severity": "ERROR",
+        "fix_regex": {
+          "regex": "xml",
+          "replacement": "defusedxml"
+        },
+        "is_ignored": false,
+        "lines": "from xml.dom import NamespaceErr"
+      }
+    },
+    {
+      "check_id": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tools/wapiti/parser.py",
+      "start": {
+        "line": 4,
+        "col": 1
+      },
+      "end": {
+        "line": 4,
+        "col": 33
+      },
+      "extra": {
+        "message": "Found use of the native Python XML libraries, which is vulnerable to XML external entity (XXE)\nattacks. The Python documentation recommends the 'defusedxml' library instead. Use 'defusedxml'.\nSee https://github.com/tiran/defusedxml for more information.\n",
+        "metavars": {},
+        "metadata": {
+          "owasp": "A4: XML External Entities (XXE)",
+          "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+          "references": [
+            "https://docs.python.org/3/library/xml.html",
+            "https://github.com/tiran/defusedxml"
+          ]
+        },
+        "severity": "ERROR",
+        "fix_regex": {
+          "regex": "xml",
+          "replacement": "defusedxml"
+        },
+        "is_ignored": false,
+        "lines": "from xml.dom import NamespaceErr"
+      }
+    },
+    {
+      "check_id": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tools/qualys_webapp/parser.py",
+      "start": {
+        "line": 7,
+        "col": 1
+      },
+      "end": {
+        "line": 7,
+        "col": 29
+      },
+      "extra": {
+        "message": "Found use of the native Python XML libraries, which is vulnerable to XML external entity (XXE)\nattacks. The Python documentation recommends the 'defusedxml' library instead. Use 'defusedxml'.\nSee https://github.com/tiran/defusedxml for more information.\n",
+        "metavars": {},
+        "metadata": {
+          "owasp": "A4: XML External Entities (XXE)",
+          "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+          "references": [
+            "https://docs.python.org/3/library/xml.html",
+            "https://github.com/tiran/defusedxml"
+          ]
+        },
+        "severity": "ERROR",
+        "fix_regex": {
+          "regex": "xml",
+          "replacement": "defusedxml"
+        },
+        "is_ignored": false,
+        "lines": "import xml.etree.ElementTree"
+      }
+    },
+    {
+      "check_id": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tools/sslscan/parser.py",
+      "start": {
+        "line": 3,
+        "col": 1
+      },
+      "end": {
+        "line": 3,
+        "col": 33
+      },
+      "extra": {
+        "message": "Found use of the native Python XML libraries, which is vulnerable to XML external entity (XXE)\nattacks. The Python documentation recommends the 'defusedxml' library instead. Use 'defusedxml'.\nSee https://github.com/tiran/defusedxml for more information.\n",
+        "metavars": {},
+        "metadata": {
+          "owasp": "A4: XML External Entities (XXE)",
+          "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+          "references": [
+            "https://docs.python.org/3/library/xml.html",
+            "https://github.com/tiran/defusedxml"
+          ]
+        },
+        "severity": "ERROR",
+        "fix_regex": {
+          "regex": "xml",
+          "replacement": "defusedxml"
+        },
+        "is_ignored": false,
+        "lines": "from xml.dom import NamespaceErr"
+      }
+    },
+    {
+      "check_id": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tools/sslyze/parser_xml.py",
+      "start": {
+        "line": 3,
+        "col": 1
+      },
+      "end": {
+        "line": 3,
+        "col": 33
+      },
+      "extra": {
+        "message": "Found use of the native Python XML libraries, which is vulnerable to XML external entity (XXE)\nattacks. The Python documentation recommends the 'defusedxml' library instead. Use 'defusedxml'.\nSee https://github.com/tiran/defusedxml for more information.\n",
+        "metavars": {},
+        "metadata": {
+          "owasp": "A4: XML External Entities (XXE)",
+          "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+          "references": [
+            "https://docs.python.org/3/library/xml.html",
+            "https://github.com/tiran/defusedxml"
+          ]
+        },
+        "severity": "ERROR",
+        "fix_regex": {
+          "regex": "xml",
+          "replacement": "defusedxml"
+        },
+        "is_ignored": false,
+        "lines": "from xml.dom import NamespaceErr"
+      }
+    },
+    {
+      "check_id": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tools/nessus/parser.py",
+      "start": {
+        "line": 6,
+        "col": 1
+      },
+      "end": {
+        "line": 6,
+        "col": 33
+      },
+      "extra": {
+        "message": "Found use of the native Python XML libraries, which is vulnerable to XML external entity (XXE)\nattacks. The Python documentation recommends the 'defusedxml' library instead. Use 'defusedxml'.\nSee https://github.com/tiran/defusedxml for more information.\n",
+        "metavars": {},
+        "metadata": {
+          "owasp": "A4: XML External Entities (XXE)",
+          "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+          "references": [
+            "https://docs.python.org/3/library/xml.html",
+            "https://github.com/tiran/defusedxml"
+          ]
+        },
+        "severity": "ERROR",
+        "fix_regex": {
+          "regex": "xml",
+          "replacement": "defusedxml"
+        },
+        "is_ignored": false,
+        "lines": "from xml.dom import NamespaceErr"
+      }
+    },
+    {
+      "check_id": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tools/ibm_app/parser.py",
+      "start": {
+        "line": 4,
+        "col": 1
+      },
+      "end": {
+        "line": 4,
+        "col": 33
+      },
+      "extra": {
+        "message": "Found use of the native Python XML libraries, which is vulnerable to XML external entity (XXE)\nattacks. The Python documentation recommends the 'defusedxml' library instead. Use 'defusedxml'.\nSee https://github.com/tiran/defusedxml for more information.\n",
+        "metavars": {},
+        "metadata": {
+          "owasp": "A4: XML External Entities (XXE)",
+          "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+          "references": [
+            "https://docs.python.org/3/library/xml.html",
+            "https://github.com/tiran/defusedxml"
+          ]
+        },
+        "severity": "ERROR",
+        "fix_regex": {
+          "regex": "xml",
+          "replacement": "defusedxml"
+        },
+        "is_ignored": false,
+        "lines": "from xml.dom import NamespaceErr"
+      }
+    },
+    {
+      "check_id": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tools/openscap/parser.py",
+      "start": {
+        "line": 4,
+        "col": 1
+      },
+      "end": {
+        "line": 4,
+        "col": 33
+      },
+      "extra": {
+        "message": "Found use of the native Python XML libraries, which is vulnerable to XML external entity (XXE)\nattacks. The Python documentation recommends the 'defusedxml' library instead. Use 'defusedxml'.\nSee https://github.com/tiran/defusedxml for more information.\n",
+        "metavars": {},
+        "metadata": {
+          "owasp": "A4: XML External Entities (XXE)",
+          "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+          "references": [
+            "https://docs.python.org/3/library/xml.html",
+            "https://github.com/tiran/defusedxml"
+          ]
+        },
+        "severity": "ERROR",
+        "fix_regex": {
+          "regex": "xml",
+          "replacement": "defusedxml"
+        },
+        "is_ignored": false,
+        "lines": "from xml.dom import NamespaceErr"
+      }
+    },
+    {
+      "check_id": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tools/microfocus_webinspect/parser.py",
+      "start": {
+        "line": 4,
+        "col": 1
+      },
+      "end": {
+        "line": 4,
+        "col": 33
+      },
+      "extra": {
+        "message": "Found use of the native Python XML libraries, which is vulnerable to XML external entity (XXE)\nattacks. The Python documentation recommends the 'defusedxml' library instead. Use 'defusedxml'.\nSee https://github.com/tiran/defusedxml for more information.\n",
+        "metavars": {},
+        "metadata": {
+          "owasp": "A4: XML External Entities (XXE)",
+          "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+          "references": [
+            "https://docs.python.org/3/library/xml.html",
+            "https://github.com/tiran/defusedxml"
+          ]
+        },
+        "severity": "ERROR",
+        "fix_regex": {
+          "regex": "xml",
+          "replacement": "defusedxml"
+        },
+        "is_ignored": false,
+        "lines": "from xml.dom import NamespaceErr"
+      }
+    }
+  ],
+  "errors": []
+}

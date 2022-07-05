@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from dojo.utils import get_system_setting, get_full_url
 from dateutil.relativedelta import relativedelta
@@ -25,9 +26,6 @@ def expire_now(risk_acceptance):
 
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
-
-                if finding.has_jira_issue:
-                    jira_helper.add_simple_jira_comment(jira_instance, finding.jira_issue, jira_comment)
 
                 finding.save(dedupe_option=False)
                 reactivated_findings.append(finding)
@@ -111,10 +109,11 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
 
 def add_findings_to_risk_acceptance(risk_acceptance, findings):
     for finding in findings:
-        finding.active = False
-        finding.risk_accepted = True
-        finding.save(dedupe_option=False)
-        risk_acceptance.accepted_findings.add(finding)
+        if not finding.duplicate:
+            finding.active = False
+            finding.risk_accepted = True
+            finding.save(dedupe_option=False)
+            risk_acceptance.accepted_findings.add(finding)
     risk_acceptance.save()
 
     # best effort jira integration, no status changes

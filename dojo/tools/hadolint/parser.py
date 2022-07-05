@@ -41,20 +41,16 @@ def get_item(vulnerability, test):
     else:
         severity = "Info"
 
-    # create the finding object
+    # create the finding object, with 'static' type
     finding = Finding(
-        title=vulnerability['code'] + ": " + vulnerability['file'],
+        title=vulnerability['code'] + ": " + vulnerability['message'],
         test=test,
         severity=severity,
-        description="File: {}:{}\nVulnerability ID: {}\nDetails: {}\n".format(vulnerability['file'], vulnerability['line'], vulnerability['code'], vulnerability['message']),
-        mitigation="No mitigation provided",
-        active=False,
-        verified=False,
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False,
-        mitigated=None,
-        impact="No impact provided")
+        file_path=vulnerability['file'],
+        line=vulnerability['line'],
+        description="Vulnerability ID: {}\nDetails: {}\n".format(vulnerability['code'], vulnerability['message']),
+        static_finding=True,
+        dynamic_finding=False)
 
     finding.description = finding.description.strip()
 

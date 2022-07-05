@@ -1,5 +1,4 @@
 import hashlib
-from urllib.parse import urlparse
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
@@ -46,7 +45,7 @@ class ImmuniwebParser(object):
                 cwe = cwe
             else:
                 cwe = None
-            cve = vulnerability.find('CVE-ID').text
+            vulnerability_id = vulnerability.find('CVE-ID').text
             steps_to_reproduce = vulnerability.find('PoC').text
             # just to make sure severity is in the recognised sentence casing form
             severity = vulnerability.find('Risk').text.capitalize()
@@ -56,17 +55,6 @@ class ImmuniwebParser(object):
 
             description = (vulnerability.find('Description').text)
             url = vulnerability.find("URL").text
-            parsedUrl = urlparse(url)
-            protocol = parsedUrl.scheme
-            query = parsedUrl.query
-            fragment = parsedUrl.fragment
-            path = parsedUrl.path
-            port = ""  # Set port to empty string by default
-            # Split the returned network address into host and
-            try:  # If there is port number attached to host address
-                host, port = parsedUrl.netloc.split(':')
-            except:  # there's no port attached to address
-                host = parsedUrl.netloc
 
             dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
 
@@ -78,27 +66,20 @@ class ImmuniwebParser(object):
             else:  # finding is not a duplicate
                 # create finding
                 finding = Finding(title=title,
-                    test=test, active=False,
-                    verified=False, cve=cve,
+                    test=test,
                     description=description,
                     severity=severity,
                     steps_to_reproduce=steps_to_reproduce,
-                    numerical_severity=Finding.get_numerical_severity(
-                        severity
-                    ),
                     cwe=cwe,
                     mitigation=mitigation,
                     impact=impact,
                     references=reference,
                     dynamic_finding=True)
-
+                if vulnerability_id:
+                    finding.unsaved_vulnerability_ids = [vulnerability_id]
                 finding.unsaved_endpoints = list()
                 dupes[dupe_key] = finding
 
-                finding.unsaved_endpoints.append(Endpoint(
-                        host=host, port=port,
-                        path=path,
-                        protocol=protocol,
-                        query=query, fragment=fragment))
+                finding.unsaved_endpoints.append(Endpoint.from_uri(url))
 
         return list(dupes.values())

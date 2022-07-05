@@ -14,18 +14,20 @@ from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.debug import sensitive_variables, sensitive_post_parameters
 
 from dojo.models import Finding, System_Settings, Test, Dojo_User, Note_Type, NoteHistory, Notes, Sonarqube_Issue
 from dojo.forms import GoogleSheetFieldsForm
 from dojo.utils import add_breadcrumb, Product_Tab
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
 logger = logging.getLogger(__name__)
 
 
 @sensitive_post_parameters()
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.change_google_sheet', 'superuser')
 def configure_google_sheets(request):
     fields = Finding._meta.fields
     system_settings = get_object_or_404(System_Settings, id=1)
@@ -198,7 +200,7 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
                     return True
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Test, Permissions.Test_View, 'tid')
 def export_to_sheet(request, tid):
     system_settings = get_object_or_404(System_Settings, id=1)
     google_sheets_enabled = system_settings.enable_google_sheets
@@ -223,7 +225,7 @@ def export_to_sheet(request, tid):
             errors = sync['errors']
             sheet_title = sync['sheet_title']
             if len(errors) > 0:
-                product_tab = Product_Tab(test.engagement.product.id, title="Syncing Errors", tab="engagements")
+                product_tab = Product_Tab(test.engagement.product, title="Syncing Errors", tab="engagements")
                 product_tab.setEngagement(test.engagement)
                 spreadsheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
                 return render(
@@ -377,7 +379,10 @@ def sync_findings(request, tid, spreadsheetId):
                             elif finding_sheet[index_of_column] == 'FALSE':
                                 setattr(finding_db, column_name, False)
                             else:
-                                setattr(finding_db, column_name, finding_sheet[index_of_column])
+                                if finding_sheet[index_of_column] == '':
+                                    setattr(finding_db, column_name, None)
+                                else:
+                                    setattr(finding_db, column_name, finding_sheet[index_of_column])
                     elif column_name[:6] == '[note]' and column_name[-3:] == '_id':                      # Updating notes
                         note_column_name = column_name[:-3]
                         try:

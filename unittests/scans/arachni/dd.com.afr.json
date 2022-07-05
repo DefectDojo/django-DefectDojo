@@ -1,0 +1,576 @@
+{
+  "version" : "1.5.1",
+  "seed" : "eba759d29cb0cab748f34ee2afad1c6e",
+  "options" : {
+    "browser_cluster" : {
+      "local_storage" : {},
+      "wait_for_elements" : {},
+      "pool_size" : 6,
+      "job_timeout" : 10,
+      "worker_time_to_live" : 100,
+      "ignore_images" : false,
+      "screen_width" : 1600,
+      "screen_height" : 1200
+    },
+    "http" : {
+      "user_agent" : "Arachni/v1.5.1",
+      "request_timeout" : 10000,
+      "request_redirect_limit" : 5,
+      "request_concurrency" : 20,
+      "request_queue_size" : 100,
+      "request_headers" : {},
+      "response_max_size" : 500000,
+      "cookies" : {},
+      "authentication_type" : "auto"
+    },
+    "session" : {},
+    "audit" : {
+      "parameter_values" : true,
+      "exclude_vector_patterns" : [],
+      "include_vector_patterns" : [],
+      "link_templates" : [],
+      "links" : true,
+      "forms" : true,
+      "cookies" : true,
+      "ui_inputs" : true,
+      "ui_forms" : true,
+      "jsons" : true,
+      "xmls" : true
+    },
+    "input" : {
+      "values" : {},
+      "default_values" : {
+        "name" : "arachni_name",
+        "user" : "arachni_user",
+        "usr" : "arachni_user",
+        "pass" : "5543!%arachni_secret",
+        "txt" : "arachni_text",
+        "num" : "132",
+        "amount" : "100",
+        "mail" : "arachni@email.gr",
+        "account" : "12",
+        "id" : "1"
+      },
+      "without_defaults" : false,
+      "force" : false
+    },
+    "datastore" : {
+      "report_path" : "dd.com.afr"
+    },
+    "scope" : {
+      "redundant_path_patterns" : {},
+      "dom_depth_limit" : 5,
+      "exclude_file_extensions" : [],
+      "exclude_path_patterns" : [],
+      "exclude_content_patterns" : [],
+      "include_path_patterns" : [],
+      "restrict_paths" : [],
+      "extend_paths" : [],
+      "url_rewrites" : {}
+    },
+    "checks" : [
+      "code_injection_php_input_wrapper",
+      "xss",
+      "rfi",
+      "os_cmd_injection",
+      "xss_dom_script_context",
+      "code_injection_timing",
+      "xpath_injection",
+      "xss_event",
+      "path_traversal",
+      "session_fixation",
+      "unvalidated_redirect",
+      "xss_tag",
+      "xss_path",
+      "file_inclusion",
+      "code_injection",
+      "os_cmd_injection_timing",
+      "source_code_disclosure",
+      "sql_injection_differential",
+      "ldap_injection",
+      "xxe",
+      "xss_dom",
+      "csrf",
+      "sql_injection_timing",
+      "sql_injection",
+      "xss_script_context",
+      "unvalidated_redirect_dom",
+      "no_sql_injection_differential",
+      "no_sql_injection",
+      "trainer",
+      "response_splitting",
+      "allowed_methods",
+      "backdoors",
+      "insecure_cross_domain_policy_access",
+      "origin_spoof_access_restriction_bypass",
+      "private_ip",
+      "password_autocomplete",
+      "insecure_cookies",
+      "ssn",
+      "insecure_cors_policy",
+      "cvs_svn_users",
+      "mixed_resource",
+      "html_objects",
+      "credit_card",
+      "cookie_set_for_parent_domain",
+      "http_only_cookies",
+      "form_upload",
+      "emails",
+      "captcha",
+      "hsts",
+      "unencrypted_password_forms",
+      "x_frame_options",
+      "http_put",
+      "common_directories",
+      "htaccess_limit",
+      "common_admin_interfaces",
+      "xst",
+      "localstart_asp",
+      "common_files",
+      "directory_listing",
+      "webdav",
+      "backup_files",
+      "insecure_cross_domain_policy_headers",
+      "backup_directories",
+      "interesting_responses",
+      "insecure_client_access_policy"
+    ],
+    "platforms" : [],
+    "plugins" : {},
+    "no_fingerprinting" : false,
+    "authorized_by" : null,
+    "url" : "https://demo.defectdojo.org/"
+  },
+  "sitemap" : {
+    "https://demo.defectdojo.org/" : 302,
+    "https://demo.defectdojo.org/login?next=/" : 200,
+    "https://demo.defectdojo.org/static/font-awesome/fonts/fontawesome-webfont.woff?v=4.7.0" : 200
+  },
+  "start_datetime" : "2021-03-17 19:37:24 +0100",
+  "finish_datetime" : "2021-03-17 19:41:46 +0100",
+  "delta_time" : "00:04:22",
+  "issues" : [
+    {
+      "name" : "Missing 'Strict-Transport-Security' header",
+      "description" : "\nThe HTTP protocol by itself is clear text, meaning that any data that is\ntransmitted via HTTP can be captured and the contents viewed. To keep data\nprivate and prevent it from being intercepted, HTTP is often tunnelled through\neither Secure Sockets Layer (SSL) or Transport Layer Security (TLS).\nWhen either of these encryption standards are used, it is referred to as HTTPS.\n\nHTTP Strict Transport Security (HSTS) is an optional response header that can be\nconfigured on the server to instruct the browser to only communicate via HTTPS.\nThis will be enforced by the browser even if the user requests a HTTP resource\non the same server.\n\nCyber-criminals will often attempt to compromise sensitive information passed\nfrom the client to the server using HTTP. This can be conducted via various\nMan-in-The-Middle (MiTM) attacks or through network packet captures.\n\nArachni discovered that the affected application is using HTTPS however does not\nuse the HSTS header.\n",
+      "references" : {
+        "OWASP" : "https://www.owasp.org/index.php/HTTP_Strict_Transport_Security",
+        "Wikipedia" : "http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security"
+      },
+      "cwe" : 200,
+      "severity" : "medium",
+      "remedy_guidance" : "\nDepending on the framework being used the implementation methods will vary,\nhowever it is advised that the `Strict-Transport-Security` header be configured\non the server.\n\nOne of the options for this header is `max-age`, which is a representation (in\nmilliseconds) determining the time in which the client's browser will adhere to\nthe header policy.\n\nDepending on the environment and the application this time period could be from\nas low as minutes to as long as days.\n",
+      "check" : {
+        "name" : "HTTP Strict Transport Security",
+        "description" : "Checks HTTPS pages for missing `Strict-Transport-Security` headers.",
+        "author" : "Tasos Laskos <tasos.laskos@arachni-scanner.com>",
+        "version" : "0.1.3",
+        "elements" : [
+          "server"
+        ],
+        "shortname" : "hsts"
+      },
+      "vector" : {
+        "class" : "Arachni::Element::Server",
+        "type" : "server",
+        "url" : "https://demo.defectdojo.org/",
+        "affected_input_name" : null
+      },
+      "proof" : "HTTP/1.1 302 Found",
+      "referring_page" : {
+        "body" : "",
+        "dom" : {
+          "url" : "https://demo.defectdojo.org/",
+          "transitions" : [],
+          "cookies" : [],
+          "digest" : null,
+          "data_flow_sinks" : [],
+          "execution_flow_sinks" : []
+        }
+      },
+      "page" : {
+        "body" : "",
+        "dom" : {
+          "url" : "https://demo.defectdojo.org/",
+          "transitions" : [],
+          "cookies" : [],
+          "digest" : null,
+          "data_flow_sinks" : [],
+          "execution_flow_sinks" : []
+        }
+      },
+      "remarks" : {},
+      "trusted" : true,
+      "tags" : [],
+      "cwe_url" : "http://cwe.mitre.org/data/definitions/200.html",
+      "digest" : 1181628906,
+      "response" : {
+        "headers" : {
+          "Content-Length" : "0",
+          "Content-Type" : "text/html; charset=utf-8",
+          "Date" : "Wed, 17 Mar 2021 18:37:26 GMT",
+          "Location" : "/login?next=/",
+          "Server" : [
+            "Caddy",
+            "nginx/1.19.7"
+          ],
+          "Vary" : "Cookie",
+          "X-Content-Type-Options" : "nosniff",
+          "X-Frame-Options" : "SAMEORIGIN",
+          "X-Xss-Protection" : "1; mode=block"
+        },
+        "url" : "https://demo.defectdojo.org/",
+        "code" : 302,
+        "ip_address" : "104.131.110.75",
+        "headers_string" : "HTTP/1.1 302 Found\r\nContent-Length: 0\r\nContent-Type: text/html; charset=utf-8\r\nDate: Wed, 17 Mar 2021 18:37:26 GMT\r\nLocation: /login?next=/\r\nServer: Caddy\r\nServer: nginx/1.19.7\r\nVary: Cookie\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: SAMEORIGIN\r\nX-Xss-Protection: 1; mode=block\r\n\r\n",
+        "body" : "",
+        "time" : 0.342285,
+        "app_time" : 0.091144,
+        "total_time" : 0.342285,
+        "return_code" : "ok",
+        "return_message" : "No error",
+        "status_line" : "HTTP/1.1 302 Found"
+      },
+      "request" : {
+        "url" : "https://demo.defectdojo.org/",
+        "parameters" : {},
+        "headers" : {
+          "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "User-Agent" : "Arachni/v1.5.1",
+          "Accept-Language" : "en-US,en;q=0.8,he;q=0.6",
+          "X-Arachni-Scan-Seed" : "eba759d29cb0cab748f34ee2afad1c6e"
+        },
+        "headers_string" : "GET / HTTP/1.1\r\nHost: demo.defectdojo.org\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Arachni/v1.5.1\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.8,he;q=0.6\r\nX-Arachni-Scan-Seed: eba759d29cb0cab748f34ee2afad1c6e\r\n\r\n",
+        "effective_body" : null,
+        "body" : null,
+        "method" : "get"
+      }
+    },
+    {
+      "name" : "Insecure cookie",
+      "description" : "\nHTTP by itself is a stateless protocol. Therefore the server is unable to determine\nwhich requests are performed by which client, and which clients are authenticated\nor unauthenticated.\n\nThe use of HTTP cookies within the headers, allows a web server to identify each\nindividual client and can therefore determine which clients hold valid\nauthentication, from those that do not. These are known as session cookies.\n\nWhen a cookie is set by the server (sent the header of an HTTP response) there\nare several flags that can be set to configure the properties of the cookie and\nhow it is to be handled by the browser.\n\nOne of these flags is known as the `secure` flag. When the secure flag is set,\nthe browser will prevent it from being sent over a clear text channel (HTTP) and\nonly allow it to be sent when an encrypted channel is used (HTTPS).\n\nArachni discovered that a cookie was set by the server without the secure flag\nbeing set. Although the initial setting of this cookie was via an HTTPS\nconnection, any HTTP link to the same server will result in the cookie being\nsend in clear text.\n",
+      "references" : {
+        "SecureFlag - OWASP" : "https://www.owasp.org/index.php/SecureFlag"
+      },
+      "cwe" : 200,
+      "severity" : "informational",
+      "remedy_guidance" : "\nThe initial steps to remedy this should be determined on whether the cookie is\nsensitive in nature.\nIf the cookie does not contain any sensitive information then the risk of this\nvulnerability is reduced; however, if the cookie does contain sensitive\ninformation, then the server should ensure that the cookie has its `secure` flag set.\n",
+      "check" : {
+        "name" : "Insecure cookies",
+        "description" : "\nLogs cookies that are served over an encrypted channel but without having the\n`secure` flag set.\n",
+        "elements" : [
+          "cookie"
+        ],
+        "author" : "Tasos \"Zapotek\" Laskos <tasos.laskos@arachni-scanner.com>",
+        "version" : "0.1.5",
+        "shortname" : "insecure_cookies"
+      },
+      "vector" : {
+        "class" : "Arachni::Element::Cookie",
+        "type" : "cookie",
+        "url" : "https://demo.defectdojo.org/login?next=/",
+        "action" : "https://demo.defectdojo.org/login?next=/",
+        "method" : "get",
+        "source" : "csrftoken=ozdf8aj3T8aHuFq5KFMtxy7TgCxqGXjINwjolgbqcAW9wnvE99HfZdw6dWF8Ud7o; expires=Wed, 16 Mar 2022 18:37:26 GMT; HttpOnly; Max-Age=31449600; Path=/; SameSite=Lax",
+        "inputs" : {
+          "csrftoken" : "ozdf8aj3T8aHuFq5KFMtxy7TgCxqGXjINwjolgbqcAW9wnvE99HfZdw6dWF8Ud7o"
+        },
+        "raw_inputs" : [],
+        "default_inputs" : {
+          "csrftoken" : "ozdf8aj3T8aHuFq5KFMtxy7TgCxqGXjINwjolgbqcAW9wnvE99HfZdw6dWF8Ud7o"
+        },
+        "affected_input_name" : null
+      },
+      "referring_page" : {
+        "body" : "\n\n\n<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <meta name=\"description\" content=\"\">\n    <meta name=\"author\" content=\"\">\n    <title>\n        \n        DefectDojo\n    </title>\n    \n    \n\n    <!-- jQuery -->\n    <script src=\"/static/jquery/dist/jquery.js\"></script>\n    <!--  jQuery UI -->\n    <script src=\"/static/components-jqueryui/jquery-ui.min.js\"></script>\n    <!-- Bootstrap Core JavaScript -->\n    <script src=\"/static/bootstrap/dist/js/bootstrap.min.js\"></script>\n\n    <!-- Metis Menu Plugin JavaScript -->\n    <script src=\"/static/metismenu/dist/metisMenu.min.js\"></script>\n\n    <script src=\"/static/chosen-js/chosen.jquery.min.js\"></script>\n\n    <!-- Custom Theme JavaScript -->\n    <script src=\"/static/startbootstrap-sb-admin-2/dist/js/sb-admin-2.js\"></script>\n    <!-- Calendar JavaScript -->\n    <script src=\"/static/moment/min/moment.min.js\"></script>\n    <script src=\"/static/fullcalendar/dist/fullcalendar.min.js\"></script>\n    <!-- jquery cookie -->\n    <script src=\"/static/jquery.cookie/jquery.cookie.js\"></script>\n    <!-- DataTables Javascript -->\n    <script src=\"/static/datatables.net/js/jquery.dataTables.min.js\"></script>\n    <script src=\"/static/datatables.net-dt/js/dataTables.dataTables.min.js\"></script>\n    <script src=\"/static/datatables.net-bs/js/dataTables.bootstrap.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/dataTables.buttons.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/buttons.html5.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/buttons.colVis.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/buttons.print.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons-bs/js/buttons.bootstrap.min.js\"></script>\n    <script src=\"/static/datatables.net-colreorder/js/dataTables.colReorder.min.js\"></script>\n\n    <script src=\"/static/pdfmake/build/pdfmake.min.js\"></script>\n    <script src=\"/static/pdfmake/build/vfs_fonts.js\"></script>\n\n    <script src=\"/static/jszip/dist/jszip.min.js\"></script>\n\n    <!-- Bootstrap Core CSS -->\n    <link href=\"/static/bootstrap/dist/css/bootstrap.min.css\" rel=\"stylesheet\">\n\n    <!-- MetisMenu CSS -->\n    <link href=\"/static/metismenu/dist/metisMenu.min.css\" rel=\"stylesheet\">\n\n    <!-- Custom CSS -->\n    <link href=\"/static/startbootstrap-sb-admin-2/dist/css/sb-admin-2.css\" rel=\"stylesheet\">\n\n    <!-- Custom Fonts -->\n    <link href=\"/static/font-awesome/css/font-awesome.min.css\" rel=\"stylesheet\" type=\"text/css\">\n\n    \n    \n    <link rel=\"stylesheet\" href=\"/static/components-jqueryui/themes/flick/jquery-ui.min.css\">\n    <link rel=\"shortcut icon\" href=\"/static/dojo/img/favicon.ico\"/>\n    <link rel=\"stylesheet\" href=\"/static/chosen-bootstrap/chosen.bootstrap.min.css\">\n    <link rel=\"stylesheet\" href=\"/static/fullcalendar/dist/fullcalendar.min.css\">\n    <link rel=\"stylesheet\" href=\"/static/dojo/css/dojo.css\">\n    <link rel=\"stylesheet\" href=\"/static/datatables.net-dt/css/jquery.dataTables.min.css\">\n    \n    <link rel=\"stylesheet\" href=\"/static/datatables.net-bs/css/dataTables.bootstrap.min.css\">\n    <link rel=\"stylesheet\" href=\"/static/datatables.net-buttons-bs/css/buttons.bootstrap.min.css\">\n\n    <style>\n        \n        \n    </style>\n</head>\n<body class=\"min\">\n\n<div id=\"wrapper\">\n    \n        <!-- Navigation -->\n        <nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\" style=\"margin-bottom: 0\">\n            <div class=\"navbar-header\">\n                <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\n                    <span class=\"sr-only\">Toggle navigation</span>\n                    <span class=\"icon-bar\"></span>\n                    <span class=\"icon-bar\"></span>\n                    <span class=\"icon-bar\"></span>\n                </button>\n                <a class=\"navbar-brand\" href=\"/\">\n                    <img src=\"/static/dojo/img/logo.png\" alt=\"DefectDojo Logo\" width=\"240\"/>\n                </a>\n\n            </div>\n            <!-- /.navbar-header -->\n\n            <ul class=\"nav navbar-top-links navbar-right\">\n                \n                <li class=\"dropdown\">\n                    <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\" aria-expanded=\"false\" aria-label=\"User Menu\">\n                        <i class=\"fa fa-user fa-fw\"></i> <i class=\"fa fa-caret-down\"></i>\n                    </a>\n                    <ul class=\"dropdown-menu dropdown-user\">\n                        \n                            \n                            <li><a href=\"/api/v1/doc/\"><i class=\"fa fa-book fa-fw\"></i> API\n                                v1 Docs</a></li>\n                            <li><a href=\"/api/v2/doc/\"><i class=\"fa fa-book fa-fw\"></i> API\n                                v2 Docs</a></li>\n                            \n                            \n                        \n                        \n                    </ul>\n                    <!-- /.dropdown-user -->\n                </li>\n                <!-- /.dropdown -->\n            </ul>\n            <!-- /.navbar-top-links -->\n\n            \n        </nav>\n    \n    <!-- Page Content -->\n    <div id=\"page-wrapper\">\n        <div class=\"container-fluid\">\n            <!-- start of tabs -->\n            \n            <div class=\"row hidden-xs\">\n                <div class=\"col-lg-12\">\n                    \n                </div>\n            </div>\n            \n            <!-- end of tabs -->\n            <div class=\"row\">\n                <div class=\"col-lg-12\">\n                    \n                </div>\n                <!-- /.col-lg-12 -->\n            </div>\n            <!-- /.row -->\n            <div class=\"row\">\n                <div id=\"base-content\" class=\"col-lg-12\">\n                    \n\n                    \n\n                    \n\n                    \n\n                    \n\n                    \n    <h3>Login</h3>\n    <form class=\"form-horizontal\" method=\"POST\" autocomplete=\"off\"> <input type=\"hidden\" name=\"csrfmiddlewaretoken\" value=\"79PPi2cy3TPavG3kzqyAkJMTYCvUBe1nw6VYv84VmlBCxo8TYUtmMob6VWDCPuP3\">\n        <fieldset class=\"col-md-offset-3 col-md-6\">\n            \n                <div class=\"well\">\n                Greetings from Germany\n                </div>\n            \n\n            \n               \n\n    \n\n\n    \n\n\n\n\n\n    <div class=\"form-group\">\n        \n            \n                <label class=\"col-sm-2 control-label\n                        \"\n                       for=\"id_username\">Username<sup>*</sup>\n                        \n                </label>\n            \n            <div class=\"col-sm-10  \">\n                <input type=\"text\" name=\"username\" autofocus class=\"form-control\" required id=\"id_username\">\n\n\n                \n            </div>\n        \n    </div>\n\n    <div class=\"form-group\">\n        \n            \n                <label class=\"col-sm-2 control-label\n                        \"\n                       for=\"id_password\">Password<sup>*</sup>\n                        \n                </label>\n            \n            <div class=\"col-sm-10  \">\n                <input type=\"password\" name=\"password\" class=\"form-control\" required id=\"id_password\">\n\n\n                \n            </div>\n        \n    </div>\n\n            \n\n            <!-- Button -->\n            <div class=\"form-group\">\n                \n                    <div class=\"col-sm-offset-1 col-sm-4\" id=\"toggleBox\" onclick=\"togglePassVisibility()\">\n                        <i class=\"fa fa-eye\"></i>\n                        <span><b>Show Password</b></span>\n                    </div>\n                \n                \n                    <div class=\"col-sm-offset-1 col-sm-1\">\n                        <button class=\"btn btn-success\">Login</button>\n                    </div>\n                \n            </div>\n            <div class=\"form-group\">\n                \n\n                \n\n                \n\n                \n\n                \n\n                \n            </div>\n        </fieldset>\n    </form>\n\n                </div>\n                <!-- /.col-lg-12 -->\n            </div>\n        </div>\n        <!-- /.container-fluid -->\n    </div>\n    <!-- /#page-wrapper -->\n    <footer class=\"footer\">\n        <div class=\"container\">\n            <div class=\"row\">\n                <div class=\"col-md-12 text-center text-\">\n                    <p>\n                        <a href=\"/\"><img class=\"logo\" src=\"/static/dojo/img/chop.png\"\n                                                        alt=\"DefectDojo Chop\" height=\"45\"/></a><br/>\n                        v. 1.13.1 ( release mode )\n                    </p>\n                    <p>\n                        Detailed DefectDojo documentation can be found at  <a\n                            href=\"http://defectdojo.readthedocs.io/\">Read The Docs</a>.\n                    </p>\n                    <p>\n                        DefectDojo is licensed under the <a\n                            href=\"https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md\">Simplified BSD\n                        license</a>.\n                    </p>\n                    <p>\n                        &copy; 2021 DefectDojo\n                    </p>\n                </div>\n            </div>\n        </div>\n        <p id=\"alert_refresh\" class=\"hidden\">True</p>\n        <p id=\"disable_count\" class=\"hidden\">False</p>\n    </footer>\n</div>\n\n<!-- /#wrapper -->\n\n<!-- our JS -->\n<script src=\"/static/dojo/js/index.js\"></script>\n\n<!-- our CVSS stuff -->\n<script src=\"/static/dojo/js/cvsscalc30_helptext.js\"></script>\n<script src=\"/static/dojo/js/cvsscalc30.js\"></script>\n<script src=\"/static/dojo/js/cvss_calculator.js\"></script>\n<script type=\"application/javascript\">\n    $(document).ready(function() {\n        disable_count = document.getElementById('disable_count').innerHTML\n        refresh = document.getElementById('alert_refresh').innerHTML\n\n        $('.has-popover').popover({'trigger':'hover'});\n        \n\n        function update_alertcount() {\n            $.get(\"/alerts/count\", function (data) {\n                if (data.count != $('#alert_count').text()) {\n                    $('#alert_count').text(data.count);\n                    $('#alert_count').removeClass().addClass('badge badge-count badge-count' + data.count);\n                }\n            });\n        }\n\n        function htmlEscape(str) {\n          return str\n            .replace(/\\n/g, \" \")\n            .replace(/&/g, '&amp;')\n            .replace(/\"/g, '&quot;')\n            .replace(/'/g, '&#39;')\n            .replace(/</g, '&lt;')\n            .replace(/>/g, '&gt;');\n        }\n\n        function get_alerts() {\n            $('.dropdown-alerts').html('<div class=\"text-center\"><i class=\"fa fa-spin fa-spinner\"></i></div>');\n            $.get(\"/alerts/json?limit=12\", function (data) {\n                $('.dropdown-alerts').empty();\n                $.each(data, function(i, elem) {\n                  var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;\n                  var display_title = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';\n                  var description = elem.fields.description\n                  var display_description = description ? description.length < 100 ? description : jQuery.trim(description).substring(0,100).trim(this) + '...': ''\n                  var dropdown_alert = \"alert-list\" + i;\n                  $('.dropdown-alerts').append('<li><div style=\"padding: 3px 20px;\"><i class=\"fa fa-' + htmlEscape(elem.fields.icon) +\n                                                ' fa-fw\"></i><a href=\"' + htmlEscape(elem.fields.url) + '\" id=' + dropdown_alert +\n                                                ' title=\"' + htmlEscape(display_description) + '\"></a><span class=\"pull-right text-muted small\">' +\n                                               htmlEscape(elem.fields.source) + '</span></div></li><li class=\"divider\"></li>');\n                  $(\"#\" + dropdown_alert).text(display_title);\n                });\n                $('.dropdown-alerts').append('<li><a class=\"text-center\" href=\"/alerts\"><strong>See All Alerts </strong>' +\n                                             '<i class=\"fa fa-angle-right\"></i></a></li>');\n                $('.dropdown-alerts').append('<li><a class=\"text-center\" href=\"/delete_alerts\"><strong>Clear All Alerts </strong>' +\n                                           '<i class=\"fa fa-angle-right\"></i></a></li>');\n            });\n        }\n\n        $(\"#id_jiraform-jira_issue\").on('paste', function(e) {\n            var clipboardData = e.clipboardData || e.originalEvent.clipboardData || window.clipboardData;\n            var pastedData = clipboardData.getData('text');\n\n            $this = $(this)\n            // if someone entered/pasted a full URL, we strip evertyhing until last '/'\n            setTimeout(function (elem) {\n                $this.val($this.val().substring($this.val().lastIndexOf(\"/\") + 1));\n            }, 100);\n        });\n\n        <!-- TODO not working with django tagulous which uses select2, break styling -->\n        <!-- $('#id_tags').select2({ -->\n            <!-- 'placeholder': 'Select or add some tags...', -->\n            <!-- 'no_results_text': \"Tag not found, press TAB key to add.\", -->\n        <!-- }); -->\n\n    });\n</script>\n\n\n\n</body>\n\n</html>\n",
+        "dom" : {
+          "url" : "https://demo.defectdojo.org/login?next=/",
+          "transitions" : [],
+          "cookies" : [],
+          "digest" : null,
+          "data_flow_sinks" : [],
+          "execution_flow_sinks" : []
+        }
+      },
+      "page" : {
+        "body" : "\n\n\n<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <meta name=\"description\" content=\"\">\n    <meta name=\"author\" content=\"\">\n    <title>\n        \n        DefectDojo\n    </title>\n    \n    \n\n    <!-- jQuery -->\n    <script src=\"/static/jquery/dist/jquery.js\"></script>\n    <!--  jQuery UI -->\n    <script src=\"/static/components-jqueryui/jquery-ui.min.js\"></script>\n    <!-- Bootstrap Core JavaScript -->\n    <script src=\"/static/bootstrap/dist/js/bootstrap.min.js\"></script>\n\n    <!-- Metis Menu Plugin JavaScript -->\n    <script src=\"/static/metismenu/dist/metisMenu.min.js\"></script>\n\n    <script src=\"/static/chosen-js/chosen.jquery.min.js\"></script>\n\n    <!-- Custom Theme JavaScript -->\n    <script src=\"/static/startbootstrap-sb-admin-2/dist/js/sb-admin-2.js\"></script>\n    <!-- Calendar JavaScript -->\n    <script src=\"/static/moment/min/moment.min.js\"></script>\n    <script src=\"/static/fullcalendar/dist/fullcalendar.min.js\"></script>\n    <!-- jquery cookie -->\n    <script src=\"/static/jquery.cookie/jquery.cookie.js\"></script>\n    <!-- DataTables Javascript -->\n    <script src=\"/static/datatables.net/js/jquery.dataTables.min.js\"></script>\n    <script src=\"/static/datatables.net-dt/js/dataTables.dataTables.min.js\"></script>\n    <script src=\"/static/datatables.net-bs/js/dataTables.bootstrap.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/dataTables.buttons.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/buttons.html5.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/buttons.colVis.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/buttons.print.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons-bs/js/buttons.bootstrap.min.js\"></script>\n    <script src=\"/static/datatables.net-colreorder/js/dataTables.colReorder.min.js\"></script>\n\n    <script src=\"/static/pdfmake/build/pdfmake.min.js\"></script>\n    <script src=\"/static/pdfmake/build/vfs_fonts.js\"></script>\n\n    <script src=\"/static/jszip/dist/jszip.min.js\"></script>\n\n    <!-- Bootstrap Core CSS -->\n    <link href=\"/static/bootstrap/dist/css/bootstrap.min.css\" rel=\"stylesheet\">\n\n    <!-- MetisMenu CSS -->\n    <link href=\"/static/metismenu/dist/metisMenu.min.css\" rel=\"stylesheet\">\n\n    <!-- Custom CSS -->\n    <link href=\"/static/startbootstrap-sb-admin-2/dist/css/sb-admin-2.css\" rel=\"stylesheet\">\n\n    <!-- Custom Fonts -->\n    <link href=\"/static/font-awesome/css/font-awesome.min.css\" rel=\"stylesheet\" type=\"text/css\">\n\n    \n    \n    <link rel=\"stylesheet\" href=\"/static/components-jqueryui/themes/flick/jquery-ui.min.css\">\n    <link rel=\"shortcut icon\" href=\"/static/dojo/img/favicon.ico\"/>\n    <link rel=\"stylesheet\" href=\"/static/chosen-bootstrap/chosen.bootstrap.min.css\">\n    <link rel=\"stylesheet\" href=\"/static/fullcalendar/dist/fullcalendar.min.css\">\n    <link rel=\"stylesheet\" href=\"/static/dojo/css/dojo.css\">\n    <link rel=\"stylesheet\" href=\"/static/datatables.net-dt/css/jquery.dataTables.min.css\">\n    \n    <link rel=\"stylesheet\" href=\"/static/datatables.net-bs/css/dataTables.bootstrap.min.css\">\n    <link rel=\"stylesheet\" href=\"/static/datatables.net-buttons-bs/css/buttons.bootstrap.min.css\">\n\n    <style>\n        \n        \n    </style>\n</head>\n<body class=\"min\">\n\n<div id=\"wrapper\">\n    \n        <!-- Navigation -->\n        <nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\" style=\"margin-bottom: 0\">\n            <div class=\"navbar-header\">\n                <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\n                    <span class=\"sr-only\">Toggle navigation</span>\n                    <span class=\"icon-bar\"></span>\n                    <span class=\"icon-bar\"></span>\n                    <span class=\"icon-bar\"></span>\n                </button>\n                <a class=\"navbar-brand\" href=\"/\">\n                    <img src=\"/static/dojo/img/logo.png\" alt=\"DefectDojo Logo\" width=\"240\"/>\n                </a>\n\n            </div>\n            <!-- /.navbar-header -->\n\n            <ul class=\"nav navbar-top-links navbar-right\">\n                \n                <li class=\"dropdown\">\n                    <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\" aria-expanded=\"false\" aria-label=\"User Menu\">\n                        <i class=\"fa fa-user fa-fw\"></i> <i class=\"fa fa-caret-down\"></i>\n                    </a>\n                    <ul class=\"dropdown-menu dropdown-user\">\n                        \n                            \n                            <li><a href=\"/api/v1/doc/\"><i class=\"fa fa-book fa-fw\"></i> API\n                                v1 Docs</a></li>\n                            <li><a href=\"/api/v2/doc/\"><i class=\"fa fa-book fa-fw\"></i> API\n                                v2 Docs</a></li>\n                            \n                            \n                        \n                        \n                    </ul>\n                    <!-- /.dropdown-user -->\n                </li>\n                <!-- /.dropdown -->\n            </ul>\n            <!-- /.navbar-top-links -->\n\n            \n        </nav>\n    \n    <!-- Page Content -->\n    <div id=\"page-wrapper\">\n        <div class=\"container-fluid\">\n            <!-- start of tabs -->\n            \n            <div class=\"row hidden-xs\">\n                <div class=\"col-lg-12\">\n                    \n                </div>\n            </div>\n            \n            <!-- end of tabs -->\n            <div class=\"row\">\n                <div class=\"col-lg-12\">\n                    \n                </div>\n                <!-- /.col-lg-12 -->\n            </div>\n            <!-- /.row -->\n            <div class=\"row\">\n                <div id=\"base-content\" class=\"col-lg-12\">\n                    \n\n                    \n\n                    \n\n                    \n\n                    \n\n                    \n    <h3>Login</h3>\n    <form class=\"form-horizontal\" method=\"POST\" autocomplete=\"off\"> <input type=\"hidden\" name=\"csrfmiddlewaretoken\" value=\"79PPi2cy3TPavG3kzqyAkJMTYCvUBe1nw6VYv84VmlBCxo8TYUtmMob6VWDCPuP3\">\n        <fieldset class=\"col-md-offset-3 col-md-6\">\n            \n                <div class=\"well\">\n                Greetings from Germany\n                </div>\n            \n\n            \n               \n\n    \n\n\n    \n\n\n\n\n\n    <div class=\"form-group\">\n        \n            \n                <label class=\"col-sm-2 control-label\n                        \"\n                       for=\"id_username\">Username<sup>*</sup>\n                        \n                </label>\n            \n            <div class=\"col-sm-10  \">\n                <input type=\"text\" name=\"username\" autofocus class=\"form-control\" required id=\"id_username\">\n\n\n                \n            </div>\n        \n    </div>\n\n    <div class=\"form-group\">\n        \n            \n                <label class=\"col-sm-2 control-label\n                        \"\n                       for=\"id_password\">Password<sup>*</sup>\n                        \n                </label>\n            \n            <div class=\"col-sm-10  \">\n                <input type=\"password\" name=\"password\" class=\"form-control\" required id=\"id_password\">\n\n\n                \n            </div>\n        \n    </div>\n\n            \n\n            <!-- Button -->\n            <div class=\"form-group\">\n                \n                    <div class=\"col-sm-offset-1 col-sm-4\" id=\"toggleBox\" onclick=\"togglePassVisibility()\">\n                        <i class=\"fa fa-eye\"></i>\n                        <span><b>Show Password</b></span>\n                    </div>\n                \n                \n                    <div class=\"col-sm-offset-1 col-sm-1\">\n                        <button class=\"btn btn-success\">Login</button>\n                    </div>\n                \n            </div>\n            <div class=\"form-group\">\n                \n\n                \n\n                \n\n                \n\n                \n\n                \n            </div>\n        </fieldset>\n    </form>\n\n                </div>\n                <!-- /.col-lg-12 -->\n            </div>\n        </div>\n        <!-- /.container-fluid -->\n    </div>\n    <!-- /#page-wrapper -->\n    <footer class=\"footer\">\n        <div class=\"container\">\n            <div class=\"row\">\n                <div class=\"col-md-12 text-center text-\">\n                    <p>\n                        <a href=\"/\"><img class=\"logo\" src=\"/static/dojo/img/chop.png\"\n                                                        alt=\"DefectDojo Chop\" height=\"45\"/></a><br/>\n                        v. 1.13.1 ( release mode )\n                    </p>\n                    <p>\n                        Detailed DefectDojo documentation can be found at  <a\n                            href=\"http://defectdojo.readthedocs.io/\">Read The Docs</a>.\n                    </p>\n                    <p>\n                        DefectDojo is licensed under the <a\n                            href=\"https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md\">Simplified BSD\n                        license</a>.\n                    </p>\n                    <p>\n                        &copy; 2021 DefectDojo\n                    </p>\n                </div>\n            </div>\n        </div>\n        <p id=\"alert_refresh\" class=\"hidden\">True</p>\n        <p id=\"disable_count\" class=\"hidden\">False</p>\n    </footer>\n</div>\n\n<!-- /#wrapper -->\n\n<!-- our JS -->\n<script src=\"/static/dojo/js/index.js\"></script>\n\n<!-- our CVSS stuff -->\n<script src=\"/static/dojo/js/cvsscalc30_helptext.js\"></script>\n<script src=\"/static/dojo/js/cvsscalc30.js\"></script>\n<script src=\"/static/dojo/js/cvss_calculator.js\"></script>\n<script type=\"application/javascript\">\n    $(document).ready(function() {\n        disable_count = document.getElementById('disable_count').innerHTML\n        refresh = document.getElementById('alert_refresh').innerHTML\n\n        $('.has-popover').popover({'trigger':'hover'});\n        \n\n        function update_alertcount() {\n            $.get(\"/alerts/count\", function (data) {\n                if (data.count != $('#alert_count').text()) {\n                    $('#alert_count').text(data.count);\n                    $('#alert_count').removeClass().addClass('badge badge-count badge-count' + data.count);\n                }\n            });\n        }\n\n        function htmlEscape(str) {\n          return str\n            .replace(/\\n/g, \" \")\n            .replace(/&/g, '&amp;')\n            .replace(/\"/g, '&quot;')\n            .replace(/'/g, '&#39;')\n            .replace(/</g, '&lt;')\n            .replace(/>/g, '&gt;');\n        }\n\n        function get_alerts() {\n            $('.dropdown-alerts').html('<div class=\"text-center\"><i class=\"fa fa-spin fa-spinner\"></i></div>');\n            $.get(\"/alerts/json?limit=12\", function (data) {\n                $('.dropdown-alerts').empty();\n                $.each(data, function(i, elem) {\n                  var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;\n                  var display_title = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';\n                  var description = elem.fields.description\n                  var display_description = description ? description.length < 100 ? description : jQuery.trim(description).substring(0,100).trim(this) + '...': ''\n                  var dropdown_alert = \"alert-list\" + i;\n                  $('.dropdown-alerts').append('<li><div style=\"padding: 3px 20px;\"><i class=\"fa fa-' + htmlEscape(elem.fields.icon) +\n                                                ' fa-fw\"></i><a href=\"' + htmlEscape(elem.fields.url) + '\" id=' + dropdown_alert +\n                                                ' title=\"' + htmlEscape(display_description) + '\"></a><span class=\"pull-right text-muted small\">' +\n                                               htmlEscape(elem.fields.source) + '</span></div></li><li class=\"divider\"></li>');\n                  $(\"#\" + dropdown_alert).text(display_title);\n                });\n                $('.dropdown-alerts').append('<li><a class=\"text-center\" href=\"/alerts\"><strong>See All Alerts </strong>' +\n                                             '<i class=\"fa fa-angle-right\"></i></a></li>');\n                $('.dropdown-alerts').append('<li><a class=\"text-center\" href=\"/delete_alerts\"><strong>Clear All Alerts </strong>' +\n                                           '<i class=\"fa fa-angle-right\"></i></a></li>');\n            });\n        }\n\n        $(\"#id_jiraform-jira_issue\").on('paste', function(e) {\n            var clipboardData = e.clipboardData || e.originalEvent.clipboardData || window.clipboardData;\n            var pastedData = clipboardData.getData('text');\n\n            $this = $(this)\n            // if someone entered/pasted a full URL, we strip evertyhing until last '/'\n            setTimeout(function (elem) {\n                $this.val($this.val().substring($this.val().lastIndexOf(\"/\") + 1));\n            }, 100);\n        });\n\n        <!-- TODO not working with django tagulous which uses select2, break styling -->\n        <!-- $('#id_tags').select2({ -->\n            <!-- 'placeholder': 'Select or add some tags...', -->\n            <!-- 'no_results_text': \"Tag not found, press TAB key to add.\", -->\n        <!-- }); -->\n\n    });\n</script>\n\n\n\n</body>\n\n</html>\n",
+        "dom" : {
+          "url" : "https://demo.defectdojo.org/login?next=/",
+          "transitions" : [],
+          "cookies" : [],
+          "digest" : null,
+          "data_flow_sinks" : [],
+          "execution_flow_sinks" : []
+        }
+      },
+      "remarks" : {},
+      "trusted" : true,
+      "tags" : [],
+      "cwe_url" : "http://cwe.mitre.org/data/definitions/200.html",
+      "digest" : 155423837,
+      "response" : {
+        "headers" : {
+          "Cache-Control" : "max-age=0, no-cache, no-store, must-revalidate",
+          "Content-Length" : "13456",
+          "Content-Type" : "text/html; charset=utf-8",
+          "Date" : "Wed, 17 Mar 2021 18:37:26 GMT",
+          "Expires" : "Wed, 17 Mar 2021 18:37:26 GMT",
+          "Server" : [
+            "Caddy",
+            "nginx/1.19.7"
+          ],
+          "Set-Cookie" : "csrftoken=ozdf8aj3T8aHuFq5KFMtxy7TgCxqGXjINwjolgbqcAW9wnvE99HfZdw6dWF8Ud7o; expires=Wed, 16 Mar 2022 18:37:26 GMT; HttpOnly; Max-Age=31449600; Path=/; SameSite=Lax",
+          "Vary" : "Cookie",
+          "X-Content-Type-Options" : "nosniff",
+          "X-Frame-Options" : "SAMEORIGIN",
+          "X-Xss-Protection" : "1; mode=block"
+        },
+        "url" : "https://demo.defectdojo.org/login?next=/",
+        "code" : 200,
+        "ip_address" : "104.131.110.75",
+        "headers_string" : "HTTP/1.1 200 OK\r\nCache-Control: max-age=0, no-cache, no-store, must-revalidate\r\nContent-Length: 13456\r\nContent-Type: text/html; charset=utf-8\r\nDate: Wed, 17 Mar 2021 18:37:26 GMT\r\nExpires: Wed, 17 Mar 2021 18:37:26 GMT\r\nServer: Caddy\r\nServer: nginx/1.19.7\r\nSet-Cookie: csrftoken=ozdf8aj3T8aHuFq5KFMtxy7TgCxqGXjINwjolgbqcAW9wnvE99HfZdw6dWF8Ud7o; expires=Wed, 16 Mar 2022 18:37:26 GMT; HttpOnly; Max-Age=31449600; Path=/; SameSite=Lax\r\nVary: Cookie\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: SAMEORIGIN\r\nX-Xss-Protection: 1; mode=block\r\n\r\n",
+        "body" : "\n\n\n<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <meta name=\"description\" content=\"\">\n    <meta name=\"author\" content=\"\">\n    <title>\n        \n        DefectDojo\n    </title>\n    \n    \n\n    <!-- jQuery -->\n    <script src=\"/static/jquery/dist/jquery.js\"></script>\n    <!--  jQuery UI -->\n    <script src=\"/static/components-jqueryui/jquery-ui.min.js\"></script>\n    <!-- Bootstrap Core JavaScript -->\n    <script src=\"/static/bootstrap/dist/js/bootstrap.min.js\"></script>\n\n    <!-- Metis Menu Plugin JavaScript -->\n    <script src=\"/static/metismenu/dist/metisMenu.min.js\"></script>\n\n    <script src=\"/static/chosen-js/chosen.jquery.min.js\"></script>\n\n    <!-- Custom Theme JavaScript -->\n    <script src=\"/static/startbootstrap-sb-admin-2/dist/js/sb-admin-2.js\"></script>\n    <!-- Calendar JavaScript -->\n    <script src=\"/static/moment/min/moment.min.js\"></script>\n    <script src=\"/static/fullcalendar/dist/fullcalendar.min.js\"></script>\n    <!-- jquery cookie -->\n    <script src=\"/static/jquery.cookie/jquery.cookie.js\"></script>\n    <!-- DataTables Javascript -->\n    <script src=\"/static/datatables.net/js/jquery.dataTables.min.js\"></script>\n    <script src=\"/static/datatables.net-dt/js/dataTables.dataTables.min.js\"></script>\n    <script src=\"/static/datatables.net-bs/js/dataTables.bootstrap.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/dataTables.buttons.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/buttons.html5.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/buttons.colVis.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons/js/buttons.print.min.js\"></script>\n    <script src=\"/static/datatables.net-buttons-bs/js/buttons.bootstrap.min.js\"></script>\n    <script src=\"/static/datatables.net-colreorder/js/dataTables.colReorder.min.js\"></script>\n\n    <script src=\"/static/pdfmake/build/pdfmake.min.js\"></script>\n    <script src=\"/static/pdfmake/build/vfs_fonts.js\"></script>\n\n    <script src=\"/static/jszip/dist/jszip.min.js\"></script>\n\n    <!-- Bootstrap Core CSS -->\n    <link href=\"/static/bootstrap/dist/css/bootstrap.min.css\" rel=\"stylesheet\">\n\n    <!-- MetisMenu CSS -->\n    <link href=\"/static/metismenu/dist/metisMenu.min.css\" rel=\"stylesheet\">\n\n    <!-- Custom CSS -->\n    <link href=\"/static/startbootstrap-sb-admin-2/dist/css/sb-admin-2.css\" rel=\"stylesheet\">\n\n    <!-- Custom Fonts -->\n    <link href=\"/static/font-awesome/css/font-awesome.min.css\" rel=\"stylesheet\" type=\"text/css\">\n\n    \n    \n    <link rel=\"stylesheet\" href=\"/static/components-jqueryui/themes/flick/jquery-ui.min.css\">\n    <link rel=\"shortcut icon\" href=\"/static/dojo/img/favicon.ico\"/>\n    <link rel=\"stylesheet\" href=\"/static/chosen-bootstrap/chosen.bootstrap.min.css\">\n    <link rel=\"stylesheet\" href=\"/static/fullcalendar/dist/fullcalendar.min.css\">\n    <link rel=\"stylesheet\" href=\"/static/dojo/css/dojo.css\">\n    <link rel=\"stylesheet\" href=\"/static/datatables.net-dt/css/jquery.dataTables.min.css\">\n    \n    <link rel=\"stylesheet\" href=\"/static/datatables.net-bs/css/dataTables.bootstrap.min.css\">\n    <link rel=\"stylesheet\" href=\"/static/datatables.net-buttons-bs/css/buttons.bootstrap.min.css\">\n\n    <style>\n        \n        \n    </style>\n</head>\n<body class=\"min\">\n\n<div id=\"wrapper\">\n    \n        <!-- Navigation -->\n        <nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\" style=\"margin-bottom: 0\">\n            <div class=\"navbar-header\">\n                <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\n                    <span class=\"sr-only\">Toggle navigation</span>\n                    <span class=\"icon-bar\"></span>\n                    <span class=\"icon-bar\"></span>\n                    <span class=\"icon-bar\"></span>\n                </button>\n                <a class=\"navbar-brand\" href=\"/\">\n                    <img src=\"/static/dojo/img/logo.png\" alt=\"DefectDojo Logo\" width=\"240\"/>\n                </a>\n\n            </div>\n            <!-- /.navbar-header -->\n\n            <ul class=\"nav navbar-top-links navbar-right\">\n                \n                <li class=\"dropdown\">\n                    <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\" aria-expanded=\"false\" aria-label=\"User Menu\">\n                        <i class=\"fa fa-user fa-fw\"></i> <i class=\"fa fa-caret-down\"></i>\n                    </a>\n                    <ul class=\"dropdown-menu dropdown-user\">\n                        \n                            \n                            <li><a href=\"/api/v1/doc/\"><i class=\"fa fa-book fa-fw\"></i> API\n                                v1 Docs</a></li>\n                            <li><a href=\"/api/v2/doc/\"><i class=\"fa fa-book fa-fw\"></i> API\n                                v2 Docs</a></li>\n                            \n                            \n                        \n                        \n                    </ul>\n                    <!-- /.dropdown-user -->\n                </li>\n                <!-- /.dropdown -->\n            </ul>\n            <!-- /.navbar-top-links -->\n\n            \n        </nav>\n    \n    <!-- Page Content -->\n    <div id=\"page-wrapper\">\n        <div class=\"container-fluid\">\n            <!-- start of tabs -->\n            \n            <div class=\"row hidden-xs\">\n                <div class=\"col-lg-12\">\n                    \n                </div>\n            </div>\n            \n            <!-- end of tabs -->\n            <div class=\"row\">\n                <div class=\"col-lg-12\">\n                    \n                </div>\n                <!-- /.col-lg-12 -->\n            </div>\n            <!-- /.row -->\n            <div class=\"row\">\n                <div id=\"base-content\" class=\"col-lg-12\">\n                    \n\n                    \n\n                    \n\n                    \n\n                    \n\n                    \n    <h3>Login</h3>\n    <form class=\"form-horizontal\" method=\"POST\" autocomplete=\"off\"> <input type=\"hidden\" name=\"csrfmiddlewaretoken\" value=\"79PPi2cy3TPavG3kzqyAkJMTYCvUBe1nw6VYv84VmlBCxo8TYUtmMob6VWDCPuP3\">\n        <fieldset class=\"col-md-offset-3 col-md-6\">\n            \n                <div class=\"well\">\n                Greetings from Germany\n                </div>\n            \n\n            \n               \n\n    \n\n\n    \n\n\n\n\n\n    <div class=\"form-group\">\n        \n            \n                <label class=\"col-sm-2 control-label\n                        \"\n                       for=\"id_username\">Username<sup>*</sup>\n                        \n                </label>\n            \n            <div class=\"col-sm-10  \">\n                <input type=\"text\" name=\"username\" autofocus class=\"form-control\" required id=\"id_username\">\n\n\n                \n            </div>\n        \n    </div>\n\n    <div class=\"form-group\">\n        \n            \n                <label class=\"col-sm-2 control-label\n                        \"\n                       for=\"id_password\">Password<sup>*</sup>\n                        \n                </label>\n            \n            <div class=\"col-sm-10  \">\n                <input type=\"password\" name=\"password\" class=\"form-control\" required id=\"id_password\">\n\n\n                \n            </div>\n        \n    </div>\n\n            \n\n            <!-- Button -->\n            <div class=\"form-group\">\n                \n                    <div class=\"col-sm-offset-1 col-sm-4\" id=\"toggleBox\" onclick=\"togglePassVisibility()\">\n                        <i class=\"fa fa-eye\"></i>\n                        <span><b>Show Password</b></span>\n                    </div>\n                \n                \n                    <div class=\"col-sm-offset-1 col-sm-1\">\n                        <button class=\"btn btn-success\">Login</button>\n                    </div>\n                \n            </div>\n            <div class=\"form-group\">\n                \n\n                \n\n                \n\n                \n\n                \n\n                \n            </div>\n        </fieldset>\n    </form>\n\n                </div>\n                <!-- /.col-lg-12 -->\n            </div>\n        </div>\n        <!-- /.container-fluid -->\n    </div>\n    <!-- /#page-wrapper -->\n    <footer class=\"footer\">\n        <div class=\"container\">\n            <div class=\"row\">\n                <div class=\"col-md-12 text-center text-\">\n                    <p>\n                        <a href=\"/\"><img class=\"logo\" src=\"/static/dojo/img/chop.png\"\n                                                        alt=\"DefectDojo Chop\" height=\"45\"/></a><br/>\n                        v. 1.13.1 ( release mode )\n                    </p>\n                    <p>\n                        Detailed DefectDojo documentation can be found at  <a\n                            href=\"http://defectdojo.readthedocs.io/\">Read The Docs</a>.\n                    </p>\n                    <p>\n                        DefectDojo is licensed under the <a\n                            href=\"https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md\">Simplified BSD\n                        license</a>.\n                    </p>\n                    <p>\n                        &copy; 2021 DefectDojo\n                    </p>\n                </div>\n            </div>\n        </div>\n        <p id=\"alert_refresh\" class=\"hidden\">True</p>\n        <p id=\"disable_count\" class=\"hidden\">False</p>\n    </footer>\n</div>\n\n<!-- /#wrapper -->\n\n<!-- our JS -->\n<script src=\"/static/dojo/js/index.js\"></script>\n\n<!-- our CVSS stuff -->\n<script src=\"/static/dojo/js/cvsscalc30_helptext.js\"></script>\n<script src=\"/static/dojo/js/cvsscalc30.js\"></script>\n<script src=\"/static/dojo/js/cvss_calculator.js\"></script>\n<script type=\"application/javascript\">\n    $(document).ready(function() {\n        disable_count = document.getElementById('disable_count').innerHTML\n        refresh = document.getElementById('alert_refresh').innerHTML\n\n        $('.has-popover').popover({'trigger':'hover'});\n        \n\n        function update_alertcount() {\n            $.get(\"/alerts/count\", function (data) {\n                if (data.count != $('#alert_count').text()) {\n                    $('#alert_count').text(data.count);\n                    $('#alert_count').removeClass().addClass('badge badge-count badge-count' + data.count);\n                }\n            });\n        }\n\n        function htmlEscape(str) {\n          return str\n            .replace(/\\n/g, \" \")\n            .replace(/&/g, '&amp;')\n            .replace(/\"/g, '&quot;')\n            .replace(/'/g, '&#39;')\n            .replace(/</g, '&lt;')\n            .replace(/>/g, '&gt;');\n        }\n\n        function get_alerts() {\n            $('.dropdown-alerts').html('<div class=\"text-center\"><i class=\"fa fa-spin fa-spinner\"></i></div>');\n            $.get(\"/alerts/json?limit=12\", function (data) {\n                $('.dropdown-alerts').empty();\n                $.each(data, function(i, elem) {\n                  var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;\n                  var display_title = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';\n                  var description = elem.fields.description\n                  var display_description = description ? description.length < 100 ? description : jQuery.trim(description).substring(0,100).trim(this) + '...': ''\n                  var dropdown_alert = \"alert-list\" + i;\n                  $('.dropdown-alerts').append('<li><div style=\"padding: 3px 20px;\"><i class=\"fa fa-' + htmlEscape(elem.fields.icon) +\n                                                ' fa-fw\"></i><a href=\"' + htmlEscape(elem.fields.url) + '\" id=' + dropdown_alert +\n                                                ' title=\"' + htmlEscape(display_description) + '\"></a><span class=\"pull-right text-muted small\">' +\n                                               htmlEscape(elem.fields.source) + '</span></div></li><li class=\"divider\"></li>');\n                  $(\"#\" + dropdown_alert).text(display_title);\n                });\n                $('.dropdown-alerts').append('<li><a class=\"text-center\" href=\"/alerts\"><strong>See All Alerts </strong>' +\n                                             '<i class=\"fa fa-angle-right\"></i></a></li>');\n                $('.dropdown-alerts').append('<li><a class=\"text-center\" href=\"/delete_alerts\"><strong>Clear All Alerts </strong>' +\n                                           '<i class=\"fa fa-angle-right\"></i></a></li>');\n            });\n        }\n\n        $(\"#id_jiraform-jira_issue\").on('paste', function(e) {\n            var clipboardData = e.clipboardData || e.originalEvent.clipboardData || window.clipboardData;\n            var pastedData = clipboardData.getData('text');\n\n            $this = $(this)\n            // if someone entered/pasted a full URL, we strip evertyhing until last '/'\n            setTimeout(function (elem) {\n                $this.val($this.val().substring($this.val().lastIndexOf(\"/\") + 1));\n            }, 100);\n        });\n\n        <!-- TODO not working with django tagulous which uses select2, break styling -->\n        <!-- $('#id_tags').select2({ -->\n            <!-- 'placeholder': 'Select or add some tags...', -->\n            <!-- 'no_results_text': \"Tag not found, press TAB key to add.\", -->\n        <!-- }); -->\n\n    });\n</script>\n\n\n\n</body>\n\n</html>\n",
+        "time" : 0.21874,
+        "app_time" : 0.103239,
+        "total_time" : 0.21874,
+        "return_code" : "ok",
+        "return_message" : "No error"
+      },
+      "request" : {
+        "url" : "https://demo.defectdojo.org/login?next=/",
+        "parameters" : {},
+        "headers" : {
+          "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "User-Agent" : "Arachni/v1.5.1",
+          "Accept-Language" : "en-US,en;q=0.8,he;q=0.6",
+          "X-Arachni-Scan-Seed" : "eba759d29cb0cab748f34ee2afad1c6e"
+        },
+        "headers_string" : "GET /login?next=%2F HTTP/1.1\r\nHost: demo.defectdojo.org\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Arachni/v1.5.1\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.8,he;q=0.6\r\nX-Arachni-Scan-Seed: eba759d29cb0cab748f34ee2afad1c6e\r\n\r\n",
+        "effective_body" : null,
+        "body" : null,
+        "method" : "get"
+      }
+    },
+    {
+      "name" : "Interesting response",
+      "description" : "\nThe server responded with a non 200 (OK) nor 404 (Not Found) status code.\nThis is a non-issue, however exotic HTTP response status codes can provide useful\ninsights into the behavior of the web application and assist with the penetration test.\n",
+      "references" : {
+        "w3.org" : "http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html"
+      },
+      "severity" : "informational",
+      "check" : {
+        "name" : "Interesting responses",
+        "description" : "Logs all non 200 (OK) server responses.",
+        "elements" : [
+          "server"
+        ],
+        "author" : "Tasos \"Zapotek\" Laskos <tasos.laskos@arachni-scanner.com>",
+        "version" : "0.2.1",
+        "max_issues" : 25,
+        "shortname" : "interesting_responses"
+      },
+      "vector" : {
+        "class" : "Arachni::Element::Server",
+        "type" : "server",
+        "url" : "https://demo.defectdojo.org/login?next=/",
+        "affected_input_name" : null
+      },
+      "proof" : "HTTP/1.1 403 Forbidden",
+      "referring_page" : {
+        "body" : "",
+        "dom" : {
+          "url" : "https://demo.defectdojo.org/",
+          "transitions" : [],
+          "cookies" : [],
+          "digest" : null,
+          "data_flow_sinks" : [],
+          "execution_flow_sinks" : []
+        }
+      },
+      "page" : {
+        "body" : "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">\n  <meta name=\"robots\" content=\"NONE,NOARCHIVE\">\n  <title>403 Forbidden</title>\n  <style type=\"text/css\">\n    html * { padding:0; margin:0; }\n    body * { padding:10px 20px; }\n    body * * { padding:0; }\n    body { font:small sans-serif; background:#eee; color:#000; }\n    body>div { border-bottom:1px solid #ddd; }\n    h1 { font-weight:normal; margin-bottom:.4em; }\n    h1 span { font-size:60%; color:#666; font-weight:normal; }\n    #info { background:#f6f6f6; }\n    #info ul { margin: 0.5em 4em; }\n    #info p, #summary p { padding-top:10px; }\n    #summary { background: #ffc; }\n    #explanation { background:#eee; border-bottom: 0px none; }\n  </style>\n</head>\n<body>\n<div id=\"summary\">\n  <h1>Forbidden <span>(403)</span></h1>\n  <p>CSRF verification failed. Request aborted.</p>\n\n  <p>You are seeing this message because this HTTPS site requires a &#39;Referer header&#39; to be sent by your Web browser, but none was sent. This header is required for security reasons, to ensure that your browser is not being hijacked by third parties.</p>\n  <p>If you have configured your browser to disable &#39;Referer&#39; headers, please re-enable them, at least for this site, or for HTTPS connections, or for &#39;same-origin&#39; requests.</p>\n  <p>If you are using the &lt;meta name=&quot;referrer&quot; content=&quot;no-referrer&quot;&gt; tag or including the &#39;Referrer-Policy: no-referrer&#39; header, please remove them. The CSRF protection requires the &#39;Referer&#39; header to do strict referer checking. If you&#39;re concerned about privacy, use alternatives like &lt;a rel=&quot;noreferrer&quot; ...&gt; for links to third-party sites.</p>\n\n\n</div>\n\n<div id=\"explanation\">\n  <p><small>More information is available with DEBUG=True.</small></p>\n</div>\n\n</body>\n</html>\n",
+        "dom" : {
+          "url" : "https://demo.defectdojo.org/login?next=/",
+          "transitions" : [],
+          "cookies" : [],
+          "digest" : null,
+          "data_flow_sinks" : [],
+          "execution_flow_sinks" : []
+        }
+      },
+      "remarks" : {},
+      "trusted" : true,
+      "tags" : [
+        "interesting",
+        "response",
+        "server"
+      ],
+      "digest" : 4089014025,
+      "response" : {
+        "headers" : {
+          "Content-Length" : "1889",
+          "Content-Type" : "text/html",
+          "Date" : "Wed, 17 Mar 2021 18:37:27 GMT",
+          "Server" : [
+            "Caddy",
+            "nginx/1.19.7"
+          ],
+          "Vary" : "Cookie",
+          "X-Content-Type-Options" : "nosniff",
+          "X-Frame-Options" : "SAMEORIGIN",
+          "X-Xss-Protection" : "1; mode=block"
+        },
+        "url" : "https://demo.defectdojo.org/login?next=/",
+        "code" : 403,
+        "ip_address" : "104.131.110.75",
+        "headers_string" : "HTTP/1.1 403 Forbidden\r\nContent-Length: 1889\r\nContent-Type: text/html\r\nDate: Wed, 17 Mar 2021 18:37:27 GMT\r\nServer: Caddy\r\nServer: nginx/1.19.7\r\nVary: Cookie\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: SAMEORIGIN\r\nX-Xss-Protection: 1; mode=block\r\n\r\n",
+        "body" : "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">\n  <meta name=\"robots\" content=\"NONE,NOARCHIVE\">\n  <title>403 Forbidden</title>\n  <style type=\"text/css\">\n    html * { padding:0; margin:0; }\n    body * { padding:10px 20px; }\n    body * * { padding:0; }\n    body { font:small sans-serif; background:#eee; color:#000; }\n    body>div { border-bottom:1px solid #ddd; }\n    h1 { font-weight:normal; margin-bottom:.4em; }\n    h1 span { font-size:60%; color:#666; font-weight:normal; }\n    #info { background:#f6f6f6; }\n    #info ul { margin: 0.5em 4em; }\n    #info p, #summary p { padding-top:10px; }\n    #summary { background: #ffc; }\n    #explanation { background:#eee; border-bottom: 0px none; }\n  </style>\n</head>\n<body>\n<div id=\"summary\">\n  <h1>Forbidden <span>(403)</span></h1>\n  <p>CSRF verification failed. Request aborted.</p>\n\n  <p>You are seeing this message because this HTTPS site requires a &#39;Referer header&#39; to be sent by your Web browser, but none was sent. This header is required for security reasons, to ensure that your browser is not being hijacked by third parties.</p>\n  <p>If you have configured your browser to disable &#39;Referer&#39; headers, please re-enable them, at least for this site, or for HTTPS connections, or for &#39;same-origin&#39; requests.</p>\n  <p>If you are using the &lt;meta name=&quot;referrer&quot; content=&quot;no-referrer&quot;&gt; tag or including the &#39;Referrer-Policy: no-referrer&#39; header, please remove them. The CSRF protection requires the &#39;Referer&#39; header to do strict referer checking. If you&#39;re concerned about privacy, use alternatives like &lt;a rel=&quot;noreferrer&quot; ...&gt; for links to third-party sites.</p>\n\n\n</div>\n\n<div id=\"explanation\">\n  <p><small>More information is available with DEBUG=True.</small></p>\n</div>\n\n</body>\n</html>\n",
+        "time" : 0.102432,
+        "app_time" : 0.100718,
+        "total_time" : 0.102432,
+        "return_code" : "ok",
+        "return_message" : "No error",
+        "status_line" : "HTTP/1.1 403 Forbidden"
+      },
+      "request" : {
+        "url" : "https://demo.defectdojo.org/login?next=/",
+        "parameters" : {},
+        "headers" : {
+          "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "User-Agent" : "Arachni/v1.5.1",
+          "Accept-Language" : "en-US,en;q=0.8,he;q=0.6",
+          "X-Arachni-Scan-Seed" : "eba759d29cb0cab748f34ee2afad1c6e",
+          "Cookie" : "csrftoken=ozdf8aj3T8aHuFq5KFMtxy7TgCxqGXjINwjolgbqcAW9wnvE99HfZdw6dWF8Ud7o"
+        },
+        "headers_string" : "POST /login?next=%2F HTTP/1.1\r\nHost: demo.defectdojo.org\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Arachni/v1.5.1\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.8,he;q=0.6\r\nX-Arachni-Scan-Seed: eba759d29cb0cab748f34ee2afad1c6e\r\nCookie: csrftoken=ozdf8aj3T8aHuFq5KFMtxy7TgCxqGXjINwjolgbqcAW9wnvE99HfZdw6dWF8Ud7o\r\nContent-Length: 185\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\n",
+        "effective_body" : "csrfmiddlewaretoken=79PPi2cy3TPavG3kzqyAkJMTYCvUBe1nw6VYv84VmlBCxo8TYUtmMob6VWDCPuP3%3Cxss_eba759d29cb0cab748f34ee2afad1c6e%2F%3E&username=arachni_name&password=5543%21%25arachni_secret",
+        "body" : {
+          "csrfmiddlewaretoken" : "79PPi2cy3TPavG3kzqyAkJMTYCvUBe1nw6VYv84VmlBCxo8TYUtmMob6VWDCPuP3<xss_eba759d29cb0cab748f34ee2afad1c6e/>",
+          "username" : "arachni_name",
+          "password" : "5543!%arachni_secret"
+        },
+        "method" : "post"
+      }
+    },
+    {
+      "name" : "Interesting response",
+      "description" : "\nThe server responded with a non 200 (OK) nor 404 (Not Found) status code.\nThis is a non-issue, however exotic HTTP response status codes can provide useful\ninsights into the behavior of the web application and assist with the penetration test.\n",
+      "references" : {
+        "w3.org" : "http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html"
+      },
+      "severity" : "informational",
+      "check" : {
+        "name" : "Interesting responses",
+        "description" : "Logs all non 200 (OK) server responses.",
+        "elements" : [
+          "server"
+        ],
+        "author" : "Tasos \"Zapotek\" Laskos <tasos.laskos@arachni-scanner.com>",
+        "version" : "0.2.1",
+        "max_issues" : 25,
+        "shortname" : "interesting_responses"
+      },
+      "vector" : {
+        "class" : "Arachni::Element::Server",
+        "type" : "server",
+        "url" : "https://demo.defectdojo.org/",
+        "affected_input_name" : null
+      },
+      "proof" : "HTTP/1.1 405 Method Not Allowed",
+      "referring_page" : {
+        "body" : "",
+        "dom" : {
+          "url" : "https://demo.defectdojo.org/",
+          "transitions" : [],
+          "cookies" : [],
+          "digest" : null,
+          "data_flow_sinks" : [],
+          "execution_flow_sinks" : []
+        }
+      },
+      "page" : {
+        "body" : "<html>\r\n<head><title>405 Not Allowed</title></head>\r\n<body>\r\n<center><h1>405 Not Allowed</h1></center>\r\n<hr><center>nginx/1.19.7</center>\r\n</body>\r\n</html>\r\n",
+        "dom" : {
+          "url" : "https://demo.defectdojo.org/",
+          "transitions" : [],
+          "cookies" : [],
+          "digest" : null,
+          "data_flow_sinks" : [],
+          "execution_flow_sinks" : []
+        }
+      },
+      "remarks" : {},
+      "trusted" : true,
+      "tags" : [
+        "interesting",
+        "response",
+        "server"
+      ],
+      "digest" : 339900473,
+      "response" : {
+        "headers" : {
+          "Content-Length" : "157",
+          "Content-Type" : "text/html",
+          "Date" : "Wed, 17 Mar 2021 18:37:27 GMT",
+          "Server" : [
+            "Caddy",
+            "nginx/1.19.7"
+          ]
+        },
+        "url" : "https://demo.defectdojo.org/",
+        "code" : 405,
+        "ip_address" : "104.131.110.75",
+        "headers_string" : "HTTP/1.1 405 Method Not Allowed\r\nContent-Length: 157\r\nContent-Type: text/html\r\nDate: Wed, 17 Mar 2021 18:37:27 GMT\r\nServer: Caddy\r\nServer: nginx/1.19.7\r\n\r\n",
+        "body" : "<html>\r\n<head><title>405 Not Allowed</title></head>\r\n<body>\r\n<center><h1>405 Not Allowed</h1></center>\r\n<hr><center>nginx/1.19.7</center>\r\n</body>\r\n</html>\r\n",
+        "time" : 0.370424,
+        "app_time" : 0.083302,
+        "total_time" : 0.370424,
+        "return_code" : "ok",
+        "return_message" : "No error",
+        "status_line" : "HTTP/1.1 405 Method Not Allowed"
+      },
+      "request" : {
+        "url" : "https://demo.defectdojo.org/",
+        "parameters" : {},
+        "headers" : {
+          "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "User-Agent" : "Arachni/v1.5.1",
+          "Accept-Language" : "en-US,en;q=0.8,he;q=0.6",
+          "X-Arachni-Scan-Seed" : "eba759d29cb0cab748f34ee2afad1c6e"
+        },
+        "headers_string" : "TRACE / HTTP/1.1\r\nHost: demo.defectdojo.org\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Arachni/v1.5.1\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.8,he;q=0.6\r\nX-Arachni-Scan-Seed: eba759d29cb0cab748f34ee2afad1c6e\r\n\r\n",
+        "effective_body" : null,
+        "body" : null,
+        "method" : "trace"
+      }
+    }
+  ],
+  "plugins" : {
+    "healthmap" : {
+      "name" : "Health map",
+      "description" : "Generates a simple list of safe/unsafe URLs.",
+      "author" : "Tasos \"Zapotek\" Laskos <tasos.laskos@arachni-scanner.com>",
+      "version" : "0.1.5",
+      "results" : {
+        "map" : [
+          {
+            "with_issues" : "https://demo.defectdojo.org/"
+          },
+          {
+            "without_issues" : "https://demo.defectdojo.org/login"
+          },
+          {
+            "with_issues" : "https://demo.defectdojo.org/login?next=/"
+          },
+          {
+            "without_issues" : "https://demo.defectdojo.org/static/font-awesome/fonts/fontawesome-webfont.woff"
+          }
+        ],
+        "total" : 4,
+        "without_issues" : 2,
+        "with_issues" : 2,
+        "issue_percentage" : 50
+      }
+    }
+  }
+}
