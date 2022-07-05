@@ -1651,7 +1651,7 @@ def merge_finding_product(request, pid):
                                 finding_descriptions = "{}\n**File Path:** {}\n".format(finding_descriptions, finding.file_path)
 
                         # If checked merge the Reference
-                        if form.cleaned_data['append_reference']:
+                        if form.cleaned_data['append_reference'] and finding.references is not None:
                             finding_references = "{}\n{}".format(finding_references, finding.references)
 
                         # if checked merge the endpoints

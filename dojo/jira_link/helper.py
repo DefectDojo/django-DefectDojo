@@ -5,6 +5,7 @@ import io
 import json
 import requests
 from django.conf import settings
+from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
@@ -456,7 +457,7 @@ def log_jira_alert(error, obj):
         event='jira_update',
         title='Error pushing to JIRA ' + '(' + truncate_with_dots(prod_name(obj), 25) + ')',
         description=to_str_typed(obj) + ', ' + error,
-        url=obj.get_absolute_url,
+        url=obj.get_absolute_url(),
         icon='bullseye',
         source='Push to JIRA',
         obj=obj)
@@ -719,6 +720,10 @@ def add_jira_issue(obj, *args, **kwargs):
 
         logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
         return True
+    except TemplateDoesNotExist as e:
+        logger.exception(e)
+        log_jira_alert(str(e), obj)
+        return False
     except JIRAError as e:
         logger.exception(e)
         logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe

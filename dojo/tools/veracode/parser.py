@@ -175,6 +175,8 @@ class VeracodeParser(object):
         _sast_source_obj = xml_node.attrib.get('functionprototype')
         finding.sast_source_object = _sast_source_obj if _sast_source_obj else None
 
+        finding.unsaved_tags = ["sast"]
+
         return finding
 
     @classmethod
@@ -186,20 +188,9 @@ class VeracodeParser(object):
         url_host = xml_node.attrib.get('url')
         finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
 
-        return finding
+        finding.unsaved_tags = ["dast"]
 
-    @classmethod
-    def __cvss_to_severity(cls, cvss):
-        if cvss >= 9:
-            return cls.vc_severity_mapping.get(5)
-        elif cvss >= 7:
-            return cls.vc_severity_mapping.get(4)
-        elif cvss >= 4:
-            return cls.vc_severity_mapping.get(3)
-        elif cvss > 0:
-            return cls.vc_severity_mapping.get(2)
-        else:
-            return cls.vc_severity_mapping.get(1)
+        return finding
 
     @staticmethod
     def _get_cwe(val):
@@ -220,7 +211,9 @@ class VeracodeParser(object):
         finding.unique_id_from_tool = xml_node.attrib['cve_id']
 
         # Report values
-        finding.severity = cls.__cvss_to_severity(float(xml_node.attrib['cvss_score']))
+        cvss_score = float(xml_node.attrib['cvss_score'])
+        finding.cvssv3_score = cvss_score
+        finding.severity = cls.__xml_flaw_to_severity(xml_node)
         finding.unsaved_vulnerability_ids = [xml_node.attrib['cve_id']]
         finding.cwe = cls._get_cwe(xml_node.attrib['cwe_id'])
         finding.title = "Vulnerable component: {0}:{1}".format(library, version)
@@ -233,7 +226,7 @@ class VeracodeParser(object):
 
         _description = 'This library has known vulnerabilities.\n'
         _description += \
-                "**CVE: [{0}](https://nvd.nist.gov/vuln/detail/{0})** ({1})\n" \
+                "**CVE:** {0} ({1})\n" \
                 "CVS Score: {2} ({3})\n" \
                 "Summary: \n>{4}" \
                 "\n\n-----\n\n".format(
@@ -243,5 +236,7 @@ class VeracodeParser(object):
                     cls.vc_severity_mapping.get(int(xml_node.attrib['severity']), 'Info'),
                     xml_node.attrib['cve_summary'])
         finding.description = _description
+
+        finding.unsaved_tags = ["sca"]
 
         return finding

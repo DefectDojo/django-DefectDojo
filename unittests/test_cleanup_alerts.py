@@ -2,7 +2,6 @@ from dojo.tasks import cleanup_alerts
 from .dojo_test_case import DojoTestCase
 from django.conf import settings
 from dojo.models import User, Alerts
-from datetime import datetime, timezone
 import logging
 logger = logging.getLogger(__name__)
 
@@ -13,9 +12,9 @@ class TestCleanupAlerts(DojoTestCase):
     def setUp(self):
         testuser = User.objects.get(username='admin')
         Alerts.objects.filter(user_id=testuser).delete()
-        Alerts.objects.create(title="B", user_id=testuser, created=datetime(2021, 1, 8, 16, 54, 23, 597051, tzinfo=timezone.utc))
-        Alerts.objects.create(title="A", user_id=testuser, created=datetime(2021, 1, 7, 16, 54, 23, 597051, tzinfo=timezone.utc))
-        Alerts.objects.create(title="C", user_id=testuser, created=datetime(2021, 1, 9, 16, 54, 23, 597051, tzinfo=timezone.utc))
+        Alerts.objects.create(title="A", user_id=testuser)
+        Alerts.objects.create(title="B", user_id=testuser)
+        Alerts.objects.create(title="C", user_id=testuser)
 
     def test_delete_alerts_disabled(self):
         settings.MAX_ALERTS_PER_USER = -1
