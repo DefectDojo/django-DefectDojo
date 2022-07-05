@@ -31,12 +31,12 @@ jobs:
           git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
           git push origin ${{ github.event.inputs.release_number }}
       - name: Install Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
           version: v3.4.0
       - name: Configure Helm repos
         run: |
-          helm repo add bitnami https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami/
+          helm repo add bitnami https://charts.bitnami.com/bitnami
           helm dependency list ./helm/defectdojo
           helm dependency update ./helm/defectdojo
       - name: Package Helm chart

@@ -61,10 +61,9 @@ headers = {'content-type': 'application/json',
             'Authorization': 'Token c8572a5adf107a693aa6c72584da31f4d1f1dcff'}
 r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
 
-for key, value in r.__dict__.iteritems():
-    print key
-    print value
-    print '------------------'
+for key, value in r.__dict__.items():
+  print(f"'{key}': '{value}'")
+  print('------------------')
 {{< /highlight >}}
 
 This code will return the list of all the users defined in DefectDojo.
@@ -101,10 +100,9 @@ headers = {'content-type': 'application/json',
             'Authorization': 'Token c8572a5adf107a693aa6c72584da31f4d1f1dcff'}
 r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
 
-for key, value in r.__dict__.iteritems():
-    print key
-    print value
-    print '------------------'
+for key, value in r.__dict__.items():
+  print(f"'{key}': '{value}'")
+  print('------------------')
 {{< /highlight >}}
 
 The json object result is: :

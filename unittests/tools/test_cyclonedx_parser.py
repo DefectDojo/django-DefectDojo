@@ -116,7 +116,7 @@ class TestParser(DojoTestCase):
                 self.assertEqual("CVE-2021-20193", finding.vuln_id_from_tool)
 
     def test_cyclonedx_1_4_xml(self):
-        """ClyconeDX version 1.4 XML format"""
+        """CycloneDX version 1.4 XML format"""
         with open("unittests/scans/cyclonedx/valid-vulnerability-1.4.xml") as file:
             parser = CycloneDXParser()
             findings = parser.get_findings(file, Test())
@@ -155,7 +155,7 @@ class TestParser(DojoTestCase):
                 self.assertEqual('CVE-2018-7489', vulnerability_ids[2])
 
     def test_cyclonedx_1_4_json(self):
-        """ClyconeDX version 1.4 JSON format"""
+        """CycloneDX version 1.4 JSON format"""
         with open("unittests/scans/cyclonedx/valid-vulnerability-1.4.json") as file:
             parser = CycloneDXParser()
             findings = parser.get_findings(file, Test())
@@ -193,7 +193,7 @@ class TestParser(DojoTestCase):
                 self.assertEqual('CVE-2018-7489', vulnerability_ids[1])
 
     def test_cyclonedx_1_4_jake_json(self):
-        """ClyconeDX version 1.4 JSON format produced by jake 1.4.1"""
+        """CycloneDX version 1.4 JSON format produced by jake 1.4.1"""
         with open("unittests/scans/cyclonedx/jake2.json") as file:
             parser = CycloneDXParser()
             findings = parser.get_findings(file, Test())
@@ -244,3 +244,18 @@ class TestParser(DojoTestCase):
                             finding.description,
                         )
                         self.assertEqual("CVE-2018-6188", finding.vuln_id_from_tool)
+
+    def test_cyclonedx_json_cwe(self):
+        """CycloneDX version 1.4 JSON format"""
+        with open("unittests/scans/cyclonedx/cyclonedx_cwe.json") as file:
+            parser = CycloneDXParser()
+            findings = parser.get_findings(file, Test())
+            for finding in findings:
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                finding.clean()
+            self.assertEqual(1, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
+                self.assertEqual(20, finding.cwe)
