@@ -90,12 +90,9 @@
                                 <option value="High">High</option>
                                 <option value="Critical">Critical</option>
                             </select><br/><br/>
-
-                            <label><b>Planned Remediation Date</b><br/>
-                                <input id="id_bulk_planned_remediation_date" name="planned_remediation_date" type="date" alt="Select the date the Finding will be remediated"/></label><br/>
-
+                            <label>Planned Remediation Date</label><br/>
+                                <input id="id_bulk_planned_remediation_date" name="planned_remediation_date" type="date" alt="Select the date the Finding will be remediated"/><br/>
                             <label><b>Status</b><input id="id_bulk_status" name="status" type="checkbox" alt="Select to enable"/></label><br/>
-
                             <label style="font-size: 80%; font-weight: normal; display: block">
                                 <input id="id_bulk_active" name="active" type="checkbox" disabled/> <span>Active</span>
                             </label>
@@ -222,7 +219,7 @@
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
                             {% endif %}
                             <th>Service</th>
-                            <th>Planned Remediation Date</th>
+                            <th>Planned Remediation</th>
                         </tr>
                         </thead>
                         <tbody>
