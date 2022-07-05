@@ -265,7 +265,7 @@ def get_severity(result, rule):
     elif 'warning' == severity:
         return 'Medium'
     elif 'error' == severity:
-        return 'Critical'
+        return 'High'
     else:
         return 'Medium'
 
