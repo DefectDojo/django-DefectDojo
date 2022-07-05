@@ -83,6 +83,25 @@ This requires a one-time rebuild of the Django-Watson search index. Execute the 
 
 `./manage.py buildwatson`
 
+**Upgrade instructions for helm chart with postgres enabled**: The postgres database uses a statefulset by default. Before upgrading the helm chart we have to delete the statefullset and ensure that the pvc is reused, to keep the data. For more information: https://docs.bitnami.com/kubernetes/infrastructure/postgresql/administration/upgrade/ .
+
+```bash
+helm repo update
+helm dependency update ./helm/defectdojo
+
+# obtain name oft the postgres pvc
+export POSTGRESQL_PVC=$(kubectl get pvc -l app.kubernetes.io/instance=defectdojo,role=primary -o jsonpath="{.items[0].metadata.name}")
+
+# delete postgres statefulset
+kubectl delete statefulsets.apps defectdojo-postgresql --namespace default --cascade=orphan
+
+# upgrade
+helm upgrade \
+  defectdojo \
+  ./helm/defectdojo/ \
+  --set primary.persistence.existingClaim=$POSTGRESQL_PVC \
+  ... # add your custom settings
+```
 
 ## Upgrading to DefectDojo Version 2.10.x.
 
