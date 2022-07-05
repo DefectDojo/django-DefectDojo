@@ -456,7 +456,7 @@ def log_jira_alert(error, obj):
         event='jira_update',
         title='Error pushing to JIRA ' + '(' + truncate_with_dots(prod_name(obj), 25) + ')',
         description=to_str_typed(obj) + ', ' + error,
-        url=obj.get_absolute_url,
+        url=obj.get_absolute_url(),
         icon='bullseye',
         source='Push to JIRA',
         obj=obj)
