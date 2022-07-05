@@ -469,68 +469,6 @@ class DateRangeOmniFilter(ChoiceFilter):
         return self.options[value][1](qs, self.field_name)
 
 
-class DateRangeOmniFilter(ChoiceFilter):
-    options = {
-        '': (_('Any date'), lambda qs, name: qs.all()),
-        1: (_('Today'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
-            '%s__month' % name: now().month,
-            '%s__day' % name: now().day
-        })),
-        2: (_('Next 7 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=7)),
-        })),
-        3: (_('Next 30 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=30)),
-        })),
-        4: (_('Next 90 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=90)),
-        })),
-        5: (_('Past 7 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=7)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
-        })),
-        6: (_('Past 30 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=30)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
-        })),
-        7: (_('Past 90 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=90)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
-        })),
-        8: (_('Current month'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
-            '%s__month' % name: now().month
-        })),
-        9: (_('Past year'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=365)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
-        })),
-        10: (_('Current year'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
-        })),
-        11: (_('Next year'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=365)),
-        })),
-    }
-
-    def __init__(self, *args, **kwargs):
-        kwargs['choices'] = [
-            (key, value[0]) for key, value in six.iteritems(self.options)]
-        super(DateRangeOmniFilter, self).__init__(*args, **kwargs)
-
-    def filter(self, qs, value):
-        try:
-            value = int(value)
-        except (ValueError, TypeError):
-            value = ''
-        return self.options[value][1](qs, self.field_name)
-
-
 class ReportBooleanFilter(ChoiceFilter):
     options = {
         '': (_('Either'), lambda qs, name: qs.all()),
