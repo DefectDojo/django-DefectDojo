@@ -131,3 +131,19 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual('https', endpoint.protocol)
         self.assertEqual('www.example.com', endpoint.host)
         self.assertEqual('index.html', endpoint.path)
+
+    def test_parse_file_with_changed_severity(self):
+        testfile = open("unittests/scans/veracode/veracode_scan_changed_severity.xml")
+        parser = VeracodeParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(7, len(findings))
+        # finding 6
+        finding = findings[6]
+        self.assertEqual("Low", finding.severity)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2012-6153", finding.unsaved_vulnerability_ids[0])
+        self.assertEqual(20, finding.cwe)
+        self.assertEqual("commons-httpclient", finding.component_name)
+        self.assertEqual("3.1", finding.component_version)
+        self.assertEqual("CVE-2012-6153", finding.unique_id_from_tool)
+        self.assertEqual(4.3, finding.cvssv3_score)
