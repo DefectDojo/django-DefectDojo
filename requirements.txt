@@ -70,7 +70,7 @@ django-fieldsignals==0.7.0
 hyperlink==21.0.0
 numpy==1.23.0
 django-test-migrations==1.2.0
-djangosaml2==1.5.0
+djangosaml2==1.5.1
 drf-spectacular==0.22.1
 django-ratelimit==3.0.1
 argon2-cffi==21.3.0
