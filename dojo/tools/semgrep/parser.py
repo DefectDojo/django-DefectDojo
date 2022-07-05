@@ -67,7 +67,7 @@ class SemgrepParser(object):
 
     def convert_severity(self, val):
         if "WARNING" == val.upper():
-            return "Low"
+            return "Medium"
         elif "ERROR" == val.upper():
             return "High"
         elif "INFO" == val.upper():
