@@ -11,7 +11,7 @@ from django.utils.encoding import force_text
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from dojo.filters import EndpointFilter, ReportAuthedFindingFilter
+from dojo.filters import EndpointFilter, ReportFindingFilter
 from dojo.forms import CustomReportOptionsForm
 from dojo.models import Endpoint, Finding
 from dojo.utils import get_page_items, get_words_for_field
@@ -277,8 +277,8 @@ class FindingList(Widget):
         self.multiple = 'true'
         self.extra_help = "You can use this form to filter findings and select only the ones to be included in the " \
                           "report."
-        self.title_words = get_words_for_field(self.findings.qs, 'title')
-        self.component_words = get_words_for_field(self.findings.qs, 'component_name')
+        self.title_words = get_words_for_field(Finding, 'title')
+        self.component_words = get_words_for_field(Finding, 'component_name')
 
         if self.request is not None:
             self.paged_findings = get_page_items(self.request, self.findings.qs, 25)
@@ -408,7 +408,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             from dojo.endpoint.views import get_endpoint_ids
             ids = get_endpoint_ids(endpoints)
 
-            endpoints = Endpoint.objects.filter(id__in=ids)
+            endpoints = Endpoint.objects.filter(id__in=endpoints)
             endpoints = EndpointFilter(d, queryset=endpoints, user=request.user)
             user_id = user.id if user is not None else None
             endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes,
@@ -425,7 +425,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                 else:
                     d[item['name']] = item['value']
 
-            findings = ReportAuthedFindingFilter(d, queryset=findings)
+            findings = ReportFindingFilter(d, queryset=findings)
             user_id = user.id if user is not None else None
             selected_widgets[list(widget.keys())[0] + '-' + str(idx)] = FindingList(request=request, findings=findings,
                                                                               finding_notes=finding_notes,

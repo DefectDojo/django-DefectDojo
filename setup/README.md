@@ -1,16 +1,19 @@
-## Documentation on setup.bash 
+## END OF LIFE ##
+This install method is end of life and has been removed from the codebase. The documentation below is only here for future reference and may be removed at any point in time.
+
+## Documentation on setup.bash
 
 The bash script setup.bash was created to automate installation of Defect Dojo and allow for the following install situations to be automated:
 
 ### Supported Installs
 
 * Single Server - simplest DefectDojo install where DefectDojo, Dojo dependencies and 3rd party services are installed on a single server. [default install]
-* Dev Install - install for local development where a Single Server install is run with credentials and other passwords set to known values.  
+* Dev Install - install for local development where a Single Server install is run with credentials and other passwords set to known values.
 * Stand-alone Server - install DefectDojo & Dojo dependencies only where 3rd party services (database) is running on other infrastructure.
 * ? Docker Single Server - a Single Server install where DefectDojo, Dojo dependencies and 3rd party services are installed in a single container
-* ? Docker Stand-alone - a Stand-alone Server install DefectDojo & Dojo dependencies only are installed in a single container.  
+* ? Docker Stand-alone - a Stand-alone Server install DefectDojo & Dojo dependencies only are installed in a single container.
 
-Note: Cloning the DefectDojo repo and running ./setup.bash does a single server interactive install.  Doing other install methods requires setting configuration values and/or using command-line options.  
+Note: Cloning the DefectDojo repo and running ./setup.bash does a single server interactive install.  Doing other install methods requires setting configuration values and/or using command-line options.
 
 ### TDB install situations
 
@@ -24,18 +27,18 @@ All installs make these assumption:
 * DefectDojo will be run in a virtualenv
 * All installs support an interactive and non-interactive install methods
 * All installation configuration lives in ./dojo/settings/template-env
-* * Running setup.bash without editing template-env assumes a single-server install.
-* * Running setup.bash without editing template-env non-interactively assumes a single-server install with MySQL
+  * Running setup.bash without editing template-env assumes a single-server install.
+  * Running setup.bash without editing template-env non-interactively assumes a single-server install with MySQL
 * Any install configuration variable can be overridden by setting an environmental variable
 * One of the following Operating Systems is used as the base for the install
-* * Ubuntu Linux - officially supported versions: 16.04 LTS, 18.04 LTS
-* * CentOS - officially supported versions: ?
-* * Mac OS X - officially supported versions: ?
+  * Ubuntu Linux - officially supported versions: 16.04 LTS, 18.04 LTS
+  * CentOS - officially supported versions: ?
+  * Mac OS X - officially supported versions: ?
 
 ### Definitions
 
 * DefectDojo - the source code and supporting files for DefectDojo contained in the Github repo at https://github.com/DefectDojo/django-DefectDojo
-* Dojo dependencies - any additional software, libraries or services needed to install and run the software in the DefectDojo repo.  This includes Django and other pip packages, celery workers, and any binaries required to run DefectDojo such as wkhtmltopdf
+* Dojo dependencies - any additional software, libraries or services needed to install and run the software in the DefectDojo repo.  This includes Django and other pip packages, celery workers, and any binaries required to run DefectDojo
 * 3rd party services - additional services not maintained by DefectDojo but needed to run DefectDojo - currently a database
 
 ### Command-line options
@@ -110,5 +113,3 @@ Configuration items for setup.py are in template-env in ./dojo/settings/ and con
 * REPO_BASE : The full path to where the DefectDojo source was cloned usually /opt/dojo/django-DefectDojo
 * LIB_PATH : The full path to where the configuration values and libraries are for the DefectDojo installer which is SETUP_BASE + /scripts/common/
 * DB_TYPPE : The database type DefectDojo will use - currently either SQLite, MySQL or PostgreSQL
-
-

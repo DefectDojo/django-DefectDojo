@@ -1,15 +1,11 @@
 import hashlib
 import logging
-import re
 
-from dojo.models import Finding
-
-from .parser_helper import get_defectdojo_findings
-
-__author__ = "Vijay Bheemineni"
-__license__ = "MIT"
-__version__ = "1.0.0"
-__status__ = "Development"
+import dateutil
+import html2text
+import hyperlink
+from defusedxml.ElementTree import parse
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
@@ -27,92 +23,133 @@ class AcunetixParser(object):
         return "XML format"
 
     def get_findings(self, xml_output, test):
-        if xml_output is None:
-            return list()
-        acunetix_defectdojo_findings = get_defectdojo_findings(xml_output)
-        return self.set_defectdojo_findings(acunetix_defectdojo_findings, test)
+        root = parse(xml_output).getroot()
 
-    def set_defectdojo_findings(self, acunetix_defectdojo_findings, test):
-        defectdojo_findings = dict()
+        dupes = dict()
+        for scan in root.findall("Scan"):
+            start_url = scan.findtext("StartURL")
+            if ":" not in start_url:
+                start_url = "//" + start_url
+            # get report date
+            if scan.findtext("StartTime") and "" != scan.findtext("StartTime"):
+                report_date = dateutil.parser.parse(scan.findtext("StartTime")).date()
 
-        for acunetix_defectdojo_finding in acunetix_defectdojo_findings:
-            dupe_key = hashlib.md5((acunetix_defectdojo_finding.title + acunetix_defectdojo_finding.description).encode("utf-8")).hexdigest()
+            for item in scan.findall("ReportItems/ReportItem"):
 
-            if dupe_key not in defectdojo_findings:
-                defectdojo_findings[dupe_key] = Finding(
-                            title=acunetix_defectdojo_finding.title,
-                            date=get_defectdojo_date(acunetix_defectdojo_finding.date),
-                            url=acunetix_defectdojo_finding.url,
-                            cwe=get_cwe_number(acunetix_defectdojo_finding.cwe),
-                            test=test,
-                            severity=get_severity(acunetix_defectdojo_finding.severity),
-                            description=acunetix_defectdojo_finding.description,
-                            mitigation=acunetix_defectdojo_finding.mitigation,
-                            references=acunetix_defectdojo_finding.references,
-                            impact=acunetix_defectdojo_finding.impact,
-                            false_p=get_false_positive(acunetix_defectdojo_finding.false_p),
-                            dynamic_finding=acunetix_defectdojo_finding.dynamic_finding
+                finding = Finding(
+                    test=test,
+                    title=item.findtext("Name"),
+                    severity=self.get_severity(item.findtext("Severity")),
+                    description=html2text.html2text(item.findtext("Description")).strip(),
+                    false_p=self.get_false_positive(item.findtext("IsFalsePositive")),
+                    static_finding=True,
+                    dynamic_finding=False,
+                    nb_occurences=1,
                 )
-            else:
-                logger.debug("Duplicate finding : {defectdojo_title}".format(defectdojo_title=acunetix_defectdojo_finding.title))
 
-        return list(defectdojo_findings.values())
+                if item.findtext("Impact") and "" != item.findtext("Impact"):
+                    finding.impact = item.findtext("Impact")
 
+                if item.findtext("Recommendation") and "" != item.findtext("Recommendation"):
+                    finding.mitigation = item.findtext("Recommendation")
 
-def get_defectdojo_date(date):
-    """
-        Returns date as required by DefectDojo.
-    :param date:
-    :return: yyyy--mm-dd
-    """
-    regex = r"([0-9]{2})\/([0-9]{2})\/([0-9]{4})"
-    matches = re.finditer(regex, date, re.MULTILINE)
-    match = next(enumerate(matches))
-    date = match[1].groups()
-    day = date[0]
-    mon = date[1]
-    year = date[2]
-    defectdojo_date = "{year}-{mon}-{day}".format(year=year, mon=mon, day=day)
-    return defectdojo_date
+                if report_date:
+                    finding.date = report_date
 
+                if item.findtext("CWEList/CWE"):
+                    finding.cwe = self.get_cwe_number(item.findtext("CWEList/CWE"))
 
-def get_cwe_number(cwe):
-    """
-        Returns cwe number.
-    :param cwe:
-    :return: cwe number
-    """
-    if cwe is None:
-        return None
-    else:
-        return int(cwe.split("-")[1])
+                references = []
+                for reference in item.findall("References/Reference"):
+                    url = reference.findtext("URL")
+                    db = reference.findtext("Database") or url
+                    references.append(" * [{}]({})".format(db, url))
+                if len(references) > 0:
+                    finding.references = "\n".join(references)
 
+                if item.findtext("CVSS3/Descriptor"):
+                    finding.cvssv3 = item.findtext("CVSS3/Descriptor")
 
-def get_severity(severity):
-    """
-        Returns Severity as per DefectDojo standards.
-    :param severity:
-    :return:
-    """
-    if severity == "high":
-        return "High"
-    elif severity == "medium":
-        return "Medium"
-    elif severity == "low":
-        return "Low"
-    elif severity == "informational":
-        return "Informational"
-    else:
-        return "Critical"
+                # more description are in "Details"
+                if item.findtext("Details") and len(item.findtext("Details").strip()) > 0:
+                    finding.description += "\n\n**Details:**\n{}".format(html2text.html2text(item.findtext("Details")))
+                if item.findtext("TechnicalDetails") and len(item.findtext("TechnicalDetails").strip()) > 0:
+                    finding.description += "\n\n**TechnicalDetails:**\n\n{}".format(item.findtext("TechnicalDetails"))
 
+                # add requests
+                finding.unsaved_req_resp = list()
+                if len(item.findall("TechnicalDetails/Request")):
+                    finding.dynamic_finding = True  # if there is some requests it's dynamic
+                    finding.static_finding = False  # if there is some requests it's dynamic
+                    for request in item.findall("TechnicalDetails/Request"):
+                        finding.unsaved_req_resp.append({"req": (request.text or ""), "resp": ""})
 
-def get_false_positive(false_p):
-    """
-        Returns True, False for false positive as per DefectDojo standards.
-    :param false_p:
-    :return:
-    """
-    if false_p:
-        return True
-    else:
-        return False
+                # manage the endpoint
+                url = hyperlink.parse(start_url)
+                endpoint = Endpoint(
+                        host=url.host,
+                        port=url.port,
+                        path=item.findtext("Affects"),
+                )
+                if url.scheme is not None and "" != url.scheme:
+                    endpoint.protocol = url.scheme
+                finding.unsaved_endpoints = [endpoint]
+
+                dupe_key = hashlib.sha256("|".join([
+                    finding.title,
+                    str(finding.impact),
+                    str(finding.mitigation),
+                ]).encode("utf-8")).hexdigest()
+
+                if dupe_key in dupes:
+                    find = dupes[dupe_key]
+                    # add details for the duplicate finding
+                    if item.findtext("Details") and len(item.findtext("Details").strip()) > 0:
+                        find.description += "\n-----\n\n**Details:**\n{}".format(html2text.html2text(item.findtext("Details")))
+                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    find.unsaved_req_resp.extend(finding.unsaved_req_resp)
+                    find.nb_occurences += finding.nb_occurences
+                    logger.debug("Duplicate finding : {defectdojo_title}".format(defectdojo_title=finding.title))
+                else:
+                    dupes[dupe_key] = finding
+
+        return list(dupes.values())
+
+    def get_cwe_number(self, cwe):
+        """
+            Returns cwe number.
+        :param cwe:
+        :return: cwe number
+        """
+        if cwe is None:
+            return None
+        else:
+            return int(cwe.split("-")[1])
+
+    def get_severity(self, severity):
+        """
+            Returns Severity as per DefectDojo standards.
+        :param severity:
+        :return:
+        """
+        if severity == "high":
+            return "High"
+        elif severity == "medium":
+            return "Medium"
+        elif severity == "low":
+            return "Low"
+        elif severity == "informational":
+            return "Info"
+        else:
+            return "Critical"
+
+    def get_false_positive(self, false_p):
+        """
+            Returns True, False for false positive as per DefectDojo standards.
+        :param false_p:
+        :return:
+        """
+        if false_p:
+            return True
+        else:
+            return False

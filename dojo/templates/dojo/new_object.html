@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block content %}
- {{ block.super }}
-    <h3> Add Tracked Files to a Product</h3>
+    {{ block.super }}
+     <h3> Add Tracked Files to a Product</h3>
     <form class="form-horizontal" action="{% url 'new_object' pid %}" method="post">{% csrf_token %}
      {% include "dojo/form_fields.html" with form=tform %}
         <div class="form-group">
@@ -14,4 +14,5 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 {% endblock %}

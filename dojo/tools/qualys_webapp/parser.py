@@ -7,13 +7,18 @@ import re
 import xml.etree.ElementTree
 from datetime import datetime
 from dojo.models import Endpoint, Finding
-from urllib.parse import urlparse
 
 try:
     from dojo.settings.settings import QUALYS_WAS_WEAKNESS_IS_VULN
 except ImportError:
     # Avoid breaking change
     QUALYS_WAS_WEAKNESS_IS_VULN = False
+
+try:
+    from dojo.settings.settings import QUALYS_WAS_UNIQUE_ID
+except ImportError:
+    # Avoid breaking change
+    QUALYS_WAS_UNIQUE_ID = False
 
 # Severities are listed under WAS_SCAN_REPORT/APPENDIX/SEVERITY_CATEGORY_LIST
 # Since Info findings are not recroded in the Confirmed Vulnerability or
@@ -41,10 +46,8 @@ def get_cwe(cwe):
         return 0
 
 
-# Inputs are a list of endpoints and request/response pairs and doctors
-# them to fit their respective model structures and the adds them to a
-# newly generated Finding
-def attach_extras(endpoints, requests, responses, finding, date, qid):
+def attach_unique_extras(endpoints, requests, responses, finding, date, qid, param, payload, unique_id, active_text, test):
+    # finding should always be none, since unique ID's are being used
     if finding is None:
         finding = Finding()
         finding.unsaved_req_resp = list()
@@ -52,6 +55,10 @@ def attach_extras(endpoints, requests, responses, finding, date, qid):
         if date is not None:
             finding.date = date
         finding.vuln_id_from_tool = str(qid)
+        finding.unique_id_from_tool = unique_id
+        finding.param = param
+        finding.payload = payload
+        finding.test = test
     else:
         # Finding already exists
         if date is not None and finding.date > date:
@@ -71,10 +78,44 @@ def attach_extras(endpoints, requests, responses, finding, date, qid):
             host = parsedUrl.netloc
 
         finding.unsaved_endpoints.append(Endpoint(
-                    host=truncate_str(host, 500), port=port,
-                    path=truncate_str(path, 500),
-                    protocol=protocol,
-                    query=truncate_str(query, 1000), fragment=truncate_str(fragment, 500)))
+            host=truncate_str(host, 500), port=port,
+            path=truncate_str(path, 500),
+            protocol=protocol,
+            query=truncate_str(query, 1000), fragment=truncate_str(fragment, 500)))
+
+    for i in range(0, len(requests)):
+        if requests[i] != '' or responses[i] != '':
+            finding.unsaved_req_resp.append({"req": requests[i], "resp": responses[i]})
+
+    if active_text is not None:
+        if 'fixed' in active_text.lower():
+            finding.active = False
+            # TODO: may need to look up by finding ID and mark current finding as fixed
+        else:
+            finding.active = True
+
+    return finding
+
+
+# Inputs are a list of endpoints and request/response pairs and doctors
+# them to fit their respective model structures and the adds them to a
+# newly generated Finding
+def attach_extras(endpoints, requests, responses, finding, date, qid, test):
+    if finding is None:
+        finding = Finding()
+        finding.unsaved_req_resp = list()
+        finding.unsaved_endpoints = list()
+        finding.test = test
+        if date is not None:
+            finding.date = date
+        finding.vuln_id_from_tool = str(qid)
+    else:
+        # Finding already exists
+        if date is not None and finding.date > date:
+            finding.date = date
+
+    for endpoint in endpoints:
+        finding.unsaved_endpoints.append(Endpoint.from_uri(endpoint))
 
     for i in range(0, len(requests)):
         if requests[i] != '' or responses[i] != '':
@@ -127,9 +168,58 @@ def get_request_response(payloads):
     return [requests, responses]
 
 
+def get_unique_vulnerabilities(vulnerabilities, test, is_info=False, is_app_report=False):
+    findings = {}
+    # Iterate through all vulnerabilites to pull necessary info
+    for vuln in vulnerabilities:
+        urls = []
+        requests = response = ''
+        qid = int(vuln.findtext('QID'))
+        url = vuln.findtext('URL')
+        if url is not None:
+            urls.append(str(url))
+        access_path = vuln.find('ACCESS_PATH')
+        if access_path is not None:
+            urls += [url.text for url in access_path.iter('URL')]
+        payloads = vuln.find('PAYLOADS')
+        if payloads is not None:
+            req_resps = get_request_response(payloads)
+        else:
+            req_resps = [[], []]
+
+        if is_info:
+            raw_finding_date = vuln.findtext('LAST_TIME_DETECTED')
+        elif is_app_report:
+            raw_finding_date = vuln.findtext('FIRST_TIME_DETECTED')
+        else:
+            raw_finding_date = vuln.findtext('DETECTION_DATE')
+
+        # Qualys uses a non-standard date format.
+        if raw_finding_date is not None:
+            if raw_finding_date.endswith("GMT"):
+                finding_date = datetime.strptime(raw_finding_date, "%d %b %Y %I:%M%p GMT")
+            else:
+                finding_date = datetime.strptime(raw_finding_date, "%d %b %Y %I:%M%p GMT%z")
+        else:
+            finding_date = None
+
+        # Updating to include customized values
+        unique_id = vuln.findtext('UNIQUE_ID')
+        active_text = vuln.findtext('STATUS')
+        param = None
+        payload = None
+        if not is_info:
+            param = vuln.findtext('PARAM')
+            payload = vuln.findtext('PAYLOADS/PAYLOAD/PAYLOAD')
+
+        findings[unique_id] = attach_unique_extras(urls, req_resps[0], req_resps[1], None, finding_date, qid, param, payload,
+                                            unique_id, active_text, test)
+    return findings
+
+
 # Traverse and retreive any information in the VULNERABILITY_LIST
 # section of the report. This includes all endpoints and request/response pairs
-def get_vulnerabilities(vulnerabilities, is_info=False, is_app_report=False):
+def get_vulnerabilities(vulnerabilities, test, is_info=False, is_app_report=False):
     findings = {}
     # Iterate through all vulnerabilites to pull necessary info
     for vuln in vulnerabilities:
@@ -165,7 +255,7 @@ def get_vulnerabilities(vulnerabilities, is_info=False, is_app_report=False):
             finding_date = None
 
         finding = findings.get(qid, None)
-        findings[qid] = attach_extras(urls, req_resps[0], req_resps[1], finding, finding_date, qid)
+        findings[qid] = attach_extras(urls, req_resps[0], req_resps[1], finding, finding_date, qid, test)
     return findings
 
 
@@ -206,19 +296,43 @@ def get_info_item(info_gathered, finding):
     return finding
 
 
+# Create findings report for all unique vulnerabilities in the report
+def get_unique_items(vulnerabilities, info_gathered, glossary, is_app_report, test, enable_weakness=False):
+    ig_qid_list = [int(ig.findtext('QID')) for ig in info_gathered]
+    g_qid_list = [int(g.findtext('QID')) for g in glossary]
+    # This dict has findings mapped by unique ID to remove any duplicates
+    findings = {}
+    total = 0
+
+    for unique_id, finding in get_unique_vulnerabilities(vulnerabilities, test, False, is_app_report).items():
+        qid = int(finding.vuln_id_from_tool)
+        if qid in g_qid_list:
+            index = g_qid_list.index(qid)
+            findings[unique_id] = get_glossary_item(glossary[index], finding, enable_weakness)
+    for unique_id, finding in get_unique_vulnerabilities(info_gathered, test, True, is_app_report).items():
+        qid = int(finding.vuln_id_from_tool)
+        if qid in g_qid_list:
+            index = g_qid_list.index(qid)
+            finding = get_glossary_item(glossary[index], finding, True, enable_weakness)
+        if qid in ig_qid_list:
+            index = ig_qid_list.index(qid)
+            findings[unique_id] = get_info_item(info_gathered[index], finding)
+    return findings
+
+
 # Create finding items for all vulnerabilities in the report
-def get_items(vulnerabilities, info_gathered, glossary, is_app_report, enable_weakness=False):
+def get_items(vulnerabilities, info_gathered, glossary, is_app_report, test, enable_weakness=False):
     ig_qid_list = [int(ig.findtext('QID')) for ig in info_gathered]
     g_qid_list = [int(g.findtext('QID')) for g in glossary]
 
     # This dict has findings mapped by QID to remove any duplicates
     findings = {}
 
-    for qid, finding in get_vulnerabilities(vulnerabilities, False, is_app_report).items():
+    for qid, finding in get_vulnerabilities(vulnerabilities, test, False, is_app_report).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             findings[qid] = get_glossary_item(glossary[index], finding, enable_weakness)
-    for qid, finding in get_vulnerabilities(info_gathered, True, is_app_report).items():
+    for qid, finding in get_vulnerabilities(info_gathered, test, True, is_app_report).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             finding = get_glossary_item(glossary[index], finding, True, enable_weakness)
@@ -229,7 +343,7 @@ def get_items(vulnerabilities, info_gathered, glossary, is_app_report, enable_we
     return findings
 
 
-def qualys_webapp_parser(qualys_xml_file, test, enable_weakness=False):
+def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
     if qualys_xml_file is None:
         return []
 
@@ -245,7 +359,10 @@ def qualys_webapp_parser(qualys_xml_file, test, enable_weakness=False):
         info_gathered = tree.findall('./RESULTS/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED')
     glossary = tree.findall('./GLOSSARY/QID_LIST/QID')
 
-    items = list(get_items(vulnerabilities, info_gathered, glossary, is_app_report, enable_weakness).values())
+    if unique:
+        items = list(get_unique_items(vulnerabilities, info_gathered, glossary, is_app_report, test, enable_weakness).values())
+    else:
+        items = list(get_items(vulnerabilities, info_gathered, glossary, is_app_report, test, enable_weakness).values())
 
     return items
 
@@ -262,4 +379,4 @@ class QualysWebAppParser(object):
         return "Qualys WebScan output files can be imported in XML format."
 
     def get_findings(self, file, test, enable_weakness=QUALYS_WAS_WEAKNESS_IS_VULN):
-        return qualys_webapp_parser(file, test, enable_weakness)
+        return qualys_webapp_parser(file, test, QUALYS_WAS_UNIQUE_ID, enable_weakness)

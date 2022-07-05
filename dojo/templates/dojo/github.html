@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load authorization_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Configuration List
+                        GitHub Configuration List
                         <div class="dropdown pull-right">
+                            {% if "dojo.add_github_conf"|has_configuration_permission:"staff" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -17,10 +20,11 @@
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a href="{% url 'add_github' %}">
-                                            <i class="fa fa-plus"></i> Add Github Configuration
+                                            <i class="fa fa-plus"></i> Add GitHub Configuration
                                         </a>
                                     </li>
                             </ul>
+                            {% endif %}
                         </div>
                     </h3>
                 </div>
@@ -33,7 +37,7 @@
                 </div>
                 <div class="panel panel-default table-responsive">
                     <table id="products"
-                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                           class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
                             <th>Name</th>
@@ -47,10 +51,12 @@
                                         {{ conf.configuration_name }}
                                 </td>
                                 <td class="text-right">
-                                    <a href="{% url 'delete_github' conf.id %}" class="btn btn-sm btn-warning">
-                                        <i class="fa fa-trash"></i>
+                                    {% if "dojo.delete_github_conf"|has_configuration_permission:"staff" %}
+                                    <a href="{% url 'delete_github' conf.id %}" class="btn btn-sm btn-danger">
+                                        <i class="fa fa-trash" style="color:white"></i>
                                         Delete
                                     </a>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -61,11 +67,12 @@
                     {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
                 </div>
             {% else %}
-                <p class="text-center">No configurations found.</p>
+                <p class="text-center">No GitHub configurations found.</p>
             {% endif %}
         </div>
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

@@ -1,6 +1,5 @@
 import hashlib
 import logging
-from urllib.parse import urlparse
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
@@ -47,29 +46,9 @@ class IbmAppParser(object):
                     name = issue_data['name']
                     # advisory = issue_data['advisory']
 
-                    cve = None
-                    if "cve" in issue_data:
-                        cve = issue_data['cve']
+                    vulnerability_id = issue_data.get('cve')
 
                     url = self.get_url(root, item.find('url/ref').text)
-                    # in case empty string is returned as url
-                    # this condition is very rare to occur
-                    # As most of the actions of any vuln scanner depends on urls
-                    if url == "N/A":
-                        host = "N/A"
-                        path = ""
-                        scheme = "N/A"
-                        port = ""
-                        query = ""
-                    else:
-                        host = urlparse(url).netloc
-                        path = urlparse(url).path
-                        scheme = urlparse(url).scheme
-                        if scheme == "https":
-                            port = '443'
-                        else:
-                            port = '80'
-                        query = urlparse(url).query
 
                     severity = item.find('severity').text.capitalize()
                     issue_description = self.fetch_advisory_group(root, issue_data['advisory'])
@@ -95,27 +74,23 @@ class IbmAppParser(object):
                     else:  # finding is not a duplicate
                         # create finding
                         finding = Finding(title=name,
-                                          test=test, active=False,
-                                          verified=False, cve=cve,
+                                          test=test,
                                           description=issue_description,
                                           severity=severity,
-                                          numerical_severity=Finding.get_numerical_severity(
-                                              severity
-                                          ),
                                           mitigation=recommendation_data,
                                           impact=impact,
                                           references=ref_link,
                                           dynamic_finding=True)
-
+                        if vulnerability_id:
+                            finding.unsaved_vulnerability_ids = [vulnerability_id]
                         finding.unsaved_endpoints = list()
                         dupes[dupe_key] = finding
 
-                        finding.unsaved_endpoints.append(Endpoint(
-                            host=host, port=port,
-                            path=path,
-                            protocol=scheme,
-                            query=query
-                        ))
+                        # in case empty string is returned as url
+                        # this condition is very rare to occur
+                        # As most of the actions of any vuln scanner depends on urls
+                        if url:
+                            finding.unsaved_endpoints.append(Endpoint.from_uri(url))
 
         return list(dupes.values())
 
@@ -152,4 +127,4 @@ class IbmAppParser(object):
                 if item.attrib['id'] == ref:
                     return item.find('name').text
 
-        return "N/A"  # This case is very rare to occur
+        return None  # This case is very rare to occur

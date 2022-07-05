@@ -1,0 +1,220 @@
+{
+  "version" : "1.5.1",
+  "seed" : "b6e3767e2a205790c18aed8cdefbd7de",
+  "options" : {
+    "scope" : {
+      "redundant_path_patterns" : {},
+      "dom_depth_limit" : 5,
+      "exclude_file_extensions" : [],
+      "exclude_path_patterns" : [],
+      "exclude_content_patterns" : [],
+      "include_path_patterns" : [],
+      "restrict_paths" : [],
+      "extend_paths" : [],
+      "url_rewrites" : {},
+      "page_limit" : 1
+    },
+    "datastore" : {
+      "report_path" : "/var/jenkins_home/workspace/groovy/reports/arachni/arachni_2017-11-14-02-57-22_e587cae7-bcaa-48cf-8a46-f95ccde4575b.afr"
+    },
+    "input" : {
+      "values" : {},
+      "default_values" : {
+        "name" : "arachni_name",
+        "user" : "arachni_user",
+        "usr" : "arachni_user",
+        "pass" : "5543!%arachni_secret",
+        "txt" : "arachni_text",
+        "num" : "132",
+        "amount" : "100",
+        "mail" : "arachni@email.gr",
+        "account" : "12",
+        "id" : "1"
+      },
+      "without_defaults" : false,
+      "force" : false
+    },
+    "audit" : {
+      "parameter_values" : true,
+      "exclude_vector_patterns" : [],
+      "include_vector_patterns" : [],
+      "link_templates" : [],
+      "forms" : true
+    },
+    "http" : {
+      "user_agent" : "Arachni/v1.5.1",
+      "request_timeout" : 10000,
+      "request_redirect_limit" : 5,
+      "request_concurrency" : 20,
+      "request_queue_size" : 100,
+      "request_headers" : {},
+      "response_max_size" : 500000,
+      "cookies" : {},
+      "authentication_type" : "auto"
+    },
+    "browser_cluster" : {
+      "local_storage" : {},
+      "wait_for_elements" : {},
+      "pool_size" : 6,
+      "job_timeout" : 10,
+      "worker_time_to_live" : 100,
+      "ignore_images" : false,
+      "screen_width" : 1600,
+      "screen_height" : 1200
+    },
+    "session" : {},
+    "checks" : [
+      "xss"
+    ],
+    "platforms" : [],
+    "plugins" : {},
+    "no_fingerprinting" : false,
+    "authorized_by" : null,
+    "url" : "http://testfire.net/"
+  },
+  "sitemap" : {
+    "http://testfire.net/" : 200
+  },
+  "start_datetime" : "2017-11-14 02:57:24 +0000",
+  "finish_datetime" : "2017-11-14 02:57:29 +0000",
+  "delta_time" : "00:00:05",
+  "issues" : [
+    {
+      "name" : "Cross-Site Scripting (XSS)",
+      "description" : "\nClient-side scripts are used extensively by modern web applications.\nThey perform from simple functions (such as the formatting of text) up to full\nmanipulation of client-side data and Operating System interaction.\n\nCross Site Scripting (XSS) allows clients to inject scripts into a request and\nhave the server return the script to the client in the response. This occurs\nbecause the application is taking untrusted data (in this example, from the client)\nand reusing it without performing any validation or sanitisation.\n\nIf the injected script is returned immediately this is known as reflected XSS.\nIf the injected script is stored by the server and returned to any client visiting\nthe affected page, then this is known as persistent XSS (also stored XSS).\n\nArachni has discovered that it is possible to insert script content directly into\nHTML element content.\n",
+      "references" : {
+        "Secunia" : "http://secunia.com/advisories/9716/",
+        "WASC" : "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting",
+        "OWASP" : "https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet"
+      },
+      "tags" : [
+        "xss",
+        "regexp",
+        "injection",
+        "script"
+      ],
+      "cwe" : 79,
+      "severity" : "high",
+      "remedy_guidance" : "\nTo remedy XSS vulnerabilities, it is important to never use untrusted or unfiltered\ndata within the code of a HTML page.\n\nUntrusted data can originate not only form the client but potentially a third\nparty or previously uploaded file etc.\n\nFiltering of untrusted data typically involves converting special characters to\ntheir HTML entity encoded counterparts (however, other methods do exist, see references).\nThese special characters include:\n\n* `&`\n* `<`\n* `>`\n* `\"`\n* `'`\n* `/`\n\nAn example of HTML entity encoding is converting `<` to `&lt;`.\n\nAlthough it is possible to filter untrusted input, there are five locations\nwithin an HTML page where untrusted input (even if it has been filtered) should\nnever be placed:\n\n1. Directly in a script.\n2. Inside an HTML comment.\n3. In an attribute name.\n4. In a tag name.\n5. Directly in CSS.\n\nEach of these locations have their own form of escaping and filtering.\n\n_Because many browsers attempt to implement XSS protection, any manual verification\nof this finding should be conducted using multiple different browsers and browser\nversions._\n",
+      "check" : {
+        "name" : "XSS",
+        "description" : "\nInjects an HTML element into page inputs and then parses the HTML markup of\ntainted responses to look for proof of vulnerability.\n",
+        "elements" : [
+          "form",
+          "link",
+          "cookie",
+          "header",
+          "link_template"
+        ],
+        "author" : "Tasos \"Zapotek\" Laskos <tasos.laskos@arachni-scanner.com> ",
+        "version" : "0.4.9",
+        "shortname" : "xss"
+      },
+      "vector" : {
+        "class" : "Arachni::Element::Form",
+        "type" : "form",
+        "url" : "http://testfire.net/",
+        "source" : "<form id=\"frmSearch\" method=\"get\" action=\"/search.aspx\">\n  <table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\n    <tr>\n      <td rowspan=\"2\">\n        <a id=\"_ctl0__ctl0_HyperLink1\" href=\"default.aspx\">\n          <img src=\"images/logo.gif\" border=\"0\">\n          </img>\n        </a>\n      </td>\n      <td align=\"right\" valign=\"top\">\n        <a id=\"_ctl0__ctl0_LoginLink\" title=\"It does not appear that you have properly authenticated yourself.  Please click here to sign in.\" href=\"bank/login.aspx\">\n          <b>\n            <font color=\"Red\">\n              Sign In\n            </font>\n          </b>\n        </a>\n        |\n        <a id=\"_ctl0__ctl0_HyperLink3\" href=\"default.aspx?content=inside_contact.htm\">\n          Contact Us\n        </a>\n        |\n        <a id=\"_ctl0__ctl0_HyperLink4\" href=\"feedback.aspx\">\n          Feedback\n        </a>\n        |\n        <label for=\"txtSearch\">\n          Search\n        </label>\n        <input type=\"text\" name=\"txtSearch\" id=\"txtSearch\" accesskey=\"S\">\n        </input>\n        <input type=\"submit\" value=\"Go\">\n        </input>\n      </td>\n    </tr>\n    <tr>\n      <td align=\"right\" style=\"background-image:url(/images/gradient.jpg);padding:0px;margin:0px;\">\n        <img id=\"_ctl0__ctl0_Image1\" src=\"images/header_pic.jpg\" border=\"0\" height=\"60\" width=\"354\">\n        </img>\n      </td>\n    </tr>\n  </table>\n</form>",
+        "inputs" : {
+          "txtSearch" : "arachni_text</textarea>--><xss_b6e3767e2a205790c18aed8cdefbd7de/><!--<textarea>"
+        },
+        "raw_inputs" : [],
+        "default_inputs" : {
+          "txtSearch" : ""
+        },
+        "action" : "http://testfire.net/search.aspx",
+        "method" : "get",
+        "affected_input_name" : "txtSearch",
+        "affected_input_value" : "arachni_text</textarea>--><xss_b6e3767e2a205790c18aed8cdefbd7de/><!--<textarea>",
+        "seed" : "</textarea>--><xss_b6e3767e2a205790c18aed8cdefbd7de/><!--<textarea>"
+      },
+      "proof" : "<xss_b6e3767e2a205790c18aed8cdefbd7de/>",
+      "referring_page" : {
+        "body" : "\r\n\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" >\r\n<head id=\"_ctl0__ctl0_head\"><title>\r\n\tAltoro Mutual\r\n</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"><link href=\"style.css\" rel=\"stylesheet\" type=\"text/css\" /><meta name=\"description\" content=\"Altoro Mutual offers a broad range of commercial, private, retail and mortgage banking services to small and middle-market businesses and individuals.\"></head>\r\n<body style=\"margin-top:5px;\">\r\n\r\n<div id=\"header\" style=\"margin-bottom:5px; width: 99%;\">\r\n  <form id=\"frmSearch\" method=\"get\" action=\"/search.aspx\">\r\n\t  <table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\r\n\t\t  <tr>\r\n\t\t      <td rowspan=\"2\"><a id=\"_ctl0__ctl0_HyperLink1\" href=\"default.aspx\"><img src=\"images/logo.gif\" border=\"0\" /></a></td>\r\n\t\t\t  <td align=\"right\" valign=\"top\">\r\n  \t\t\t  <a id=\"_ctl0__ctl0_LoginLink\" title=\"It does not appear that you have properly authenticated yourself.  Please click here to sign in.\" href=\"bank/login.aspx\"><b><font color=\"Red\">Sign In</font></b></a> | <a id=\"_ctl0__ctl0_HyperLink3\" href=\"default.aspx?content=inside_contact.htm\">Contact Us</a> | <a id=\"_ctl0__ctl0_HyperLink4\" href=\"feedback.aspx\">Feedback</a> | <label for=\"txtSearch\">Search</label>\r\n          <input type=\"text\" name=\"txtSearch\" id=\"txtSearch\" accesskey=\"S\" />\r\n          <input type=\"submit\" value=\"Go\" />\r\n\t\t\t  </td>\r\n\t\t  </tr>\r\n\t\t  <tr>\r\n\t\t\t  <td align=\"right\" style=\"background-image:url(/images/gradient.jpg);padding:0px;margin:0px;\"><img id=\"_ctl0__ctl0_Image1\" src=\"images/header_pic.jpg\" border=\"0\" height=\"60\" width=\"354\" /></td>\r\n\t\t  </tr>\r\n\t  </table>\r\n\t</form>\r\n</div>\r\n\r\n<div id=\"wrapper\" style=\"width: 99%;\">\r\n    \r\n\r\n<table cellspacing=\"0\" width=\"100%\">\r\n  <tr>\r\n    <td width=\"25%\" class=\"bt br bb\"><div id=\"Header1\"><img id=\"_ctl0__ctl0_Content_Image1\" src=\"images/pf_lock.gif\" alt=\"Secure Login\" align=\"absbottom\" border=\"0\" height=\"14\" width=\"12\" /> &nbsp; <a id=\"_ctl0__ctl0_Content_AccountLink\" title=\"You do not appear to have authenticated yourself with the application.  Click here to enter your valid username and password.\" class=\"focus\" href=\"bank/login.aspx\">ONLINE BANKING LOGIN</a></div></td>\r\n    <td width=\"25%\" class=\"cc bt br bb\"><div id=\"Header2\"><a id=\"_ctl0__ctl0_Content_LinkHeader2\" class=\"focus\" href=\"default.aspx?content=personal.htm\">PERSONAL</a></div></td>\r\n    <td width=\"25%\" class=\"cc bt br bb\"><div id=\"Header3\"><a id=\"_ctl0__ctl0_Content_LinkHeader3\" class=\"focus\" href=\"default.aspx?content=business.htm\">SMALL BUSINESS</a></div></td>\r\n    <td width=\"25%\" class=\"cc bt bb\"><div id=\"Header4\"><a id=\"_ctl0__ctl0_Content_LinkHeader4\" class=\"focus\" href=\"default.aspx?content=inside.htm\">INSIDE ALTORO MUTUAL</a></div></td>\r\n  </tr>\r\n  <tr>\r\n    <td valign=\"top\" class=\"cc br bb\">\r\n        <br style=\"line-height: 10px;\"/>\r\n        <a id=\"_ctl0__ctl0_Content_CatLink1\" class=\"subheader\" href=\"default.aspx?content=personal.htm\">PERSONAL</a>\r\n        <ul class=\"sidebar\">\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink1\" href=\"default.aspx?content=personal_deposit.htm\">Deposit Product</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink2\" href=\"default.aspx?content=personal_checking.htm\">Checking</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink3\" href=\"default.aspx?content=personal_loans.htm\">Loan Products</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink4\" href=\"default.aspx?content=personal_cards.htm\">Cards</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink5\" href=\"default.aspx?content=personal_investments.htm\">Investments &amp; Insurance</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink6\" href=\"default.aspx?content=personal_other.htm\">Other Services</a></li>\r\n        </ul>\r\n\r\n        <a id=\"_ctl0__ctl0_Content_CatLink2\" class=\"subheader\" href=\"default.aspx?content=business.htm\">SMALL BUSINESS</a>\r\n        <ul class=\"sidebar\">\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink7\" href=\"default.aspx?content=business_deposit.htm\">Deposit Products</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink8\" href=\"default.aspx?content=business_lending.htm\">Lending Services</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink9\" href=\"default.aspx?content=business_cards.htm\">Cards</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink10\" href=\"default.aspx?content=business_insurance.htm\">Insurance</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink11\" href=\"default.aspx?content=business_retirement.htm\">Retirement</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink12\" href=\"default.aspx?content=business_other.htm\">Other Services</a></li>\r\n        </ul>\r\n\r\n        <a id=\"_ctl0__ctl0_Content_CatLink3\" class=\"subheader\" href=\"default.aspx?content=inside.htm\">INSIDE ALTORO MUTUAL</a>\r\n        <ul class=\"sidebar\">\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink13\" href=\"default.aspx?content=inside_about.htm\">About Us</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink14\" href=\"default.aspx?content=inside_contact.htm\">Contact Us</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink15\" href=\"cgi.exe\">Locations</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink16\" href=\"default.aspx?content=inside_investor.htm\">Investor Relations</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink17\" href=\"default.aspx?content=inside_press.htm\">Press Room</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink18\" href=\"default.aspx?content=inside_careers.htm\">Careers</a></li>\r\n        </ul>\r\n    </td>\r\n    <td valign=\"top\" colspan=\"3\" class=\"bb\">\r\n\r\n    <span id=\"_ctl0__ctl0_Content_Main_lblContent\"><br /><table border=0 cellspacing=0 width=\"100%\">  <tr>    <td width=\"33%\" valign=\"top\">        <b><a href=\"default.aspx?content=personal_savings.htm\">Online Banking with FREE Online Bill Pay </a></b><br />        No stamps, envelopes, or checks to write give you more time to spend on the things you enjoy. <br />        <br />        <center><img src=\"images/home1.jpg\" width=\"170\" height=\"114\" /></center>        <br />        <b><a href=\"default.aspx?content=personal_loans.htm\">Real Estate Financing</a></b><br />        Fast. Simple. Professional. Whether you are preparing to buy, build, purchase land, or construct new space, let Altoro Mutual's premier real estate lenders help with financing. As a regional leader, we know the market, we understand the business, and we have the track record to prove it    </td>    <td width=\"33%\" valign=\"top\">        <center><img src=\"images/home2.jpg\" width=\"170\" height=\"128\" /></center>        <br /><br/>        <b><a href=\"default.aspx?content=business_cards.htm\">Business Credit Cards</a></b><br />        You're always looking for ways to improve your company's bottom line. You want to be informed, improve efficiency and control expenses. Now, you can do it all - with a business credit card account from Altoro Mutual.        <br />        <br />        <b><a href=\"default.aspx?content=business_retirement.htm\">Retirement Solutions</a></b><br />        Retaining good employees is a tough task. See how Altoro Mutual can assist you in accomplishing this feat through effective Retirement Solutions.    </td>    <td width=\"33%\" valign=\"top\">        <b>Privacy and Security </b><br />        The 2000 employees of Altoro Mutual are dedicated to protecting your <a href=\"default.aspx?content=privacy.htm\">privacy</a> and <a href=\"default.aspx?content=security.htm\">security</a>. We pledge to provide you with the information and resources that you need to help secure your information and keep it confidential.  This is our promise.        <br /><br />        <center><img src=\"images/home3.jpg\" width=\"170\" height=\"113\" /></center><br /><br />        <b><a href=\"survey_questions.aspx\">Win an 8GB iPod Nano</a></b>        <br />        Completing this short survey will enter you in a draw for 1 of 50 iPod Nanos.  We look forward to hearing your important feedback.        <br /><br />    </td>  </tr></table></span>\r\n\r\n    </td>\r\n  </tr>\r\n</table>\r\n\r\n\r\n</div>\r\n\r\n<div id=\"footer\" style=\"width: 99%;\">\r\n    <a id=\"_ctl0__ctl0_HyperLink5\" href=\"default.aspx?content=privacy.htm\">Privacy Policy</a>\r\n    &nbsp;&nbsp;|&nbsp;&nbsp;\r\n    <a id=\"_ctl0__ctl0_HyperLink6\" href=\"default.aspx?content=security.htm\">Security Statement</a>\r\n    &nbsp;&nbsp;|&nbsp;&nbsp;\r\n    &copy; 2017 Altoro Mutual, Inc.\r\n\r\n    <div class=\"disclaimer\">\r\n        The Altoro Mutual website is published by Watchfire, Inc. for the sole purpose of\r\n        demonstrating the effectiveness of Watchfire products in detecting web application\r\n        vulnerabilities and website defects. This site is not a real banking site. Similarities,\r\n        if any, to third party products and/or websites are purely coincidental. This site is\r\n        provided \"as is\" without warranty of any kind, either express or implied. Watchfire does\r\n        not assume any risk in relation to your use of this website. For additional Terms of Use,\r\n        please go to <a id=\"_ctl0__ctl0_HyperLink7\" href=\"http://www.watchfire.com/statements/terms.aspx\">http://www.watchfire.com/statements/terms.aspx</a>.<br /><br />\r\n\r\n        Copyright &copy; 2017, Watchfire Corporation, All rights reserved.\r\n    </div>\r\n</div>\r\n\r\n</body>\r\n</html>",
+        "dom" : {
+          "url" : "http://testfire.net/",
+          "transitions" : [],
+          "cookies" : [],
+          "digest" : null,
+          "data_flow_sinks" : [],
+          "execution_flow_sinks" : []
+        }
+      },
+      "page" : {
+        "body" : "\r\n\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" >\r\n<head id=\"_ctl0__ctl0_head\"><title>\r\n\tAltoro Mutual: Search Results\r\n</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"><link href=\"style.css\" rel=\"stylesheet\" type=\"text/css\" /><meta name=\"keywords\" content=\"Altoro Mutual, search, query, find\"></head>\r\n<body style=\"margin-top:5px;\">\r\n\r\n<div id=\"header\" style=\"margin-bottom:5px; width: 99%;\">\r\n  <form id=\"frmSearch\" method=\"get\" action=\"/search.aspx\">\r\n\t  <table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\r\n\t\t  <tr>\r\n\t\t      <td rowspan=\"2\"><a id=\"_ctl0__ctl0_HyperLink1\" href=\"default.aspx\"><img src=\"images/logo.gif\" border=\"0\" /></a></td>\r\n\t\t\t  <td align=\"right\" valign=\"top\">\r\n  \t\t\t  <a id=\"_ctl0__ctl0_LoginLink\" title=\"It does not appear that you have properly authenticated yourself.  Please click here to sign in.\" href=\"bank/login.aspx\"><b><font color=\"Red\">Sign In</font></b></a> | <a id=\"_ctl0__ctl0_HyperLink3\" href=\"default.aspx?content=inside_contact.htm\">Contact Us</a> | <a id=\"_ctl0__ctl0_HyperLink4\" href=\"feedback.aspx\">Feedback</a> | <label for=\"txtSearch\">Search</label>\r\n          <input type=\"text\" name=\"txtSearch\" id=\"txtSearch\" accesskey=\"S\" />\r\n          <input type=\"submit\" value=\"Go\" />\r\n\t\t\t  </td>\r\n\t\t  </tr>\r\n\t\t  <tr>\r\n\t\t\t  <td align=\"right\" style=\"background-image:url(/images/gradient.jpg);padding:0px;margin:0px;\"><img id=\"_ctl0__ctl0_Image1\" src=\"images/header_pic.jpg\" border=\"0\" height=\"60\" width=\"354\" /></td>\r\n\t\t  </tr>\r\n\t  </table>\r\n\t</form>\r\n</div>\r\n\r\n<div id=\"wrapper\" style=\"width: 99%;\">\r\n    \r\n\r\n<table cellspacing=\"0\" width=\"100%\">\r\n  <tr>\r\n    <td width=\"25%\" class=\"bt br bb\"><div id=\"Header1\"><img id=\"_ctl0__ctl0_Content_Image1\" src=\"images/pf_lock.gif\" alt=\"Secure Login\" align=\"absbottom\" border=\"0\" height=\"14\" width=\"12\" /> &nbsp; <a id=\"_ctl0__ctl0_Content_AccountLink\" title=\"You do not appear to have authenticated yourself with the application.  Click here to enter your valid username and password.\" class=\"focus\" href=\"bank/login.aspx\">ONLINE BANKING LOGIN</a></div></td>\r\n    <td width=\"25%\" class=\"cc bt br bb\"><div id=\"Header2\"><a id=\"_ctl0__ctl0_Content_LinkHeader2\" class=\"focus\" href=\"default.aspx?content=personal.htm\">PERSONAL</a></div></td>\r\n    <td width=\"25%\" class=\"cc bt br bb\"><div id=\"Header3\"><a id=\"_ctl0__ctl0_Content_LinkHeader3\" class=\"focus\" href=\"default.aspx?content=business.htm\">SMALL BUSINESS</a></div></td>\r\n    <td width=\"25%\" class=\"cc bt bb\"><div id=\"Header4\"><a id=\"_ctl0__ctl0_Content_LinkHeader4\" class=\"focus\" href=\"default.aspx?content=inside.htm\">INSIDE ALTORO MUTUAL</a></div></td>\r\n  </tr>\r\n  <tr>\r\n    <td valign=\"top\" class=\"cc br bb\">\r\n        <br style=\"line-height: 10px;\"/>\r\n        <a id=\"_ctl0__ctl0_Content_CatLink1\" class=\"subheader\" href=\"default.aspx?content=personal.htm\">PERSONAL</a>\r\n        <ul class=\"sidebar\">\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink1\" href=\"default.aspx?content=personal_deposit.htm\">Deposit Product</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink2\" href=\"default.aspx?content=personal_checking.htm\">Checking</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink3\" href=\"default.aspx?content=personal_loans.htm\">Loan Products</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink4\" href=\"default.aspx?content=personal_cards.htm\">Cards</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink5\" href=\"default.aspx?content=personal_investments.htm\">Investments &amp; Insurance</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink6\" href=\"default.aspx?content=personal_other.htm\">Other Services</a></li>\r\n        </ul>\r\n\r\n        <a id=\"_ctl0__ctl0_Content_CatLink2\" class=\"subheader\" href=\"default.aspx?content=business.htm\">SMALL BUSINESS</a>\r\n        <ul class=\"sidebar\">\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink7\" href=\"default.aspx?content=business_deposit.htm\">Deposit Products</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink8\" href=\"default.aspx?content=business_lending.htm\">Lending Services</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink9\" href=\"default.aspx?content=business_cards.htm\">Cards</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink10\" href=\"default.aspx?content=business_insurance.htm\">Insurance</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink11\" href=\"default.aspx?content=business_retirement.htm\">Retirement</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink12\" href=\"default.aspx?content=business_other.htm\">Other Services</a></li>\r\n        </ul>\r\n\r\n        <a id=\"_ctl0__ctl0_Content_CatLink3\" class=\"subheader\" href=\"default.aspx?content=inside.htm\">INSIDE ALTORO MUTUAL</a>\r\n        <ul class=\"sidebar\">\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink13\" href=\"default.aspx?content=inside_about.htm\">About Us</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink14\" href=\"default.aspx?content=inside_contact.htm\">Contact Us</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink15\" href=\"cgi.exe\">Locations</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink16\" href=\"default.aspx?content=inside_investor.htm\">Investor Relations</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink17\" href=\"default.aspx?content=inside_press.htm\">Press Room</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink18\" href=\"default.aspx?content=inside_careers.htm\">Careers</a></li>\r\n        </ul>\r\n    </td>\r\n    <td valign=\"top\" colspan=\"3\" class=\"bb\">\r\n\r\n\r\n<div class=\"fl\" style=\"width: 99%;\">\r\n\r\n<h1>Search Results</h1>\r\n\r\n<p>No results were found for the query:<br /><br />\r\n<span id=\"_ctl0__ctl0_Content_Main_lblSearch\">arachni_text</textarea>--><xss_b6e3767e2a205790c18aed8cdefbd7de/><!--<textarea></span></p>\r\n\r\n</div>\r\n\r\n\r\n    </td>\r\n  </tr>\r\n</table>\r\n\r\n\r\n</div>\r\n\r\n<div id=\"footer\" style=\"width: 99%;\">\r\n    <a id=\"_ctl0__ctl0_HyperLink5\" href=\"default.aspx?content=privacy.htm\">Privacy Policy</a>\r\n    &nbsp;&nbsp;|&nbsp;&nbsp;\r\n    <a id=\"_ctl0__ctl0_HyperLink6\" href=\"default.aspx?content=security.htm\">Security Statement</a>\r\n    &nbsp;&nbsp;|&nbsp;&nbsp;\r\n    &copy; 2017 Altoro Mutual, Inc.\r\n\r\n    <div class=\"disclaimer\">\r\n        The Altoro Mutual website is published by Watchfire, Inc. for the sole purpose of\r\n        demonstrating the effectiveness of Watchfire products in detecting web application\r\n        vulnerabilities and website defects. This site is not a real banking site. Similarities,\r\n        if any, to third party products and/or websites are purely coincidental. This site is\r\n        provided \"as is\" without warranty of any kind, either express or implied. Watchfire does\r\n        not assume any risk in relation to your use of this website. For additional Terms of Use,\r\n        please go to <a id=\"_ctl0__ctl0_HyperLink7\" href=\"http://www.watchfire.com/statements/terms.aspx\">http://www.watchfire.com/statements/terms.aspx</a>.<br /><br />\r\n\r\n        Copyright &copy; 2017, Watchfire Corporation, All rights reserved.\r\n    </div>\r\n</div>\r\n\r\n</body>\r\n</html>",
+        "dom" : {
+          "url" : "http://testfire.net/search.aspx?txtSearch=arachni_text%3C/textarea%3E--%3E%3Cxss_b6e3767e2a205790c18aed8cdefbd7de/%3E%3C!--%3Ctextarea%3E",
+          "transitions" : [],
+          "cookies" : [],
+          "digest" : null,
+          "data_flow_sinks" : [],
+          "execution_flow_sinks" : []
+        }
+      },
+      "remarks" : {},
+      "trusted" : true,
+      "cwe_url" : "http://cwe.mitre.org/data/definitions/79.html",
+      "digest" : 3658678253,
+      "response" : {
+        "headers" : {
+          "Cache-Control" : "private",
+          "Content-Length" : "7294",
+          "Content-Type" : "text/html; charset=utf-8",
+          "Server" : "Microsoft-IIS/8.0",
+          "X-Aspnet-Version" : "2.0.50727",
+          "X-Powered-By" : "ASP.NET",
+          "Date" : "Tue, 14 Nov 2017 00:49:54 GMT"
+        },
+        "url" : "http://testfire.net/search.aspx?txtSearch=arachni_text%3C/textarea%3E--%3E%3Cxss_b6e3767e2a205790c18aed8cdefbd7de/%3E%3C!--%3Ctextarea%3E",
+        "code" : 200,
+        "ip_address" : "65.61.137.117",
+        "headers_string" : "HTTP/1.1 200 OK\r\nCache-Control: private\r\nContent-Length: 7294\r\nContent-Type: text/html; charset=utf-8\r\nServer: Microsoft-IIS/8.0\r\nX-AspNet-Version: 2.0.50727\r\nX-Powered-By: ASP.NET\r\nDate: Tue, 14 Nov 2017 00:49:54 GMT\r\n\r\n",
+        "body" : "\r\n\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" >\r\n<head id=\"_ctl0__ctl0_head\"><title>\r\n\tAltoro Mutual: Search Results\r\n</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"><link href=\"style.css\" rel=\"stylesheet\" type=\"text/css\" /><meta name=\"keywords\" content=\"Altoro Mutual, search, query, find\"></head>\r\n<body style=\"margin-top:5px;\">\r\n\r\n<div id=\"header\" style=\"margin-bottom:5px; width: 99%;\">\r\n  <form id=\"frmSearch\" method=\"get\" action=\"/search.aspx\">\r\n\t  <table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\r\n\t\t  <tr>\r\n\t\t      <td rowspan=\"2\"><a id=\"_ctl0__ctl0_HyperLink1\" href=\"default.aspx\"><img src=\"images/logo.gif\" border=\"0\" /></a></td>\r\n\t\t\t  <td align=\"right\" valign=\"top\">\r\n  \t\t\t  <a id=\"_ctl0__ctl0_LoginLink\" title=\"It does not appear that you have properly authenticated yourself.  Please click here to sign in.\" href=\"bank/login.aspx\"><b><font color=\"Red\">Sign In</font></b></a> | <a id=\"_ctl0__ctl0_HyperLink3\" href=\"default.aspx?content=inside_contact.htm\">Contact Us</a> | <a id=\"_ctl0__ctl0_HyperLink4\" href=\"feedback.aspx\">Feedback</a> | <label for=\"txtSearch\">Search</label>\r\n          <input type=\"text\" name=\"txtSearch\" id=\"txtSearch\" accesskey=\"S\" />\r\n          <input type=\"submit\" value=\"Go\" />\r\n\t\t\t  </td>\r\n\t\t  </tr>\r\n\t\t  <tr>\r\n\t\t\t  <td align=\"right\" style=\"background-image:url(/images/gradient.jpg);padding:0px;margin:0px;\"><img id=\"_ctl0__ctl0_Image1\" src=\"images/header_pic.jpg\" border=\"0\" height=\"60\" width=\"354\" /></td>\r\n\t\t  </tr>\r\n\t  </table>\r\n\t</form>\r\n</div>\r\n\r\n<div id=\"wrapper\" style=\"width: 99%;\">\r\n    \r\n\r\n<table cellspacing=\"0\" width=\"100%\">\r\n  <tr>\r\n    <td width=\"25%\" class=\"bt br bb\"><div id=\"Header1\"><img id=\"_ctl0__ctl0_Content_Image1\" src=\"images/pf_lock.gif\" alt=\"Secure Login\" align=\"absbottom\" border=\"0\" height=\"14\" width=\"12\" /> &nbsp; <a id=\"_ctl0__ctl0_Content_AccountLink\" title=\"You do not appear to have authenticated yourself with the application.  Click here to enter your valid username and password.\" class=\"focus\" href=\"bank/login.aspx\">ONLINE BANKING LOGIN</a></div></td>\r\n    <td width=\"25%\" class=\"cc bt br bb\"><div id=\"Header2\"><a id=\"_ctl0__ctl0_Content_LinkHeader2\" class=\"focus\" href=\"default.aspx?content=personal.htm\">PERSONAL</a></div></td>\r\n    <td width=\"25%\" class=\"cc bt br bb\"><div id=\"Header3\"><a id=\"_ctl0__ctl0_Content_LinkHeader3\" class=\"focus\" href=\"default.aspx?content=business.htm\">SMALL BUSINESS</a></div></td>\r\n    <td width=\"25%\" class=\"cc bt bb\"><div id=\"Header4\"><a id=\"_ctl0__ctl0_Content_LinkHeader4\" class=\"focus\" href=\"default.aspx?content=inside.htm\">INSIDE ALTORO MUTUAL</a></div></td>\r\n  </tr>\r\n  <tr>\r\n    <td valign=\"top\" class=\"cc br bb\">\r\n        <br style=\"line-height: 10px;\"/>\r\n        <a id=\"_ctl0__ctl0_Content_CatLink1\" class=\"subheader\" href=\"default.aspx?content=personal.htm\">PERSONAL</a>\r\n        <ul class=\"sidebar\">\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink1\" href=\"default.aspx?content=personal_deposit.htm\">Deposit Product</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink2\" href=\"default.aspx?content=personal_checking.htm\">Checking</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink3\" href=\"default.aspx?content=personal_loans.htm\">Loan Products</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink4\" href=\"default.aspx?content=personal_cards.htm\">Cards</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink5\" href=\"default.aspx?content=personal_investments.htm\">Investments &amp; Insurance</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink6\" href=\"default.aspx?content=personal_other.htm\">Other Services</a></li>\r\n        </ul>\r\n\r\n        <a id=\"_ctl0__ctl0_Content_CatLink2\" class=\"subheader\" href=\"default.aspx?content=business.htm\">SMALL BUSINESS</a>\r\n        <ul class=\"sidebar\">\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink7\" href=\"default.aspx?content=business_deposit.htm\">Deposit Products</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink8\" href=\"default.aspx?content=business_lending.htm\">Lending Services</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink9\" href=\"default.aspx?content=business_cards.htm\">Cards</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink10\" href=\"default.aspx?content=business_insurance.htm\">Insurance</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink11\" href=\"default.aspx?content=business_retirement.htm\">Retirement</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink12\" href=\"default.aspx?content=business_other.htm\">Other Services</a></li>\r\n        </ul>\r\n\r\n        <a id=\"_ctl0__ctl0_Content_CatLink3\" class=\"subheader\" href=\"default.aspx?content=inside.htm\">INSIDE ALTORO MUTUAL</a>\r\n        <ul class=\"sidebar\">\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink13\" href=\"default.aspx?content=inside_about.htm\">About Us</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink14\" href=\"default.aspx?content=inside_contact.htm\">Contact Us</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink15\" href=\"cgi.exe\">Locations</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink16\" href=\"default.aspx?content=inside_investor.htm\">Investor Relations</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink17\" href=\"default.aspx?content=inside_press.htm\">Press Room</a></li>\r\n            <li><a id=\"_ctl0__ctl0_Content_MenuHyperLink18\" href=\"default.aspx?content=inside_careers.htm\">Careers</a></li>\r\n        </ul>\r\n    </td>\r\n    <td valign=\"top\" colspan=\"3\" class=\"bb\">\r\n\r\n\r\n<div class=\"fl\" style=\"width: 99%;\">\r\n\r\n<h1>Search Results</h1>\r\n\r\n<p>No results were found for the query:<br /><br />\r\n<span id=\"_ctl0__ctl0_Content_Main_lblSearch\">arachni_text</textarea>--><xss_b6e3767e2a205790c18aed8cdefbd7de/><!--<textarea></span></p>\r\n\r\n</div>\r\n\r\n\r\n    </td>\r\n  </tr>\r\n</table>\r\n\r\n\r\n</div>\r\n\r\n<div id=\"footer\" style=\"width: 99%;\">\r\n    <a id=\"_ctl0__ctl0_HyperLink5\" href=\"default.aspx?content=privacy.htm\">Privacy Policy</a>\r\n    &nbsp;&nbsp;|&nbsp;&nbsp;\r\n    <a id=\"_ctl0__ctl0_HyperLink6\" href=\"default.aspx?content=security.htm\">Security Statement</a>\r\n    &nbsp;&nbsp;|&nbsp;&nbsp;\r\n    &copy; 2017 Altoro Mutual, Inc.\r\n\r\n    <div class=\"disclaimer\">\r\n        The Altoro Mutual website is published by Watchfire, Inc. for the sole purpose of\r\n        demonstrating the effectiveness of Watchfire products in detecting web application\r\n        vulnerabilities and website defects. This site is not a real banking site. Similarities,\r\n        if any, to third party products and/or websites are purely coincidental. This site is\r\n        provided \"as is\" without warranty of any kind, either express or implied. Watchfire does\r\n        not assume any risk in relation to your use of this website. For additional Terms of Use,\r\n        please go to <a id=\"_ctl0__ctl0_HyperLink7\" href=\"http://www.watchfire.com/statements/terms.aspx\">http://www.watchfire.com/statements/terms.aspx</a>.<br /><br />\r\n\r\n        Copyright &copy; 2017, Watchfire Corporation, All rights reserved.\r\n    </div>\r\n</div>\r\n\r\n</body>\r\n</html>",
+        "time" : 0.236532,
+        "app_time" : 0.094097,
+        "total_time" : 0.236532,
+        "return_code" : "ok",
+        "return_message" : "No error"
+      },
+      "request" : {
+        "url" : "http://testfire.net/search.aspx",
+        "parameters" : {
+          "txtSearch" : "arachni_text</textarea>--><xss_b6e3767e2a205790c18aed8cdefbd7de/><!--<textarea>"
+        },
+        "headers" : {
+          "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "User-Agent" : "Arachni/v1.5.1",
+          "Accept-Language" : "en-US,en;q=0.8,he;q=0.6",
+          "X-Arachni-Scan-Seed" : "b6e3767e2a205790c18aed8cdefbd7de",
+          "Cookie" : "ASP.NET_SessionId=ckyz4iyi0slakv252hczdtj3;amSessionId=184954224683"
+        },
+        "headers_string" : "GET /search.aspx?txtSearch=arachni_text%3C%2Ftextarea%3E--%3E%3Cxss_b6e3767e2a205790c18aed8cdefbd7de%2F%3E%3C%21--%3Ctextarea%3E HTTP/1.1\r\nHost: testfire.net\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Arachni/v1.5.1\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.8,he;q=0.6\r\nX-Arachni-Scan-Seed: b6e3767e2a205790c18aed8cdefbd7de\r\nCookie: ASP.NET_SessionId=ckyz4iyi0slakv252hczdtj3;amSessionId=184954224683\r\n\r\n",
+        "effective_body" : null,
+        "body" : null,
+        "method" : "get"
+      }
+    }
+  ],
+  "plugins" : {
+    "healthmap" : {
+      "name" : "Health map",
+      "description" : "Generates a simple list of safe/unsafe URLs.",
+      "author" : "Tasos \"Zapotek\" Laskos <tasos.laskos@arachni-scanner.com>",
+      "version" : "0.1.5",
+      "results" : {
+        "map" : [
+          {
+            "without_issues" : "http://testfire.net/"
+          },
+          {
+            "with_issues" : "http://testfire.net/search.aspx"
+          }
+        ],
+        "total" : 2,
+        "without_issues" : 1,
+        "with_issues" : 1,
+        "issue_percentage" : 50
+      }
+    }
+  }
+}

@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load humanize %}
 {% load static %}
 
 {% block add_styles %}
+    {{ block.super }}
     .chosen-container {
     width: 70% !important;
     }
@@ -12,9 +14,11 @@
     }
 {% endblock %}
 {% block add_css %}
+    {{ block.super }}
     <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}">
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     {% if risk_acceptance.is_expired %}
         <div class="danger-zone panel panel-danger">
             <div class="panel-heading">
@@ -180,7 +184,7 @@
                         <td>{{ finding.active }}</td>
 
                         <td>
-                            {% if user|is_authorized_for_staff:risk_acceptance %}
+                            {% if engagement|has_object_permission:"Risk_Acceptance" %}
                                 <form method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
@@ -205,7 +209,7 @@
         {% endif %}
     </div>
 
-    {% if user|is_authorized_for_staff:risk_acceptance %}
+    {% if engagement|has_object_permission:"Risk_Acceptance" %}
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3>Accept Additional Findings</h3>
@@ -246,7 +250,7 @@
                         {{ risk_acceptance.created }}
                     </td>
                     <td>
-                        {% if user|is_authorized_for_staff:risk_acceptance %}
+                        {% if engagement|has_object_permission:"Risk_Acceptance" %}
                             <form id="replace_risk_file" enctype="multipart/form-data" method="post">
                                 {% csrf_token %}
                                 <label class="btn btn-sm btn-primary">
@@ -295,7 +299,7 @@
                             {{ note }}
                         </td>
                         <td>
-                            {% if user|is_authorized_for_staff:risk_acceptance %}
+                            {% if engagement|has_object_permission:"Risk_Acceptance" %}
                                 <form method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="delete_note_id" value="{{ note.id }}"/>
@@ -327,6 +331,7 @@
 {% endblock %}
 
 {% block postscript %}
+    {{ block.super }}
 {% if not edit_mode %}
     <script type="text/javascript">
         // keyboard shortcuts

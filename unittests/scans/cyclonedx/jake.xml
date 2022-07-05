@@ -1,0 +1,1026 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.1" xmlns:v="http://cyclonedx.org/schema/ext/vulnerability/1.0" version="1">
+   <components>
+      <component type="library" bom-ref="pkg:pypi/yaspin@0.16.0?extension=tar.gz">
+         <name>yaspin</name>
+         <version>0.16.0</version>
+         <purl>pkg:pypi/yaspin@0.16.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/yarl@1.6.3?extension=tar.gz">
+         <name>yarl</name>
+         <version>1.6.3</version>
+         <purl>pkg:pypi/yarl@1.6.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/xmlschema@1.2.5?extension=tar.gz">
+         <name>xmlschema</name>
+         <version>1.2.5</version>
+         <purl>pkg:pypi/xmlschema@1.2.5?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/xlrd@1.2.0?extension=tar.gz">
+         <name>xlrd</name>
+         <version>1.2.0</version>
+         <purl>pkg:pypi/xlrd@1.2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/wrapt@1.12.1?extension=tar.gz">
+         <name>wrapt</name>
+         <version>1.12.1</version>
+         <purl>pkg:pypi/wrapt@1.12.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/wimpy@0.6?extension=tar.gz">
+         <name>wimpy</name>
+         <version>0.6</version>
+         <purl>pkg:pypi/wimpy@0.6?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/whitenoise@5.2.0?extension=tar.gz">
+         <name>whitenoise</name>
+         <version>5.2.0</version>
+         <purl>pkg:pypi/whitenoise@5.2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/wheel@0.36.2?extension=tar.gz">
+         <name>wheel</name>
+         <version>0.36.2</version>
+         <purl>pkg:pypi/wheel@0.36.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/webencodings@0.5.1?extension=tar.gz">
+         <name>webencodings</name>
+         <version>0.5.1</version>
+         <purl>pkg:pypi/webencodings@0.5.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/webcolors@1.11.1?extension=tar.gz">
+         <name>webcolors</name>
+         <version>1.11.1</version>
+         <purl>pkg:pypi/webcolors@1.11.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/vobject@0.9.6.1?extension=tar.gz">
+         <name>vobject</name>
+         <version>0.9.6.1</version>
+         <purl>pkg:pypi/vobject@0.9.6.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/vine@1.3.0?extension=tar.gz">
+         <name>vine</name>
+         <version>1.3.0</version>
+         <purl>pkg:pypi/vine@1.3.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/vcrpy@4.1.1?extension=tar.gz">
+         <name>vcrpy</name>
+         <version>4.1.1</version>
+         <purl>pkg:pypi/vcrpy@4.1.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/vcrpy-unittest@0.1.7?extension=tar.gz">
+         <name>vcrpy-unittest</name>
+         <version>0.1.7</version>
+         <purl>pkg:pypi/vcrpy-unittest@0.1.7?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/validators@0.18.2?extension=tar.gz">
+         <name>validators</name>
+         <version>0.18.2</version>
+         <purl>pkg:pypi/validators@0.18.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/uWSGI@2.0.19.1?extension=tar.gz">
+         <name>uWSGI</name>
+         <version>2.0.19.1</version>
+         <purl>pkg:pypi/uWSGI@2.0.19.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/urllib3@1.26.4?extension=tar.gz">
+         <name>urllib3</name>
+         <version>1.26.4</version>
+         <purl>pkg:pypi/urllib3@1.26.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/uritemplate@3.0.1?extension=tar.gz">
+         <name>uritemplate</name>
+         <version>3.0.1</version>
+         <purl>pkg:pypi/uritemplate@3.0.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/typing-extensions@3.7.4.3?extension=tar.gz">
+         <name>typing-extensions</name>
+         <version>3.7.4.3</version>
+         <purl>pkg:pypi/typing-extensions@3.7.4.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/typed-ast@1.4.1?extension=tar.gz">
+         <name>typed-ast</name>
+         <version>1.4.1</version>
+         <purl>pkg:pypi/typed-ast@1.4.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/truffleHogRegexes@0.0.7?extension=tar.gz">
+         <name>truffleHogRegexes</name>
+         <version>0.0.7</version>
+         <purl>pkg:pypi/truffleHogRegexes@0.0.7?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/tqdm@4.56.0?extension=tar.gz">
+         <name>tqdm</name>
+         <version>4.56.0</version>
+         <purl>pkg:pypi/tqdm@4.56.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/toml@0.10.2?extension=tar.gz">
+         <name>toml</name>
+         <version>0.10.2</version>
+         <purl>pkg:pypi/toml@0.10.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/titlecase@2.0.0?extension=tar.gz">
+         <name>titlecase</name>
+         <version>2.0.0</version>
+         <purl>pkg:pypi/titlecase@2.0.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/tinydb@3.15.2?extension=tar.gz">
+         <name>tinydb</name>
+         <version>3.15.2</version>
+         <purl>pkg:pypi/tinydb@3.15.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/terminaltables@3.1.0?extension=tar.gz">
+         <name>terminaltables</name>
+         <version>3.1.0</version>
+         <purl>pkg:pypi/terminaltables@3.1.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/termcolor@1.1.0?extension=tar.gz">
+         <name>termcolor</name>
+         <version>1.1.0</version>
+         <purl>pkg:pypi/termcolor@1.1.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/tabulate@0.8.7?extension=tar.gz">
+         <name>tabulate</name>
+         <version>0.8.7</version>
+         <purl>pkg:pypi/tabulate@0.8.7?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/supervisor@4.2.2?extension=tar.gz">
+         <name>supervisor</name>
+         <version>4.2.2</version>
+         <purl>pkg:pypi/supervisor@4.2.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/strict-rfc3339@0.7?extension=tar.gz">
+         <name>strict-rfc3339</name>
+         <version>0.7</version>
+         <purl>pkg:pypi/strict-rfc3339@0.7?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/sqlparse@0.4.1?extension=tar.gz">
+         <name>sqlparse</name>
+         <version>0.4.1</version>
+         <purl>pkg:pypi/sqlparse@0.4.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/SQLAlchemy@1.3.23?extension=tar.gz">
+         <name>SQLAlchemy</name>
+         <version>1.3.23</version>
+         <purl>pkg:pypi/SQLAlchemy@1.3.23?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/social-auth-core@4.1.0?extension=tar.gz">
+         <name>social-auth-core</name>
+         <version>4.1.0</version>
+         <purl>pkg:pypi/social-auth-core@4.1.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/social-auth-app-django@4.0.0?extension=tar.gz">
+         <name>social-auth-app-django</name>
+         <version>4.0.0</version>
+         <purl>pkg:pypi/social-auth-app-django@4.0.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/smmap@3.0.5?extension=tar.gz">
+         <name>smmap</name>
+         <version>3.0.5</version>
+         <purl>pkg:pypi/smmap@3.0.5?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/six@1.15.0?extension=tar.gz">
+         <name>six</name>
+         <version>1.15.0</version>
+         <purl>pkg:pypi/six@1.15.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/simplejson@3.17.2?extension=tar.gz">
+         <name>simplejson</name>
+         <version>3.17.2</version>
+         <purl>pkg:pypi/simplejson@3.17.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/setuptools@49.2.1?extension=tar.gz">
+         <name>setuptools</name>
+         <version>49.2.1</version>
+         <purl>pkg:pypi/setuptools@49.2.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/selenium@3.141.0?extension=tar.gz">
+         <name>selenium</name>
+         <version>3.141.0</version>
+         <purl>pkg:pypi/selenium@3.141.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/safety@1.10.3?extension=tar.gz">
+         <name>safety</name>
+         <version>1.10.3</version>
+         <purl>pkg:pypi/safety@1.10.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/safety-db@2020.4.14?extension=tar.gz">
+         <name>safety-db</name>
+         <version>2020.4.14</version>
+         <purl>pkg:pypi/safety-db@2020.4.14?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/s3transfer@0.3.4?extension=tar.gz">
+         <name>s3transfer</name>
+         <version>0.3.4</version>
+         <purl>pkg:pypi/s3transfer@0.3.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/ruamel.yaml@0.16.12?extension=tar.gz">
+         <name>ruamel.yaml</name>
+         <version>0.16.12</version>
+         <purl>pkg:pypi/ruamel.yaml@0.16.12?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/rsa@4.5?extension=tar.gz">
+         <name>rsa</name>
+         <version>4.5</version>
+         <purl>pkg:pypi/rsa@4.5?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/rfc3987@1.3.8?extension=tar.gz">
+         <name>rfc3987</name>
+         <version>1.3.8</version>
+         <purl>pkg:pypi/rfc3987@1.3.8?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/requirements-parser@0.2.0?extension=tar.gz">
+         <name>requirements-parser</name>
+         <version>0.2.0</version>
+         <purl>pkg:pypi/requirements-parser@0.2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/requests@2.25.0?extension=tar.gz">
+         <name>requests</name>
+         <version>2.25.0</version>
+         <purl>pkg:pypi/requests@2.25.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/requests-toolbelt@0.9.1?extension=tar.gz">
+         <name>requests-toolbelt</name>
+         <version>0.9.1</version>
+         <purl>pkg:pypi/requests-toolbelt@0.9.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/requests-oauthlib@1.3.0?extension=tar.gz">
+         <name>requests-oauthlib</name>
+         <version>1.3.0</version>
+         <purl>pkg:pypi/requests-oauthlib@1.3.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/regex@2020.11.13?extension=tar.gz">
+         <name>regex</name>
+         <version>2020.11.13</version>
+         <purl>pkg:pypi/regex@2020.11.13?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/redis@3.5.3?extension=tar.gz">
+         <name>redis</name>
+         <version>3.5.3</version>
+         <purl>pkg:pypi/redis@3.5.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/PyYAML@5.3.1?extension=tar.gz">
+         <name>PyYAML</name>
+         <version>5.3.1</version>
+         <purl>pkg:pypi/PyYAML@5.3.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pytz@2021.1?extension=tar.gz">
+         <name>pytz</name>
+         <version>2021.1</version>
+         <purl>pkg:pypi/pytz@2021.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/python3-openid@3.2.0?extension=tar.gz">
+         <name>python3-openid</name>
+         <version>3.2.0</version>
+         <purl>pkg:pypi/python3-openid@3.2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/python-nmap@0.6.1?extension=tar.gz">
+         <name>python-nmap</name>
+         <version>0.6.1</version>
+         <purl>pkg:pypi/python-nmap@0.6.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/python-mimeparse@1.6.0?extension=tar.gz">
+         <name>python-mimeparse</name>
+         <version>1.6.0</version>
+         <purl>pkg:pypi/python-mimeparse@1.6.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/python-jose@3.2.0?extension=tar.gz">
+         <name>python-jose</name>
+         <version>3.2.0</version>
+         <purl>pkg:pypi/python-jose@3.2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/python-gitlab@2.6.0?extension=tar.gz">
+         <name>python-gitlab</name>
+         <version>2.6.0</version>
+         <purl>pkg:pypi/python-gitlab@2.6.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/python-dateutil@2.8.1?extension=tar.gz">
+         <name>python-dateutil</name>
+         <version>2.8.1</version>
+         <purl>pkg:pypi/python-dateutil@2.8.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pysaml2@6.5.1?extension=tar.gz">
+         <name>pysaml2</name>
+         <version>6.5.1</version>
+         <purl>pkg:pypi/pysaml2@6.5.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pyrsistent@0.17.3?extension=tar.gz">
+         <name>pyrsistent</name>
+         <version>0.17.3</version>
+         <purl>pkg:pypi/pyrsistent@0.17.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pyparsing@2.4.7?extension=tar.gz">
+         <name>pyparsing</name>
+         <version>2.4.7</version>
+         <purl>pkg:pypi/pyparsing@2.4.7?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pyOpenSSL@20.0.1?extension=tar.gz">
+         <name>pyOpenSSL</name>
+         <version>20.0.1</version>
+         <purl>pkg:pypi/pyOpenSSL@20.0.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/PyJWT@2.0.1?extension=tar.gz">
+         <name>PyJWT</name>
+         <version>2.0.1</version>
+         <purl>pkg:pypi/PyJWT@2.0.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/PyGithub@1.54.1?extension=tar.gz">
+         <name>PyGithub</name>
+         <version>1.54.1</version>
+         <purl>pkg:pypi/PyGithub@1.54.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pyflakes@2.2.0?extension=tar.gz">
+         <name>pyflakes</name>
+         <version>2.2.0</version>
+         <purl>pkg:pypi/pyflakes@2.2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pyfiglet@0.8.post1?extension=tar.gz">
+         <name>pyfiglet</name>
+         <version>0.8.post1</version>
+         <purl>pkg:pypi/pyfiglet@0.8.post1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pycparser@2.20?extension=tar.gz">
+         <name>pycparser</name>
+         <version>2.20</version>
+         <purl>pkg:pypi/pycparser@2.20?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pycodestyle@2.6.0?extension=tar.gz">
+         <name>pycodestyle</name>
+         <version>2.6.0</version>
+         <purl>pkg:pypi/pycodestyle@2.6.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pyasn1@0.4.8?extension=tar.gz">
+         <name>pyasn1</name>
+         <version>0.4.8</version>
+         <purl>pkg:pypi/pyasn1@0.4.8?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pyasn1-modules@0.2.8?extension=tar.gz">
+         <name>pyasn1-modules</name>
+         <version>0.2.8</version>
+         <purl>pkg:pypi/pyasn1-modules@0.2.8?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/ptvsd@4.3.2?extension=tar.gz">
+         <name>ptvsd</name>
+         <version>4.3.2</version>
+         <purl>pkg:pypi/ptvsd@4.3.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/psycopg2-binary@2.8.6?extension=tar.gz">
+         <name>psycopg2-binary</name>
+         <version>2.8.6</version>
+         <purl>pkg:pypi/psycopg2-binary@2.8.6?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/protobuf@3.14.0?extension=tar.gz">
+         <name>protobuf</name>
+         <version>3.14.0</version>
+         <purl>pkg:pypi/protobuf@3.14.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/prometheus-client@0.9.0?extension=tar.gz">
+         <name>prometheus-client</name>
+         <version>0.9.0</version>
+         <purl>pkg:pypi/prometheus-client@0.9.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/polling@0.3.1?extension=tar.gz">
+         <name>polling</name>
+         <version>0.3.1</version>
+         <purl>pkg:pypi/polling@0.3.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pkginfo@1.5.0.1?extension=tar.gz">
+         <name>pkginfo</name>
+         <version>1.5.0.1</version>
+         <purl>pkg:pypi/pkginfo@1.5.0.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pip@21.0.1?extension=tar.gz">
+         <name>pip</name>
+         <version>21.0.1</version>
+         <purl>pkg:pypi/pip@21.0.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/Pillow@8.1.2?extension=tar.gz">
+         <name>Pillow</name>
+         <version>8.1.2</version>
+         <purl>pkg:pypi/Pillow@8.1.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pilkit@2.0?extension=tar.gz">
+         <name>pilkit</name>
+         <version>2.0</version>
+         <purl>pkg:pypi/pilkit@2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pdfkit@0.6.1?extension=tar.gz">
+         <name>pdfkit</name>
+         <version>0.6.1</version>
+         <purl>pkg:pypi/pdfkit@0.6.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pbr@5.5.1?extension=tar.gz">
+         <name>pbr</name>
+         <version>5.5.1</version>
+         <purl>pkg:pypi/pbr@5.5.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pathspec@0.8.1?extension=tar.gz">
+         <name>pathspec</name>
+         <version>0.8.1</version>
+         <purl>pkg:pypi/pathspec@0.8.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/pandas@1.1.5?extension=tar.gz">
+         <name>pandas</name>
+         <version>1.1.5</version>
+         <purl>pkg:pypi/pandas@1.1.5?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/packaging@20.3?extension=tar.gz">
+         <name>packaging</name>
+         <version>20.3</version>
+         <purl>pkg:pypi/packaging@20.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/packageurl-python@0.9.4?extension=tar.gz">
+         <name>packageurl-python</name>
+         <version>0.9.4</version>
+         <purl>pkg:pypi/packageurl-python@0.9.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/oyaml@0.9?extension=tar.gz">
+         <name>oyaml</name>
+         <version>0.9</version>
+         <purl>pkg:pypi/oyaml@0.9?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/opinel@3.3.4?extension=tar.gz">
+         <name>opinel</name>
+         <version>3.3.4</version>
+         <purl>pkg:pypi/opinel@3.3.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/openpyxl@3.0.7?extension=tar.gz">
+         <name>openpyxl</name>
+         <version>3.0.7</version>
+         <purl>pkg:pypi/openpyxl@3.0.7?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/openapi-codec@1.3.2?extension=tar.gz">
+         <name>openapi-codec</name>
+         <version>1.3.2</version>
+         <purl>pkg:pypi/openapi-codec@1.3.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/oauthlib@3.1.0?extension=tar.gz">
+         <name>oauthlib</name>
+         <version>3.1.0</version>
+         <purl>pkg:pypi/oauthlib@3.1.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/numpy@1.19.5?extension=tar.gz">
+         <name>numpy</name>
+         <version>1.19.5</version>
+         <purl>pkg:pypi/numpy@1.19.5?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/netaddr@0.8.0?extension=tar.gz">
+         <name>netaddr</name>
+         <version>0.8.0</version>
+         <purl>pkg:pypi/netaddr@0.8.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/mysqlclient@2.0.3?extension=tar.gz">
+         <name>mysqlclient</name>
+         <version>2.0.3</version>
+         <purl>pkg:pypi/mysqlclient@2.0.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/mypy-extensions@0.4.3?extension=tar.gz">
+         <name>mypy-extensions</name>
+         <version>0.4.3</version>
+         <purl>pkg:pypi/mypy-extensions@0.4.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/multidict@5.1.0?extension=tar.gz">
+         <name>multidict</name>
+         <version>5.1.0</version>
+         <purl>pkg:pypi/multidict@5.1.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/mccabe@0.6.1?extension=tar.gz">
+         <name>mccabe</name>
+         <version>0.6.1</version>
+         <purl>pkg:pypi/mccabe@0.6.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/MarkupSafe@1.1.1?extension=tar.gz">
+         <name>MarkupSafe</name>
+         <version>1.1.1</version>
+         <purl>pkg:pypi/MarkupSafe@1.1.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/Markdown@3.3.4?extension=tar.gz">
+         <name>Markdown</name>
+         <version>3.3.4</version>
+         <purl>pkg:pypi/Markdown@3.3.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/lxml@4.6.2?extension=tar.gz">
+         <name>lxml</name>
+         <version>4.6.2</version>
+         <purl>pkg:pypi/lxml@4.6.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/lazy-object-proxy@1.4.3?extension=tar.gz">
+         <name>lazy-object-proxy</name>
+         <version>1.4.3</version>
+         <purl>pkg:pypi/lazy-object-proxy@1.4.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/kombu@4.6.11?extension=tar.gz">
+         <name>kombu</name>
+         <version>4.6.11</version>
+         <purl>pkg:pypi/kombu@4.6.11?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/junit-xml@1.9?extension=tar.gz">
+         <name>junit-xml</name>
+         <version>1.9</version>
+         <purl>pkg:pypi/junit-xml@1.9?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/jsonschema@3.2.0?extension=tar.gz">
+         <name>jsonschema</name>
+         <version>3.2.0</version>
+         <purl>pkg:pypi/jsonschema@3.2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/jsonpointer@2.0?extension=tar.gz">
+         <name>jsonpointer</name>
+         <version>2.0</version>
+         <purl>pkg:pypi/jsonpointer@2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/jsonlines@2.0.0?extension=tar.gz">
+         <name>jsonlines</name>
+         <version>2.0.0</version>
+         <purl>pkg:pypi/jsonlines@2.0.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/JSON-log-formatter@0.3.0?extension=tar.gz">
+         <name>JSON-log-formatter</name>
+         <version>0.3.0</version>
+         <purl>pkg:pypi/JSON-log-formatter@0.3.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/jmespath@0.10.0?extension=tar.gz">
+         <name>jmespath</name>
+         <version>0.10.0</version>
+         <purl>pkg:pypi/jmespath@0.10.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/jira@2.0.0?extension=tar.gz">
+         <name>jira</name>
+         <version>2.0.0</version>
+         <purl>pkg:pypi/jira@2.0.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/Jinja2@2.11.1?extension=tar.gz">
+         <name>Jinja2</name>
+         <version>2.11.1</version>
+         <purl>pkg:pypi/Jinja2@2.11.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/jdcal@1.4.1?extension=tar.gz">
+         <name>jdcal</name>
+         <version>1.4.1</version>
+         <purl>pkg:pypi/jdcal@1.4.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/jake@0.2.68?extension=tar.gz">
+         <name>jake</name>
+         <version>0.2.68</version>
+         <purl>pkg:pypi/jake@0.2.68?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/itypes@1.2.0?extension=tar.gz">
+         <name>itypes</name>
+         <version>1.2.0</version>
+         <purl>pkg:pypi/itypes@1.2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/isort@5.6.4?extension=tar.gz">
+         <name>isort</name>
+         <version>5.6.4</version>
+         <purl>pkg:pypi/isort@5.6.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/inflection@0.5.1?extension=tar.gz">
+         <name>inflection</name>
+         <version>0.5.1</version>
+         <purl>pkg:pypi/inflection@0.5.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/importlib-resources@5.1.0?extension=tar.gz">
+         <name>importlib-resources</name>
+         <version>5.1.0</version>
+         <purl>pkg:pypi/importlib-resources@5.1.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/idna@2.10?extension=tar.gz">
+         <name>idna</name>
+         <version>2.10</version>
+         <purl>pkg:pypi/idna@2.10?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/iampoliciesgonewild@1.0.6.2?extension=tar.gz">
+         <name>iampoliciesgonewild</name>
+         <version>1.0.6.2</version>
+         <purl>pkg:pypi/iampoliciesgonewild@1.0.6.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/hyperlink@21.0.0?extension=tar.gz">
+         <name>hyperlink</name>
+         <version>21.0.0</version>
+         <purl>pkg:pypi/hyperlink@21.0.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/humanize@3.2.0?extension=tar.gz">
+         <name>humanize</name>
+         <version>3.2.0</version>
+         <purl>pkg:pypi/humanize@3.2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/httplib2@0.18.1?extension=tar.gz">
+         <name>httplib2</name>
+         <version>0.18.1</version>
+         <purl>pkg:pypi/httplib2@0.18.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/html2text@2020.1.16?extension=tar.gz">
+         <name>html2text</name>
+         <version>2020.1.16</version>
+         <purl>pkg:pypi/html2text@2020.1.16?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/gunicorn@20.0.4?extension=tar.gz">
+         <name>gunicorn</name>
+         <version>20.0.4</version>
+         <purl>pkg:pypi/gunicorn@20.0.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/googleapis-common-protos@1.52.0?extension=tar.gz">
+         <name>googleapis-common-protos</name>
+         <version>1.52.0</version>
+         <purl>pkg:pypi/googleapis-common-protos@1.52.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/google-auth@1.27.1?extension=tar.gz">
+         <name>google-auth</name>
+         <version>1.27.1</version>
+         <purl>pkg:pypi/google-auth@1.27.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/google-auth-oauthlib@0.4.3?extension=tar.gz">
+         <name>google-auth-oauthlib</name>
+         <version>0.4.3</version>
+         <purl>pkg:pypi/google-auth-oauthlib@0.4.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/google-auth-httplib2@0.0.4?extension=tar.gz">
+         <name>google-auth-httplib2</name>
+         <version>0.0.4</version>
+         <purl>pkg:pypi/google-auth-httplib2@0.0.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/google-api-python-client@1.12.8?extension=tar.gz">
+         <name>google-api-python-client</name>
+         <version>1.12.8</version>
+         <purl>pkg:pypi/google-api-python-client@1.12.8?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/google-api-core@1.25.0?extension=tar.gz">
+         <name>google-api-core</name>
+         <version>1.25.0</version>
+         <purl>pkg:pypi/google-api-core@1.25.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/GitPython@3.1.14?extension=tar.gz">
+         <name>GitPython</name>
+         <version>3.1.14</version>
+         <purl>pkg:pypi/GitPython@3.1.14?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/gitdb2@4.0.2?extension=tar.gz">
+         <name>gitdb2</name>
+         <version>4.0.2</version>
+         <purl>pkg:pypi/gitdb2@4.0.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/gitdb@4.0.5?extension=tar.gz">
+         <name>gitdb</name>
+         <version>4.0.5</version>
+         <purl>pkg:pypi/gitdb@4.0.5?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/flake8@3.8.4?extension=tar.gz">
+         <name>flake8</name>
+         <version>3.8.4</version>
+         <purl>pkg:pypi/flake8@3.8.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/et-xmlfile@1.0.1?extension=tar.gz">
+         <name>et-xmlfile</name>
+         <version>1.0.1</version>
+         <purl>pkg:pypi/et-xmlfile@1.0.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/elementpath@2.1.2?extension=tar.gz">
+         <name>elementpath</name>
+         <version>2.1.2</version>
+         <purl>pkg:pypi/elementpath@2.1.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/ecdsa@0.14.1?extension=tar.gz">
+         <name>ecdsa</name>
+         <version>0.14.1</version>
+         <purl>pkg:pypi/ecdsa@0.14.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/drheader@1.5.3?extension=tar.gz">
+         <name>drheader</name>
+         <version>1.5.3</version>
+         <purl>pkg:pypi/drheader@1.5.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/drf-yasg2@1.19.4?extension=tar.gz">
+         <name>drf-yasg2</name>
+         <version>1.19.4</version>
+         <purl>pkg:pypi/drf-yasg2@1.19.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/drf-yasg@1.20.0?extension=tar.gz">
+         <name>drf-yasg</name>
+         <version>1.20.0</version>
+         <purl>pkg:pypi/drf-yasg@1.20.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/dparse@0.5.1?extension=tar.gz">
+         <name>dparse</name>
+         <version>0.5.1</version>
+         <purl>pkg:pypi/dparse@0.5.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/docutils@0.15.2?extension=tar.gz">
+         <name>docutils</name>
+         <version>0.15.2</version>
+         <purl>pkg:pypi/docutils@0.15.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/djangorestframework@3.12.2?extension=tar.gz">
+         <name>djangorestframework</name>
+         <version>3.12.2</version>
+         <purl>pkg:pypi/djangorestframework@3.12.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/djangorestframework-jwt@1.11.0?extension=tar.gz">
+         <name>djangorestframework-jwt</name>
+         <version>1.11.0</version>
+         <purl>pkg:pypi/djangorestframework-jwt@1.11.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/Django@2.2.18?extension=tar.gz">
+         <name>Django</name>
+         <version>2.2.18</version>
+         <purl>pkg:pypi/Django@2.2.18?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-watson@1.5.5?extension=tar.gz">
+         <name>django-watson</name>
+         <version>1.5.5</version>
+         <purl>pkg:pypi/django-watson@1.5.5?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-tastypie@0.14.2?extension=tar.gz">
+         <name>django-tastypie</name>
+         <version>0.14.2</version>
+         <purl>pkg:pypi/django-tastypie@0.14.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-tastypie-swagger@0.1.4?extension=tar.gz">
+         <name>django-tastypie-swagger</name>
+         <version>0.1.4</version>
+         <purl>pkg:pypi/django-tastypie-swagger@0.1.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-tagulous@1.1.0?extension=tar.gz">
+         <name>django-tagulous</name>
+         <version>1.1.0</version>
+         <purl>pkg:pypi/django-tagulous@1.1.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-tagging@0.5.0?extension=tar.gz">
+         <name>django-tagging</name>
+         <version>0.5.0</version>
+         <purl>pkg:pypi/django-tagging@0.5.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-split-settings@1.0.1?extension=tar.gz">
+         <name>django-split-settings</name>
+         <version>1.0.1</version>
+         <purl>pkg:pypi/django-split-settings@1.0.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-slack@5.16.0?extension=tar.gz">
+         <name>django-slack</name>
+         <version>5.16.0</version>
+         <purl>pkg:pypi/django-slack@5.16.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-saml2-auth@2.2.1?extension=tar.gz">
+         <name>django-saml2-auth</name>
+         <version>2.2.1</version>
+         <purl>pkg:pypi/django-saml2-auth@2.2.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-rest-swagger@2.2.0?extension=tar.gz">
+         <name>django-rest-swagger</name>
+         <version>2.2.0</version>
+         <purl>pkg:pypi/django-rest-swagger@2.2.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-rest-auth@0.9.5?extension=tar.gz">
+         <name>django-rest-auth</name>
+         <version>0.9.5</version>
+         <purl>pkg:pypi/django-rest-auth@0.9.5?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-prometheus@2.1.0?extension=tar.gz">
+         <name>django-prometheus</name>
+         <version>2.1.0</version>
+         <purl>pkg:pypi/django-prometheus@2.1.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-polymorphic@3.0.0?extension=tar.gz">
+         <name>django-polymorphic</name>
+         <version>3.0.0</version>
+         <purl>pkg:pypi/django-polymorphic@3.0.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-multiselectfield@0.1.12?extension=tar.gz">
+         <name>django-multiselectfield</name>
+         <version>0.1.12</version>
+         <purl>pkg:pypi/django-multiselectfield@0.1.12?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-jsonfield@1.4.1?extension=tar.gz">
+         <name>django-jsonfield</name>
+         <version>1.4.1</version>
+         <purl>pkg:pypi/django-jsonfield@1.4.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-jsonfield-backport@1.0.3?extension=tar.gz">
+         <name>django-jsonfield-backport</name>
+         <version>1.0.3</version>
+         <purl>pkg:pypi/django-jsonfield-backport@1.0.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-imagekit@4.0.2?extension=tar.gz">
+         <name>django-imagekit</name>
+         <version>4.0.2</version>
+         <purl>pkg:pypi/django-imagekit@4.0.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-filter@2.4.0?extension=tar.gz">
+         <name>django-filter</name>
+         <version>2.4.0</version>
+         <purl>pkg:pypi/django-filter@2.4.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-fieldsignals@0.6.0?extension=tar.gz">
+         <name>django-fieldsignals</name>
+         <version>0.6.0</version>
+         <purl>pkg:pypi/django-fieldsignals@0.6.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-extensions@3.1.1?extension=tar.gz">
+         <name>django-extensions</name>
+         <version>3.1.1</version>
+         <purl>pkg:pypi/django-extensions@3.1.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-environ@0.4.5?extension=tar.gz">
+         <name>django-environ</name>
+         <version>0.4.5</version>
+         <purl>pkg:pypi/django-environ@0.4.5?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-debug-toolbar@3.2?extension=tar.gz">
+         <name>django-debug-toolbar</name>
+         <version>3.2</version>
+         <purl>pkg:pypi/django-debug-toolbar@3.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-debug-toolbar-request-history@0.1.3?extension=tar.gz">
+         <name>django-debug-toolbar-request-history</name>
+         <version>0.1.3</version>
+         <purl>pkg:pypi/django-debug-toolbar-request-history@0.1.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-dbbackup@3.3.0?extension=tar.gz">
+         <name>django-dbbackup</name>
+         <version>3.3.0</version>
+         <purl>pkg:pypi/django-dbbackup@3.3.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-crum@0.7.9?extension=tar.gz">
+         <name>django-crum</name>
+         <version>0.7.9</version>
+         <purl>pkg:pypi/django-crum@0.7.9?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-crispy-forms@1.11.1?extension=tar.gz">
+         <name>django-crispy-forms</name>
+         <version>1.11.1</version>
+         <purl>pkg:pypi/django-crispy-forms@1.11.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-celery-results@2.0.1?extension=tar.gz">
+         <name>django-celery-results</name>
+         <version>2.0.1</version>
+         <purl>pkg:pypi/django-celery-results@2.0.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-auditlog@1.0a1?extension=tar.gz">
+         <name>django-auditlog</name>
+         <version>1.0a1</version>
+         <purl>pkg:pypi/django-auditlog@1.0a1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/django-appconf@1.0.4?extension=tar.gz">
+         <name>django-appconf</name>
+         <version>1.0.4</version>
+         <purl>pkg:pypi/django-appconf@1.0.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/distlib@0.3.1?extension=tar.gz">
+         <name>distlib</name>
+         <version>0.3.1</version>
+         <purl>pkg:pypi/distlib@0.3.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/detect-secrets@0.14.3?extension=tar.gz">
+         <name>detect-secrets</name>
+         <version>0.14.3</version>
+         <purl>pkg:pypi/detect-secrets@0.14.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/Deprecated@1.2.11?extension=tar.gz">
+         <name>Deprecated</name>
+         <version>1.2.11</version>
+         <purl>pkg:pypi/Deprecated@1.2.11?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/defusedxml@0.7.1?extension=tar.gz">
+         <name>defusedxml</name>
+         <version>0.7.1</version>
+         <purl>pkg:pypi/defusedxml@0.7.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/decorator@4.4.2?extension=tar.gz">
+         <name>decorator</name>
+         <version>4.4.2</version>
+         <purl>pkg:pypi/decorator@4.4.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/cyclonedx-bom@0.4.3?extension=tar.gz">
+         <name>cyclonedx-bom</name>
+         <version>0.4.3</version>
+         <purl>pkg:pypi/cyclonedx-bom@0.4.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/cvss@2.2?extension=tar.gz">
+         <name>cvss</name>
+         <version>2.2</version>
+         <purl>pkg:pypi/cvss@2.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/cryptography@3.4.6?extension=tar.gz">
+         <name>cryptography</name>
+         <version>3.4.6</version>
+         <purl>pkg:pypi/cryptography@3.4.6?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/cpe@1.2.1?extension=tar.gz">
+         <name>cpe</name>
+         <version>1.2.1</version>
+         <purl>pkg:pypi/cpe@1.2.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/coverage@5.5?extension=tar.gz">
+         <name>coverage</name>
+         <version>5.5</version>
+         <purl>pkg:pypi/coverage@5.5?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/coreschema@0.0.4?extension=tar.gz">
+         <name>coreschema</name>
+         <version>0.0.4</version>
+         <purl>pkg:pypi/coreschema@0.0.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/coreapi@2.3.3?extension=tar.gz">
+         <name>coreapi</name>
+         <version>2.3.3</version>
+         <purl>pkg:pypi/coreapi@2.3.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/colored@1.4.2?extension=tar.gz">
+         <name>colored</name>
+         <version>1.4.2</version>
+         <purl>pkg:pypi/colored@1.4.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/colorama@0.4.3?extension=tar.gz">
+         <name>colorama</name>
+         <version>0.4.3</version>
+         <purl>pkg:pypi/colorama@0.4.3?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/cloc@0.2.5?extension=tar.gz">
+         <name>cloc</name>
+         <version>0.2.5</version>
+         <purl>pkg:pypi/cloc@0.2.5?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/click@7.1.2?extension=tar.gz">
+         <name>click</name>
+         <version>7.1.2</version>
+         <purl>pkg:pypi/click@7.1.2?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/chardet@3.0.4?extension=tar.gz">
+         <name>chardet</name>
+         <version>3.0.4</version>
+         <purl>pkg:pypi/chardet@3.0.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/cffi@1.14.4?extension=tar.gz">
+         <name>cffi</name>
+         <version>1.14.4</version>
+         <purl>pkg:pypi/cffi@1.14.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/certifi@2020.11.8?extension=tar.gz">
+         <name>certifi</name>
+         <version>2020.11.8</version>
+         <purl>pkg:pypi/certifi@2020.11.8?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/celery@4.4.7?extension=tar.gz">
+         <name>celery</name>
+         <version>4.4.7</version>
+         <purl>pkg:pypi/celery@4.4.7?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/cachetools@4.1.0?extension=tar.gz">
+         <name>cachetools</name>
+         <version>4.1.0</version>
+         <purl>pkg:pypi/cachetools@4.1.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/botocore@1.20.32?extension=tar.gz">
+         <name>botocore</name>
+         <version>1.20.32</version>
+         <purl>pkg:pypi/botocore@1.20.32?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/boto3@1.17.32?extension=tar.gz">
+         <name>boto3</name>
+         <version>1.17.32</version>
+         <purl>pkg:pypi/boto3@1.17.32?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/bleach@3.3.0?extension=tar.gz">
+         <name>bleach</name>
+         <version>3.3.0</version>
+         <purl>pkg:pypi/bleach@3.3.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/black@20.8b1?extension=tar.gz">
+         <name>black</name>
+         <version>20.8b1</version>
+         <purl>pkg:pypi/black@20.8b1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/billiard@3.6.3.0?extension=tar.gz">
+         <name>billiard</name>
+         <version>3.6.3.0</version>
+         <purl>pkg:pypi/billiard@3.6.3.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/AWSScout2@3.2.1?extension=tar.gz">
+         <name>AWSScout2</name>
+         <version>3.2.1</version>
+         <purl>pkg:pypi/AWSScout2@3.2.1?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/awscli@1.18.223?extension=tar.gz">
+         <name>awscli</name>
+         <version>1.18.223</version>
+         <purl>pkg:pypi/awscli@1.18.223?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/attrs@20.3.0?extension=tar.gz">
+         <name>attrs</name>
+         <version>20.3.0</version>
+         <purl>pkg:pypi/attrs@20.3.0?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/asteval@0.9.23?extension=tar.gz">
+         <name>asteval</name>
+         <version>0.9.23</version>
+         <purl>pkg:pypi/asteval@0.9.23?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/appdirs@1.4.4?extension=tar.gz">
+         <name>appdirs</name>
+         <version>1.4.4</version>
+         <purl>pkg:pypi/appdirs@1.4.4?extension=tar.gz</purl>
+      </component>
+      <component type="library" bom-ref="pkg:pypi/amqp@2.6.1?extension=tar.gz">
+         <name>amqp</name>
+         <version>2.6.1</version>
+         <purl>pkg:pypi/amqp@2.6.1?extension=tar.gz</purl>
+      </component>
+   </components>
+</bom>
+

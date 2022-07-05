@@ -42,9 +42,10 @@ class AquaParser(object):
 def get_item(resource, vuln, test):
     resource_name = resource.get('name', resource.get('path'))
     resource_version = resource.get('version', 'No version')
-    cve = vuln.get('name', 'No CVE')
+    vulnerability_id = vuln.get('name', 'No CVE')
     fix_version = vuln.get('fix_version', 'None')
     description = vuln.get('description', 'No description.')
+    cvssv3 = None
 
     url = ""
     if 'nvd_url' in vuln:
@@ -56,41 +57,54 @@ def get_item(resource, vuln, test):
     score = 0
     severity_justification = ""
     used_for_classification = ""
-    if 'aqua_score' in vuln:
-        score = vuln.get('aqua_score')
-        used_for_classification = "Aqua score ({}) used for classification.\n".format(score)
-    if 'vendor_score' in vuln:
-        score = vuln.get('vendor_score')
-        used_for_classification = "Vendor score ({}) used for classification.\n".format(score)
-    if 'nvd_score' in vuln:
-        score = vuln.get('nvd_score')
-        used_for_classification = "NVD score v2 ({}) used for classification.\n".format(score)
-        severity_justification += "\nNVD v2 vectors: {}".format(vuln.get('nvd_vectors'))
-    if 'nvd_score_v3' in vuln:
-        score = vuln.get('nvd_score_v3')
-        used_for_classification = "NVD score v3 ({}) used for classification.\n".format(score)
-        severity_justification += "\nNVD v3 vectors: {}".format(vuln.get('nvd_vectors_v3'))
-    severity_justification += "\n{}".format(used_for_classification)
+    if 'aqua_severity' in vuln:
+        score = vuln.get('aqua_severity')
+        severity = aqua_severity_of(score)
+        used_for_classification = "Aqua security score ({}) used for classification.\n".format(score)
+        severity_justification = vuln.get('aqua_severity_classification')
+        if 'nvd_score_v3' in vuln:
+            cvssv3 = vuln.get('nvd_vectors_v3')
+    else:
+        if 'aqua_score' in vuln:
+            score = vuln.get('aqua_score')
+            used_for_classification = "Aqua score ({}) used for classification.\n".format(score)
+        elif 'vendor_score' in vuln:
+            score = vuln.get('vendor_score')
+            used_for_classification = "Vendor score ({}) used for classification.\n".format(score)
+        elif 'nvd_score_v3' in vuln:
+            score = vuln.get('nvd_score_v3')
+            used_for_classification = "NVD score v3 ({}) used for classification.\n".format(score)
+            severity_justification += "\nNVD v3 vectors: {}".format(vuln.get('nvd_vectors_v3'))
+            # Add the CVSS3 to Finding
+            cvssv3 = vuln.get('nvd_vectors_v3')
+        elif 'nvd_score' in vuln:
+            score = vuln.get('nvd_score')
+            used_for_classification = "NVD score v2 ({}) used for classification.\n".format(score)
+            severity_justification += "\nNVD v2 vectors: {}".format(vuln.get('nvd_vectors'))
+        severity = severity_of(score)
+        severity_justification += "\n{}".format(used_for_classification)
 
-    severity = severity_of(score)
-
-    return Finding(
-        title=cve + " - " + resource_name + " (" + resource_version + ") ",
+    finding = Finding(
+        title=vulnerability_id + " - " + resource_name + " (" + resource_version + ") ",
         test=test,
         severity=severity,
         severity_justification=severity_justification,
         cwe=0,
-        cve=cve,
+        cvssv3=cvssv3,
         description=description.strip(),
         mitigation=fix_version,
         references=url,
         component_name=resource.get('name'),
         component_version=resource.get('version'),
         impact=severity)
+    if vulnerability_id != 'No CVE':
+        finding.unsaved_vulnerability_ids = [vulnerability_id]
+
+    return finding
 
 
 def get_item_v2(item, test):
-    cve = item['name']
+    vulnerability_id = item['name']
     file_path = item['file']
     url = item.get('url')
     severity = severity_of(float(item['score']))
@@ -104,15 +118,30 @@ def get_item_v2(item, test):
     else:
         mitigation = 'No known mitigation'
 
-    return Finding(title=str(cve) + ': ' + str(file_path),
+    finding = Finding(title=str(vulnerability_id) + ': ' + str(file_path),
                    description=description,
                    url=url,
                    cwe=0,
-                   cve=cve,
                    test=test,
                    severity=severity,
                    impact=severity,
                    mitigation=mitigation)
+    finding.unsaved_vulnerability_ids = [vulnerability_id]
+
+    return finding
+
+
+def aqua_severity_of(score):
+    if score == 'high':
+        return "High"
+    if score == 'medium':
+        return "Medium"
+    elif score == 'low':
+        return "Low"
+    elif score == "negligible":
+        return "Info"
+    else:
+        return "Critical"
 
 
 def severity_of(score):

@@ -1,0 +1,4 @@
+TimeofDiscovery,Source,Searcher,Description,Line,IsSuppressed,HashKey,SuppressJustification,MatchingScore
+2021-04-10T21:43:46.792Z,E:sample/dir/first/App.config,CSCAN-GENERAL0060 General Password,[Use Triage Mode (-t) to output matching details.],10,NO,4BszeHDdqD3qPgsQ66sOA//MHECABy0rIRG6mEhwe9s=,"",95.9
+2021-04-10T21:43:46.792Z,E:sample/dir/second/App.config,CSCAN-GENERAL0060 General Password,[Use Triage Mode (-t) to output matching details.],12,NO,uii77iY6ne7jUSZKxV0MOnD2LrJpboai/cA/2yRK838=,"",98.9
+2021-04-10T21:43:46.917Z,E:sample/dir/third/App.config,CSCAN-GENERAL0030 User Login Credentials,[Use Triage Mode (-t) to output matching details.],31,NO,578h6k9gQ2ZuJLaShnLtkl0xrB3D02fhbxGUwV9NyJ0=,"",99.4

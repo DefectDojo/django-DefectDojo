@@ -1,0 +1,930 @@
+<?xml version="1.0"?><OWASPZAPReport version="2.10.0" generated="Fri, 18 Jun 2021 09:21:51">
+<site name="http://bodgeit.securecodebox-demo.svc:8080" host="bodgeit.securecodebox-demo.svc" port="8080" ssl="false"><alerts><alertitem>
+  <pluginid>10202</pluginid>
+  <alertRef>10202</alertRef>
+  <alert>Absence of Anti-CSRF Tokens</alert>
+  <name>Absence of Anti-CSRF Tokens</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;No Anti-CSRF tokens were found in a HTML submission form.&lt;/p&gt;&lt;p&gt;A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;CSRF attacks are effective in a number of situations, including:&lt;/p&gt;&lt;p&gt;    * The victim has an active session on the target site.&lt;/p&gt;&lt;p&gt;    * The victim is authenticated via HTTP auth on the target site.&lt;/p&gt;&lt;p&gt;    * The victim is on the same local network as the target site.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;CSRF has primarily been used to perform an action against a target site using the victim&apos;s privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=11</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;basket.jsp&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=6</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;basket.jsp&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;basket.jsp&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=21</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;basket.jsp&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=16</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;basket.jsp&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=5</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;basket.jsp&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/login.jsp</uri>
+  <method>GET</method>
+  <evidence>&lt;form method=&quot;POST&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=27</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;basket.jsp&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=31</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;basket.jsp&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/search.jsp</uri>
+  <method>GET</method>
+  <evidence>&lt;FORM name=&apos;query&apos; method=&apos;GET&apos;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=26</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;basket.jsp&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=14</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;basket.jsp&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  </instances>
+  <count>12</count>
+  <solution>&lt;p&gt;Phase: Architecture and Design&lt;/p&gt;&lt;p&gt;Use a vetted library or framework that does not allow this weakness to occur or provides constructs that make this weakness easier to avoid.&lt;/p&gt;&lt;p&gt;For example, use anti-CSRF packages such as the OWASP CSRFGuard.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Implementation&lt;/p&gt;&lt;p&gt;Ensure that your application is free of cross-site scripting issues, because most CSRF defenses can be bypassed using attacker-controlled script.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Architecture and Design&lt;/p&gt;&lt;p&gt;Generate a unique nonce for each form, place the nonce into the form, and verify the nonce upon receipt of the form. Be sure that the nonce is not predictable (CWE-330).&lt;/p&gt;&lt;p&gt;Note that this can be bypassed using XSS.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Identify especially dangerous operations. When the user performs a dangerous operation, send a separate confirmation request to ensure that the user intended to perform that operation.&lt;/p&gt;&lt;p&gt;Note that this can be bypassed using XSS.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Use the ESAPI Session Management control.&lt;/p&gt;&lt;p&gt;This control includes a component for CSRF.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Do not use the GET method for any request that triggers a state change.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Implementation&lt;/p&gt;&lt;p&gt;Check the HTTP Referer header to see if the request originated from an expected page. This could break legitimate functionality, because users or proxies may have disabled sending the Referer for privacy reasons.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;No known Anti-CSRF token [anticsrf, CSRFToken, __RequestVerificationToken, csrfmiddlewaretoken, authenticity_token, OWASP_CSRFTOKEN, anoncsrf, csrf_token, _csrf, _csrfSecret, __csrf_magic, CSRF] was found in the following HTML form: [Form 1: &quot;price&quot; &quot;productid&quot; &quot;quantity&quot; &quot;submit&quot; ].&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;http://projects.webappsec.org/Cross-Site-Request-Forgery&lt;/p&gt;&lt;p&gt;http://cwe.mitre.org/data/definitions/352.html&lt;/p&gt;</reference>
+  <cweid>352</cweid>
+  <wascid>9</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10027</pluginid>
+  <alertRef>10027</alertRef>
+  <alert>Information Disclosure - Suspicious Comments</alert>
+  <name>Information Disclosure - Suspicious Comments</name>
+  <riskcode>0</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Informational (Medium)</riskdesc>
+  <desc>&lt;p&gt;The response appears to contain suspicious comments which may help an attacker. Note: Matches made within script blocks or files are against the entire content not only comments.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/home.jsp</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=2</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=3</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/contact.jsp</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/search.jsp</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=5</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/about.jsp</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=6</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=7</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/login.jsp</uri>
+  <method>GET</method>
+  <evidence>admin</evidence>
+  </instance>
+  </instances>
+  <count>12</count>
+  <solution>&lt;p&gt;Remove all comments that return information that may help an attacker and fix any underlying problems they refer to.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;The following pattern was used: \bADMIN\b and was detected in the element starting with: &quot;&lt;!-- td align=&quot;center&quot; width=&quot;16%&quot;&gt;&lt;a href=&quot;admin.jsp&quot;&gt;Admin&lt;/a&gt;&lt;/td--&gt;&quot;, see evidence field for the suspicious comment/snippet.&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10109</pluginid>
+  <alertRef>10109</alertRef>
+  <alert>Modern Web Application</alert>
+  <name>Modern Web Application</name>
+  <riskcode>0</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Informational (Medium)</riskdesc>
+  <desc>&lt;p&gt;The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=16</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=31</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=5</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=26</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=13</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=27</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=14</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=30</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=11</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=23</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=6</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=21</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;#&quot; onclick=&quot;decQuantity();&quot;&gt;&lt;img src=&quot;images/130.png&quot; alt=&quot;Decrease quantity in basket&quot; border=&quot;0&quot;&gt;&lt;/a&gt;</evidence>
+  </instance>
+  </instances>
+  <count>12</count>
+  <solution>&lt;p&gt;This is an informational alert and so no changes are required.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application.&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;&lt;/p&gt;</reference>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>40018</pluginid>
+  <alertRef>40018</alertRef>
+  <alert>SQL Injection</alert>
+  <name>SQL Injection</name>
+  <riskcode>3</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>High (Medium)</riskdesc>
+  <desc>&lt;p&gt;SQL injection may be possible.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>POST</method>
+  <param>productid</param>
+  <attack>8-2</attack>
+  </instance>
+  </instances>
+  <count>1</count>
+  <solution>&lt;p&gt;Do not trust client side input, even if there is client side validation in place.  &lt;/p&gt;&lt;p&gt;In general, type check all data on the server side.&lt;/p&gt;&lt;p&gt;If the application uses JDBC, use PreparedStatement or CallableStatement, with parameters passed by &apos;?&apos;&lt;/p&gt;&lt;p&gt;If the application uses ASP, use ADO Command Objects with strong type checking and parameterized queries.&lt;/p&gt;&lt;p&gt;If database Stored Procedures can be used, use them.&lt;/p&gt;&lt;p&gt;Do *not* concatenate strings into queries in the stored procedure, or use &apos;exec&apos;, &apos;exec immediate&apos;, or equivalent functionality!&lt;/p&gt;&lt;p&gt;Do not create dynamic SQL queries using simple string concatenation.&lt;/p&gt;&lt;p&gt;Escape all data received from the client.&lt;/p&gt;&lt;p&gt;Apply an &apos;allow list&apos; of allowed characters, or a &apos;deny list&apos; of disallowed characters in user input.&lt;/p&gt;&lt;p&gt;Apply the principle of least privilege by using the least privileged database user possible.&lt;/p&gt;&lt;p&gt;In particular, avoid using the &apos;sa&apos; or &apos;db-owner&apos; database users. This does not eliminate SQL injection, but minimizes its impact.&lt;/p&gt;&lt;p&gt;Grant the minimum database access that is necessary for the application.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;The original page results were successfully replicated using the expression [8-2] as the parameter value&lt;/p&gt;&lt;p&gt;The parameter value being modified was stripped from the HTML output for the purposes of the comparison&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html&lt;/p&gt;</reference>
+  <cweid>89</cweid>
+  <wascid>19</wascid>
+  <sourceid>1</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10049</pluginid>
+  <alertRef>10049</alertRef>
+  <alert>Storable and Cacheable Content</alert>
+  <name>Storable and Cacheable Content</name>
+  <riskcode>0</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Informational (Medium)</riskdesc>
+  <desc>&lt;p&gt;The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users.  If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where &quot;shared&quot; caching servers such as &quot;proxy&quot; caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=5</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/about.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/contact.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/search.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=3</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/login.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=2</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/home.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=6</uri>
+  <method>GET</method>
+  </instance>
+  </instances>
+  <count>12</count>
+  <solution>&lt;p&gt;Validate that the response does not contain sensitive, personal or user-specific information.  If it does, consider the use of the following HTTP response headers, to limit, or prevent the content being stored and retrieved from the cache by another user:&lt;/p&gt;&lt;p&gt;Cache-Control: no-cache, no-store, must-revalidate, private&lt;/p&gt;&lt;p&gt;Pragma: no-cache&lt;/p&gt;&lt;p&gt;Expires: 0&lt;/p&gt;&lt;p&gt;This configuration directs both HTTP 1.0 and HTTP 1.1 compliant caching servers to not store the response, and to not retrieve the response (without validation) from the cache, in response to a similar request. &lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;In the absence of an explicitly specified caching lifetime directive in the response, a liberal lifetime heuristic of 1 year was assumed. This is permitted by rfc7234.&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;https://tools.ietf.org/html/rfc7234&lt;/p&gt;&lt;p&gt;https://tools.ietf.org/html/rfc7231&lt;/p&gt;&lt;p&gt;http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html (obsoleted by rfc7234)&lt;/p&gt;</reference>
+  <cweid>524</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10036</pluginid>
+  <alertRef>10036</alertRef>
+  <alert>Server Leaks Version Information via &quot;Server&quot; HTTP Response Header Field</alert>
+  <name>Server Leaks Version Information via &quot;Server&quot; HTTP Response Header Field</name>
+  <riskcode>1</riskcode>
+  <confidence>3</confidence>
+  <riskdesc>Low (High)</riskdesc>
+  <desc>&lt;p&gt;The web/application server is leaking version information via the &quot;Server&quot; HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=2</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/search.jsp</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=3</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/contact.jsp</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=6</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=5</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/login.jsp</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/home.jsp</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/about.jsp</uri>
+  <method>GET</method>
+  <evidence>Apache-Coyote/1.1</evidence>
+  </instance>
+  </instances>
+  <count>12</count>
+  <solution>&lt;p&gt;Ensure that your web server, application server, load balancer, etc. is configured to suppress the &quot;Server&quot; header or provide generic details.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;http://httpd.apache.org/docs/current/mod/core.html#servertokens&lt;/p&gt;&lt;p&gt;http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007&lt;/p&gt;&lt;p&gt;http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx&lt;/p&gt;&lt;p&gt;http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10021</pluginid>
+  <alertRef>10021</alertRef>
+  <alert>X-Content-Type-Options Header Missing</alert>
+  <name>X-Content-Type-Options Header Missing</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;The Anti-MIME-Sniffing header X-Content-Type-Options was not set to &apos;nosniff&apos;. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/home.jsp</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/search.jsp</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=6</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/contact.jsp</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=5</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=3</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=2</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/login.jsp</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/about.jsp</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  </instances>
+  <count>12</count>
+  <solution>&lt;p&gt;Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to &apos;nosniff&apos; for all web pages.&lt;/p&gt;&lt;p&gt;If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.&lt;/p&gt;&lt;p&gt;At &quot;High&quot; threshold this scan rule will not alert on client or server error responses.&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx&lt;/p&gt;&lt;p&gt;https://owasp.org/www-community/Security_Headers&lt;/p&gt;</reference>
+  <cweid>693</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10054</pluginid>
+  <alertRef>10054</alertRef>
+  <alert>Cookie without SameSite Attribute</alert>
+  <name>Cookie without SameSite Attribute</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;A cookie has been set without the SameSite attribute, which means that the cookie can be sent as a result of a &apos;cross-site&apos; request. The SameSite attribute is an effective counter measure to cross-site request forgery, cross-site script inclusion, and timing attacks.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>POST</method>
+  </instance>
+  </instances>
+  <count>2</count>
+  <solution>&lt;p&gt;Ensure that the SameSite attribute is set to either &apos;lax&apos; or ideally &apos;strict&apos; for all cookies.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site&lt;/p&gt;</reference>
+  <cweid>1275</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10038</pluginid>
+  <alertRef>10038</alertRef>
+  <alert>Content Security Policy (CSP) Header Not Set</alert>
+  <name>Content Security Policy (CSP) Header Not Set</name>
+  <riskcode>2</riskcode>
+  <confidence>3</confidence>
+  <riskdesc>Medium (High)</riskdesc>
+  <desc>&lt;p&gt;Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=3</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=2</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/home.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/about.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/login.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/search.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=6</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=5</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/contact.jsp</uri>
+  <method>GET</method>
+  </instance>
+  </instances>
+  <count>12</count>
+  <solution>&lt;p&gt;Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header, to achieve optimal browser support: &quot;Content-Security-Policy&quot; for Chrome 25+, Firefox 23+ and Safari 7+, &quot;X-Content-Security-Policy&quot; for Firefox 4.0+ and Internet Explorer 10+, and &quot;X-WebKit-CSP&quot; for Chrome 14+ and Safari 6+.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://developer.mozilla.org/en-US/docs/Web/Security/CSP/Introducing_Content_Security_Policy&lt;/p&gt;&lt;p&gt;https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html&lt;/p&gt;&lt;p&gt;http://www.w3.org/TR/CSP/&lt;/p&gt;&lt;p&gt;http://w3c.github.io/webappsec/specs/content-security-policy/csp-specification.dev.html&lt;/p&gt;&lt;p&gt;http://www.html5rocks.com/en/tutorials/security/content-security-policy/&lt;/p&gt;&lt;p&gt;http://caniuse.com/#feat=contentsecuritypolicy&lt;/p&gt;&lt;p&gt;http://content-security-policy.com/&lt;/p&gt;</reference>
+  <cweid>693</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10063</pluginid>
+  <alertRef>10063</alertRef>
+  <alert>Permissions Policy Header Not Set</alert>
+  <name>Permissions Policy Header Not Set</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=3</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/contact.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=6</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=5</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/home.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/search.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=2</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/login.jsp</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/about.jsp</uri>
+  <method>GET</method>
+  </instance>
+  </instances>
+  <count>12</count>
+  <solution>&lt;p&gt;Ensure that your web server, application server, load balancer, etc. is configured to set the Permissions-Policy header.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy&lt;/p&gt;&lt;p&gt;https://developers.google.com/web/updates/2018/06/feature-policy&lt;/p&gt;&lt;p&gt;https://scotthelme.co.uk/a-new-security-header-feature-policy/&lt;/p&gt;&lt;p&gt;https://w3c.github.io/webappsec-feature-policy/&lt;/p&gt;&lt;p&gt;https://www.smashingmagazine.com/2018/12/feature-policy/&lt;/p&gt;</reference>
+  <cweid>693</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10020</pluginid>
+  <alertRef>10020</alertRef>
+  <alert>X-Frame-Options Header Not Set</alert>
+  <name>X-Frame-Options Header Not Set</name>
+  <riskcode>2</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Medium (Medium)</riskdesc>
+  <desc>&lt;p&gt;X-Frame-Options header is not included in the HTTP response to protect against &apos;ClickJacking&apos; attacks.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/contact.jsp</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=3</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=2</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/about.jsp</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/home.jsp</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/login.jsp</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/search.jsp</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=6</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?typeid=5</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  </instances>
+  <count>12</count>
+  <solution>&lt;p&gt;Most modern Web browsers support the X-Frame-Options HTTP header. Ensure it&apos;s set on all web pages returned by your site (if you expect the page to be framed only by pages on your server (e.g. it&apos;s part of a FRAMESET) then you&apos;ll want to use SAMEORIGIN, otherwise if you never expect the page to be framed, you should use DENY. Alternatively consider implementing Content Security Policy&apos;s &quot;frame-ancestors&quot; directive. &lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options&lt;/p&gt;</reference>
+  <cweid>1021</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>30001</pluginid>
+  <alertRef>30001</alertRef>
+  <alert>Buffer Overflow</alert>
+  <name>Buffer Overflow</name>
+  <riskcode>2</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Medium (Medium)</riskdesc>
+  <desc>&lt;p&gt;Buffer overflow errors are characterized by the overwriting of memory spaces of the background web process, which should have never been modified intentionally or unintentionally. Overwriting values of the IP (Instruction Pointer), BP (Base Pointer) and other registers causes exceptions, segmentation faults, and other process errors to occur. Usually these errors end execution of the application in an unexpected way. &lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>POST</method>
+  <param>quantity</param>
+  <attack>SiuoZoWMUofNVNwKqRSSZntNpcfSVdPPZPIoSwpvqtQiYmvYdjpPDHmiZWNqoCIIwFTTtUZYkByRuKGRkiVbhSPBfKsrbgfjwVIiVWRYYOkJfeeLEwCJGVADFYlckvdBtCEaVUFrVYIcwHZCvpZyFQFYIxrGVQKVqvEjCJYwyTagBGMFBWQBqlDPEAAnZLZVsPqkjWWfajyoOeTeJQqWAwkGBWFwBDMTUGHEkAyRiFvkkDePeIRAlYBQXTxMPSurVgJOuXhJanDNmbdbRAguQbhHOibdnlLjwhtvahtxkxfuDqosRKKnKiOChDFDAXuogadQEETsHPgVWvordgYncWDsrTgoZRauVquRmfLhZXtQFsGQipwveZmALveuAnFMhtRSPMBpPRLtOrudpZGFBUXyhUjHdewiSffjFQcmUSrvfwPKnAgBlhXJFvjHyPWtbLTJlNFXXPEoBFQqQItqSayLuLGZvjVmSABPPAycbSCaZCKnCdZIevyfjDfpYVWisIUGdeOxgLQpfONJCsYHHbDGiPLHGkUYHqTDWIYtATTCsHGNRYDQeaKwPbYKdHimmpsfQFUWvUhPOEVGPFwsBPvcVDXoFdHmuNiqRSnpGDuwPsbuDqNoJbLAUcuEpFqklfckYThSZgaxsfRbKabqHJxCFQrTjfdSUlIrRmeWLwjOnWOIpqtgRShyEMtqUNMhnSvHNDMGDGiXocpppFnYCSgcQDyIYjxVHCnlWlWLEHZsennBWSSFOneGvdSylVnVNnoGlgLMooqhWmZJfJtqeBMtnSjtIyklyANvfeyPZwyOYYIUoIAUuGaHSGdWQPWKtWCQvVIBOSYbOeCgqVhmlytujOweIvHXTRURZjhWxxMmLiTRhcwWAoIbrBtlJTyNtEQrmtUxRlAKjqLOqPxOxLAnAgZyOJrqsrMIDWZJusrAEADPwosOnRmguuYLIhNKuyyNhEcFlcCOfeWDkunGbWNYGZeymVZoGgIlQHDgMUeMXffgLjXYUNNSbpVptTbdnSgjoOyRurMewCNxKxoUCqjAQDktWbVkDOlhMOYVlYRMsfoprfFWSVlVBxeVGvejJnarnSsSCBdPXCbjBpEdMYPoAhMtRtLthAiBegjpnLjcQjTFPUIVeactcdFTweTPJYdoeHpWVxCBQSevMMDuvwEsYtBrMTdPxVemqhnhFXWoKjMiMfeSaiVSZwwNitXByVAuJMBlOjSAJIWasAhuIqAUkGITIsxmWjPfBeTTuZwKexEBYxfnvSxFUqdpIKGyUwnaGmBYOiBUWfPYdZwLMMAarAgeicqVpUvRmkXSPlMZGfdHPOIEllauFfFhqxNGMfPRexOllBdWmGOqQGIejhTOtmgfmhiQfWjsGdjgvHojWseELHIJZIMVmjNHQXgUIwJXQrZJjZPUwlcrAJucmNlqKCmYbvxNbAEbHjlxIyxBFcDsxyFEGHdUmUAfqtlCsdISakUpwHjcSveDFrrNoaEcNKVscrfFRCoqgTVpVJmwmCgjEnkBQCgYalVMVRDENvYdVdqlTVksmonhSXouAsgjoRTealgPDuJSyylSfnAmfWooQWKZOKXGOIEabqGBGZjaMFjXUobvxdavsiEiagLKoXPGwRSledxRdurUeThyNseEKjLrmxoYmMbMpEyeQrDygWIfLJiJdKGkEYBoifQemZYcgWanrZcvCSxiJdrOdLdlByoqnABnSVppZXMIULUXYeDUjqEEtDWQJxwGuxcgntqMdsnCMIHLNRwfVUuZSJBXPeSTFDPbhNgjpEWNBYlfLqvQYkXtKpyBQMFkVwQscJpiEMxFHlUfxfyqRqpHfyFGqktkFfaSURYwZVOTSBhLQcvdXvbIdIAZVQXkVqBQODridskaxXmMwQxLebEWnifFchHVbWyxtiWvEVeeHKXbNjLWYCmKAVpCqjQFWukQQrSEVsnbwyKYftjOogTteHhDIdqcqlWgJCwycnRLmuhJoICrXaRjmRqQCKvIybeYSvfyYUXpCattEbSfvBLiRqrQAesiXsmpSlEbdiNKBpwFPeFiAhLRoJmmAjXWBQBtXpdddfJgMuvWceENNELsZjsZlmEE</attack>
+  <evidence>Connection: close</evidence>
+  </instance>
+  </instances>
+  <count>1</count>
+  <solution>&lt;p&gt;Rewrite the background program using proper return length checking.  This will require a recompile of the background executable.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;Potential Buffer Overflow.  The script closed the connection and threw a 500 Internal Server Error&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;https://owasp.org/www-community/attacks/Buffer_overflow_attack&lt;/p&gt;</reference>
+  <cweid>120</cweid>
+  <wascid>7</wascid>
+  <sourceid>1</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>40012</pluginid>
+  <alertRef>40012</alertRef>
+  <alert>Cross Site Scripting (Reflected)</alert>
+  <name>Cross Site Scripting (Reflected)</name>
+  <riskcode>3</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>High (Medium)</riskdesc>
+  <desc>&lt;p&gt;Cross-site Scripting (XSS) is an attack technique that involves echoing attacker-supplied code into a user&apos;s browser instance. A browser instance can be a standard web browser client, or a browser object embedded in a software product such as the browser within WinAmp, an RSS reader, or an email client. The code itself is usually written in HTML/JavaScript, but may also extend to VBScript, ActiveX, Java, Flash, or any other browser-supported technology.&lt;/p&gt;&lt;p&gt;When an attacker gets a user&apos;s browser to execute his/her code, the code will run within the security context (or zone) of the hosting web site. With this level of privilege, the code has the ability to read, modify and transmit any sensitive data accessible by the browser. A Cross-site Scripted user could have his/her account hijacked (cookie theft), their browser redirected to another location, or possibly shown fraudulent content delivered by the web site they are visiting. Cross-site Scripting attacks essentially compromise the trust relationship between a user and the web site. Applications utilizing browser object instances which load content from the file system may execute code under the local machine zone allowing for system compromise.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;There are three types of Cross-site Scripting attacks: non-persistent, persistent and DOM-based.&lt;/p&gt;&lt;p&gt;Non-persistent attacks and DOM-based attacks require a user to either visit a specially crafted link laced with malicious code, or visit a malicious web page containing a web form, which when posted to the vulnerable site, will mount the attack. Using a malicious form will oftentimes take place when the vulnerable resource only accepts HTTP POST requests. In such a case, the form can be submitted automatically, without the victim&apos;s knowledge (e.g. by using JavaScript). Upon clicking on the malicious link or submitting the malicious form, the XSS payload will get echoed back and will get interpreted by the user&apos;s browser and execute. Another technique to send almost arbitrary requests (GET and POST) is by using an embedded client, such as Adobe Flash.&lt;/p&gt;&lt;p&gt;Persistent attacks occur when the malicious code is submitted to a web site where it&apos;s stored for a period of time. Examples of an attacker&apos;s favorite targets often include message board posts, web mail messages, and web chat software. The unsuspecting user is not required to interact with any additional site/link (e.g. an attacker site or a malicious link sent via email), just simply view the web page containing the code.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/search.jsp?q=%3C%2Ffont%3E%3Cscript%3Ealert%281%29%3B%3C%2Fscript%3E%3Cfont%3E</uri>
+  <method>GET</method>
+  <param>q</param>
+  <attack>&lt;/font&gt;&lt;script&gt;alert(1);&lt;/script&gt;&lt;font&gt;</attack>
+  <evidence>&lt;/font&gt;&lt;script&gt;alert(1);&lt;/script&gt;&lt;font&gt;</evidence>
+  </instance>
+  </instances>
+  <count>1</count>
+  <solution>&lt;p&gt;Phase: Architecture and Design&lt;/p&gt;&lt;p&gt;Use a vetted library or framework that does not allow this weakness to occur or provides constructs that make this weakness easier to avoid.&lt;/p&gt;&lt;p&gt;Examples of libraries and frameworks that make it easier to generate properly encoded output include Microsoft&apos;s Anti-XSS library, the OWASP ESAPI Encoding module, and Apache Wicket.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phases: Implementation; Architecture and Design&lt;/p&gt;&lt;p&gt;Understand the context in which your data will be used and the encoding that will be expected. This is especially important when transmitting data between different components, or when generating outputs that can contain multiple encodings at the same time, such as web pages or multi-part mail messages. Study all expected communication protocols and data representations to determine the required encoding strategies.&lt;/p&gt;&lt;p&gt;For any data that will be output to another web page, especially any data that was received from external inputs, use the appropriate encoding on all non-alphanumeric characters.&lt;/p&gt;&lt;p&gt;Consult the XSS Prevention Cheat Sheet for more details on the types of encoding and escaping that are needed.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Architecture and Design&lt;/p&gt;&lt;p&gt;For any security checks that are performed on the client side, ensure that these checks are duplicated on the server side, in order to avoid CWE-602. Attackers can bypass the client-side checks by modifying values after the checks have been performed, or by changing the client to remove the client-side checks entirely. Then, these modified values would be submitted to the server.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;If available, use structured mechanisms that automatically enforce the separation between data and code. These mechanisms may be able to provide the relevant quoting, encoding, and validation automatically, instead of relying on the developer to provide this capability at every point where output is generated.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Implementation&lt;/p&gt;&lt;p&gt;For every web page that is generated, use and specify a character encoding such as ISO-8859-1 or UTF-8. When an encoding is not specified, the web browser may choose a different encoding by guessing which encoding is actually being used by the web page. This can cause the web browser to treat certain sequences as special, opening up the client to subtle XSS attacks. See CWE-116 for more mitigations related to encoding/escaping.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;To help mitigate XSS attacks against the user&apos;s session cookie, set the session cookie to be HttpOnly. In browsers that support the HttpOnly feature (such as more recent versions of Internet Explorer and Firefox), this attribute can prevent the user&apos;s session cookie from being accessible to malicious client-side scripts that use document.cookie. This is not a complete solution, since HttpOnly is not supported by all browsers. More importantly, XMLHTTPRequest and other powerful browser technologies provide read access to HTTP headers, including the Set-Cookie header in which the HttpOnly flag is set.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Assume all input is malicious. Use an &quot;accept known good&quot; input validation strategy, i.e., use an allow list of acceptable inputs that strictly conform to specifications. Reject any input that does not strictly conform to specifications, or transform it into something that does. Do not rely exclusively on looking for malicious or malformed inputs (i.e., do not rely on a deny list). However, deny lists can be useful for detecting potential attacks or determining which inputs are so malformed that they should be rejected outright.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;When performing input validation, consider all potentially relevant properties, including length, type of input, the full range of acceptable values, missing or extra inputs, syntax, consistency across related fields, and conformance to business rules. As an example of business rule logic, &quot;boat&quot; may be syntactically valid because it only contains alphanumeric characters, but it is not valid if you are expecting colors such as &quot;red&quot; or &quot;blue.&quot;&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Ensure that you perform input validation at well-defined interfaces within the application. This will help protect the application even if a component is reused or moved elsewhere.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;http://projects.webappsec.org/Cross-Site-Scripting&lt;/p&gt;&lt;p&gt;http://cwe.mitre.org/data/definitions/79.html&lt;/p&gt;</reference>
+  <cweid>79</cweid>
+  <wascid>8</wascid>
+  <sourceid>1</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10031</pluginid>
+  <alertRef>10031</alertRef>
+  <alert>User Controllable HTML Element Attribute (Potential XSS)</alert>
+  <name>User Controllable HTML Element Attribute (Potential XSS)</name>
+  <riskcode>0</riskcode>
+  <confidence>1</confidence>
+  <riskdesc>Informational (Low)</riskdesc>
+  <desc>&lt;p&gt;This check looks at user-supplied input in query string parameters and POST data to identify where certain HTML attribute values might be controlled. This provides hot-spot detection for XSS (cross-site scripting) that will require further review by a security analyst to determine exploitability.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=26</uri>
+  <method>GET</method>
+  <param>prodid</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=16</uri>
+  <method>GET</method>
+  <param>prodid</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=14</uri>
+  <method>GET</method>
+  <param>prodid</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=21</uri>
+  <method>GET</method>
+  <param>prodid</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=27</uri>
+  <method>GET</method>
+  <param>prodid</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=16</uri>
+  <method>GET</method>
+  <param>prodid</param>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=11</uri>
+  <method>GET</method>
+  <param>prodid</param>
+  </instance>
+  </instances>
+  <count>7</count>
+  <solution>&lt;p&gt;Validate all input and sanitize output it before writing to any HTML attributes.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;http://bodgeit.securecodebox-demo.svc:8080/bodgeit/product.jsp?prodid=26&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;appears to include user input in: &lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;a(n) [input] tag [value] attribute &lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;The user input found was:&lt;/p&gt;&lt;p&gt;prodid=26&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;The user-controlled value was:&lt;/p&gt;&lt;p&gt;26&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;http://websecuritytool.codeplex.com/wikipage?title=Checks#user-controlled-html-attribute&lt;/p&gt;</reference>
+  <cweid>20</cweid>
+  <wascid>20</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10096</pluginid>
+  <alertRef>10096</alertRef>
+  <alert>Timestamp Disclosure - Unix</alert>
+  <name>Timestamp Disclosure - Unix</name>
+  <riskcode>0</riskcode>
+  <confidence>1</confidence>
+  <riskdesc>Informational (Low)</riskdesc>
+  <desc>&lt;p&gt;A timestamp was disclosed by the application/web server - Unix&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/admin.jsp</uri>
+  <method>GET</method>
+  <evidence>1111111111</evidence>
+  </instance>
+  </instances>
+  <count>1</count>
+  <solution>&lt;p&gt;Manually confirm that the timestamp data is not sensitive, and that the data cannot be aggregated to disclose exploitable patterns.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;1111111111, which evaluates to: 2005-03-18 01:58:31&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;http://projects.webappsec.org/w/page/13246936/Information%20Leakage&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10010</pluginid>
+  <alertRef>10010</alertRef>
+  <alert>Cookie No HttpOnly Flag</alert>
+  <name>Cookie No HttpOnly Flag</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;A cookie has been set without the HttpOnly flag, which means that the cookie can be accessed by JavaScript. If a malicious script can be run on this page then the cookie will be accessible and can be transmitted to another site. If this is a session cookie then session hijacking may be possible.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>POST</method>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>GET</method>
+  </instance>
+  </instances>
+  <count>2</count>
+  <solution>&lt;p&gt;Ensure that the HttpOnly flag is set for all cookies.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://owasp.org/www-community/HttpOnly&lt;/p&gt;</reference>
+  <cweid>1004</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>40026</pluginid>
+  <alertRef>40026</alertRef>
+  <alert>Cross Site Scripting (DOM Based)</alert>
+  <name>Cross Site Scripting (DOM Based)</name>
+  <riskcode>3</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>High (Medium)</riskdesc>
+  <desc>&lt;p&gt;Cross-site Scripting (XSS) is an attack technique that involves echoing attacker-supplied code into a user&apos;s browser instance. A browser instance can be a standard web browser client, or a browser object embedded in a software product such as the browser within WinAmp, an RSS reader, or an email client. The code itself is usually written in HTML/JavaScript, but may also extend to VBScript, ActiveX, Java, Flash, or any other browser-supported technology.&lt;/p&gt;&lt;p&gt;When an attacker gets a user&apos;s browser to execute his/her code, the code will run within the security context (or zone) of the hosting web site. With this level of privilege, the code has the ability to read, modify and transmit any sensitive data accessible by the browser. A Cross-site Scripted user could have his/her account hijacked (cookie theft), their browser redirected to another location, or possibly shown fraudulent content delivered by the web site they are visiting. Cross-site Scripting attacks essentially compromise the trust relationship between a user and the web site. Applications utilizing browser object instances which load content from the file system may execute code under the local machine zone allowing for system compromise.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;There are three types of Cross-site Scripting attacks: non-persistent, persistent and DOM-based.&lt;/p&gt;&lt;p&gt;Non-persistent attacks and DOM-based attacks require a user to either visit a specially crafted link laced with malicious code, or visit a malicious web page containing a web form, which when posted to the vulnerable site, will mount the attack. Using a malicious form will oftentimes take place when the vulnerable resource only accepts HTTP POST requests. In such a case, the form can be submitted automatically, without the victim&apos;s knowledge (e.g. by using JavaScript). Upon clicking on the malicious link or submitting the malicious form, the XSS payload will get echoed back and will get interpreted by the user&apos;s browser and execute. Another technique to send almost arbitrary requests (GET and POST) is by using an embedded client, such as Adobe Flash.&lt;/p&gt;&lt;p&gt;Persistent attacks occur when the malicious code is submitted to a web site where it&apos;s stored for a period of time. Examples of an attacker&apos;s favorite targets often include message board posts, web mail messages, and web chat software. The unsuspecting user is not required to interact with any additional site/link (e.g. an attacker site or a malicious link sent via email), just simply view the web page containing the code.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/search.jsp?q=%3Cscript%3Ealert(1)%3C/script%3E</uri>
+  <method>GET</method>
+  <attack>&lt;script&gt;alert(1)&lt;/script&gt;</attack>
+  </instance>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/search.jsp#jaVasCript:/*-/*`/*\`/*&apos;/*&quot;/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//&lt;/stYle/&lt;/titLe/&lt;/teXtarEa/&lt;/scRipt/--!&gt;\x3csVg/&lt;sVg/oNloAd=alert()//&gt;\x3e</uri>
+  <method>GET</method>
+  <attack>#jaVasCript:/*-/*`/*\`/*&apos;/*&quot;/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//&lt;/stYle/&lt;/titLe/&lt;/teXtarEa/&lt;/scRipt/--!&gt;\x3csVg/&lt;sVg/oNloAd=alert()//&gt;\x3e</attack>
+  </instance>
+  </instances>
+  <count>2</count>
+  <solution>&lt;p&gt;Phase: Architecture and Design&lt;/p&gt;&lt;p&gt;Use a vetted library or framework that does not allow this weakness to occur or provides constructs that make this weakness easier to avoid.&lt;/p&gt;&lt;p&gt;Examples of libraries and frameworks that make it easier to generate properly encoded output include Microsoft&apos;s Anti-XSS library, the OWASP ESAPI Encoding module, and Apache Wicket.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phases: Implementation; Architecture and Design&lt;/p&gt;&lt;p&gt;Understand the context in which your data will be used and the encoding that will be expected. This is especially important when transmitting data between different components, or when generating outputs that can contain multiple encodings at the same time, such as web pages or multi-part mail messages. Study all expected communication protocols and data representations to determine the required encoding strategies.&lt;/p&gt;&lt;p&gt;For any data that will be output to another web page, especially any data that was received from external inputs, use the appropriate encoding on all non-alphanumeric characters.&lt;/p&gt;&lt;p&gt;Consult the XSS Prevention Cheat Sheet for more details on the types of encoding and escaping that are needed.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Architecture and Design&lt;/p&gt;&lt;p&gt;For any security checks that are performed on the client side, ensure that these checks are duplicated on the server side, in order to avoid CWE-602. Attackers can bypass the client-side checks by modifying values after the checks have been performed, or by changing the client to remove the client-side checks entirely. Then, these modified values would be submitted to the server.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;If available, use structured mechanisms that automatically enforce the separation between data and code. These mechanisms may be able to provide the relevant quoting, encoding, and validation automatically, instead of relying on the developer to provide this capability at every point where output is generated.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Implementation&lt;/p&gt;&lt;p&gt;For every web page that is generated, use and specify a character encoding such as ISO-8859-1 or UTF-8. When an encoding is not specified, the web browser may choose a different encoding by guessing which encoding is actually being used by the web page. This can cause the web browser to treat certain sequences as special, opening up the client to subtle XSS attacks. See CWE-116 for more mitigations related to encoding/escaping.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;To help mitigate XSS attacks against the user&apos;s session cookie, set the session cookie to be HttpOnly. In browsers that support the HttpOnly feature (such as more recent versions of Internet Explorer and Firefox), this attribute can prevent the user&apos;s session cookie from being accessible to malicious client-side scripts that use document.cookie. This is not a complete solution, since HttpOnly is not supported by all browsers. More importantly, XMLHTTPRequest and other powerful browser technologies provide read access to HTTP headers, including the Set-Cookie header in which the HttpOnly flag is set.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Assume all input is malicious. Use an &quot;accept known good&quot; input validation strategy, i.e., use an allow list of acceptable inputs that strictly conform to specifications. Reject any input that does not strictly conform to specifications, or transform it into something that does. Do not rely exclusively on looking for malicious or malformed inputs (i.e., do not rely on a deny list). However, deny lists can be useful for detecting potential attacks or determining which inputs are so malformed that they should be rejected outright.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;When performing input validation, consider all potentially relevant properties, including length, type of input, the full range of acceptable values, missing or extra inputs, syntax, consistency across related fields, and conformance to business rules. As an example of business rule logic, &quot;boat&quot; may be syntactically valid because it only contains alphanumeric characters, but it is not valid if you are expecting colors such as &quot;red&quot; or &quot;blue.&quot;&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Ensure that you perform input validation at well-defined interfaces within the application. This will help protect the application even if a component is reused or moved elsewhere.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;http://projects.webappsec.org/Cross-Site-Scripting&lt;/p&gt;&lt;p&gt;http://cwe.mitre.org/data/definitions/79.html&lt;/p&gt;</reference>
+  <cweid>79</cweid>
+  <wascid>8</wascid>
+  <sourceid>1</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>40033</pluginid>
+  <alertRef>40033</alertRef>
+  <alert>NoSQL Injection - MongoDB</alert>
+  <name>NoSQL Injection - MongoDB</name>
+  <riskcode>3</riskcode>
+  <confidence>3</confidence>
+  <riskdesc>High (High)</riskdesc>
+  <desc>&lt;p&gt;MongoDB query injection may be possible.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://bodgeit.securecodebox-demo.svc:8080/bodgeit/basket.jsp</uri>
+  <method>POST</method>
+  <param>price</param>
+  <attack>price[$ne]</attack>
+  </instance>
+  </instances>
+  <count>1</count>
+  <solution>&lt;p&gt;Do not trust client side input and escape all data on the server side. &lt;/p&gt;&lt;p&gt;Avoid to use the query input directly into the where and group clauses and upgrade all drivers at the latest available version.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;In some PHP or NodeJS based back end implementations, in order to obtain sensitive data it is possible to inject the &quot;[$ne]&quot; string (or other similar ones) that is processed as an associative array rather than a simple text.&lt;/p&gt;&lt;p&gt;Through this, the queries made to MongoDB will always be true.&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;https://arxiv.org/pdf/1506.04082.pdf&lt;/p&gt;&lt;p&gt;https://owasp.org/www-project-web-security-testing-guide/v41/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05.6-Testing_for_NoSQL_Injection.html&lt;/p&gt;</reference>
+  <cweid>943</cweid>
+  <wascid>19</wascid>
+  <sourceid>1</sourceid>
+</alertitem>
+</alerts></site></OWASPZAPReport>

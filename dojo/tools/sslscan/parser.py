@@ -1,5 +1,4 @@
 import hashlib
-from urllib.parse import urlparse
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree as ET
@@ -33,17 +32,8 @@ class SslscanParser(object):
                 severity = ""
                 description = ""
                 severity = "Info"
-                url = ssltest.attrib['host']
-                port = ssltest.attrib['port']
-                parsedUrl = urlparse(url)
-                protocol = parsedUrl.scheme
-                query = parsedUrl.query
-                fragment = parsedUrl.fragment
-                path = parsedUrl.path
-                try:
-                    (host, port) = parsedUrl.netloc.split(':')
-                except:
-                    host = parsedUrl.netloc
+                host = ssltest.attrib['host']
+                port = int(ssltest.attrib['port'])
                 if target.tag == "heartbleed" and target.attrib['vulnerable'] == '1':
                     title = "heartbleed" + " | " + target.attrib['sslversion']
                     description = "**heartbleed** :" + "\n\n" + \
@@ -68,21 +58,18 @@ class SslscanParser(object):
                         finding = Finding(
                             title=title,
                             test=test,
-                            active=False,
-                            verified=False,
                             description=description,
                             severity=severity,
-                            numerical_severity=Finding.get_numerical_severity(severity),
                             dynamic_finding=True,)
                         finding.unsaved_endpoints = list()
                         dupes[dupe_key] = finding
 
-                        if url is not None:
-                            finding.unsaved_endpoints.append(Endpoint(
-                                host=host,
-                                port=port,
-                                path=path,
-                                protocol=protocol,
-                                query=query,
-                                fragment=fragment,))
+                        if host:
+                            if '://' in host:
+                                endpoint = Endpoint.from_uri(host)
+                            else:
+                                endpoint = Endpoint(
+                                    host=host,
+                                    port=port)
+                            finding.unsaved_endpoints.append(endpoint)
         return dupes.values()

@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 {% block add_css %}
+    {{ block.super }}
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
+    {{ block.super }}
 .chosen-container {
     width: 70% !important;
     }
@@ -16,6 +18,7 @@
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> Edit {{ product.name }}</h3>
     <form class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
@@ -29,11 +32,6 @@
             <hr>
             {% include "dojo/form_fields.html" with form=gform %}
         {% endif %}
-        {% if sonarqube_form %}
-            <h4> SonarQube API </h4>
-            <hr>
-            {% include "dojo/form_fields.html" with form=sonarqube_form %}
-        {% endif %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <input class="btn btn-primary" type="submit" value="Submit"/>
@@ -42,6 +40,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="application/javascript">
         $(function () {
@@ -66,10 +65,6 @@
               });
               mde.render();
             });
-            $('#id_product_manager').chosen({'placeholder_text_single': 'Select a Product Manager...'});
-            $('#id_team_manager').chosen({'placeholder_text_single': 'Select a Team Manager...'});
-            $('#id_technical_contact').chosen({'placeholder_text_single': 'Select a Technical Contact...'});
-            $('#id_authorized_users').chosen({'placeholder_text_multiple': 'Select some users...'});
 
         });
     </script>

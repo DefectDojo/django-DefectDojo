@@ -1,18 +1,10 @@
 {% extends "base.html" %}
+{% load display_tags %}
 {% load static %}
 
 {% block content %}
+    {{ block.super }}
     <h3> {{ name }} {% if to_edit %}- {{ to_edit.username }}{% endif %}</h3>
-    <div class="alert alert-info" role="alert">
-        By default all users are created with an unusable password. If a password is needed it can be set using the
-        {% if to_edit %}
-            <a href="{% url 'admin:auth_user_change' to_edit.id %}"><b>Admin interface</b></a>
-        {% else %}
-            Admin interface
-        {% endif %}.
-    </div>
-
-
     <form class="form-horizontal" method="post">{% csrf_token %}
         <fieldset>
             <legend>Default Information</legend>
@@ -22,33 +14,19 @@
             <legend>Additional Contact Information</legend>
             {% include "dojo/form_fields.html" with form=contact_form %}
         </fieldset>
+        <fieldset>
+            <legend>Global Role</legend>
+            {% include "dojo/form_fields.html" with form=global_role_form %}
+        </fieldset>
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-                <input class="btn btn-primary" type="submit" name="add_user" value="{{ name }}"/>
-                &nbsp;&nbsp;
-                {% if to_edit and to_edit.id != user.id %}
-                    <a class="btn btn-danger" href="{% url 'delete_user' to_edit.id %}">Delete User</a>
-                {% endif %}
+                <input class="btn btn-primary" type="submit" name="add_user" value="Submit"/>
             </div>
         </div>
     </form>
 {% endblock %}
 {% block postscript %}
-    {% if to_add or to_edit and not to_edit.is_staff %}
-        <script type="application/javascript">
-            $(function () {
-                $('#id_authorized_products').chosen({'placeholder_text_multiple': 'Select some products...'});
-                $('#id_authorized_product_types').chosen({'placeholder_text_multiple': 'Select some product types...'});
-            });
-        </script>
-    {% else %}
-        <script type="application/javascript">
-            $(function () {
-                $('#id_authorized_products').parents(".form-group").remove();
-                $('#id_authorized_product_types').parents(".form-group").remove();
-            });
-        </script>
-    {% endif %}
+    {{ block.super }}
     {% if not user.is_superuser %}
         <script type="application/javascript">
             $(function () {

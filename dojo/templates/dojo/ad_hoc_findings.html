@@ -3,14 +3,20 @@
 {% load display_tags %}
 {% load static %}
 {% block add_css %}
+    {{ block.super }}
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
-    .select2 .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    {{ block.super }}
+    .chosen-container {
+    width: 70% !important;
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
     width: 70% !important;
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <div>
         <h3> Add Findings to a Test </h3>
     </div>
@@ -52,6 +58,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js"%}"></script>
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
@@ -65,20 +72,18 @@
                     elem.id = "req"
                 }
 
-                var mde = new EasyMDE({
-                    spellChecker: false,
-                    element: elem,
-                    autofocus: false,
-                    forceSync: true,
-                    hideIcons: ["side-by-side", "fullscreen"]
-                });
-                mde.render();
+                if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids') {
+                    var mde = new EasyMDE({
+                        spellChecker: false,
+                        element: elem,
+                        autofocus: false,
+                        forceSync: true,
+                        hideIcons: ["side-by-side", "fullscreen"]
+                    });
+                    mde.render();
+                }
             });
         });
-        $('#add_id_endpoints').attr('href', "{% url 'add_endpoint' pid %}?_popup");
-        {% if not form_error %}
-            $('#id_endpoints').find('option').remove();
-        {% endif %}
     </script>
 
 

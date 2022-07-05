@@ -1,6 +1,5 @@
 import logging
 
-from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse
@@ -10,11 +9,12 @@ from dojo.forms import NoteTypeForm, EditNoteTypeForm, DisableOrEnableNoteTypeFo
 from dojo.models import Note_Type
 from dojo.filters import NoteTypesFilter
 from dojo.utils import get_page_items, add_breadcrumb
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.view_note_type', 'superuser')
 def note_type(request):
     initial_queryset = Note_Type.objects.all().order_by('name')
     name_words = initial_queryset.values_list('name', flat=True)
@@ -30,7 +30,7 @@ def note_type(request):
         'name_words': name_words})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.change_note_type', 'superuser')
 def edit_note_type(request, ntid):
     nt = get_object_or_404(Note_Type, pk=ntid)
     is_single = nt.is_single
@@ -56,7 +56,7 @@ def edit_note_type(request, ntid):
         'nt': nt})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.change_note_type', 'superuser')
 def disable_note_type(request, ntid):
     nt = get_object_or_404(Note_Type, pk=ntid)
     nt_form = DisableOrEnableNoteTypeForm(instance=nt)
@@ -81,7 +81,7 @@ def disable_note_type(request, ntid):
         'nt': nt})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.change_note_type', 'superuser')
 def enable_note_type(request, ntid):
     nt = get_object_or_404(Note_Type, pk=ntid)
     nt_form = DisableOrEnableNoteTypeForm(instance=nt)
@@ -105,7 +105,7 @@ def enable_note_type(request, ntid):
         'nt': nt})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_configuration_authorized('dojo.add_note_type', 'superuser')
 def add_note_type(request):
     form = NoteTypeForm()
     if request.method == 'POST':

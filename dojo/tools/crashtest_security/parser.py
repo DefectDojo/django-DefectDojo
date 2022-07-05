@@ -72,7 +72,6 @@ class CrashtestSecurityJsonParser(object):
             title=description["title"],
             description=finding["information"],
             test=test,
-            cve=None,
             severity=severity,
             mitigation=description["how_to_fix"],
             references=description["reference_resolution"],
@@ -83,7 +82,6 @@ class CrashtestSecurityJsonParser(object):
             out_of_scope=False,
             mitigated=None,
             impact=impact,
-            numerical_severity=Finding.get_numerical_severity(severity),
         )
 
     def generate_cve_finding(self, cve_finding, test):
@@ -97,13 +95,11 @@ class CrashtestSecurityJsonParser(object):
         """
         severity = self.get_severity(cve_finding["cvss"])
         references = "https://nvd.nist.gov/vuln/detail/{}".format(cve_finding["cve_id"])
-        return Finding(
+        finding = Finding(
             title=cve_finding["cve_id"],
             description=cve_finding["information"],
             test=test,
-            cve=cve_finding["cve_id"],
             severity=severity,
-            mitigation="No mitigation provided.",
             references=references,
             active=True,
             verified=False,
@@ -111,9 +107,9 @@ class CrashtestSecurityJsonParser(object):
             duplicate=False,
             out_of_scope=False,
             mitigated=None,
-            impact="No impact provided.",
-            numerical_severity=Finding.get_numerical_severity(severity),
         )
+        finding.unsaved_vulnerability_ids = [cve_finding["cve_id"]]
+        return finding
 
     def get_severity(self, cvss_base_score):
         """
@@ -184,9 +180,9 @@ class CrashtestSecurityXmlParser(object):
 
             # Attache CVEs
             if "CVE" in title:
-                cve = re.findall(r'CVE-\d{4}-\d{4,10}', title)[0]
+                vulnerability_id = re.findall(r'CVE-\d{4}-\d{4,10}', title)[0]
             else:
-                cve = None
+                vulnerability_id = None
             description = failure.get('message')
             severity = failure.get('type').capitalize()
 
@@ -201,7 +197,6 @@ class CrashtestSecurityXmlParser(object):
             find = Finding(title=title,
                            description=description,
                            test=test,
-                           cve=cve,
                            severity=severity,
                            mitigation="No mitigation provided",
                            active=False,
@@ -211,7 +206,9 @@ class CrashtestSecurityXmlParser(object):
                            out_of_scope=False,
                            mitigated=None,
                            impact="No impact provided",
-                           numerical_severity=Finding.get_numerical_severity(severity))
+                           )
+            if vulnerability_id:
+                find.unsaved_vulnerability_ids = [vulnerability_id]
             items.append(find)
 
         return items

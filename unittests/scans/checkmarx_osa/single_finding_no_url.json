@@ -1,0 +1,38 @@
+[
+  [
+    {
+      "id": "2A3E02E74053088617923D6FE19F14E8188B5271",
+      "cveName": "CVE-2020-25649",
+      "score": 7.5,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2020-12-03T17:15:00",
+      "description": "A flaw was found in FasterXML Jackson Databind before 2.6.7.4, 2.7.0 through 2.9.10.6, and 2.10.0 through 2.10.5, where it did not have entity expansion secured properly. This flaw makes it vulnerable to XML external entity (XXE) attacks. The highest threat from this vulnerability is data integrity.",
+      "recommendations": "Upgrade to 2.10.5.1",
+      "sourceFileName": "",
+      "libraryId": "76F59F68DE2C8064E535A70E5874405EC654031E",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    }
+  ],
+  [
+    {
+      "id": "76F59F68DE2C8064E535A70E5874405EC654031E",
+      "name": "com.fasterxml.jackson.core:jackson-databind",
+      "version": "2.10.2",
+      "newestVersion": "2.12.1",
+      "newestVersionReleaseDate": "2021-01-09T01:30:57",
+      "numberOfVersionsSinceLastUpdate": 12,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 2,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    }
+  ]
+]

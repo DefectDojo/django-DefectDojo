@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row" xmlns="http://www.w3.org/1999/html">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -13,8 +15,8 @@
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form.has_changed %}in{% endif %}">
-                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                <div id="the-filters" class="is-filters panel-body collapse {% if filter_form.has_changed %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filter_form %}
                 </div>
             </div>
             {% if products %}
@@ -24,7 +26,7 @@
                 </div>
 
                 <div class="table-responsive panel panel-default">
-                    <table id="engagements" class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                    <table id="engagements" class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
                             <th>Product</th>
@@ -37,9 +39,7 @@
                             <th>Period</th>
                             <th>Lead</th>
                             <th>Tests</th>
-                            {% if user.is_staff %}
-                                <th>Engagement</th>
-                            {% endif %}
+                            <th>Engagement</th>
                         </tr>
                         </thead>
 
@@ -49,27 +49,14 @@
                                 <tr>
 
                                     <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
-                                        <sup>
-                                            {% for tag in p.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                            href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                            {% endfor %}
-                                        </sup>
+                                        {% include "dojo/snippets/tags.html" with tags=p.tags.all %}
                                     </td>
                                     <td class="prod_name">
                                         <a href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
                                     </td>
                                     <td>
-                                        <a style="display: inline" class="eng_link"
-                                           href="{% url 'view_engagement' e.id %}">
-                                            {% if e.name %}{{ e.name }} {% endif %}
-                                        </a>
-                                        <sup>
-                                            {% for tag in e.tags.all %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                            href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
-                                            {% endfor %}
-                                        </sup>
+                                        <a class="eng_link" href="{% url 'view_engagement' e.id %}">{% if e.name %}{{ e.name }}{% endif %}</a>
+                                        {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                         <br>
                                     </td>
                                     {% if system_settings.enable_jira %}
@@ -78,27 +65,25 @@
                                     </td>
                                     {% endif %}
                                     <td> {{ e.status }} </td>
-                                    <td> {{ e.target_start|date:"SHORT_DATE_FORMAT" }} - {{ e.target_end|date:"SHORT_DATE_FORMAT" }}
-                                        {% if e.is_overdue %}<sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
+                                    <td> {{ e.target_start }} - {{ e.target_end }}
+                                        {% if e.is_overdue and e.active %}
+                                        <sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
                                         {% endif %}
                                     </td>
-                                    <td> {{ e.lead.first_name }}</td>
-                                    <td> {% for test in e.test_set.all %}
-                                        {% if test.lead %}
-                                            <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} ({{ test.updated|date}})</a>
-                                        {% else %}
-                                            <a href="{% url 'view_test' test.id %}"> {{ test }} ({{ test.updated|date}})</a>
-                                        {% endif %}
-                                        <br>
-                                    {% endfor %}
+                                    <td> {{ e.lead.first_name }} {{ e.lead.last_name }}</td>
+                                    <td>
+                                        <a class="eng_link"
+                                           href="{% url 'view_engagement' e.id %}#tests">
+                                            {{ e.test_count }}
+                                        </a>
                                     </td>
-                                    {% if user.is_staff %}
-                                        <td>
-                                            <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
+                                    <td>
+                                        {% if p|has_object_permission:"Engagement_Add" %}
+                                        <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
                                                 <i class="fa fa-plus"></i> Add
-                                            </a>
-                                        </td>
-                                    {% endif %}
+                                        </a>
+                                        {% endif %}
+                                    </td>
                                 </tr>
 
                             {% endfor %}
@@ -116,6 +101,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 
     <script>
         $(function () {

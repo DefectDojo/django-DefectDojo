@@ -1,10 +1,8 @@
 import hashlib
 import re
-from urllib.parse import urlparse
-from xml.dom import NamespaceErr
 
 import html2text
-from defusedxml import ElementTree as ET
+from defusedxml.ElementTree import parse
 
 from dojo.models import Endpoint, Finding
 
@@ -22,30 +20,20 @@ class MicrofocusWebinspectParser(object):
         return "Import XML report"
 
     def get_findings(self, file, test):
-
-        tree = ET.parse(file)
+        tree = parse(file)
         # get root of tree.
         root = tree.getroot()
         if 'Sessions' not in root.tag:
-            raise NamespaceErr("This doesn't seem to be a valid Webinspect xml file.")
+            raise ValueError("This doesn't seem to be a valid Webinspect xml file.")
 
         dupes = dict()
         for session in root:
             url = session.find('URL').text
-            parts = urlparse(url)
-            endpoint = Endpoint(protocol=parts.scheme,
-                                host=parts.netloc,
-                                path=parts.path,
-                                query=parts.query,
-                                fragment=parts.fragment,
-                                product=test.engagement.product)
+            endpoint = Endpoint.from_uri(url)
             issues = session.find('Issues')
             for issue in issues.findall('Issue'):
-                unique_id_from_tool = issue.attrib.get("id", None)
-                title = issue.find('Name').text
-                description = ""
-                mitigation = ""
-                reference = ""
+                mitigation = None
+                reference = None
                 severity = MicrofocusWebinspectParser.convert_severity(issue.find('Severity').text)
                 for content in issue.findall('ReportSection'):
                     name = content.find('Name').text
@@ -68,34 +56,35 @@ class MicrofocusWebinspectParser(object):
                         cwe = MicrofocusWebinspectParser.get_cwe(content.attrib['identifier'])
                         description += "\n\n" + content.text + "\n"
 
+                finding = Finding(
+                    title=issue.findtext('Name'),
+                    test=test,
+                    cwe=cwe,
+                    description=description,
+                    mitigation=mitigation,
+                    severity=severity,
+                    references=reference,
+                    static_finding=False,
+                    dynamic_finding=True,
+                    nb_occurences=1,
+                )
+                if "id" in issue.attrib:
+                    finding.unique_id_from_tool = issue.attrib.get("id")
+                # manage endpoint
+                finding.unsaved_endpoints = [endpoint]
+
                 # make dupe hash key
-                dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
+                dupe_key = hashlib.sha256("|".join([
+                    finding.description,
+                    finding.title,
+                    finding.severity,
+                ]).encode('utf-8')).hexdigest()
                 # check if dupes are present.
                 if dupe_key in dupes:
-                    finding = dupes[dupe_key]
-                    if finding.description:
-                        finding.description = finding.description
-                    dupes[dupe_key] = finding
+                    find = dupes[dupe_key]
+                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    find.nb_occurences += finding.nb_occurences
                 else:
-                    dupes[dupe_key] = True
-
-                    finding = Finding(title=title,
-                                    test=test,
-                                    active=False,
-                                    verified=False,
-                                    cwe=cwe,
-                                    description=description,
-                                    severity=severity,
-                                    numerical_severity=Finding.get_numerical_severity(
-                                        severity),
-                                    mitigation=mitigation,
-                                    references=reference,
-                                    static_finding=False,
-                                    dynamic_finding=True)
-                    if "id" in issue.attrib:
-                        finding.unique_id_from_tool = issue.attrib.get("id")
-                    # manage endpoint
-                    finding.unsaved_endpoints.append(endpoint)
                     dupes[dupe_key] = finding
 
         return list(dupes.values())

@@ -51,13 +51,21 @@ def system_settings(request):
     if request.method == 'POST':
         form = SystemSettingsForm(request.POST, instance=system_settings_obj)
         if form.is_valid():
-            new_settings = form.save()
-            enable_disable_auditlog(enable=new_settings.enable_auditlog)
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Settings saved.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('system_settings', ))
+            if (form.cleaned_data['default_group'] is None and form.cleaned_data['default_group_role'] is not None) or \
+               (form.cleaned_data['default_group'] is not None and form.cleaned_data['default_group_role'] is None):
+                messages.add_message(request,
+                    messages.WARNING,
+                    'Settings cannot be saved: Default group and Default group role must either both be set or both be empty.',
+                    extra_tags='alert-warning')
+            else:
+                new_settings = form.save()
+                enable_disable_auditlog(enable=new_settings.enable_auditlog)
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Settings saved.',
+                                    extra_tags='alert-success')
+        return HttpResponseRedirect(reverse('system_settings', ))
+
     else:
         # Celery needs to be set with the setting: CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
         if hasattr(settings, 'CELERY_RESULT_BACKEND'):

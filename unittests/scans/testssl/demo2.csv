@@ -1,0 +1,7 @@
+"id","fqdn/ip","port","severity","finding","cve","cwe"
+"service","fghgfh.com/213.186.33.31","443","INFO","HTTP","",""
+"pre_128cipher","fghgfh.com/213.186.33.31","443","INFO","No 128 cipher limit bug","",""
+"FS","fghgfh.com/213.186.33.31","443","OK","offered","",""
+"FS_ciphers","fghgfh.com/213.186.33.31","443","INFO","ECDHE-RSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-SHA384 ECDHE-RSA-AES256-SHA DHE-RSA-AES256-GCM-SHA384 DHE-RSA-AES256-SHA256 DHE-RSA-AES256-SHA ECDHE-RSA-AES128-GCM-SHA256 ECDHE-RSA-AES128-SHA256 ECDHE-RSA-AES128-SHA DHE-RSA-AES128-GCM-SHA256 DHE-RSA-AES128-SHA256 DHE-RSA-AES128-SHA","",""
+"FS_ECDHE_curves","fghgfh.com/213.186.33.31","443","OK","prime256v1","",""
+"DH_groups","fghgfh.com/213.186.33.31","443","OK","HAProxy","",""

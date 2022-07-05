@@ -18,18 +18,21 @@ class TruffleHogParser(object):
     def get_findings(self, filename, test):
 
         data = filename.read()
-        self.dupes = dict()
-        self.items = ()
+        dupes = dict()
 
         for line in data.splitlines():
-            json_data = self.parse_json(line)
+            try:
+                json_data = json.loads(str(line, 'utf-8'))
+            except:
+                json_data = json.loads(line)
             file = json_data["path"]
 
             reason = json_data["reason"]
             titleText = "Hard Coded " + reason + " in: " + file
 
             commit = json_data["commit"]
-            description = "**Commit:** " + commit.rstrip("\n") + "\n"
+            description = "**Commit:** " + str(json_data.get("commit")).split("\n")[0] + "\n"
+            description += "```\n" + str(json_data.get("commit")).replace('```', '\\`\\`\\`') + "\n```\n"
             description += "**Commit Hash:** " + json_data["commitHash"] + "\n"
             description += "**Commit Date:** " + json_data["date"] + "\n"
             description += "**Branch:** " + json_data["branch"] + "\n"
@@ -49,42 +52,31 @@ class TruffleHogParser(object):
                 strings_found += string + "\n"
 
             dupe_key = hashlib.md5((file + reason).encode("utf-8")).hexdigest()
-            description += "\n**Strings Found:**\n" + strings_found + "\n"
+            description += "\n**Strings Found:**\n```" + strings_found + "```\n"
 
-            if dupe_key in self.dupes:
-                finding = self.dupes[dupe_key]
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]
                 finding.description = finding.description + description
-                self.dupes[dupe_key] = finding
+                finding.nb_occurences += 1
+                dupes[dupe_key] = finding
             else:
-                self.dupes[dupe_key] = True
+                dupes[dupe_key] = True
 
                 finding = Finding(title=titleText,
                                   test=test,
                                   cwe=798,
-                                  active=False,
-                                  verified=False,
                                   description=description,
                                   severity=severity,
-                                  numerical_severity=Finding.get_numerical_severity(severity),
                                   mitigation="Secrets and passwords should be stored in a secure vault and/or secure storage.",
                                   impact="This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code.",
                                   references="N/A",
                                   file_path=file,
+                                  line=0,  # setting it to a fake value to activate deduplication
                                   url='N/A',
                                   dynamic_finding=False,
-                                  static_finding=True)
+                                  static_finding=True,
+                                  nb_occurences=1)
 
-                self.dupes[dupe_key] = finding
+                dupes[dupe_key] = finding
 
-        self.items = list(self.dupes.values())
-
-    def parse_json(self, json_output):
-        try:
-            try:
-                json_data = json.loads(str(json_output, 'utf-8'))
-            except:
-                json_data = json.loads(json_output)
-        except ValueError:
-            raise Exception("Invalid format")
-
-        return json_data
+        return list(dupes.values())

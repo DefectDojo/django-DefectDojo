@@ -3,10 +3,12 @@
 {% load display_tags %}
 {% load static %}
 {% block add_css %}
+    {{ block.super }}
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
+    {{ block.super }}
     .chosen-container {
     width: 70% !important;
     }
@@ -15,6 +17,7 @@
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <div>
         <h3> Add Findings to a Test</h3>
     </div>
@@ -46,7 +49,7 @@
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
                         <input class="btn btn-primary" type="submit" value="Add Another Finding"/>
-                        <input class="btn btn-primary" type="submit" value="Finished"/>
+                        <input class="btn btn-primary" type="submit" id="id_finished" value="Finished"/>
                     </div>
                 </div>
             </form>
@@ -84,6 +87,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
@@ -93,11 +97,6 @@
         $ = django.jQuery;
         $.hotkeys.options.filterInputAcceptingElements = false;
         $.hotkeys.options.filterTextInputs = false;
-
-        $('#add_id_endpoints').attr('href', "{% url 'add_endpoint' test.engagement.product.id %}?_popup");
-        {% if not form_error %}
-            $('#id_endpoints').find('option').remove();
-        {% endif %}
 
         $(document).bind('keydown', 'ctrl+s', function (event) {
             if (event.preventDefault) {
@@ -120,19 +119,21 @@
                     elem.id = "req"
                 }
 
-                var mde = new EasyMDE({
-                    spellChecker: false,
-                    element: elem,
-                    autofocus: false,
-                    forceSync: true,
-                    toolbar: ["bold", "italic", "heading", "|",
-                        "quote", "unordered-list", "ordered-list", "|",
-                        "link", "image", "|",
-                        "table", "horizontal-rule", "code", "|",
-                        "guide"
-                    ]
-                });
-                mde.render();
+                if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids') {
+                    var mde = new EasyMDE({
+                        spellChecker: false,
+                        element: elem,
+                        autofocus: false,
+                        forceSync: true,
+                        toolbar: ["bold", "italic", "heading", "|",
+                            "quote", "unordered-list", "ordered-list", "|",
+                            "link", "image", "|",
+                            "table", "horizontal-rule", "code", "|",
+                            "guide"
+                        ]
+                    });
+                    mde.render();
+                }
             });
 
         $("#add_finding").submit(function () {

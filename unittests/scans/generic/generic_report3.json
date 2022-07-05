@@ -1,0 +1,49 @@
+{
+    "findings": [
+        {
+            "title": "test title with endpoints as dict",
+            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau",
+            "severity": "Medium",
+            "mitigation": "Some mitigation",
+            "date": "2021-01-06",
+            "cve": "CVE-2020-36234",
+            "cwe": 261,
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
+            "file_path": "src/first.cpp",
+            "line": 13,
+            "endpoints": [
+                {
+                    "host": "exemple.com"
+                }
+            ]
+        },
+        {
+            "title": "test title with endpoints as strings",
+            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau2",
+            "severity": "Critical",
+            "mitigation": "Some mitigation",
+            "date": "2021-01-06",
+            "cve": "CVE-2020-36235",
+            "cwe": 287,
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
+            "file_path": "src/two.cpp",
+            "line": 135,
+            "endpoints": [
+                "http://urlfiltering.paloaltonetworks.com/test-command-and-control",
+                "https://urlfiltering.paloaltonetworks.com:2345/test-pest"
+            ]
+        },
+        {
+            "title": "test title",
+            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau2",
+            "severity": "Critical",
+            "mitigation": "Some mitigation",
+            "date": "2021-01-06",
+            "cve": "CVE-2020-36236",
+            "cwe": 287,
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
+            "file_path": "src/threeeeeeeeee.cpp",
+            "line": 1353
+        }
+    ]
+}

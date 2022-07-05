@@ -2,6 +2,7 @@
 {% load navigation_tags %}
 {% load get_config_setting %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
       <div class="col-md-12">
           <div class="panel panel-default table-responsive">
@@ -37,7 +38,7 @@
                             <td>{{ cred.cred_id.is_valid }}</td>
                             <td>
                                 <div class="btn-group">
-                                    <a class="btn btn-sm btn-primary"
+                                    <a class="btn btn-sm btn-secondary"
                                        href="{% url 'view_cred_product' cred.product.id cred.id  %}">View</a>
                                     <a class="btn btn-sm btn-warning"
                                        href="{% url 'edit_cred_product' cred.product.id cred.id  %}">Edit</a>

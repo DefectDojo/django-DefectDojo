@@ -6,7 +6,7 @@ from datetime import datetime
 from dojo.models import Endpoint, Finding
 
 
-class SSLlabsParser(object):
+class SslLabsParser(object):
 
     def get_scan_types(self):
         return ["SSL Labs Scan"]
@@ -45,9 +45,9 @@ class SSLlabsParser(object):
                 title = ''
                 group = ''
                 status = ''
-                port = ''
-                ipAddress = ''
-                protocol = ''
+                port = None
+                protocol = None
+                ipAddress = None
 
                 grade = ""
                 if "grade" in endpoints:
@@ -55,12 +55,13 @@ class SSLlabsParser(object):
                 port = ""
                 if "port" in host:
                     port = host["port"]
-                ipAddress = ""
-                if "ipAddress" in endpoints:
-                    ipAddress = endpoints["ipAddress"]
                 protocol = ""
                 if "protocol" in host:
                     protocol = host["protocol"]
+                if protocol.lower() == "http":
+                    protocol = "https"
+                if "ipAddress" in endpoints:
+                    ipAddress = endpoints["ipAddress"]
 
                 title = "TLS Grade '%s' for %s" % (grade, hostName)
 
@@ -185,29 +186,31 @@ class SSLlabsParser(object):
                     find = Finding(title=title,
                                    cwe=310,  # Cryptographic Issues
                                    test=test,
-                                   active=False,
-                                   verified=False,
                                    description=description,
                                    severity=sev,
-                                   numerical_severity=Finding.get_numerical_severity(sev),
                                    mitigation=mitigation,
                                    impact=impact,
                                    references=references,
-                                   url=host,
                                    date=find_date,
                                    dynamic_finding=True)
                     dupes[dupe_key] = find
                     find.unsaved_endpoints = list()
 
-                find.unsaved_endpoints.append(Endpoint(host=ipAddress, fqdn=hostName, port=port, protocol=protocol))
+                find.unsaved_endpoints.append(Endpoint(host=hostName, port=port, protocol=protocol))
+                if ipAddress:
+                    find.unsaved_endpoints.append(Endpoint(host=ipAddress, port=port, protocol=protocol))
+                if endpoints["details"]["httpTransactions"]:
+                    for url in endpoints["details"]["httpTransactions"]:
+                        find.unsaved_endpoints.append(Endpoint.from_uri(url['requestUrl']))
 
-            self.items = list(dupes.values())
+        return list(dupes.values())
 
     # Criticality rating
     # Grades: https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide
-    # A - Info, B - Medium, C - High, D/F/M/T - Critical
+    # A - Info, B - Medium, C - High, D/F/M/T - Critical, (unknown/other) - Critical
     def getCriticalityRating(self, rating):
-        criticality = "Info"
+        # Default to Critical if we can't make sense of the grade
+        criticality = "Critical"
         if "A" in rating:
             criticality = "Info"
         elif "B" in rating:

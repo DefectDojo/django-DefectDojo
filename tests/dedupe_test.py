@@ -1,15 +1,17 @@
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-import unittest
-import sys
-import os
-from base_test_class import BaseTestCase, on_exception_html_source_logger
-from product_test import ProductTest
-import time
 import logging
+import os
+import sys
+import time
+import unittest
 
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+
+from base_test_class import (BaseTestCase, on_exception_html_source_logger,
+                             set_suite_settings)
+from product_test import ProductTest
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +35,9 @@ class DedupeTest(BaseTestCase):
             self.goto_all_findings_list(driver)
             dupe_count = 0
             # iterate over the rows of the findings table and concatenates all columns into td.text
-            trs = driver.find_elements_by_xpath('//*[@id="open_findings"]/tbody/tr')
+            trs = driver.find_elements(By.XPATH, '//*[@id="open_findings"]/tbody/tr')
             for row in trs:
-                concatRow = ' '.join([td.text for td in row.find_elements_by_xpath(".//td")])
+                concatRow = ' '.join([td.text for td in row.find_elements(By.XPATH, ".//td")])
                 # print(concatRow)
                 if '(DUPE)' and 'Duplicate' in concatRow:
                     dupe_count += 1
@@ -46,7 +48,7 @@ class DedupeTest(BaseTestCase):
                 break
 
         if (dupe_count != expected_number_of_duplicates):
-            findings_table = driver.find_element_by_id('open_findings')
+            findings_table = driver.find_element(By.ID, 'open_findings')
             print(findings_table.get_attribute('innerHTML'))
 
         self.assertEqual(dupe_count, expected_number_of_duplicates)
@@ -56,13 +58,13 @@ class DedupeTest(BaseTestCase):
         logger.debug("enabling deduplication...")
         driver = self.driver
         driver.get(self.base_url + 'system_settings')
-        if not driver.find_element_by_id('id_enable_deduplication').is_selected():
-            driver.find_element_by_xpath('//*[@id="id_enable_deduplication"]').click()
+        if not driver.find_element(By.ID, 'id_enable_deduplication').is_selected():
+            driver.find_element(By.XPATH, '//*[@id="id_enable_deduplication"]').click()
             # save settings
-            driver.find_element_by_css_selector("input.btn.btn-primary").click()
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # check if it's enabled after reload
             driver.get(self.base_url + 'system_settings')
-            self.assertTrue(driver.find_element_by_id('id_enable_deduplication').is_selected())
+            self.assertTrue(driver.find_element(By.ID, 'id_enable_deduplication').is_selected())
 
     @on_exception_html_source_logger
     def test_delete_findings(self):
@@ -71,12 +73,12 @@ class DedupeTest(BaseTestCase):
         driver.get(self.base_url + "finding?page=1")
 
         if self.element_exists_by_id("no_findings"):
-            text = driver.find_element_by_id("no_findings").text
+            text = driver.find_element(By.ID, "no_findings").text
             if 'No findings found.' in text:
                 return
 
-        driver.find_element_by_id("select_all").click()
-        driver.find_element_by_css_selector("i.fa.fa-trash").click()
+        driver.find_element(By.ID, "select_all").click()
+        driver.find_element(By.CSS_SELECTOR, "i.fa.fa-trash").click()
         try:
             WebDriverWait(driver, 1).until(EC.alert_is_present(),
                                         'Timed out waiting for finding delete ' +
@@ -85,16 +87,9 @@ class DedupeTest(BaseTestCase):
         except TimeoutException:
             self.fail('Confirmation dialogue not shown, cannot delete previous findings')
 
-        # not sure if this is needed. the datatables js logic only kicks in
-        # if the dev with id "findings" is present
-        # so if it isn't, the no_findings div is available straight after
-        # the page load. but we see some errors here about the div not being there
-        # but when we log the page source, the no_findings div is present
-        self.wait_for_datatable_if_content("no_findings", "findings_wrapper")
-
-        text = None
-        if self.element_exists_by_id("no_findings"):
-            text = driver.find_element_by_id("no_findings").text
+        logger.debug("page source when checking for no_findings element")
+        logger.debug(self.driver.page_source)
+        text = driver.find_element(By.ID, "no_findings").text
 
         self.assertIsNotNone(text)
         self.assertTrue('No findings found.' in text)
@@ -112,59 +107,68 @@ class DedupeTest(BaseTestCase):
         # Create engagement
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-        driver.find_element_by_link_text("Add New Engagement").click()
-        driver.find_element_by_id("id_name").send_keys("Dedupe Path Test")
-        driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element_by_name("_Add Tests").click()
+        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+        driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
+        driver.find_element(By.ID, "id_name").send_keys("Dedupe Path Test")
+        driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
+        driver.find_element(By.NAME, "_Add Tests").click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
         # Add the tests
         # Test 1
-        driver.find_element_by_id("id_title").send_keys("Path Test 1")
-        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Bandit Scan")
-        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
-        driver.find_element_by_name("_Add Another Test").click()
+        driver.find_element(By.ID, "id_title").send_keys("Path Test 1")
+        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Bandit Scan")
+        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
+        driver.find_element(By.NAME, "_Add Another Test").click()
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
         # Test 2
-        driver.find_element_by_id("id_title").send_keys("Path Test 2")
-        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Bandit Scan")
-        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element(By.ID, "id_title").send_keys("Path Test 2")
+        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Bandit Scan")
+        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
 
     @on_exception_html_source_logger
     def test_import_path_tests(self):
+        """
+        Re-upload dedupe_path_1.json bandit report into "Path Test 1" empty test (nothing uploaded before)
+        Then do the same with dedupe_path_2.json / "Path Test 2"
+        """
         logger.debug("importing reports...")
         # First test
+        # the first report have 3 duplicates of the same finding
         driver = self.driver
         self.goto_active_engagements_overview(driver)
-        driver.find_element_by_partial_link_text("Dedupe Path Test").click()
-        driver.find_element_by_partial_link_text("Path Test 1").click()
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Re-Upload Scan").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Path Test").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 1").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
         # active and verified:
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_1.json")
-        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_1.json")
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        # 'Bandit Scan processed a total of 1 findings created 1 findings did not touch 1 findings.'
+        self.assertTrue(self.is_success_message_present(text='a total of 1 findings'))
 
         # Second test
+        # the second report have 2 findings (same vuln_id same file but different line number)
+        # one the findings is the same in the first and the second report
         self.goto_active_engagements_overview(driver)
-        driver.find_element_by_partial_link_text("Dedupe Path Test").click()
-        driver.find_element_by_partial_link_text("Path Test 2").click()
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Re-Upload Scan").click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_2.json")
-        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Path Test").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 2").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_2.json")
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        # 'Bandit Scan processed a total of 2 findings created 2 findings did not touch 1 findings.'
+        self.assertTrue(self.is_success_message_present(text='a total of 2 findings'))
 
     @on_exception_html_source_logger
     def test_check_path_status(self):
@@ -184,26 +188,26 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-        driver.find_element_by_link_text("Add New Engagement").click()
-        driver.find_element_by_id("id_name").send_keys("Dedupe Endpoint Test")
-        driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element_by_name("_Add Tests").click()
+        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+        driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
+        driver.find_element(By.ID, "id_name").send_keys("Dedupe Endpoint Test")
+        driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
+        driver.find_element(By.NAME, "_Add Tests").click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
         # Add the tests
         # Test 1
-        driver.find_element_by_id("id_title").send_keys("Endpoint Test 1")
-        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Immuniweb Scan")
-        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
-        driver.find_element_by_name("_Add Another Test").click()
+        driver.find_element(By.ID, "id_title").send_keys("Endpoint Test 1")
+        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Immuniweb Scan")
+        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
+        driver.find_element(By.NAME, "_Add Another Test").click()
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
         # Test 2
-        driver.find_element_by_id("id_title").send_keys("Endpoint Test 2")
-        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Immuniweb Scan")
-        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element(By.ID, "id_title").send_keys("Endpoint Test 2")
+        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Immuniweb Scan")
+        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
 
@@ -214,31 +218,31 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_active_engagements_overview(driver)
-        driver.find_element_by_partial_link_text("Dedupe Endpoint Test").click()
-        driver.find_element_by_partial_link_text("Endpoint Test 1").click()
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Re-Upload Scan").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Endpoint Test").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoint Test 1").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
         # active and verified
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
-        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
         # Second test : Immuniweb Scan (dynamic)
         self.goto_active_engagements_overview(driver)
-        driver.find_element_by_partial_link_text("Dedupe Endpoint Test").click()
-        driver.find_element_by_partial_link_text("Endpoint Test 2").click()
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Re-Upload Scan").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Endpoint Test").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoint Test 2").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
         # active and verified
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_2.xml")
-        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_2.xml")
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
     @on_exception_html_source_logger
     def test_check_endpoint_status(self):
@@ -254,26 +258,26 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-        driver.find_element_by_link_text("Add New Engagement").click()
-        driver.find_element_by_id("id_name").send_keys("Dedupe Same Eng Test")
-        driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element_by_name("_Add Tests").click()
+        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+        driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
+        driver.find_element(By.ID, "id_name").send_keys("Dedupe Same Eng Test")
+        driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
+        driver.find_element(By.NAME, "_Add Tests").click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
         # Add the tests
         # Test 1
-        driver.find_element_by_id("id_title").send_keys("Same Eng Test 1")
-        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Immuniweb Scan")
-        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
-        driver.find_element_by_name("_Add Another Test").click()
+        driver.find_element(By.ID, "id_title").send_keys("Same Eng Test 1")
+        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Immuniweb Scan")
+        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
+        driver.find_element(By.NAME, "_Add Another Test").click()
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
         # Test 2
-        driver.find_element_by_id("id_title").send_keys("Same Eng Test 2")
-        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Generic Findings Import")
-        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element(By.ID, "id_title").send_keys("Same Eng Test 2")
+        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Generic Findings Import")
+        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
 
@@ -284,29 +288,29 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_active_engagements_overview(driver)
-        driver.find_element_by_partial_link_text("Dedupe Same Eng Test").click()
-        driver.find_element_by_partial_link_text("Same Eng Test 1").click()
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Re-Upload Scan").click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
-        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Same Eng Test").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Same Eng Test 1").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
         # Second test : Generic Findings Import with Url (dynamic)
         self.goto_active_engagements_overview(driver)
-        driver.find_element_by_partial_link_text("Dedupe Same Eng Test").click()
-        driver.find_element_by_partial_link_text("Same Eng Test 2").click()
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Re-Upload Scan").click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
-        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Same Eng Test").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Same Eng Test 2").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
     @on_exception_html_source_logger
     def test_check_same_eng_status(self):
@@ -328,26 +332,26 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-        driver.find_element_by_link_text("Add New Engagement").click()
-        driver.find_element_by_id("id_name").send_keys("Dedupe on hash_code only")
-        driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element_by_name("_Add Tests").click()
+        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+        driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
+        driver.find_element(By.ID, "id_name").send_keys("Dedupe on hash_code only")
+        driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
+        driver.find_element(By.NAME, "_Add Tests").click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
         # Add the tests
         # Test 1
-        driver.find_element_by_id("id_title").send_keys("Path Test 1")
-        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Checkmarx Scan")
-        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
-        driver.find_element_by_name("_Add Another Test").click()
+        driver.find_element(By.ID, "id_title").send_keys("Path Test 1")
+        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Checkmarx Scan")
+        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
+        driver.find_element(By.NAME, "_Add Another Test").click()
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
         # Test 2
-        driver.find_element_by_id("id_title").send_keys("Path Test 2")
-        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Checkmarx Scan")
-        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element(By.ID, "id_title").send_keys("Path Test 2")
+        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Checkmarx Scan")
+        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
 
@@ -356,30 +360,30 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_active_engagements_overview(driver)
-        driver.find_element_by_partial_link_text("Dedupe on hash_code only").click()
-        driver.find_element_by_partial_link_text("Path Test 1").click()
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Re-Upload Scan").click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe on hash_code only").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 1").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         # os.path.realpath makes the path canonical
-        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
-        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+        driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 2 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 2 findings'))
 
         # Second test
         self.goto_active_engagements_overview(driver)
-        driver.find_element_by_partial_link_text("Dedupe on hash_code only").click()
-        driver.find_element_by_partial_link_text("Path Test 2").click()
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Re-Upload Scan").click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings_line_changed.xml"))
-        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe on hash_code only").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 2").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings_line_changed.xml"))
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 2 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 2 findings'))
 
     def test_check_path_status_checkmarx_scan(self):
         # After aggregation, it's only two findings. Both are duplicates even though the line number has changed
@@ -397,35 +401,35 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-        driver.find_element_by_link_text("Add New Engagement").click()
-        driver.find_element_by_id("id_name").send_keys("Dedupe Generic Test")
-        # driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element_by_name("_Add Tests").click()
+        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+        driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
+        driver.find_element(By.ID, "id_name").send_keys("Dedupe Generic Test")
+        # driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
+        driver.find_element(By.NAME, "_Add Tests").click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
         # Test
-        driver.find_element_by_id("id_title").send_keys("Generic Test")
-        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Generic Findings Import")
-        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element(By.ID, "id_title").send_keys("Generic Test")
+        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Generic Findings Import")
+        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
 
         # Create immuniweb engagement
         self.goto_product_overview(driver)
-        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
-        driver.find_element_by_link_text("Add New Engagement").click()
-        driver.find_element_by_id("id_name").send_keys("Dedupe Immuniweb Test")
-        # driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element_by_name("_Add Tests").click()
+        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
+        driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
+        driver.find_element(By.ID, "id_name").send_keys("Dedupe Immuniweb Test")
+        # driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
+        driver.find_element(By.NAME, "_Add Tests").click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
         # Test
-        driver.find_element_by_id("id_title").send_keys("Immuniweb Test")
-        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Immuniweb Scan")
-        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element(By.ID, "id_title").send_keys("Immuniweb Test")
+        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Immuniweb Scan")
+        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
 
@@ -435,36 +439,126 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_active_engagements_overview(driver)
-        driver.find_element_by_partial_link_text("Dedupe Immuniweb Test").click()
-        driver.find_element_by_partial_link_text("Immuniweb Test").click()
-        driver.find_element_by_css_selector("b.fa.fa-ellipsis-v").click()
-        driver.find_element_by_link_text("Re-Upload Scan Results").click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
-        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Immuniweb Test").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Immuniweb Test").click()
+        driver.find_element(By.CSS_SELECTOR, "b.fa.fa-ellipsis-v").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan Results").click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
         # Second test : generic scan with url (dynamic)
         self.goto_active_engagements_overview(driver)
-        driver.find_element_by_partial_link_text("Dedupe Generic Test").click()
-        driver.find_element_by_partial_link_text("Generic Test").click()
-        driver.find_element_by_css_selector("b.fa.fa-ellipsis-v").click()
-        driver.find_element_by_link_text("Re-Upload Scan Results").click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
-        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Generic Test").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Generic Test").click()
+        driver.find_element(By.CSS_SELECTOR, "b.fa.fa-ellipsis-v").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan Results").click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
     def test_check_cross_status(self):
         self.check_nb_duplicates(1)
 
+# --------------------------------------------------------------------------------------------------------
+# Deduplication with and without service attribute in finding
+# --------------------------------------------------------------------------------------------------------
+    def test_import_no_service(self):
+        logger.debug("Importing findings...")
 
-def add_dedupe_tests_to_suite(suite):
+        driver = self.driver
+
+        # We reuse the engagement and test for Checkmarx, because we need a parser with hash_code deduplication
+        self.goto_active_engagements_overview(driver)
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe on hash_code only").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 1").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
+
+        self.assertTrue(self.is_success_message_present(text='Checkmarx Scan processed a total of 2 findings created 2 findings.'))
+
+        # Import the same findings a second time - they should all be duplicates
+        self.goto_active_engagements_overview(driver)
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe on hash_code only").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 2").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
+
+        self.assertTrue(self.is_success_message_present(text='Checkmarx Scan processed a total of 2 findings created 2 findings.'))
+
+    def test_check_no_service(self):
+        # Since we imported the same report twice, we should have 2 duplicates
+        self.check_nb_duplicates(2)
+
+    def test_import_service(self):
+        logger.debug("Importing findings...")
+
+        driver = self.driver
+
+        # We reuse the engagement and test for Checkmarx, because we need a parser with hash_code deduplication
+        self.goto_active_engagements_overview(driver)
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe on hash_code only").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 1").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_service').send_keys("service_1")
+        driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
+
+        self.assertTrue(self.is_success_message_present(text='Checkmarx Scan processed a total of 2 findings created 2 findings.'))
+
+        # Import the same findings a second time with a different service - they should all be new findings
+        self.goto_active_engagements_overview(driver)
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe on hash_code only").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 2").click()
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element(By.ID, 'id_service').send_keys("service_2")
+        driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
+        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
+
+        self.assertTrue(self.is_success_message_present(text='Checkmarx Scan processed a total of 2 findings created 2 findings.'))
+
+    def test_check_service(self):
+        # Since we imported the same report twice but with different service names, we should have no duplicates
+        self.check_nb_duplicates(0)
+
+
+def add_dedupe_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase('test_login'))
+    set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
+
+    if jira:
+        suite.addTest(BaseTestCase('enable_jira'))
+    else:
+        suite.addTest(BaseTestCase('disable_jira'))
+    if github:
+        suite.addTest(BaseTestCase('enable_github'))
+    else:
+        suite.addTest(BaseTestCase('disable_github'))
+    if block_execution:
+        suite.addTest(BaseTestCase('enable_block_execution'))
+    else:
+        suite.addTest(BaseTestCase('disable_block_execution'))
+
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(DedupeTest('test_enable_deduplication'))
     # Test same scanners - same engagement - static - dedupe
@@ -492,6 +586,13 @@ def add_dedupe_tests_to_suite(suite):
     suite.addTest(DedupeTest('test_add_cross_test_suite'))
     suite.addTest(DedupeTest('test_import_cross_test'))
     suite.addTest(DedupeTest('test_check_cross_status'))
+    # Test deduplication with and without service in findings
+    suite.addTest(DedupeTest('test_delete_findings'))
+    suite.addTest(DedupeTest('test_import_no_service'))
+    suite.addTest(DedupeTest('test_check_no_service'))
+    suite.addTest(DedupeTest('test_delete_findings'))
+    suite.addTest(DedupeTest('test_import_service'))
+    suite.addTest(DedupeTest('test_check_service'))
     # Clean up
     suite.addTest(ProductTest('test_delete_product'))
     return suite
@@ -499,12 +600,8 @@ def add_dedupe_tests_to_suite(suite):
 
 def suite():
     suite = unittest.TestSuite()
-    add_dedupe_tests_to_suite(suite)
-    suite.addTest(DedupeTest('enable_jira'))
-    suite.addTest(DedupeTest('enable_github'))
-    # block mode no longer needed, so good to actually test in non block mode so celery does the dedupe
-    # suite.addTest(DedupeTest('enable_block_execution'))
-    add_dedupe_tests_to_suite(suite)
+    add_dedupe_tests_to_suite(suite, jira=False, github=False, block_execution=False)
+    add_dedupe_tests_to_suite(suite, jira=True, github=True, block_execution=True)
     return suite
 
 

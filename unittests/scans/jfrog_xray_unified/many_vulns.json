@@ -1,0 +1,147 @@
+{ "total_rows" : 3,
+  "rows" : [
+{
+	"cves": [
+	{
+	"cve": "CVE-2020-28493",
+	"cvss_v2_score": 5,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:L/Au:N/C:N/I:N/A:P",
+	"cvss_v3_score": 5.3,
+	"cvss_v3_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+	}
+	],
+	"cvss2_max_score": 5,
+	"cvss3_max_score": 5.3,
+	"summary": "This affects the package jinja2 from 0.0.0 and before 2.11.3. The ReDOS vulnerability of the regex is mainly due to the sub-pattern [a-zA-Z0-9._-]+.[a-zA-Z0-9._-]+ This issue can be mitigated by Markdown to format user content instead of the urlize filter, or by implementing request timeouts and limiting process memory.",
+	"severity": "Medium",
+	"vulnerable_component": "pypi://Jinja2:2.11.2",
+	"impacted_artifact": "pypi://Jinja2:2.11.2",
+	"impact_path": [
+	"pypi://Jinja2:2.11.2"
+	],
+	"path": "pypi-remote/30/9e/f663a2aa66a09d838042ae1a2c5659828bb9b41ea3a6efa20a20fd92b121/Jinja2-2.11.2-py2.py3-none-any.whl",
+	"fixed_versions": [
+	"2.11.3"
+	],
+	"published": "2021-02-02T22:43:02+11:00",
+	"artifact_scan_time": "2021-01-15T15:39:25+11:00",
+	"issue_id": "XRAY-139239",
+	"package_type": "pypi",
+	"provider": "JFrog",
+	"description": "This affects the package jinja2 from 0.0.0 and before 2.11.3. The ReDOS vulnerability of the regex is mainly due to the sub-pattern [a-zA-Z0-9._-]+.[a-zA-Z0-9._-]+ This issue can be mitigated by Markdown to format user content instead of the urlize filter, or by implementing request timeouts and limiting process memory.",
+	"references": [
+	"https://snyk.io/vuln/SNYK-PYTHON-JINJA2-1012994",
+	"https://github.com/pallets/jinja/pull/1343",
+	"https://github.com/pallets/jinja/blob/ab81fd9c277900c85da0c322a2ff9d68a235b2e6/src/jinja2/utils.py%23L20"
+	]
+	}
+,{
+	"cves": [
+	{
+	"cve": "CVE-2020-11023",
+	"cvss_v2_score": 4.3,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:M/Au:N/C:N/I:P/A:N",
+	"cvss_v3_score": 6.1,
+	"cvss_v3_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+	}
+	],
+	"cvss2_max_score": 4.3,
+	"cvss3_max_score": 6.1,
+	"summary": "In jQuery versions greater than or equal to 1.0.3 and before 3.5.0, passing HTML containing \u003coption\u003e elements from untrusted sources - even after sanitizing it - to one of jQuery's DOM manipulation methods (i.e. .html(), .append(), and others) may execute untrusted code. This problem is patched in jQuery 3.5.0.",
+	"severity": "Medium",
+	"vulnerable_component": "npm://jquery:3.4.1",
+	"impacted_artifact": "pypi://Werkzeug:1.0.1",
+	"impact_path": [
+	"pypi://Werkzeug:1.0.1",
+	"npm://jquery:3.4.1"
+	],
+	"path": "pypi-remote/cc/94/5f7079a0e00bd6863ef8f1da638721e9da21e5bacee597595b318f71d62e/Werkzeug-1.0.1-py2.py3-none-any.whl",
+	"fixed_versions": [
+	"3.5.0"
+	],
+	"published": "2020-05-03T21:27:46+10:00",
+	"artifact_scan_time": "2021-01-15T15:39:25+11:00",
+	"issue_id": "XRAY-97245",
+	"package_type": "npm",
+	"provider": "JFrog",
+	"description": "In jQuery versions greater than or equal to 1.0.3 and before 3.5.0, passing HTML containingelements from untrusted sources - even after sanitizing it - to one of jQuery's DOM manipulation methods (i.e. .html(), .append(), and others) may execute untrusted code. This problem is patched in jQuery 3.5.0.",
+	"references": [
+	"http://lists.opensuse.org/opensuse-security-announce/2020-07/msg00085.html",
+	"http://lists.opensuse.org/opensuse-security-announce/2020-07/msg00067.html",
+	"https://lists.apache.org/thread.html/r9c5fda81e4bca8daee305b4c03283dddb383ab8428a151d4cb0b3b15@%3Cissues.hive.apache.org%3E",
+	"https://lists.apache.org/thread.html/r094f435595582f6b5b24b66fedf80543aa8b1d57a3688fbcc21f06ec@%3Cissues.hive.apache.org%3E",
+	"https://lists.apache.org/thread.html/ra3c9219fcb0b289e18e9ec5a5ebeaa5c17d6b79a201667675af6721c@%3Cgitbox.hive.apache.org%3E",
+	"https://lists.apache.org/thread.html/rf661a90a15da8da5922ba6127b3f5f8194d4ebec8855d60a0dd13248@%3Cdev.hive.apache.org%3E",
+	"https://www.oracle.com/security-alerts/cpujul2020.html",
+	"https://jquery.com/upgrade-guide/3.5/",
+	"https://blog.jquery.com/2020/04/10/jquery-3-5-0-released",
+	"https://security.gentoo.org/glsa/202007-03",
+	"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/QPN2L2XVQGUA2V5HNQJWHK3APSK3VN7K/",
+	"https://www.debian.org/security/2020/dsa-4693",
+	"https://www.drupal.org/sa-core-2020-002",
+	"https://security.netapp.com/advisory/ntap-20200511-0006/",
+	"https://github.com/jquery/jquery/security/advisories/GHSA-jpcq-cgw6-v4j6"
+	]
+	}
+,{
+	"cves": [
+	{
+	"cve": "CVE-2020-11022",
+	"cvss_v2_score": 4.3,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:M/Au:N/C:N/I:P/A:N",
+	"cvss_v3_score": 6.1,
+	"cvss_v3_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+	}
+	],
+	"cvss2_max_score": 4.3,
+	"cvss3_max_score": 6.1,
+	"summary": "In jQuery versions greater than or equal to 1.2 and before 3.5.0, passing HTML from untrusted sources - even after sanitizing it - to one of jQuery's DOM manipulation methods (i.e. .html(), .append(), and others) may execute untrusted code. This problem is patched in jQuery 3.5.0.",
+	"severity": "Medium",
+	"vulnerable_component": "npm://jquery:3.4.1",
+	"impacted_artifact": "pypi://Werkzeug:1.0.1",
+	"impact_path": [
+	"pypi://Werkzeug:1.0.1",
+	"npm://jquery:3.4.1"
+	],
+	"path": "pypi-remote/cc/94/5f7079a0e00bd6863ef8f1da638721e9da21e5bacee597595b318f71d62e/Werkzeug-1.0.1-py2.py3-none-any.whl",
+	"fixed_versions": [
+	"3.5.0"
+	],
+	"published": "2020-05-04T01:33:59+10:00",
+	"artifact_scan_time": "2021-01-15T15:39:25+11:00",
+	"issue_id": "XRAY-97257",
+	"package_type": "npm",
+	"provider": "JFrog",
+	"description": "In jQuery versions greater than or equal to 1.2 and before 3.5.0, passing HTML from untrusted sources - even after sanitizing it - to one of jQuery's DOM manipulation methods (i.e. .html(), .append(), and others) may execute untrusted code. This problem is patched in jQuery 3.5.0.",
+	"references": [
+	"http://lists.opensuse.org/opensuse-security-announce/2020-11/msg00039.html",
+	"http://lists.opensuse.org/opensuse-security-announce/2020-07/msg00085.html",
+	"http://lists.opensuse.org/opensuse-security-announce/2020-07/msg00067.html",
+	"https://lists.apache.org/thread.html/r8f70b0f65d6bedf316ecd899371fd89e65333bc988f6326d2956735c@%3Cissues.flink.apache.org%3E",
+	"https://lists.apache.org/thread.html/r564585d97bc069137e64f521e68ba490c7c9c5b342df5d73c49a0760@%3Cissues.flink.apache.org%3E",
+	"https://lists.apache.org/thread.html/r49ce4243b4738dd763caeb27fa8ad6afb426ae3e8c011ff00b8b1f48@%3Cissues.flink.apache.org%3E",
+	"https://lists.apache.org/thread.html/r706cfbc098420f7113968cc377247ec3d1439bce42e679c11c609e2d@%3Cissues.flink.apache.org%3E",
+	"https://lists.apache.org/thread.html/rbb448222ba62c430e21e13f940be4cb5cfc373cd3bce56b48c0ffa67@%3Cdev.flink.apache.org%3E",
+	"https://lists.apache.org/thread.html/rdf44341677cf7eec7e9aa96dcf3f37ed709544863d619cca8c36f133@%3Ccommits.airflow.apache.org%3E",
+	"https://www.oracle.com/security-alerts/cpuoct2020.html",
+	"https://www.oracle.com/security-alerts/cpujul2020.html",
+	"https://www.oracle.com/security-alerts/cpujan2021.html",
+	"https://jquery.com/upgrade-guide/3.5/",
+	"https://github.com/jquery/jquery/commit/1d61fd9407e6fbe82fe55cb0b938307aa0791f77",
+	"https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/",
+	"https://security.gentoo.org/glsa/202007-03",
+	"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/SAPQVX3XDNPGFT26QAQ6AJIXZZBZ4CD4/",
+	"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/SFP4UK4EGP4AFH2MWYJ5A5Z4I7XVFQ6B/",
+	"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/QPN2L2XVQGUA2V5HNQJWHK3APSK3VN7K/",
+	"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/VOE7P7APPRQKD4FGNHBKJPDY6FFCOH3W/",
+	"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/AVKYXLWCLZBV2N7M46KYK4LVA5OXWPBY/",
+	"https://www.debian.org/security/2020/dsa-4693",
+	"https://www.tenable.com/security/tns-2021-02",
+	"https://www.tenable.com/security/tns-2020-11",
+	"https://www.tenable.com/security/tns-2020-10",
+	"https://www.drupal.org/sa-core-2020-002",
+	"https://security.netapp.com/advisory/ntap-20200511-0006/",
+	"https://github.com/jquery/jquery/security/advisories/GHSA-gxr4-xjj5-5px2"
+	]
+	}
+]}

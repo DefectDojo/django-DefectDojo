@@ -1,0 +1,117 @@
+Plugin ID,CVE,CVSS,CVSSv3,Risk,Host,Protocol,Port,Name,Synopsis,Description,Solution,See Also,Plugin Output
+98104,,7.5,7.1,high,google.com,http,,Cross-Site Scripting (XSS),Cross-Site Scripting (XSS),"Client-side scripts are used extensively by modern web applications. They perform from simple functions (such as the formatting of text) up to full manipulation of client-side data and Operating System interaction.
+
+Cross Site Scripting (XSS) allows clients to inject scripts into a request and have the server return the script to the client in the response. This occurs because the application is taking untrusted data (in this example, from the client) and reusing it without performing any validation or sanitisation.
+
+If the injected script is returned immediately this is known as reflected XSS. If the injected script is stored by the server and returned to any client visiting the affected page, then this is known as persistent XSS (also stored XSS).
+
+Scanner has discovered that it is possible to insert script content directly into HTML element content.","To remedy XSS vulnerabilities, it is important to never use untrusted or unfiltered data within the code of a HTML page.
+Untrusted data can originate not only form the client but potentially a third party or previously uploaded file etc.
+Filtering of untrusted data typically involves converting special characters to their HTML entity encoded counterparts (however, other methods do exist, see references). These special characters include:
+* `&` * `<` * `>` * `'` * `'` * `/`
+An example of HTML entity encoding is converting `<` to `&lt;`.
+Although it is possible to filter untrusted input, there are five locations within an HTML page where untrusted input (even if it has been filtered) should never be placed:
+1. Directly in a script. 2. Inside an HTML comment. 3. In an attribute name. 4. In a tag name. 5. Directly in CSS.
+Each of these locations have their own form of escaping and filtering.
+_Because many browsers attempt to implement XSS protection, any manual verification of this finding should be conducted using multiple different browsers and browser versions._","http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting
+
+https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet","Vulnerability has been detected on URL 'http://google.com/search.jsp' by exploiting 'form' element named 'query' and injecting following payload:
+
+ | ()""&%1'-;<xss_9676200>'
+
+To confirm the presence of the vulnerability, this proof has been identified in the target response:
+
+ | <xss_9676200>"
+112491,,,,info,google.com,http,,SSL/TLS Certificate Information,SSL/TLS Certificate Information,This plugin displays information about the X.509 certificate extracted from the HTTPS connection.,,,"
+
+Certificate 1
+--------------
+Common Name: google.com
+Alternative Names: google.com
+Issuer: N/A
+Valid from: 2020-05-22 00:00:00 UTC
+Valid until: 2022-05-22 23:59:59 UTC (expires in 1 year, 2 months, 1 week, 3 days)
+Validity Period: 730 days
+Key: RSA 2048-bit
+Signature: sha256WithRSAEncryption
+
+Certificate 2
+--------------
+Common Name: N/A
+Issuer: N/A
+Valid from: 2019-03-12 00:00:00 UTC
+Valid until: 2028-12-31 23:59:59 UTC (expires in 7 years, 9 months, 2 weeks, 6 days)
+Validity Period: 3582 days
+Key: RSA 4096-bit
+Signature: sha384WithRSAEncryption
+
+Certificate 3
+--------------
+Common Name: N/A
+Issuer: N/A
+Valid from: 2004-01-01 00:00:00 UTC
+Valid until: 2028-12-31 23:59:59 UTC (expires in 7 years, 9 months, 2 weeks, 6 days)
+Validity Period: 9131 days
+Key: RSA 2048-bit
+Signature: sha1WithRSAEncryption"
+98060,,2.6,3.1,low,google.com,http,,Missing 'X-Frame-Options' Header,Missing 'X-Frame-Options' Header,"Clickjacking (User Interface redress attack, UI redress attack, UI redressing) is a malicious technique of tricking a Web user into clicking on something different from what the user perceives they are clicking on, thus potentially revealing confidential information or taking control of their computer while clicking on seemingly innocuous web pages.
+
+The server didn't return an `X-Frame-Options` header which means that this website could be at risk of a clickjacking attack.
+
+The `X-Frame-Options` HTTP response header can be used to indicate whether or not a browser should be allowed to render a page inside a frame or iframe. Sites can use this to avoid clickjacking attacks, by ensuring that their content is not embedded into other sites.",Configure your web server to include an `X-Frame-Options` header.,"https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options
+
+http://tools.ietf.org/html/rfc7034
+
+https://www.owasp.org/index.php/Clickjacking",Page http://google.com/ has no X-Frame-Option header defined
+115540,,2.6,3.1,low,google.com,http,,Cookie Without SameSite Flag Detected,Cookie Without SameSite Flag Detected,"SameSite is an attribute which can be set on a cookie to instruct the web browser if this cookie can be sent along with cross-site requests to help prevent Cross-Site Request Forgery (CSRF) attacks.
+
+The attribute has three possible values :
+
+ - Strict : the cookie will only be sent in a first-party context, thus preventing cross-site requests initiated from third-party websites to include it.
+
+ - Lax : the cookie is allowed to be sent in GET cross-site requests initiated by the top-level navigation from third-party websites. For example, following an hypertext link from the external website will make the request include the cookie.
+
+ - None : the cookie is explicitly set to be sent by the browser in any context.
+
+The scanner identified the lack of SameSite attribute on cookies set by the application or a misconfiguration.","Web browsers default behavior may differ when processing cookies in a cross-site context, making the final decision to send the cookie in this context unpredictable. The SameSite attribute should be set in every cookie to enforce the expected result by developers. When using the 'None' attribute value, ensure that the cookie is also set with the 'Secure' flag.","https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+
+https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#samesite-cookie-attribute
+
+https://web.dev/samesite-cookies-explained
+
+https://blog.chromium.org/2019/10/developers-get-ready-for-new.html",http://google.com/ returned a cookie named 'JSESSIONID' which does not have the 'SameSite' attribute set.
+112551,,2.6,3.1,low,google.com,http,,Missing Content Security Policy,Missing Content Security Policy,"Content Security Policy (CSP) is a web security standard that helps to mitigate attacks like cross-site scripting (XSS), clickjacking or mixed content issues. CSP provides mechanisms to websites to restrict content that browsers will be allowed to load.
+
+No CSP header has been detected on this host. This URL is flagged as an specific example.",Configure Content Security Policy on your website by adding 'Content-Security-Policy' HTTP header or meta tag http-equiv='Content-Security-Policy'.,"https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+
+https://developers.google.com/web/fundamentals/security/csp/
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+
+https://csp-evaluator.withgoogle.com/
+
+https://content-security-policy.com/",http://google.com/
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,

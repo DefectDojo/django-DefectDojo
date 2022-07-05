@@ -1,0 +1,90 @@
+{
+  "errors": [],
+  "mobsfscan_version": "0.0.6",
+  "results": {
+    "android_certificate_transparency": {
+      "metadata": {
+        "cwe": "CWE-295 Improper Certificate Validation",
+        "description": "This app does not enforce TLS Certificate Transparency which helps to  detect SSL certificates that have been mistakenly issued by a  certificate authority or maliciously acquired from an otherwise  unimpeachable certificate authority.",
+        "masvs": "MSTG-NETWORK-4",
+        "owasp-mobile": "M3: Insecure Communication",
+        "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4",
+        "severity": "INFO"
+      }
+    },
+    "android_kotlin_hardcoded": {
+      "files": [
+        {
+          "file_path": "app/src/main/java/com/routes/domain/analytics/event/Signatures.kt",
+          "match_lines": [
+            10,
+            10
+          ],
+          "match_position": [
+            243,
+            271
+          ],
+          "match_string": "key = \"hmi_busroutes_health\""
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-798 Use of Hard-coded Credentials",
+        "description": "Files may contain hardcoded sensitive information like usernames, passwords, keys etc.",
+        "masvs": "MSTG-STORAGE-14",
+        "owasp-mobile": "M9: Reverse Engineering",
+        "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#storing-a-key---example",
+        "severity": "WARNING"
+      }
+    },
+    "android_prevent_screenshot": {
+      "metadata": {
+        "cwe": "CWE-200 Information Exposure",
+        "description": "This app does not have capabilities to prevent against Screenshots from Recent Task History/ Now On Tap etc.",
+        "masvs": "MSTG-STORAGE-9",
+        "owasp-mobile": "M2: Insecure Data Storage",
+        "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#finding-sensitive-information-in-auto-generated-screenshots-mstg-storage-9",
+        "severity": "INFO"
+      }
+    },
+    "android_root_detection": {
+      "metadata": {
+        "cwe": "CWE-919 - Weaknesses in Mobile Applications",
+        "description": "This app does not have root detection capabilities. Running a sensitive application on a rooted device questions the device integrity and affects users data.",
+        "masvs": "MSTG-RESILIENCE-1",
+        "owasp-mobile": "M8: Code Tampering",
+        "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-root-detection-mstg-resilience-1",
+        "severity": "INFO"
+      }
+    },
+    "android_safetynet": {
+      "metadata": {
+        "cwe": "CWE-353 Missing Support for Integrity Check",
+        "description": "This app does not uses SafetyNet Attestation API that provides cryptographically-signed attestation, assessing the device's integrity. This check helps to ensure that the servers are interacting with the genuine app running on a genuine Android device. ",
+        "masvs": "MSTG-RESILIENCE-1",
+        "owasp-mobile": "M8: Code Tampering",
+        "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-root-detection-mstg-resilience-1",
+        "severity": "INFO"
+      }
+    },
+    "android_ssl_pinning": {
+      "metadata": {
+        "cwe": "CWE-295 Improper Certificate Validation",
+        "description": "This app does not use TLS/SSL certificate or public key pinning to detect or prevent MITM attacks in secure communication channel.",
+        "masvs": "MSTG-NETWORK-4",
+        "owasp-mobile": "M3: Insecure Communication",
+        "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4",
+        "severity": "INFO"
+      }
+    },
+    "android_tapjacking": {
+      "metadata": {
+        "cwe": "CWE-200 Information Exposure",
+        "description": "This app does not have capabilities to prevent tapjacking attacks.",
+        "masvs": "MSTG-PLATFORM-9",
+        "owasp-mobile": "M1: Improper Platform Usage",
+        "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-for-overlay-attacks-mstg-platform-9",
+        "severity": "INFO"
+      }
+    }
+  }
+}

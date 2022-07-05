@@ -1,6 +1,5 @@
 import json
-from base64 import b64encode
-from urllib.parse import urlparse
+from datetime import datetime
 
 import html2text
 from django.utils.encoding import force_str
@@ -9,6 +8,11 @@ from dojo.models import Endpoint, Finding
 
 
 class ArachniParser(object):
+    """Arachni Web Scanner (http://arachni-scanner.com/wiki)
+
+    Reports are generated with arachni_reporter tool:
+    `./arachni_reporter --reporter 'json' js.com.afr`
+    """
 
     def get_scan_types(self):
         return ["Arachni Scan"]
@@ -17,193 +21,90 @@ class ArachniParser(object):
         return "Arachni Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Arachni JSON report format."
+        return "Arachni JSON report format (generated with `arachni_reporter --reporter 'json'`)."
 
     def get_findings(self, json_output, test):
-        self.target = None
-        self.port = "80"
-        self.host = None
-
-        tree = self.parse_json(json_output)
-        if tree:
-            return [data for data in self.get_items(tree, test)]
-        else:
-            return []
-
-    def parse_json(self, json_output):
-        try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return tree
+        tree = json.load(json_output)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
-        bugtype = ""
         items = {}
-
-        issues = tree['issues']
-
-        for node in issues:
-            item = get_item(node, test)
-            dupe_key = str(item.url) + item.severity + item.title
+        report_date = None
+        if 'finish_datetime' in tree:
+            report_date = datetime.strptime(tree.get('finish_datetime'), '%Y-%m-%d %H:%M:%S %z')
+        for node in tree['issues']:
+            item = self.get_item(node, report_date)
+            dupe_key = item.severity + item.title
             if dupe_key in items:
                 items[dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
                 items[dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
-
-                # make sure only unique endpoints are retained
-                unique_objs = []
-                new_list = []
-                for o in items[dupe_key].unsaved_endpoints:
-                    if str(o) in unique_objs:
-                        continue
-                    new_list.append(o)
-                    unique_objs.append(str(o))
-
-                items[dupe_key].unsaved_endpoints = new_list
+                items[dupe_key].nb_occurences += 1
             else:
                 items[dupe_key] = item
+                items[dupe_key].nb_occurences = 1
 
         return list(items.values())
 
+    def get_item(self, item_node, report_date):
+        # url management
+        if 'vector' in item_node and 'action' in item_node['vector']:
+            url = item_node['vector']['action']
+        else:
+            url = item_node['response']['url']
 
-def do_clean(value):
-    myreturn = ""
-    if value is not None:
-        if len(value) > 0:
-            for x in value:
-                myreturn += x.text
-    return myreturn
+        request = item_node['request']
+        #
+        req = ''
+        #
+        for key, value in request.items():
+            req += str(key) + ": " + str(value) + "\n\n"
+        #
+        respz = item_node['response']
 
+        resp = ''
 
-def get_item(item_node, test):
-    if 'vector' in item_node and 'action' in item_node['vector']:
-        url = item_node['vector']['action']
-    else:
-        url = item_node['response']['url']
+        for key, value in respz.items():
+            if key != 'body':
+                resp += str(key) + ": " + str(value) + "\n\n"
 
-    o = urlparse(url)
+        resp += "\n\n\n" + force_str(respz['body'])
+        unsaved_req_resp = list()
 
-    """
+        if request is not None and respz is not None:
+            unsaved_req_resp.append({"req": req, "resp": resp})
 
-    ParseResult(scheme='http', netloc='www.cwi.nl:80', path='/%7Eguido/Python.html',
-                params='', query='', fragment='')
-    """
+        endpoint = Endpoint.from_uri(url)
 
-    # rhost = re.search(
-    #     "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-    #     url)
-    protocol = o.scheme
-    host = o.netloc
-    path = o.path
-    query = o.query
-    fragment = o.fragment
+        description = item_node.get('description', 'N/A')
+        description = html2text.html2text(description)
 
-    port = 80
-    if protocol == 'https':
-        port = 443
+        remediation = item_node['remedy_guidance'] if 'remedy_guidance' in item_node else 'n/a'
+        if remediation:
+            remediation = html2text.html2text(remediation)
 
-    # if rhost.group(11) is not None:
-    #     port = rhost.group(11)
-    if o.port is not None:
-        port = o.port
+        references = list(item_node['references'].values()) if 'references' in item_node else None
+        references = '<br/><br/>'.join(reference for reference in references)
 
-    request = item_node['request']
-    #
-    req = ''
-    #
-    for key, value in request.items():
-        req += str(key) + ": " + str(value) + "\n\n"
-    #
-    respz = item_node['response']
+        if references:
+            references = html2text.html2text(references)
 
-    resp = ''
+        severity = item_node.get('severity', 'Info').capitalize()
+        if 'Informational' == severity:
+            severity = 'Info'
 
-    for key, value in respz.items():
-        if key != 'body':
-            resp += str(key) + ": " + str(value) + "\n\n"
+        # Finding and Endpoint objects returned have not been saved to the database
+        finding = Finding(title=item_node['name'],
+                            date=report_date,
+                            severity=severity,
+                            description=description,
+                            mitigation=remediation,
+                            references=references,
+                            impact="No impact provided",
+                            cwe=item_node.get('cwe'),
+                            vuln_id_from_tool=item_node.get('digest'),
+                          )
+        finding.unsaved_endpoints = [endpoint]
+        finding.unsaved_req_resp = unsaved_req_resp
+        finding.unsaved_tags = item_node.get('tags')
 
-    resp += "\n\n\n" + force_str(respz['body'])
-    unsaved_req_resp = list()
-
-    if request is not None and respz is not None:
-        unsaved_req_resp.append({"req": b64encode(req.encode("utf-8")), "resp": b64encode(resp.encode("utf-8"))})
-
-    try:
-        dupe_endpoint = Endpoint.objects.get(protocol=protocol,
-                                             host=host + (":" + port) if port is not None else "",
-                                             query=query,
-                                             fragment=fragment,
-                                             path=path,
-                                             product=test.engagement.product)
-    except:
-        dupe_endpoint = None
-
-    if not dupe_endpoint:
-        endpoint = Endpoint(protocol=protocol,
-                            host=host + (":" + str(port)) if port is not None else "",
-                            query=query,
-                            fragment=fragment,
-                            path=path,
-                            product=test.engagement.product)
-    else:
-        endpoint = dupe_endpoint
-
-    if not dupe_endpoint:
-        endpoints = [endpoint]
-    else:
-        endpoints = [endpoint, dupe_endpoint]
-
-    background = item_node['description'] if 'description' in item_node else None
-    if background:
-        background = html2text.html2text(background)
-
-    remediation = item_node['remedy_guidance'] if 'remedy_guidance' in item_node else 'n/a'
-    if remediation:
-        remediation = html2text.html2text(remediation)
-
-    references = list(item_node['references'].values()) if 'references' in item_node else None
-    references = '<br/><br/>'.join(reference for reference in references)
-
-    if references:
-        references = html2text.html2text(references)
-
-    severity = item_node['severity'].capitalize() if 'severity' in item_node else 'Info'
-
-    if severity == 'Informational':
-        severity == 'Info'
-
-    cwe = item_node['cwe'] if 'cwe' in item_node else None
-
-    tags = item_node['tags'] if 'tags' in item_node else None
-
-    if tags:
-        tags = ', '.join(tag for tag in tags)
-
-    digest = item_node['digest']
-    # Finding and Endpoint objects returned have not been saved to the database
-    finding = Finding(title=item_node['name'] + " (" + str(digest) + ")",
-                      url=url,
-                      test=test,
-                      severity=severity,
-                      description=background + "\n\n",
-                      mitigation=remediation,
-                      references=references,
-                      active=False,
-                      verified=False,
-                      false_p=False,
-                      duplicate=False,
-                      out_of_scope=False,
-                      mitigated=None,
-                      impact="No impact provided",
-                      numerical_severity=Finding.get_numerical_severity(severity),
-                      cwe=cwe)
-    finding.unsaved_endpoints = endpoints
-    finding.unsaved_req_resp = unsaved_req_resp
-    finding.unsaved_tags = tags
-
-    return finding
+        return finding

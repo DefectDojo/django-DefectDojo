@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.91 scan initiated Thu Apr 29 09:26:36 2021 as: nmap -v -sV -&#45;script=nmap-vulners/vulners.nse -&#45;script-args mincvss=0 -Pn -p 1-65535 -oX - 10.250.195.71 -->
+<nmaprun scanner="nmap" args="nmap -v -sV -&#45;script=nmap-vulners/vulners.nse -&#45;script-args mincvss=0 -Pn -p 1-65535 -oX - 10.250.195.71" start="1619688396" startstr="Thu Apr 29 09:26:36 2021" version="7.91" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="65535" services="1-65535"/>
+<verbose level="1"/>
+<debugging level="0"/>
+<taskbegin task="NSE" time="1619688396"/>
+<taskend task="NSE" time="1619688396"/>
+<taskbegin task="NSE" time="1619688396"/>
+<taskend task="NSE" time="1619688396"/>
+<taskbegin task="Parallel DNS resolution of 1 host." time="1619688396"/>
+<taskend task="Parallel DNS resolution of 1 host." time="1619688396"/>
+<taskbegin task="SYN Stealth Scan" time="1619688396"/>
+<taskend task="SYN Stealth Scan" time="1619688397" extrainfo="65535 total ports"/>
+<taskbegin task="Service scan" time="1619688397"/>
+<taskend task="Service scan" time="1619688494" extrainfo="25 services on 1 host"/>
+<taskbegin task="NSE" time="1619688494"/>
+<taskend task="NSE" time="1619688496"/>
+<taskbegin task="NSE" time="1619688496"/>
+<taskend task="NSE" time="1619688497"/>
+<host starttime="1619688396" endtime="1619688497"><status state="up" reason="user-set" reason_ttl="0"/>
+<address addr="10.250.195.71" addrtype="ipv4"/>
+<hostnames>
+<hostname name="ip-10-250-195-71.eu-west-1.compute.internal" type="PTR"/>
+</hostnames>
+<ports><extraports state="closed" count="65510">
+<extrareasons reason="resets" count="65510"/>
+</extraports>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="7.4" extrainfo="protocol 2.0" method="probed" conf="10"><cpe>cpe:/a:openbsd:openssh:7.4</cpe></service><script id="vulners" output="&#xa;  cpe:/a:openbsd:openssh:7.4: &#xa;    &#x9;MSF:ILITIES/UBUNTU-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/UBUNTU-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/SUSE-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/SUSE-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/SUSE-CVE-2019-25017/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/SUSE-CVE-2019-25017/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/REDHAT_LINUX-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/REDHAT_LINUX-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/REDHAT-OPENSHIFT-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/REDHAT-OPENSHIFT-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/ORACLE-SOLARIS-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/ORACLE-SOLARIS-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/OPENBSD-OPENSSH-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/OPENBSD-OPENSSH-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/IBM-AIX-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/IBM-AIX-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/HUAWEI-EULEROS-2_0_SP8-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/HUAWEI-EULEROS-2_0_SP8-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/HUAWEI-EULEROS-2_0_SP5-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/HUAWEI-EULEROS-2_0_SP5-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/HUAWEI-EULEROS-2_0_SP3-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/HUAWEI-EULEROS-2_0_SP3-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/HUAWEI-EULEROS-2_0_SP2-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/HUAWEI-EULEROS-2_0_SP2-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/GENTOO-LINUX-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/GENTOO-LINUX-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/F5-BIG-IP-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/F5-BIG-IP-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/DEBIAN-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/DEBIAN-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/CENTOS_LINUX-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/CENTOS_LINUX-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/AMAZON_LINUX-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/AMAZON_LINUX-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/AMAZON-LINUX-AMI-2-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/AMAZON-LINUX-AMI-2-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;MSF:ILITIES/ALPINE-LINUX-CVE-2019-6111/&#x9;5.8&#x9;https://vulners.com/metasploit/MSF:ILITIES/ALPINE-LINUX-CVE-2019-6111/&#x9;*EXPLOIT*&#xa;    &#x9;EXPLOITPACK:98FE96309F9524B8C84C508837551A19&#x9;5.8&#x9;https://vulners.com/exploitpack/EXPLOITPACK:98FE96309F9524B8C84C508837551A19&#x9;*EXPLOIT*&#xa;    &#x9;EXPLOITPACK:5330EA02EBDE345BFC9D6DDDD97F9E97&#x9;5.8&#x9;https://vulners.com/exploitpack/EXPLOITPACK:5330EA02EBDE345BFC9D6DDDD97F9E97&#x9;*EXPLOIT*&#xa;    &#x9;EDB-ID:46516&#x9;5.8&#x9;https://vulners.com/exploitdb/EDB-ID:46516&#x9;*EXPLOIT*&#xa;    &#x9;CVE-2019-6111&#x9;5.8&#x9;https://vulners.com/cve/CVE-2019-6111&#xa;    &#x9;SSH_ENUM&#x9;5.0&#x9;https://vulners.com/canvas/SSH_ENUM&#x9;*EXPLOIT*&#xa;    &#x9;PACKETSTORM:150621&#x9;5.0&#x9;https://vulners.com/packetstorm/PACKETSTORM:150621&#x9;*EXPLOIT*&#xa;    &#x9;MSF:AUXILIARY/SCANNER/SSH/SSH_ENUMUSERS&#x9;5.0&#x9;https://vulners.com/metasploit/MSF:AUXILIARY/SCANNER/SSH/SSH_ENUMUSERS&#x9;*EXPLOIT*&#xa;    &#x9;EXPLOITPACK:F957D7E8A0CC1E23C3C649B764E13FB0&#x9;5.0&#x9;https://vulners.com/exploitpack/EXPLOITPACK:F957D7E8A0CC1E23C3C649B764E13FB0&#x9;*EXPLOIT*&#xa;    &#x9;EXPLOITPACK:EBDBC5685E3276D648B4D14B75563283&#x9;5.0&#x9;https://vulners.com/exploitpack/EXPLOITPACK:EBDBC5685E3276D648B4D14B75563283&#x9;*EXPLOIT*&#xa;    &#x9;EDB-ID:45939&#x9;5.0&#x9;https://vulners.com/exploitdb/EDB-ID:45939&#x9;*EXPLOIT*&#xa;    &#x9;CVE-2018-15919&#x9;5.0&#x9;https://vulners.com/cve/CVE-2018-15919&#xa;    &#x9;CVE-2018-15473&#x9;5.0&#x9;https://vulners.com/cve/CVE-2018-15473&#xa;    &#x9;CVE-2017-15906&#x9;5.0&#x9;https://vulners.com/cve/CVE-2017-15906&#xa;    &#x9;1337DAY-ID-31730&#x9;5.0&#x9;https://vulners.com/zdt/1337DAY-ID-31730&#x9;*EXPLOIT*&#xa;    &#x9;EDB-ID:45233&#x9;4.6&#x9;https://vulners.com/exploitdb/EDB-ID:45233&#x9;*EXPLOIT*&#xa;    &#x9;CVE-2020-14145&#x9;4.3&#x9;https://vulners.com/cve/CVE-2020-14145&#xa;    &#x9;CVE-2019-6110&#x9;4.0&#x9;https://vulners.com/cve/CVE-2019-6110&#xa;    &#x9;CVE-2019-6109&#x9;4.0&#x9;https://vulners.com/cve/CVE-2019-6109&#xa;    &#x9;CVE-2018-20685&#x9;2.6&#x9;https://vulners.com/cve/CVE-2018-20685&#xa;    &#x9;PACKETSTORM:151227&#x9;0.0&#x9;https://vulners.com/packetstorm/PACKETSTORM:151227&#x9;*EXPLOIT*&#xa;    &#x9;EDB-ID:46193&#x9;0.0&#x9;https://vulners.com/exploitdb/EDB-ID:46193&#x9;*EXPLOIT*&#xa;    &#x9;1337DAY-ID-32009&#x9;0.0&#x9;https://vulners.com/zdt/1337DAY-ID-32009&#x9;*EXPLOIT*&#xa;    &#x9;1337DAY-ID-30937&#x9;0.0&#x9;https://vulners.com/zdt/1337DAY-ID-30937&#x9;*EXPLOIT*"><table key="cpe:/a:openbsd:openssh:7.4">
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/UBUNTU-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/SUSE-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/SUSE-CVE-2019-25017/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/REDHAT_LINUX-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/REDHAT-OPENSHIFT-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/ORACLE-SOLARIS-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/OPENBSD-OPENSSH-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/IBM-AIX-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/HUAWEI-EULEROS-2_0_SP8-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/HUAWEI-EULEROS-2_0_SP5-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/HUAWEI-EULEROS-2_0_SP3-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/HUAWEI-EULEROS-2_0_SP2-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/GENTOO-LINUX-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/F5-BIG-IP-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/DEBIAN-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/CENTOS_LINUX-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/AMAZON_LINUX-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/AMAZON-LINUX-AMI-2-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">MSF:ILITIES/ALPINE-LINUX-CVE-2019-6111/</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">EXPLOITPACK:98FE96309F9524B8C84C508837551A19</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">exploitpack</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">EXPLOITPACK:5330EA02EBDE345BFC9D6DDDD97F9E97</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">exploitpack</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">EDB-ID:46516</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">exploitdb</elem>
+</table>
+<table>
+<elem key="cvss">5.8</elem>
+<elem key="id">CVE-2019-6111</elem>
+<elem key="is_exploit">false</elem>
+<elem key="type">cve</elem>
+</table>
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">SSH_ENUM</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">canvas</elem>
+</table>
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">PACKETSTORM:150621</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">packetstorm</elem>
+</table>
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">MSF:AUXILIARY/SCANNER/SSH/SSH_ENUMUSERS</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">metasploit</elem>
+</table>
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">EXPLOITPACK:F957D7E8A0CC1E23C3C649B764E13FB0</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">exploitpack</elem>
+</table>
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">EXPLOITPACK:EBDBC5685E3276D648B4D14B75563283</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">exploitpack</elem>
+</table>
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">EDB-ID:45939</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">exploitdb</elem>
+</table>
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">CVE-2018-15919</elem>
+<elem key="is_exploit">false</elem>
+<elem key="type">cve</elem>
+</table>
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">CVE-2018-15473</elem>
+<elem key="is_exploit">false</elem>
+<elem key="type">cve</elem>
+</table>
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">CVE-2017-15906</elem>
+<elem key="is_exploit">false</elem>
+<elem key="type">cve</elem>
+</table>
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">1337DAY-ID-31730</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">zdt</elem>
+</table>
+<table>
+<elem key="cvss">4.6</elem>
+<elem key="id">EDB-ID:45233</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">exploitdb</elem>
+</table>
+<table>
+<elem key="cvss">4.3</elem>
+<elem key="id">CVE-2020-14145</elem>
+<elem key="is_exploit">false</elem>
+<elem key="type">cve</elem>
+</table>
+<table>
+<elem key="cvss">4.0</elem>
+<elem key="id">CVE-2019-6110</elem>
+<elem key="is_exploit">false</elem>
+<elem key="type">cve</elem>
+</table>
+<table>
+<elem key="cvss">4.0</elem>
+<elem key="id">CVE-2019-6109</elem>
+<elem key="is_exploit">false</elem>
+<elem key="type">cve</elem>
+</table>
+<table>
+<elem key="cvss">2.6</elem>
+<elem key="id">CVE-2018-20685</elem>
+<elem key="is_exploit">false</elem>
+<elem key="type">cve</elem>
+</table>
+<table>
+<elem key="cvss">0.0</elem>
+<elem key="id">PACKETSTORM:151227</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">packetstorm</elem>
+</table>
+<table>
+<elem key="cvss">0.0</elem>
+<elem key="id">EDB-ID:46193</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">exploitdb</elem>
+</table>
+<table>
+<elem key="cvss">0.0</elem>
+<elem key="id">1337DAY-ID-32009</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">zdt</elem>
+</table>
+<table>
+<elem key="cvss">0.0</elem>
+<elem key="id">1337DAY-ID-30937</elem>
+<elem key="is_exploit">true</elem>
+<elem key="type">zdt</elem>
+</table>
+</table>
+</script></port>
+<port protocol="tcp" portid="111"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="rpcbind" version="2-4" extrainfo="RPC #100000" method="probed" conf="10"/><script id="rpcinfo" output="&#xa;  program version    port/proto  service&#xa;  100000  2,3,4        111/tcp   rpcbind&#xa;  100000  2,3,4        111/udp   rpcbind&#xa;  100000  3,4          111/tcp6  rpcbind&#xa;  100000  3,4          111/udp6  rpcbind&#xa;"><table key="100000">
+<table key="tcp">
+<elem key="owner">superuser</elem>
+<elem key="port">111</elem>
+<elem key="addr">0.0.0.0</elem>
+<table key="version">
+<elem>2</elem>
+<elem>3</elem>
+<elem>4</elem>
+</table>
+</table>
+<table key="local">
+<elem key="owner">superuser</elem>
+<elem key="addr">/var/run/rpcbind.sock</elem>
+<table key="version">
+<elem>3</elem>
+<elem>4</elem>
+</table>
+</table>
+<table key="udp6">
+<elem key="owner">superuser</elem>
+<elem key="port">111</elem>
+<elem key="addr">::</elem>
+<table key="version">
+<elem>3</elem>
+<elem>4</elem>
+</table>
+</table>
+<table key="udp">
+<elem key="owner">superuser</elem>
+<elem key="port">111</elem>
+<elem key="addr">0.0.0.0</elem>
+<table key="version">
+<elem>2</elem>
+<elem>3</elem>
+<elem>4</elem>
+</table>
+</table>
+<table key="tcp6">
+<elem key="owner">superuser</elem>
+<elem key="port">111</elem>
+<elem key="addr">::</elem>
+<table key="version">
+<elem>3</elem>
+<elem>4</elem>
+</table>
+</table>
+</table>
+</script></port>
+<port protocol="tcp" portid="179"><state state="open" reason="syn-ack" reason_ttl="255"/><service name="tcpwrapped" method="probed" conf="8"/></port>
+<port protocol="tcp" portid="2379"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="etcd-client" tunnel="ssl" method="table" conf="3"/></port>
+<port protocol="tcp" portid="2380"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="etcd-server" tunnel="ssl" method="table" conf="3"/></port>
+<port protocol="tcp" portid="6443"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="sun-sr-https" servicefp="SF-Port6443-TCP:V=7.91%T=SSL%I=7%D=4/29%Time=608A7BD9%P=x86_64-redhat-linux-gnu%r(GenericLines,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(GetRequest,170,&quot;HTTP/1\.0\x20403\x20Forbidden\r\nCache-Control:\x20no-cache,\x20private\r\nContent-Type:\x20application/json\r\nX-Content-Type-Options:\x20nosniff\r\nDate:\x20Thu,\x2029\x20Apr\x202021\x2009:26:49\x20GMT\r\nContent-Length:\x20185\r\n\r\n{\&quot;kind\&quot;:\&quot;Status\&quot;,\&quot;apiVersion\&quot;:\&quot;v1\&quot;,\&quot;metadata\&quot;:{},\&quot;status\&quot;:\&quot;Failure\&quot;,\&quot;message\&quot;:\&quot;forbidden:\x20User\x20\\\&quot;system:anonymous\\\&quot;\x20cannot\x20get\x20path\x20\\\&quot;/\\\&quot;\&quot;,\&quot;reason\&quot;:\&quot;Forbidden\&quot;,\&quot;details\&quot;:{},\&quot;code\&quot;:403}\n&quot;)%r(HTTPOptions,174,&quot;HTTP/1\.0\x20403\x20Forbidden\r\nCache-Control:\x20no-cache,\x20private\r\nContent-Type:\x20application/json\r\nX-Content-Type-Options:\x20nosniff\r\nDate:\x20Thu,\x2029\x20Apr\x202021\x2009:26:49\x20GMT\r\nContent-Length:\x20189\r\n\r\n{\&quot;kind\&quot;:\&quot;Status\&quot;,\&quot;apiVersion\&quot;:\&quot;v1\&quot;,\&quot;metadata\&quot;:{},\&quot;status\&quot;:\&quot;Failure\&quot;,\&quot;message\&quot;:\&quot;forbidden:\x20User\x20\\\&quot;system:anonymous\\\&quot;\x20cannot\x20options\x20path\x20\\\&quot;/\\\&quot;\&quot;,\&quot;reason\&quot;:\&quot;Forbidden\&quot;,\&quot;details\&quot;:{},\&quot;code\&quot;:403}\n&quot;)%r(RTSPRequest,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(Help,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(SSLSessionReq,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(TerminalServerCookie,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(TLSSessionReq,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(Kerberos,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;);" tunnel="ssl" method="table" conf="3"/><script id="fingerprint-strings" output="&#xa;  GenericLines, Help, Kerberos, RTSPRequest, SSLSessionReq, TLSSessionReq, TerminalServerCookie: &#xa;    HTTP/1.1 400 Bad Request&#xa;    Content-Type: text/plain; charset=utf-8&#xa;    Connection: close&#xa;    Request&#xa;  GetRequest: &#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: application/json&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:26:49 GMT&#xa;    Content-Length: 185&#xa;    {&quot;kind&quot;:&quot;Status&quot;,&quot;apiVersion&quot;:&quot;v1&quot;,&quot;metadata&quot;:{},&quot;status&quot;:&quot;Failure&quot;,&quot;message&quot;:&quot;forbidden: User &quot;system:anonymous&quot; cannot get path &quot;/&quot;&quot;,&quot;reason&quot;:&quot;Forbidden&quot;,&quot;details&quot;:{},&quot;code&quot;:403}&#xa;  HTTPOptions: &#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: application/json&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:26:49 GMT&#xa;    Content-Length: 189&#xa;    {&quot;kind&quot;:&quot;Status&quot;,&quot;apiVersion&quot;:&quot;v1&quot;,&quot;metadata&quot;:{},&quot;status&quot;:&quot;Failure&quot;,&quot;message&quot;:&quot;forbidden: User &quot;system:anonymous&quot; cannot options path &quot;/&quot;&quot;,&quot;reason&quot;:&quot;Forbidden&quot;,&quot;details&quot;:{},&quot;code&quot;:403}"><elem key="GenericLines, Help, Kerberos, RTSPRequest, SSLSessionReq, TLSSessionReq, TerminalServerCookie">&#xa;    HTTP/1.1 400 Bad Request&#xa;    Content-Type: text/plain; charset=utf-8&#xa;    Connection: close&#xa;    Request</elem>
+<elem key="GetRequest">&#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: application/json&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:26:49 GMT&#xa;    Content-Length: 185&#xa;    {&quot;kind&quot;:&quot;Status&quot;,&quot;apiVersion&quot;:&quot;v1&quot;,&quot;metadata&quot;:{},&quot;status&quot;:&quot;Failure&quot;,&quot;message&quot;:&quot;forbidden: User &quot;system:anonymous&quot; cannot get path &quot;/&quot;&quot;,&quot;reason&quot;:&quot;Forbidden&quot;,&quot;details&quot;:{},&quot;code&quot;:403}</elem>
+<elem key="HTTPOptions">&#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: application/json&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:26:49 GMT&#xa;    Content-Length: 189&#xa;    {&quot;kind&quot;:&quot;Status&quot;,&quot;apiVersion&quot;:&quot;v1&quot;,&quot;metadata&quot;:{},&quot;status&quot;:&quot;Failure&quot;,&quot;message&quot;:&quot;forbidden: User &quot;system:anonymous&quot; cannot options path &quot;/&quot;&quot;,&quot;reason&quot;:&quot;Forbidden&quot;,&quot;details&quot;:{},&quot;code&quot;:403}</elem>
+</script></port>
+<port protocol="tcp" portid="9100"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="jetdirect" method="table" conf="3"/></port>
+<port protocol="tcp" portid="9253"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Golang net/http server" extrainfo="Go-IPFS json-rpc or InfluxDB API" method="probed" conf="10"><cpe>cpe:/a:protocol_labs:go-ipfs</cpe></service></port>
+<port protocol="tcp" portid="9353"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Golang net/http server" extrainfo="Go-IPFS json-rpc or InfluxDB API" method="probed" conf="10"><cpe>cpe:/a:protocol_labs:go-ipfs</cpe></service></port>
+<port protocol="tcp" portid="10250"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Golang net/http server" extrainfo="Go-IPFS json-rpc or InfluxDB API" tunnel="ssl" method="probed" conf="10"><cpe>cpe:/a:protocol_labs:go-ipfs</cpe></service></port>
+<port protocol="tcp" portid="10256"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Golang net/http server" extrainfo="Go-IPFS json-rpc or InfluxDB API" method="probed" conf="10"><cpe>cpe:/a:protocol_labs:go-ipfs</cpe></service></port>
+<port protocol="tcp" portid="10257"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="unknown" servicefp="SF-Port10257-TCP:V=7.91%T=SSL%I=7%D=4/29%Time=608A7BDE%P=x86_64-redhat-linux-gnu%r(GenericLines,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(GetRequest,170,&quot;HTTP/1\.0\x20403\x20Forbidden\r\nCache-Control:\x20no-cache,\x20private\r\nContent-Type:\x20application/json\r\nX-Content-Type-Options:\x20nosniff\r\nDate:\x20Thu,\x2029\x20Apr\x202021\x2009:26:54\x20GMT\r\nContent-Length:\x20185\r\n\r\n{\&quot;kind\&quot;:\&quot;Status\&quot;,\&quot;apiVersion\&quot;:\&quot;v1\&quot;,\&quot;metadata\&quot;:{},\&quot;status\&quot;:\&quot;Failure\&quot;,\&quot;message\&quot;:\&quot;forbidden:\x20User\x20\\\&quot;system:anonymous\\\&quot;\x20cannot\x20get\x20path\x20\\\&quot;/\\\&quot;\&quot;,\&quot;reason\&quot;:\&quot;Forbidden\&quot;,\&quot;details\&quot;:{},\&quot;code\&quot;:403}\n&quot;)%r(HTTPOptions,174,&quot;HTTP/1\.0\x20403\x20Forbidden\r\nCache-Control:\x20no-cache,\x20private\r\nContent-Type:\x20application/json\r\nX-Content-Type-Options:\x20nosniff\r\nDate:\x20Thu,\x2029\x20Apr\x202021\x2009:26:54\x20GMT\r\nContent-Length:\x20189\r\n\r\n{\&quot;kind\&quot;:\&quot;Status\&quot;,\&quot;apiVersion\&quot;:\&quot;v1\&quot;,\&quot;metadata\&quot;:{},\&quot;status\&quot;:\&quot;Failure\&quot;,\&quot;message\&quot;:\&quot;forbidden:\x20User\x20\\\&quot;system:anonymous\\\&quot;\x20cannot\x20options\x20path\x20\\\&quot;/\\\&quot;\&quot;,\&quot;reason\&quot;:\&quot;Forbidden\&quot;,\&quot;details\&quot;:{},\&quot;code\&quot;:403}\n&quot;)%r(RTSPRequest,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(Help,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(SSLSessionReq,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(TerminalServerCookie,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(TLSSessionReq,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(Kerberos,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;);" tunnel="ssl" method="table" conf="3"/><script id="fingerprint-strings" output="&#xa;  GenericLines, Help, Kerberos, RTSPRequest, SSLSessionReq, TLSSessionReq, TerminalServerCookie: &#xa;    HTTP/1.1 400 Bad Request&#xa;    Content-Type: text/plain; charset=utf-8&#xa;    Connection: close&#xa;    Request&#xa;  GetRequest: &#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: application/json&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:26:54 GMT&#xa;    Content-Length: 185&#xa;    {&quot;kind&quot;:&quot;Status&quot;,&quot;apiVersion&quot;:&quot;v1&quot;,&quot;metadata&quot;:{},&quot;status&quot;:&quot;Failure&quot;,&quot;message&quot;:&quot;forbidden: User &quot;system:anonymous&quot; cannot get path &quot;/&quot;&quot;,&quot;reason&quot;:&quot;Forbidden&quot;,&quot;details&quot;:{},&quot;code&quot;:403}&#xa;  HTTPOptions: &#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: application/json&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:26:54 GMT&#xa;    Content-Length: 189&#xa;    {&quot;kind&quot;:&quot;Status&quot;,&quot;apiVersion&quot;:&quot;v1&quot;,&quot;metadata&quot;:{},&quot;status&quot;:&quot;Failure&quot;,&quot;message&quot;:&quot;forbidden: User &quot;system:anonymous&quot; cannot options path &quot;/&quot;&quot;,&quot;reason&quot;:&quot;Forbidden&quot;,&quot;details&quot;:{},&quot;code&quot;:403}"><elem key="GenericLines, Help, Kerberos, RTSPRequest, SSLSessionReq, TLSSessionReq, TerminalServerCookie">&#xa;    HTTP/1.1 400 Bad Request&#xa;    Content-Type: text/plain; charset=utf-8&#xa;    Connection: close&#xa;    Request</elem>
+<elem key="GetRequest">&#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: application/json&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:26:54 GMT&#xa;    Content-Length: 185&#xa;    {&quot;kind&quot;:&quot;Status&quot;,&quot;apiVersion&quot;:&quot;v1&quot;,&quot;metadata&quot;:{},&quot;status&quot;:&quot;Failure&quot;,&quot;message&quot;:&quot;forbidden: User &quot;system:anonymous&quot; cannot get path &quot;/&quot;&quot;,&quot;reason&quot;:&quot;Forbidden&quot;,&quot;details&quot;:{},&quot;code&quot;:403}</elem>
+<elem key="HTTPOptions">&#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: application/json&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:26:54 GMT&#xa;    Content-Length: 189&#xa;    {&quot;kind&quot;:&quot;Status&quot;,&quot;apiVersion&quot;:&quot;v1&quot;,&quot;metadata&quot;:{},&quot;status&quot;:&quot;Failure&quot;,&quot;message&quot;:&quot;forbidden: User &quot;system:anonymous&quot; cannot options path &quot;/&quot;&quot;,&quot;reason&quot;:&quot;Forbidden&quot;,&quot;details&quot;:{},&quot;code&quot;:403}</elem>
+</script></port>
+<port protocol="tcp" portid="10259"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="unknown" servicefp="SF-Port10259-TCP:V=7.91%T=SSL%I=7%D=4/29%Time=608A7BDE%P=x86_64-redhat-linux-gnu%r(GenericLines,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(GetRequest,11F,&quot;HTTP/1\.0\x20403\x20Forbidden\r\nCache-Control:\x20no-cache,\x20private\r\nContent-Type:\x20text/plain\r\nX-Content-Type-Options:\x20nosniff\r\nDate:\x20Thu,\x2029\x20Apr\x202021\x2009:26:54\x20GMT\r\nContent-Length:\x20110\r\n\r\n:\x20no\x20kind\x20is\x20registered\x20for\x20the\x20type\x20v1\.Status\x20in\x20scheme\x20\&quot;k8s\.io/kubernetes/pkg/api/legacyscheme/scheme\.go:30\&quot;&quot;)%r(HTTPOptions,11F,&quot;HTTP/1\.0\x20403\x20Forbidden\r\nCache-Control:\x20no-cache,\x20private\r\nContent-Type:\x20text/plain\r\nX-Content-Type-Options:\x20nosniff\r\nDate:\x20Thu,\x2029\x20Apr\x202021\x2009:26:54\x20GMT\r\nContent-Length:\x20110\r\n\r\n:\x20no\x20kind\x20is\x20registered\x20for\x20the\x20type\x20v1\.Status\x20in\x20scheme\x20\&quot;k8s\.io/kubernetes/pkg/api/legacyscheme/scheme\.go:30\&quot;&quot;)%r(RTSPRequest,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(Help,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(SSLSessionReq,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(TerminalServerCookie,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(TLSSessionReq,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(Kerberos,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(FourOhFourRequest,11F,&quot;HTTP/1\.0\x20403\x20Forbidden\r\nCache-Control:\x20no-cache,\x20private\r\nContent-Type:\x20text/plain\r\nX-Content-Type-Options:\x20nosniff\r\nDate:\x20Thu,\x2029\x20Apr\x202021\x2009:27:19\x20GMT\r\nContent-Length:\x20110\r\n\r\n:\x20no\x20kind\x20is\x20registered\x20for\x20the\x20type\x20v1\.Status\x20in\x20scheme\x20\&quot;k8s\.io/kubernetes/pkg/api/legacyscheme/scheme\.go:30\&quot;&quot;);" tunnel="ssl" method="table" conf="3"/><script id="fingerprint-strings" output="&#xa;  FourOhFourRequest: &#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: text/plain&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:27:19 GMT&#xa;    Content-Length: 110&#xa;    kind is registered for the type v1.Status in scheme &quot;k8s.io/kubernetes/pkg/api/legacyscheme/scheme.go:30&quot;&#xa;  GenericLines, Help, Kerberos, RTSPRequest, SSLSessionReq, TLSSessionReq, TerminalServerCookie: &#xa;    HTTP/1.1 400 Bad Request&#xa;    Content-Type: text/plain; charset=utf-8&#xa;    Connection: close&#xa;    Request&#xa;  GetRequest, HTTPOptions: &#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: text/plain&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:26:54 GMT&#xa;    Content-Length: 110&#xa;    kind is registered for the type v1.Status in scheme &quot;k8s.io/kubernetes/pkg/api/legacyscheme/scheme.go:30&quot;"><elem key="FourOhFourRequest">&#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: text/plain&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:27:19 GMT&#xa;    Content-Length: 110&#xa;    kind is registered for the type v1.Status in scheme &quot;k8s.io/kubernetes/pkg/api/legacyscheme/scheme.go:30&quot;</elem>
+<elem key="GenericLines, Help, Kerberos, RTSPRequest, SSLSessionReq, TLSSessionReq, TerminalServerCookie">&#xa;    HTTP/1.1 400 Bad Request&#xa;    Content-Type: text/plain; charset=utf-8&#xa;    Connection: close&#xa;    Request</elem>
+<elem key="GetRequest, HTTPOptions">&#xa;    HTTP/1.0 403 Forbidden&#xa;    Cache-Control: no-cache, private&#xa;    Content-Type: text/plain&#xa;    X-Content-Type-Options: nosniff&#xa;    Date: Thu, 29 Apr 2021 09:26:54 GMT&#xa;    Content-Length: 110&#xa;    kind is registered for the type v1.Status in scheme &quot;k8s.io/kubernetes/pkg/api/legacyscheme/scheme.go:30&quot;</elem>
+</script></port>
+<port protocol="tcp" portid="30150"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="unknown" servicefp="SF-Port30150-TCP:V=7.91%I=7%D=4/29%Time=608A7BD3%P=x86_64-redhat-linux-gnu%r(GenericLines,16,&quot;\0\0\0\x12\0\0\0\x01E_BAD_PROTOCOL&quot;);" method="table" conf="3"/><script id="fingerprint-strings" output="&#xa;  GenericLines: &#xa;    E_BAD_PROTOCOL"><elem key="GenericLines">&#xa;    E_BAD_PROTOCOL</elem>
+</script></port>
+<port protocol="tcp" portid="30151"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="unknown" servicefp="SF-Port30151-TCP:V=7.91%I=7%D=4/29%Time=608A7BD3%P=x86_64-redhat-linux-gnu%r(GenericLines,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(GetRequest,BF,&quot;HTTP/1\.0\x20404\x20Not\x20Found\r\nContent-Type:\x20application/json;\x20charset=utf-8\r\nX-Nsq-Content-Type:\x20nsq;\x20version=1\.0\r\nDate:\x20Thu,\x2029\x20Apr\x202021\x2009:26:43\x20GMT\r\nContent-Length:\x2023\r\n\r\n{\&quot;message\&quot;:\&quot;NOT_FOUND\&quot;}&quot;)%r(HTTPOptions,BF,&quot;HTTP/1\.0\x20404\x20Not\x20Found\r\nContent-Type:\x20application/json;\x20charset=utf-8\r\nX-Nsq-Content-Type:\x20nsq;\x20version=1\.0\r\nDate:\x20Thu,\x2029\x20Apr\x202021\x2009:26:43\x20GMT\r\nContent-Length:\x2023\r\n\r\n{\&quot;message\&quot;:\&quot;NOT_FOUND\&quot;}&quot;)%r(RTSPRequest,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(Help,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(SSLSessionReq,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(TerminalServerCookie,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(TLSSessionReq,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(Kerberos,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(FourOhFourRequest,BF,&quot;HTTP/1\.0\x20404\x20Not\x20Found\r\nContent-Type:\x20application/json;\x20charset=utf-8\r\nX-Nsq-Content-Type:\x20nsq;\x20version=1\.0\r\nDate:\x20Thu,\x2029\x20Apr\x202021\x2009:27:08\x20GMT\r\nContent-Length:\x2023\r\n\r\n{\&quot;message\&quot;:\&quot;NOT_FOUND\&quot;}&quot;)%r(LPDString,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;);" method="table" conf="3"/><script id="fingerprint-strings" output="&#xa;  FourOhFourRequest: &#xa;    HTTP/1.0 404 Not Found&#xa;    Content-Type: application/json; charset=utf-8&#xa;    X-Nsq-Content-Type: nsq; version=1.0&#xa;    Date: Thu, 29 Apr 2021 09:27:08 GMT&#xa;    Content-Length: 23&#xa;    {&quot;message&quot;:&quot;NOT_FOUND&quot;}&#xa;  GenericLines, Help, Kerberos, LPDString, RTSPRequest, SSLSessionReq, TLSSessionReq, TerminalServerCookie: &#xa;    HTTP/1.1 400 Bad Request&#xa;    Content-Type: text/plain; charset=utf-8&#xa;    Connection: close&#xa;    Request&#xa;  GetRequest, HTTPOptions: &#xa;    HTTP/1.0 404 Not Found&#xa;    Content-Type: application/json; charset=utf-8&#xa;    X-Nsq-Content-Type: nsq; version=1.0&#xa;    Date: Thu, 29 Apr 2021 09:26:43 GMT&#xa;    Content-Length: 23&#xa;    {&quot;message&quot;:&quot;NOT_FOUND&quot;}"><elem key="FourOhFourRequest">&#xa;    HTTP/1.0 404 Not Found&#xa;    Content-Type: application/json; charset=utf-8&#xa;    X-Nsq-Content-Type: nsq; version=1.0&#xa;    Date: Thu, 29 Apr 2021 09:27:08 GMT&#xa;    Content-Length: 23&#xa;    {&quot;message&quot;:&quot;NOT_FOUND&quot;}</elem>
+<elem key="GenericLines, Help, Kerberos, LPDString, RTSPRequest, SSLSessionReq, TLSSessionReq, TerminalServerCookie">&#xa;    HTTP/1.1 400 Bad Request&#xa;    Content-Type: text/plain; charset=utf-8&#xa;    Connection: close&#xa;    Request</elem>
+<elem key="GetRequest, HTTPOptions">&#xa;    HTTP/1.0 404 Not Found&#xa;    Content-Type: application/json; charset=utf-8&#xa;    X-Nsq-Content-Type: nsq; version=1.0&#xa;    Date: Thu, 29 Apr 2021 09:26:43 GMT&#xa;    Content-Length: 23&#xa;    {&quot;message&quot;:&quot;NOT_FOUND&quot;}</elem>
+</script></port>
+<port protocol="tcp" portid="30367"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="mysql" product="MySQL" version="5.7.32" method="probed" conf="10"><cpe>cpe:/a:mysql:mysql:5.7.32</cpe></service></port>
+<port protocol="tcp" portid="30368"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="mysql" product="MySQL" version="5.7.32" method="probed" conf="10"><cpe>cpe:/a:mysql:mysql:5.7.32</cpe></service></port>
+<port protocol="tcp" portid="30369"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="mysql" product="MySQL" version="5.7.32" method="probed" conf="10"><cpe>cpe:/a:mysql:mysql:5.7.32</cpe></service></port>
+<port protocol="tcp" portid="30370"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="mysql" product="MySQL" version="5.7.32" method="probed" conf="10"><cpe>cpe:/a:mysql:mysql:5.7.32</cpe></service></port>
+<port protocol="tcp" portid="30371"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="mysql" product="MySQL" version="5.7.32" method="probed" conf="10"><cpe>cpe:/a:mysql:mysql:5.7.32</cpe></service></port>
+<port protocol="tcp" portid="30372"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="mysql" product="MySQL" version="5.7.32" method="probed" conf="10"><cpe>cpe:/a:mysql:mysql:5.7.32</cpe></service></port>
+<port protocol="tcp" portid="30373"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="mysql" product="MySQL" version="5.7.32" method="probed" conf="10"><cpe>cpe:/a:mysql:mysql:5.7.32</cpe></service></port>
+<port protocol="tcp" portid="30475"><state state="open" reason="syn-ack" reason_ttl="62"/></port>
+<port protocol="tcp" portid="31007"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="http" product="Golang net/http server" extrainfo="Go-IPFS json-rpc or InfluxDB API" method="probed" conf="10"><cpe>cpe:/a:protocol_labs:go-ipfs</cpe></service></port>
+<port protocol="tcp" portid="31641"><state state="open" reason="syn-ack" reason_ttl="62"/></port>
+</ports>
+<times srtt="104" rttvar="8" to="100000"/>
+</host>
+<taskbegin task="NSE" time="1619688497"/>
+<taskend task="NSE" time="1619688497"/>
+<taskbegin task="NSE" time="1619688497"/>
+<taskend task="NSE" time="1619688497"/>
+<runstats><finished time="1619688497" timestr="Thu Apr 29 09:28:17 2021" summary="Nmap done at Thu Apr 29 09:28:17 2021; 1 IP address (1 host up) scanned in 101.28 seconds" elapsed="101.28" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

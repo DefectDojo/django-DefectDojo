@@ -34,7 +34,6 @@ class TwistlockCSVParser(object):
 
         finding = Finding(
             title=textwrap.shorten(title, width=255, placeholder="..."),
-            cve=data_vulnerability_id,
             test=test,
             severity=convert_severity(data_severity),
             description=data_description + "<p> Vulnerable Package: " +
@@ -43,22 +42,20 @@ class TwistlockCSVParser(object):
             mitigation=data_fix_status,
             component_name=textwrap.shorten(data_package_name, width=200, placeholder="..."),
             component_version=data_package_version,
-            active=False,
-            verified=False,
             false_p=False,
             duplicate=False,
             out_of_scope=False,
             mitigated=None,
             severity_justification="(CVSS v3 base score: {})".format(data_cvss),
             impact=data_severity)
-
         finding.description = finding.description.strip()
+        if data_vulnerability_id:
+            finding.unsaved_vulnerability_ids = [data_vulnerability_id]
 
         return finding
 
     def parse(self, filename, test):
         if filename is None:
-            self.items = ()
             return
         content = filename.read()
         dupes = dict()
@@ -97,18 +94,12 @@ class TwistlockJsonParser(object):
     def get_items(self, tree, test):
         items = {}
         if 'results' in tree:
-            try:
-                vulnerabilityTree = tree['results'][0]['vulnerabilities']
-
-                for node in vulnerabilityTree:
-
-                    item = get_item(node, test)
-                    unique_key = node['id'] + str(node['packageName'] + str(
-                        node['packageVersion']) + str(node['severity']))
-                    items[unique_key] = item
-            except KeyError as ke:
-                logger.warn("Could not find key {}".format(ke))
-
+            vulnerabilityTree = tree['results'][0].get('vulnerabilities', [])
+            for node in vulnerabilityTree:
+                item = get_item(node, test)
+                unique_key = node['id'] + str(node['packageName'] + str(
+                    node['packageVersion']) + str(node['severity']))
+                items[unique_key] = item
         return list(items.values())
 
 
@@ -122,7 +113,6 @@ def get_item(vulnerability, test):
     # create the finding object
     finding = Finding(
         title=vulnerability['id'] + ": " + vulnerability['packageName'] + " - " + vulnerability['packageVersion'],
-        cve=vulnerability['id'],
         test=test,
         severity=severity,
         description=vulnerability['description'] + "<p> Vulnerable Package: " +
@@ -132,15 +122,13 @@ def get_item(vulnerability, test):
         references=vulnerability['link'],
         component_name=vulnerability['packageName'],
         component_version=vulnerability['packageVersion'],
-        active=False,
-        verified=False,
         false_p=False,
         duplicate=False,
         out_of_scope=False,
         mitigated=None,
         severity_justification="{} (CVSS v3 base score: {})\n\n{}".format(vector, cvss, riskFactors),
         impact=severity)
-
+    finding.unsaved_vulnerability_ids = [vulnerability['id']]
     finding.description = finding.description.strip()
 
     return finding

@@ -3,6 +3,7 @@
 {% load authorization_tags %}
 
 {% block content %}
+    {{ block.super }}
     <h3 id="id_heading"> Product Type {{ pt.name }}</h3>
     <div class="row">
         <div id="tests" class="col-md-8">
@@ -17,7 +18,7 @@
                                       <span class="caret"></span>
                                   </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            {% if pt|has_object_permission:Permissions.Product_Type_Edit %}
+                            {% if pt|has_object_permission:"Product_Type_Edit" %}
                             <li>
                                 <a class="" href="{% url 'edit_product_type' pt.id %}">
                                 <i class="fa fa-pencil-square-o"></i> Edit</a>
@@ -32,7 +33,7 @@
                                 <a class="" href="{% url 'product_type_report' pt.id %}">
                                 <i class="fa fa-file-text-o"></i> Product Type Report</a>
                             </li>
-                            {% if pt|has_object_permission:Permissions.Product_Type_Delete %}
+                            {% if pt|has_object_permission:"Product_Type_Delete" %}
                             <li role="separator" class="divider"></li>
                             <li>
                                 <a class="" href="{% url 'delete_product_type' pt.id %}">
@@ -52,7 +53,7 @@
                 <div class="panel-heading">
                     <div class="clearfix">
                         <h4 class="pull-left">Products</h4>
-                        {% if pt|has_object_permission:Permissions.Product_Type_Add_Product %}
+                        {% if pt|has_object_permission:"Product_Type_Add_Product" %}
                         <div class="dropdown pull-right">
                             <div class="btn-group">
                                 <button class="btn btn-primary dropdown-toggle" type="button" label="Actions" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
@@ -71,6 +72,9 @@
                     </div>
                 </div>
                 {% if products %}
+                    <div class="clearfix pagination-in-panel">
+                        {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                    </div>
                     <div class="table-responsive">
                         <table class="tablesorter-bootstrap table table-condensed table-striped">
                             <thead>
@@ -88,11 +92,7 @@
                                     <td><a href="{% url 'view_product' product.id %}">{{ product.name }}</a></td>
                                     <!-- Tags column -->
                                     <td class="text-center">
-                                        <sup>
-                                        {% for tag in product.tags.all %}
-                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                        </sup>
+                                        {% include "dojo/snippets/tags.html" with tags=product.tags.all %}
                                     </td>
                                     <!-- End of Tags Column -->
                                     <td class="text-center">{{ product.business_criticality|business_criticality_icon }}</td>
@@ -105,8 +105,8 @@
                                     </td>
                                     <td class="text-center">
                                         {% if product.findings_count %}
-                                            <a href="{% url 'product_open_findings' product.id %}?test__engagement__product={{ product.id }}"><b>{{ product.findings_count }}</b></a>
-                                            &nbsp;(<a href="{% url 'product_verified_findings' product.id %}?test__engagement__product={{ product.id }}">{{ product.findings_active_verified_count }}</a>)
+                                            <a href="{% url 'product_open_findings' product.id %}"><b>{{ product.findings_count }}</b></a>
+                                            &nbsp;(<a href="{% url 'product_verified_findings' product.id %}">{{ product.findings_active_verified_count }}</a>)
                                         {% else %}
                                             0
                                         {% endif %}
@@ -116,29 +116,33 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="clearfix pagination-in-panel">
+                        {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                    </div>
                 {% else %}
                     <div class="panel-body">
                         <small class="text-muted"><em>No products found.</em></small>
                     </div>
                 {% endif %}
             </div>
-        {% feature_new_authorization as feature_new_authorization_flag %}
-            {% if feature_new_authorization_flag %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <div class="clearfix">
                             <h4 class="pull-left">Members</h4>
-                            {% if pt|has_object_permission:Permissions.Product_Type_Manage_Members %}
+                            &nbsp;
+                            <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                                <i class="fa fa-question-circle"></i></a>
+                            {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                             <div class="dropdown pull-right">
-                                <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenu1"
-                                        data-toggle="dropdown" aria-expanded="true">
+                                <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductTypeMember"
+                                        data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Type Member">
                                     <span class="fa fa-bars"></span>
                                     <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a class="" href="{% url 'add_product_type_member' pt.id %}">
-                                            <i class="fa fa-plus"></i> Add Member
+                                        <a id="addProductTypeMember" href="{% url 'add_product_type_member' pt.id %}">
+                                            <i class="fa fa-plus"></i> Add Users
                                         </a>
                                     </li>
                                 </ul>
@@ -162,17 +166,17 @@
                                         <td>
                                             <ul>
                                             <li class="dropdown" style="list-style:none;position:absolute">
-                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                                 <ul class="dropdown-menu">
-                                                    {% if pt|has_object_permission:Permissions.Product_Type_Manage_Members %}
+                                                    {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                                                     <li>
-                                                        <a class="" href="{% url 'edit_product_type_member' member.id %}">
+                                                        <a name="editProductTypeMember" href="{% url 'edit_product_type_member' member.id %}">
                                                         <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                     </li>
                                                     {% endif %}
-                                                    {% if member|has_object_permission:Permissions.Product_Type_Remove_Member %}
+                                                    {% if member|has_object_permission:"Product_Type_Member_Delete" %}
                                                     <li>
-                                                        <a class="" href="{% url 'delete_product_type_member' member.id %}">
+                                                        <a name="deleteProductTypeMember" href="{% url 'delete_product_type_member' member.id %}">
                                                         <i class="fa fa-trash"></i> Delete</a>
                                                     </li>
                                                     {% endif %}
@@ -180,8 +184,8 @@
                                             </li>
                                             </ul>
                                         </td>
-                                        <td>{{ member.user|full_name }}</td>
-                                        <td>{% role_as_string member.role %}</td>
+                                        <td name="member_user">{{ member.user.get_full_name }}</td>
+                                        <td name="member_role">{{ member.role }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
@@ -193,7 +197,79 @@
                         </div>
                     {% endif %}
                 </div>
-            {% endif %}
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="clearfix">
+                        <h4 class="pull-left">Groups</h4>
+                        &nbsp;
+                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                            <i class="fa fa-question-circle"></i></a>
+                        {% if pt|has_object_permission:"Product_Type_Group_Add" %}
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductTypeGroup"
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Type Group">
+                                <span class="fa fa-bars"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                <li role="presentation">
+                                    <a id="addProductTypeGroup" href="{% url 'add_product_type_group' pt.id %}">
+                                        <i class="fa fa-plus"></i> Add Groups
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if groups %}
+                <div class="table-responsive">
+                    <table class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Group</th>
+                            <th>Role</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for group in groups %}
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li class="dropdown" style="list-style:none;position:absolute">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeGroup">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                        <ul class="dropdown-menu">
+                                            {% if pt|has_object_permission:"Product_Type_Group_Edit" %}
+                                            <li>
+                                                <a name="editProductTypeGroup" href="{% url 'edit_product_type_group' group.id %}">
+                                                    <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                            </li>
+                                            {% endif %}
+                                            {% if pt|has_object_permission:"Product_Type_Group_Delete" %}
+                                            <li>
+                                                <a name="deleteProductTypeGroup" href="{% url 'delete_product_type_group' group.id %}">
+                                                    <i class="fa fa-trash"></i> Delete</a>
+                                            </li>
+                                            {% endif %}
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </td>
+                            <td name="product_type_group_group">{{ group.group.name }}</td>
+                            <td name="product_type_group_role">{{ group.role }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="panel-body">
+                    <small class="text-muted"><em>No groups found.</em></small>
+                </div>
+                {% endif %}
+            </div>
         </div>
         <div class="col-md-4">
             <div class="panel panel-default-secondary">
@@ -225,23 +301,6 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        {% feature_new_authorization as feature_new_authorization_flag %}
-                        {% if feature_new_authorization_flag is False %}
-                        <tr>
-                            <td style="width: 150px;"><strong>Authorized Users</strong></td>
-                            <td>
-                                {% if pt.authorized_users.all %}
-                                    {% if pt.authorized_users.all.count > 1 %}
-                                        {% for au in pt.authorized_users.all %}
-                                            {{au}}{%if not forloop.last%},{%endif%}
-                                        {% endfor %}
-                                    {% else %}
-                                        {{ pt.authorized_users.all.0 }}
-                                    {% endif %}
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endif %}
                     </tbody>
                     </table>
                 </div>

@@ -1,117 +1,125 @@
-__author__ = 'Hasan Tayyar Besik'
 
-# Cloned form aws_scout2 scanner
 import json
+import textwrap
 from datetime import datetime
 
-from django.utils.html import strip_tags
-from django.utils.text import Truncator
-
 from dojo.models import Finding
+from dojo.tools.parser_test import ParserTest
 
 
 class ScoutSuiteParser(object):
     """"ScoutSuite Wiki: https://github.com/nccgroup/ScoutSuite/wiki"""
 
+    ID = "Scout Suite"
+
     item_data = ""
     pdepth = 0
 
     def get_scan_types(self):
-        return ["Scout Suite Scan"]
+        return [f"{self.ID} Scan"]
 
     def get_label_for_scan_types(self, scan_type):
-        return scan_type  # no custom label for now
+        return f"{self.ID} Scan"  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
         return "JS file in scoutsuite-results/scoutsuite_results_*.js."
 
-    def get_findings(self, filename, test):
-        with open(filename.temporary_file_path(), "r") as fileobj:
-            raw_data = fileobj.read()
-            raw_data = raw_data.replace("scoutsuite_results =", "")
+    def get_tests(self, scan_type, handle):
+        content = handle.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        raw_data = content.replace("scoutsuite_results =", "")
         data = json.loads(raw_data)
-        find_date = datetime.now()
-        dupes = {}
+
+        account_id = data["account_id"]
+        last_run = data["last_run"]
 
         test_description = ""
-        account_id = data["account_id"]
-        test_description = "%s  **Account:** %s\n" % (test_description, account_id)
-        last_run = data["last_run"]
-        test_description = "%s  **Ruleset:** %s\n" % (test_description, last_run["ruleset_name"])
-        test_description = "%s  **Ruleset Description:** %s\n" % (test_description, last_run["ruleset_about"])
+        test_description = "%s**Account:** `%s`\n" % (test_description, account_id)
+        test_description = "%s**Provider:** %s\n" % (test_description, data["provider_name"])
+        test_description = "%s**Ruleset:** `%s`\n" % (test_description, last_run["ruleset_name"])
+        test_description = "%s**Ruleset Description:** %s\n" % (test_description, last_run["ruleset_about"])
 
         # Summary of Services
-        test_description = "%s\n**Services** \n\n" % (test_description)
+        test_description = "%s\n\n Services | Checked Items | Flagged Items | Max Level | Resource Count | Rules Count" % (test_description)
+        test_description = "%s\n:---|---:|---:|---:|---:|---:" % (test_description)
         for service, items in list(last_run["summary"].items()):
-            test_description = "%s\n**%s** \n" % (test_description, service.upper())
-            test_description = "%s\n* **Checked Items:** %s\n" % (test_description, items["checked_items"])
-            test_description = "%s* **Flagged Items:** %s\n" % (test_description, items["flagged_items"])
-            test_description = "%s* **Max Level:** %s\n" % (test_description, items["max_level"])
-            test_description = "%s* **Resource Count:** %s\n" % (test_description, items["resources_count"])
-            test_description = "%s* **Rules Count:** %s\n\n" % (test_description, items["rules_count"])
+            test_description += "\n"
+            test_description += "|".join([
+                service,
+                str(items["checked_items"]),
+                str(items["flagged_items"]),
+                str(items["max_level"]),
+                str(items["resources_count"]),
+                str(items["rules_count"])
+            ])
+
+        tests = list()
+        test = ParserTest(
+            name=self.ID,
+            type=data["provider_name"],
+            version=last_run.get('version'),
+        )
         test.description = test_description
 
-        scoutsuite_findings = []
+        test.findings = self.__get_items(data)
+        tests.append(test)
+        return tests
+
+    def get_findings(self, filename, test):
+        content = filename.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        raw_data = content.replace("scoutsuite_results =", "")
+        data = json.loads(raw_data)
+        return self.__get_items(data)
+
+    def __get_items(self, data):
+        findings = []
+        # get the date of the run
+        last_run_date = None
+        if "time" in data.get("last_run", {}):
+            last_run_date = datetime.strptime(data["last_run"]["time"][0:10], "%Y-%m-%d").date()
 
         # Configured Services
-        for service in list(data["services"].items()):
-            for service_item in service:
-                if "findings" in service_item:
-                    for name, finding in list(service_item["findings"].items()):
-                        if finding["items"]:
-                            description_text = ""
-                            for name in finding["items"]:
-                                description_text = description_text + "**Location:** " + name + "\n\n---\n"
-                                description_text = description_text + "\n"
-                                key = name.split('.')
-                                i = 1
-                                lookup = service_item
-                                while i < len(key):
-                                    if key[i] in lookup:
-                                        if (type(lookup[key[i]]) is dict):
-                                            lookup = lookup[key[i]]
-                                            if (key[i - 1] == "security_groups" or key[i - 1] == "PolicyDocument"):
-                                                break
-                                    i = i + 1
+        for service_name in data["services"]:
+            service_item = data["services"][service_name]
+            for finding_name in service_item.get("findings", []):
+                finding = service_item["findings"][finding_name]
+                for name in finding["items"]:
+                    description_text = finding.get("rationale", "") + "\n**Location:** " + name + "\n\n---\n"
+                    key = name.split('.')
+                    i = 1
+                    lookup = service_item
+                    while i < len(key):
+                        if key[i] in lookup:
+                            if (type(lookup[key[i]]) is dict):
+                                lookup = lookup[key[i]]
+                                if (key[i - 1] == "security_groups" or key[i - 1] == "PolicyDocument"):
+                                    break
+                        i = i + 1
 
-                                self.recursive_print(lookup)
-                                description_text = description_text + self.item_data
-                                self.item_data = ""
+                    self.recursive_print(lookup)
+                    description_text = description_text + self.item_data
+                    self.item_data = ""
 
-                            refs = finding["references"]
-                            mobsf_item = {
-                                "category": "Mobile Permissions",
-                                "title": finding["description"],
-                                "severity": finding["level"],
-                                "description": description_text,
-                                "references": ' '.join(filter(None, refs) if hasattr(refs, '__len__') else [])
-                            }
-                            scoutsuite_findings.append(mobsf_item)
+                    find = Finding(
+                        title=textwrap.shorten(finding['description'], 150),
+                        date=last_run_date,
+                        cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
+                        description=description_text,
+                        severity=self.getCriticalityRating(finding["level"]),
+                        mitigation=finding.get("remediation"),
+                        file_path=name,  # we use file_path as a hack as there is no notion of "service" in finding today
+                        dynamic_finding=False,
+                        static_finding=True,
+                        vuln_id_from_tool=":".join([data["provider_code"], finding_name]),
+                    )
+                    if finding.get("references"):
+                        find.references = "\n".join(finding["references"])
+                    findings.append(find)
 
-        for scoutsuite_finding in scoutsuite_findings:
-            title = strip_tags(scoutsuite_finding["title"])
-            sev = self.getCriticalityRating(scoutsuite_finding["severity"])
-            description = scoutsuite_finding["description"]
-            references = scoutsuite_finding["references"]
-            dupe_key = sev + title
-            if dupe_key in dupes:
-                find = dupes[dupe_key]
-                if description is not None:
-                    find.description += description
-            else:
-                find = Finding(title=Truncator(title).words(6),
-                                cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
-                                test=test,
-                                active=False,
-                                verified=False,
-                                description="**Account:** " + account_id + "\n" + description,
-                                severity=sev,
-                                numerical_severity=Finding.get_numerical_severity(sev),
-                                references=references,
-                                date=find_date,
-                                dynamic_finding=True)
-                dupes[dupe_key] = find
-        return list(dupes.values())
+        return findings
 
     def formatview(self, depth):
         if depth > 1:

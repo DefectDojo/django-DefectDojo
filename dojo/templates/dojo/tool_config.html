@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load authorization_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Tool Configuration
+                        Tool Configurations
                         <div class="dropdown pull-right">
+                            {% if "dojo.add_tool_configuration"|has_configuration_permission:"superuser" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -21,6 +24,7 @@
                                         </a>
                                     </li>
                             </ul>
+                            {% endif %}
                         </div>
                     </h3>
                 </div>
@@ -33,11 +37,12 @@
                 </div>
                 <div class="panel panel-default table-responsive">
                     <table id="products"
-                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                           class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Tool Name</th>
+                            <th>Name</th>
                             <th>Description</th>
+                            <th>URL</th>
                             <th>Category</th>
                         </tr>
                         </thead>
@@ -45,10 +50,17 @@
                         {% for conf in confs %}
                             <tr>
                                 <td>
-                                    <a href="{% url 'edit_tool_config' conf.id %}"><b>{{ conf.name }}</b></a>
+                                    {% if "dojo.change_tool_configuration"|has_configuration_permission:"superuser" %}
+                                        <a href="{% url 'edit_tool_config' conf.id %}"><b>{{ conf.name }}</b></a>
+                                    {% else %}
+                                        {{ conf.name }}
+                                    {% endif %}
                                 </td>
                                 <td>
-                                        {{ conf.description }}
+                                    {% if conf.description %}{{ conf.description }}{% endif %}
+                                </td>
+                                <td>
+                                    {% if conf.url %}{{ conf.url }}{% endif %}
                                 </td>
                                 <td>
                                   {{ conf.tool_type.name }}
@@ -68,5 +80,6 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

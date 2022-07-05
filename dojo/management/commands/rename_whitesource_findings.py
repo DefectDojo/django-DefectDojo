@@ -36,7 +36,5 @@ def rename_whitesource_finding():
             logger.debug('Set cwe for finding %d to 1035 if not an cwe Number is set' % finding.id)
             finding.cwe = 1035
         finding.title = finding.title.rstrip()  # delete \n at the end of the title
-        from titlecase import titlecase
-        finding.title = titlecase(finding.title)
         finding.hash_code = finding.compute_hash_code()
         finding.save()

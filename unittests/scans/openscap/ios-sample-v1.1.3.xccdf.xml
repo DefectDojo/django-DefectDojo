@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf:Benchmark id="ios-test-1" resolved="0" xml:lang="en" xmlns:cdf="http://checklists.nist.gov/xccdf/1.1" xmlns:cpe="http://cpe.mitre.org/XMLSchema/cpe/1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:htm="http://www.w3.org/1999/xhtml" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xsi:schemaLocation="http://checklists.nist.gov/xccdf/1.1 xccdf-1.1.xsd http://cpe.mitre.org/XMLSchema/cpe/1.0 cpe-1.0.xsd">
+
+   <cdf:status date="2006-12-12">draft</cdf:status>
+   <cdf:title>XCCDF Sample for Cisco IOS</cdf:title>
+   <cdf:description>
+     This document defines a small set of rules for securing Cisco 
+     IOS routers. The set of rules constitute a <htm:i>benchmark</htm:i>. 
+     A benchmark usually represents an industry consensus of best 
+     practices.  It lists steps to be taken as well as rationale for 
+     them.  This example benchmark is merely a small subset of the
+     rules that would be necessary for securing an IOS router.
+   </cdf:description>
+
+   <cdf:notice id="Sample-Terms-Of-Use" xml:lang="en">
+      This document may be copied and used subject to the
+      subject to the NIST terms of use 
+      (http://www.nist.gov/public_affairs/disclaim.htm)
+      and the NSA Legal Notices 
+      (http://www.nsa.gov/notices/notic00004.cfm?Address=/).
+   </cdf:notice>
+   <cdf:front-matter>
+     <htm:p>
+       This benchmark assumes that you are running IOS 11.3 or later.
+     </htm:p>
+   </cdf:front-matter>
+   <cdf:reference href="http://www.nsa.gov/ia/">
+     NSA Router Security Configuration Guide, Version 1.1c
+   </cdf:reference>
+   <cdf:reference>
+      <dc:title>Hardening Cisco Routers</dc:title>
+      <dc:creator>Thomas Akin</dc:creator>
+      <dc:publisher>O'Reilly and Associates</dc:publisher>
+      <dc:identifier>http://www.ora.com/</dc:identifier>
+   </cdf:reference>
+
+   <cdf:plain-text id="os-name">
+     Cisco Internet Operating System (tm)
+   </cdf:plain-text>
+
+   <cpe:cpe-list>
+     <cpe:cpe-item name="cpe://cisco:ios:12.3">
+       <cpe:title>Cisco IOS version 12.3</cpe:title>
+     </cpe:cpe-item>
+     <cpe:cpe-item name="cpe://cisco:ios:12.2">
+       <cpe:title>Cisco IOS version 12.2</cpe:title>
+     </cpe:cpe-item>
+     <cpe:cpe-item name="cpe://cisco:ios:12.1">
+       <cpe:title>Cisco IOS version 12.1</cpe:title>
+     </cpe:cpe-item>
+     <cpe:cpe-item name="cpe://cisco:ios:12.0">
+       <cpe:title>Cisco IOS version 12.0</cpe:title>
+     </cpe:cpe-item>
+     <cpe:cpe-item name="cpe://cisco:ios:11.3">
+       <cpe:title>Cisco IOS version 11.3</cpe:title>
+     </cpe:cpe-item>
+   </cpe:cpe-list>
+
+   <cdf:platform idref="cpe://cisco:ios:12.3"/>
+   <cdf:platform idref="cpe://cisco:ios:12.2"/>
+   <cdf:platform idref="cpe://cisco:ios:12.1"/>
+   <cdf:platform idref="cpe://cisco:ios:12.0"/>
+   <cdf:platform idref="cpe://cisco:ios:11.3"/>
+   <cdf:version>0.1.15</cdf:version>
+   <cdf:model system="urn:xccdf:scoring:default"/>
+   <cdf:model system="urn:xccdf:scoring:flat"/>
+   <cdf:model system="urn:bindview.com:scoring:relative">
+      <cdf:param name="floor">0.0</cdf:param>
+      <cdf:param name="ceiling">1000</cdf:param>
+   </cdf:model>
+  <cdf:Profile id="profile1" prohibitChanges="1" note-tag="lenient">
+     <cdf:title>Sample Profile No. 1</cdf:title>
+     <cdf:select idref="mgmt-plane" selected="0"/>
+     <cdf:select idref="ctrl-plane" selected="1"/>
+     <cdf:select idref="finger" selected="1"/>
+     <cdf:set-value idref="exec-timeout-time">30</cdf:set-value>
+     <cdf:refine-value idref="buffered-logging-level" selector="lenient"/>
+  </cdf:Profile>
+  <cdf:Profile id="profile2" extends="profile1" note-tag="strict">
+     <cdf:title override="1">Sample Profile No. 2</cdf:title>
+     <cdf:select idref="mgmt-plane" selected="1"/>
+     <cdf:select idref="data-plane" selected="1"/>
+     <cdf:set-value idref="exec-timeout-time">10</cdf:set-value>
+     <cdf:refine-value idref="buffered-logging-level" selector="strict"/>
+     <cdf:refine-rule idref="no-tcp-small-servers" weight="0.8" severity="medium"/>
+  </cdf:Profile>
+
+
+  <cdf:Value id="exec-timeout-time" type="number" operator="less than or equal">
+    <cdf:title>IOS - line exec timeout value</cdf:title>
+    <cdf:description>
+       The length of time, in minutes, that an interactive session
+       should be allowed to stay idle before being terminated.  
+    </cdf:description>
+    <cdf:question>Session exec timeout time (in minutes)</cdf:question>
+    <cdf:value>10</cdf:value>
+    <cdf:default>15</cdf:default>
+    <cdf:lower-bound>1</cdf:lower-bound>
+    <cdf:upper-bound>60</cdf:upper-bound>
+  </cdf:Value>
+
+  <cdf:Group id="mgmt-plane" selected="1" prohibitChanges="1" weight="3">
+     <cdf:title>Management Plane Rules</cdf:title>
+     <cdf:description>
+       Services, settings, and data streams related tosetting up 
+       and examining the static configuration of the router, and the
+       authentication and authorization of administrators/operators.
+     </cdf:description>
+     <cdf:requires idref="no-directed-broadcast no-tcp-small-servers"/>
+     <cdf:Rule id="no-finger-service-base" selected="0" weight="5.0" prohibitChanges="1" hidden="1" abstract="1" cluster-id="finger">
+       <cdf:title>IOS - no IP finger service</cdf:title>
+       <cdf:description>
+         Disable the finger service, it can reveal information
+         about logged in users to unauthorized parties.
+         (For <cdf:sub idref="os-name"/> version 11.3 and later.)
+       </cdf:description>
+       <cdf:question>Prohibit the finger service</cdf:question>
+       <cdf:fixtext fixref="no-finger" xml:lang="en">
+          Turn off the finger service altogether,
+	  it is <htm:i>very</htm:i> rarely used.
+       </cdf:fixtext>
+       <cdf:check system="http://oval.mitre.org/XMLSchema/oval">
+         <cdf:check-content-ref href="http://oval.mitre.org/repository/find?file=iosDefns.xml" name="OVAL1002"/>
+         <cdf:check-content-ref href="iosDefns.xml" name="OVAL1002"/>
+       </cdf:check>
+     </cdf:Rule>
+
+     <cdf:Rule id="ios11-no-finger-service" selected="0" prohibitChanges="1" hidden="0" weight="5" extends="no-finger-service-base">
+       <cdf:title override="1">IOS 11 - no IP finger service</cdf:title>
+       <cdf:platform idref="cpe://cisco:ios:11.3"/>
+       <cdf:fix id="no-finger" system="urn:xccdf:fix:system:commands" disruption="low" strategy="disable">
+           no service finger
+       </cdf:fix>
+     </cdf:Rule>
+
+     <cdf:Rule id="ios12-no-finger-service" selected="0" prohibitChanges="1" hidden="0" weight="5" extends="no-finger-service-base">
+       <cdf:title override="1">IOS 12 - no IP finger service</cdf:title>
+       <cdf:platform idref="cpe://cisco:ios:12.3"/>
+       <cdf:platform idref="cpe://cisco:ios:12.2"/>
+       <cdf:platform idref="cpe://cisco:ios:12.1"/>
+       <cdf:platform idref="cpe://cisco:ios:12.0"/>
+       <cdf:fix id="no-finger" system="urn:xccdf:fix:system:commands" disruption="low" strategy="disable">
+            no ip finger
+       </cdf:fix>
+     </cdf:Rule>
+
+     <cdf:Rule id="req-exec-timeout" selected="1" weight="8" multiple="1">
+       <cdf:title>Require exec timeout on admin sessions</cdf:title>
+       <cdf:description>
+         Configure each administrative access line to terminate idle
+         sessions after a fixed period of time determined by local policy
+       </cdf:description>
+       <cdf:question>Require admin session idle timeout</cdf:question>
+       <cdf:profile-note tag="lenient">
+         Half an hour
+       </cdf:profile-note>
+       <cdf:profile-note tag="strict">
+         Ten minutes or less
+       </cdf:profile-note>
+       <cdf:fix strategy="configure" disruption="low" system="urn:xccdf:fix:commands">
+           line vty 0 4
+           exec-timeout <cdf:sub idref="exec-timeout-time"/>
+       </cdf:fix>
+       <cdf:check system="http://oval.mitre.org/XMLSchema/oval" id="foo">
+         <cdf:check-export value-id="exec-timeout-time" export-name="var-2"/>
+         <cdf:check-content-ref href="iosDefns.xml" name="OVAL708"/>
+       </cdf:check>
+     </cdf:Rule>
+  </cdf:Group>
+
+  <cdf:Group id="ctrl-plane" selected="1" prohibitChanges="1" weight="3">
+     <cdf:title>Control Plane Rules</cdf:title>
+     <cdf:description>
+          Services, settings, and data streams that support the 
+          operation and dynamic status of the router.
+     </cdf:description>
+     <cdf:question>Check rules related to system control</cdf:question>
+
+     <cdf:Value id="buffered-logging-level" type="string" operator="equals" prohibitChanges="0" interfaceHint="choice">
+       <cdf:title>Logging level for buffered logging</cdf:title>
+       <cdf:description>
+          Logging level for buffered logging; this setting is
+          a severity level.  Every audit message of this
+          severity or more (worse) will be logged.
+       </cdf:description>
+       <cdf:question>Select a buffered logging level</cdf:question>
+       <cdf:value selector="strict">informational</cdf:value>
+       <cdf:value selector="lenient">warning</cdf:value>
+       <cdf:value>notification</cdf:value>
+       <cdf:choices mustMatch="1">
+          <cdf:choice>warning</cdf:choice>
+          <cdf:choice>notification</cdf:choice>
+          <cdf:choice>informational</cdf:choice>
+       </cdf:choices>
+       <cdf:source uri="urn:OS:Cisco:IOS:logging:levels"/>
+     </cdf:Value>
+
+     <cdf:Rule id="no-tcp-small-servers" selected="1" prohibitChanges="1" weight="7">
+       <cdf:title>Disable tcp-small-servers</cdf:title>
+       <cdf:description>
+           Disable unnecessary services such as echo, chargen, etc.
+       </cdf:description>
+       <cdf:question>Prohibit TCP small services</cdf:question>
+       <cdf:fixtext>
+           Disable TCP small servers in IOS global config mode.
+       </cdf:fixtext>
+       <cdf:fix>no service tcp-small-servers</cdf:fix>
+       <cdf:check system="http://oval.mitre.org/XMLSchema/oval">
+          <cdf:check-content-ref href="iosDefns.xml" name="OVAL1000"/>
+       </cdf:check>
+     </cdf:Rule>
+
+     <cdf:Rule id="no-udp-small-servers" selected="1" role="full" prohibitChanges="1" weight="5.7">
+       <cdf:title>Disable udp-small-servers</cdf:title>
+       <cdf:description>
+           Disable unnecessary UDP services such as echo, chargen, etc.
+       </cdf:description>
+       <cdf:question>Forbid UDP small services</cdf:question>
+       <cdf:fixtext>
+         Disable UDP small servers in IOS global config mode.
+       </cdf:fixtext>
+       <cdf:fix>no service udp-small-servers</cdf:fix>
+       <cdf:check system="http://oval.mitre.org/XMLSchema/oval">
+          <cdf:check-content-ref href="iosDefns.xml" name="OVAL1001"/>
+       </cdf:check>
+     </cdf:Rule> 
+
+     <cdf:Rule id="enabled-buffered-logging-at-level" selected="1" prohibitChanges="0" weight="8.5">
+       <cdf:title xml:lang="en">
+          Ensure buffered logging enabled at proper level
+       </cdf:title>
+       <cdf:description>
+          Make sure that buffered logging is enabled, and that 
+          the buffered logging level to one of the appropriate
+          levels, Warning or higher. 
+       </cdf:description>
+       <cdf:question>Check buffered logging and level</cdf:question>
+       <cdf:fix>
+          logging on
+          logging buffered <cdf:sub idref="buffered-logging-level"/>
+       </cdf:fix>
+       <cdf:complex-check operator="AND" negate="1">
+             <cdf:check system="http://oval.mitre.org/XMLSchema/oval">
+                  <cdf:check-export value-id="buffered-logging-level" export-name="var-4"/>
+                  <cdf:check-content-ref href="iosDefns.xml" name="org.cisecurity.cisco.ios.logging.buf.level"/>
+             </cdf:check>
+             <cdf:check system="http://oval.mitre.org/XMLSchema/oval">
+                  <cdf:check-content-ref href="iosDefns.xml" name="org.cisecurity.cisco.ios.logging.enabled"/>
+             </cdf:check>
+       </cdf:complex-check>
+     </cdf:Rule>
+  </cdf:Group>
+
+  <cdf:Group id="data-plane" selected="1" prohibitChanges="1" weight="2">
+     <cdf:title>Data Plane Level 1</cdf:title>
+     <cdf:description>
+          Services and settings related to the data passing through
+          the router (as opposed to directed to it). Basically, the
+          data plane is for everything not in control or mgmt planes. 
+     </cdf:description>
+     <cdf:question>Check rules related to data flow</cdf:question>
+     
+    <cdf:Group id="routing-rules" selected="1" prohibitChanges="1">
+      <cdf:title>Routing Rules</cdf:title>
+      <cdf:description>
+         Rules in this group affect traffic forwarded through the
+         router, including router actions taken on receipt of
+         special data traffic.
+      </cdf:description>
+      <cdf:question>Apply standard forwarding protections</cdf:question>
+
+    <cdf:Rule id="no-directed-broadcast" weight="7" multiple="1" selected="1" prohibitChanges="1">
+      <cdf:title>IOS - no directed broadcasts</cdf:title>
+      <cdf:description>
+          Disable IP directed broadcast on each interface.
+      </cdf:description>
+      <cdf:question>Forbid IP directed broadcast</cdf:question>
+      <cdf:fixtext>
+        Disable IP directed broadcast on each interface
+        using IOS interface configuration mode.
+      </cdf:fixtext>
+      <cdf:fix>
+         interface <cdf:instance context="interface"/>
+           no ip directed-broadcast
+      </cdf:fix>
+      <cdf:check system="http://oval.mitre.org/XMLSchema/oval">
+         <cdf:check-content-ref href="iosDefns.xml" name="OVAL1101"/>
+      </cdf:check>
+    </cdf:Rule>
+   </cdf:Group>
+ </cdf:Group>
+
+  <cdf:TestResult id="ios-test-5" end-time="2004-09-25T13:45:02-04:00">
+    <cdf:benchmark href="ios-sample-v1.1.xccdf.xml"/>
+    <cdf:title>Sample Results Block</cdf:title>
+    <cdf:remark>Test run by Bob on Sept 25</cdf:remark>
+    <cdf:target>lower.test.net</cdf:target>
+    <cdf:target-address>192.168.248.1</cdf:target-address>
+    <cdf:target-address>2001:8::1</cdf:target-address>
+    <cdf:target-facts>
+        <cdf:fact type="string" name="urn:xccdf:fact:ethernet:MAC">
+            02:50:e6:c0:14:39
+        </cdf:fact>
+        <cdf:fact name="urn:xccdf:fact:OS:IOS">1</cdf:fact>
+        <cdf:fact name="urn:xccdf:fact:OS:IOS:12">1</cdf:fact>
+        <cdf:fact name="urn:xccdf:fact:OS:IOS:12:3">1</cdf:fact>
+        <cdf:fact name="urn:xccdf:fact:OS:IOS:12:3:14T">1</cdf:fact>
+        <cdf:fact type="string" name="urn:xccdf:fact:OS:IOS:relname">
+           12.3(14)T
+        </cdf:fact>
+    </cdf:target-facts>
+    <cdf:set-value idref="exec-timeout-time">10</cdf:set-value>
+    <cdf:rule-result idref="ios12-no-finger-service" time="2004-09-25T13:45:00-04:00">
+        <cdf:result>fail</cdf:result>
+    </cdf:rule-result>
+    <cdf:rule-result idref="req-exec-timeout" time="2004-09-25T13:45:06-04:00">
+        <cdf:result>pass</cdf:result>
+        <cdf:override time="2004-09-25T13:59:00-04:00" authority="Neal Ziring">
+          <cdf:old-result>fail</cdf:old-result>
+          <cdf:new-result>pass</cdf:new-result>
+          <cdf:remark>Test override</cdf:remark>
+        </cdf:override>
+        <cdf:instance context="line">console</cdf:instance>
+        <cdf:fix>
+             line console
+             exec-timeout 10 0
+        </cdf:fix>
+    </cdf:rule-result>
+    <cdf:rule-result idref="ios12-no-finger-service">
+      <cdf:result>notselected</cdf:result>
+    </cdf:rule-result>
+    <cdf:score system="urn:xccdf:model:default">67.5</cdf:score>
+    <cdf:score system="urn:xccdf:model:flat" maximum="214">
+       157.5
+    </cdf:score>
+  </cdf:TestResult>
+
+</cdf:Benchmark>

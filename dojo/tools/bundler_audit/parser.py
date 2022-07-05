@@ -18,10 +18,7 @@ class BundlerAuditParser(object):
         return "'bundler-audit check' output (in plain text)"
 
     def get_findings(self, filename, test):
-        if filename is None:
-            return ()
-
-        lines = filename.read().decode('utf8')
+        lines = filename.read()
         dupes = dict()
         find_date = datetime.now()
         warnings = lines.split('\n\n')
@@ -29,7 +26,7 @@ class BundlerAuditParser(object):
         for warning in warnings:
             if not warning.startswith('Name'):
                 continue
-
+            advisory_cve = None
             gem_report_fields = warning.split('\n')
             for field in gem_report_fields:
                 if field.startswith('Name'):
@@ -38,6 +35,8 @@ class BundlerAuditParser(object):
                     gem_version = field.replace('Version: ', '')
                 elif field.startswith('Advisory'):
                     advisory_cve = field.replace('Advisory: ', '')
+                elif field.startswith('CVE'):
+                    advisory_cve = field.replace('CVE: ', '')
                 elif field.startswith('Criticality'):
                     criticality = field.replace('Criticality: ', '')
                     if criticality.lower() == 'unknown':
@@ -68,16 +67,18 @@ class BundlerAuditParser(object):
                 find = Finding(
                     title=title,
                     test=test,
-                    active=False,
-                    verified=False,
                     description=findingdetail,
                     severity=sev,
-                    numerical_severity=Finding.get_numerical_severity(sev),
                     mitigation=mitigation,
                     references=references,
-                    url='N/A',
                     date=find_date,
-                    static_finding=True)
+                    static_finding=True,
+                    dynamic_finding=False,
+                    component_name=gem_name,
+                    component_version=gem_version,
+                )
+                if advisory_cve:
+                    find.unsaved_vulnerability_ids = [advisory_cve]
 
                 dupes[dupe_key] = find
 

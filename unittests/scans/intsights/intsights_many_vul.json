@@ -1,0 +1,135 @@
+{
+  "Alerts": [
+    {
+      "_id": "5c45ebba3100d1000610f27f",
+      "Details": {
+        "Source": {
+          "URL": "https://www.initech.com/websec/?id=YuvecAXC",
+          "Date": "2019-01-21T15:55:19.270Z",
+          "Type": "Other",
+          "NetworkType": "ClearWeb"
+        },
+        "Images": [
+          "5c45ebbc5df24f0006eeff6e",
+          "5c45ebbc05df870006a9523b",
+          "5c45ebbc1b2a9300068c0731"
+        ],
+        "Title": "HTTP headers weakness in initech-conferences.com web server",
+        "Tags": [
+          {
+            "_id": "603582ded2320f0008ff0187",
+            "Name": "Pending",
+            "CreatedBy": "API"
+          },
+          {
+            "_id": "603582fe1a64380007f745b5",
+            "Name": "ResID: 265711",
+            "CreatedBy": "API"
+          }
+        ],
+        "Type": "ExploitableData",
+        "Severity": "Medium",
+        "SubType": "VulnerabilityInTechnologyInUse",
+        "Description": "X-FRAME-OPTIONS, X-XSS-PROTECTION, X-CONTENT-TYPE-OPTIONS and CONTENT-SECURITY-POLICY headers were not sent by the server, which makes it vulnerable for various attack vectors"
+      },
+      "Assignees": [
+        "5d780124b92e7b0007108a60"
+      ],
+      "FoundDate": "2019-01-21T15:57:25.709Z",
+      "Assets": [
+        {
+          "Type": "Domains",
+          "Value": "initech-conferences.com"
+        }
+      ],
+      "TakedownStatus": "NotSent",
+      "IsFlagged": false,
+      "UpdateDate": "2021-02-23T22:34:37.669Z",
+      "RelatedIocs": [],
+      "RelatedThreatIDs": [],
+      "Closed": {
+        "IsClosed": false
+      }
+    },
+    {
+      "_id": "5c80dbf83b4a3900078b6be6",
+      "Details": {
+        "Source": {
+          "URL": "https://www.initech.com/websec/?id=DSHv46Jg",
+          "Date": "2019-03-07T08:52:08.917Z",
+          "Type": "Other",
+          "NetworkType": "ClearWeb"
+        },
+        "Images": [
+          "5c80dbfa3963a40007e01e8d",
+          "5c80dbfb3b4a3900078b6bea",
+          "5c80dbfc4626bd0007bd64db"
+        ],
+        "Title": "HTTP headers weakness in initech.com web server",
+        "Tags": [],
+        "Type": "ExploitableData",
+        "Severity": "Medium",
+        "SubType": "VulnerabilityInTechnologyInUse",
+        "Description": "X-XSS-PROTECTION and CONTENT-SECURITY-POLICY headers were not sent by the server, which makes it vulnerable for various attack vectors"
+      },
+      "Assignees": [
+        "5c3c8f64903dfd0006ge5e61"
+      ],
+      "FoundDate": "2019-03-08T13:03:30.655Z",
+      "Assets": [
+        {
+          "Type": "Domains",
+          "Value": "initech.com"
+        }
+      ],
+      "TakedownStatus": "NotSent",
+      "IsFlagged": false,
+      "UpdateDate": "2019-03-08T13:03:30.655Z",
+      "RelatedIocs": [],
+      "RelatedThreatIDs": [],
+      "Closed": {
+        "IsClosed": false
+      }
+    },
+        {
+      "_id": "5c80dbg83b4a3900078b6be6",
+      "Details": {
+        "Source": {
+          "URL": "https://www.initech.com/websec/?id=DSHv46Jg",
+          "Date": "2019-03-07T08:52:08.917Z",
+          "Type": "Other",
+          "NetworkType": "ClearWeb"
+        },
+        "Images": [
+          "5c80dbfa3963a40007e01e8d",
+          "5c80dbfb3b4a3900078b6bea",
+          "5c80dbfc4626bd0007bd64db"
+        ],
+        "Title": "HTTP headers weakness in initec.com web server",
+        "Tags": [],
+        "Type": "ExploitableData",
+        "Severity": "Medium",
+        "SubType": "VulnerabilityInTechnologyInUse",
+        "Description": "X-XSS-PROTECTION and CONTENT-SECURITY-POLICY headers were not sent by the server, which makes it vulnerable for various attack vectors"
+      },
+      "Assignees": [
+        "5c3c8f64903dfd0006ge5e61"
+      ],
+      "FoundDate": "2019-03-08T13:03:30.655Z",
+      "Assets": [
+        {
+          "Type": "Domains",
+          "Value": "initech-test.com"
+        }
+      ],
+      "TakedownStatus": "NotSent",
+      "IsFlagged": false,
+      "UpdateDate": "2019-03-08T13:03:30.655Z",
+      "RelatedIocs": [],
+      "RelatedThreatIDs": [],
+      "Closed": {
+        "IsClosed": false
+      }
+    }
+  ]
+}

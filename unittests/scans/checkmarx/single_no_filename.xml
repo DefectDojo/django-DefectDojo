@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CxXMLResults InitiatorName="support" Owner="Administrator" ScanId="1003406" ProjectId="10" ProjectName="project" TeamFullPathOnReportDate="CxServer" DeepLink="https://checkmarx/CxWebClient/ViewerMain.aspx?scanid=1003406&amp;projectid=10" ScanStart="Friday, December 24, 2021 9:12:14 AM" Preset="Checkmarx Default" ScanTime="00h:28m:02s" LinesOfCodeScanned="233670" FilesScanned="1063" ReportCreationTime="Friday, December 24, 2021 9:40:43 AM" Team="CxServer" CheckmarxVersion="9.4.0.2076" ScanComments="" ScanType="Full" SourceOrigin="LocalPath" Visibility="Public">
+  <Query id="5437" cweId="346" name="Missing_HSTS_Header" group="PHP_Medium_Threat" Severity="Medium" Language="PHP" LanguageHash="0487062789656422" LanguageChangeDate="2021-08-24T00:00:00.0000000" SeverityIndex="2" QueryPath="PHP\Cx\PHP Medium Threat\Missing HSTS Header Version:1" QueryVersionCode="119183642">
+    <Result NodeId="10034060073" FileName="" Status="Recurrent" Line="1" Column="0" FalsePositive="True" Severity="Medium" AssignToUser="" state="1" Remark="some remark, [Monday, October 25, 2021 9:31:40 AM]: Changed status to Not Exploitable" DeepLink="https://checkmarx/CxWebClient/ViewerMain.aspx?scanid=1003406&amp;projectid=10&amp;pathid=73" SeverityIndex="2" StatusIndex="1" DetectionDate="9/13/2021 5:12:37 AM">
+      <Path ResultId="1003406" PathId="73" SimilarityId="445614419">
+        <PathNode>
+          <FileName></FileName>
+          <Line>1</Line>
+          <Column>0</Column>
+          <NodeId>1</NodeId>
+          <Name>array</Name>
+          <Type></Type>
+          <Length>0</Length>
+        </PathNode>
+      </Path>
+    </Result>
+  </Query>
+</CxXMLResults>

@@ -1,0 +1,16 @@
+{
+    "findings": [
+        {
+            "endpoints": [
+                "www.example.com",
+                "localhost",
+                "127.0.0.1:80",
+                "foo.bar/path"
+            ],
+            "vulnerability_ids": [
+                "GHSA-5mrr-rgp6-x4gr",
+                "CVE-2015-9235"
+            ]
+        }
+    ]
+}

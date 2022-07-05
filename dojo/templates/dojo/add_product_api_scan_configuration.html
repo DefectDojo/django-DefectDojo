@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <h3> Add {{ product.name }} API Scan Configuration</h3>
+    <form class="form-horizontal" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-2">
+                <input class="btn btn-primary" type="submit" name="add" value="Save"/>
+            </div>
+            <div class="col-sm-2">
+                <input class="btn btn-primary" type="submit" name="add_another" value="Save &amp; Add Another"/>
+            </div>
+        </div>
+    </form>
+    <div class="alert alert-info">
+        API Scan Configurations are supported for the test types SonarQube API, Cobalt.io API and Edgescan API.
+    <ul>
+        <li>For <b>SonarQube API</b> the field <b>Service key 1</b> has to be set with the SonarQube project key.</li>   
+        <li>For <b>Cobalt.io API</b> the field <b>Service key 1</b> has to be set with the Cobalt.io asset id. 
+            <b>Service key 2</b> will be populated with the asset name while saving the configuration.</li>   
+        <li>For <b>Edgescan API</b> the field <b>Service key 1</b> has to be set with the Edgescan asset id.</li>
+    </ul>
+    </div>
+{% endblock %}
+{% block postscript %}
+{% endblock %}

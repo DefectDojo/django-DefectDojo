@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -17,7 +19,7 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                {% if user.is_staff %}
+                                {% if request.user|can_add_product %}
                                     <li role="presentation">
                                         <a href="{% url 'new_product' %}">
                                             <i class="fa fa-plus"></i> Add Product
@@ -60,7 +62,7 @@
                             <th class="text-center">GitHub</th>
                             {% endif %}
                             <th class="text-center"> Active (Verified) Findings</th>
-                            <th class="text-center"> Endpoints</th>
+                            <th class="text-center"> Vulnerable Hosts / Endpoints</th>
                             <th> Contact</th>
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
                         </tr>
@@ -78,59 +80,74 @@
                                               <i class="fa fa-list-alt"></i> View
                                           </a>
                                         </li>
-                                        {% if user|is_authorized_for_change:prod %}
+                                        {% if prod|has_object_permission:"Product_Edit" %}
                                           <li role="presentation">
                                             <a class="" href="{% url 'edit_product' prod.id %}">
                                                 <i class="fa fa-pencil-square-o"></i> Edit
                                             </a>
                                           </li>
                                         {% endif %}
-                                        {% if user|is_authorized_for_staff:prod %}
                                           <li role="separator" class="divider"></li>
                                           <li><a href="{% url 'view_engagements' prod.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
-                                          <li role="separator" class="divider"></li>
+                                        {% if prod|has_object_permission:"Engagement_Add" %}
                                           <li><a href="{% url 'new_eng_for_prod' prod.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
+                                        {% endif %}
                                           <li role="separator" class="divider"></li>
-                                          <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Open Findings</a></li>
-                                          <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}&severity=Critical"><i class="fa fa-exclamation-triangle"></i> View Critical Findings</a></li>
-                                          <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}&date=1"><i class="fa fa-calendar"></i> View Last 7 Days Findings</a></li>
-                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}"><i class="fa fa-list-alt"></i> View Open Findings</a></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}?severity=Critical"><i class="fa fa-exclamation-triangle"></i> View Critical Findings</a></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}?date=2"><i class="fa fa-calendar"></i> View Last 7 Days Findings</a></li>
+                                        {% if prod|has_object_permission:"Finding_Add" %}
                                           <li><a href="{% url 'ad_hoc_finding' prod.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
+                                        {% endif %}
                                           <li role="separator" class="divider"></li>
-                                          <li role="separator" class="divider"></li>
-                                          <li><a href="{% url 'endpoints' %}?product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
+                                          <li><a href="{% url 'endpoint' %}?product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
+                                          <li><a href="{% url 'endpoint_host' %}?product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Hosts</a></li>
                                           <li><a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Endpoints</a></li>
-                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Hosts</a></li>
                                           <li><a href="{% url 'product_endpoint_report' prod.id %}"><i class="fa fa-file-text-o"></i> Endpoint Report</a></li>
-                                          <li role="separator" class="divider"></li>
+                                        {% if prod|has_object_permission:"Endpoint_Add" %}
                                           <li><a href="{% url 'add_endpoint' prod.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
-                                          <li role="separator" class="divider"></li>
+                                        {% endif %}
+                                        {% if prod|has_object_permission:"Product_Edit" %}
                                           <li role="separator" class="divider"></li>
                                           <li role="presentation">
                                             <a class="" href="{% url 'add_meta_data' prod.id %}">
                                                 <i class="fa fa-list-alt"></i> Add Custom Fields
                                             </a>
                                           </li>
-                                        {% endif %}
-                                        {% if user|is_authorized_for_change:prod %}
                                           <li role="presentation">
                                             <a title="Edit Custom Fields" href="{% url 'edit_meta_data' prod.id %}">
                                               <i class="fa fa-pencil-square-o"></i> Edit Custom Fields
                                             </a>
                                           </li>
-                                        {% endif %}
-                                        {% if user|is_authorized_for_staff:prod %}
                                           <li role="separator" class="divider"></li>
+                                          <li role="presentation">
+                                              <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
+                                                  <i class="fa fa-list-alt"></i> Add Scan API Configuration
+                                              </a>
+                                          </li>
+                                          <li role="presentation">
+                                              <a title="View API Scan configurations" href="{% url 'view_api_scan_configurations' prod.id %}">
+                                                <i class="fa fa-history"></i> View Scan API Configurations
+                                              </a>
+                                          </li>
+                                        {% endif %}
+                                        {% if system_settings.enable_product_tracking_files %}
+                                          <li role="separator" class="divider"></li>
+                                          {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
                                           <li role="presentation">
                                             <a class="" href="{% url 'new_object' prod.id %}">
                                               <i class="fa fa-list-alt"></i> Add Product Tracking Files
                                             </a>
                                           </li>
+                                          {% endif %}
+                                          {% if prod|has_object_permission:"Product_Tracking_Files_View" %}
                                           <li role="presentation">
                                             <a href="{% url 'view_objects' prod.id %}">
                                               <i class="fa fa-history"></i> View Product Tracking Files
                                             </a>
                                           </li>
+                                          {% endif %}
                                         {% endif %}
                                         <li role="separator" class="divider"></li>
                                         <li role="presentation">
@@ -138,7 +155,7 @@
                                             <i class="fa fa-file-text-o"></i> Product Report
                                           </a>
                                         </li>
-                                        {% if user|is_authorized_for_staff:prod %}
+                                        {% if prod|has_object_permission:"Benchmark_Edit" %}
                                           {% if system_settings.enable_benchmark and benchmark_type %}
                                             <li role="separator" class="divider"></li>
                                             {% for bt in benchmark_type %}
@@ -156,7 +173,7 @@
                                               <i class="fa fa-history"></i> View History
                                           </a>
                                         </li>
-                                        {% if user|is_authorized_for_delete:prod %}
+                                        {% if prod|has_object_permission:"Product_Delete" %}
                                           <li role="separator" class="divider"></li>
                                           <li role="presentation">
                                             <a class="text-danger" href="{% url 'delete_product' prod.id %}">
@@ -178,11 +195,7 @@
                                 </td>
                                 <!-- Tags column -->
                                 <td>
-                                    <sup>
-                                    {% for tag in prod.tags.all %}
-                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                    {% endfor %}
-                                  </sup>
+                                  {% include "dojo/snippets/tags.html" with tags=prod.tags.all %}
                                 </td>
                                 <!-- End of Tags Column -->
                                 <td class="text-center">{{ prod.business_criticality|business_criticality_icon }}</td>
@@ -233,9 +246,10 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-center">
-                                  {% if prod.endpoints_count %}
+                                  {% if prod.endpoint_count %}
+                                    <a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><b>{{ prod.endpoint_host_count }}</b></a> /
                                     <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
-                                  {% else %}
+                                    {% else %}
                                       0
                                   {% endif %}
                                 </td>
@@ -274,6 +288,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         $(function () {
             //Ensures dropdown has proper zindex

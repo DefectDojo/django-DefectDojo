@@ -3,6 +3,7 @@ import logging
 import re
 
 from dojo.models import Finding
+from dojo.tools.utils import get_npm_cwe
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class NpmAuditParser(object):
         return scan_type  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
-        return "NPM Audit Scan output file can be imported in JSON format."
+        return "NPM Audit Scan json output up to v6 can be imported in JSON format."
 
     def get_findings(self, json_output, test):
         tree = self.parse_json(json_output)
@@ -24,7 +25,6 @@ class NpmAuditParser(object):
 
     def parse_json(self, json_output):
         if json_output is None:
-            self.items = []
             return
         try:
             data = json_output.read()
@@ -59,6 +59,16 @@ class NpmAuditParser(object):
         return list(items.values())
 
 
+def censor_path_hashes(path):
+    """ https://github.com/npm/npm/issues/20739 for dependencies installed from git, npm audit replaces the name with a (random?) hash """
+    """ this hash changes on every run of npm audit, so defect dojo might think it's a new finding every run """
+    """ we strip the hash and replace it with 'censored_by_npm_audit` """
+    if not path:
+        return None
+
+    return re.sub('[a-f0-9]{64}', 'censored_by_npm_audit', path)
+
+
 def get_item(item_node, test):
 
     if item_node['severity'] == 'low':
@@ -81,17 +91,12 @@ def get_item(item_node, test):
         if len(npm_finding['paths']) > 25:
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
-    # Use CWE-1035 as fallback
-    cwe = 1035  # Vulnerable Third Party Component
-    if item_node['cwe']:
-        m = re.match(r"^(CWE-)?(\d+)", item_node['cwe'])
-        if m:
-            cwe = int(m.group(2))
+    cwe = get_npm_cwe(item_node)
 
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
-                      file_path=item_node['findings'][0]['paths'][0],
+                      file_path=censor_path_hashes(item_node['findings'][0]['paths'][0]),
                       description=item_node['url'] + "\n" +
                       item_node['overview'] + "\n Vulnerable Module: " +
                       item_node['module_name'] + "\n Vulnerable Versions: " +
@@ -101,13 +106,10 @@ def get_item(item_node, test):
                       str(item_node['cwe']) + "\n Access: " +
                       str(item_node['access']),
                       cwe=cwe,
-                      cve=item_node['cves'][0] if (len(item_node['cves']) > 0) else None,
                       mitigation=item_node['recommendation'],
                       references=item_node['url'],
                       component_name=item_node['module_name'],
                       component_version=component_version,
-                      active=False,
-                      verified=False,
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,
@@ -115,5 +117,10 @@ def get_item(item_node, test):
                       impact="No impact provided",
                       static_finding=True,
                       dynamic_finding=False)
+
+    if len(item_node['cves']) > 0:
+        dojo_finding.unsaved_vulnerability_ids = list()
+        for vulnerability_id in item_node['cves']:
+            dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
 
     return dojo_finding

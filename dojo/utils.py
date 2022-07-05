@@ -1,8 +1,12 @@
+from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.queries import get_authorized_findings
 import re
 import binascii
 import os
 import hashlib
 import bleach
+import mimetypes
+import hyperlink
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
@@ -15,16 +19,15 @@ from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
-from django.template.defaultfilters import pluralize
 from django.utils import timezone
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
-from dojo.models import Finding, Engagement, Finding_Template, Product, \
-    Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule
+from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
+    Dojo_User, Test, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
+    Language_Type, Languages, Rule, Dojo_Group_Member, NOTIFICATION_CHOICES
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
 import logging
@@ -34,6 +37,7 @@ from django.http import HttpResponseRedirect
 import crum
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 
 
 logger = logging.getLogger(__name__)
@@ -45,10 +49,6 @@ Helper functions for DefectDojo
 """
 
 
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
 def do_false_positive_history(new_finding, *args, **kwargs):
     logger.debug('%s: sync false positive history', new_finding.id)
     if new_finding.endpoints.count() == 0:
@@ -94,6 +94,9 @@ def do_false_positive_history(new_finding, *args, **kwargs):
         new_finding.false_p = True
         new_finding.active = False
         new_finding.verified = True
+        # Remove the async user kwarg because save() really does not like it
+        # Would rather not add anything to Finding.save()
+        kwargs.pop('async_user')
         super(Finding, new_finding).save(*args, **kwargs)
 
 
@@ -102,10 +105,76 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 
+def get_endpoints_as_url(finding):
+    list1 = []
+    for e in finding.endpoints.all():
+        list1.append(hyperlink.parse(str(e)))
+    return list1
+
+
+def are_urls_equal(url1, url2, fields):
+    # Possible values are: scheme, host, port, path, query, fragment, userinfo, and user.
+    # For a details description see https://hyperlink.readthedocs.io/en/latest/api.html#attributes
+    deduplicationLogger.debug("Check if url %s and url %s are equal in terms of %s.", url1, url2, fields)
+    for field in fields:
+        if field == 'scheme':
+            if url1.scheme != url2.scheme:
+                return False
+        elif field == 'host':
+            if url1.host != url2.host:
+                return False
+        elif field == 'port':
+            if url1.port != url2.port:
+                return False
+        elif field == 'path':
+            if url1.path != url2.path:
+                return False
+        elif field == 'query':
+            if url1.query != url2.query:
+                return False
+        elif field == 'fragment':
+            if url1.fragment != url2.fragment:
+                return False
+        elif field == 'userinfo':
+            if url1.userinfo != url2.userinfo:
+                return False
+        elif field == 'user':
+            if url1.user != url2.user:
+                return False
+        else:
+            logger.warning('Field ' + field + ' is not supported by the endpoint dedupe algorithm, ignoring it.')
+    return True
+
+
+def are_endpoints_duplicates(new_finding, to_duplicate_finding):
+    fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
+    # shortcut if fields list is empty/feature is disabled
+    if len(fields) == 0:
+        deduplicationLogger.debug("deduplication by endpoint fields is disabled")
+        return True
+
+    list1 = get_endpoints_as_url(new_finding)
+    list2 = get_endpoints_as_url(to_duplicate_finding)
+
+    deduplicationLogger.debug("Starting deduplication by endpoint fields for finding {} with urls {} and finding {} with urls {}".format(new_finding.id, list1, to_duplicate_finding.id, list2))
+    if list1 == [] and list2 == []:
+        return True
+
+    for l1 in list1:
+        for l2 in list2:
+            if are_urls_equal(l1, l2, fields):
+                return True
+    return False
+
+
 @dojo_model_to_id
 @dojo_async_task
 @app.task
 @dojo_model_from_id
+def do_dedupe_finding_task(new_finding, *args, **kwargs):
+    return do_dedupe_finding(new_finding, *args, **kwargs)
+
+
 def do_dedupe_finding(new_finding, *args, **kwargs):
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
@@ -113,33 +182,21 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
         logger.warning("system settings not found")
         enabled = False
     if enabled:
-        deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
+        deduplicationLogger.debug('dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
-        # TODO use test.dedupe_algo and case statement
-        if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
-            scan_type = new_finding.test.test_type.name
-            deduplicationLogger.debug('scan_type for this finding is :' + scan_type)
-            # Default algorithm
-            deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
-            # Check for an override for this scan_type in the deduplication configuration
-            if (scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
-                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[scan_type]
-            deduplicationLogger.debug('deduplication algorithm: ' + deduplicationAlgorithm)
-            if(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL):
-                deduplicate_unique_id_from_tool(new_finding)
-            elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_HASH_CODE):
-                deduplicate_hash_code(new_finding)
-            elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE):
-                deduplicate_uid_or_hash_code(new_finding)
-            else:
-                logger.debug('dedupe legacy start')
-                deduplicate_legacy(new_finding)
-                logger.debug('dedupe legacy start.done.')
+        deduplicationAlgorithm = new_finding.test.deduplication_algorithm
+        deduplicationLogger.debug('deduplication algorithm: ' + deduplicationAlgorithm)
+        if deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
+            deduplicate_unique_id_from_tool(new_finding)
+        elif deduplicationAlgorithm == settings.DEDUPE_ALGO_HASH_CODE:
+            deduplicate_hash_code(new_finding)
+        elif deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
+            deduplicate_uid_or_hash_code(new_finding)
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
     else:
-        deduplicationLogger.debug("sync_dedupe: skipping dedupe because it's disabled in system settings get()")
+        deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
 
 
 def deduplicate_legacy(new_finding):
@@ -172,7 +229,7 @@ def deduplicate_legacy(new_finding):
         str(len(total_findings)) + " findings with either same title or same cwe")
 
     # total_findings = total_findings.order_by('date')
-    for find in total_findings:
+    for find in total_findings.order_by('id'):
         flag_endpoints = False
         flag_line_path = False
         flag_hash = False
@@ -188,8 +245,8 @@ def deduplicate_legacy(new_finding):
         # ---------------------------------------------------------
 
         if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
-            list1 = [e.host_with_port for e in new_finding.endpoints.all()]
-            list2 = [e.host_with_port for e in find.endpoints.all()]
+            list1 = [str(e) for e in new_finding.endpoints.all()]
+            list2 = [str(e) for e in find.endpoints.all()]
 
             if all(x in list1 for x in list2):
                 deduplicationLogger.debug("%s: existing endpoints are present in new finding", find.id)
@@ -201,6 +258,11 @@ def deduplicate_legacy(new_finding):
             else:
                 deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
         else:
+            deduplicationLogger.debug('find.static/dynamic: %s/%s', find.static_finding, find.dynamic_finding)
+            deduplicationLogger.debug('new_finding.static/dynamic: %s/%s', new_finding.static_finding, new_finding.dynamic_finding)
+            deduplicationLogger.debug('find.file_path: %s', find.file_path)
+            deduplicationLogger.debug('new_finding.file_path: %s', new_finding.file_path)
+
             deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
 
         if find.hash_code == new_finding.hash_code:
@@ -232,7 +294,7 @@ def deduplicate_unique_id_from_tool(new_finding):
             unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     else:
         existing_findings = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
@@ -241,7 +303,7 @@ def deduplicate_unique_id_from_tool(new_finding):
             unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
 
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same unique_id_from_tool")
@@ -252,10 +314,10 @@ def deduplicate_unique_id_from_tool(new_finding):
             continue
         try:
             set_duplicate(new_finding, find)
+            break
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-        break
 
 
 def deduplicate_hash_code(new_finding):
@@ -265,14 +327,14 @@ def deduplicate_hash_code(new_finding):
             hash_code=new_finding.hash_code).exclude(
                 id=new_finding.id).exclude(
                     hash_code=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     else:
         existing_findings = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             hash_code=new_finding.hash_code).exclude(
                 id=new_finding.id).exclude(
                     hash_code=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
 
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same hash_code")
@@ -282,30 +344,31 @@ def deduplicate_hash_code(new_finding):
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:
-            set_duplicate(new_finding, find)
+            if are_endpoints_duplicates(new_finding, find):
+                set_duplicate(new_finding, find)
+                break
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-        break
 
 
 def deduplicate_uid_or_hash_code(new_finding):
     if new_finding.test.engagement.deduplication_on_engagement:
         existing_findings = Finding.objects.filter(
-            Q(hash_code=new_finding.hash_code) |
-            (Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
+            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
+            # unique_id_from_tool can only apply to the same test_type because it is parser dependent
+            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
             test__engagement=new_finding.test.engagement).exclude(
                 id=new_finding.id).exclude(
-                    hash_code=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     else:
+        # same without "test__engagement=new_finding.test.engagement" condition
         existing_findings = Finding.objects.filter(
-            Q(hash_code=new_finding.hash_code) |
-            (Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
+            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
+            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
             test__engagement__product=new_finding.test.engagement.product).exclude(
                 id=new_finding.id).exclude(
-                    hash_code=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
     for find in existing_findings:
@@ -314,7 +377,8 @@ def deduplicate_uid_or_hash_code(new_finding):
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:
-            set_duplicate(new_finding, find)
+            if are_endpoints_duplicates(new_finding, find):
+                set_duplicate(new_finding, find)
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
@@ -323,47 +387,49 @@ def deduplicate_uid_or_hash_code(new_finding):
 
 def set_duplicate(new_finding, existing_finding):
     if existing_finding.duplicate:
+        logger.debug('existing finding: %s:%s:duplicate=%s;duplicate_finding=%s', existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else 'None')
         raise Exception("Existing finding is a duplicate")
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     if is_duplicate_reopen(new_finding, existing_finding):
-        set_duplicate_reopen_(new_finding, existing_finding)
+        set_duplicate_reopen(new_finding, existing_finding)
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
-    for find in new_finding.original_finding.all():
+
+    # Make sure transitive duplication is flattened
+    # if A -> B and B is made a duplicate of C here, aferwards:
+    # A -> C and B -> C should be true
+    for find in new_finding.original_finding.all().order_by('-id'):
         new_finding.original_finding.remove(find)
         set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
-    logger.debug('saving new finding')
+    logger.debug('saving new finding: %d', new_finding.id)
     super(Finding, new_finding).save()
-    logger.debug('saving existing finding')
+    logger.debug('saving existing finding: %d', existing_finding.id)
     super(Finding, existing_finding).save()
 
 
 def is_duplicate_reopen(new_finding, existing_finding):
-    if (existing_finding.is_Mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_Mitigated:
+    if (existing_finding.is_mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_mitigated:
         return True
     else:
         return False
 
 
 def set_duplicate_reopen(new_finding, existing_finding):
+    logger.debug('duplicate reopen existing finding')
     existing_finding.mitigated = new_finding.mitigated
-    existing_finding.is_Mitigated = new_finding.is_Mitigated
+    existing_finding.is_mitigated = new_finding.is_mitigated
     existing_finding.active = new_finding.active
     existing_finding.verified = new_finding.verified
     existing_finding.notes.create(author=existing_finding.reporter,
-                                    entry="This finding has been automatically re-openend as it was found in recent scans.")
+                                    entry="This finding has been automatically re-opened as it was found in recent scans.")
     existing_finding.save()
 
 
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
 def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
@@ -490,8 +556,7 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
         for f in findings:
             if f.mitigated is not None and end_of_period >= f.mitigated >= start_of_period:
                 o_count['closed'] += 1
-            elif f.mitigated is not None and f.mitigated > end_of_period and f.date <= end_of_period.date(
-            ):
+            elif f.mitigated is not None and f.mitigated > end_of_period and f.date <= end_of_period.date():
                 if f.severity == 'Critical':
                     o_count['zero'] += 1
                 elif f.severity == 'High':
@@ -503,20 +568,15 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
             elif f.mitigated is None and f.date <= end_of_period.date():
                 if f.severity == 'Critical':
                     o_count['zero'] += 1
-                elif f.severity == 'High':
-                    o_count['one'] += 1
-                elif f.severity == 'Medium':
-                    o_count['two'] += 1
-                elif f.severity == 'Low':
-                    o_count['three'] += 1
-            elif f.mitigated is None and f.date <= end_of_period.date():
-                if f.severity == 'Critical':
                     a_count['zero'] += 1
                 elif f.severity == 'High':
+                    o_count['one'] += 1
                     a_count['one'] += 1
                 elif f.severity == 'Medium':
+                    o_count['two'] += 1
                     a_count['two'] += 1
                 elif f.severity == 'Low':
+                    o_count['three'] += 1
                     a_count['three'] += 1
 
         total = sum(o_count.values()) - o_count['closed']
@@ -623,6 +683,22 @@ def add_breadcrumb(parent=None,
         crumbs += obj_crumbs
 
     request.session['dojo_breadcrumbs'] = crumbs
+
+
+def is_title_in_breadcrumbs(title):
+    request = crum.get_current_request()
+    if request is None:
+        return False
+
+    breadcrumbs = request.session.get('dojo_breadcrumbs')
+    if breadcrumbs is None:
+        return False
+
+    for breadcrumb in breadcrumbs:
+        if breadcrumb.get('title') == title:
+            return True
+
+    return False
 
 
 def get_punchcard_data(objs, start_date, weeks, view='Finding'):
@@ -1087,11 +1163,6 @@ def opened_in_period(start_date, end_date, pt):
     return oip
 
 
-def message(count, noun, verb):
-    return ('{} ' + noun + '{} {} ' + verb).format(
-        count, pluralize(count), pluralize(count, 'was,were'))
-
-
 class FileIterWrapper(object):
     def __init__(self, flo, chunk_size=1024**2):
         self.flo = flo
@@ -1202,6 +1273,10 @@ def get_page_items_and_count(request, items, page_size, prefix='', do_count=True
 
 def handle_uploaded_threat(f, eng):
     name, extension = os.path.splitext(f.name)
+    # Check if threat folder exist.
+    if not os.path.isdir(settings.MEDIA_ROOT + '/threat/'):
+        # Create the folder
+        os.mkdir(settings.MEDIA_ROOT + '/threat/')
     with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
               'wb+') as destination:
         for chunk in f.chunks():
@@ -1226,7 +1301,7 @@ def handle_uploaded_selenium(f, cred):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def add_external_issue(find, external_issue_provider):
+def add_external_issue(find, external_issue_provider, **kwargs):
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
     logger.debug('adding external issue with provider: ' + external_issue_provider)
@@ -1239,7 +1314,7 @@ def add_external_issue(find, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def update_external_issue(find, old_status, external_issue_provider):
+def update_external_issue(find, old_status, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
@@ -1251,7 +1326,7 @@ def update_external_issue(find, old_status, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def close_external_issue(find, note, external_issue_provider):
+def close_external_issue(find, note, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
@@ -1263,7 +1338,7 @@ def close_external_issue(find, note, external_issue_provider):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def reopen_external_issue(find, note, external_issue_provider):
+def reopen_external_issue(find, note, external_issue_provider, **kwargs):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
 
@@ -1303,7 +1378,7 @@ def process_notifications(request, note, parent_url, parent_title):
         User.objects.filter(username=username).get()
         for username in usernames_to_check
         if User.objects.filter(is_active=True, username=username).exists()
-    ]  # is_staff also?
+    ]
 
     if len(note.entry) > 200:
         note.entry = note.entry[:200]
@@ -1429,9 +1504,22 @@ def get_system_setting(setting, default=None):
     return getattr(system_settings, setting, (default if default is not None else None))
 
 
-def calculate_grade(product):
+def get_setting(setting):
+    return getattr(settings, setting)
+
+
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id(model=Product)
+def calculate_grade(product, *args, **kwargs):
     system_settings = System_Settings.objects.get()
+    if not product:
+        logger.warning('ignoring calculate product for product None!')
+        return
+
     if system_settings.enable_product_grade:
+        logger.debug('calculating product grade for %s:%s', product.id, product.name)
         severity_values = Finding.objects.filter(
             ~Q(severity='Info'),
             active=True,
@@ -1475,8 +1563,8 @@ def get_celery_worker_status():
 
 # Used to display the counts and enabled tabs in the product view
 class Product_Tab():
-    def __init__(self, product_id, title=None, tab=None):
-        self.product = Product.objects.get(id=product_id)
+    def __init__(self, product, title=None, tab=None):
+        self.product = product
         self.title = title
         self.tab = tab
         self.engagement_count = Engagement.objects.filter(
@@ -1489,6 +1577,8 @@ class Product_Tab():
                                                           mitigated__isnull=True).count()
         self.endpoints_count = Endpoint.objects.filter(
             product=self.product).count()
+        self.endpoint_hosts_count = Endpoint.objects.filter(
+            product=self.product).values('host').distinct().count()
         self.benchmark_type = Benchmark_Type.objects.filter(
             enabled=True).order_by('name')
         self.engagement = None
@@ -1523,6 +1613,9 @@ class Product_Tab():
     def endpoints(self):
         return self.endpoints_count
 
+    def endpoint_hosts(self):
+        return self.endpoint_hosts_count
+
     def benchmark_type(self):
         return self.benchmark_type
 
@@ -1545,8 +1638,8 @@ def tab_view_count(product_id):
     return product, engagements, open_findings, endpoints, benchmark_type
 
 
-# Add a lanaguage to product
-def add_language(product, language):
+def add_language(product, language, files=1, code=1):
+    """Add a language to product"""
     prod_language = Languages.objects.filter(
         language__language__iexact=language, product=product)
 
@@ -1556,7 +1649,7 @@ def add_language(product, language):
                 language__iexact=language)
 
             if language_type:
-                lang = Languages(language=language_type, product=product)
+                lang = Languages(language=language_type, product=product, files=files, code=code)
                 lang.save()
         except Language_Type.DoesNotExist:
             pass
@@ -1610,14 +1703,40 @@ def get_site_url():
 
 
 @receiver(post_save, sender=Dojo_User)
-def set_default_notifications(sender, instance, created, **kwargs):
-    # for new user we create a Notifications object so the default 'alert' notifications work
-    # this needs to be a signal to make it also work for users created via ldap, oauth and other authentication backends
+def user_post_save(sender, instance, created, **kwargs):
+    # For new users we create a Notifications object so the default 'alert' notifications work and
+    # assign them to a default group if specified in the system settings.
+    # This needs to be a signal to make it also work for users created via ldap, oauth and other
+    # authentication backends
     if created:
-        logger.info('creating default set of notifications for: ' + str(instance))
-        notifications = Notifications()
-        notifications.user = instance
+        try:
+            notifications = Notifications.objects.get(template=True)
+            notifications.pk = None
+            notifications.template = False
+            notifications.user = instance
+            logger.info('creating default set (from template) of notifications for: ' + str(instance))
+        except Exception as err:
+            notifications = Notifications(user=instance)
+            logger.info('creating default set of notifications for: ' + str(instance))
+
         notifications.save()
+
+        system_settings = System_Settings.objects.get()
+        if system_settings.default_group and system_settings.default_group_role:
+            if (system_settings.default_group_email_pattern and re.fullmatch(system_settings.default_group_email_pattern, instance.email)) or \
+               not system_settings.default_group_email_pattern:
+                logger.info('setting default group for: ' + str(instance))
+                dojo_group_member = Dojo_Group_Member(
+                    group=system_settings.default_group,
+                    user=instance,
+                    role=system_settings.default_group_role)
+                dojo_group_member.save()
+
+    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
+        # Superusers shall always be staff
+        if instance.is_superuser and not instance.is_staff:
+            instance.is_staff = True
+            instance.save()
 
 
 @receiver(post_save, sender=Engagement)
@@ -1715,6 +1834,7 @@ def sla_compute_and_notify(*args, **kwargs):
             event='sla_breach',
             title=title,
             finding=finding,
+            url=reverse('view_finding', args=(finding.id,)),
             sla_age=sla_age
         )
 
@@ -1743,9 +1863,9 @@ def sla_compute_and_notify(*args, **kwargs):
 
             query = None
             if settings.SLA_NOTIFY_ACTIVE:
-                query = Q(active=True, is_Mitigated=False, duplicate=False)
+                query = Q(active=True, is_mitigated=False, duplicate=False)
             if settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
-                query = Q(active=True, verified=True, is_Mitigated=False, duplicate=False)
+                query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
             logger.debug("My query: {}".format(query))
 
             no_jira_findings = {}
@@ -1783,7 +1903,13 @@ def sla_compute_and_notify(*args, **kwargs):
                     continue
 
                 do_jira_sla_comment = False
+                jira_issue = None
                 if finding.has_jira_issue:
+                    jira_issue = finding.jira_issue
+                elif finding.has_finding_group:
+                    jira_issue = finding.finding_group.jira_issue
+
+                if jira_issue:
                     jira_count += 1
                     jira_instance = jira_helper.get_jira_instance(finding)
                     if jira_instance is not None:
@@ -1804,7 +1930,6 @@ def sla_compute_and_notify(*args, **kwargs):
                                 product_jira_sla_comment_enabled
                             ))
                             do_jira_sla_comment = True
-                            jira_issue = finding.jira_issue
                             logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
 
                 logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
@@ -1836,11 +1961,21 @@ def sla_compute_and_notify(*args, **kwargs):
         logger.info("Findings SLA is not enabled.")
 
 
-def get_words_for_field(queryset, fieldname):
+def get_words_for_field(model, fieldname):
     max_results = getattr(settings, 'MAX_AUTOCOMPLETE_WORDS', 20000)
-    words = [
-        word for component_name in queryset.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (component_name.split() if component_name else []) if len(word) > 2
-    ]
+    models = None
+    if model == Finding:
+        models = get_authorized_findings(Permissions.Finding_View, user=get_current_user())
+    elif model == Finding_Template:
+        models = Finding_Template.objects.all()
+
+    if models is not None:
+        words = [
+            word for field_value in models.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
+        ]
+    else:
+        words = []
+
     return sorted(set(words))
 
 
@@ -1889,6 +2024,42 @@ def get_object_or_none(klass, *args, **kwargs):
         return None
 
 
+def get_last_object_or_none(klass, *args, **kwargs):
+    """
+    Use last() to return an object, or return None
+    does not exist.
+    klass may be a Model, Manager, or QuerySet object. All other passed
+    arguments and keyword arguments are used in the get() query.
+    Like with QuerySet.get(), MultipleObjectsReturned is raised if more than
+    one object is found.
+    """
+    queryset = klass
+
+    if hasattr(klass, '_default_manager'):
+        queryset = klass._default_manager.all()
+
+    if not hasattr(queryset, 'get'):
+        klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
+        raise ValueError(
+            "First argument to get_last_object_or_None() must be a Model, Manager, "
+            "or QuerySet, not '%s'." % klass__name
+        )
+    try:
+        results = queryset.filter(*args, **kwargs).order_by('id')
+        logger.debug('last_object_or_none: %s', results.query)
+        return results.last()
+    except queryset.model.DoesNotExist:
+        return None
+
+
+def add_success_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.SUCCESS,
+                            message,
+                            extra_tags='alert-success')
+
+
 def add_error_message_to_response(message):
     if get_current_request():
         messages.add_message(get_current_request(),
@@ -1901,3 +2072,235 @@ def add_field_errors_to_response(form):
     if form and get_current_request():
         for field, error in form.errors.items():
             add_error_message_to_response(error)
+
+
+def mass_model_updater(model_type, models, function, fields, page_size=1000, order='asc', log_prefix=''):
+    """ Using the default for model in queryset can be slow for large querysets. Even
+    when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
+    this process very well if we can process the models ordered by id.
+    In that case we don't need LIMIT or OFFSET, but can keep track of the latest id that
+    was processed and continue from there on the next page. This is fast because
+    it results in an index seek instead of executing the whole query again and skipping
+    the first X items.
+    """
+    # force ordering by id to make our paging work
+    last_id = None
+    models = models.order_by()
+    if order == 'asc':
+        logger.debug('ordering ascending')
+        models = models.order_by('id')
+        last_id = 0
+    elif order == 'desc':
+        logger.debug('ordering descending')
+        models = models.order_by('-id')
+        # get maximum, which is the first due to descending order
+        last_id = models.first().id + 1
+    else:
+        raise ValueError('order must be ''asc'' or ''desc''')
+    # use filter to make count fast on mysql
+    total_count = models.filter(id__gt=0).count()
+    logger.debug('%s found %d models for mass update:', log_prefix, total_count)
+
+    i = 0
+    batch = []
+    total_pages = (total_count // page_size) + 2
+    # logger.info('pages to process: %d', total_pages)
+    logger.debug('%s%s out of %s models processed ...', log_prefix, i, total_count)
+    for p in range(1, total_pages):
+        # logger.info('page: %d', p)
+        if order == 'asc':
+            page = models.filter(id__gt=last_id)[:page_size]
+        else:
+            page = models.filter(id__lt=last_id)[:page_size]
+
+        # logger.info('page query: %s', page.query)
+        # if p == 23:
+        #     raise ValueError('bla')
+        for model in page:
+            i += 1
+            last_id = model.id
+            # logger.info('last_id: %s', last_id)
+
+            function(model)
+
+            batch.append(model)
+
+            if (i > 0 and i % page_size == 0):
+                if fields:
+                    model_type.objects.bulk_update(batch, fields)
+                batch = []
+                logger.debug('%s%s out of %s models processed ...', log_prefix, i, total_count)
+
+    if fields:
+        model_type.objects.bulk_update(batch, fields)
+    batch = []
+    logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
+
+
+def to_str_typed(obj):
+    """ for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
+    return '%s: %s' % (type(obj), obj)
+
+
+def get_product(obj):
+    logger.debug('getting product for %s:%s', type(obj), obj)
+    if not obj:
+        return None
+
+    if type(obj) == Finding or type(obj) == Finding_Group:
+        return obj.test.engagement.product
+
+    if type(obj) == Test:
+        return obj.engagement.product
+
+    if type(obj) == Engagement:
+        return obj.product
+
+    if type(obj) == Product:
+        return obj
+
+
+def prod_name(obj):
+    if not obj:
+        return 'Unknown'
+
+    return get_product(obj).name
+
+
+# Returns image locations by default (i.e. uploaded_files/09577eb1-6ccb-430b-bc82-0742d4c97a09.png)
+# if return_objects=True, return the FileUPload object instead of just the file location
+def get_file_images(obj, return_objects=False):
+    logger.debug('getting images for %s:%s', type(obj), obj)
+    files = None
+    if not obj:
+        return files
+    files = obj.files.all()
+
+    images = []
+    for file in files:
+        file_name = file.file.name
+        file_type = mimetypes.guess_type(file_name)[0]
+        if file_type and 'image' in file_type:
+            if return_objects:
+                images.append(file)
+            else:
+                images.append(file_name)
+    return images
+
+
+def get_enabled_notifications_list():
+    # Alerts need to enabled by default
+    enabled = ['alert']
+    for choice in NOTIFICATION_CHOICES:
+        if get_system_setting('enable_{}_notifications'.format(choice[0])):
+            enabled.append(choice[0])
+    return enabled
+
+
+def is_finding_groups_enabled():
+    """Returns true is feature is enabled otherwise false"""
+    return get_system_setting("enable_finding_groups")
+
+
+class async_delete():
+    def __init__(self, *args, **kwargs):
+        self.mapping = {
+            'Product_Type': [
+                (Endpoint, 'product__prod_type'),
+                (Finding, 'test__engagement__product__prod_type'),
+                (Test, 'engagement__product__prod_type'),
+                (Engagement, 'product__prod_type'),
+                (Product, 'prod_type')],
+            'Product': [
+                (Endpoint, 'product'),
+                (Finding, 'test__engagement__product'),
+                (Test, 'engagement__product'),
+                (Engagement, 'product')],
+            'Engagement': [
+                (Finding, 'test__engagement'),
+                (Test, 'engagement')],
+            'Test': [(Finding, 'test')]
+        }
+
+    @dojo_async_task
+    @app.task
+    def delete_chunk(self, objects, **kwargs):
+        for object in objects:
+            try:
+                object.delete()
+            except AssertionError:
+                logger.debug('ASYNC_DELETE: object has already been deleted elsewhere. Skipping')
+                # The id must be None
+                # The object has already been deleted elsewhere
+                pass
+
+    @dojo_async_task
+    @app.task
+    def delete(self, object, **kwargs):
+        logger.debug('ASYNC_DELETE: Deleting ' + self.get_object_name(object) + ': ' + str(object))
+        model_list = self.mapping.get(self.get_object_name(object), None)
+        if model_list:
+            # The object to be deleted was found in the object list
+            self.crawl(object, model_list)
+        else:
+            # The object is not supported in async delete, delete normally
+            logger.debug('ASYNC_DELETE: ' + self.get_object_name(object) + ' async delete not supported. Deleteing normally: ' + str(object))
+            object.delete()
+
+    @dojo_async_task
+    @app.task
+    def crawl(self, object, model_list, **kwargs):
+        logger.debug('ASYNC_DELETE: Crawling ' + self.get_object_name(object) + ': ' + str(object))
+        for model_info in model_list:
+            model = model_info[0]
+            model_query = model_info[1]
+            filter_dict = {model_query: object}
+            objects_to_delete = model.objects.filter(**filter_dict)
+            logger.debug('ASYNC_DELETE: Deleting ' + str(len(objects_to_delete)) + ' ' + self.get_object_name(model) + 's in chunks')
+            chunks = self.chunk_list(model, objects_to_delete)
+            for chunk in chunks:
+                print('deleting', len(chunk), self.get_object_name(model))
+                self.delete_chunk(chunk)
+        self.delete_chunk([object])
+        logger.debug('ASYNC_DELETE: Successfully deleted ' + self.get_object_name(object) + ': ' + str(object))
+
+    def chunk_list(self, model, list):
+        chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
+        # Break the list of objects into "chunk_size" lists
+        chunk_list = [list[i:i + chunk_size] for i in range(0, len(list), chunk_size)]
+        logger.debug('ASYNC_DELETE: Split ' + self.get_object_name(model) + ' into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_size))
+        return chunk_list
+
+    def get_object_name(self, object):
+        if object.__class__.__name__ == 'ModelBase':
+            return object.__name__
+        return object.__class__.__name__
+
+
+@receiver(user_logged_in)
+def log_user_login(sender, request, user, **kwargs):
+    # to cover more complex cases:
+    # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
+
+    logger.info('login user: {user} via ip: {ip}'.format(
+        user=user.username,
+        ip=request.META.get('REMOTE_ADDR')
+    ))
+
+
+@receiver(user_logged_out)
+def log_user_logout(sender, request, user, **kwargs):
+
+    logger.info('logout user: {user} via ip: {ip}'.format(
+        user=user.username,
+        ip=request.META.get('REMOTE_ADDR')
+    ))
+
+
+@receiver(user_login_failed)
+def log_user_login_failed(sender, credentials, request, **kwargs):
+
+    logger.warning('login failed for: {credentials} via ip: {ip}'.format(
+        credentials=credentials['username'],
+        ip=request.META['REMOTE_ADDR']
+    ))

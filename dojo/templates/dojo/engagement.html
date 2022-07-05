@@ -1,86 +1,104 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
+{% load dict_key %}
+
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Active Engagements
+                        {{ view }} Engagements
                         <div class="dropdown pull-right">
+                            &nbsp;
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="downloadMenu"
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="download">
+                                <span class="fa fa-download"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="downloadMenu">
+                            <li role="presentation">
+                                <a id="csv_export" href="{% url 'engagement_csv_export' %}?url={{ request.get_full_path }}">
+                                    <i class="fa fa-table"></i> CSV Export
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a id="excel_export" href="{% url 'engagement_excel_export' %}?url={{ request.get_full_path }}">
+                                    <i class="fa fa-file-excel-o"></i> Excel Export
+                                </a>
+                            </li>
+                            </ul>
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form.has_changed %}in{% endif %}">
-                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                <div id="the-filters" class="is-filters panel-body collapse {% if filter_form.has_changed %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filter_form %}
                 </div>
             </div>
-            {% if products %}
+            {% if engagements %}
 
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                    {% include "dojo/paging_snippet.html" with page=engagements page_size=True %}
                 </div>
 
                 <div class="table-responsive panel panel-default">
                     <table id="engagements"
-                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                           class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
-                            <th class="prod_name">{% dojo_sort request 'Product' 'name' 'asc' %}</th>
-                            <th class="prod_name">{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
-                            <th>Active Engagements</th>
-                            {% if user.is_staff %}
-                                <th> Engagement</th>
+                            <th>{% dojo_sort request 'Engagement' 'name' 'asc' %}</th>
+                            <th>{% dojo_sort request 'Period' 'target_start' 'asc' %}</th>
+                            <th>Status</th>
+                            <th class="prod_name">{% dojo_sort request 'Product' 'product__name' 'asc' %}</th>
+                            <th class="prod_name">{% dojo_sort request 'Product Type' 'product__prod_type__name' %}</th>
+                            <th>{% dojo_sort request 'Lead' 'lead__first_name' %}</th>
+                            <th>Tests</th>
+                            {% if system_settings.enable_jira %}
+                                <th>Jira</th>
                             {% endif %}
                         </tr>
 
-                        {% for p in products %}
+                        {% for e in engagements %}
                             <tr>
-                                <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
-                                    {{ p|jira_project_tag }}
-                                  <sup>
-                                   {% for tag in p.tags.all %}
-                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                    {% endfor %}
-                                  </sup>
+                                <td style="white-space: normal">
+                                    <a class="eng_link" href="{%url 'view_engagement' e.id %}">{% if e.name %}{{ e.name }}{% endif %}</a>
+                                    <div>
+                                        {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
+                                    </div>
                                 </td>
-                                <td class="prod_name"><a
-                                        href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
+                                <td> {{ e.target_start }} - {{ e.target_end }}
+                                     {% if e.is_overdue %}
+                                        <span class="tag-label warning-color">
+                                             {{ e.target_end|overdue }} overdue
+                                         </span>
+                                      {% endif %}
                                 </td>
+                                <td>{{ e.status }}</td>
+                                <td class="prod_name">
+                                    <a href="{% url 'view_product' e.product.id %}">
+                                        {{ e.product.name }}
+                                    </a>
+                                    {{ e.product|jira_project_tag }}
+                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
+                                </td>
+                                <td class="prod_name">
+                                    <a href="{% url 'product_type_metrics' e.product.prod_type.id %}">
+                                        {{ e.product.prod_type.name }}
+                                    </a>
+                                </td>
+                                <td>{{ e.lead.first_name }} {{ e.lead.last_name }}</td>
                                 <td>
-                                    {% for e in p.engagement_set.all %}
-                                        {% if e.active %}
-                                            <div class="lineContainer">
-                                                <a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
-                                                {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start|date }} - {{ e.target_end|date }}</a>
-                                                <sup>
-                                                    {% for tag in e.tags.all %}
-                                                         <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
-                                                     {% endfor %}
-                                                </sup>
-                                                {% if e.is_overdue %}
-                                                <sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
-                                                {% endif %}
-							                    | Lead: {{ e.lead.first_name }}
-                                                |
-                                                {% for test in e.test_set.all %}
-								                    {% if test.lead %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} ({{ test.updated|date}})</a> |
-								                    {% else %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test }} ({{ test.updated|date}})</a> |
-								                    {% endif %}
-                                                {% endfor %}
-                                                {{ e|jira_project_tag }}
-						                    </div>
-                                        {% endif %}
-                                    {% endfor %}
+                                    <a class="eng_link" href="{%url 'view_engagement' e.id %}#tests">
+                                        {% with test_count=engagement_test_counts|dict_key:e.pk|default_if_none:0 %}
+                                            {{ test_count }}
+                                        {% endwith %}
+                                    </a>
                                 </td>
-                                {% if user.is_staff %}
+                                {% if system_settings.enable_jira %}
                                     <td>
-                                        <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
-                                            <i class="fa fa-plus"></i> Add
-                                        </a>
+                                        {{ e|jira_project_tag }}
                                     </td>
                                 {% endif %}
                             </tr>
@@ -88,7 +106,7 @@
                     </table>
                 </div>
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                    {% include "dojo/paging_snippet.html" with page=engagements page_size=True %}
                 </div>
             {% else %}
                 <div id="no_engagements"><h5 class="text-center"> No active engagements </h5></div>
@@ -98,22 +116,23 @@
 
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         $(function () {
-            var availableTags = [
-                {% for word in name_words %}
+            var prodWords = [
+                {% for word in product_name_words %}
                     "{{word}}",
                 {% endfor %}
             ];
             var engWords = [
-                {% for word in eng_words %}
+                {% for word in engagement_name_words %}
                     "{{word}}",
                 {% endfor %}
             ];
-            $("#id_name").autocomplete({
-                source: availableTags
+            $("#id_product__name").autocomplete({
+                source: prodWords
             });
-            $("#id_engagement__name").autocomplete({
+            $("#id_name").autocomplete({
                 source: engWords
             });
         });

@@ -1,0 +1,112 @@
+{
+  "url": "https://www.meterian.com/projects/?pid=a4f21aff-0777-4957-9860-d98fc7757f5e&branch=head&mode=eli",
+  "timestamp": "2021-06-02 10:40:05",
+  "scores": {
+    "stability": "100",
+    "security": "0",
+    "licensing": "100"
+  },
+
+  "security": {
+    "score": 100,
+    "reports": [
+      {
+        "language": "nodejs",
+        "reports": [
+          {
+            "dependency": {
+              "name": "date-and-time",
+              "version": "0.6.3",
+              "dependencies": [],
+              "locations": []
+            },
+            "advices": [
+              {
+                "id": "7be36211-b569-30c0-8851-26b4bb8740ca",
+                "library": {
+                  "name": "date-and-time",
+                  "language": "nodejs"
+                },
+                "description": "date-and-time is an npm package for manipulating date and time. In date-and-time before version 0.14.2, there a regular expression involved in parsing which can be exploited to to cause a denial of service. This is fixed in version 0.14.2.",
+                "severity": "HIGH",
+                "links": [
+                  {
+                    "type": "CVE",
+                    "url": "CVE-2020-26289"
+                  },
+                  {
+                    "type": "NVD",
+                    "url": "CVE-2020-26289"
+                  },
+                  {
+                    "type": "INFO",
+                    "url": "https://www.npmjs.com/package/date-and-time"
+                  },
+                  {
+                    "type": "INFO",
+                    "url": "https://github.com/knowledgecode/date-and-time/security/advisories/GHSA-r92x-f52r-x54g"
+                  },
+                  {
+                    "type": "FIX",
+                    "url": "https://github.com/knowledgecode/date-and-time/commit/9e4b501eacddccc8b1f559fb414f48472ee17c2a"
+                  }
+                ],
+                "type": "SECURITY",
+                "cvss": 7.5,
+                "versionRange": "[,0.14.2)",
+                "cve": "CVE-2020-26289",
+                "cwe": "CWE-400"
+              }
+            ],
+            "hierarchy": [
+              "project:--",
+              "date-and-time:0.6.3"
+            ],
+            "locations": [],
+            "safeVersions": {
+              "latestMinor": "0.14.2",
+              "latestMajor": "1.0.1"
+            },
+            "transitive": false
+          }
+        ]
+      }
+    ]
+  },
+  "stability": {
+    "reports": [
+      {
+        "language": "nodejs",
+        "versions": []
+      }
+    ]
+  },
+  "licensing": {
+    "reports": [
+      {
+        "language": "nodejs",
+        "results": [
+          {
+            "name": "big-integer",
+            "version": "1.6.48",
+            "warnings": [],
+            "violations": [],
+            "licenses": [
+              {
+                "id": "Unlicense",
+                "name": "The Unlicense",
+                "uri": "https://spdx.org/licenses/Unlicense.html",
+                "wildcard": false
+              }
+            ]
+          }
+        ],
+        "warningsCount": 0,
+        "violationsCount": 0
+      }
+    ],
+    "warningsCount": 0,
+    "violationsCount": 0
+  }
+
+}

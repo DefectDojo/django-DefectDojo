@@ -2,10 +2,12 @@
 {% load event_tags %}
 {% load static %}
 {% block add_css %}
+    {{ block.super }}
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
+    {{ block.super }}
     .chosen-container {
     width: 70% !important;
     }
@@ -14,6 +16,7 @@
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> Apply template to a Finding</h3>
     <form id="add_finding" class="form-horizontal" name="apply_template"
           action="{% url 'apply_template_to_finding' finding.id template.id %}" method="post">
@@ -30,6 +33,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
    <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
@@ -39,8 +43,6 @@
         $.hotkeys.options.filterInputAcceptingElements = false;
         $.hotkeys.options.filterTextInputs = false;
 
-        $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add?_popup');
-
         $(function () {
             $("textarea").each(function (index, elem) {
 
@@ -49,20 +51,22 @@
                     elem.id = "req"
                 }
 
-                var mde = new EasyMDE({
-                    spellChecker: false,
-                    element: elem,
-                    autofocus: false,
-                    forceSync: true,
-                    toolbar: ["bold", "italic", "heading", "|",
-                        "quote", "unordered-list", "ordered-list", "|",
-                        "link", "image", "|",
-                        "table", "horizontal-rule", "code", "|",
-                        "guide"
-                    ]
-                });
-                mde.render();
-                elem.mde = mde;
+                if (elem.name != 'vulnerability_ids') {
+                    var mde = new EasyMDE({
+                        spellChecker: false,
+                        element: elem,
+                        autofocus: false,
+                        forceSync: true,
+                        toolbar: ["bold", "italic", "heading", "|",
+                            "quote", "unordered-list", "ordered-list", "|",
+                            "link", "image", "|",
+                            "table", "horizontal-rule", "code", "|",
+                            "guide"
+                        ]
+                    });
+                    mde.render();
+                    elem.mde = mde;
+                }
             });
         });
 

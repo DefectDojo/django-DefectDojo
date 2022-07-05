@@ -20,8 +20,6 @@ urlpatterns = [
         views.product_type_counts, name='product_type_counts'),
     url(r'^metrics/engineer$', views.engineer_metrics,
         name='engineer_metrics'),
-    url(r'^metrics/research$', views.research_metrics,
-        name='research_metrics'),
     url(r'^metrics/engineer/(?P<eid>\d+)$', views.view_engineer,
         name='view_engineer'),
 ]
