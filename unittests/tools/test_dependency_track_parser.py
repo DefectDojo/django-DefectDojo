@@ -46,7 +46,7 @@ class TestDependencyTrackParser(DojoTestCase):
         self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
         self.assertEqual('533', findings[0].unsaved_vulnerability_ids[0]))
         self.assertEqual(1, len(findings[1].unsaved_vulnerability_ids))
-        self.assertEqual('48', findings[1].unsaved_vulnerability_ids[0]))
+        self.assertEqual('48', findings[1].unsaved_vulnerability_ids[0])
         self.assertEqual(1, len(findings[2].unsaved_vulnerability_ids))
         self.assertEqual('CVE-2016-2097', findings[2].unsaved_vulnerability_ids[0])
         self.assertEqual(1, len(findings[3].unsaved_vulnerability_ids))
