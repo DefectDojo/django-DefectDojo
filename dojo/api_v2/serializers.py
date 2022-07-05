@@ -1298,6 +1298,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     push_to_jira = serializers.BooleanField(default=False)
     vulnerability_ids = VulnerabilityIdSerializer(source='vulnerability_id_set', many=True, required=False)
+    reporter = serializers.PrimaryKeyRelatedField(required=False, queryset=User.objects.all())
 
     class Meta:
         model = Finding
@@ -1305,7 +1306,6 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         extra_kwargs = {
             'active': {'required': True},
             'verified': {'required': True},
-            'reporter': {'default': serializers.CurrentUserDefault()},
         }
 
     # Overriding this to push add Push to JIRA functionality
@@ -1346,6 +1346,10 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         return tag_object
 
     def validate(self, data):
+        if 'reporter' not in data:
+            request = self.context['request']
+            data['reporter'] = request.user
+
         if ((data['active'] or data['verified']) and data['duplicate']):
             raise serializers.ValidationError('Duplicate findings cannot be'
                                               ' verified or active')
