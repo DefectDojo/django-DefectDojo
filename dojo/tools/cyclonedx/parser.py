@@ -349,6 +349,14 @@ class CycloneDXParser(object):
                 if vulnerability_ids:
                     finding.unsaved_vulnerability_ids = vulnerability_ids
 
+                # if there is some CWE
+                cwes = vulnerability.get('cwes')
+                if cwes and len(cwes) > 1:
+                    # FIXME support more than one CWE
+                    LOGGER.debug(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
+                if cwes and len(cwes) > 0:
+                    finding.cwe = cwes[0]
+
                 findings.append(finding)
         return findings
 
