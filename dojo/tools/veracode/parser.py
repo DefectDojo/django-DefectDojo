@@ -192,19 +192,6 @@ class VeracodeParser(object):
 
         return finding
 
-    @classmethod
-    def __cvss_to_severity(cls, cvss):
-        if cvss >= 9:
-            return cls.vc_severity_mapping.get(5)
-        elif cvss >= 7:
-            return cls.vc_severity_mapping.get(4)
-        elif cvss >= 4:
-            return cls.vc_severity_mapping.get(3)
-        elif cvss > 0:
-            return cls.vc_severity_mapping.get(2)
-        else:
-            return cls.vc_severity_mapping.get(1)
-
     @staticmethod
     def _get_cwe(val):
         # Match only the first CWE!
@@ -226,7 +213,7 @@ class VeracodeParser(object):
         # Report values
         cvss_score = float(xml_node.attrib['cvss_score'])
         finding.cvssv3_score = cvss_score
-        finding.severity = cls.__cvss_to_severity(cvss_score)
+        finding.severity = cls.__xml_flaw_to_severity(xml_node)
         finding.unsaved_vulnerability_ids = [xml_node.attrib['cve_id']]
         finding.cwe = cls._get_cwe(xml_node.attrib['cwe_id'])
         finding.title = "Vulnerable component: {0}:{1}".format(library, version)
