@@ -249,7 +249,8 @@ class ProductForm(forms.ModelForm):
 
     sla_configuration = forms.ModelChoiceField(label='SLA Configuration',
                                         queryset=SLA_Configuration.objects.all(),
-                                        required=True)
+                                        required=True,
+                                        initial='Default')
 
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
