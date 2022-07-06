@@ -1975,7 +1975,7 @@ def finding_bulk_update_all(request, pid=None):
                     add_error_message_to_response('%i finding groups could not be pushed to JIRA: %s' % (error_count, error_message))
 
                 if success_count > 0:
-                    add_success_message_to_response('%i finding groups pushed to JIRA succesfully' % success_count)
+                    add_success_message_to_response('%i finding groups pushed to JIRA successfully' % success_count)
 
                 # refresh from db
                 finds = finds.all()
@@ -2015,7 +2015,7 @@ def finding_bulk_update_all(request, pid=None):
                     add_error_message_to_response('%i findings could not be pushed to JIRA: %s' % (error_count, error_message))
 
                 if success_count > 0:
-                    add_success_message_to_response('%i findings pushed to JIRA succesfully' % success_count)
+                    add_success_message_to_response('%i findings pushed to JIRA successfully' % success_count)
 
                 if updated_find_count > 0:
                     messages.add_message(request,
