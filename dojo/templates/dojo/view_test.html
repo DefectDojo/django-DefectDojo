@@ -588,7 +588,7 @@
                                 <label style="font-size: 80%; font-weight: normal;">
                                     <input id="id_bulk_finding_group_add" name="finding_group_add" class="finding_group_option" type="checkbox" disabled/> <span>Add to...</span>
                                 </label>
-                                <select id="id_add_to_finding_group" name="add_to_finding_group" style="font-size: 80%">
+                                <select id="id_add_to_finding_group_id" name="add_to_finding_group_id" style="font-size: 80%">
                                     <option value="">Choose...</option>
                                     {% for group in finding_groups %}
                                         <option value="{{ group.id }}">{{ group.name|truncatechars_html:40 }}</option>

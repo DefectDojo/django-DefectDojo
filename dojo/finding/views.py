@@ -1877,7 +1877,7 @@ def finding_bulk_update_all(request, pid=None):
 
                 if form.cleaned_data['finding_group_add']:
                     logger.debug('finding_group_add checked!')
-                    fgid = form.cleaned_data['add_to_finding_group']
+                    fgid = form.cleaned_data['add_to_finding_group_id']
                     finding_group = Finding_Group.objects.get(id=fgid)
                     finding_group, added, skipped = finding_helper.add_to_finding_group(finding_group, finds)
 
