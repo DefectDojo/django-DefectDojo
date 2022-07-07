@@ -1969,8 +1969,6 @@ def finding_bulk_update_all(request, pid=None):
                             jira_helper.push_to_jira(group)
                             success_count += 1
 
-                        jira_helper.push_to_jira(group)
-
                 for error_message, error_count in error_counts.items():
                     add_error_message_to_response('%i finding groups could not be pushed to JIRA: %s' % (error_count, error_message))
 
