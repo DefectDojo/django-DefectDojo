@@ -1630,7 +1630,7 @@ def merge_finding_product(request, pid):
 
                 if finding_to_merge_into not in findings_to_merge:
                     for finding in findings_to_merge.exclude(pk=finding_to_merge_into.pk):
-                        notes_entry = "{} {} ({}),".format(notes_entry, finding.title, finding.id)
+                        notes_entry = "{}\n- {} ({}),".format(notes_entry, finding.title, finding.id)
                         if finding.static_finding:
                             static = finding.static_finding
 
@@ -1720,7 +1720,7 @@ def merge_finding_product(request, pid):
                         finding_action = "deleted"
                         findings_to_merge.delete()
 
-                    notes_entry = "Finding consists of merged findings from the following findings: {} which have been {}.".format(notes_entry[:-1], finding_action)
+                    notes_entry = "Finding consists of merged findings from the following findings which have been {}: {}".format(finding_action, notes_entry[:-1])
                     note = Notes(entry=notes_entry, author=request.user)
                     note.save()
                     finding_to_merge_into.notes.add(note)
