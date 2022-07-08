@@ -284,7 +284,9 @@ class SonarQubeApiImporter(object):
     def get_references(vuln_details):
         parser = etree.HTMLParser()
         details = etree.fromstring(vuln_details, parser)
+
         rule_references = ""
-        for a in details.iter("a"):
-            rule_references += "[{}]({})\n".format(a.text, a.get('href'))
+        if details:
+            for a in details.iter("a"):
+                rule_references += "[{}]({})\n".format(a.text, a.get('href'))
         return rule_references
