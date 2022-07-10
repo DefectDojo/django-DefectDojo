@@ -20,10 +20,12 @@ class Acunetix360Parser(object):
         data = json.load(filename)
         dupes = dict()
         scan_date = datetime.datetime.strptime(data["Generated"], "%d/%m/%Y %H:%M %p").date()
+        text_maker = html2text.HTML2Text()
+        text_maker.body_width = 0
 
         for item in data["Vulnerabilities"]:
             title = item["Name"]
-            findingdetail = html2text.html2text(item.get("Description", ""))
+            findingdetail = text_maker.handle(item.get("Description", ""))
             if "Cwe" in item["Classification"]:
                 try:
                     cwe = int(item["Classification"]["Cwe"].split(',')[0])
@@ -34,10 +36,10 @@ class Acunetix360Parser(object):
             sev = item["Severity"]
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'
-            mitigation = html2text.html2text(item.get("RemedialProcedure", ""))
-            references = html2text.html2text(item.get("RemedyReferences", ""))
+            mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
+            references = text_maker.handle(item.get("RemedyReferences", ""))
             url = item["Url"]
-            impact = html2text.html2text(item.get("Impact", ""))
+            impact = text_maker.handle(item.get("Impact", ""))
             dupe_key = title
             request = item["HttpRequest"]["Content"]
             if request is None or len(request) <= 0:
