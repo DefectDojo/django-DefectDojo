@@ -1,8 +1,8 @@
 import json
 import hashlib
-import hyperlink
 
 from dojo.models import Finding
+
 
 class PWNSASTParser(object):
     """
@@ -25,7 +25,7 @@ class PWNSASTParser(object):
         data_arr = results["data"]
 
         findings = {}
-        
+
         for data_hash in data_arr:
             timestamp = entry["timestamp"]
             security_requirements = data_hash["security_requirements"]
@@ -40,7 +40,7 @@ class PWNSASTParser(object):
             line_no_and_contents = data_hash["line_no_and_contents"]
             test_case_filter = data_hash["test_case_filter"]
             steps_to_reproduce = "\n".join([
-                f"Install pwn_sast Driver via: https://github.com/0dayinc/pwn#installation",
+                "Install pwn_sast Driver via: https://github.com/0dayinc/pwn#installation",
                 "Execute the pwn_sast Driver via:",
                 f"```pwn_sast --dir-path . --uri-source-root {git_repo_root_uri} -s```"
             ])
@@ -56,7 +56,7 @@ class PWNSASTParser(object):
                     f"Offending URI: {offending_uri}",
                     f"Line: {line_no}",
                     f"Committed By: {author}",
-                    f"Line Contents:",
+                    "Line Contents:",
                     f"```{contents}```"
                 ])
 
