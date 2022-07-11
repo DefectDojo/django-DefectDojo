@@ -30,4 +30,4 @@ class TestPWNSASTParser(DojoTestCase):
         parser = PWNSASTParser()
         findings = parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
-        self.assertEqual(2, len(findings))
+        self.assertEqual(1, len(findings))
