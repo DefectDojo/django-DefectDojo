@@ -27,7 +27,7 @@ class PWNSASTParser(object):
         findings = {}
 
         for data_hash in data_arr:
-            timestamp = entry["timestamp"]
+            timestamp = data_hash["timestamp"]
             security_requirements = data_hash["security_requirements"]
             sast_module = security_requirements["sast_module"]
             section = security_requirements["section"]
@@ -46,7 +46,7 @@ class PWNSASTParser(object):
             ])
 
             for line in line_no_and_contents:
-                offending_uri = f"{git_repo_root_uri}/{entry}"
+                offending_uri = f"{git_repo_root_uri}/{offending_file}"
                 line_no = line["line_no"]
                 contents = line["contents"]
                 author = line["author"]
