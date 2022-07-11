@@ -92,6 +92,6 @@ class PWNSASTParser(object):
                         steps_to_reproduce=steps_to_reproduce,
                         file_path=offending_file
                     )
-                    findings[unique_finding_key](finding)
+                    findings[unique_finding_key] = finding
 
         return list(findings.values())
