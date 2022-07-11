@@ -50,6 +50,7 @@ class IbmAppParser(object):
                         cwe = int(cwe)
 
                     url = self.get_url(root, item.find('url/ref').text)
+
                     severity = item.find('severity').text.capitalize()
                     if severity == 'Informational':
                         severity = 'Info'
