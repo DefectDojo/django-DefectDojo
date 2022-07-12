@@ -206,17 +206,24 @@ def update_finding_group(finding, finding_group):
 
 
 def get_group_by_group_name(finding, finding_group_by_option):
+    group_name = None
+
     if finding_group_by_option == 'component_name':
-        group_name = finding.component_name if finding.component_name else 'None'
+        group_name = finding.component_name
     elif finding_group_by_option == 'component_name+component_version':
-        group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
-        (finding.component_version if finding.component_version else 'None'))
+        if finding.component_name or finding.component_version:
+            group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
+                (finding.component_version if finding.component_version else 'None'))
     elif finding_group_by_option == 'file_path':
-        group_name = 'Filepath %s' % (finding.file_path if finding.file_path else 'None')
+        if finding.file_path:
+            group_name = 'Filepath %s' % (finding.file_path)
     else:
         raise ValueError("Invalid group_by option %s" % finding_group_by_option)
 
-    return 'Findings in: %s' % group_name
+    if group_name:
+        return 'Findings in: %s' % group_name
+
+    return group_name
 
 
 def group_findings_by(finds, finding_group_by_option):
@@ -231,6 +238,10 @@ def group_findings_by(finds, finding_group_by_option):
             continue
 
         group_name = get_group_by_group_name(find, finding_group_by_option)
+        if group_name is None:
+            skipped += 1
+            continue
+
         finding_group = Finding_Group.objects.filter(name=group_name).first()
         if not finding_group:
             finding_group, added, skipped = create_finding_group([find], group_name)
@@ -250,13 +261,14 @@ def group_findings_by(finds, finding_group_by_option):
 def add_finding_to_auto_group(finding, group_by, **kwargs):
     test = finding.test
     name = get_group_by_group_name(finding, group_by)
-    creator = get_current_user()
-    if not creator:
-        creator = kwargs.get('async_user', None)
-    finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)
-    if created:
-        logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)
-    finding_group.findings.add(finding)
+    if name is not None:
+        creator = get_current_user()
+        if not creator:
+            creator = kwargs.get('async_user', None)
+        finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)
+        if created:
+            logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)
+        finding_group.findings.add(finding)
 
 
 @dojo_model_to_id
