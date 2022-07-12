@@ -19,6 +19,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 
@@ -99,7 +100,7 @@ def view_test(request, tid):
             process_notifications(request, new_note, url, title)
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Note added successfully.',
+                                 _('Note added successfully.'),
                                  extra_tags='alert-success')
     else:
         if note_type_activation:
@@ -121,7 +122,7 @@ def view_test(request, tid):
     paged_stub_findings = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in get_choices_sorted())
 
-    product_tab = Product_Tab(prod, title="Test", tab="engagements")
+    product_tab = Product_Tab(prod, title=_("Test"), tab="engagements")
     product_tab.setEngagement(test.engagement)
     jira_project = jira_helper.get_jira_project(test)
 
@@ -149,7 +150,7 @@ def view_test(request, tid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue. Until fixed, the Google Sheets Sync feature cannot be used.",
+                _("There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue. Until fixed, the Google Sheets Sync feature cannot be used."),
                 extra_tags="alert-danger",
             )
             google_sheets_enabled = False
@@ -157,7 +158,7 @@ def view_test(request, tid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Unable to reach the Google Sheet API.",
+                _("Unable to reach the Google Sheet API."),
                 extra_tags="alert-danger",
             )
         else:
@@ -246,7 +247,7 @@ def edit_test(request, tid):
             new_test = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Test saved.',
+                                 _('Test saved.'),
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_engagement', args=(test.engagement.id,)))
 
@@ -254,7 +255,7 @@ def edit_test(request, tid):
     form.initial['target_end'] = test.target_end.date()
     form.initial['description'] = test.description
 
-    product_tab = Product_Tab(test.engagement.product, title="Edit Test", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title=_("Edit Test"), tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/edit_test.html',
                   {'test': test,
@@ -277,18 +278,18 @@ def delete_test(request, tid):
                 if get_setting("ASYNC_OBJECT_DELETE"):
                     async_del = async_delete()
                     async_del.delete(test)
-                    message = 'Test and relationships will be removed in the background.'
+                    message = _('Test and relationships will be removed in the background.')
                 else:
-                    message = 'Test and relationships removed.'
+                    message = _('Test and relationships removed.')
                     test.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      message,
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                    title='Deletion of %s' % test.title,
+                                    title=_('Deletion of %(title)s') % {"title": test.title},
                                     product=product,
-                                    description='The test "%s" was deleted by %s' % (test.title, request.user),
+                                    description=_('The test "%(title)s" was deleted by %(user)s') % {"title": test.title, "user": request.user},
                                     url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id, ))),
                                     recipients=[test.engagement.lead],
                                     icon="exclamation-triangle")
@@ -301,7 +302,7 @@ def delete_test(request, tid):
         collector.collect([test])
         rels = collector.nested()
 
-    product_tab = Product_Tab(test.engagement.product, title="Delete Test", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title=_("Delete Test"), tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/delete_test.html',
                   {'test': test,
@@ -376,7 +377,7 @@ def test_calendar(request):
 
     tests = tests.prefetch_related('test_type', 'lead', 'engagement__product')
 
-    add_breadcrumb(title="Test Calendar", top_level=True, request=request)
+    add_breadcrumb(title=_("Test Calendar"), top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
         'caltype': 'tests',
         'leads': request.GET.getlist('lead', ''),
@@ -392,10 +393,15 @@ def test_ics(request, tid):
     uid = "dojo_test_%d_%d_%d" % (test.id, test.engagement.id, test.engagement.product.id)
     cal = get_cal_event(start_date,
                         end_date,
-                        "Test: %s (%s)" % (test.test_type.name, test.engagement.product.name),
-                        "Set aside for test %s, on product %s.  Additional detail can be found at %s" % (
-                            test.test_type.name, test.engagement.product.name,
-                            request.build_absolute_uri((reverse("view_test", args=(test.id,))))),
+                        _("Test: %(test_type_name)s (%(product_name)s)") % {
+                            'test_type_name': test.test_type.name,
+                            'product_name': test.engagement.product.name
+                        },
+                        _("Set aside for test %(test_type_name)s, on product %(product_name)s. Additional detail can be found at %(detail_url)s") % {
+                            'test_type_name': test.test_type.name,
+                            'product_name': test.engagement.product.name,
+                            'detail_url': request.build_absolute_uri((reverse("view_test", args=(test.id,))))
+                        },
                         uid)
     output = cal.serialize()
     response = HttpResponse(content=output)
@@ -418,9 +424,9 @@ def add_findings(request, tid):
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
-                error_inactive = ValidationError('Can not set a finding as inactive without adding all mandatory notes',
+                error_inactive = ValidationError(_('Can not set a finding as inactive without adding all mandatory notes'),
                                         code='inactive_without_mandatory_notes')
-                error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
+                error_false_p = ValidationError(_('Can not set a finding as false positive without adding all mandatory notes'),
                                         code='false_p_without_mandatory_notes')
                 if form['active'].value() is False:
                     form.add_error('active', error_inactive)
@@ -428,7 +434,7 @@ def add_findings(request, tid):
                     form.add_error('false_p', error_false_p)
                 messages.add_message(request,
                                      messages.ERROR,
-                                     'Can not set a finding as inactive or false positive without adding all mandatory notes',
+                                     _('Can not set a finding as inactive or false positive without adding all mandatory notes'),
                                      extra_tags='alert-danger')
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
@@ -486,9 +492,11 @@ def add_findings(request, tid):
 
             new_finding.save(false_history=True, push_to_jira=push_to_jira)
             create_notification(event='other',
-                                title='Addition of %s' % new_finding.title,
+                                title=_('Addition of %(title)s') % {'title': new_finding.title},
                                 finding=new_finding,
-                                description='Finding "%s" was added by %s' % (new_finding.title, request.user),
+                                description=_('Finding "%(title)s" was added by %(user)s') % {
+                                    'title': new_finding.title, 'user': request.user
+                                },
                                 url=request.build_absolute_uri(reverse('view_finding', args=(new_finding.id,))),
                                 icon="exclamation-triangle")
 
@@ -507,7 +515,7 @@ def add_findings(request, tid):
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
         else:
             form_error = True
-            add_error_message_to_response('The form has errors, please correct them below.')
+            add_error_message_to_response(_('The form has errors, please correct them below.'))
             add_field_errors_to_response(jform)
             add_field_errors_to_response(form)
 
@@ -515,7 +523,7 @@ def add_findings(request, tid):
         if use_jira:
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
-    product_tab = Product_Tab(test.engagement.product, title="Add Finding", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title=_("Add Finding"), tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
@@ -546,9 +554,9 @@ def add_temp_finding(request, tid, fid):
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
-                error_inactive = ValidationError('Can not set a finding as inactive without adding all mandatory notes',
+                error_inactive = ValidationError(_('Can not set a finding as inactive without adding all mandatory notes'),
                                         code='not_active_or_false_p_true')
-                error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
+                error_false_p = ValidationError(_('Can not set a finding as false positive without adding all mandatory notes'),
                                         code='not_active_or_false_p_true')
                 if form['active'].value() is False:
                     form.add_error('active', error_inactive)
@@ -556,7 +564,7 @@ def add_temp_finding(request, tid, fid):
                     form.add_error('false_p', error_false_p)
                 messages.add_message(request,
                                      messages.ERROR,
-                                     'Can not set a finding as inactive or false positive without adding all mandatory notes',
+                                     _('Can not set a finding as inactive or false positive without adding all mandatory notes'),
                                      extra_tags='alert-danger')
         if form.is_valid():
             finding.last_used = timezone.now()
@@ -585,14 +593,14 @@ def add_temp_finding(request, tid, fid):
 
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Finding from template added successfully.',
+                                 _('Finding from template added successfully.'),
                                  extra_tags='alert-success')
 
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
         else:
             messages.add_message(request,
                                  messages.ERROR,
-                                 'The form has errors, please correct them below.',
+                                 _('The form has errors, please correct them below.'),
                                  extra_tags='alert-danger')
 
     else:
@@ -620,7 +628,7 @@ def add_temp_finding(request, tid, fid):
     # logger.debug('jform errors: %s', jform.errors)
     # logger.debug('jform errors: %s', vars(jform))
 
-    product_tab = Product_Tab(test.engagement.product, title="Add Finding", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title=_("Add Finding"), tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
@@ -643,7 +651,7 @@ def search(request, tid):
 
     title_words = get_words_for_field(Finding_Template, 'title')
 
-    add_breadcrumb(parent=test, title="Add From Template", top_level=False, request=request)
+    add_breadcrumb(parent=test, title=_("Add From Template"), top_level=False, request=request)
     return render(request, 'dojo/templates.html',
                   {'templates': paged_templates,
                    'filtered': templates,
@@ -655,9 +663,9 @@ def search(request, tid):
 
 @user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid')
 def re_import_scan_results(request, tid):
-    additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
+    additional_message = _("When re-uploading a scan, any findings not found in original scan will be updated as " \
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
-                         "is highly recommended."
+                         "is highly recommended.")
     test = get_object_or_404(Test, id=tid)
     # by default we keep a trace of the scan_type used to create the test
     # if it's not here, we use the "name" of the test type
@@ -707,7 +715,7 @@ def re_import_scan_results(request, tid):
             if scan and is_scan_file_too_large(scan):
                 messages.add_message(request,
                                      messages.ERROR,
-                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                                     _("Report file is too large. Maximum supported size is %(size)d MB") % {'size': settings.SCAN_FILE_MAX_SIZE},
                                      extra_tags='alert-danger')
                 return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
 
@@ -716,7 +724,7 @@ def re_import_scan_results(request, tid):
             finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = 0, 0, 0, 0, 0
             reimporter = ReImporter()
             try:
-                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, _ = \
+                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, test_import = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
                                                 tags=None, minimum_severity=minimum_severity,
                                                 endpoints_to_add=endpoints_to_add, scan_date=scan_date,
@@ -738,7 +746,7 @@ def re_import_scan_results(request, tid):
 
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
 
-    product_tab = Product_Tab(engagement.product, title="Re-upload a %s" % scan_type, tab="engagements")
+    product_tab = Product_Tab(engagement.product, title=_("Re-upload a %(scan_type)s") % {"scan_type": scan_type}, tab="engagements")
     product_tab.setEngagement(engagement)
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     form.initial['api_scan_configuration'] = test.api_scan_configuration
