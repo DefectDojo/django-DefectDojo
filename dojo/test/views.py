@@ -663,9 +663,9 @@ def search(request, tid):
 
 @user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid')
 def re_import_scan_results(request, tid):
-    additional_message = _("When re-uploading a scan, any findings not found in original scan will be updated as " \
-                         "mitigated.  The process attempts to identify the differences, however manual verification " \
-                         "is highly recommended.")
+    additional_message = _("When re-uploading a scan, any findings not found in original scan will be updated as "
+                           "mitigated.  The process attempts to identify the differences, however manual verification "
+                           "is highly recommended.")
     test = get_object_or_404(Test, id=tid)
     # by default we keep a trace of the scan_type used to create the test
     # if it's not here, we use the "name" of the test type
