@@ -249,7 +249,7 @@ def express_new_jira(request):
                 issue_id = jform.cleaned_data.get('issue_key')
                 key_url = jira_server.strip('/') + '/rest/api/latest/issue/' + issue_id + '/transitions?expand=transitions.fields'
                 response = jira._session.get(key_url).json()
-                logger.debug('Retrieved JIRA issue succesfully')
+                logger.debug('Retrieved JIRA issue successfully')
                 open_key = close_key = None
                 for node in response['transitions']:
                     if node['to']['statusCategory']['name'] == 'To Do':
