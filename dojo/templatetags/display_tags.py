@@ -261,7 +261,7 @@ def finding_sla(finding):
         if find_sla and find_sla < 0:
             status = "orange"
             find_sla = abs(find_sla)
-            status_text = 'Out of SLA: Remediatied ' + str(
+            status_text = 'Out of SLA: Remediated ' + str(
                 find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
     else:
         status = "green"
