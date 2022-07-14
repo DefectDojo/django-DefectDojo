@@ -4,7 +4,7 @@ from auditlog.models import LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, FileResponse
 from django.conf import settings
 from django.urls import reverse
 from django.shortcuts import render, get_object_or_404
@@ -172,3 +172,24 @@ def manage_files(request, oid, obj_type):
             'obj': obj,
             'obj_type': obj_type,
         })
+
+
+def access_file(request, fid, oid, obj_type, url=False):
+    if obj_type == 'Engagement':
+        obj = get_object_or_404(Engagement, pk=oid)
+        user_has_permission_or_403(request.user, obj, Permissions.Engagement_Edit)
+    elif obj_type == 'Test':
+        obj = get_object_or_404(Test, pk=oid)
+        user_has_permission_or_403(request.user, obj, Permissions.Test_Edit)
+    elif obj_type == 'Finding':
+        obj = get_object_or_404(Finding, pk=oid)
+        user_has_permission_or_403(request.user, obj, Permissions.Finding_Edit)
+    else:
+        raise Http404()
+    # If reaching this far, user must have permission to get file
+    file = get_object_or_404(FileUpload, pk=fid)
+    redirect_url = '{media_root}/{file_name}'.format(
+        media_root=settings.MEDIA_ROOT,
+        file_name=file.file.url.lstrip(settings.MEDIA_URL))
+
+    return FileResponse(open(redirect_url))
