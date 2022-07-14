@@ -46,7 +46,9 @@ class HorusecParser(object):
         test.findings = [self._get_finding(node, report_date) for node in data.get("analysisVulnerabilities")]
         return [test]
 
-    def _get_finding(self, data, date):
+    def _get_finding(self, data, date):        
+        if data["vulnerabilities"]["line"] is None or data["vulnerabilities"]["line"] == "":
+            data["vulnerabilities"]["line"] = "0"
 
         description = "\n".join(
             [
@@ -63,13 +65,7 @@ class HorusecParser(object):
             severity=data["vulnerabilities"]["severity"].title(),
             description=description,
             file_path=data["vulnerabilities"]["file"],
-            line=self._vulnerability_parser_line(data["vulnerabilities"]["line"]),
+            line=int(data["vulnerabilities"]["line"]),
             scanner_confidence=self.CONDIFDENCE[data["vulnerabilities"]["confidence"]],
         )
         return finding
-
-    def _vulnerability_parser_line(value):
-        try:
-            return int(value)
-        except:
-            return 0
