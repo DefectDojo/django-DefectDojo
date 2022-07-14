@@ -666,7 +666,8 @@ class BaseManageFileFormSet(forms.BaseModelFormSet):
             return
         for form in self.forms:
             print(dir(form))
-            if file := form.cleaned_data.get('file', None):
+            file = form.cleaned_data.get('file', None)
+            if file:
                 ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
                 valid_extensions = settings.FILE_UPLOAD_TYPES
                 if ext.lower() not in valid_extensions:
