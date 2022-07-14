@@ -21,7 +21,7 @@ class PWNSASTParser(object):
     def get_findings(self, filename, test):
 
         results = json.load(filename)
-        
+
         if results is not None:
             report_name = results.get("report_name")
             data_arr = results.get("data")
