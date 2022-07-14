@@ -3,7 +3,7 @@
   "data":[
     {
       "timestamp": "2022-07-08 09:11:52.913858476 -0600",
-      "security_requirements": {
+      "security_references": {
         "sast_module": "PWN::SAST::Eval",
         "section": "MALICIOUS CODE PROTECTION",
         "nist_800_53_uri": "https://csrc.nist.gov/Projects/risk-management/sp800-53-controls/release-search#/control/?version=5.1&number=SI-3",
