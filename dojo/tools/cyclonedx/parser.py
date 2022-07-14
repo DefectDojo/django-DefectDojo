@@ -29,7 +29,7 @@ class CycloneDXParser(object):
         root = nscan.getroot()
         namespace = self.get_namespace(root)
         if not namespace.startswith("{http://cyclonedx.org/schema/bom/"):
-            raise ValueError(f"This doesn't seem to be a valid CyclonDX BOM XML file. Namespace={namespace}")
+            raise ValueError(f"This doesn't seem to be a valid CycloneDX BOM XML file. Namespace={namespace}")
         ns = {
             "b": namespace.replace("{", "").replace("}", ""),  # we accept whatever the version
             "v": "http://cyclonedx.org/schema/ext/vulnerability/1.0",
@@ -80,9 +80,9 @@ class CycloneDXParser(object):
         else:
             dupes[dupe_key] = finding
 
-    def get_cwes(self, node, namespaces):
+    def get_cwes(self, node, prefix, namespaces):
         cwes = []
-        for cwe in node.findall("v:cwes/v:cwe", namespaces):
+        for cwe in node.findall(prefix + ":cwes/" + prefix + ":cwe", namespaces):
             if cwe.text.isdigit():
                 cwes.append(int(cwe.text))
         return cwes
@@ -157,7 +157,7 @@ class CycloneDXParser(object):
                     finding.cvssv3 = cvssv3.clean_vector()
 
         # if there is some CWE
-        cwes = self.get_cwes(vulnerability, ns)
+        cwes = self.get_cwes(vulnerability, "v", ns)
         if len(cwes) > 1:
             # FIXME support more than one CWE
             LOGGER.debug(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
@@ -247,8 +247,10 @@ class CycloneDXParser(object):
                         finding.cvssv3 = cvssv3.clean_vector()
                         finding.severity = cvssv3.severities()[0]
 
-            # if there is some CWE
-            cwes = self.get_cwes(vulnerability, ns)
+            # if there is some CWE. Check both for old namespace and for 1.4
+            cwes = self.get_cwes(vulnerability, "v", ns)
+            if not cwes:
+                cwes = self.get_cwes(vulnerability, "b", ns)
             if len(cwes) > 1:
                 # FIXME support more than one CWE
                 LOGGER.debug(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
@@ -348,6 +350,14 @@ class CycloneDXParser(object):
                         vulnerability_ids.append(vulnerability_id)
                 if vulnerability_ids:
                     finding.unsaved_vulnerability_ids = vulnerability_ids
+
+                # if there is some CWE
+                cwes = vulnerability.get('cwes')
+                if cwes and len(cwes) > 1:
+                    # FIXME support more than one CWE
+                    LOGGER.debug(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
+                if cwes and len(cwes) > 0:
+                    finding.cwe = cwes[0]
 
                 findings.append(finding)
         return findings

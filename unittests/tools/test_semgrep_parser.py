@@ -19,7 +19,7 @@ class TestSemgrepParser(DojoTestCase):
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Medium", finding.severity)
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02194.java", finding.file_path)
         self.assertEqual(64, finding.line)
         self.assertEqual(696, finding.cwe)
@@ -35,7 +35,7 @@ class TestSemgrepParser(DojoTestCase):
         testfile.close()
         self.assertEqual(3, len(findings))
         finding = findings[0]
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Medium", finding.severity)
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02194.java", finding.file_path)
         self.assertEqual(64, finding.line)
         self.assertEqual(696, finding.cwe)
@@ -56,7 +56,7 @@ class TestSemgrepParser(DojoTestCase):
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Medium", finding.severity)
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01150.java", finding.file_path)
         self.assertEqual(66, finding.line)
         self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
@@ -77,12 +77,12 @@ class TestSemgrepParser(DojoTestCase):
         self.assertIsNone(finding.mitigation)
         self.assertEqual("python.lang.correctness.tempfile.flush.tempfile-without-flush", finding.vuln_id_from_tool)
         finding = findings[2]
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Medium", finding.severity)
         self.assertEqual("utils.py", finding.file_path)
         self.assertEqual(503, finding.line)
         self.assertEqual("python.lang.maintainability.useless-ifelse.useless-if-conditional", finding.vuln_id_from_tool)
         finding = findings[4]
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Medium", finding.severity)
         self.assertEqual("tools/sslyze/parser_xml.py", finding.file_path)
         self.assertEqual(124, finding.line)
         self.assertEqual(327, finding.cwe)

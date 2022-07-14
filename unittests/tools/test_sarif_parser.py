@@ -35,7 +35,7 @@ class TestSarifParser(DojoTestCase):
         item = findings[0]
         self.assertEqual("collections/list.h", item.file_path)
         self.assertEqual(15, item.line)
-        self.assertEqual("Critical", item.severity)
+        self.assertEqual("High", item.severity)
         description = """**Result message:** Variable "ptr" was used without being initialized. It was declared [here](0).
 **Snippet:**
 ```add_core(ptr, offset, val);
@@ -136,7 +136,7 @@ class TestSarifParser(DojoTestCase):
             "CVE-2019-11358 - jQuery before 3.4.0, as used in Drupal, Backdrop CMS, and other products, mishandles jQuery.extend(true, {}, ...) because of [...]",
             item.title,
         )
-        self.assertEqual("Critical", item.severity)
+        self.assertEqual("High", item.severity)
         self.assertEqual(1, len(item.unsaved_vulnerability_ids))
         self.assertEqual("CVE-2019-11358", item.unsaved_vulnerability_ids[0])
         for finding in findings:
@@ -192,7 +192,7 @@ class TestSarifParser(DojoTestCase):
             "XML injection with user data from `filename in parser_helper.py:167` is used for parsing XML at `parser_helper.py:23`.",
             item.title,
         )
-        self.assertEqual("Critical", item.severity)
+        self.assertEqual("High", item.severity)
         self.assertIsNone(item.unsaved_vulnerability_ids)
         for finding in findings:
             self.common_checks(finding)
@@ -235,7 +235,7 @@ class TestSarifParser(DojoTestCase):
         with self.subTest(i=0):
             finding = findings[0]
             self.assertEqual("CIS-DI-0010", finding.vuln_id_from_tool)
-            self.assertEqual("Critical", finding.severity)
+            self.assertEqual("High", finding.severity)
             description = """**Result message:** Suspicious ENV key found : DD_ADMIN_PASSWORD, Suspicious ENV key found : DD_CELERY_BROKER_PASSWORD, Suspicious ENV key found : DD_DATABASE_PASSWORD
 **Rule short description:** Do not store credential in ENVIRONMENT vars/files"""
             self.assertEqual(description, finding.description)
@@ -338,7 +338,7 @@ class TestSarifParser(DojoTestCase):
                 "random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).",
                 finding.title,
             )
-            self.assertEqual("Critical", finding.severity)
+            self.assertEqual("High", finding.severity)
             description = """**Result message:** random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).
 **Snippet:**
 ```      is.setstate(std::ios::failbit);```
@@ -374,7 +374,7 @@ class TestSarifParser(DojoTestCase):
                 "buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).",
                 finding.title,
             )
-            self.assertEqual("Critical", finding.severity)
+            self.assertEqual("High", finding.severity)
             description = """**Result message:** buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).
 **Snippet:**
 ```      if (sscanf(argv[i], "%[^=]=%s", name, val) == 2) {```
@@ -401,7 +401,7 @@ class TestSarifParser(DojoTestCase):
                 "random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).",
                 finding.title,
             )
-            self.assertEqual("Critical", finding.severity)
+            self.assertEqual("High", finding.severity)
             description = """**Result message:** random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).
 **Snippet:**
 ```      is.setstate(std::ios::failbit);```
@@ -434,7 +434,7 @@ class TestSarifParser(DojoTestCase):
         with self.subTest(i=52):
             finding = findings[52]
             self.assertEqual("buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).", finding.title)
-            self.assertEqual("Critical", finding.severity)
+            self.assertEqual("High", finding.severity)
             description = """**Result message:** buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).
 **Snippet:**
 ```      if (sscanf(argv[i], "%[^=]=%s", name, val) == 2) {```
@@ -470,7 +470,7 @@ class TestSarifParser(DojoTestCase):
         item = findings[7]
         self.assertEqual("good/mod_user.py", item.file_path)
         self.assertEqual(33, item.line)
-        self.assertEqual("Critical", item.severity)
+        self.assertEqual("High", item.severity)
         description = """**Result message:** Keyword argument 'request' is not a supported parameter name of [function create](1).
 **Snippet:**
 ```
@@ -485,3 +485,17 @@ class TestSarifParser(DojoTestCase):
         self.assertEqual(description, item.description)
         for finding in findings:
             self.common_checks(finding)
+
+    def test_severity_cvss_from_grype(self):
+        testfile = open(path.join(path.dirname(__file__), "../scans/sarif/cxf-3.4.6.sarif"))
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(22, len(findings))
+        # finding 0
+        item = findings[0]
+        self.assertEqual("Low", item.severity)
+        self.assertEqual(2.1, item.cvssv3_score)
+        # finding 6
+        item = findings[6]
+        self.assertEqual("High", item.severity)
+        self.assertEqual(7.8, item.cvssv3_score)
