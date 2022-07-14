@@ -188,7 +188,7 @@ class UserHasImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(request.data)
+        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(request.data)
         product_type = get_target_product_type_if_exists(product_type_name)
         product = get_target_product_if_exists(product_name, product_type_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
@@ -286,7 +286,7 @@ class UserHasReimportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(request.data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(request.data)
 
         product_type = get_target_product_type_if_exists(product_type_name)
         product = get_target_product_if_exists(product_name, product_type_name)

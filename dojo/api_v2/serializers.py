@@ -75,7 +75,9 @@ def get_import_meta_data_from_dict(data):
 
     auto_create_context = data.get('auto_create_context', None)
 
-    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context
+    deduplication_on_engagement = data.get('deduplication_on_engagement', False)
+
+    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement
 
 
 def get_product_id_from_dict(data):
@@ -1477,7 +1479,7 @@ class ImportScanSerializer(serializers.Serializer):
         queryset=Engagement.objects.all(), required=False)
     test_title = serializers.CharField(required=False)
     auto_create_context = serializers.BooleanField(required=False)
-
+    deduplication_on_engagement = serializers.BooleanField(required=False)
     lead = serializers.PrimaryKeyRelatedField(
         allow_null=True,
         default=None,
@@ -1537,8 +1539,8 @@ class ImportScanSerializer(serializers.Serializer):
 
         group_by = data.get('group_by', None)
 
-        _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(data)
-        engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context)
+        _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(data)
+        engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement)
 
         # have to make the scan_date_time timezone aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
         scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
@@ -1615,6 +1617,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         queryset=Test.objects.all())
     test_title = serializers.CharField(required=False)
     auto_create_context = serializers.BooleanField(required=False)
+    deduplication_on_engagement = serializers.BooleanField(required=False)
 
     push_to_jira = serializers.BooleanField(default=False)
     # Close the old findings if the parameter is not provided. This is to
@@ -1669,13 +1672,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         tags = data.get('tags', None)
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
-
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
         group_by = data.get('group_by', None)
 
-        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(data)
         # we passed validation, so the test is present
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
@@ -1704,7 +1706,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             elif auto_create_context:
                 # perform Import to create test
                 logger.debug('reimport for non-existing test, using import to create new test')
-                engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context)
+                engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement)
                 importer = Importer()
                 test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, lead, environment,
                                                                                                 active=active, verified=verified, tags=tags,
