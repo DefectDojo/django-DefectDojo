@@ -35,7 +35,7 @@
     "jszip": "^3.10.0",
     "justgage": "^1.5.1",
     "metismenu": "~3.0.7",
-    "moment": "^2.29.3",
+    "moment": "^2.29.4",
     "morris.js": "morrisjs/morris.js",
     "pdfmake": "^0.2.5",
     "startbootstrap-sb-admin-2": "1.0.7"
