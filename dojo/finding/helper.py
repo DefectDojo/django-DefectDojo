@@ -562,15 +562,14 @@ def save_vulnerability_ids(finding, vulnerability_ids):
     # Remove duplicates
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
-    previous_vulnerability_ids = set(Vulnerability_Id.objects.filter(finding=finding))
-    for vulnerability_id in vulnerability_ids:
-        obj, created = Vulnerability_Id.objects.get_or_create(
-            finding=finding, vulnerability_id=vulnerability_id)
-        if not created:
-            previous_vulnerability_ids.remove(obj)
-    for vulnerability_id in previous_vulnerability_ids:
-        vulnerability_id.delete()
+    # Remove old vulnerability ids
+    Vulnerability_Id.objects.filter(finding=finding).delete()
 
+    # Save new vulnerability ids
+    for vulnerability_id in vulnerability_ids:
+        Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id).save()
+
+    # Set CVE
     if vulnerability_ids:
         finding.cve = vulnerability_ids[0]
     else:
@@ -581,15 +580,14 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
     # Remove duplicates
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
-    previous_vulnerability_ids = set(Vulnerability_Id_Template.objects.filter(finding_template=finding_template))
-    for vulnerability_id in vulnerability_ids:
-        obj, created = Vulnerability_Id_Template.objects.get_or_create(
-            finding_template=finding_template, vulnerability_id=vulnerability_id)
-        if not created:
-            previous_vulnerability_ids.remove(obj)
-    for vulnerability_id in previous_vulnerability_ids:
-        vulnerability_id.delete()
+    # Remove old vulnerability ids
+    Vulnerability_Id_Template.objects.filter(finding_template=finding_template).delete()
 
+    # Save new vulnerability ids
+    for vulnerability_id in vulnerability_ids:
+        Vulnerability_Id_Template(finding_template=finding_template, vulnerability_id=vulnerability_id).save()
+
+    # Set CVE
     if vulnerability_ids:
         finding_template.cve = vulnerability_ids[0]
     else:
