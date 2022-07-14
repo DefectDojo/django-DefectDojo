@@ -28,75 +28,6 @@ class PWNSASTParser(object):
 
             findings = {}
 
-<<<<<<< HEAD
-        for data_hash in data_arr:
-            timestamp = data_hash["timestamp"]
-            security_requirements = data_hash["security_requirements"]
-            sast_module = security_requirements["sast_module"]
-            section = security_requirements["section"]
-            nist_800_53_uri = security_requirements["nist_800_53_uri"]
-            cwe_id = security_requirements["cwe_id"]
-            cwe_uri = security_requirements["cwe_uri"]
-            filename_hash = data_hash["filename"]
-            git_repo_root_uri = filename_hash["git_repo_root_uri"]
-            offending_file = filename_hash["entry"]
-            line_no_and_contents = data_hash["line_no_and_contents"]
-            test_case_filter = data_hash["test_case_filter"]
-            steps_to_reproduce = "\n".join([
-                "Install pwn_sast Driver via: https://github.com/0dayinc/pwn#installation",
-                "Execute the pwn_sast Driver via:",
-                f"```pwn_sast --dir-path . --uri-source-root {git_repo_root_uri} -s```"
-            ])
-
-            for line in line_no_and_contents:
-                offending_uri = f"{git_repo_root_uri}/{offending_file}"
-                line_no = line["line_no"]
-                contents = line["contents"]
-                author = line["author"]
-                severity = 'Info'
-                description = "\n".join([
-                    f"SAST Module: {sast_module}",
-                    f"Offending URI: {offending_uri}",
-                    f"Line: {line_no}",
-                    f"Committed By: {author}",
-                    "Line Contents:",
-                    f"```{contents}```"
-                ])
-
-                impact = "\n".join([
-                    f"Security Control Impacted: {section}",
-                    f"NIST 800-53 Security Control Details: {nist_800_53_uri}",
-                    f"CWE Details: {cwe_uri}"
-                ])
-
-                mitigation = "\n".join([
-                    f"NIST 800-53 Security Control Details / Mitigation Strategy: {nist_800_53_uri}",
-                ])
-
-                unique_finding_key = hashlib.sha256(
-                    (offending_uri + contents).encode("utf-8")
-                ).hexdigest()
-
-                if unique_finding_key in findings:
-                    finding = findings[unique_finding_key]
-                    finding.nb_occurences += 1
-                else:
-                    finding = Finding(
-                        title=f"Source Code Anti-Pattern Discovered in {offending_uri} Line: {line_no}",
-                        test=test,
-                        severity=severity,
-                        description=description,
-                        impact=impact,
-                        mitigation="N/A",
-                        static_finding=True,
-                        dynamic_finding=False,
-                        cwe=cwe_id,
-                        nb_occurences=1,
-                        steps_to_reproduce=steps_to_reproduce,
-                        file_path=offending_file
-                    )
-                    findings[unique_finding_key] = finding
-=======
             for data_hash in data_arr:
                 timestamp = data_hash.get("timestamp")
 
@@ -113,7 +44,6 @@ class PWNSASTParser(object):
                   nist_800_53_uri = None
                   cwe_id = None
                   cwe_uri = None
->>>>>>> 6fbff9448 (Request review changes)
 
                 filename_hash = data_hash.get("filename")
                 if filename_hash is not None:
