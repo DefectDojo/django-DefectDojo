@@ -121,12 +121,7 @@ class CycloneDXParser(object):
             component_name = bom["name"]
             component_version = bom["version"]
 
-        if severity is None:
-            severity = "Medium"
-        if "Unknown" == severity:
-            severity = "Info"
-        if "None" == severity:
-            severity = "Info"
+        severity = self.fix_severity(severity)
         references = ""
         for adv in vulnerability.findall("v:advisories/v:advisory", namespaces=ns):
             references += f"{adv.text}\n"
@@ -152,9 +147,14 @@ class CycloneDXParser(object):
         for rating in vulnerability.findall("v:ratings/v:rating", namespaces=ns):
             if "CVSSv3" == rating.findtext("v:method", namespaces=ns):
                 raw_vector = rating.findtext("v:vector", namespaces=ns)
+                severity = rating.findtext("v:severity", namespaces=ns)
                 cvssv3 = self._get_cvssv3(raw_vector)
                 if cvssv3:
                     finding.cvssv3 = cvssv3.clean_vector()
+                    if severity:
+                        finding.severity = self.fix_severity(severity)
+                    else:
+                        finding.severity = cvssv3.severities()[0]
 
         # if there is some CWE
         cwes = self.get_cwes(vulnerability, ns)
@@ -187,10 +187,7 @@ class CycloneDXParser(object):
                 description = f'\n{detail}'
 
         severity = vulnerability.findtext("b:ratings/b:rating/b:severity", namespaces=ns)
-        if severity is None:
-            severity = "Medium"
-        else:
-            severity = self.fix_severity(severity)
+        severity = self.fix_severity(severity)
 
         references = ""
         for advisory in vulnerability.findall("b:advisories/b:advisory", namespaces=ns):
@@ -242,10 +239,14 @@ class CycloneDXParser(object):
             for rating in vulnerability.findall("b:ratings/b:rating", namespaces=ns):
                 if "CVSSv3" == rating.findtext("b:method", namespaces=ns):
                     raw_vector = rating.findtext("b:vector", namespaces=ns)
+                    severity = rating.findtext("b:severity", namespaces=ns)
                     cvssv3 = self._get_cvssv3(raw_vector)
                     if cvssv3:
                         finding.cvssv3 = cvssv3.clean_vector()
-                        finding.severity = cvssv3.severities()[0]
+                        if severity:
+                            finding.severity = self.fix_severity(severity)
+                        else:
+                            finding.severity = cvssv3.severities()[0]
 
             # if there is some CWE
             cwes = self.get_cwes(vulnerability, ns)
@@ -333,9 +334,13 @@ class CycloneDXParser(object):
                     if rating.get("method") == "CVSSv3":
                         raw_vector = rating["vector"]
                         cvssv3 = self._get_cvssv3(raw_vector)
+                        severity = rating["severity"]
                         if cvssv3:
                             finding.cvssv3 = cvssv3.clean_vector()
-                            finding.severity = cvssv3.severities()[0]
+                            if severity:
+                                finding.severity = self.fix_severity(severity)
+                            else:
+                                finding.severity = cvssv3.severities()[0]
 
                 vulnerability_ids = list()
                 # set id as first vulnerability id
@@ -368,6 +373,8 @@ class CycloneDXParser(object):
 
     def fix_severity(self, severity):
         severity = severity.capitalize()
-        if "Unknown" == severity or "None" == severity:
+        if severity is None:
+            severity = "Medium"
+        elif "Unknown" == severity or "None" == severity:
             severity = "Info"
         return severity
