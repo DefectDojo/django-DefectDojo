@@ -46,7 +46,7 @@ class HorusecParser(object):
         test.findings = [self._get_finding(node, report_date) for node in data.get("analysisVulnerabilities")]
         return [test]
 
-    def _get_finding(self, data, date):        
+    def _get_finding(self, data, date):
         if data["vulnerabilities"]["line"] is None or data["vulnerabilities"]["line"] == "":
             data["vulnerabilities"]["line"] = "0"
 
