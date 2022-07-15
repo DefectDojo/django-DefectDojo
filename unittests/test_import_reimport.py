@@ -76,6 +76,7 @@ class ImportReimportMixin(object):
         self.veracode_same_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_same_hash_code_different_unique_id.xml'
         self.veracode_same_unique_id_different_hash_code = self.scans_path + 'veracode/many_findings_same_unique_id_different_hash_code.xml'
         self.veracode_different_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_different_hash_code_different_unique_id.xml'
+        self.veracode_mitigated_findings = self.scans_path + 'veracode/mitigated_finding.xml'
         self.scan_type_veracode = 'Veracode Scan'
 
         self.clair_few_findings = self.scans_path + 'clair/few_vuln.json'
@@ -376,7 +377,7 @@ class ImportReimportMixin(object):
     def test_import_veracode_reimport_veracode_active_verified(self):
         logger.debug('reimporting exact same original veracode_many_findings xml report again')
 
-        import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode, verified=True)
+        import_veracode_many_findings = self.import_scan_with_params(self.veracode_mitigated_findings, scan_type=self.scan_type_veracode, verified=True)
 
         test_id = import_veracode_many_findings['test']
 
@@ -384,7 +385,7 @@ class ImportReimportMixin(object):
 
         # # reimport exact same report
         with assertTestImportModelsCreated(self, reimports=1, untouched=4):
-            reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_many_findings, scan_type=self.scan_type_veracode)
+            reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_mitigated_findings, scan_type=self.scan_type_veracode)
 
         test_id = reimport_veracode_many_findings['test']
         self.assertEqual(test_id, test_id)
