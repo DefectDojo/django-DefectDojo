@@ -110,6 +110,8 @@ class TestParser(DojoTestCase):
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("apt", finding.component_name)
                 self.assertEqual("1.8.2.1", finding.component_version)
+                self.assertFalse(finding.is_mitigated)
+                self.assertTrue(finding.active)
             with self.subTest(i=5):
                 finding = findings[5]
                 self.assertEqual("Info", finding.severity)
@@ -162,6 +164,10 @@ class TestParser(DojoTestCase):
                     finding.mitigation,
                 )
                 self.assertIn(
+                    "An optional explanation of why the application is not affected by the vulnerable component.",
+                    finding.mitigation,
+                )
+                self.assertIn(
                     "GitHub Commit",
                     finding.references,
                 )
@@ -175,6 +181,8 @@ class TestParser(DojoTestCase):
                 self.assertEqual('SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111', vulnerability_ids[0])
                 self.assertEqual('CVE-2018-7489', vulnerability_ids[1])
                 self.assertEqual('CVE-2018-7489', vulnerability_ids[2])
+                self.assertTrue(finding.is_mitigated)
+                self.assertFalse(finding.active)
 
     def test_cyclonedx_1_4_json(self):
         """CycloneDX version 1.4 JSON format"""
@@ -201,6 +209,10 @@ class TestParser(DojoTestCase):
                     finding.mitigation,
                 )
                 self.assertIn(
+                    "An optional explanation of why the application is not affected by the vulnerable component.",
+                    finding.mitigation,
+                )
+                self.assertIn(
                     "GitHub Commit",
                     finding.references,
                 )
@@ -213,6 +225,8 @@ class TestParser(DojoTestCase):
                 self.assertEqual(2, len(vulnerability_ids))
                 self.assertEqual('SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111', vulnerability_ids[0])
                 self.assertEqual('CVE-2018-7489', vulnerability_ids[1])
+                self.assertTrue(finding.is_mitigated)
+                self.assertFalse(finding.active)
 
     def test_cyclonedx_1_4_jake_json(self):
         """CycloneDX version 1.4 JSON format produced by jake 1.4.1"""

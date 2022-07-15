@@ -258,6 +258,23 @@ class CycloneDXParser(object):
             if len(cwes) > 0:
                 finding.cwe = cwes[0]
 
+            # Check for mitigation
+            analysis = vulnerability.findall("b:analysis", namespaces=ns)
+            if analysis and len(analysis) == 1:
+                state = analysis[0].findtext("b:state", namespaces=ns)
+                if state:
+                    if "resolved" == state or "resolved_with_pedigree" == state or "not_affected" == state:
+                        finding.is_mitigated = True
+                        finding.active = False
+                    elif "false_positive" == state:
+                        finding.false_p = True
+                        finding.active = False
+                    if not finding.active:
+                        detail = analysis[0].findtext("b:detail", namespaces=ns)
+                        if detail:
+                            finding.mitigation = \
+                                finding.mitigation + '\n**This vulnerability is mitigated and/or suppressed:** {}\n'.format(detail)
+
             findings.append(finding)
 
         return findings
@@ -363,6 +380,23 @@ class CycloneDXParser(object):
                     LOGGER.debug(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
                 if cwes and len(cwes) > 0:
                     finding.cwe = cwes[0]
+
+                # Check for mitigation
+                analysis = vulnerability.get('analysis')
+                if analysis:
+                    state = analysis.get('state')
+                    if state:
+                        if "resolved" == state or "resolved_with_pedigree" == state or "not_affected" == state:
+                            finding.is_mitigated = True
+                            finding.active = False
+                        elif "false_positive" == state:
+                            finding.false_p = True
+                            finding.active = False
+                        if not finding.active:
+                            detail = analysis.get("detail")
+                            if detail:
+                                finding.mitigation = \
+                                    finding.mitigation + '\n**This vulnerability is mitigated and/or suppressed:** {}\n'.format(detail)
 
                 findings.append(finding)
         return findings
