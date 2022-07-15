@@ -374,8 +374,8 @@ class ImportReimportMixin(object):
     # - reimport, findings stay the same, stay active
     # - active = True, verified = True
     # - existing findings with verified is true should stay verified
-    def test_import_veracode_reimport_veracode_active_verified(self):
-        logger.debug('reimporting exact same original veracode_many_findings xml report again')
+    def test_import_veracode_reimport_veracode_active_verified_mitigated(self):
+        logger.debug('reimporting same original veracode mitigated xml report again to validate no changes on mitigated items')
 
         import_veracode_many_findings = self.import_scan_with_params(self.veracode_mitigated_findings, scan_type=self.scan_type_veracode, verified=True)
 
@@ -383,7 +383,7 @@ class ImportReimportMixin(object):
 
         notes_count_before = self.db_notes_count()
 
-        # # reimport exact same report
+        # reimport exact same report that has 1 mitigated static flaw
         with assertTestImportModelsCreated(self, reimports=1, untouched=1):
             reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_mitigated_findings, scan_type=self.scan_type_veracode)
 
@@ -393,8 +393,8 @@ class ImportReimportMixin(object):
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
-        # # reimported count must match count in sonar report
-        # # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
+        # reimported count must match count in veracode report
+        # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
         findings = self.get_test_findings_api(test_id, verified=True)
         self.assert_finding_count_json(1, findings)
 
@@ -402,8 +402,13 @@ class ImportReimportMixin(object):
         findings = self.get_test_findings_api(test_id, verified=False)
         self.assert_finding_count_json(0, findings)
 
-        # # reimporting the exact same scan shouldn't create any notes
+        # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
+        
+        # reimporting the same mitigated flaws should keep the same number of mitigated flaws, 
+        # since defectdojo is the only one that can override a mitigation coming from the scanner
+        mitigated_findings = self.get_test_findings_api(test_id, is_mitigated=True)
+        self.assert_finding_count_json(1, mitigated_findings)
 
     # import 0 and then reimport 0 again
     # - reimport, findings stay the same, stay active
