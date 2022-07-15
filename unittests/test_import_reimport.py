@@ -368,6 +368,41 @@ class ImportReimportMixin(object):
         self.assertEqual(notes_count_before, self.db_notes_count())
 
         return test_id
+    
+    # import veracode and then reimport veracode again
+    # - reimport, findings stay the same, stay active
+    # - active = True, verified = True
+    # - existing findings with verified is true should stay verified
+    def test_import_veracode_reimport_veracode_active_verified(self):
+        logger.debug('reimporting exact same original veracode_many_findings xml report again')
+
+        import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode, verified=True)
+
+        test_id = import_veracode_many_findings['test']
+
+        notes_count_before = self.db_notes_count()
+
+        # # reimport exact same report
+        with assertTestImportModelsCreated(self, reimports=1, untouched=4):
+            reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_many_findings, scan_type=self.scan_type_veracode)
+
+        test_id = reimport_veracode_many_findings['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # # reimported count must match count in sonar report
+        # # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(4, findings)
+
+        # inversely, we should see no findings with verified=False
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
+
+        # # reimporting the exact same scan shouldn't create any notes
+        self.assertEqual(notes_count_before, self.db_notes_count())
 
     # import 0 and then reimport 0 again
     # - reimport, findings stay the same, stay active
