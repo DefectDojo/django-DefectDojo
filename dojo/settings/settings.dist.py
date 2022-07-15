@@ -232,8 +232,8 @@ env = environ.Env(
     # Feature toggle for new authorization for configurations
     DD_FEATURE_CONFIGURATION_AUTHORIZATION=(bool, True),
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
-    DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.yml', '.png', '.jpeg',
-                                 '.csv', '.html', '.sarif', '.xslx', '.html', '.js', '.nessus', '.zip']),
+    DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
+                                 '.html', '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
 )
 
 
