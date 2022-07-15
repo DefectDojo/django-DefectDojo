@@ -404,8 +404,8 @@ class ImportReimportMixin(object):
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
-        
-        # reimporting the same mitigated flaws should keep the same number of mitigated flaws, 
+
+        # reimporting the same mitigated flaws should keep the same number of mitigated flaws
         # since defectdojo is the only one that can override a mitigation coming from the scanner
         mitigated_findings = self.get_test_findings_api(test_id, is_mitigated=True)
         self.assert_finding_count_json(1, mitigated_findings)
