@@ -7,7 +7,6 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.http import Http404, HttpResponseRedirect, FileResponse
 from django.conf import settings
 from django.urls import reverse
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.views.static import serve
 from django.shortcuts import render, get_object_or_404
