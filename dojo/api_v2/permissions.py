@@ -214,7 +214,7 @@ class UserHasMetaImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, _, _, product_name, _, _ = get_import_meta_data_from_dict(request.data)
+        _, _, _, _, _, product_name, _, _, _ = get_import_meta_data_from_dict(request.data)
         product = get_target_product_if_exists(product_name)
         if not product:
             product_id = get_product_id_from_dict(request.data)

@@ -1803,7 +1803,7 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
         create_tags = data['create_tags']
         create_dojo_meta = data['create_dojo_meta']
 
-        _, _, _, _, _, product_name, _, _ = get_import_meta_data_from_dict(data)
+        _, _, _, _, _, product_name, _, _, _ = get_import_meta_data_from_dict(data)
         product = get_target_product_if_exists(product_name)
         if not product:
             product_id = get_product_id_from_dict(data)
