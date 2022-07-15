@@ -369,7 +369,7 @@ class ImportReimportMixin(object):
         self.assertEqual(notes_count_before, self.db_notes_count())
 
         return test_id
-    
+
     # import veracode and then reimport veracode again
     # - reimport, findings stay the same, stay active
     # - active = True, verified = True
