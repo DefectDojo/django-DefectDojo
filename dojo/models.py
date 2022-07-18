@@ -3050,6 +3050,8 @@ class GITHUB_PKey(models.Model):
         return self.product.name + " | " + self.git_project
 
 
+
+
 class JIRA_Instance(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text=_("Enter a name to give to this configuration"), default='')
     url = models.URLField(max_length=2000, verbose_name=_('JIRA URL'), help_text=_("For more information how to configure Jira, read the DefectDojo documentation."))
@@ -3087,7 +3089,10 @@ class JIRA_Instance(models.Model):
     accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_('JIRA resolution names (comma-separated values) that maps to an Accepted Finding'))
     false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_('JIRA resolution names (comma-separated values) that maps to a False Positive Finding'))
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
-
+    consumer_key = models.CharField(null=True, max_length=200)
+    cert_file = models.FileField(null=True)
+    cert_data = models.CharField (null=True, max_length=2000)
+    use_oauth = models.BooleanField(default=False)
     @property
     def accepted_resolutions(self):
         return [m.strip() for m in (self.accepted_mapping_resolution or '').split(',')]

@@ -14,7 +14,7 @@ from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
 # Local application/library imports
-from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
+from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, JIRAFormOAUTH, ExpressJIRAForm
 from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes
 from dojo.utils import add_breadcrumb, add_error_message_to_response, get_system_setting
 from dojo.notifications.helper import create_notification
@@ -234,7 +234,10 @@ def express_new_jira(request):
             jira_password = jform.cleaned_data.get('password')
 
             try:
-                jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+                jira_instance = JIRA_Instance(username=jira_username,
+                                              password=jira_password,
+                                              url=jira_server,
+                                              use_oauth=False)
             except Exception as e:
                 logger.exception(e)  # already logged in jira_helper
                 messages.add_message(request,
@@ -319,10 +322,11 @@ def new_jira(request):
             jira_password = jform.cleaned_data.get('password')
 
             logger.debug('calling get_jira_connection_raw')
-            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+            #jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
 
             new_j = jform.save(commit=False)
             new_j.url = jira_server
+            jira = jira_helper.get_jira_connection_raw(new_j)
             new_j.save()
             messages.add_message(request,
                                     messages.SUCCESS,
@@ -344,43 +348,207 @@ def new_jira(request):
                   {'jform': jform})
 
 
+@user_is_configuration_authorized('dojo.add_jira_instance', 'superuser')
+def new_jira_oauth(request):
+    if request.method == 'POST':
+        jform = JIRAFormOAUTH(request.POST, request.FILES, instance=JIRA_Instance())
+        logger.debug(jform)
+        if jform.is_valid():
+            logger.debug("form is valid")
+            jira_server = jform.cleaned_data.get('url').rstrip('/')
+            jira_conf_name = jform.cleaned_data.get('configuration_name')
+            jira_access_token = jform.cleaned_data.get('access_token')
+            jira_access_token_secret = jform.cleaned_data.get('access_token_secret')
+            jira_consumer_key = jform.cleaned_data.get('consumer_key')
+            jira_epic_name_id = jform.cleaned_data.get('epic_name_id')
+            jira_open_status_key = jform.cleaned_data.get('open_status_key')
+            jira_close_status_key = jform.cleaned_data.get('close_status_key')
+            with open('/app/dojo/jira_link/cert', 'wb+') as destination:
+                for chunk in request.FILES['cert_file'].chunks():
+                    destination.write(chunk)
+                    logger.error('uploaded cert to ', destination)
+
+            logger.error('calling get_jira_connection_oauth')
+            with open("/app/dojo/jira_link/cert") as f:
+                jira_key_cert = f.read()
+            #            jira = jira_helper.get_jira_connection_oauth(jira_server, jira_access_token, jira_access_token_secret, jira_consumer_key, jira_key_cert)
+            logger.error('everything seems great!')
+            logger.error('trying to save this form')
+            #logger.error(request.FILES['cert'])
+            new_j = jform.save(commit=False)
+
+            jira_instance = JIRA_Instance(username=jira_access_token,
+                                          password=jira_access_token_secret,
+                                          url=jira_server,
+                                          configuration_name=jira_conf_name,
+                                          finding_text='',
+                                          info_mapping_severity=jform.cleaned_data.get('info_mapping_severity'),
+                                          low_mapping_severity=jform.cleaned_data.get('low_mapping_severity'),
+                                          medium_mapping_severity=jform.cleaned_data.get('medium_mapping_severity'),
+                                          high_mapping_severity=jform.cleaned_data.get('high_mapping_severity'),
+                                          critical_mapping_severity=jform.cleaned_data.get('critical_mapping_severity'),
+                                          epic_name_id=jira_epic_name_id,
+                                          open_status_key=jira_open_status_key,
+                                          close_status_key=jira_close_status_key,
+                                          consumer_key=jira_consumer_key,
+                                          cert_data=jira_key_cert,
+                                          use_oauth=True,
+                                          default_issue_type=jform.cleaned_data.get('default_issue_type'))
+
+            jira = jira_helper.get_jira_connection_raw(jira_instance)
+
+            jira_instance.save()
+
+            logger.error('cert_posle_seiva', jira_key_cert)
+            # new_j.url = jira_server
+            # new_j.cert = request.FILES['cert'].name
+            # new_j.configuration_name = jira_conf_name
+            # new_j.username = jira_access_token
+            # new_j.password = jira_access_token_secret
+            # new_j.consumer_key = jira_consumer_key
+            # new_j.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'JIRA Configuration Successfully Created.',
+                                 extra_tags='alert-success')
+            create_notification(event='other',
+                                title='New addition of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
+                                description='JIRA "%s" was added by %s' %
+                                            (jform.cleaned_data.get('configuration_name'), request.user),
+                                url=request.build_absolute_uri(reverse('jira')),
+                                )
+            return HttpResponseRedirect(reverse('jira', ))
+        else:
+            logger.debug("form invalid")
+            logger.error('jform.errors: %s', jform.errors)
+
+
+
+    else:
+        jform = JIRAFormOAUTH()
+        add_breadcrumb(title="New Jira Configuration (OAUTH)", top_level=False, request=request)
+    return render(request, "dojo/oauth_new_jira.html",
+                  {'jform': jform})
+
+
 @user_is_configuration_authorized('dojo.change_jira_instance', 'superuser')
 def edit_jira(request, jid):
     jira = JIRA_Instance.objects.get(pk=jid)
     jira_password_from_db = jira.password
+    logger.error('jira', jira)
     if request.method == 'POST':
-        jform = JIRAForm(request.POST, instance=jira)
-        if jform.is_valid():
-            jira_server = jform.cleaned_data.get('url').rstrip('/')
-            jira_username = jform.cleaned_data.get('username')
+        if jira.consumer_key:
+            logger.error('jira.consumer_key')
+            jform = JIRAFormOAUTH(request.POST, request.FILES, instance=JIRA_Instance())
+            logger.error(jform)
+            if jform.is_valid():
+                logger.error("form is valid")
+                jira_server = jform.cleaned_data.get('url').rstrip('/')
+                jira_conf_name = jform.cleaned_data.get('configuration_name')
+                jira_access_token = jform.cleaned_data.get('access_token')
+                jira_access_token_secret = jform.cleaned_data.get('access_token_secret')
+                jira_consumer_key = jform.cleaned_data.get('consumer_key')
+                jira_epic_name_id = jform.cleaned_data.get('epic_name_id')
+                jira_open_status_key = jform.cleaned_data.get('open_status_key')
+                jira_close_status_key = jform.cleaned_data.get('close_status_key')
+                if request.FILES['cert_file']:
+                    with open('/app/dojo/jira_link/cert', 'wb+') as destination:
+                        for chunk in request.FILES['cert_file'].chunks():
+                            destination.write(chunk)
+                            logger.error('uploaded cert to ', destination)
 
-            if jform.cleaned_data.get('password'):
-                jira_password = jform.cleaned_data.get('password')
+                    with open("/app/dojo/jira_link/cert") as f:
+                        jira_key_cert = f.read()
+                else:
+                    cert_data=jira.cert_data
+                logger.error('calling get_jira_connection_oauth')
+                #            jira = jira_helper.get_jira_connection_oauth(jira_server, jira_access_token, jira_access_token_secret, jira_consumer_key, jira_key_cert)
+                logger.error('everything seems great!')
+                logger.error('trying to save this form')
+                # logger.error(request.FILES['cert'])
+                new_j = jform.save(commit=False)
+
+                jira_instance = JIRA_Instance(username=jira_access_token,
+                                              password=jira_access_token_secret,
+                                              url=jira_server,
+                                              configuration_name=jira_conf_name,
+                                              finding_text='',
+                                              info_mapping_severity=jform.cleaned_data.get('info_mapping_severity'),
+                                              low_mapping_severity=jform.cleaned_data.get('low_mapping_severity'),
+                                              medium_mapping_severity=jform.cleaned_data.get('medium_mapping_severity'),
+                                              high_mapping_severity=jform.cleaned_data.get('high_mapping_severity'),
+                                              critical_mapping_severity=jform.cleaned_data.get(
+                                                  'critical_mapping_severity'),
+                                              epic_name_id=jira_epic_name_id,
+                                              open_status_key=jira_open_status_key,
+                                              close_status_key=jira_close_status_key,
+                                              consumer_key=jira_consumer_key,
+                                              cert_data=jira_key_cert,
+                                              use_oauth=True,
+                                              default_issue_type=jform.cleaned_data.get('default_issue_type'))
+
+                jira = jira_helper.get_jira_connection_raw(jira_instance)
+
+                jira_instance.save()
+
+                logger.error('cert_posle_seiva', jira_key_cert)
+                # new_j.url = jira_server
+                # new_j.cert = request.FILES['cert'].name
+                # new_j.configuration_name = jira_conf_name
+                # new_j.username = jira_access_token
+                # new_j.password = jira_access_token_secret
+                # new_j.consumer_key = jira_consumer_key
+                # new_j.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'JIRA Configuration Successfully edited.',
+                                     extra_tags='alert-success')
+                create_notification(event='other',
+                                    title='New edition of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
+                                    description='JIRA "%s" was edited by %s' %
+                                                (jform.cleaned_data.get('configuration_name'), request.user),
+                                    url=request.build_absolute_uri(reverse('jira')),
+                                    )
+                return HttpResponseRedirect(reverse('jira', ))
             else:
-                # on edit the password is optional
-                jira_password = jira_password_from_db
+                logger.debug("form invalid")
+                logger.error('jform.errors: %s', jform.errors)
 
-            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
 
-            new_j = jform.save(commit=False)
-            new_j.url = jira_server
+
+        else:
+            jform = JIRAForm(request.POST, instance=jira)
+            if jform.is_valid():
+                jira_server = jform.cleaned_data.get('url').rstrip('/')
+                jira_username = jform.cleaned_data.get('username')
+
+                if jform.cleaned_data.get('password'):
+                    jira_password = jform.cleaned_data.get('password')
+                else:
+                    # on edit the password is optional
+                    jira_password = jira_password_from_db
+
+                jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+
+                new_j = jform.save(commit=False)
+                new_j.url = jira_server
             # on edit the password is optional
-            new_j.password = jira_password
-            new_j.save()
-            messages.add_message(request,
+                new_j.password = jira_password
+                new_j.save()
+                messages.add_message(request,
                                     messages.SUCCESS,
                                     'JIRA Configuration Successfully Saved.',
                                     extra_tags='alert-success')
-            create_notification(event='other',
+                create_notification(event='other',
                                 title='Edit of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
                                 description='JIRA "%s" was edited by %s' %
                                             (jform.cleaned_data.get('configuration_name'), request.user),
                                 url=request.build_absolute_uri(reverse('jira')),
                                 )
-            return HttpResponseRedirect(reverse('jira', ))
+                return HttpResponseRedirect(reverse('jira', ))
 
     else:
-        jform = JIRAForm(instance=jira)
+        jform = JIRAFormOAUTH(instance=jira)
         add_breadcrumb(title="Edit JIRA Configuration", top_level=False, request=request)
 
     return render(request,

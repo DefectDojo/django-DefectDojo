@@ -2124,13 +2124,52 @@ class JIRAForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'])
+            jira = jira_helper.get_jira_connection_raw(form_data)
             logger.debug('valid JIRA config!')
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
             message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e)
             self.add_error('username', message)
             self.add_error('password', message)
+
+        return form_data
+
+
+class JIRAFormOAUTH(forms.ModelForm):
+    issue_key = forms.CharField(required=False,
+                                help_text='A valid issue ID is required to gather the necessary information.')
+    access_token = forms.CharField(required=True)
+    access_token_secret = forms.CharField(required=True)
+
+    class Meta:
+        model = JIRA_Instance
+        exclude = ['product', 'finding_text', 'use_oauth', 'username', 'password', 'cert_data']
+
+    def clean(self):
+        import dojo.jira_link.helper as jira_helper
+        form_data = self.cleaned_data
+        if form_data['cert_file']:
+            try:
+                with open('/app/dojo/jira_link/cert', 'wb+') as destination:
+                    for chunk in form_data['cert_file'].chunks():
+                        destination.write(chunk)
+                logger.error('uploaded cert')
+                logger.debug('form data type', type(form_data))
+                with open('/app/dojo/jira_link/cert') as f:
+                    jira_key_cert = f.read()
+
+                auth = JIRA_Instance(use_oauth=True, consumer_key=form_data['consumer_key'],
+                                 username=form_data['access_token'], password=form_data['access_token_secret'],
+                                 cert_data=jira_key_cert, url=form_data['url'])
+                jira = jira_helper.get_jira_connection_raw(auth)
+                logger.debug('valid JIRA config!')
+            except Exception as e:
+                logger.debug('invalid JIRA config! forms 2159')
+            # form only used by admins, so we can show full error message using str(e) which can help debug any problems
+                message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(
+                    e)
+                self.add_error('access_token', message)
+                self.add_error('access_token_secret', message)
 
         return form_data
 
@@ -2144,14 +2183,14 @@ class ExpressJIRAForm(forms.ModelForm):
         exclude = ['product', 'epic_name_id', 'open_status_key',
                     'close_status_key', 'info_mapping_severity',
                     'low_mapping_severity', 'medium_mapping_severity',
-                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
+                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text', 'use_oauth', 'cert', 'consumer_key']
 
     def clean(self):
         import dojo.jira_link.helper as jira_helper
         form_data = self.cleaned_data
 
         try:
-            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'],)
+            jira = jira_helper.get_jira_connection_raw(form_data)
             logger.debug('valid JIRA config!')
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
