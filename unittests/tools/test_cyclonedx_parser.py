@@ -50,6 +50,27 @@ class TestParser(DojoTestCase):
                 self.assertEqual("CVE-2018-7489", finding.vuln_id_from_tool)
                 self.assertEqual("Upgrade\n", finding.mitigation)
 
+    def test_spec1_report_low_first(self):
+        """Test a report from the spec itself"""
+        with open("unittests/scans/cyclonedx/spec1_lowfirst.xml") as file:
+            parser = CycloneDXParser()
+            findings = list(parser.get_findings(file, Test()))
+            for finding in findings:
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+            self.assertEqual(1, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                vulnerability_ids = finding.unsaved_vulnerability_ids
+                self.assertEqual(1, len(vulnerability_ids))
+                self.assertEqual('CVE-2018-7489', vulnerability_ids[0])
+                self.assertEqual("Critical", finding.severity)
+                self.assertIn(finding.cwe, [184, 502])  # there is 2 CWE in the report
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
+                self.assertEqual("jackson-databind", finding.component_name)
+                self.assertEqual("2.9.9", finding.component_version)
+                self.assertEqual("CVE-2018-7489", finding.vuln_id_from_tool)
+                self.assertEqual("Upgrade\n", finding.mitigation)
+
     def test_cyclonedx_bom_report(self):
         with open("unittests/scans/cyclonedx/cyclonedx_bom.xml") as file:
             parser = CycloneDXParser()
