@@ -4,10 +4,9 @@ import re
 from os.path import join
 
 from django.urls import reverse
-from dojo.models import Finding, Notes
+from dojo.models import Finding
 from dojo.notifications.helper import create_notification
 from jsonschema import ValidationError, validate
-from uuid import uuid4
 
 
 class CsafParser(object):
@@ -72,11 +71,21 @@ def csaf_import(dd_test, file, json):
     if hasattr(dd_test, 'engagement'):
         dd_test.engagement.name = engagement_title
 
+        first_entry = True
+        dd_test.engagement.description = ''
         if 'notes' in document:
-            dd_test.engagement.description = description_from_notes(document['notes'])
+            dd_test.engagement.description += description_from_notes(document['notes'])
+            first_entry = False
 
-    if 'publisher' in document:
-        dd_test.notes.add(notes_from_publishers(dd_test, document['publisher']))
+        if 'publisher' in document:
+            if not first_entry:
+                dd_test.engagement.description += separator()
+
+            publishers = document['publisher']
+            publisher = '\n'.join(
+                f'**{field.replace("_", " ").title()}:** {publishers[field]}' for field in publishers
+            )
+            dd_test.engagement.description += publisher
 
     out = []
     for vulnerability in vulnerabilities:
@@ -150,12 +159,5 @@ def description_from_notes(notes):
     return '\n\n'.join(descriptions)
 
 
-def notes_from_publishers(dd_test, publishers):
-    entry = '\n'.join(
-        f'{field.replace("_", " ").title()}: {publishers[field]}' for field in publishers
-    )
-
-    notes = Notes(entry=entry, author=dd_test.lead)
-    notes.save()
-
-    return notes
+def separator():
+    return '\n\n --- \n\n'
