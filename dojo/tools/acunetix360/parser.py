@@ -62,6 +62,15 @@ class Acunetix360Parser(object):
             if (item["Classification"] is not None) and (item["Classification"]["Cvss"] is not None) and (item["Classification"]["Cvss"]["Vector"] is not None):
                 finding.cvssv3 = item["Classification"]["Cvss"]["Vector"]
 
+            if item["State"] is not None:
+                state = [x.strip() for x in item["State"].split(',')]
+                if "AcceptedRisk" in state:
+                    finding.risk_accepted = True
+                    finding.active = False
+                elif "FalsePositive" in state:
+                    finding.false_p = True
+                    finding.active = False
+
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
