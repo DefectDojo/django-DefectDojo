@@ -4,7 +4,7 @@ import re
 from os.path import join
 
 from django.urls import reverse
-from dojo.models import FileUpload, Finding, Notes
+from dojo.models import Finding, Notes
 from dojo.notifications.helper import create_notification
 from jsonschema import ValidationError, validate
 from uuid import uuid4
@@ -74,12 +74,6 @@ def csaf_import(dd_test, file, json):
 
         if 'notes' in document:
             dd_test.engagement.description = description_from_notes(document['notes'])
-
-    # Defect Dojo does not allow file name duplications
-    file_title = str(uuid4()) + '_' + file.name
-    file_upload = FileUpload(title=file_title, file=file)
-    file_upload.save()
-    dd_test.files.add(file_upload)
 
     if 'publisher' in document:
         dd_test.notes.add(notes_from_publishers(dd_test, document['publisher']))
