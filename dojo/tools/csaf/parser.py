@@ -1,14 +1,10 @@
-import io
 import json
-import os
 import re
-import sys
 
-from os.path import join, normpath
+from os.path import join
 
-from django.utils.dateparse import parse_datetime
 from django.urls import reverse
-from dojo.models import Alerts, Endpoint, FileUpload, Finding, Notes
+from dojo.models import FileUpload, Finding, Notes
 from dojo.notifications.helper import create_notification
 from jsonschema import ValidationError, validate
 from uuid import uuid4
@@ -37,7 +33,6 @@ class CsafParser(object):
         csaf_validate(dd_test, csaf)
 
         return csaf_import(dd_test, file, csaf)
-
 
 
 def csaf_validate(dd_test, csaf):
