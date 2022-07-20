@@ -1,6 +1,7 @@
 from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.acunetix360.parser import Acunetix360Parser
+from datetime import datetime
 
 
 class TestAcunetix360Parser(DojoTestCase):
@@ -23,6 +24,7 @@ class TestAcunetix360Parser(DojoTestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual(str(endpoint), "http://php.testsparker.com/auth/login.php")
+            self.assertEqual(finding.date, datetime(2021, 6, 16, 12, 30))
 
     def test_parse_file_with_one_finding_false_positive(self):
         testfile = open("unittests/scans/acunetix360/acunetix360_one_finding_false_positive.json")
