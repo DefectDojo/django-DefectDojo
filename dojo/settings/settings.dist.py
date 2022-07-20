@@ -231,6 +231,9 @@ env = environ.Env(
     DD_DELETE_PREVIEW=(bool, True),
     # Feature toggle for new authorization for configurations
     DD_FEATURE_CONFIGURATION_AUTHORIZATION=(bool, True),
+    # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
+    DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
+                                 '.html', '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
 )
 
 
@@ -1474,3 +1477,5 @@ VULNERABILITY_URLS = {
     'SNYK': 'https://snyk.io/vuln/',
     'RUSTSEC': 'https://rustsec.org/advisories/',
 }
+# List of acceptable file types that can be uploaded to a given object via arbitrary file upload
+FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
