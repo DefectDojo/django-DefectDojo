@@ -658,14 +658,23 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
 
 
-class UploadFileForm(forms.ModelForm):
+class BaseManageFileFormSet(forms.BaseModelFormSet):
+    def clean(self):
+        """Validate the IP/Mask combo is in CIDR format"""
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+        for form in self.forms:
+            print(dir(form))
+            file = form.cleaned_data.get('file', None)
+            if file:
+                ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+                valid_extensions = settings.FILE_UPLOAD_TYPES
+                if ext.lower() not in valid_extensions:
+                    form.add_error('file', 'Unsupported file extension.')
 
-    class Meta:
-        model = FileUpload
-        fields = ['title', 'file']
 
-
-ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=['title', 'file'], can_delete=True)
+ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=['title', 'file'], can_delete=True, formset=BaseManageFileFormSet)
 
 
 class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
