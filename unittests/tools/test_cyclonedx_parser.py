@@ -49,6 +49,8 @@ class TestParser(DojoTestCase):
                 self.assertEqual("2.9.9", finding.component_version)
                 self.assertEqual("CVE-2018-7489", finding.vuln_id_from_tool)
                 self.assertEqual("Upgrade\n", finding.mitigation)
+                self.assertEqual(finding.component_name + ":" + finding.component_version + " | " + vulnerability_ids[0],
+                                 finding.title)
 
     def test_spec1_report_low_first(self):
         """Test a report from the spec itself"""
