@@ -281,3 +281,37 @@ class TestParser(DojoTestCase):
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertEqual(20, finding.cwe)
+
+    def test_cyclonedx_1_4_xml_cvssv31(self):
+        """CycloneDX version 1.4 XML format"""
+        with open("unittests/scans/cyclonedx/log4j.xml") as file:
+            parser = CycloneDXParser()
+            findings = parser.get_findings(file, Test())
+            for finding in findings:
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                finding.clean()
+            self.assertEqual(8, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("log4j-core:2.13.2 | CVE-2021-44228", finding.title)
+                self.assertEqual("Critical", finding.severity)
+                self.assertEqual("log4j-core", finding.component_name)
+                self.assertEqual("2.13.2", finding.component_version)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
+
+    def test_cyclonedx_1_4_json_cvssv31(self):
+        """CycloneDX version 1.4 JSON format"""
+        with open("unittests/scans/cyclonedx/log4j.json") as file:
+            parser = CycloneDXParser()
+            findings = parser.get_findings(file, Test())
+            for finding in findings:
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                finding.clean()
+            self.assertEqual(8, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("log4j-core:2.13.2 | CVE-2021-44228", finding.title)
+                self.assertEqual("Critical", finding.severity)
+                self.assertEqual("log4j-core", finding.component_name)
+                self.assertEqual("2.13.2", finding.component_version)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
