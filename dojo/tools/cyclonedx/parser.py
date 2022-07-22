@@ -126,7 +126,7 @@ class CycloneDXParser(object):
         for adv in vulnerability.findall("v:advisories/v:advisory", namespaces=ns):
             references += f"{adv.text}\n"
         finding = Finding(
-            title=vuln_id,
+            title=f"{component_name}:{component_version} | {vuln_id}",
             description=description,
             severity=severity,
             references=references,
