@@ -28,7 +28,7 @@ from dojo.filters import TemplateFindingFilter, SimilarFindingFilter, FindingFil
 from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
-    FindingFormID, FindingBulkUpdateForm, MergeFindings
+    FindingFormID, FindingBulkUpdateForm, MergeFindings, CopyFindingForm
 from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, Endpoint_Status, \
     FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, Test_Import_Finding_Action, User, Engagement, Vulnerability_Id_Template
@@ -48,6 +48,7 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
+from dojo.test.queries import get_authorized_tests
 
 logger = logging.getLogger(__name__)
 
@@ -661,6 +662,50 @@ def delete_finding(request, fid):
                 extra_tags='alert-danger')
     else:
         return HttpResponseForbidden()
+
+
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+def copy_finding(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    product = finding.test.engagement.product
+    tests = get_authorized_tests(Permissions.Test_Edit).filter(engagement=finding.test.engagement)
+    form = CopyFindingForm(tests=tests)
+
+    if request.method == 'POST':
+        form = CopyFindingForm(request.POST, tests=tests)
+        if form.is_valid():
+            test = form.cleaned_data.get('test')
+            product = finding.test.engagement.product
+            finding_copy = finding.copy(test=test)
+            calculate_grade(product)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Finding Copied successfully.',
+                extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Copying of %s' % finding.title,
+                                description='The finding "%s" was copied by %s to %s' % (finding.title, request.user, test.title),
+                                product=product,
+                                url=request.build_absolute_uri(reverse('finding_copy', args=(finding_copy.unsaved_vulnerability_ids, ))),
+                                recipients=[finding.test.engagement.lead],
+                                icon="exclamation-triangle")
+            return redirect_to_return_url_or_else(request, reverse('view_test', args=(test.id,)))
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Unable to copy finding, please try again.',
+                extra_tags='alert-danger')
+
+    product_tab = Product_Tab(product, title="Copy Finding", tab="findings")
+    return render(request, 'dojo/copy_object.html', {
+        'source': finding,
+        'source_label': 'Finding',
+        'destination_label': 'Test',
+        'product_tab': product_tab,
+        'form': form,
+    })
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
