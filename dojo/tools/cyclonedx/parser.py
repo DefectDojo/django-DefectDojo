@@ -237,7 +237,8 @@ class CycloneDXParser(object):
 
             # manage CVSS
             for rating in vulnerability.findall("b:ratings/b:rating", namespaces=ns):
-                if "CVSSv3" == rating.findtext("b:method", namespaces=ns):
+                method = rating.findtext("b:method", namespaces=ns)
+                if "CVSSv3" == method or "CVSSv31" == method:
                     raw_vector = rating.findtext("b:vector", namespaces=ns)
                     severity = rating.findtext("b:severity", namespaces=ns)
                     cvssv3 = self._get_cvssv3(raw_vector)
@@ -333,10 +334,10 @@ class CycloneDXParser(object):
 
                 ratings = vulnerability.get("ratings", [])
                 for rating in ratings:
-                    if rating.get("method") == "CVSSv3":
+                    if rating.get("method") == "CVSSv3" or rating.get("method") == "CVSSv31":
                         raw_vector = rating["vector"]
                         cvssv3 = self._get_cvssv3(raw_vector)
-                        severity = rating["severity"]
+                        severity = rating.get("severity")
                         if cvssv3:
                             finding.cvssv3 = cvssv3.clean_vector()
                             if severity:
