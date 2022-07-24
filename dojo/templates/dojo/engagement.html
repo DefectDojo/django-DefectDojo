@@ -65,7 +65,7 @@
                                 <td style="white-space: normal">
                                     <a class="eng_link" href="{%url 'view_engagement' e.id %}">{% if e.name %}{{ e.name }}{% endif %}</a>
                                     <div>
-                                        {% include "dojo/snippets/tags.html" with tags=e.tags.alll %}
+                                        {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                     </div>
                                 </td>
                                 <td> {{ e.target_start }} - {{ e.target_end }}
@@ -81,7 +81,7 @@
                                         {{ e.product.name }}
                                     </a>
                                     {{ e.product|jira_project_tag }}
-                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
                                 </td>
                                 <td class="prod_name">
                                     <a href="{% url 'product_type_metrics' e.product.prod_type.id %}">

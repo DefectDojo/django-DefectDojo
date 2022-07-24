@@ -103,8 +103,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
     def test_import_with_push_to_jira_epic_as_issue_type(self):
         jira_instance = JIRA_Instance.objects.get(id=2)
-        # we choose issue type Epic and test if it can be created succesfully.
-        # if yes, it means we have succesfully populated the Epic Name custom field which is mandatory in JIRA
+        # we choose issue type Epic and test if it can be created successfully.
+        # if yes, it means we have successfully populated the Epic Name custom field which is mandatory in JIRA
         jira_instance.default_issue_type = "Epic"
         jira_instance.save()
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)

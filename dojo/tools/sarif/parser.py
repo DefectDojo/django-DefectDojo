@@ -232,6 +232,27 @@ def get_references(rule):
     return reference
 
 
+def cvss_to_severity(cvss):
+    severity_mapping = {
+        1: 'Info',
+        2: 'Low',
+        3: 'Medium',
+        4: 'High',
+        5: 'Critical'
+    }
+
+    if cvss >= 9:
+        return severity_mapping.get(5)
+    elif cvss >= 7:
+        return severity_mapping.get(4)
+    elif cvss >= 4:
+        return severity_mapping.get(3)
+    elif cvss > 0:
+        return severity_mapping.get(2)
+    else:
+        return severity_mapping.get(1)
+
+
 def get_severity(result, rule):
     severity = result.get('level')
     if severity is None and rule is not None:
@@ -244,7 +265,7 @@ def get_severity(result, rule):
     elif 'warning' == severity:
         return 'Medium'
     elif 'error' == severity:
-        return 'Critical'
+        return 'High'
     else:
         return 'Medium'
 
@@ -284,12 +305,20 @@ def get_item(result, rules, artifacts, run_date):
     if 'ruleId' in result:
         finding.vuln_id_from_tool = result['ruleId']
         # for now we only support when the id of the rule is a CVE
-        finding.cve = cve_try(result['ruleId'])
+        if cve_try(result['ruleId']):
+            finding.unsaved_vulnerability_ids = [cve_try(result['ruleId'])]
     # some time the rule id is here but the tool doesn't define it
     if rule is not None:
         cwes_extracted = get_rule_cwes(rule)
         if len(cwes_extracted) > 0:
             finding.cwe = cwes_extracted[-1]
+
+        # Some tools such as GitHub or Grype return the severity in properties instead
+        if 'properties' in rule and 'security-severity' in rule['properties']:
+            cvss = float(rule['properties']['security-severity'])
+            severity = cvss_to_severity(cvss)
+            finding.cvssv3_score = cvss
+            finding.severity = severity
 
     # manage the case that some tools produce CWE as properties of the result
     cwes_properties_extracted = get_result_cwes_properties(result)

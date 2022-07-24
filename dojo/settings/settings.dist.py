@@ -30,6 +30,7 @@ env = environ.Env(
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
     DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
+    DD_CSRF_TRUSTED_ORIGINS=(list, []),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
@@ -103,6 +104,9 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=(bool, False),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER=(str, ''),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS=(bool, True),
     DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS=(bool, False),
@@ -227,6 +231,9 @@ env = environ.Env(
     DD_DELETE_PREVIEW=(bool, True),
     # Feature toggle for new authorization for configurations
     DD_FEATURE_CONFIGURATION_AUTHORIZATION=(bool, True),
+    # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
+    DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
+                                 '.html', '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
 )
 
 
@@ -455,6 +462,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
+    'dojo.pipeline.update_azure_groups',
     'dojo.pipeline.update_product_access',
 )
 
@@ -488,6 +496,9 @@ SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET')
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID')
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE')
+AZUREAD_TENANT_OAUTH2_GET_GROUPS = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS')
+AZUREAD_TENANT_OAUTH2_GROUPS_FILTER = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER')
+AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS')
 
 GITLAB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED')
 GITLAB_PROJECT_AUTO_IMPORT = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT')
@@ -613,6 +624,12 @@ SESSION_COOKIE_SECURE = env('DD_SESSION_COOKIE_SECURE')
 
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
+
+# A list of trusted origins for unsafe requests (e.g. POST).
+# Use comma-separated list of domains, they will be split to list automatically
+# DefectDojo is running on Django version 3.2. Format of DD_CSRF_TRUSTED_ORIGINS may change in future when it will be upgraded to Django version 4.0
+# Please see: https://docs.djangoproject.com/en/4.0/ref/settings/#std-setting-CSRF_TRUSTED_ORIGINS
+CSRF_TRUSTED_ORIGINS = env('DD_CSRF_TRUSTED_ORIGINS')
 
 if env('DD_SECURE_PROXY_SSL_HEADER'):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -1063,7 +1080,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'SonarQube API Import': ['title', 'file_path', 'line'],
     'Dependency Check Scan': ['vulnerability_ids', 'cwe', 'file_path'],
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'vulnerability_ids'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
     'Nessus Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
@@ -1106,6 +1123,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Rusty Hog Scan': ['title', 'description'],
     'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'Hydra Scan': ['title', 'description'],
+    'DrHeader JSON Importer': ['title', 'description'],
+    'PWN SAST': ['title', 'description'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1163,6 +1182,17 @@ DEDUPE_ALGO_HASH_CODE = 'hash_code'
 # unique_id_from_tool or hash_code
 # Makes it possible to deduplicate on a technical id (same parser) and also on some functional fields (cross-parsers deduplication)
 DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code'
+
+# Allows to deduplicate with endpoints if endpoints is not included in the hashcode.
+# Possible values are: scheme, host, port, path, query, fragment, userinfo, and user. For a details description see https://hyperlink.readthedocs.io/en/latest/api.html#attributes.
+# Example:
+# Finding A and B have the same hashcode. Finding A has endpoint http://defectdojo.com and finding B has endpoint https://defectdojo.com/finding.
+# - An empyt list ([]) means, no fields are used. B is marked as duplicated of A.
+# - Host (['host']) means: B is marked as duplicate of A because the host (defectdojo.com) is the same.
+# - Host and path (['host', 'path']) means: A and B stay untouched because the path is different.
+#
+# If a finding has more than one endpoint, only one endpoint pair must match to mark the finding as duplicate.
+DEDUPE_ALGO_ENDPOINT_FIELDS = ['host', 'path']
 
 # Choice of deduplication algorithm per parser
 # Key = the scan_type from factory.py (= the test_type)
@@ -1237,7 +1267,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SSLyze Scan (JSON)': DEDUPE_ALGO_HASH_CODE,
     'Harbor Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Rusty Hog Scan': DEDUPE_ALGO_HASH_CODE,
+    'StackHawk HawkScan': DEDUPE_ALGO_HASH_CODE,
     'Hydra Scan': DEDUPE_ALGO_HASH_CODE,
+    'DrHeader JSON Importer': DEDUPE_ALGO_HASH_CODE,
+    'PWN SAST': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1444,3 +1477,5 @@ VULNERABILITY_URLS = {
     'SNYK': 'https://snyk.io/vuln/',
     'RUSTSEC': 'https://rustsec.org/advisories/',
 }
+# List of acceptable file types that can be uploaded to a given object via arbitrary file upload
+FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")

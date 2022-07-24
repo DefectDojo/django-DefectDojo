@@ -220,10 +220,15 @@ class UserContactInfo(models.Model):
 
 
 class Dojo_Group(models.Model):
+    AZURE = 'AzureAD'
+    SOCIAL_CHOICES = (
+        (AZURE, _('AzureAD')),
+    )
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
     auth_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
+    social_provider = models.CharField(max_length=10, choices=SOCIAL_CHOICES, blank=True, null=True, help_text='Group imported from a social provider.', verbose_name='Social Authentication Provider')
 
     def __str__(self):
         return self.name
@@ -460,6 +465,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_('Enable Finding Groups'),
         help_text=_("With this setting turned off, the Finding Groups will be disabled."))
+    enable_calendar = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_('Enable Calendar'),
+        help_text=_("With this setting turned off, the Calendar will be disabled in the user interface."))
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
@@ -527,7 +537,7 @@ class Contact(models.Model):
     team = models.CharField(max_length=100)
     is_admin = models.BooleanField(default=False)
     is_globally_read_only = models.BooleanField(default=False)
-    updated = models.DateTimeField(editable=False)
+    updated = models.DateTimeField(auto_now=True)
 
 
 class Note_Type(models.Model):
@@ -787,10 +797,10 @@ class Product(models.Model):
     team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                      related_name='team_manager', on_delete=models.RESTRICT)
 
-    created = models.DateTimeField(editable=False, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
                                   null=False, blank=False, on_delete=models.CASCADE)
-    updated = models.DateTimeField(editable=False, null=True, blank=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
     tid = models.IntegerField(default=0, editable=False)
     members = models.ManyToManyField(Dojo_User, through='Product_Member', related_name='product_members', blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Group', related_name='product_groups', blank=True)
@@ -1513,14 +1523,22 @@ class Endpoint(models.Model):
                 query_parts.append(u"=".join([k, v]))
         query_string = u"&".join(query_parts)
 
+        protocol = url.scheme if url.scheme != '' else None
+        userinfo = ':'.join(url.userinfo) if url.userinfo not in [(), ('',)] else None
+        host = url.host if url.host != '' else None
+        port = url.port
+        path = '/'.join(url.path)[:500] if url.path not in [None, (), ('',)] else None
+        query = query_string[:1000] if query_string is not None and query_string != '' else None
+        fragment = url.fragment[:500] if url.fragment is not None and url.fragment != '' else None
+
         return Endpoint(
-            protocol=url.scheme if url.scheme != '' else None,
-            userinfo=':'.join(url.userinfo) if url.userinfo not in [(), ('',)] else None,
-            host=url.host if url.host != '' else None,
-            port=url.port,
-            path='/'.join(url.path)[:500] if url.path not in [None, (), ('',)] else None,
-            query=query_string[:1000] if query_string is not None and query_string != '' else None,
-            fragment=url.fragment[:500] if url.fragment is not None and url.fragment != '' else None
+            protocol=protocol,
+            userinfo=userinfo,
+            host=host,
+            port=port,
+            path=path,
+            query=query,
+            fragment=fragment,
         )
 
     def get_absolute_url(self):
@@ -1550,7 +1568,7 @@ class Sonarqube_Issue(models.Model):
 
 class Sonarqube_Issue_Transition(models.Model):
     sonarqube_issue = models.ForeignKey(Sonarqube_Issue, on_delete=models.CASCADE, db_index=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
     finding_status = models.CharField(max_length=100)
     sonarqube_status = models.CharField(max_length=50)
     transitions = models.CharField(max_length=100)
@@ -2440,29 +2458,6 @@ class Finding(models.Model):
     def has_finding_group(self):
         return self.finding_group is not None
 
-    def long_desc(self):
-        long_desc = ''
-        long_desc += '*' + self.title + '*\n\n'
-        long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
-        long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
-        long_desc += '*CVSS v3:* ' + str(self.cvssv3) + '\n\n'
-        long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
-        if self.test.engagement.branch_tag:
-            long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
-        if self.test.engagement.build_id:
-            long_desc += '*BuildID:* ' + self.test.engagement.build_id + '\n\n'
-        if self.test.engagement.commit_hash:
-            long_desc += '*Commit hash:* ' + self.test.engagement.commit_hash + '\n\n'
-        long_desc += '*Systems*: \n\n'
-
-        for e in self.endpoints.all():
-            long_desc += str(e) + '\n\n'
-        long_desc += '*Description*: \n' + str(self.description) + '\n\n'
-        long_desc += '*Mitigation*: \n' + str(self.mitigation) + '\n\n'
-        long_desc += '*Impact*: \n' + str(self.impact) + '\n\n'
-        long_desc += '*References*:' + str(self.references)
-        return long_desc
-
     def save_no_options(self, *args, **kwargs):
         return self.save(dedupe_option=False, false_history=False, rules_option=False, product_grading_option=False,
              issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
@@ -2672,6 +2667,10 @@ class Vulnerability_Id(models.Model):
 
     def __str__(self):
         return self.vulnerability_id
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_finding', args=[str(self.finding.id)])
 
 
 class Stub_Finding(models.Model):
@@ -2955,8 +2954,8 @@ class Risk_Acceptance(models.Model):
     restart_sla_expired = models.BooleanField(default=False, null=False, verbose_name=_('Restart SLA on expiration'), help_text=_("When enabled, the SLA for findings is restarted when the risk acceptance expires."))
 
     notes = models.ManyToManyField(Notes, editable=False)
-    created = models.DateTimeField(null=False, editable=False, auto_now_add=True)
-    updated = models.DateTimeField(editable=False, auto_now=True)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self):
         return str(self.name)
@@ -3345,7 +3344,7 @@ class Alerts(models.Model):
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
     user_id = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
 
     class Meta:
         ordering = ['-created']
@@ -3416,7 +3415,7 @@ class Languages(models.Model):
     blank = models.IntegerField(blank=True, null=True, verbose_name=_('Number of blank lines'))
     comment = models.IntegerField(blank=True, null=True, verbose_name=_('Number of comment lines'))
     code = models.IntegerField(blank=True, null=True, verbose_name=_('Number of code lines'))
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
 
     def __str__(self):
         return self.language.language
@@ -3434,7 +3433,7 @@ class App_Analysis(models.Model):
     icon = models.CharField(max_length=200, null=True, blank=True)
     website = models.URLField(max_length=400, null=True, blank=True)
     website_found = models.URLField(max_length=400, null=True, blank=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
 
     tags = TagField(blank=True, force_lowercase=True)
 
@@ -3444,7 +3443,7 @@ class App_Analysis(models.Model):
 
 class Objects_Review(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
 
     def __str__(self):
         return self.name
@@ -3460,7 +3459,7 @@ class Objects_Product(models.Model):
     artifact = models.CharField(max_length=400, verbose_name=_('Artifact'),
                                 null=True, blank=True)
     review_status = models.ForeignKey(Objects_Review, on_delete=models.CASCADE)
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this object. Choose from the list or add new tags. Press Enter key to add."))
 
@@ -3478,8 +3477,8 @@ class Objects_Product(models.Model):
 
 class Testing_Guide_Category(models.Model):
     name = models.CharField(max_length=300)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ('name',)
@@ -3496,8 +3495,8 @@ class Testing_Guide(models.Model):
     objective = models.CharField(max_length=800, help_text=_("Objective of the test"))
     how_to_test = models.TextField(default=None, help_text=_("How to test the objective"))
     results_expected = models.CharField(max_length=800, help_text=_("What the results look like for a test"))
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.testing_guide_category.name + ': ' + self.name
@@ -3512,8 +3511,8 @@ class Benchmark_Type(models.Model):
     benchmark_source = models.CharField(max_length=20, blank=False,
                                         null=True, choices=source,
                                         default='OWASP ASVS')
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
     enabled = models.BooleanField(default=True)
 
     def __str__(self):
@@ -3526,8 +3525,8 @@ class Benchmark_Category(models.Model):
     objective = models.TextField()
     references = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ('name',)
@@ -3547,8 +3546,8 @@ class Benchmark_Requirement(models.Model):
     enabled = models.BooleanField(default=True)
     cwe_mapping = models.ManyToManyField(CWE, blank=True)
     testing_guide = models.ManyToManyField(Testing_Guide, blank=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.objective_number) + ': ' + self.category.name
@@ -3562,8 +3561,8 @@ class Benchmark_Product(models.Model):
     enabled = models.BooleanField(default=True,
                                   help_text=_('Applicable for this specific product.'))
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
@@ -3591,8 +3590,8 @@ class Benchmark_Product_Summary(models.Model):
     asvs_level_3_benchmark = models.IntegerField(null=False, default=0, help_text=_("Total number of active benchmarks for this application."))
     asvs_level_3_score = models.IntegerField(null=False, default=0, help_text=_("ASVS Level 3 Score"))
     publish = models.BooleanField(default=False, help_text=_('Publish score to Product.'))
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.product.name + ': ' + self.benchmark_type.name

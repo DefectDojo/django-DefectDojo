@@ -183,15 +183,15 @@ class SonarQubeApiImporter(object):
 
                 type = 'SECURITY_HOTSPOT'
                 severity = 'Info'
-                title = textwrap.shorten(text=hotspot['message'], width=500)
-                component_key = hotspot['component']
+                title = textwrap.shorten(text=hotspot.get('message', ''), width=500)
+                component_key = hotspot.get('component')
                 line = hotspot.get('line')
-                rule_id = hotspot['key']
+                rule_id = hotspot.get('key', '')
                 rule = client.get_hotspot_rule(rule_id)
-                scanner_confidence = self.convert_scanner_confidence(hotspot['vulnerabilityProbability'])
-                description = self.clean_rule_description_html(rule['vulnerabilityDescription'])
-                cwe = self.clean_cwe(rule['fixRecommendations'])
-                references = self.get_references(rule['riskDescription']) + self.get_references(rule['fixRecommendations'])
+                scanner_confidence = self.convert_scanner_confidence(hotspot.get('vulnerabilityProbability', ''))
+                description = self.clean_rule_description_html(rule.get('vulnerabilityDescription', 'No description provided.'))
+                cwe = self.clean_cwe(rule.get('fixRecommendations', ''))
+                references = self.get_references(rule.get('riskDescription', '')) + self.get_references(rule.get('fixRecommendations', ''))
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
                     key=hotspot['key'],
@@ -284,7 +284,9 @@ class SonarQubeApiImporter(object):
     def get_references(vuln_details):
         parser = etree.HTMLParser()
         details = etree.fromstring(vuln_details, parser)
+
         rule_references = ""
-        for a in details.iter("a"):
-            rule_references += "[{}]({})\n".format(a.text, a.get('href'))
+        if details:
+            for a in details.iter("a"):
+                rule_references += "[{}]({})\n".format(a.text, a.get('href'))
         return rule_references

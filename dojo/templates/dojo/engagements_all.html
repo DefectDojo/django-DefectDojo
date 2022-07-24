@@ -49,14 +49,14 @@
                                 <tr>
 
                                     <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
-                                        {% include "dojo/snippets/tags.html" with tags=p.tags.alll %}
+                                        {% include "dojo/snippets/tags.html" with tags=p.tags.all %}
                                     </td>
                                     <td class="prod_name">
                                         <a href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
                                     </td>
                                     <td>
                                         <a class="eng_link" href="{% url 'view_engagement' e.id %}">{% if e.name %}{{ e.name }}{% endif %}</a>
-                                        {% include "dojo/snippets/tags.html" with tags=e.tags.alll %}
+                                        {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                         <br>
                                     </td>
                                     {% if system_settings.enable_jira %}

@@ -937,13 +937,15 @@ def request_finding_review(request, fid):
             finding.save()
             reviewers = ""
             for suser in form.cleaned_data['reviewers']:
-                reviewers += str(suser) + ", "
+                full_user = Dojo_User.generate_full_name(Dojo_User.objects.get(id=suser))
+                logger.debug("Asking %s for review", full_user)
+                reviewers += str(full_user) + ", "
             reviewers = reviewers[:-2]
 
             create_notification(event='review_requested',
                                 title='Finding review requested',
                                 finding=finding,
-                                description='User %s has requested that users %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
+                                description='User %s has requested that user(s) %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
                                 icon='check',
                                 url=reverse("view_finding", args=(finding.id,)))
 
@@ -1628,7 +1630,7 @@ def merge_finding_product(request, pid):
 
                 if finding_to_merge_into not in findings_to_merge:
                     for finding in findings_to_merge.exclude(pk=finding_to_merge_into.pk):
-                        notes_entry = "{} {} ({}),".format(notes_entry, finding.title, finding.id)
+                        notes_entry = "{}\n- {} ({}),".format(notes_entry, finding.title, finding.id)
                         if finding.static_finding:
                             static = finding.static_finding
 
@@ -1649,7 +1651,7 @@ def merge_finding_product(request, pid):
                                 finding_descriptions = "{}\n**File Path:** {}\n".format(finding_descriptions, finding.file_path)
 
                         # If checked merge the Reference
-                        if form.cleaned_data['append_reference']:
+                        if form.cleaned_data['append_reference'] and finding.references is not None:
                             finding_references = "{}\n{}".format(finding_references, finding.references)
 
                         # if checked merge the endpoints
@@ -1718,7 +1720,7 @@ def merge_finding_product(request, pid):
                         finding_action = "deleted"
                         findings_to_merge.delete()
 
-                    notes_entry = "Finding consists of merged findings from the following findings: {} which have been {}.".format(notes_entry[:-1], finding_action)
+                    notes_entry = "Finding consists of merged findings from the following findings which have been {}: {}".format(finding_action, notes_entry[:-1])
                     note = Notes(entry=notes_entry, author=request.user)
                     note.save()
                     finding_to_merge_into.notes.add(note)
@@ -1875,7 +1877,7 @@ def finding_bulk_update_all(request, pid=None):
 
                 if form.cleaned_data['finding_group_add']:
                     logger.debug('finding_group_add checked!')
-                    fgid = form.cleaned_data['add_to_finding_group']
+                    fgid = form.cleaned_data['add_to_finding_group_id']
                     finding_group = Finding_Group.objects.get(id=fgid)
                     finding_group, added, skipped = finding_helper.add_to_finding_group(finding_group, finds)
 
@@ -1967,13 +1969,11 @@ def finding_bulk_update_all(request, pid=None):
                             jira_helper.push_to_jira(group)
                             success_count += 1
 
-                        jira_helper.push_to_jira(group)
-
                 for error_message, error_count in error_counts.items():
                     add_error_message_to_response('%i finding groups could not be pushed to JIRA: %s' % (error_count, error_message))
 
                 if success_count > 0:
-                    add_success_message_to_response('%i finding groups pushed to JIRA succesfully' % success_count)
+                    add_success_message_to_response('%i finding groups pushed to JIRA successfully' % success_count)
 
                 # refresh from db
                 finds = finds.all()
@@ -2013,7 +2013,7 @@ def finding_bulk_update_all(request, pid=None):
                     add_error_message_to_response('%i findings could not be pushed to JIRA: %s' % (error_count, error_message))
 
                 if success_count > 0:
-                    add_success_message_to_response('%i findings pushed to JIRA succesfully' % success_count)
+                    add_success_message_to_response('%i findings pushed to JIRA successfully' % success_count)
 
                 if updated_find_count > 0:
                     messages.add_message(request,

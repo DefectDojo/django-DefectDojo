@@ -40,7 +40,7 @@ class DawnScannerParser(object):
             )
 
             if self.CVE_REGEX.match(item["name"]):
-                finding.cve = self.CVE_REGEX.findall(item["name"])[0]
+                finding.unsaved_vulnerability_ids = [self.CVE_REGEX.findall(item["name"])[0]]
 
             items.append(finding)
 
