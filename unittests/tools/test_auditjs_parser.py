@@ -77,6 +77,3 @@ class TestAuditJSParser(DojoTestCase):
 
         self.assertEqual(1, len(findings))
         self.assertEqual("%40next/env", findings[0].component_name)
-
-# ./dc-unittest.sh --profile mysql-rabbitmq --test-case unittests.tools.test_usditjs_parser.TestAuditJSParser
-# python manage.py test unittests.tools.test_auditjs_parser.TestAuditJSParser --keepdb
