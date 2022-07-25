@@ -2225,12 +2225,12 @@ class Finding(models.Model):
     def copy(self, test=None):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_notes =  self.notes.all()
-        old_files =  self.files.all()
-        old_endpoint_status =  self.endpoint_status.all()
-        old_endpoints =  self.endpoints.all()
-        old_reviewers =  self.reviewers.all()
-        old_found_by =  self.found_by.all()
+        old_notes = self.notes.all()
+        old_files = self.files.all()
+        old_endpoint_status = self.endpoint_status.all()
+        old_endpoints = self.endpoints.all()
+        old_reviewers = self.reviewers.all()
+        old_found_by = self.found_by.all()
         old_tags = self.tags.all()
         # Wipe the IDs of the new object
         copy.pk = None
@@ -3140,7 +3140,7 @@ class Risk_Acceptance(models.Model):
     def copy(self, engagement=None):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_notes =  self.notes.all()
+        old_notes = self.notes.all()
         old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
         # Wipe the IDs of the new object
         copy.pk = None

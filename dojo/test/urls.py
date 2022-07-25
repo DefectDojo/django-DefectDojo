@@ -13,7 +13,7 @@ urlpatterns = [
         name='edit_test'),
     url(r'^test/(?P<tid>\d+)/delete$', views.delete_test,
         name='delete_test'),
-     url(r'^test/(?P<tid>\d+)/copy$', views.copy_test,
+    url(r'^test/(?P<tid>\d+)/copy$', views.copy_test,
         name='copy_test'),
     url(r'^test/(?P<tid>\d+)/add_findings$', views.add_findings,
         name='add_findings'),
