@@ -2256,7 +2256,7 @@ class Finding(models.Model):
         copy.found_by.set(old_found_by)
         # Assign any tags
         copy.tags.set(old_tags)
-        
+
         return copy
 
     def get_absolute_url(self):
