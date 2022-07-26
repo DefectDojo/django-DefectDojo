@@ -865,6 +865,18 @@ class DeleteTestForm(forms.ModelForm):
         fields = ['id']
 
 
+class CopyTestForm(forms.Form):
+    engagement = forms.ModelChoiceField(
+        required=True,
+        queryset=Engagement.objects.none(),
+        error_messages={'required': '*'})
+
+    def __init__(self, *args, **kwargs):
+        authorized_lists = kwargs.pop('engagements', None)
+        super(CopyTestForm, self).__init__(*args, **kwargs)
+        self.fields['engagement'].queryset = authorized_lists
+
+
 class AddFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
@@ -2029,6 +2041,18 @@ class DeleteFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         fields = ['id']
+
+
+class CopyFindingForm(forms.Form):
+    test = forms.ModelChoiceField(
+        required=True,
+        queryset=Test.objects.none(),
+        error_messages={'required': '*'})
+
+    def __init__(self, *args, **kwargs):
+        authorized_lists = kwargs.pop('tests', None)
+        super(CopyFindingForm, self).__init__(*args, **kwargs)
+        self.fields['test'].queryset = authorized_lists
 
 
 class FindingFormID(forms.ModelForm):
