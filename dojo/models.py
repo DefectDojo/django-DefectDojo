@@ -488,12 +488,6 @@ class System_Settings(models.Model):
         default='',
         blank=True,
         help_text=_("New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition."))
-    staff_user_email_pattern = models.CharField(
-        max_length=200,
-        default='',
-        blank=True,
-        verbose_name=_('Email pattern for staff users'),
-        help_text=_("When the email address of a new user created by OAuth2 matches this regex pattern, their is_staff flag will be set to True."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()

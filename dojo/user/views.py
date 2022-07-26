@@ -258,7 +258,7 @@ def change_password(request):
         'form': form})
 
 
-@user_is_configuration_authorized('auth.view_user', 'staff')
+@user_is_configuration_authorized('auth.view_user')
 def user(request):
     users = Dojo_User.objects.all() \
         .select_related('usercontactinfo', 'global_role') \
@@ -274,7 +274,7 @@ def user(request):
                    })
 
 
-@user_is_configuration_authorized('auth.add_user', 'superuser')
+@user_is_configuration_authorized('auth.add_user')
 def add_user(request):
     form = AddDojoUserForm()
     contact_form = UserContactInfoForm()
@@ -330,7 +330,7 @@ def add_user(request):
         'to_add': True})
 
 
-@user_is_configuration_authorized('auth.view_user', 'staff')
+@user_is_configuration_authorized('auth.view_user')
 def view_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     product_members = get_authorized_product_members_for_user(user, Permissions.Product_View)
@@ -347,7 +347,7 @@ def view_user(request, uid):
         'configuration_permission_form': configuration_permission_form})
 
 
-@user_is_configuration_authorized('auth.change_user', 'superuser')
+@user_is_configuration_authorized('auth.change_user')
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = EditDojoUserForm(instance=user)
@@ -413,7 +413,7 @@ def edit_user(request, uid):
         'to_edit': user})
 
 
-@user_is_configuration_authorized('auth.delete_user', 'superuser')
+@user_is_configuration_authorized('auth.delete_user')
 def delete_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = DeleteUserForm(instance=user)
@@ -551,7 +551,7 @@ def add_group_member(request, uid):
     })
 
 
-@user_is_configuration_authorized('auth.change_permission', 'superuser')
+@user_is_configuration_authorized('auth.change_permission')
 def edit_permissions(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     if request.method == 'POST':

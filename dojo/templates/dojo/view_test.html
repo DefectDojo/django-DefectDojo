@@ -727,14 +727,14 @@
                                             </a>
                                         </li>
                                     {% endif %}
-                                    {% if "dojo.add_finding_template"|has_configuration_permission:"staff" %}
+                                    {% if "dojo.add_finding_template"|has_configuration_permission %}
                                         <li role="presentation">
                                             <a href="{% url 'mktemplate' finding.id %}">
                                                 <i class="fa fa-copy"></i> Make Finding a Template
                                             </a>
                                         </li>
                                     {% endif %}
-                                    {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission:"staff" %}
+                                    {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission %}
                                         <li role="presentation">
                                             <a href="{% url 'find_template_to_apply' finding.id %}">
                                                 <i class="fa fa-copy"></i> Apply Template to Finding

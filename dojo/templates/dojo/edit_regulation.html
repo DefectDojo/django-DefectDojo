@@ -10,7 +10,7 @@
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <button class="btn btn-primary" type="submit" name="submit"  id="submit" value="Submit">Update</button>
-                {% if "dojo.delete_regulation"|has_configuration_permission:"superuser" %}
+                {% if "dojo.delete_regulation"|has_configuration_permission %}
                 <button class="btn btn-danger" type="submit" name="delete" id="delete" value="Delete">Delete</button>
                 {% endif %}
             </div>

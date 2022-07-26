@@ -71,7 +71,7 @@ def action_history(request, cid, oid):
         if not authorized:
             raise PermissionDenied
     elif ct.model == "user":
-        user_has_configuration_permission_or_403(request.user, 'auth.view_user', legacy='superuser')
+        user_has_configuration_permission_or_403(request.user, 'auth.view_user')
     else:
         if not request.user.is_superuser:
             raise PermissionDenied
