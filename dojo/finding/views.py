@@ -1070,7 +1070,7 @@ def clear_finding_review(request, fid):
     })
 
 
-@user_is_configuration_authorized('dojo.add_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.add_finding_template')
 def mktemplate(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     templates = Finding_Template.objects.filter(title=finding.title)
@@ -1112,7 +1112,7 @@ def mktemplate(request, fid):
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
-@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.view_finding_template')
 def find_template_to_apply(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
@@ -1414,7 +1414,7 @@ def promote_to_finding(request, fid):
         })
 
 
-@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.view_finding_template')
 def templates(request):
     templates = Finding_Template.objects.all().order_by('cwe')
     templates = TemplateFindingFilter(request.GET, queryset=templates)
@@ -1432,7 +1432,7 @@ def templates(request):
         })
 
 
-@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.view_finding_template')
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize('json', Finding_Template.objects.all())
     return HttpResponse(leads_as_json, content_type='json')
@@ -1483,7 +1483,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
     return count
 
 
-@user_is_configuration_authorized('dojo.add_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.add_finding_template')
 def add_template(request):
     form = FindingTemplateForm()
     if request.method == 'POST':
@@ -1518,7 +1518,7 @@ def add_template(request):
     })
 
 
-@user_is_configuration_authorized('dojo.change_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.change_finding_template')
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = FindingTemplateForm(
@@ -1564,7 +1564,7 @@ def edit_template(request, tid):
     })
 
 
-@user_is_configuration_authorized('dojo.delete_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.delete_finding_template')
 def delete_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
 

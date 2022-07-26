@@ -7,7 +7,7 @@ import traceback
 
 import social_core.pipeline.user
 from django.conf import settings
-from dojo.models import Product, Product_Member, Product_Type, System_Settings, Role, Dojo_Group, Dojo_Group_Member
+from dojo.models import Product, Product_Member, Product_Type, Role, Dojo_Group, Dojo_Group_Member
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
 from dojo.authorization.roles_permissions import Permissions, Roles
@@ -61,18 +61,6 @@ def social_uid(backend, details, response, *args, **kwargs):
         # This modified way needs to work
         else:
             return {'uid': response.get('preferred_username')}
-
-
-def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
-    # if user doesn't exist then user is None
-    if user is not None and kwargs.get('is_new'):
-        system_settings = System_Settings.objects.get()
-        if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            if system_settings.staff_user_email_pattern is not None and \
-               re.fullmatch(system_settings.staff_user_email_pattern, user.email) is not None:
-                user.is_staff = True
-            else:
-                user.is_staff = False
 
 
 def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):

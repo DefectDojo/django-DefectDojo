@@ -1917,17 +1917,12 @@ class AddDojoUserForm(forms.ModelForm):
 
     class Meta:
         model = Dojo_User
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
-        else:
-            fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_staff', 'is_superuser']
+        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         current_user = get_current_user()
         if not current_user.is_superuser:
-            if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-                self.fields['is_staff'].disabled = True
             self.fields['is_superuser'].disabled = True
 
 
@@ -1935,17 +1930,12 @@ class EditDojoUserForm(forms.ModelForm):
 
     class Meta:
         model = Dojo_User
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            fields = ['username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
-        else:
-            fields = ['username', 'first_name', 'last_name', 'email', 'is_active', 'is_staff', 'is_superuser']
+        fields = ['username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         current_user = get_current_user()
         if not current_user.is_superuser:
-            if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-                self.fields['is_staff'].disabled = True
             self.fields['is_superuser'].disabled = True
 
 
@@ -2424,8 +2414,6 @@ class SystemSettingsForm(forms.ModelForm):
     class Meta:
         model = System_Settings
         exclude = ['product_grade', 'credentials', 'column_widths', 'drive_folder_ID']
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            exclude += ['staff_user_email_pattern']
 
 
 class BenchmarkForm(forms.ModelForm):
