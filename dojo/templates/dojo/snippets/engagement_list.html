@@ -77,6 +77,11 @@
                                </a>
                             </li>
                             <li>
+                              <a class="" href="{% url 'copy_engagement' eng.id %}">
+                                <i class="fa fa-copy"></i> Copy
+                              </a>
+                           </li>
+                            <li>
                               </a>
                               {% if status == "open" or status == "paused" %}
                               <a class="" href="{% url 'close_engagement' eng.id %}">
