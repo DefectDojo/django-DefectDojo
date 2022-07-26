@@ -26,7 +26,9 @@ def create_notification(event=None, **kwargs):
         logger.debug('creating notifications for recipients: %s', kwargs['recipients'])
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
             # kwargs.update({'user': recipient_notifications.user})
+            logger.debug('Sent notification to %s', recipient_notifications)
             process_notifications(event, recipient_notifications, **kwargs)
+
     else:
         logger.debug('creating system notifications for event: %s', event)
         # send system notifications to all admin users
