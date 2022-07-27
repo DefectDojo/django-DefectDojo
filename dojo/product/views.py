@@ -145,9 +145,6 @@ def view_product(request, pid):
     prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager', 'sla_configuration') \
                                       .prefetch_related('members') \
                                       .prefetch_related('prod_type__members')
-    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager') \
-        .prefetch_related('members') \
-        .prefetch_related('prod_type__members')
     prod = get_object_or_404(prod_query, id=pid)
     product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
     product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)

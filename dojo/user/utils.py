@@ -21,6 +21,8 @@ class Permission_Helper:
             return 'Questionnaires'
         elif self.name == 'permission':
             return 'Configuration Permissions'
+        elif self.name == 'sla configuration':
+            return 'SLA Configurations'
         else:
             return self.name.title() + 's'
 
@@ -118,6 +120,7 @@ def get_configuration_permissions_fields():
         Permission_Helper(name='tool configuration', app='dojo', view=True, add=True, change=True, delete=True),
         Permission_Helper(name='tool type', app='dojo', view=True, add=True, change=True, delete=True),
         Permission_Helper(name='user', app='auth', view=True, add=True, change=True, delete=True),
+        Permission_Helper(name='sla configuration', app='dojo', view=True, add=True, change=True, delete=True)
     ]
 
     return permission_fields

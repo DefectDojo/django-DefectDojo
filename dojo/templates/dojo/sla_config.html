@@ -51,7 +51,7 @@
                         {% for conf in confs %}
                             <tr>
                                 <td>
-                                    {% if "dojo.change_tool_configuration"|has_configuration_permission:"superuser" %}
+                                    {% if "dojo.change_sla_configuration"|has_configuration_permission:"superuser" %}
                                         <a href="{% url 'edit_sla_config' conf.id %}"><b>{{ conf.name }}</b></a>
                                     {% else %}
                                         {{ conf.name }}
