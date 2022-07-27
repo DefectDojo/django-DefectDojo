@@ -1,9 +1,10 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+import datetime
 from unittest.mock import patch
 
-from dojo.models import Test, Engagement, Product
+from dojo.models import Engagement, Product, Test
 from dojo.tools.checkmarx.parser import CheckmarxParser
-import datetime
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestCheckmarxParser(DojoTestCase):
@@ -709,3 +710,54 @@ class TestCheckmarxParser(DojoTestCase):
             self.assertEqual(datetime.datetime(2021, 12, 24, 9, 12, 14), finding.date)
             self.assertEqual(bool, type(finding.static_finding))
             self.assertEqual(True, finding.static_finding)
+
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_with_many_aggregated_findings(self, mock):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/checkmarx/many_aggregated_findings.xml"
+        )
+        parser = CheckmarxParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.teardown(my_file_handle)
+        self.assertEqual(1, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            # ScanStart
+            self.assertEqual("Insufficient Logging of Exceptions (filename3.cs)", finding.title)
+            self.assertEqual("Information", finding.severity)
+            self.assertEqual(185, finding.nb_occurences)
+            self.assertEqual("5273", finding.vuln_id_from_tool)
+
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_with_many_findings_json(self, mock):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/checkmarx/multiple_findings.json"
+        )
+        parser = CheckmarxParser()
+        findings = parser.get_findings(my_file_handle, Test())
+        self.teardown(my_file_handle)
+        self.assertEqual(10, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("SQL Injection", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(89, finding.cwe)
+            self.assertEqual("/diva-android-master/app/src/main/java/jakhar/aseem/diva/SQLInjectionActivity.java", finding.file_path)
+            self.assertEqual(70, finding.line)
+            self.assertEqual("/oiUUpBjigtUpTb1+haL9nypVaQ=", finding.unique_id_from_tool)
+        with self.subTest(i=5):
+            finding = findings[4]
+            self.assertEqual("CSRF", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual(352, finding.cwe)
+            self.assertEqual("/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java", finding.file_path)
+            self.assertEqual(67, finding.line)
+            self.assertEqual("IJOkZAzX5emCOIeTESXgsNulW2w=", finding.unique_id_from_tool)
+        with self.subTest(i=9):
+            finding = findings[9]
+            self.assertEqual("Heap Inspection", finding.title)
+            self.assertEqual("Low", finding.severity)
+            self.assertEqual(244, finding.cwe)
+            self.assertEqual("/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage1Activity.java", finding.file_path)
+            self.assertEqual(54, finding.line)
+            self.assertEqual("udB1urKobWKTYYlRQbAAub1yRAc=", finding.unique_id_from_tool)

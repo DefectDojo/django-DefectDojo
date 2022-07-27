@@ -3,7 +3,6 @@ import logging
 
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.utils import timezone
 from dojo.models import Engagement
 import dojo.jira_link.helper as jira_helper
 
@@ -13,7 +12,6 @@ logger = logging.getLogger(__name__)
 def close_engagement(eng):
     eng.active = False
     eng.status = 'Completed'
-    eng.updated = timezone.now()
     eng.save()
 
     if jira_helper.get_jira_project(eng):

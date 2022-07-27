@@ -36,19 +36,19 @@ class AnchoreGrypeParser(object):
                 vuln_fix_versions = vulnerability['fix'].get('versions')
             vuln_cvss = vulnerability.get('cvss')
 
-            rel_id = None
             rel_datasource = None
             rel_urls = None
             rel_description = None
             rel_cvss = None
+            vulnerability_ids = None
             related_vulnerabilities = item.get('relatedVulnerabilities')
             if related_vulnerabilities:
                 related_vulnerability = related_vulnerabilities[0]
-                rel_id = related_vulnerability.get('id')
                 rel_datasource = related_vulnerability.get('dataSource')
                 rel_urls = related_vulnerability.get('urls')
                 rel_description = related_vulnerability.get('description')
                 rel_cvss = related_vulnerability.get('cvss')
+            vulnerability_ids = self.get_vulnerability_ids(vuln_id, related_vulnerabilities)
 
             matches = item['matchDetails']
 
@@ -56,18 +56,18 @@ class AnchoreGrypeParser(object):
             artifact_name = artifact.get('name')
             artifact_version = artifact.get('version')
             artifact_purl = artifact.get('purl')
+            artifact_location = artifact.get('locations')
+            if artifact_location and len(artifact_location) > 0 and artifact_location[0].get('path'):
+                file_path = artifact_location[0].get('path')
 
-            cve = self.get_cve(vuln_id, rel_id)
-            finding_title = f'{cve} in {artifact_name}:{artifact_version}'
+            finding_title = f'{vuln_id} in {artifact_name}:{artifact_version}'
 
             finding_tags = None
-            finding_description = f'**Vulnerability Id:** {vuln_id}'
+            finding_description = ''
             if vuln_namespace:
-                finding_description += f'\n**Vulnerability Namespace:** {vuln_namespace}'
+                finding_description += f'**Vulnerability Namespace:** {vuln_namespace}'
             if vuln_description:
                 finding_description += f'\n**Vulnerability Description:** {vuln_description}'
-            if rel_id and rel_id != vuln_id:
-                finding_description += f'\n**Related Vulnerability Id:** {rel_id}'
             if rel_description and rel_description != vuln_description:
                 finding_description += f'\n**Related Vulnerability Description:** {rel_description}'
             if matches:
@@ -87,11 +87,6 @@ class AnchoreGrypeParser(object):
                             finding_tags.append(tag)
             if artifact_purl:
                 finding_description += f'\n**Package URL:** {artifact_purl}'
-
-            if cve.startswith('CVE'):
-                finding_cve = cve
-            else:
-                finding_cve = None
 
             finding_mitigation = None
             if vuln_fix_versions:
@@ -142,7 +137,6 @@ class AnchoreGrypeParser(object):
                 dupes[dupe_key] = Finding(
                             title=finding_title,
                             description=finding_description,
-                            cve=finding_cve,
                             cwe=1352,
                             cvssv3=finding_cvss3,
                             severity=vuln_severity,
@@ -155,7 +149,9 @@ class AnchoreGrypeParser(object):
                             static_finding=True,
                             dynamic_finding=False,
                             nb_occurences=1,
+                            file_path=file_path,
                         )
+                dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
 
         return list(dupes.values())
 
@@ -167,14 +163,6 @@ class AnchoreGrypeParser(object):
         else:
             return val.title()
 
-    def get_cve(self, vuln_id, rel_id):
-        if vuln_id and vuln_id.startswith('CVE'):
-            return vuln_id
-        elif rel_id and rel_id.startswith('CVE'):
-            return rel_id
-        else:
-            return vuln_id
-
     def get_cvss(self, cvss):
         if cvss:
             for cvss_item in cvss:
@@ -183,3 +171,16 @@ class AnchoreGrypeParser(object):
                 if len(cvss_objects) > 0 and type(cvss_objects[0]) == CVSS3:
                     return vector
         return None
+
+    def get_vulnerability_ids(self, vuln_id, related_vulnerabilities):
+        vulnerability_ids = list()
+        if vuln_id:
+            vulnerability_ids.append(vuln_id)
+        if related_vulnerabilities:
+            for related_vulnerability in related_vulnerabilities:
+                if related_vulnerability.get('id'):
+                    vulnerability_ids.append(related_vulnerability.get('id'))
+        if vulnerability_ids:
+            return vulnerability_ids
+        else:
+            return None

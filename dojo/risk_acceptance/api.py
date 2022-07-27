@@ -10,18 +10,21 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from dojo.api_v2.serializers import RiskAcceptanceSerializer
-from dojo.models import Risk_Acceptance, User
+from dojo.models import Risk_Acceptance, User, Vulnerability_Id
 from django.utils import timezone
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
 
 
-AcceptedRisk = NamedTuple('AcceptedRisk', (('cve', str), ('justification', str), ('accepted_by', str)))
+AcceptedRisk = NamedTuple('AcceptedRisk', (('vulnerability_id', str), ('justification', str), ('accepted_by', str)))
 
 
 class AcceptedRiskSerializer(serializers.Serializer):
-    cve = serializers.CharField(max_length=28, label='CVE', help_text='CVE or vulnerability id to accept findings for')
-    justification = serializers.CharField(help_text='Justification for accepting findings with this CVE')
+    vulnerability_id = serializers.CharField(
+        max_length=50,
+        label='Vulnerability Id',
+        help_text='An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposure (CVE) or from other sources.')
+    justification = serializers.CharField(help_text='Justification for accepting findings with this vulnerability id')
     accepted_by = serializers.CharField(max_length=200, help_text='Name or email of person who accepts the risk')
 
     def create(self, validated_data):
@@ -91,11 +94,14 @@ class AcceptedFindingsMixin(ABC):
 def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, owner: User):
     accepted = []
     for risk in accepted_risks:
-        findings = base_findings.filter(cve=risk.cve)
+        vulnerability_ids = Vulnerability_Id.objects \
+            .filter(vulnerability_id=risk.vulnerability_id) \
+            .values('finding')
+        findings = base_findings.filter(id__in=vulnerability_ids)
         if findings.exists():
-            # TODO we could use risk.cve to name the risk_acceptance, but would need to check for existing risk_acceptances in that case
+            # TODO we could use risk.vulnerability_id to name the risk_acceptance, but would need to check for existing risk_acceptances in that case
             # so for now we add some timestamp based suffix
-            name = risk.cve + ' via api at ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')
+            name = risk.vulnerability_id + ' via api at ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')
             acceptance = Risk_Acceptance.objects.create(owner=owner, name=name[:100],
                                                         decision=Risk_Acceptance.TREATMENT_ACCEPT,
                                                         decision_details=risk.justification,

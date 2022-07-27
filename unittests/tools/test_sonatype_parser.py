@@ -10,6 +10,8 @@ class TestSonatypeParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
+        self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2016-2402", findings[0].unsaved_vulnerability_ids[0])
 
     def test_parse_file_with_many_vulns(self):
         testfile = open("unittests/scans/sonatype/many_vulns.json")

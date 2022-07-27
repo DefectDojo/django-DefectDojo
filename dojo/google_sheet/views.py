@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 @sensitive_post_parameters()
-@user_is_configuration_authorized('dojo.change_google_sheet', 'superuser')
+@user_is_configuration_authorized('dojo.change_google_sheet')
 def configure_google_sheets(request):
     fields = Finding._meta.fields
     system_settings = get_object_or_404(System_Settings, id=1)
@@ -225,7 +225,7 @@ def export_to_sheet(request, tid):
             errors = sync['errors']
             sheet_title = sync['sheet_title']
             if len(errors) > 0:
-                product_tab = Product_Tab(test.engagement.product.id, title="Syncing Errors", tab="engagements")
+                product_tab = Product_Tab(test.engagement.product, title="Syncing Errors", tab="engagements")
                 product_tab.setEngagement(test.engagement)
                 spreadsheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
                 return render(

@@ -5,7 +5,7 @@
 # Dockerfile.django to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.8.12-slim-bullseye@sha256:3d3edc52cfae3ed6fb8303559f10184f962a8069194b2dee93baaac66ebedeb5 as base
+FROM python:3.8.13-slim-bullseye@sha256:0e07cc072353e6b10de910d8acffa020a42467112ae6610aa90d6a3c56a74911 as base
 FROM base as build
 WORKDIR /app
 RUN \
@@ -72,7 +72,7 @@ COPY dojo/ ./dojo/
 
 RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
 
-FROM nginx:1.21.6-alpine@sha256:da9c94bec1da829ebd52431a84502ec471c8e548ffb2cedbf36260fd9bd1d4d3
+FROM nginx:1.23.1-alpine@sha256:87fb6f4040ffd52dd616f360b8520ed4482930ea75417182ad3f76c4aaadf24f
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/

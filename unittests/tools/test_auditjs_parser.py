@@ -53,7 +53,8 @@ class TestAuditJSParser(DojoTestCase):
             findings[0].description)
         self.assertEqual("[CVE-2018-3717] connect node module before 2.14.0 suffers from a Cross-Site Scripting (XSS) vuln...",
             findings[0].title)
-        self.assertEqual("CVE-2018-3717", findings[0].cve)
+        self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2018-3717", findings[0].unsaved_vulnerability_ids[0])
         self.assertEqual("https://ossindex.sonatype.org/vulnerability/7df31426-09a2-4b5f-a0ab-acc699023c57?component-type=npm&component-name=connect&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
             findings[0].references)
         self.assertEqual(400, findings[4].cwe)
@@ -67,3 +68,12 @@ class TestAuditJSParser(DojoTestCase):
             self.assertTrue(
                 "Invalid JSON format. Are you sure you used --json option ?" in str(context.exception)
             )
+
+    def test_auditjs_parser_with_package_name_has_namespace(self):
+        testfile = open("unittests/scans/auditjs/auditjs_with_package_namespace.json")
+        parser = AuditJSParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+
+        self.assertEqual(1, len(findings))
+        self.assertEqual("%40next/env", findings[0].component_name)
