@@ -86,3 +86,4 @@ class UserTest(APITestCase):
         }, format='json')
         self.assertEqual(r.status_code, 400, r.content[:1000])
         self.assertIn("Update of password though API is not allowed", r.content.decode("utf-8"))
+ # TODO test is disabled

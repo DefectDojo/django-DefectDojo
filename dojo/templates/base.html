@@ -159,12 +159,14 @@
                                                 {{ request.user.username }}
                                             </a>
                                         </li>
-                                        <li>
-                                            <a href="{% url 'api_v2_key' %}">
-                                                <i class="fa fa-fw fa-key"></i>
-                                                {% trans "API v2 Key" %}
-                                            </a>
-                                        </li>
+                                        {% if API_TOKENS_ENABLED %}
+                                          <li>
+                                              <a href="{% url 'api_v2_key' %}">
+                                                  <i class="fa fa-fw fa-key"></i>
+                                                  {% trans "API v2 Key" %}
+                                              </a>
+                                          </li>
+                                        {% endif %}
                                     {% endif %}
                                     <li>
                                         <a href="{% url 'api_v2_schema' %}" target="_blank">
