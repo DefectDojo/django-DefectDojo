@@ -23,7 +23,7 @@ djangorestframework==3.13.1
 gunicorn==20.1.0
 html2text==2020.1.16
 humanize==4.2.3
-jira==3.0.1
+jira==3.3.1
 PyGithub==1.55
 lxml==4.9.1
 Markdown==3.4.1
