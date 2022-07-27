@@ -8,13 +8,27 @@ logger = logging.getLogger(__name__)
 
 
 def save_existing_sla(apps, schema_editor):
+    system_settings_model = apps.get_model('dojo', 'System_Settings')
+
+    try:
+        system_settings = system_settings_model.objects.get()
+        critical = system_settings.sla_critical,
+        high = system_settings.sla_high,
+        medium = system_settings.sla_medium,
+        low = system_settings.sla_low
+    except:
+        critical = 7
+        high = 30
+        medium = 90
+        low = 120
+
     SLA_Configuration = apps.get_model('dojo', 'SLA_Configuration')
     SLA_Configuration.objects.create(name='Default',
                                      description='The Default SLA Configuration. Products not using an explicit SLA Configuration will use this one.',
-                                     critical=7,
-                                     high=30,
-                                     medium=90,
-                                     low=120)
+                                     critical=critical,
+                                     high=high,
+                                     medium=medium,
+                                     low=low)
 
 
 class Migration(migrations.Migration):
