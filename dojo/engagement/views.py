@@ -368,7 +368,7 @@ def copy_engagement(request, eid):
     return render(request, 'dojo/copy_object.html', {
         'source': engagement,
         'source_label': 'Engagement',
-        'destination_label': 'Engagement',
+        'destination_label': 'Product',
         'product_tab': product_tab,
         'form': form,
     })
