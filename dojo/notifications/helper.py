@@ -133,6 +133,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     notification_message = None
     try:
         notification_message = render_to_string(template, kwargs)
+        logger.debug("Rendering from the template %s", template)
     except TemplateDoesNotExist:
         logger.debug('template not found or not implemented yet: %s', template)
     except Exception as e:
