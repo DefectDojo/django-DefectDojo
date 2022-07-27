@@ -496,10 +496,10 @@ def check_auto_create_permission(user, product, product_name, engagement, engage
 
     if product and product_name and engagement_name:
         if not user_has_permission(user, product, Permissions.Engagement_Add):
-            raise PermissionDenied("No permission to create engagements in product '%s'", product_name)
+            raise PermissionDenied("No permission to create engagements in product '%s'" % product_name)
 
         if not user_has_permission(user, product, Permissions.Import_Scan_Result):
-            raise PermissionDenied("No permission to import scans into product '%s'", product_name)
+            raise PermissionDenied("No permission to import scans into product '%s'" % product_name)
 
         # all good
         return True
@@ -510,12 +510,12 @@ def check_auto_create_permission(user, product, product_name, engagement, engage
 
         if not product_type:
             if not user_has_global_permission(user, Permissions.Product_Type_Add):
-                raise PermissionDenied("No permission to create product_type '%s'", product_type_name)
+                raise PermissionDenied("No permission to create product_type '%s'" % product_type_name)
             # new product type can be created with current user as owner, so all objects in it can be created as well
             return True
         else:
             if not user_has_permission(user, product_type, Permissions.Product_Type_Add_Product):
-                raise PermissionDenied("No permission to create products in product_type '%s'", product_type)
+                raise PermissionDenied("No permission to create products in product_type '%s'" % product_type)
 
         # product can be created, so objects in it can be created as well
         return True
