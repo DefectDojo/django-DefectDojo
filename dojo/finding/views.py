@@ -1,52 +1,54 @@
 # #  findings
 import base64
-import copy
 import json
 import logging
 import mimetypes
 from collections import OrderedDict, defaultdict
-from itertools import chain
-
+from django.db import models
+from django.db.models.functions import Length
 from django.conf import settings
 from django.contrib import messages
-from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db import models
-from django.db.models import Count, Q, QuerySet
-from django.db.models.functions import Length
-from django.db.models.query import Prefetch
-from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseRedirect, JsonResponse, \
-    StreamingHttpResponse
-from django.shortcuts import get_object_or_404, render
-from django.template.defaultfilters import pluralize
+from django.core import serializers
 from django.urls import reverse
-from django.utils import formats, timezone
+from django.http import Http404, HttpResponse, JsonResponse
+from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import StreamingHttpResponse
+from django.shortcuts import render, get_object_or_404
+from django.utils import formats
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 from django.views.decorators.http import require_POST
+from itertools import chain
 from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
+from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
+import copy
+from dojo.filters import TemplateFindingFilter, SimilarFindingFilter, FindingFilter, AcceptedFindingFilter
+from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
+    DeleteFindingTemplateForm, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
+    DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
+    FindingFormID, FindingBulkUpdateForm, MergeFindings, CopyFindingForm
+from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
+    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, Endpoint_Status, \
+    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, Test_Import_Finding_Action, User, Engagement, Vulnerability_Id_Template
+from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
+    get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, \
+    redirect_to_return_url_or_else, get_return_url, add_external_issue, update_external_issue, \
+    get_words_for_field
+from dojo.notifications.helper import create_notification
 
-import dojo.finding.helper as finding_helper
+from django.template.defaultfilters import pluralize
+from django.db.models import Q, QuerySet, Count
+from django.db.models.query import Prefetch
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
+import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.filters import AcceptedFindingFilter, FindingFilter, SimilarFindingFilter, TemplateFindingFilter
 from dojo.finding.queries import get_authorized_findings
-from dojo.forms import ApplyFindingTemplateForm, ClearFindingReviewForm, CloseFindingForm, DefectFindingForm, \
-    DeleteFindingForm, DeleteFindingTemplateForm, DeleteStubFindingForm, EditPlannedRemediationDateFindingForm, \
-    FindingBulkUpdateForm, FindingForm, FindingFormID, FindingTemplateForm, GITHUBFindingForm, JIRAFindingForm, \
-    MergeFindings, NoteForm, PromoteFindingForm, ReviewFindingForm, StubFindingForm, TypedNoteForm
-from dojo.models import BurpRawRequestResponse, Cred_Mapping, Dojo_User, Endpoint, Endpoint_Status, Engagement, \
-    FileAccessToken, Finding, Finding_Group, Finding_Template, GITHUB_Issue, GITHUB_PKey, IMPORT_UNTOUCHED_FINDING, \
-    NoteHistory, Note_Type, Notes, Product, Stub_Finding, Test, Test_Import_Finding_Action, User, \
-    Vulnerability_Id_Template
-from dojo.notifications.helper import create_notification
-from dojo.utils import FileIterWrapper, Product_Tab, add_breadcrumb, add_error_message_to_response, add_external_issue, \
-    add_field_errors_to_response, add_success_message_to_response, apply_cwe_to_template, calculate_grade, \
-    close_external_issue, get_page_items, get_return_url, get_system_setting, get_words_for_field, \
-    process_notifications, redirect, redirect_to_return_url_or_else, reopen_external_issue, update_external_issue
+from dojo.test.queries import get_authorized_tests
 
 logger = logging.getLogger(__name__)
 
@@ -663,6 +665,50 @@ def delete_finding(request, fid):
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+def copy_finding(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    product = finding.test.engagement.product
+    tests = get_authorized_tests(Permissions.Test_Edit).filter(engagement=finding.test.engagement)
+    form = CopyFindingForm(tests=tests)
+
+    if request.method == 'POST':
+        form = CopyFindingForm(request.POST, tests=tests)
+        if form.is_valid():
+            test = form.cleaned_data.get('test')
+            product = finding.test.engagement.product
+            finding_copy = finding.copy(test=test)
+            calculate_grade(product)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Finding Copied successfully.',
+                extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Copying of %s' % finding.title,
+                                description='The finding "%s" was copied by %s to %s' % (finding.title, request.user, test.title),
+                                product=product,
+                                url=request.build_absolute_uri(reverse('finding_copy', args=(finding_copy.unsaved_vulnerability_ids, ))),
+                                recipients=[finding.test.engagement.lead],
+                                icon="exclamation-triangle")
+            return redirect_to_return_url_or_else(request, reverse('view_test', args=(test.id,)))
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Unable to copy finding, please try again.',
+                extra_tags='alert-danger')
+
+    product_tab = Product_Tab(product, title="Copy Finding", tab="findings")
+    return render(request, 'dojo/copy_object.html', {
+        'source': finding,
+        'source_label': 'Finding',
+        'destination_label': 'Test',
+        'product_tab': product_tab,
+        'form': form,
+    })
+
+
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # finding = finding._detag_to_serializable()
@@ -1056,7 +1102,7 @@ def clear_finding_review(request, fid):
     })
 
 
-@user_is_configuration_authorized('dojo.add_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.add_finding_template')
 def mktemplate(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     templates = Finding_Template.objects.filter(title=finding.title)
@@ -1098,7 +1144,7 @@ def mktemplate(request, fid):
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
-@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.view_finding_template')
 def find_template_to_apply(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
@@ -1400,7 +1446,7 @@ def promote_to_finding(request, fid):
         })
 
 
-@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.view_finding_template')
 def templates(request):
     templates = Finding_Template.objects.all().order_by('cwe')
     templates = TemplateFindingFilter(request.GET, queryset=templates)
@@ -1418,7 +1464,7 @@ def templates(request):
         })
 
 
-@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.view_finding_template')
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize('json', Finding_Template.objects.all())
     return HttpResponse(leads_as_json, content_type='json')
@@ -1469,7 +1515,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
     return count
 
 
-@user_is_configuration_authorized('dojo.add_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.add_finding_template')
 def add_template(request):
     form = FindingTemplateForm()
     if request.method == 'POST':
@@ -1504,7 +1550,7 @@ def add_template(request):
     })
 
 
-@user_is_configuration_authorized('dojo.change_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.change_finding_template')
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = FindingTemplateForm(
@@ -1550,7 +1596,7 @@ def edit_template(request, tid):
     })
 
 
-@user_is_configuration_authorized('dojo.delete_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.delete_finding_template')
 def delete_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
 
@@ -1661,7 +1707,7 @@ def merge_finding_product(request, pid):
 
                 if finding_to_merge_into not in findings_to_merge:
                     for finding in findings_to_merge.exclude(pk=finding_to_merge_into.pk):
-                        notes_entry = "{} {} ({}),".format(notes_entry, finding.title, finding.id)
+                        notes_entry = "{}\n- {} ({}),".format(notes_entry, finding.title, finding.id)
                         if finding.static_finding:
                             static = finding.static_finding
 
@@ -1751,7 +1797,7 @@ def merge_finding_product(request, pid):
                         finding_action = "deleted"
                         findings_to_merge.delete()
 
-                    notes_entry = "Finding consists of merged findings from the following findings: {} which have been {}.".format(notes_entry[:-1], finding_action)
+                    notes_entry = "Finding consists of merged findings from the following findings which have been {}: {}".format(finding_action, notes_entry[:-1])
                     note = Notes(entry=notes_entry, author=request.user)
                     note.save()
                     finding_to_merge_into.notes.add(note)
@@ -1913,7 +1959,7 @@ def finding_bulk_update_all(request, pid=None):
 
                 if form.cleaned_data['finding_group_add']:
                     logger.debug('finding_group_add checked!')
-                    fgid = form.cleaned_data['add_to_finding_group']
+                    fgid = form.cleaned_data['add_to_finding_group_id']
                     finding_group = Finding_Group.objects.get(id=fgid)
                     finding_group, added, skipped = finding_helper.add_to_finding_group(finding_group, finds)
 
@@ -2005,13 +2051,11 @@ def finding_bulk_update_all(request, pid=None):
                             jira_helper.push_to_jira(group)
                             success_count += 1
 
-                        jira_helper.push_to_jira(group)
-
                 for error_message, error_count in error_counts.items():
                     add_error_message_to_response('%i finding groups could not be pushed to JIRA: %s' % (error_count, error_message))
 
                 if success_count > 0:
-                    add_success_message_to_response('%i finding groups pushed to JIRA succesfully' % success_count)
+                    add_success_message_to_response('%i finding groups pushed to JIRA successfully' % success_count)
 
                 # refresh from db
                 finds = finds.all()
@@ -2051,7 +2095,7 @@ def finding_bulk_update_all(request, pid=None):
                     add_error_message_to_response('%i findings could not be pushed to JIRA: %s' % (error_count, error_message))
 
                 if success_count > 0:
-                    add_success_message_to_response('%i findings pushed to JIRA succesfully' % success_count)
+                    add_success_message_to_response('%i findings pushed to JIRA successfully' % success_count)
 
                 if updated_find_count > 0:
                     messages.add_message(request,

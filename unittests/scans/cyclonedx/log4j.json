@@ -1,0 +1,562 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:b93c5d57-4484-44ba-830e-dae7ef559120",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2022-07-22T09:45:32+01:00",
+    "tools": [
+      {
+        "vendor": "anchore",
+        "name": "grype",
+        "version": "0.41.0"
+      }
+    ],
+    "component": {
+      "type": "file",
+      "name": "./configuration/.m2/repository/org/apache/logging/log4j/log4j-core/2.13.2"
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "pkg:maven/org.apache.logging.log4j/log4j-core@2.13.2?package-id=5f39f8a11642bede",
+      "type": "library",
+      "name": "log4j-core",
+      "version": "2.13.2",
+      "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.13.2"
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "id": "CVE-2021-44228",
+      "source": {
+        "name": "nvd:cpe",
+        "url": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228"
+      },
+      "ratings": [
+        {
+          "severity": "critical"
+        },
+        {
+          "score": 10,
+          "method": "CVSSv2",
+          "vector": "AV:N/AC:M/Au:N/C:C/I:C/A:C"
+        },
+        {
+          "score": 10,
+          "method": "CVSSv31",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H"
+        }
+      ],
+      "description": "Apache Log4j2 2.0-beta9 through 2.15.0 (excluding security releases 2.12.2, 2.12.3, and 2.3.1) JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled. From log4j 2.15.0, this behavior has been disabled by default. From version 2.16.0 (along with 2.12.2, 2.12.3, and 2.3.1), this functionality has been completely removed. Note that this vulnerability is specific to log4j-core and does not affect log4net, log4cxx, or other Apache Logging Services projects.",
+      "advisories": [
+        {
+          "url": "https://logging.apache.org/log4j/2.x/security.html"
+        },
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/10/1"
+        },
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/10/2"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165225/Apache-Log4j2-2.14.1-Remote-Code-Execution.html"
+        },
+        {
+          "url": "https://security.netapp.com/advisory/ntap-20211210-0007/"
+        },
+        {
+          "url": "https://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-apache-log4j-qRuKNEbd"
+        },
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/10/3"
+        },
+        {
+          "url": "https://psirt.global.sonicwall.com/vuln-detail/SNWLID-2021-0032"
+        },
+        {
+          "url": "https://www.oracle.com/security-alerts/alert-cve-2021-44228.html"
+        },
+        {
+          "url": "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/VU57UJDCFIASIO35GC55JMKSRXJMCDFM/"
+        },
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/13/1"
+        },
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/13/2"
+        },
+        {
+          "url": "https://twitter.com/kurtseifried/status/1469345530182455296"
+        },
+        {
+          "url": "https://lists.debian.org/debian-lts-announce/2021/12/msg00007.html"
+        },
+        {
+          "url": "https://www.debian.org/security/2021/dsa-5020"
+        },
+        {
+          "url": "https://cert-portal.siemens.com/productcert/pdf/ssa-661247.pdf"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165270/Apache-Log4j2-2.14.1-Remote-Code-Execution.html"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165260/VMware-Security-Advisory-2021-0028.html"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165261/Apache-Log4j2-2.14.1-Information-Disclosure.html"
+        },
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/14/4"
+        },
+        {
+          "url": "https://www.intel.com/content/www/us/en/security-center/advisory/intel-sa-00646.html"
+        },
+        {
+          "url": "https://www.kb.cert.org/vuls/id/930724"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165282/Log4j-Payload-Generator.html"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165281/Log4j2-Log4Shell-Regexes.html"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165306/L4sh-Log4j-Remote-Code-Execution.html"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165307/Log4j-Remote-Code-Execution-Word-Bypassing.html"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165311/log4j-scan-Extensive-Scanner.html"
+        },
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/15/3"
+        },
+        {
+          "url": "https://cert-portal.siemens.com/productcert/pdf/ssa-714170.pdf"
+        },
+        {
+          "url": "https://msrc-blog.microsoft.com/2021/12/11/microsofts-response-to-cve-2021-44228-apache-log4j2/"
+        },
+        {
+          "url": "https://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-apache-log4j-qRuKNEbd"
+        },
+        {
+          "url": "https://cert-portal.siemens.com/productcert/pdf/ssa-479842.pdf"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165371/VMware-Security-Advisory-2021-0028.4.html"
+        },
+        {
+          "url": "https://cert-portal.siemens.com/productcert/pdf/ssa-397453.pdf"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165532/Log4Shell-HTTP-Header-Injection.html"
+        },
+        {
+          "url": "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/M5CSVUNV4HWZZXGOKNSK6L7RPM7BOKIB/"
+        },
+        {
+          "url": "https://github.com/cisagov/log4j-affected-db/blob/develop/SOFTWARE-LIST.md"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165642/VMware-vCenter-Server-Unauthenticated-Log4Shell-JNDI-Injection-Remote-Code-Execution.html"
+        },
+        {
+          "url": "http://packetstormsecurity.com/files/165673/UniFi-Network-Application-Unauthenticated-Log4Shell-Remote-Code-Execution.html"
+        },
+        {
+          "url": "https://www.oracle.com/security-alerts/cpujan2022.html"
+        },
+        {
+          "url": "https://github.com/cisagov/log4j-affected-db"
+        },
+        {
+          "url": "https://www.bentley.com/en/common-vulnerability-exposure/be-2022-0001"
+        },
+        {
+          "url": "https://support.apple.com/kb/HT213189"
+        },
+        {
+          "url": "http://seclists.org/fulldisclosure/2022/Mar/23"
+        },
+        {
+          "url": "https://www.oracle.com/security-alerts/cpuapr2022.html"
+        },
+        {
+          "url": "https://github.com/nu11secur1ty/CVE-mitre/tree/main/CVE-2021-44228"
+        },
+        {
+          "url": "https://www.nu11secur1ty.com/2021/12/cve-2021-44228.html"
+        }
+      ],
+      "analysis": {
+        "state": "in_triage"
+      },
+      "affects": [
+        {
+          "ref": "pkg:maven/org.apache.logging.log4j/log4j-core@2.13.2?package-id=5f39f8a11642bede"
+        }
+      ],
+      "properties": []
+    },
+    {
+      "id": "CVE-2021-44832",
+      "source": {
+        "name": "nvd:cpe",
+        "url": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44832"
+      },
+      "ratings": [
+        {
+          "severity": "medium"
+        },
+        {
+          "score": 6.6,
+          "method": "CVSSv2",
+          "vector": "AV:N/AC:M/Au:S/C:C/I:C/A:C"
+        },
+        {
+          "score": 6.6,
+          "method": "CVSSv31",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H"
+        }
+      ],
+      "description": "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2.",
+      "advisories": [
+        {
+          "url": "https://lists.apache.org/thread/s1o5vlo78ypqxnzn6p8zf6t9shtq5143"
+        },
+        {
+          "url": "https://issues.apache.org/jira/browse/LOG4J2-3293"
+        },
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/28/1"
+        },
+        {
+          "url": "https://cert-portal.siemens.com/productcert/pdf/ssa-784507.pdf"
+        },
+        {
+          "url": "https://lists.debian.org/debian-lts-announce/2021/12/msg00036.html"
+        },
+        {
+          "url": "https://security.netapp.com/advisory/ntap-20220104-0001/"
+        },
+        {
+          "url": "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/T57MPJUW3MA6QGWZRTMCHHMMPQNVKGFC/"
+        },
+        {
+          "url": "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/EVV25FXL4FU5X6X5BSL7RLQ7T6F65MRA/"
+        },
+        {
+          "url": "https://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-apache-log4j-qRuKNEbd"
+        },
+        {
+          "url": "https://www.oracle.com/security-alerts/cpujan2022.html"
+        },
+        {
+          "url": "https://www.oracle.com/security-alerts/cpuapr2022.html"
+        }
+      ],
+      "analysis": {
+        "state": "in_triage"
+      },
+      "affects": [
+        {
+          "ref": "pkg:maven/org.apache.logging.log4j/log4j-core@2.13.2?package-id=5f39f8a11642bede"
+        }
+      ],
+      "properties": []
+    },
+    {
+      "id": "CVE-2021-45046",
+      "source": {
+        "name": "nvd:cpe",
+        "url": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45046"
+      },
+      "ratings": [
+        {
+          "severity": "critical"
+        },
+        {
+          "score": 9,
+          "method": "CVSSv2",
+          "vector": "AV:N/AC:H/Au:N/C:P/I:P/A:P"
+        },
+        {
+          "score": 9,
+          "method": "CVSSv31",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H"
+        }
+      ],
+      "description": "It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. This could allows attackers with control over Thread Context Map (MDC) input data when the logging configuration uses a non-default Pattern Layout with either a Context Lookup (for example, $${ctx:loginId}) or a Thread Context Map pattern (%X, %mdc, or %MDC) to craft malicious input data using a JNDI Lookup pattern resulting in an information leak and remote code execution in some environments and local code execution in all environments. Log4j 2.16.0 (Java 8) and 2.12.2 (Java 7) fix this issue by removing support for message lookup patterns and disabling JNDI functionality by default.",
+      "advisories": [
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/14/4"
+        },
+        {
+          "url": "https://logging.apache.org/log4j/2.x/security.html"
+        },
+        {
+          "url": "https://www.cve.org/CVERecord?id=CVE-2021-44228"
+        },
+        {
+          "url": "https://www.intel.com/content/www/us/en/security-center/advisory/intel-sa-00646.html"
+        },
+        {
+          "url": "https://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-apache-log4j-qRuKNEbd"
+        },
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/15/3"
+        },
+        {
+          "url": "https://cert-portal.siemens.com/productcert/pdf/ssa-661247.pdf"
+        },
+        {
+          "url": "https://www.kb.cert.org/vuls/id/930724"
+        },
+        {
+          "url": "https://cert-portal.siemens.com/productcert/pdf/ssa-714170.pdf"
+        },
+        {
+          "url": "https://www.debian.org/security/2021/dsa-5022"
+        },
+        {
+          "url": "https://www.oracle.com/security-alerts/alert-cve-2021-44228.html"
+        },
+        {
+          "url": "https://psirt.global.sonicwall.com/vuln-detail/SNWLID-2021-0032"
+        },
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/18/1"
+        },
+        {
+          "url": "https://cert-portal.siemens.com/productcert/pdf/ssa-397453.pdf"
+        },
+        {
+          "url": "https://cert-portal.siemens.com/productcert/pdf/ssa-479842.pdf"
+        },
+        {
+          "url": "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/EOKPQGV24RRBBI4TBZUDQMM4MEH7MXCY/"
+        },
+        {
+          "url": "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/SIG7FZULMNK2XF6FZRU4VWYDQXNMUGAJ/"
+        },
+        {
+          "url": "https://www.oracle.com/security-alerts/cpujan2022.html"
+        },
+        {
+          "url": "https://www.oracle.com/security-alerts/cpuapr2022.html"
+        }
+      ],
+      "analysis": {
+        "state": "in_triage"
+      },
+      "affects": [
+        {
+          "ref": "pkg:maven/org.apache.logging.log4j/log4j-core@2.13.2?package-id=5f39f8a11642bede"
+        }
+      ],
+      "properties": []
+    },
+    {
+      "id": "CVE-2021-45105",
+      "source": {
+        "name": "nvd:cpe",
+        "url": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45105"
+      },
+      "ratings": [
+        {
+          "severity": "medium"
+        },
+        {
+          "score": 5.9,
+          "method": "CVSSv2",
+          "vector": "AV:N/AC:M/Au:N/C:N/I:N/A:P"
+        },
+        {
+          "score": 5.9,
+          "method": "CVSSv31",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        }
+      ],
+      "description": "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 (excluding 2.12.3 and 2.3.1) did not protect from uncontrolled recursion from self-referential lookups. This allows an attacker with control over Thread Context Map data to cause a denial of service when a crafted string is interpreted. This issue was fixed in Log4j 2.17.0, 2.12.3, and 2.3.1.",
+      "advisories": [
+        {
+          "url": "https://logging.apache.org/log4j/2.x/security.html"
+        },
+        {
+          "url": "https://security.netapp.com/advisory/ntap-20211218-0001/"
+        },
+        {
+          "url": "http://www.openwall.com/lists/oss-security/2021/12/19/1"
+        },
+        {
+          "url": "https://www.debian.org/security/2021/dsa-5024"
+        },
+        {
+          "url": "https://www.zerodayinitiative.com/advisories/ZDI-21-1541/"
+        },
+        {
+          "url": "https://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-apache-log4j-qRuKNEbd"
+        },
+        {
+          "url": "https://cert-portal.siemens.com/productcert/pdf/ssa-501673.pdf"
+        },
+        {
+          "url": "https://www.kb.cert.org/vuls/id/930724"
+        },
+        {
+          "url": "https://psirt.global.sonicwall.com/vuln-detail/SNWLID-2021-0032"
+        },
+        {
+          "url": "https://cert-portal.siemens.com/productcert/pdf/ssa-479842.pdf"
+        },
+        {
+          "url": "https://www.oracle.com/security-alerts/cpujan2022.html"
+        },
+        {
+          "url": "https://www.oracle.com/security-alerts/cpuapr2022.html"
+        }
+      ],
+      "analysis": {
+        "state": "in_triage"
+      },
+      "affects": [
+        {
+          "ref": "pkg:maven/org.apache.logging.log4j/log4j-core@2.13.2?package-id=5f39f8a11642bede"
+        }
+      ],
+      "properties": []
+    },
+    {
+      "id": "GHSA-7rjr-3q55-vv33",
+      "source": {
+        "name": "github:language:java",
+        "url": "https://github.com/advisories/GHSA-7rjr-3q55-vv33"
+      },
+      "ratings": [
+        {
+          "severity": "critical"
+        }
+      ],
+      "description": "Incomplete fix for Apache Log4j vulnerability",
+      "advisories": [
+        {
+          "url": "https://github.com/advisories/GHSA-7rjr-3q55-vv33"
+        }
+      ],
+      "analysis": {
+        "state": "in_triage"
+      },
+      "affects": [
+        {
+          "ref": "pkg:maven/org.apache.logging.log4j/log4j-core@2.13.2?package-id=5f39f8a11642bede"
+        }
+      ],
+      "properties": [
+        {
+          "name": "grype:fixed_versions",
+          "value": "2.16.0"
+        }
+      ]
+    },
+    {
+      "id": "GHSA-8489-44mv-ggj8",
+      "source": {
+        "name": "github:language:java",
+        "url": "https://github.com/advisories/GHSA-8489-44mv-ggj8"
+      },
+      "ratings": [
+        {
+          "severity": "medium"
+        }
+      ],
+      "description": "Improper Input Validation and Injection in Apache Log4j2",
+      "advisories": [
+        {
+          "url": "https://github.com/advisories/GHSA-8489-44mv-ggj8"
+        }
+      ],
+      "analysis": {
+        "state": "in_triage"
+      },
+      "affects": [
+        {
+          "ref": "pkg:maven/org.apache.logging.log4j/log4j-core@2.13.2?package-id=5f39f8a11642bede"
+        }
+      ],
+      "properties": [
+        {
+          "name": "grype:fixed_versions",
+          "value": "2.17.1"
+        }
+      ]
+    },
+    {
+      "id": "GHSA-jfh8-c2jp-5v3q",
+      "source": {
+        "name": "github:language:java",
+        "url": "https://github.com/advisories/GHSA-jfh8-c2jp-5v3q"
+      },
+      "ratings": [
+        {
+          "severity": "critical"
+        }
+      ],
+      "description": "Remote code injection in Log4j",
+      "advisories": [
+        {
+          "url": "https://github.com/advisories/GHSA-jfh8-c2jp-5v3q"
+        }
+      ],
+      "analysis": {
+        "state": "in_triage"
+      },
+      "affects": [
+        {
+          "ref": "pkg:maven/org.apache.logging.log4j/log4j-core@2.13.2?package-id=5f39f8a11642bede"
+        }
+      ],
+      "properties": [
+        {
+          "name": "grype:fixed_versions",
+          "value": "2.15.0"
+        }
+      ]
+    },
+    {
+      "id": "GHSA-p6xc-xr62-6r2g",
+      "source": {
+        "name": "github:language:java",
+        "url": "https://github.com/advisories/GHSA-p6xc-xr62-6r2g"
+      },
+      "ratings": [
+        {
+          "severity": "high"
+        }
+      ],
+      "description": "Improper Input Validation and Uncontrolled Recursion in Apache Log4j2",
+      "advisories": [
+        {
+          "url": "https://github.com/advisories/GHSA-p6xc-xr62-6r2g"
+        }
+      ],
+      "analysis": {
+        "state": "in_triage"
+      },
+      "affects": [
+        {
+          "ref": "pkg:maven/org.apache.logging.log4j/log4j-core@2.13.2?package-id=5f39f8a11642bede"
+        }
+      ],
+      "properties": [
+        {
+          "name": "grype:fixed_versions",
+          "value": "2.17.0"
+        }
+      ]
+    }
+  ]
+}

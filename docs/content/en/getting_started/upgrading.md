@@ -5,20 +5,6 @@ draft: false
 weight: 5
 ---
 
-{{% alert title="Deprecation notice" color="warning" %}}
-Legacy authorization for changing configurations based on staff users will be
-removed with version 2.12.0 / 5. July 2022. If you have set
-`FEATURE_CONFIGURATION_AUTHORIZATION` to `False` in your local configuration,
-remove this local setting and start using the new authorization as described
-in [Configuration permissions]({{< ref "/usage/permissions#configuration-permissions" >}}).
-
-To support the transition, you can run a migration script with ``./manage.py migrate_staff_users``. This script:
-
-* creates a group for all staff users,
-* sets all configuration permissions that staff users had and
-* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to `True`.
-{{% /alert %}}
-
 Docker-compose
 --------------
 
@@ -83,6 +69,29 @@ This requires a one-time rebuild of the Django-Watson search index. Execute the 
 
 `./manage.py buildwatson`
 
+**Upgrade instructions for helm chart with postgres enabled**: The postgres database uses a statefulset by default. Before upgrading the helm chart we have to delete the statefullset and ensure that the pvc is reused, to keep the data. For more information: https://docs.bitnami.com/kubernetes/infrastructure/postgresql/administration/upgrade/ .
+
+```bash
+helm repo update
+helm dependency update ./helm/defectdojo
+
+# obtain name oft the postgres pvc
+export POSTGRESQL_PVC=$(kubectl get pvc -l app.kubernetes.io/instance=defectdojo,role=primary -o jsonpath="{.items[0].metadata.name}")
+
+# delete postgres statefulset
+kubectl delete statefulsets.apps defectdojo-postgresql --namespace default --cascade=orphan
+
+# upgrade
+helm upgrade \
+  defectdojo \
+  ./helm/defectdojo/ \
+  --set primary.persistence.existingClaim=$POSTGRESQL_PVC \
+  ... # add your custom settings
+```
+
+**Further changes:**
+
+Legacy authorization for changing configurations based on staff users has been removed.
 
 ## Upgrading to DefectDojo Version 2.10.x.
 

@@ -65,6 +65,8 @@ urlpatterns = [
         views.clear_finding_review, name='clear_finding_review'),
     url(r'^finding/(?P<fid>\d+)/delete$',
         views.delete_finding, name='delete_finding'),
+    url(r'^finding/(?P<fid>\d+)/copy$',
+        views.copy_finding, name='copy_finding'),
     url(r'^finding/(?P<fid>\d+)/apply_cwe$',
         views.apply_template_cwe, name='apply_template_cwe'),
     url(r'^finding/(?P<fid>\d+)/mktemplate$', views.mktemplate,
