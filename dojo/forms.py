@@ -1128,7 +1128,7 @@ class FindingForm(forms.ModelForm):
 
         queryset = get_authorized_users_for_product_and_product_type(None, self.instance.test.engagement.product, Permissions.Finding_View)
         self.fields['mitigated_by'].choices = self._get_choices(queryset)
-        
+
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
         # if checked, always show to allow unaccept also with full risk acceptance enabled
         # when adding from template, we don't have access to the test. quickfix for now to just hide simple risk acceptance
