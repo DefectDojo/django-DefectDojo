@@ -57,7 +57,7 @@ from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
 Then further down add LDAP settings to the env dict:
 ```python
 # LDAP
-DD_LDAP_SERVER_URI=(str, 'ldap://ldap.mycompany.domain'),
+DD_LDAP_SERVER_URI=(str, 'ldap://ldap.example.com'),
 DD_LDAP_BIND_DN=(str, ''),
 DD_LDAP_BIND_PASSWORD=(str, ''),
 ```
@@ -77,24 +77,26 @@ AUTH_LDAP_USER_ATTR_MAP = {
     "email": "mail",
 }
 ```
+Please make sure to customise all of the LDAP search variables to match your company's configuration.
+
 
 For additional group controls you can add:
 ```python
 # Set up the basic group parameters.
 AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
-    "DC=mycompany,DC=com",
+    "dc=example,dc=com",
     ldap.SCOPE_SUBTREE,
     "(objectClass=groupOfNames)",
 )
 AUTH_LDAP_GROUP_TYPE = GroupOfNamesType(name_attr="cn")
 
 # Simple group restrictions
-AUTH_LDAP_REQUIRE_GROUP = "CN=DD_USER_ACTIVE,DC=mycompany,DC=com"
+AUTH_LDAP_REQUIRE_GROUP = "cn=DD_USER_ACTIVE,ou=Groups,dc=example,dc=com"
 
 AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-    "is_active": "CN=DD_USER_ACTIVE,DC=mycompany,DC=com",
-    "is_staff": "CN=DD_USER_STAFF,DC=mycompany,DC=com",
-    "is_superuser": "CN=DD_USER_ADMIN,DC=mycompany,DC=com",
+    "is_active": "cn=DD_USER_ACTIVE,ou=Groups,dc=example,dc=com",
+    "is_staff": "cn=DD_USER_STAFF,ou=Groups,dc=example,dc=com",
+    "is_superuser": "cn=DD_USER_ADMIN,ou=Groups,dc=example,dc=com",
 }
 ```
 
@@ -108,3 +110,17 @@ AUTHENTICATION_BACKENDS = (
 ```
 
 Read the docs for Django Authentication with LDAP here: https://django-auth-ldap.readthedocs.io/en/latest/
+
+#### docker-compose.yml
+
+In order to pass the variables to the settings.dist.py file via docker, it's a good idea to add these to the docker-compose file.
+
+You can do this by adding the following variables to the environment section for the uwsgi image:
+```
+DD_LDAP_SERVER_URI: "${DD_LDAP_SERVER_URI:-ldap://ldap.example.com}"
+DD_LDAP_BIND_DN: "${DD_LDAP_BIND_DN:-}"
+DD_LDAP_BIND_PASSWORD: "${DD_LDAP_BIND_PASSWORD:-}"
+```
+
+Alternatively you can set these values in a local_settings.py file.
+
