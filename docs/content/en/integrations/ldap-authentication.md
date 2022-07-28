@@ -1,6 +1,6 @@
 ---
 title: "Authentication via LDAP"
-description: "Authentication via LDAP"
+description: "Authenticate users using LDAP"
 draft: false
 weight: 3
 ---
@@ -26,15 +26,18 @@ We will need to modify a grand total of 4-5 files, depending on how you want to 
 In both Dockerfile.django and Dockerfile.nginx, you want to add the following lines to the apt-get install layers:
 
 ```bash
-    libldap2-dev \
-    libsasl2-dev \
-    ldap-utils \
+libldap2-dev \
+libsasl2-dev \
+ldap-utils \
 ```
 
 
 #### requirements.txt
 
 Please check for the latest version of these requirements at the time of implementation on pypi.org and use those if you can.
+
+- [https://pypi.org/project/python-ldap/](python-ldap)
+- [https://pypi.org/project/django-auth-ldap/](django-auth-ldap)
 
 Otherwise add the following to requirements.txt:
 
@@ -46,7 +49,7 @@ django-auth-ldap==4.1.0
 
 #### settings.dist.py
 
-Find the settings file (hint: /dojo/settings/settings.dist.py) and add the following:
+Find the settings file (hint: `/dojo/settings/settings.dist.py`) and add the following:
 
 At the top of the file:
 ```python
