@@ -1104,7 +1104,7 @@ class FindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     mitigated = forms.DateField(required=False, help_text='Date and time when the flaw has been fixed', widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    mitigated_by = forms.MultipleChoiceField(required=True)
+    mitigated_by = forms.ModelChoiceField(required=False, queryset=Dojo_User.objects.none())
 
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
@@ -1125,9 +1125,7 @@ class FindingForm(forms.ModelForm):
         super(FindingForm, self).__init__(*args, **kwargs)
 
         self.fields['endpoints'].queryset = Endpoint.objects.filter(product=self.instance.test.engagement.product)
-
-        queryset = get_authorized_users_for_product_and_product_type(None, self.instance.test.engagement.product, Permissions.Finding_View)
-        self.fields['mitigated_by'].choices = self._get_choices(queryset)
+        self.fields['mitigated_by'].queryset = get_authorized_users(Permissions.Test_Edit)
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
         # if checked, always show to allow unaccept also with full risk acceptance enabled
@@ -1188,13 +1186,6 @@ class FindingForm(forms.ModelForm):
             self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
-
-    @staticmethod
-    def _get_choices(queryset):
-        l_choices = []
-        for item in queryset:
-            l_choices.append((item.pk, item.get_full_name()))
-        return l_choices
 
     def _post_clean(self):
         super(FindingForm, self)._post_clean()
@@ -1505,8 +1496,8 @@ class CloseFindingForm(forms.ModelForm):
                                      'required, please use the text area '
                                      'below to provide documentation.')})
 
-    mitigated = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
+    mitigated = forms.DateField(required=False, help_text='Date and time when the flaw has been fixed', widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
+    mitigated_by = forms.ModelChoiceField(required=False, queryset=Dojo_User.objects.none())
 
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('missing_note_types')
@@ -1520,8 +1511,21 @@ class CloseFindingForm(forms.ModelForm):
             else False
 
         if self.can_edit_mitigated_data:
+            self.fields['mitigated_by'].queryset = get_authorized_users(Permissions.Test_Edit)
             self.fields['mitigated'].initial = self.instance.mitigated
             self.fields['mitigated_by'].initial = self.instance.mitigated_by
+
+    def _post_clean(self):
+        super(CloseFindingForm, self)._post_clean()
+
+        if self.can_edit_mitigated_data:
+            opts = self.instance._meta
+            if not self.cleaned_data.get('active'):
+                try:
+                    opts.get_field('mitigated').save_form_data(self.instance, self.cleaned_data.get('mitigated'))
+                    opts.get_field('mitigated_by').save_form_data(self.instance, self.cleaned_data.get('mitigated_by'))
+                except forms.ValidationError as e:
+                    self._update_errors(e)
 
     class Meta:
         model = Notes
