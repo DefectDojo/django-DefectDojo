@@ -31,6 +31,11 @@
                                         <i class="fa fa-pencil-square-o"></i> Edit Engagement
                                         </a>
                                     </li>
+                                    <li>
+                                        <a class="" href="{% url 'copy_engagement' eng.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                        <i class="fa fa-copy"></i> Copy Engagement
+                                        </a>
+                                    </li>
                                     <li role="presentation">
                                         {% if eng.active %}
                                             <a class="" href="{% url 'close_engagement' eng.id %}">
