@@ -1,7 +1,6 @@
 import logging
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -96,3 +95,4 @@ def sla_config(request):
                   {'confs': confs,
                    'settings': settings
                    })
+

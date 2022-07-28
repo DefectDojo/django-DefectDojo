@@ -62,3 +62,4 @@ class Migration(migrations.Migration):
                                     to='dojo.sla_configuration'),
         ),
     ]
+
