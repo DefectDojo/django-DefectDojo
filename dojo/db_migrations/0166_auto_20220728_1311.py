@@ -48,7 +48,7 @@ def save_existing_sla(apps, schema_editor):
                                      critical=critical[0],
                                      high=high[0],
                                      medium=medium[0],
-                                     low=low[0])
+                                     low=low)
 
 
 class Migration(migrations.Migration):
