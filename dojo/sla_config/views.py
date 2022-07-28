@@ -1,4 +1,3 @@
-# #  product
 import logging
 
 from django.contrib import messages
@@ -16,7 +15,7 @@ from dojo.utils import add_breadcrumb
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('dojo.add_sla_configuration', 'superuser')
+@user_is_configuration_authorized('dojo.add_sla_configuration')
 def new_sla_config(request):
     if request.method == 'POST':
         tform = SLAConfigForm(request.POST, instance=SLA_Configuration())
@@ -37,14 +36,14 @@ def new_sla_config(request):
                   {'form': tform})
 
 
-@user_is_configuration_authorized('dojo.change_sla_configuration', 'superuser')
+@user_is_configuration_authorized('dojo.change_sla_configuration')
 def edit_sla_config(request, slaid):
     sla_config = SLA_Configuration.objects.get(pk=slaid)
 
     if request.method == 'POST' and request.POST.get('delete'):
         if sla_config.id != 1:
             user_has_configuration_permission_or_403(
-                request.user, 'dojo.delete_regulation', 'superuser')
+                request.user, 'dojo.delete_sla_configuration')
             sla_config.delete()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -82,7 +81,7 @@ def edit_sla_config(request, slaid):
                   })
 
 
-@login_required
+@user_is_configuration_authorized('dojo.add_sla_configuration')
 def sla_config(request):
     settings = System_Settings.objects.all()
 
