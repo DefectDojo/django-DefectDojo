@@ -95,4 +95,3 @@ def sla_config(request):
                   {'confs': confs,
                    'settings': settings
                    })
-

@@ -7,6 +7,7 @@ from django.db import migrations, models
 
 logger = logging.getLogger(__name__)
 
+
 def save_existing_sla(apps, schema_editor):
     system_settings_model = apps.get_model('dojo', 'System_Settings')
 
@@ -25,11 +26,11 @@ def save_existing_sla(apps, schema_editor):
 
     sla_config = apps.get_model('dojo', 'SLA_Configuration')
     sla_config.objects.create(name='Default',
-                                     description='The Default SLA Configuration. Products not using an explicit SLA Configuration will use this one.',
-                                     critical=critical,
-                                     high=high,
-                                     medium=medium,
-                                     low=low)
+                              description='The Default SLA Configuration. Products not using an explicit SLA Configuration will use this one.',
+                              critical=critical,
+                              high=high,
+                              medium=medium,
+                              low=low)
 
 
 class Migration(migrations.Migration):
@@ -62,4 +63,3 @@ class Migration(migrations.Migration):
                                     to='dojo.sla_configuration'),
         ),
     ]
-
