@@ -90,7 +90,7 @@ class BugcrowdApiParser(object):
             if bug_url != "":
                 endpoint = self.convert_endpoint(bug_url)
                 finding.unsaved_endpoints = [endpoint]
-            
+
             findings.append(finding)
 
         return findings
@@ -111,7 +111,8 @@ class BugcrowdApiParser(object):
 
     def include_finding(self, entry):
         """Determine whether this finding should be imported to DefectDojo"""
-        #"new" "out-of-scope" "not-applicable" "not-reproducible" "triaged" "unresolved" "resolved" "informational"
+
+        # "new" "out-of-scope" "not-applicable" "not-reproducible" "triaged" "unresolved" "resolved" "informational"
         allowed_states = [
             "new",  # Finding from a previous pentest
             "out-of-scope",     # Fix for finding is being verified

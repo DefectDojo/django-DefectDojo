@@ -1,12 +1,8 @@
-from asyncio.log import logger
 import requests
-import logging
-import json
-from json.decoder import JSONDecodeError
 from urllib.parse import quote
 
-from dojo.models import Tool_Configuration, Tool_Type
-logger = logging.getLogger(__name__)
+from dojo.models import Tool_Type
+
 
 class BugcrowdAPI:
     """
