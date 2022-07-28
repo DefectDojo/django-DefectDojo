@@ -35,8 +35,7 @@ URL, Response Body, Response Code and Response Headers.
 
 If you're logged in to the Defect Dojo web UI, you do not need to provide the authorization token.
 
-Authentication
---------------
+## Authentication
 
 The API uses header authentication with API key. The format of the
 header should be: :
@@ -47,8 +46,12 @@ For example: :
 
     Authorization: Token c8572a5adf107a693aa6c72584da31f4d1f1dcff
 
-Sample Code
------------
+### Alternative authentication method
+
+If you use [an alternative authentication method](../social-authentication/) for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \
+Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
+
+## Sample Code
 
 Here are some simple python examples and their results produced against
 the `/users` endpoint: :
@@ -130,8 +133,7 @@ See [Django Rest Framework\'s documentation on interacting with an
 API](http://www.django-rest-framework.org/topics/api-clients/) for
 additional examples and tips.
 
-Manually calling the API
-------------------------
+## Manually calling the API
 
 Tools like Postman can be used for testing the API.
 
@@ -170,8 +172,7 @@ Example for importing a scan result:
 
 -   Click send
 
-Clients / API Wrappers
-----------------------
+## Clients / API Wrappers
 
 | Wrapper                      | Status                   | Notes |
 | -----------------------------| ------------------------| ------------------------|

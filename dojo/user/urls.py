@@ -51,4 +51,4 @@ if settings.FORGOT_PASSWORD:
     ])
 
 if settings.API_TOKENS_ENABLED:
-    urlpatterns += [url(r'^api/key-v2$', views.api_v2_key, name='api_v2_key'),]
+    urlpatterns += [url(r'^api/key-v2$', views.api_v2_key, name='api_v2_key')]

@@ -201,7 +201,7 @@ if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
 
 if hasattr(settings, 'API_TOKENS_ENABLED'):
     if settings.API_TOKENS_ENABLED:
-        urlpatterns += [url(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token, name='api-token-auth'),]
+        urlpatterns += [url(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token, name='api-token-auth')]
 
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, 'EXTRA_URL_PATTERNS'):
