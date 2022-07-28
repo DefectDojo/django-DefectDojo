@@ -1259,7 +1259,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Gitleaks Scan': DEDUPE_ALGO_HASH_CODE,
     'pip-audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Edgescan Scan': DEDUPE_ALGO_HASH_CODE,
-    'Bugcrowd API': DEDUPE_ALGO_HASH_CODE,
+    'Bugcrowd API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Rubocop Scan': DEDUPE_ALGO_HASH_CODE,
     'JFrog Xray Scan': DEDUPE_ALGO_HASH_CODE,
     'CycloneDX Scan': DEDUPE_ALGO_HASH_CODE,

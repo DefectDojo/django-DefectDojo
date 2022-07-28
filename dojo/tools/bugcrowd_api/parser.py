@@ -3,10 +3,17 @@ import textwrap
 from datetime import datetime
 from dojo.models import Endpoint, Finding
 from dojo.tools.bugcrowd_api.importer import BugcrowdApiImporter
-
+import re
 
 SCAN_BUGCROWD_API = 'Bugcrowd API Import'
-
+pattern_URI = re.compile("(?i)\
+(?P<proto>(http(s)*|ftp|ssh))\
+(://)\
+((?P<user>\w+)(:(?P<password>\w+))?@)?\
+(?P<hostname>[\w\.-]+)\
+(:(?P<port>[0-9]+))?\
+(?P<path>.*)?")
+pattern_title_authorized = re.compile("'^[a-zA-Z0-9_\s+-.]*$'")
 
 class BugcrowdApiParser(object):
     """
@@ -49,6 +56,11 @@ class BugcrowdApiParser(object):
             bugcrowd_severity = entry["attributes"]["severity"]
 
             title = entry["attributes"]["title"]
+            if not pattern_title_authorized.match(title):
+                char_to_replace = {':': ' ','"': ' ','@': 'at'}
+                for key, value in char_to_replace.items():
+                    title = title.replace(key, value)
+
             date = self.get_created_date(entry["attributes"]["submitted_at"])
             bug_url = entry["attributes"]["bug_url"]
             description = "\n".join(
@@ -87,7 +99,7 @@ class BugcrowdApiParser(object):
                 dynamic_finding=True,
                 unique_id_from_tool=unique_id_from_tool)
 
-            if bug_url != "":
+            if bug_url != "" and bug_url is not None:
                 endpoint = self.convert_endpoint(bug_url)
                 finding.unsaved_endpoints = [endpoint]
 
@@ -107,7 +119,12 @@ class BugcrowdApiParser(object):
 
     def convert_endpoint(self, url):
         """Convert bugcrowd bug url into DefectDojo endpoints"""
-        return Endpoint.from_uri(url)
+        url = url.strip()
+        result = pattern_URI.search(url)
+        if result:
+            return Endpoint.from_uri(result.group(0))
+        else:
+            return Endpoint.from_uri('')
 
     def include_finding(self, entry):
         """Determine whether this finding should be imported to DefectDojo"""

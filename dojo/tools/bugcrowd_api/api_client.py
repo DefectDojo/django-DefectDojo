@@ -27,23 +27,43 @@ class BugcrowdAPI:
         :param target:
         :return:
         """
-        if target:
-            response = self.session.get(
-                url='{}/submissions?filter%5Bprogram%5D={}&filter%5Btarget%5D={}&page%5Blimit%5D=100&page%5Boffset%5D=0&include=monetary_rewards,target&filter%5Bduplicate%5D=false&sort=submitted-desc'.format(self.bugcrowd_api_url, program, quote(target)),
-                headers=self.get_headers(),
-            )
-        else:
-            response = self.session.get(
-                url='{}/submissions?filter%5Bprogram%5D={}&page%5Blimit%5D=100&page%5Boffset%5D=0&include=monetary_rewards,target&filter%5Bduplicate%5D=false&sort=submitted-desc'.format(self.bugcrowd_api_url, program),
-                headers=self.get_headers(),
-            )
+        output = {'data':[]}
 
-        if response.ok:
-            return response.json()
+        if target:
+            next = '{}/submissions?filter%5Bprogram%5D={}&filter%5Btarget%5D={}&page%5Blimit%5D=100&page%5Boffset%5D=0&include=monetary_rewards,target&filter%5Bduplicate%5D=false&sort=submitted-desc'.format(self.bugcrowd_api_url, program, quote(target))
         else:
-            raise Exception("Unable to get asset findings due to {} - {}".format(
+            next = '{}/submissions?filter%5Bprogram%5D={}&page%5Blimit%5D=100&page%5Boffset%5D=0&include=monetary_rewards,target&filter%5Bduplicate%5D=false&sort=submitted-desc'.format(self.bugcrowd_api_url, program)
+        
+        while next != '':
+            if target:
+                response = self.session.get(
+                    url=next,
+                    headers=self.get_headers(),
+                )
+            else:
+                response = self.session.get(
+                    url=next,
+                    headers=self.get_headers(),
+                )
+
+            if response.ok:
+                data = response.json()
+                if len(data['data']) == 0 or data['meta']['total_hits'] == data['meta']['count']:
+                    break
+
+                print('Fetched ' + str(len(data['data'])) + ' submissions')
+                output['data'] = output['data'] + data['data']
+                next='{}{}'.format(self.bugcrowd_api_url,data["links"]["next"])
+            else:
+                next='over'
+                raise Exception("Unable to get asset findings due to {} - {}".format(
                 response.status_code, response.content.decode("utf-8")
-            ))
+                ))
+        
+        print('Total gathered submissions from Bugcrowd: ' + str(len(output['data'])))
+        
+        return output
+
 
     def test_connection(self):
         # Request programs
