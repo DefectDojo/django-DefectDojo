@@ -12,9 +12,9 @@ def save_existing_sla(apps, schema_editor):
 
     try:
         system_settings = system_settings_model.objects.get()
-        critical = system_settings.sla_critical,
-        high = system_settings.sla_high,
-        medium = system_settings.sla_medium,
+        critical = system_settings.sla_critical
+        high = system_settings.sla_high
+        medium = system_settings.sla_medium
         low = system_settings.sla_low
 
     except:
@@ -26,9 +26,9 @@ def save_existing_sla(apps, schema_editor):
     sla_config = apps.get_model('dojo', 'SLA_Configuration')
     sla_config.objects.create(name='Default',
                                      description='The Default SLA Configuration. Products not using an explicit SLA Configuration will use this one.',
-                                     critical=critical[0],
-                                     high=high[0],
-                                     medium=medium[0],
+                                     critical=critical,
+                                     high=high,
+                                     medium=medium,
                                      low=low)
 
 
