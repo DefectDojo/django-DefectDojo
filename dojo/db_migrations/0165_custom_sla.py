@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0163_system_settings_enable_calendar'),
+        ('dojo', '0164_remove_system_settings_staff_user_email_pattern'),
     ]
 
     operations = [
