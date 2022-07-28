@@ -17,30 +17,11 @@ def save_existing_sla(apps, schema_editor):
         medium = system_settings.sla_medium,
         low = system_settings.sla_low
 
-        logger.error(f'Critical {critical}')
-        logger.error(f'High {high}')
-        logger.error(f'Medium {medium}')
-        logger.error(f'Low {low}')
-
-        logger.error(f'Critical Type {type(critical)}')
-        logger.error(f'High {type(high)}')
-        logger.error(f'Medium {type(medium)}')
-        logger.error(f'Low {type(low)}')
-
-        logger.error(critical, high, medium, low)
-        logger.error(type(critical), type(high), type(medium), type(low))
-
     except:
         critical = 7
         high = 30
         medium = 90
         low = 120
-
-
-
-
-
-
 
     sla_config = apps.get_model('dojo', 'SLA_Configuration')
     sla_config.objects.create(name='Default',
