@@ -800,6 +800,7 @@ def edit_finding(request, fid):
             # If active is not checked and CAN_EDIT_MIIGATED_DATA, mitigate the finding and the associated endpoints status
             if finding_helper.can_edit_mitigated_data(request.user):
                 if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+                    now = timezone.now()
                     new_finding.is_mitigated = True
                     endpoint_status = new_finding.endpoint_status.all()
                     for status in endpoint_status:
