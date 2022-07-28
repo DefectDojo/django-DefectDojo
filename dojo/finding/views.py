@@ -434,13 +434,13 @@ def close_finding(request, fid):
                 finding.active = False
                 now = timezone.now()
                 finding.mitigated = form.cleaned_data["mitigated"] or now
-                finding.mitigated_by = request.user
+                finding.mitigated_by = form.cleaned_data["mitigated_by"] or request.user
                 finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 endpoint_status = finding.endpoint_status.all()
                 for status in endpoint_status:
-                    status.mitigated_by = request.user
+                    status.mitigated_by = form.cleaned_data["mitigated_by"] or request.user
                     status.mitigated_time = form.cleaned_data["mitigated"] or now
                     status.mitigated = True
                     status.last_modified = timezone.now()
@@ -803,7 +803,7 @@ def edit_finding(request, fid):
                     new_finding.is_mitigated = True
                     endpoint_status = new_finding.endpoint_status.all()
                     for status in endpoint_status:
-                        status.mitigated_by = request.user
+                        status.mitigated_by = form.cleaned_data["mitigated_by"] or request.user
                         status.mitigated_time = form.cleaned_data["mitigated"] or now
                         status.mitigated = True
                         status.last_modified = timezone.now()
