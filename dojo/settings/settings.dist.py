@@ -98,7 +98,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ''),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2/default'),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2'),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
@@ -194,9 +194,6 @@ env = environ.Env(
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
 
-    # When enabled, staff users have full access to all product types and products
-    DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
-
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
@@ -229,8 +226,9 @@ env = environ.Env(
     # When enabled, display the preview of objects to be deleted. This can take a long time to render
     # for very large objects
     DD_DELETE_PREVIEW=(bool, True),
-    # Feature toggle for new authorization for configurations
-    DD_FEATURE_CONFIGURATION_AUTHORIZATION=(bool, True),
+    # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
+    DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
+                                 '.html', '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
 )
 
 
@@ -1121,6 +1119,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'Hydra Scan': ['title', 'description'],
     'DrHeader JSON Importer': ['title', 'description'],
+    'PWN SAST': ['title', 'description'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1263,8 +1262,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SSLyze Scan (JSON)': DEDUPE_ALGO_HASH_CODE,
     'Harbor Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Rusty Hog Scan': DEDUPE_ALGO_HASH_CODE,
+    'StackHawk HawkScan': DEDUPE_ALGO_HASH_CODE,
     'Hydra Scan': DEDUPE_ALGO_HASH_CODE,
     'DrHeader JSON Importer': DEDUPE_ALGO_HASH_CODE,
+    'PWN SAST': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1427,9 +1428,6 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
 
-# When enabled, staff users have full access to all product types and products
-AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
-
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
 USE_L10N = True
@@ -1456,8 +1454,6 @@ ASYNC_OBEJECT_DELETE_CHUNK_SIZE = env("DD_ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
 # When enabled, display the preview of objects to be deleted. This can take a long time to render
 # for very large objects
 DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
-# Feature toggle for new authorization for configurations
-FEATURE_CONFIGURATION_AUTHORIZATION = env("DD_FEATURE_CONFIGURATION_AUTHORIZATION")
 
 # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
 # see https://github.com/laymonage/django-jsonfield-backport
@@ -1471,3 +1467,5 @@ VULNERABILITY_URLS = {
     'SNYK': 'https://snyk.io/vuln/',
     'RUSTSEC': 'https://rustsec.org/advisories/',
 }
+# List of acceptable file types that can be uploaded to a given object via arbitrary file upload
+FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")

@@ -838,9 +838,9 @@ def jira_change(obj):
 
 
 @register.filter
-def get_thumbnail(filename):
+def get_thumbnail(file):
     from pathlib import Path
-    file_format = Path(filename).suffix[1:]
+    file_format = Path(file.file.url).suffix[1:]
     return file_format in supported_file_formats
 
 

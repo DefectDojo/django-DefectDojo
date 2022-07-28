@@ -992,11 +992,6 @@ def new_eng_for_app(request, pid, cicd=False):
             success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)
             error = error or not success
 
-            create_notification(event='engagement_added',
-                                title=_("%(engagement)s for %(product)s") % {'engagement': engagement.name, 'product': product.name},
-                                engagement=engagement, url=reverse('view_engagement', args=(engagement.id,)),
-                                objowner=engagement.lead)
-
             messages.add_message(request,
                                  messages.SUCCESS,
                                  _('Engagement added successfully.'),

@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.conf.urls import include, url
-from django.conf.urls.static import static
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
@@ -184,7 +183,8 @@ urlpatterns = [
 
     url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
     url(r'^manage_files/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.manage_files, name='manage_files'),
-
+    url(r'^access_file/(?P<fid>\d+)/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.access_file, name='access_file'),
+    url(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), views.protected_serve, {'document_root': settings.MEDIA_ROOT})
 ]
 
 urlpatterns += survey_urls
@@ -202,9 +202,6 @@ if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:
         #  django admin
         urlpatterns += [url(r'^%sadmin/' % get_system_setting('url_prefix'), admin.site.urls)]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, 'EXTRA_URL_PATTERNS'):

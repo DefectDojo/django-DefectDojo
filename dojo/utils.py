@@ -1732,11 +1732,10 @@ def user_post_save(sender, instance, created, **kwargs):
                     role=system_settings.default_group_role)
                 dojo_group_member.save()
 
-    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-        # Superusers shall always be staff
-        if instance.is_superuser and not instance.is_staff:
-            instance.is_staff = True
-            instance.save()
+    # Superusers shall always be staff
+    if instance.is_superuser and not instance.is_staff:
+        instance.is_staff = True
+        instance.save()
 
 
 @receiver(post_save, sender=Engagement)
