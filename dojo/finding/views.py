@@ -420,7 +420,7 @@ def close_finding(request, fid):
             now = timezone.now()
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = form.cleaned_data["mitigated"] or now
+            new_note.date = form.cleaned_data.get("mitigated") or now
             new_note.save()
             finding.notes.add(new_note)
 
@@ -433,15 +433,15 @@ def close_finding(request, fid):
             if len(missing_note_types) == 0:
                 finding.active = False
                 now = timezone.now()
-                finding.mitigated = form.cleaned_data["mitigated"] or now
-                finding.mitigated_by = form.cleaned_data["mitigated_by"] or request.user
+                finding.mitigated = form.cleaned_data.get("mitigated") or now
+                finding.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
                 finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 endpoint_status = finding.endpoint_status.all()
                 for status in endpoint_status:
-                    status.mitigated_by = form.cleaned_data["mitigated_by"] or request.user
-                    status.mitigated_time = form.cleaned_data["mitigated"] or now
+                    status.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
+                    status.mitigated_time = form.cleaned_data.get("mitigated") or now
                     status.mitigated = True
                     status.last_modified = timezone.now()
                     status.save()
@@ -804,8 +804,8 @@ def edit_finding(request, fid):
                     new_finding.is_mitigated = True
                     endpoint_status = new_finding.endpoint_status.all()
                     for status in endpoint_status:
-                        status.mitigated_by = form.cleaned_data["mitigated_by"] or request.user
-                        status.mitigated_time = form.cleaned_data["mitigated"] or now
+                        status.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
+                        status.mitigated_time = form.cleaned_data.get("mitigated") or now
                         status.mitigated = True
                         status.last_modified = timezone.now()
                         status.save()
