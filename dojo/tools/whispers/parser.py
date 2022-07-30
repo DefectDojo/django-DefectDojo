@@ -61,7 +61,7 @@ class WhispersParser(object):
                 severity=SEVERITY_MAP.get(vuln.get("severity"), "Info"),
                 file_path=vuln.get("file"),
                 line=int(vuln.get("line")),
-                hash_code=hashlib.sha256(str(description).encode("utf-8")).hexdigest(),
+                uniq_id_from_tool=hashlib.sha256(str(description).encode("utf-8")).hexdigest(),
                 static_finding=True,
                 dynamic_finding=False,
                 test=test,
@@ -79,14 +79,3 @@ class WhispersParser(object):
                 dupes[dupe_key] = finding
 
         return list(dupes.values())
-
-    def convert_severity(self, num_severity):
-        """Convert severity value"""
-        if num_severity >= -10:
-            return "Low"
-        elif -11 >= num_severity > -26:
-            return "Medium"
-        elif num_severity <= -26:
-            return "High"
-        else:
-            return "Info"
