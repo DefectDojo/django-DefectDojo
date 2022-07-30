@@ -461,7 +461,7 @@ def close_finding(request, fid):
                                     title='Closing of %s' % finding.title,
                                     finding=finding,
                                     description='The finding "%s" was closed by %s' % (finding.title, request.user),
-                                    url=request.build_absolute_uri(reverse('view_test', args=(finding.test.id, ))),
+                                    url=reverse('view_finding', args=(finding.id, )),
                                     )
                 return HttpResponseRedirect(
                     reverse('view_test', args=(finding.test.id, )))
