@@ -2,7 +2,7 @@
 title: "Authentication via LDAP"
 description: "Authenticate users using LDAP"
 draft: false
-weight: 3
+weight: 4
 ---
 
 ## LDAP Authentication
