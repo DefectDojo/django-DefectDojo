@@ -20,7 +20,7 @@ The documentation is generated using [Django Rest Framework
 Yet Another Swagger Generator](https://github.com/axnsan12/drf-yasg/), and is
 interactive. On the top of API v2 docs is a link that generates an OpenAPI v2 spec.
 
-As a preparation to move to OpenAPIv3, we have added an compatible spec and documentation at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/?docExpansion=none)
+As a preparation to move to OpenAPIv3, we have added an compatible spec and documentation at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/)
 
 To interact with the documentation, a valid Authorization header value
 is needed. Visit the `/api/v2/key/` view to generate your
