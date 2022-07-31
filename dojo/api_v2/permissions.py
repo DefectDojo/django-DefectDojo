@@ -187,7 +187,7 @@ class UserHasImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(request.data)
+        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(request.data)
         product_type = get_target_product_type_if_exists(product_type_name)
         product = get_target_product_if_exists(product_name, product_type_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
@@ -213,7 +213,7 @@ class UserHasMetaImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, _, _, product_name, _, _ = get_import_meta_data_from_dict(request.data)
+        _, _, _, _, _, product_name, _, _, _ = get_import_meta_data_from_dict(request.data)
         product = get_target_product_if_exists(product_name)
         if not product:
             product_id = get_product_id_from_dict(request.data)
@@ -285,7 +285,7 @@ class UserHasReimportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(request.data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(request.data)
 
         product_type = get_target_product_type_if_exists(product_type_name)
         product = get_target_product_if_exists(product_name, product_type_name)
@@ -496,10 +496,10 @@ def check_auto_create_permission(user, product, product_name, engagement, engage
 
     if product and product_name and engagement_name:
         if not user_has_permission(user, product, Permissions.Engagement_Add):
-            raise PermissionDenied("No permission to create engagements in product '%s'", product_name)
+            raise PermissionDenied("No permission to create engagements in product '%s'" % product_name)
 
         if not user_has_permission(user, product, Permissions.Import_Scan_Result):
-            raise PermissionDenied("No permission to import scans into product '%s'", product_name)
+            raise PermissionDenied("No permission to import scans into product '%s'" % product_name)
 
         # all good
         return True
@@ -510,12 +510,12 @@ def check_auto_create_permission(user, product, product_name, engagement, engage
 
         if not product_type:
             if not user_has_global_permission(user, Permissions.Product_Type_Add):
-                raise PermissionDenied("No permission to create product_type '%s'", product_type_name)
+                raise PermissionDenied("No permission to create product_type '%s'" % product_type_name)
             # new product type can be created with current user as owner, so all objects in it can be created as well
             return True
         else:
             if not user_has_permission(user, product_type, Permissions.Product_Type_Add_Product):
-                raise PermissionDenied("No permission to create products in product_type '%s'", product_type)
+                raise PermissionDenied("No permission to create products in product_type '%s'" % product_type)
 
         # product can be created, so objects in it can be created as well
         return True

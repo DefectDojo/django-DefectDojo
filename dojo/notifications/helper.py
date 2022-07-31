@@ -26,7 +26,9 @@ def create_notification(event=None, **kwargs):
         logger.debug('creating notifications for recipients: %s', kwargs['recipients'])
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
             # kwargs.update({'user': recipient_notifications.user})
+            logger.debug('Sent notification to %s', recipient_notifications.user)
             process_notifications(event, recipient_notifications, **kwargs)
+
     else:
         logger.debug('creating system notifications for event: %s', event)
         # send system notifications to all admin users
@@ -133,6 +135,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     notification_message = None
     try:
         notification_message = render_to_string(template, kwargs)
+        logger.debug("Rendering from the template %s", template)
     except TemplateDoesNotExist:
         logger.debug('template not found or not implemented yet: %s', template)
     except Exception as e:

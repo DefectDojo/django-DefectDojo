@@ -41,6 +41,11 @@
                                 <i class="fa fa-pencil-square-o"></i> Edit Test
                             </a>
                         </li>
+                        <li>
+                            <a class="" href="{% url 'copy_test' test.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                <i class="fa fa-copy"></i> Copy Test
+                            </a>
+                        </li>
                         {% endif %}
                         {% if show_re_upload %}
                         {% if test|has_object_permission:"Import_Scan_Result" %}
@@ -709,6 +714,11 @@
                                         <li>
                                             <a class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                             <i class="fa fa-pencil-square-o"></i> Edit
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                            <i class="fa fa-copy"></i> Copy
                                             </a>
                                         </li>
                                         <li class="divider"></li>

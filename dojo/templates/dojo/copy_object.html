@@ -6,11 +6,14 @@
 {% endblock add_css %}
 {% block content %}
     {{ block.super }}
-    <h3> Copy {{ source }} to a new {{ destination_label }}</h3>
-    <div class="alert alert-info" role="alert">
-        Please select the {{ destination_label }} you would like to copy this {{ source_label }} to
-    </div>
-
+    {% if product_tab.tab == "engagements" and destination_label == "Product" %}
+        <h3> Copy {{ source }} in {{ product_tab.product }}</h3>
+    {% else %}
+        <h3> Copy {{ source }} to a new {{ destination_label }}</h3>
+        <div class="alert alert-info" role="alert">
+            Please select the {{ destination_label }} you would like to copy this {{ source_label }} to
+        </div>
+    {% endif %}
     <form class="form-horizontal" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}

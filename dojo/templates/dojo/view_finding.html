@@ -54,6 +54,11 @@
                                         <i class="fa fa-pencil-square-o"></i> Edit Finding
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                    <i class="fa fa-copy"></i> Copy Finding
+                                    </a>
+                                </li>
                             {% endif %}
                             {% if finding|has_object_permission:"Finding_Edit" %}
                                 <li role="presentation">

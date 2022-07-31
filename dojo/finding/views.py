@@ -461,7 +461,7 @@ def close_finding(request, fid):
                                     title='Closing of %s' % finding.title,
                                     finding=finding,
                                     description='The finding "%s" was closed by %s' % (finding.title, request.user),
-                                    url=request.build_absolute_uri(reverse('view_test', args=(finding.test.id, ))),
+                                    url=reverse('view_finding', args=(finding.id, )),
                                     )
                 return HttpResponseRedirect(
                     reverse('view_test', args=(finding.test.id, )))
@@ -1013,15 +1013,18 @@ def request_finding_review(request, fid):
             finding.reviewers.set(users)
             finding.save()
             reviewers = ""
+            reviewers_short = []
             for suser in form.cleaned_data['reviewers']:
                 full_user = Dojo_User.generate_full_name(Dojo_User.objects.get(id=suser))
                 logger.debug("Asking %s for review", full_user)
                 reviewers += str(full_user) + ", "
+                reviewers_short.append(Dojo_User.objects.get(id=suser).username)
             reviewers = reviewers[:-2]
 
             create_notification(event='review_requested',
                                 title='Finding review requested',
                                 finding=finding,
+                                recipients=reviewers_short,
                                 description='User %s has requested that user(s) %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
                                 icon='check',
                                 url=reverse("view_finding", args=(finding.id,)))
