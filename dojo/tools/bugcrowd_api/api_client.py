@@ -14,7 +14,7 @@ class BugcrowdAPI:
             'Accept': 'application/vnd.bugcrowd+json',
             'User-Agent': 'DefectDojo',
             'Bugcrowd-Version': '2021-10-28'
-            }
+                }
 
     def __init__(self, tool_config):
         tool_type, _ = Tool_Type.objects.get_or_create(name='Bugcrowd API')
@@ -58,14 +58,13 @@ class BugcrowdAPI:
 
                 print('Fetched ' + str(len(data['data'])) + ' submissions')
                 output['data'] = output['data'] + data['data']
-                next='{}{}'.format(self.bugcrowd_api_url, data["links"]["next"])
+                next = '{}{}'.format(self.bugcrowd_api_url, data["links"]["next"])
             else:
-                next='over'
+                next = 'over'
                 raise Exception("Unable to get asset findings due to {} - {}".format(
-                response.status_code, response.content.decode("utf-8")
-                ))
+                    response.status_code, response.content.decode("utf-8")))
 
-        print('Total gathered submissions from Bugcrowd: ' + str( len( output['data'] ) ) )
+        print('Total gathered submissions from Bugcrowd: ' + str(len(output['data'])))
         return output
 
     def test_connection(self):
