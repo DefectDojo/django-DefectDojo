@@ -10,6 +10,11 @@ class BugcrowdAPI:
     """
 
     bugcrowd_api_url = "https://api.bugcrowd.com"
+    default_headers = {
+            'Accept': 'application/vnd.bugcrowd+json',
+            'User-Agent': 'DefectDojo',
+            'Bugcrowd-Version': '2021-10-28'
+            }
 
     def __init__(self, tool_config):
         tool_type, _ = Tool_Type.objects.get_or_create(name='Bugcrowd API')
@@ -90,11 +95,7 @@ class BugcrowdAPI:
         return f'You have access to "{submission_number}" submissions in Bugcrowd in the Program code "{api_scan_configuration.service_key_1}" and Target "{api_scan_configuration.service_key_2}" (leave service key 2 empty to get all submissions in program)'
 
     def get_headers(self):
-        headers = {
-            'Accept': 'application/vnd.bugcrowd+json',
-            'Authorization': 'Token {}'.format(self.api_token),
-            'User-Agent': 'DefectDojo',
-            'Bugcrowd-Version': '2021-10-28'
-        }
 
-        return headers
+        self.default_headers['Authorization'] = 'Token {}'.format(self.api_token)
+
+        return self.default_headers
