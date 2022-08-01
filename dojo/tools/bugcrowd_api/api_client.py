@@ -27,7 +27,7 @@ class BugcrowdAPI:
         :param target:
         :return:
         """
-        output = {'data': [] }
+        output = {'data': []}
 
         if target:
             next = '{}/submissions?filter%5Bprogram%5D={}&filter%5Btarget%5D={}&page%5Blimit%5D=100&page%5Boffset%5D=0&include=monetary_rewards,target&filter%5Bduplicate%5D=false&sort=submitted-desc'.format(self.bugcrowd_api_url, program, urlencode(target))
