@@ -1,5 +1,5 @@
 import requests
-from urllib.parse import quote
+from urllib.parse import urlencode
 
 from dojo.models import Tool_Type
 
@@ -27,13 +27,13 @@ class BugcrowdAPI:
         :param target:
         :return:
         """
-        output = {'data':[]}
+        output = {'data': [] }
 
         if target:
-            next = '{}/submissions?filter%5Bprogram%5D={}&filter%5Btarget%5D={}&page%5Blimit%5D=100&page%5Boffset%5D=0&include=monetary_rewards,target&filter%5Bduplicate%5D=false&sort=submitted-desc'.format(self.bugcrowd_api_url, program, quote(target))
+            next = '{}/submissions?filter%5Bprogram%5D={}&filter%5Btarget%5D={}&page%5Blimit%5D=100&page%5Boffset%5D=0&include=monetary_rewards,target&filter%5Bduplicate%5D=false&sort=submitted-desc'.format(self.bugcrowd_api_url, program, urlencode(target))
         else:
             next = '{}/submissions?filter%5Bprogram%5D={}&page%5Blimit%5D=100&page%5Boffset%5D=0&include=monetary_rewards,target&filter%5Bduplicate%5D=false&sort=submitted-desc'.format(self.bugcrowd_api_url, program)
-        
+
         while next != '':
             if target:
                 response = self.session.get(
@@ -53,30 +53,26 @@ class BugcrowdAPI:
 
                 print('Fetched ' + str(len(data['data'])) + ' submissions')
                 output['data'] = output['data'] + data['data']
-                next='{}{}'.format(self.bugcrowd_api_url,data["links"]["next"])
+                next='{}{}'.format(self.bugcrowd_api_url, data["links"]["next"])
             else:
                 next='over'
                 raise Exception("Unable to get asset findings due to {} - {}".format(
                 response.status_code, response.content.decode("utf-8")
                 ))
-        
-        print('Total gathered submissions from Bugcrowd: ' + str(len(output['data'])))
-        
-        return output
 
+        print('Total gathered submissions from Bugcrowd: ' + str( len( output['data'] ) ) )
+        return output
 
     def test_connection(self):
         # Request programs
         response_programs = self.session.get(
             url='{}/programs'.format(self.bugcrowd_api_url),
-            headers=self.get_headers(),
-        )
+            headers=self.get_headers())
 
         # Request assets to validate the org token
         response_subs = self.session.get(
             url='{}/submissions'.format(self.bugcrowd_api_url),
-            headers=self.get_headers(),
-        )
+            headers=self.get_headers())
 
         if response_programs.ok and response_subs.ok:
             data = response_programs.json().get('data')

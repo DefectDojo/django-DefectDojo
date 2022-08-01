@@ -4,16 +4,12 @@ from datetime import datetime
 from dojo.models import Endpoint, Finding
 from dojo.tools.bugcrowd_api.importer import BugcrowdApiImporter
 import re
+import dateutil
 
 SCAN_BUGCROWD_API = 'Bugcrowd API Import'
-pattern_URI = re.compile("(?i)\
-(?P<proto>(http(s)*|ftp|ssh))\
-(://)\
-((?P<user>\w+)(:(?P<password>\w+))?@)?\
-(?P<hostname>[\w\.-]+)\
-(:(?P<port>[0-9]+))?\
-(?P<path>.*)?")
+pattern_URI = re.compile(r"(?i)(?P<proto>(http(s)*|ftp|ssh))(://)((?P<user>\w+)(:(?P<password>\w+))?@)?(?P<hostname>[\w\.-]+)(:(?P<port>[0-9]+))?(?P<path>.*)?")
 pattern_title_authorized = re.compile("'^[a-zA-Z0-9_\s+-.]*$'")
+
 
 class BugcrowdApiParser(object):
     """
@@ -57,11 +53,11 @@ class BugcrowdApiParser(object):
 
             title = entry["attributes"]["title"]
             if not pattern_title_authorized.match(title):
-                char_to_replace = {':': ' ','"': ' ','@': 'at'}
+                char_to_replace = {':': ' ', '"': ' ', '@': 'at'}
                 for key, value in char_to_replace.items():
                     title = title.replace(key, value)
 
-            date = self.get_created_date(entry["attributes"]["submitted_at"])
+            date = dateutil.parse(entry["attributes"]["submitted_at"])
             bug_url = entry["attributes"]["bug_url"]
             description = "\n".join(
                 [
@@ -76,7 +72,6 @@ class BugcrowdApiParser(object):
             )
             mitigation = entry["attributes"]["remediation_advice"]
             steps_to_reproduce = entry["attributes"]["description"]
-            # last_status_update = self.get_latest_update_date(cobalt_log)
             unique_id_from_tool = entry["id"]
 
             finding = Finding(
@@ -94,7 +89,6 @@ class BugcrowdApiParser(object):
                 out_of_scope=self.is_out_of_scope(bugcrowd_state),
                 risk_accepted=self.is_risk_accepted(bugcrowd_state),
                 is_mitigated=self.is_mitigated(bugcrowd_state),
-                # last_status_update=last_status_update,
                 static_finding=False,
                 dynamic_finding=True,
                 unique_id_from_tool=unique_id_from_tool)
