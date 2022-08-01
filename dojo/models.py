@@ -2398,7 +2398,7 @@ class Finding(models.Model):
     # (This sometimes reports "None")
     def get_endpoints(self):
         endpoint_str = ''
-        if(self.id is None):
+        if (self.id is None):
             if len(self.unsaved_endpoints) > 0:
                 deduplicationLogger.debug("get_endpoints before the finding was saved")
                 # convert list of unsaved endpoints to the list of their canonical representation
