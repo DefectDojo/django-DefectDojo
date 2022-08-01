@@ -80,7 +80,7 @@ def edit_sla_config(request, slaid):
                   })
 
 
-@user_is_configuration_authorized('dojo.add_sla_configuration')
+@user_is_configuration_authorized('dojo.view_sla_configuration')
 def sla_config(request):
     settings = System_Settings.objects.all()
 

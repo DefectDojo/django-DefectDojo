@@ -548,7 +548,7 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if system_settings.enable_finding_sla %}
+                                                {% if system_settings.enable_finding_sla and "dojo.view_sla_configuration"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'sla_config' %}">
                                                             {% trans "SLA Configuration" %}
