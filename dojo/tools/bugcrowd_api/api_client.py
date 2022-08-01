@@ -22,6 +22,9 @@ class BugcrowdAPI:
         self.session = requests.Session()
         if tool_config.authentication_type == "API":
             self.api_token = tool_config.api_key
+            self.session.headers.update({
+                    "Authorization": 'Token {}'.format(self.api_token)})
+            self.session.headers.update(self.default_headers)
         else:
             raise Exception('bugcrowd Authentication type {} not supported'.format(tool_config.authentication_type))
 
@@ -41,15 +44,9 @@ class BugcrowdAPI:
 
         while next != '':
             if target:
-                response = self.session.get(
-                    url=next,
-                    headers=self.get_headers(),
-                )
+                response = self.session.get(url=next)
             else:
-                response = self.session.get(
-                    url=next,
-                    headers=self.get_headers(),
-                )
+                response = self.session.get(url=next)
 
             if response.ok:
                 data = response.json()
@@ -70,13 +67,11 @@ class BugcrowdAPI:
     def test_connection(self):
         # Request programs
         response_programs = self.session.get(
-            url='{}/programs'.format(self.bugcrowd_api_url),
-            headers=self.get_headers())
+            url='{}/programs'.format(self.bugcrowd_api_url))
 
         # Request assets to validate the org token
         response_subs = self.session.get(
-            url='{}/submissions'.format(self.bugcrowd_api_url),
-            headers=self.get_headers())
+            url='{}/submissions'.format(self.bugcrowd_api_url))
 
         if response_programs.ok and response_subs.ok:
             data = response_programs.json().get('data')
