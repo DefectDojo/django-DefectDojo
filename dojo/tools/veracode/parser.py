@@ -1,4 +1,5 @@
 import re
+import uuid
 from datetime import datetime
 
 from defusedxml import ElementTree
@@ -75,10 +76,8 @@ class VeracodeParser(object):
             _version = component.attrib['version']
 
             for vulnerability in component.findall('x:vulnerabilities/x:vulnerability', namespaces=XML_NAMESPACE):
-                dupe_key = vulnerability.attrib['cve_id']
-                # Only process if we didn't do that before.
-                if dupe_key not in dupes:
-                    dupes[dupe_key] = self.__xml_sca_flaw_to_finding(test, report_date, _vendor, _library, _version, vulnerability)
+                # We don't have a Id for SCA findings so just generate a random one
+                dupes[str(uuid.uuid4())] = self.__xml_sca_flaw_to_finding(test, report_date, _vendor, _library, _version, vulnerability)
 
         return list(dupes.values())
 
@@ -208,7 +207,6 @@ class VeracodeParser(object):
         finding.test = test
         finding.static_finding = True
         finding.dynamic_finding = False
-        finding.unique_id_from_tool = xml_node.attrib['cve_id']
 
         # Report values
         cvss_score = float(xml_node.attrib['cvss_score'])

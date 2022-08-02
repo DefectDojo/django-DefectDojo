@@ -36,7 +36,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
-    get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url
+    get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url, calculate_grade
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
@@ -330,6 +330,47 @@ def delete_engagement(request, eid):
         'engagement': engagement,
         'form': form,
         'rels': rels,
+    })
+
+
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
+def copy_engagement(request, eid):
+    engagement = get_object_or_404(Engagement, id=eid)
+    product = engagement.product
+    form = DoneForm()
+
+    if request.method == 'POST':
+        form = DoneForm(request.POST)
+        if form.is_valid():
+            engagement_copy = engagement.copy()
+            calculate_grade(product)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Engagement Copied successfully.',
+                extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Copying of %s' % engagement.name,
+                                description='The engagement "%s" was copied by %s' % (engagement.name, request.user),
+                                product=product,
+                                url=request.build_absolute_uri(reverse('view_engagement', args=(engagement_copy.id, ))),
+                                recipients=[engagement.lead],
+                                icon="exclamation-triangle")
+            return redirect_to_return_url_or_else(request, reverse("view_engagements", args=(product.id, )))
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Unable to copy engagement, please try again.',
+                extra_tags='alert-danger')
+
+    product_tab = Product_Tab(product, title="Copy Engagement", tab="engagements")
+    return render(request, 'dojo/copy_object.html', {
+        'source': engagement,
+        'source_label': 'Engagement',
+        'destination_label': 'Product',
+        'product_tab': product_tab,
+        'form': form,
     })
 
 

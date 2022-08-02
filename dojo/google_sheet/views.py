@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 @sensitive_post_parameters()
-@user_is_configuration_authorized('dojo.change_google_sheet', 'superuser')
+@user_is_configuration_authorized('dojo.change_google_sheet')
 def configure_google_sheets(request):
     fields = Finding._meta.fields
     system_settings = get_object_or_404(System_Settings, id=1)
