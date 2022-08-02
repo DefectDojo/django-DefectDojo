@@ -11,7 +11,7 @@ from dojo import views
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
-    StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
+    SLAConfigurationViewset, StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
@@ -45,6 +45,7 @@ from dojo.tool_type.urls import urlpatterns as tool_type_urls
 from dojo.tool_config.urls import urlpatterns as tool_config_urls
 from dojo.tool_product.urls import urlpatterns as tool_product_urls
 from dojo.cred.urls import urlpatterns as cred_urls
+from dojo.sla_config.urls import urlpatterns as sla_urls
 from dojo.system_settings.urls import urlpatterns as system_settings_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
@@ -90,6 +91,7 @@ v2_api.register(r'product_type_groups', ProductTypeGroupViewSet)
 v2_api.register(r'product_groups', ProductGroupViewSet)
 v2_api.register(r'roles', RoleViewSet)
 v2_api.register(r'global_roles', GlobalRoleViewSet)
+v2_api.register(r'sla_configurations', SLAConfigurationViewset)
 v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
 v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
 v2_api.register(r'product_api_scan_configurations', ProductAPIScanConfigurationViewSet)
@@ -137,6 +139,7 @@ ur += tool_type_urls
 ur += tool_config_urls
 ur += tool_product_urls
 ur += cred_urls
+ur += sla_urls
 ur += system_settings_urls
 ur += notifications_urls
 ur += object_urls
