@@ -8,7 +8,7 @@ import dateutil.parser
 
 SCAN_BUGCROWD_API = 'Bugcrowd API Import'
 pattern_URI = re.compile(r"(?i)(?P<proto>(http(s)*|ftp|ssh))(://)((?P<user>\w+)(:(?P<password>\w+))?@)?(?P<hostname>[\w\.-]+)(:(?P<port>[0-9]+))?(?P<path>.*)?")
-pattern_title_authorized = re.compile("'^[a-zA-Z0-9_\s+-.]*$'")
+pattern_title_authorized = re.compile(r"^[a-zA-Z0-9_\s+-.]*$")
 
 
 class BugcrowdApiParser(object):
