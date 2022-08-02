@@ -1,6 +1,5 @@
 import requests
 from urllib.parse import urlencode
-
 from dojo.models import Tool_Type
 
 
@@ -47,18 +46,19 @@ class BugcrowdAPI:
 
         next = '{}/submissions?{}'.format(self.bugcrowd_api_url, params_encoded)
         while next != '':
-            if target:
-                response = self.session.get(url=next)
-            else:
-                response = self.session.get(url=next)
+            response = self.session.get(url=next)
 
             if response.ok:
                 data = response.json()
+                # When we hit the end of the submissions, break out
                 if len(data['data']) == 0 or data['meta']['total_hits'] == data['meta']['count']:
+                    output['data'] = output['data'] + data['data']
                     break
 
                 print('Fetched ' + str(len(data['data'])) + ' submissions')
                 output['data'] = output['data'] + data['data']
+
+                # Otherwise, keep updating next link
                 next = '{}{}'.format(self.bugcrowd_api_url, data["links"]["next"])
             else:
                 next = 'over'
@@ -84,7 +84,7 @@ class BugcrowdAPI:
             return f'You have access to the "{ program_names }" programs'
         else:
             raise Exception("Connection failed (error: {} - {})".format(
-                response_assets.status_code, response_assets.content.decode("utf-8")
+                response_subs.status_code, response_subs.content.decode("utf-8")
             ))
 
     def test_product_connection(self, api_scan_configuration):
