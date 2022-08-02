@@ -658,14 +658,23 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
 
 
-class UploadFileForm(forms.ModelForm):
+class BaseManageFileFormSet(forms.BaseModelFormSet):
+    def clean(self):
+        """Validate the IP/Mask combo is in CIDR format"""
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+        for form in self.forms:
+            print(dir(form))
+            file = form.cleaned_data.get('file', None)
+            if file:
+                ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+                valid_extensions = settings.FILE_UPLOAD_TYPES
+                if ext.lower() not in valid_extensions:
+                    form.add_error('file', 'Unsupported file extension.')
 
-    class Meta:
-        model = FileUpload
-        fields = ['title', 'file']
 
-
-ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=['title', 'file'], can_delete=True)
+ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=['title', 'file'], can_delete=True, formset=BaseManageFileFormSet)
 
 
 class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
@@ -854,6 +863,18 @@ class DeleteTestForm(forms.ModelForm):
     class Meta:
         model = Test
         fields = ['id']
+
+
+class CopyTestForm(forms.Form):
+    engagement = forms.ModelChoiceField(
+        required=True,
+        queryset=Engagement.objects.none(),
+        error_messages={'required': '*'})
+
+    def __init__(self, *args, **kwargs):
+        authorized_lists = kwargs.pop('engagements', None)
+        super(CopyTestForm, self).__init__(*args, **kwargs)
+        self.fields['engagement'].queryset = authorized_lists
 
 
 class AddFindingForm(forms.ModelForm):
@@ -1333,7 +1354,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     finding_group_create = forms.BooleanField(required=False)
     finding_group_create_name = forms.CharField(required=False)
     finding_group_add = forms.BooleanField(required=False)
-    add_to_finding_group = forms.BooleanField(required=False)
+    add_to_finding_group_id = forms.CharField(required=False)
     finding_group_remove = forms.BooleanField(required=False)
     finding_group_by = forms.BooleanField(required=False)
     finding_group_by_option = forms.CharField(required=False)
@@ -1896,17 +1917,12 @@ class AddDojoUserForm(forms.ModelForm):
 
     class Meta:
         model = Dojo_User
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
-        else:
-            fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_staff', 'is_superuser']
+        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         current_user = get_current_user()
         if not current_user.is_superuser:
-            if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-                self.fields['is_staff'].disabled = True
             self.fields['is_superuser'].disabled = True
 
 
@@ -1914,17 +1930,12 @@ class EditDojoUserForm(forms.ModelForm):
 
     class Meta:
         model = Dojo_User
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            fields = ['username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
-        else:
-            fields = ['username', 'first_name', 'last_name', 'email', 'is_active', 'is_staff', 'is_superuser']
+        fields = ['username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         current_user = get_current_user()
         if not current_user.is_superuser:
-            if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-                self.fields['is_staff'].disabled = True
             self.fields['is_superuser'].disabled = True
 
 
@@ -2020,6 +2031,18 @@ class DeleteFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         fields = ['id']
+
+
+class CopyFindingForm(forms.Form):
+    test = forms.ModelChoiceField(
+        required=True,
+        queryset=Test.objects.none(),
+        error_messages={'required': '*'})
+
+    def __init__(self, *args, **kwargs):
+        authorized_lists = kwargs.pop('tests', None)
+        super(CopyFindingForm, self).__init__(*args, **kwargs)
+        self.fields['test'].queryset = authorized_lists
 
 
 class FindingFormID(forms.ModelForm):
@@ -2391,8 +2414,6 @@ class SystemSettingsForm(forms.ModelForm):
     class Meta:
         model = System_Settings
         exclude = ['product_grade', 'credentials', 'column_widths', 'drive_folder_ID']
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            exclude += ['staff_user_email_pattern']
 
 
 class BenchmarkForm(forms.ModelForm):

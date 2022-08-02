@@ -1,5 +1,6 @@
 # #  tests
 from django.db.models.query import Prefetch
+from dojo.engagement.queries import get_authorized_engagements
 from dojo.importers.utils import construct_imported_message
 import logging
 import operator
@@ -25,13 +26,13 @@ from dojo.filters import TemplateFindingFilter, FindingFilter, TestImportFilter
 from dojo.forms import NoteForm, TestForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
-    FindingBulkUpdateForm
+    FindingBulkUpdateForm, CopyTestForm
 from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, Cred_Mapping, System_Settings, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
 
 from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
-    Product_Tab, is_scan_file_too_large, get_words_for_field, get_setting, async_delete
+    Product_Tab, is_scan_file_too_large, get_words_for_field, get_setting, async_delete, redirect_to_return_url_or_else, calculate_grade
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
@@ -309,6 +310,50 @@ def delete_test(request, tid):
                    'rels': rels,
                    'deletable_objects': rels,
                    })
+
+
+@user_is_authorized(Test, Permissions.Test_Edit, 'tid')
+def copy_test(request, tid):
+    test = get_object_or_404(Test, id=tid)
+    product = test.engagement.product
+    engagement_list = get_authorized_engagements(Permissions.Engagement_Edit).filter(product=product)
+    form = CopyTestForm(engagements=engagement_list)
+
+    if request.method == 'POST':
+        form = CopyTestForm(request.POST, engagements=engagement_list)
+        if form.is_valid():
+            engagement = form.cleaned_data.get('engagement')
+            product = test.engagement.product
+            test_copy = test.copy(engagement=engagement)
+            calculate_grade(product)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Test Copied successfully.',
+                extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Copying of %s' % test.title,
+                                description='The test "%s" was copied by %s to %s' % (test.title, request.user, engagement.name),
+                                product=product,
+                                url=request.build_absolute_uri(reverse('view_test', args=(test_copy.id,))),
+                                recipients=[test.engagement.lead],
+                                icon="exclamation-triangle")
+            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(engagement.id, )))
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Unable to copy test, please try again.',
+                extra_tags='alert-danger')
+
+    product_tab = Product_Tab(product, title="Copy Test", tab="engagements")
+    return render(request, 'dojo/copy_object.html', {
+        'source': test,
+        'source_label': 'Test',
+        'destination_label': 'Engagement',
+        'product_tab': product_tab,
+        'form': form,
+    })
 
 
 @cache_page(60 * 5)  # cache for 5 minutes

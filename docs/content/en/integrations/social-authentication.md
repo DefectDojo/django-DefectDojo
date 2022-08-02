@@ -137,7 +137,7 @@ carries the same attributes and a similar procedure. Follow along below.
     DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=True,
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, '**YOUR_CLIENT_ID_FROM_STEP_ABOVE**'),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, '**YOUR_CLIENT_SECRET_FROM_STEP_ABOVE**'),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2/default'),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2'),
     {{< /highlight >}}
 
 If during the login process you get the following error: *The
@@ -158,7 +158,7 @@ in, it will try to match the UPN of the user to an existing e-mail from
 a user in Defect Dojo, and if no match is found, a new user will be
 created in Defect Dojo, associated with the unique id/value of the user
 provided by your Azure AD tenant. Then, you can assign roles to this
-user, such as 'staff' or 'superuser'
+user, such as 'superuser'.
 
 1.  Navigate to the following address and follow instructions to create
     a new app registration
@@ -423,14 +423,6 @@ When a new user is created via the social-auth, only the default permissions are
 ### Default group
 
 When both the parameters `Default group` and `Default group role` are set, the new user will be a member of the given group with the given role, which will give him the respective permissions.
-
-### Staff user ###
-
-Newly created users are neither staff nor superuser by default. The `is_staff` flag of a new user will be set to `True`, if the user's email address matches the regular expression in the parameter `Email pattern for staff users`. 
-
-**Example:**
-
-`.*@example.com` will make `alice@example.com` a staff user, while `bob@partner.example.com` or `chris@example.org` will be non-staff users.
 
 ## Login speed-up
 

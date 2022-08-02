@@ -707,7 +707,7 @@ def add_jira_issue(obj, *args, **kwargs):
             else:
                 logger.info('The following EPIC does not exist: %s', eng.name)
 
-        # only link the new issue if it was succefully created, incl attachments and epic link
+        # only link the new issue if it was successfully created, incl attachments and epic link
         logger.debug('saving JIRA_Issue for %s finding %s', new_issue.key, obj.id)
         j_issue = JIRA_Issue(
             jira_id=new_issue.id, jira_key=new_issue.key, jira_project=jira_project)
@@ -1322,7 +1322,7 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
                                                 'JIRA Project config stored successfully.',
                                                 extra_tags='alert-success')
                         error = False
-                        logger.debug('stored JIRA_Project succesfully')
+                        logger.debug('stored JIRA_Project successfully')
             except Exception as e:
                 error = True
                 logger.exception(e)
@@ -1356,7 +1356,7 @@ def process_jira_epic_form(request, engagement=None):
             if jira_epic_form.cleaned_data.get('push_to_jira'):
                 logger.debug('pushing engagement to JIRA')
                 if push_to_jira(engagement):
-                    logger.debug('Push to JIRA for Epic queued succesfully')
+                    logger.debug('Push to JIRA for Epic queued successfully')
                     messages.add_message(
                         request,
                         messages.SUCCESS,

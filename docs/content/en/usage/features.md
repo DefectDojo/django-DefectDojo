@@ -455,9 +455,6 @@ Active
 :   Designates whether this user should be treated as active and can login to DefectDojo.
     Unselect this instead of deleting accounts.
 
-Staff status
-:   Staff users have some more permissions than non-staff users, see [System wide permissions]({{< ref "permissions#system-wide-permissions" >}})
-
 Superuser status
 :   Designates that this user can configure the system and has all permissions
     for objects without explicitly assigning them.
