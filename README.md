@@ -6,7 +6,7 @@
 
 ![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/screenshot1.png)
 
-[DefectDojo](https://www.defectdojo.org/) is a security orchestration and
+[DefectDojo](https://www.defectdojo.com/) is a security orchestration and
 vulnerability management platform.
 DefectDojo allows you to manage your application security program, maintain
 product and application information, triage vulnerabilities and
