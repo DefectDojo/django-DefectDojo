@@ -242,7 +242,7 @@
                         <th>Mitigated By</th>
                     {% endif %}
                         <th>CWE</th>
-                        <th>CVE</th>
+                        <th>Vulnerability Id</th>
                     <th>Found by</th>
                 </tr>
                 <tr>
@@ -371,25 +371,52 @@
                             </a>
                         {% endif %}
                         </td>
-                    {% if finding.cve|slice:":3" == 'CVE' %}
-                        <td>
-                            <a target="_blank" href="{{ finding.cve |cve_url }}">
-                                <i class="fa fa-external-link"></i> {{ finding.cve }}
+                    <td>
+                    {% with finding|first_vulnerability_id as first_vulnerability_id %}
+                    {% if first_vulnerability_id %}
+                        {% if first_vulnerability_id|has_vulnerability_url %}
+                            <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                                <i class="fa fa-external-link"></i> {{ first_vulnerability_id }}
                             </a>
-                        </td>
-                    {% else %}
-                         <td>
-                             {{ finding.cve }}
-                         </td>
+                        {% else %}
+                            {{ first_vulnerability_id }}
+                        {% endif %}
                     {% endif %}
+                    </td>
                     <td> {% for scanner in found_by %}
                         {{ scanner }}
                     {% endfor %}</td>
-
+                    {% endwith %}
                 </tr>
             </table>
         </div>
     </div>
+
+    {% with finding|additional_vulnerability_ids as additional_vulnerability_ids %}
+    {% if additional_vulnerability_ids %}
+    <div class="panel panel-default">
+        <table id="additional_finding_references" class="table-striped table table-condensed table-hover centered">
+            <tr>
+                <th>Additional Vulnerability Ids</th>
+            </tr>
+            <tr>
+                <td>
+                    {% for vulnerability_id in additional_vulnerability_ids %}
+                        {% if vulnerability_id|has_vulnerability_url%}
+                            <a target="_blank" href="{{ vulnerability_id|vulnerability_url }}">
+                                <i class="fa fa-external-link"></i> {{ vulnerability_id }}</a>
+                        {% else %}
+                            {{ vulnerability_id }}
+                        {% endif %}
+                        {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+        </table>
+    </div>
+    {% endif %}
+    {% endwith %}</td>
+
     {% if finding.static_finding or finding.line > 0 %}
         {% if finding.sast_source_object or finding.sast_sink_object or finding.sast_source_file_path or finding.sast_source_line > 0 %}
         {# For tools that give information on both source (start) and sink (end) of the attack vector #}
@@ -477,7 +504,7 @@
                 {% if finding.github_conf_new or finding.github_issue %}
                 <th>GitHub</th>
                 {% endif %}
-                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled and finding.finding_group %}
+                {% if 'is_finding_groups_enabled'|system_setting_enabled and finding.finding_group %}
                 <th>Group</th>
                 {% endif %}
             </tr>
@@ -569,7 +596,7 @@
                     {% endif %}
                     </td>
                 {% endif %}
-                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled and finding.finding_group %}
+                {% if 'is_finding_groups_enabled'|system_setting_enabled and finding.finding_group %}
                     <td>
                         {{ finding.finding_group.name }}
                         <i id="push_group_to_jira_{{ finding.finding_group.group.id }}" data-group-id="{{ finding.finding_group.id }}" class="fa fa-share-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
@@ -630,7 +657,7 @@
                 <h4 class="has-filters">Similar Findings ({{ similar_findings.paginator.count }})
                     <i class="fa fa-question-circle has-popover" data-trigger="hover"
                        data-content="Opening this panel shows findings that are not exact duplicates,
-                        but have similar values for CVE, CWE, file_path, line number, unique_id_from_tool.
+                        but have similar values for Vulnerability Id, CWE, file_path, line number, unique_id_from_tool.
                         It has a filter panel where filtering can be made less or more strict, and across
                         product boundaries. The resulting findings can be view, marked as duplicate or original.
                         Clear filters will empty all filters. Restart will start over by matching against the fields

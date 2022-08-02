@@ -12,7 +12,7 @@ from google.oauth2 import service_account
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.urls import reverse
+from django.urls import reverse, Resolver404
 from django.db.models import Q, QuerySet, Count
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -27,11 +27,11 @@ from dojo.forms import NoteForm, TestForm, \
     ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
 from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
+    Finding_Template, Cred_Mapping, System_Settings, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
 
 from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
-    Product_Tab, is_scan_file_too_large, get_words_for_field
+    Product_Tab, is_scan_file_too_large, get_words_for_field, get_setting, async_delete
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
@@ -43,6 +43,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.test.queries import get_authorized_tests
+from dojo.user.queries import get_authorized_users
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
 
 
@@ -119,11 +120,11 @@ def view_test(request, tid):
     paged_stub_findings = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in get_choices_sorted())
 
-    product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
+    product_tab = Product_Tab(prod, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
     jira_project = jira_helper.get_jira_project(test)
 
-    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue', 'creator')
+    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue', 'creator', 'findings__vulnerability_id_set')
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
@@ -215,7 +216,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set__jira_issue')
         prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
-
+        prefetched_findings = prefetched_findings.prefetch_related('vulnerability_id_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -252,7 +253,7 @@ def edit_test(request, tid):
     form.initial['target_end'] = test.target_end.date()
     form.initial['description'] = test.description
 
-    product_tab = Product_Tab(test.engagement.product.id, title="Edit Test", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title="Edit Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/edit_test.html',
                   {'test': test,
@@ -272,10 +273,16 @@ def delete_test(request, tid):
             form = DeleteTestForm(request.POST, instance=test)
             if form.is_valid():
                 product = test.engagement.product
-                test.delete()
+                if get_setting("ASYNC_OBJECT_DELETE"):
+                    async_del = async_delete()
+                    async_del.delete(test)
+                    message = 'Test and relationships will be removed in the background.'
+                else:
+                    message = 'Test and relationships removed.'
+                    test.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Test and relationships removed.',
+                                     message,
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % test.title,
@@ -286,11 +293,14 @@ def delete_test(request, tid):
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([test])
-    rels = collector.nested()
+    rels = ['Previewing the relationships has been disabled.', '']
+    display_preview = get_setting('DELETE_PREVIEW')
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([test])
+        rels = collector.nested()
 
-    product_tab = Product_Tab(test.engagement.product.id, title="Delete Test", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title="Delete Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/delete_test.html',
                   {'test': test,
@@ -304,6 +314,10 @@ def delete_test(request, tid):
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def test_calendar(request):
+
+    if not get_system_setting('enable_calendar'):
+        raise Resolver404()
+
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         tests = get_authorized_tests(Permissions.Test_View)
     else:
@@ -322,7 +336,7 @@ def test_calendar(request):
         'caltype': 'tests',
         'leads': request.GET.getlist('lead', ''),
         'tests': tests,
-        'users': Dojo_User.objects.all()})
+        'users': get_authorized_users(Permissions.Test_View)})
 
 
 @user_is_authorized(Test, Permissions.Test_View, 'tid')
@@ -423,6 +437,8 @@ def add_findings(request, tid):
                         jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
+            finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
+
             new_finding.save(false_history=True, push_to_jira=push_to_jira)
             create_notification(event='other',
                                 title='Addition of %s' % new_finding.title,
@@ -454,7 +470,7 @@ def add_findings(request, tid):
         if use_jira:
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
-    product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
@@ -505,7 +521,7 @@ def add_temp_finding(request, tid, fid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            new_finding.date = datetime.today()
+            new_finding.date = form.cleaned_data['date'] or datetime.today()
             finding_helper.update_finding_status(new_finding, request.user)
 
             new_finding.save(dedupe_option=False, false_history=False)
@@ -559,7 +575,7 @@ def add_temp_finding(request, tid, fid):
     # logger.debug('jform errors: %s', jform.errors)
     # logger.debug('jform errors: %s', vars(jform))
 
-    product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
+    product_tab = Product_Tab(test.engagement.product, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
@@ -677,7 +693,7 @@ def re_import_scan_results(request, tid):
 
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
 
-    product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
+    product_tab = Product_Tab(engagement.product, title="Re-upload a %s" % scan_type, tab="engagements")
     product_tab.setEngagement(engagement)
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     form.initial['api_scan_configuration'] = test.api_scan_configuration

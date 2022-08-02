@@ -25,7 +25,7 @@ class Outpost24Parser(object):
             # finding details
             title = detail.findtext('name')
             # date = detail.findtext('date') # can be used for Finding.date?
-            cve = detail.findtext('./cve/id')
+            vulnerability_id = detail.findtext('./cve/id')
             url = detail.findtext('./referencelist/reference/[type=\'solution\']/../url')
             description = detail.findtext('description')
             mitigation = detail.findtext('solution')
@@ -56,9 +56,11 @@ class Outpost24Parser(object):
             cvss_description = detail.findtext('cvss_vector_description')
             cvss_vector = detail.findtext('cvss_v3_vector') or detail.findtext('cvss_vector')
             severity_justification = "{}\n{}".format(cvss_score, cvss_description)
-            finding = Finding(title=title, test=test, cve=cve, url=url, description=description, mitigation=mitigation,
+            finding = Finding(title=title, test=test, url=url, description=description, mitigation=mitigation,
                               impact=impact, severity=severity,
                               severity_justification=severity_justification)
+            if vulnerability_id:
+                finding.unsaved_vulnerability_ids = [vulnerability_id]
             # endpoint details
             host = detail.findtext('ip')
             if host:

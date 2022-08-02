@@ -4,7 +4,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
 
-from dojo.models import Product_Type, Product, Engagement, Product_Type_Member, Test, Finding, User, Test_Type, Role
+from dojo.models import Product_Type, Product, Engagement, Product_Type_Member, Test, Finding, User, Test_Type, Role, Vulnerability_Id
 from dojo.authorization.roles_permissions import Roles
 
 
@@ -45,22 +45,32 @@ class TestBulkRiskAcceptanceApi(APITestCase):
 
         Finding.objects.bulk_create(
             map(lambda i: create_finding(cls.test_a, cls.user, 'CVE-1999-{}'.format(i)), range(50, 150, 3)))
+        for finding in Finding.objects.filter(test=cls.test_a):
+            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
         Finding.objects.bulk_create(
             map(lambda i: create_finding(cls.test_b, cls.user, 'CVE-1999-{}'.format(i)), range(51, 150, 3)))
+        for finding in Finding.objects.filter(test=cls.test_b):
+            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
         Finding.objects.bulk_create(
             map(lambda i: create_finding(cls.test_c, cls.user, 'CVE-1999-{}'.format(i)), range(52, 150, 3)))
+        for finding in Finding.objects.filter(test=cls.test_c):
+            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
 
         Finding.objects.bulk_create(
             map(lambda i: create_finding(cls.test_d, cls.user, 'CVE-2000-{}'.format(i)), range(50, 150, 3)))
+        for finding in Finding.objects.filter(test=cls.test_d):
+            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
         Finding.objects.bulk_create(
             map(lambda i: create_finding(cls.test_e, cls.user, 'CVE-1999-{}'.format(i)), range(50, 150, 3)))
+        for finding in Finding.objects.filter(test=cls.test_e):
+            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
 
     def setUp(self) -> None:
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
     def test_test_accept_risks(self):
-        accepted_risks = [{'cve': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
+        accepted_risks = [{'vulnerability_id': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
                            'accepted_by': 'King of the Internet'} for i in range(100, 150)]
         result = self.client.post(reverse('test-accept-risks', kwargs={'pk': self.test_a.id}), data=accepted_risks,
                                   format='json')
@@ -73,7 +83,7 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         self.assertEquals(self.engagement_2a.risk_acceptance.count(), 0)
 
     def test_engagement_accept_risks(self):
-        accepted_risks = [{'cve': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
+        accepted_risks = [{'vulnerability_id': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
                            'accepted_by': 'King of the Internet'} for i in range(100, 150)]
         result = self.client.post(reverse('engagement-accept-risks', kwargs={'pk': self.engagement.id}),
                                   data=accepted_risks, format='json')
@@ -84,7 +94,7 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         self.assertEquals(self.engagement_2a.unaccepted_open_findings.count(), 34)
 
     def test_finding_accept_risks(self):
-        accepted_risks = [{'cve': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
+        accepted_risks = [{'vulnerability_id': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
                            'accepted_by': 'King of the Internet'} for i in range(60, 140)]
         result = self.client.post(reverse('finding-accept-risks'), data=accepted_risks, format='json')
         self.assertEquals(len(result.json()), 106)

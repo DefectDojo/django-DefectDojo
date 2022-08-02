@@ -10,12 +10,14 @@ def has_endpoints(finding):
 
 @register.filter(name='get_vulnerable_endpoints')
 def get_vulnerable_endpoints(finding):
+    # TODO - remove `.all()`, use 'select_related' endpoints and change for-loop to select -> to decrease number of queries
     status_list = finding.endpoint_status.all().filter(mitigated=False)
     return [status.endpoint for status in status_list]
 
 
 @register.filter(name='get_mitigated_endpoints')
 def get_mitigated_endpoints(finding):
+    # TODO - remove `.all()`, use 'select_related' endpoints and change for-loop to select -> to decrease number of queries
     status_list = finding.endpoint_status.all().filter(mitigated=True)
     return [status.endpoint for status in status_list]
 

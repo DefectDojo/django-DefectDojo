@@ -101,7 +101,7 @@
       "is_staff": false,
       "last_login": null,
       "groups": [],
-      "user_permissions": [],
+      "user_permissions": [218, 220, 26, 28],
       "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
       "email": "",
       "date_joined": "2018-04-13T07:59:51.527Z"
@@ -910,7 +910,9 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [],
+      "endpoints": [
+        2
+      ],
       "last_reviewed": null
     }
   },
@@ -2350,6 +2352,78 @@
       "product": 1,
       "user": 2,
       "product_type_added": ["slack"]
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 217,
+    "fields": {
+      "name": "Can add finding_ template",
+      "content_type": 55,
+      "codename": "add_finding_template"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 218,
+    "fields": {
+      "name": "Can change finding_ template",
+      "content_type": 55,
+      "codename": "change_finding_template"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 219,
+    "fields": {
+      "name": "Can delete finding_ template",
+      "content_type": 55,
+      "codename": "delete_finding_template"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 220,
+    "fields": {
+      "name": "Can view finding_ template",
+      "content_type": 55,
+      "codename": "view_finding_template"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 25,
+    "fields": {
+      "name": "Can add log entry",
+      "content_type": 7,
+      "codename": "add_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 26,
+    "fields": {
+      "name": "Can change log entry",
+      "content_type": 7,
+      "codename": "change_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 27,
+    "fields": {
+      "name": "Can delete log entry",
+      "content_type": 7,
+      "codename": "delete_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 28,
+    "fields": {
+      "name": "Can view log entry",
+      "content_type": 7,
+      "codename": "view_logentry"
     }
   }
 ]

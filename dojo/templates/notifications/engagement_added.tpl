@@ -1,8 +1,8 @@
 {% if type == 'mail' %}
     {% load navigation_tags %}
     {% load display_tags %}
-    {% url 'view_product' test.engagement.product.id as product_url %}
-    {% url 'view_engagement' test.engagement.id as engagement_url %}
+    {% url 'view_product' engagement.product.id as product_url %}
+    {% url 'view_engagement' engagement.id as engagement_url %}
     <html>
         <body>
             {% autoescape on %}

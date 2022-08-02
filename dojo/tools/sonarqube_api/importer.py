@@ -145,6 +145,7 @@ class SonarQubeApiImporter(object):
                     impact="No impact provided",
                     static_finding=True,
                     sonarqube_issue=sonarqube_issue,
+                    unique_id_from_tool=issue.get('key'),
                 )
                 items.append(find)
 
@@ -155,75 +156,88 @@ class SonarQubeApiImporter(object):
                 title='SonarQube API import issue',
                 description=e,
                 icon='exclamation-triangle',
-                source='SonarQube API'
+                source='SonarQube API',
+                obj=test.engagement.product
             )
 
         return items
 
     def import_hotspots(self, test):
+        try:
+            items = list()
+            client, config = self.prepare_client(test)
 
-        items = list()
-        client, config = self.prepare_client(test)
+            if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
+                component = client.get_project(config.service_key_1)
+            else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
+                component = client.find_project(test.engagement.product.name)
 
-        if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-            component = client.get_project(config.service_key_1)
-        else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
-            component = client.find_project(test.engagement.product.name)
+            hotspots = client.find_hotspots(component['key'])
+            logging.info('Found {} hotspots for project {}'.format(len(hotspots), component["key"]))
 
-        hotspots = client.find_hotspots(component['key'])
-        logging.info('Found {} hotspots for project {}'.format(len(hotspots), component["key"]))
+            for hotspot in hotspots:
+                status = hotspot['status']
 
-        for hotspot in hotspots:
-            status = hotspot['status']
+                if self.is_reviewed(status):
+                    continue
 
-            if self.is_reviewed(status):
-                continue
+                type = 'SECURITY_HOTSPOT'
+                severity = 'Info'
+                title = textwrap.shorten(text=hotspot.get('message', ''), width=500)
+                component_key = hotspot.get('component')
+                line = hotspot.get('line')
+                rule_id = hotspot.get('key', '')
+                rule = client.get_hotspot_rule(rule_id)
+                scanner_confidence = self.convert_scanner_confidence(hotspot.get('vulnerabilityProbability', ''))
+                description = self.clean_rule_description_html(rule.get('vulnerabilityDescription', 'No description provided.'))
+                cwe = self.clean_cwe(rule.get('fixRecommendations', ''))
+                references = self.get_references(rule.get('riskDescription', '')) + self.get_references(rule.get('fixRecommendations', ''))
 
-            type = 'SECURITY_HOTSPOT'
-            severity = 'Info'
-            title = textwrap.shorten(text=hotspot['message'], width=500)
-            component_key = hotspot['component']
-            line = hotspot.get('line')
-            rule_id = hotspot['key']
-            rule = client.get_hotspot_rule(rule_id)
-            scanner_confidence = self.convert_scanner_confidence(hotspot['vulnerabilityProbability'])
-            description = self.clean_rule_description_html(rule['vulnerabilityDescription'])
-            cwe = self.clean_cwe(rule['fixRecommendations'])
-            references = self.get_references(rule['riskDescription']) + self.get_references(rule['fixRecommendations'])
+                sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
+                    key=hotspot['key'],
+                    defaults={
+                        'status': status,
+                        'type': type
+                    }
+                )
 
-            sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
-                key=hotspot['key'],
-                defaults={
-                    'status': status,
-                    'type': type
-                }
+                # Only assign the SonarQube_issue to the first finding related to the issue
+                if Finding.objects.filter(sonarqube_issue=sonarqube_issue).exists():
+                    sonarqube_issue = None
+
+                find = Finding(
+                    title=title,
+                    cwe=cwe,
+                    description=description,
+                    test=test,
+                    severity=severity,
+                    references=references,
+                    file_path=component_key,
+                    line=line,
+                    active=True,
+                    verified=self.is_confirmed(status),
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    static_finding=True,
+                    scanner_confidence=scanner_confidence,
+                    sonarqube_issue=sonarqube_issue,
+                    unique_id_from_tool=f"hotspot:{hotspot.get('key')}",
+                )
+                items.append(find)
+
+            return items
+
+        except Exception as e:
+            logger.exception(e)
+            create_notification(
+                event='other',
+                title='SonarQube API import issue',
+                description=e,
+                icon='exclamation-triangle',
+                source='SonarQube API',
+                obj=test.engagement.product
             )
-
-            # Only assign the SonarQube_issue to the first finding related to the issue
-            if Finding.objects.filter(sonarqube_issue=sonarqube_issue).exists():
-                sonarqube_issue = None
-
-            find = Finding(
-                title=title,
-                cwe=cwe,
-                description=description,
-                test=test,
-                severity=severity,
-                references=references,
-                file_path=component_key,
-                line=line,
-                active=True,
-                verified=self.is_confirmed(status),
-                false_p=False,
-                duplicate=False,
-                out_of_scope=False,
-                static_finding=True,
-                scanner_confidence=scanner_confidence,
-                sonarqube_issue=sonarqube_issue,
-            )
-            items.append(find)
-
-        return items
 
     @staticmethod
     def clean_rule_description_html(raw_html):

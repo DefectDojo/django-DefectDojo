@@ -672,6 +672,46 @@ References:
 Import JSON reports from
 [HuskyCI](<https://github.com/globocom/huskyCI>)
 
+### Hydra
+
+Import JSON reports from [THC Hydra](https://github.com/vanhauser-thc/thc-hydra).
+
+Hydra can discover weak login credentials on different types of services (e.g. RDP).
+
+As Hydra cannot provide a severity rating (as it doesn't know how severe a weak login is at this scanned service), all imported findings will be rated 'High'.
+
+Sample JSON report:
+```json
+{
+    "errormessages": [
+        "[ERROR] Error Message of Something",
+        "[ERROR] Another Message",
+        "These are very free form"
+    ],
+    "generator": {
+        "built": "2019-03-01 14:44:22",
+        "commandline": "hydra -b jsonv1 -o results.json ... ...",
+        "jsonoutputversion": "1.00",
+        "server": "127.0.0.1",
+        "service": "http-post-form",
+        "software": "Hydra",
+        "version": "v8.5"
+    },
+    "quantityfound": 1,
+    "results": [
+        {
+            "host": "127.0.0.1",
+            "login": "bill@example.com",
+            "password": "bill",
+            "port": 9999,
+            "service": "http-post-form"
+        }
+    ],
+    "success": false
+}
+```
+
+
 ### IBM AppScan DAST
 
 XML file from IBM App Scanner.
@@ -748,6 +788,10 @@ Import the JSON format for the \"Security Export\" file. Use this importer for X
 ### JFrog XRay Unified
 
 Import the JSON format for the \"Security & Compliance | Reports\" export. Jfrog's Xray tool is an add-on to their Artifactory repository that does Software Composition Analysis, see https://www.jfrog.com/confluence/display/JFROG/JFrog+Xray for more information. \"Xray Unified\" refers to Xray Version 3.0 and later.
+
+### JFrog Xray API Summary Artifact Scan
+
+Import the JSON format from the Arifact Summary API call https://www.jfrog.com/confluence/display/JFROG/Xray+REST+API#XrayRESTAPI-ArtifactSummary  
 
 ### Kiuwan Scanner
 
@@ -872,6 +916,18 @@ see
 Qualys output files can be imported in API XML format. Qualys output
 files can be imported in WebGUI XML format.
 
+A CSV formatted Qualys Scan Report can also be used. Ensure the following values are checked in the Scan Report Template config:
+
+`CVSS Version = CVSSv3`
+
+* Vulnerability Details
+  * Threat
+  * Impact
+* Solution
+  * Patches and Workarounds
+  * Virtual Patches and Mitigating Controls
+* Results
+
 ### Qualys Webapp Scan
 
 Qualys WebScan output files can be imported in XML format.
@@ -983,7 +1039,7 @@ Output of SKF Sprint summary export.
 ### Snyk
 
 Snyk output file (snyk test \--json \> snyk.json) can be imported in
-JSON format.
+JSON format. Only SCA (Software Composition Analysis) report is supported (SAST report not supported yet).
 
 ### SonarQube Scan (Aggregates findings per cwe, title, description, file\_path.)
 
