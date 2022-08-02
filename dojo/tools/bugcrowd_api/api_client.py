@@ -36,12 +36,16 @@ class BugcrowdAPI:
         :return:
         """
         output = {'data': []}
+        params_default = {'filter[program]': program, 'page[limit]': 100, 'page[offset]': 0, 'include': 'monetary_rewards,target', 'filter[duplicate]': 'false', 'sort': 'submitted-desc'}
 
         if target:
-            next = '{}/submissions?filter%5Bprogram%5D={}&filter%5Btarget%5D={}&page%5Blimit%5D=100&page%5Boffset%5D=0&include=monetary_rewards,target&filter%5Bduplicate%5D=false&sort=submitted-desc'.format(self.bugcrowd_api_url, program, urlencode(target))
+            params = params_default
+            params['filter[target]'] = target
+            params_encoded = urlencode(params)
         else:
-            next = '{}/submissions?filter%5Bprogram%5D={}&page%5Blimit%5D=100&page%5Boffset%5D=0&include=monetary_rewards,target&filter%5Bduplicate%5D=false&sort=submitted-desc'.format(self.bugcrowd_api_url, program)
+            params_encoded = urlencode(params_default)
 
+        next = '{}/submissions?{}'.format(self.bugcrowd_api_url, params_encoded)
         while next != '':
             if target:
                 response = self.session.get(url=next)
