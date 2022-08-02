@@ -28,4 +28,3 @@ class TestDockerBenchParser(DojoTestCase):
         parser = DockerBenchParser()
         findings = parser.get_findings(testfile, Test())
         self.assertTrue(len(findings) == 50)
-
