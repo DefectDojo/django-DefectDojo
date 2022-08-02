@@ -3,10 +3,10 @@ from django.test import TestCase
 from unittest.mock import patch
 
 from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuration, Tool_Type, Tool_Configuration
-from dojo.tools.edgescan.importer import EdgescanImporter
+from dojo.tools.bugcrowd_api.importer import BugcrowdApiImporter
 
 
-class TestEdgescanImporter(TestCase):
+class TestBugcrowdApiImporter(TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -43,6 +43,7 @@ class TestEdgescanImporter(TestCase):
         cls.api_scan_configuration_2.product = cls.product_2
         cls.api_scan_configuration_2.tool_configuration = cls.tool_configuration
         cls.api_scan_configuration_2.service_key_1 = 'SERVICE_KEY_1'
+        cls.api_scan_configuration_2.service_key_2 = 'SERVICE_KEY_2'
 
         cls.findings = json.dumps({'a': 1, 'b': 2})
 
@@ -56,9 +57,9 @@ class TestEdgescanImporter(TestCase):
         api_scan_configuration_3.product = self.product
         test_3.api_scan_configuration = api_scan_configuration_3
 
-        with self.assertRaisesRegex(Exception, 'API Scan Configuration for Edgescan and Product do not match.'):
-            edgescan_importer = EdgescanImporter()
-            edgescan_importer.prepare_client(test_3)
+        with self.assertRaisesRegex(Exception, 'API Scan Configuration for Bugcrowd API and Product do not match.'):
+            bugrcrowd_api_importer = BugcrowdApiImporter()
+            bugrcrowd_api_importer.prepare_client(test_3)
 
     @patch('dojo.models.Product_API_Scan_Configuration.objects')
     def test_prepare_client_more_than_one_configuration(self, mock_foo):
@@ -66,8 +67,8 @@ class TestEdgescanImporter(TestCase):
         mock_foo.count.return_value = 2
 
         with self.assertRaisesRegex(Exception, 'More than one Product API Scan Configuration has been configured, but none of them has been chosen.'):
-            edgescan_importer = EdgescanImporter()
-            edgescan_importer.prepare_client(self.test)
+            bugrcrowd_api_importer = BugcrowdApiImporter()
+            bugrcrowd_api_importer.prepare_client(self.test)
 
             mock_foo.filter.assert_called_with(product=self.product)
 
@@ -77,8 +78,8 @@ class TestEdgescanImporter(TestCase):
         mock_foo.count.return_value = 0
 
         with self.assertRaisesRegex(Exception, 'There are no API Scan Configurations for this Product.'):
-            edgescan_importer = EdgescanImporter()
-            edgescan_importer.prepare_client(self.test)
+            bugrcrowd_api_importer = BugcrowdApiImporter()
+            bugrcrowd_api_importer.prepare_client(self.test)
 
             mock_foo.filter.assert_called_with(product=self.product)
 
@@ -88,26 +89,26 @@ class TestEdgescanImporter(TestCase):
         mock_foo.count.return_value = 1
         mock_foo.first.return_value = self.api_scan_configuration
 
-        edgescan_importer = EdgescanImporter()
-        edgescan_api, api_scan_configuration = edgescan_importer.prepare_client(self.test)
+        bugrcrowd_api_importer = BugcrowdApiImporter()
+        bugcrowd_api, api_scan_configuration = bugrcrowd_api_importer.prepare_client(self.test)
 
-        mock_foo.filter.assert_called_with(product=self.product)
+        mock_foo.filter.assert_called_with(product=self.product, tool_configuration__tool_type__name='Bugcrowd API')
         self.assertEqual(api_scan_configuration, self.api_scan_configuration)
-        self.assertEqual(edgescan_api.api_key, 'API_KEY')
+        self.assertEqual(bugcrowd_api.api_token, 'API_KEY')
 
     def test_prepare_client_one_test_configuration(self):
-        edgescan_importer = EdgescanImporter()
-        edgescan_api, api_scan_configuration = edgescan_importer.prepare_client(self.test_2)
+        bugrcrowd_api_importer = BugcrowdApiImporter()
+        bugcrowd_api, api_scan_configuration = bugrcrowd_api_importer.prepare_client(self.test_2)
 
         self.assertEqual(api_scan_configuration, self.api_scan_configuration_2)
-        self.assertEqual(edgescan_api.api_key, 'API_KEY')
+        self.assertEqual(bugcrowd_api.api_token, 'API_KEY')
 
-    @patch('dojo.tools.edgescan.importer.EdgescanAPI.get_findings')
+    @patch('dojo.tools.bugcrowd_api.importer.BugcrowdAPI.get_findings')
     def test_get_findings(self, mock_foo):
         mock_foo.return_value = self.findings
 
-        edgescan_importer = EdgescanImporter()
-        my_findings = edgescan_importer.get_findings(self.test_2)
+        bugrcrowd_api_importer = BugcrowdApiImporter()
+        my_findings = bugrcrowd_api_importer.get_findings(self.test_2)
 
-        mock_foo.assert_called_with('SERVICE_KEY_1')
+        mock_foo.assert_called_with('SERVICE_KEY_1', 'SERVICE_KEY_2')
         self.assertEqual(my_findings, self.findings)

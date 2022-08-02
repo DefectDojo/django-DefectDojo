@@ -23,7 +23,7 @@ class BugcrowdApiImporter(object):
             config = test.api_scan_configuration
             # Double check of config
             if config.product != product:
-                raise ValidationError('API Scan Configuration for Bugcrowd and Product do not match.')
+                raise ValidationError('API Scan Configuration for Bugcrowd API and Product do not match.')
         else:
             configs = Product_API_Scan_Configuration.objects.filter(product=product, tool_configuration__tool_type__name='Bugcrowd API')
             if configs.count() == 1:
