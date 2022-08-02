@@ -30,7 +30,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
     EngagementPresetsForm, DeleteEngagementPresetsForm, ProductNotificationsForm, \
     GITHUB_Product_Form, GITHUBFindingForm, AppAnalysisForm, JIRAEngagementForm, Add_Product_MemberForm, \
     Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, \
-    Delete_Product_GroupForm, \
+    Delete_Product_GroupForm, SLA_Configuration, \
     DeleteAppAnalysisForm, Product_API_Scan_ConfigurationForm, DeleteProduct_API_Scan_ConfigurationForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, \
     Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
@@ -142,9 +142,9 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 @user_is_authorized(Product, Permissions.Product_View, 'pid')
 def view_product(request, pid):
-    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager') \
-        .prefetch_related('members') \
-        .prefetch_related('prod_type__members')
+    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager', 'sla_configuration') \
+                                      .prefetch_related('members') \
+                                      .prefetch_related('prod_type__members')
     prod = get_object_or_404(prod_query, id=pid)
     product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
     product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)
@@ -158,6 +158,7 @@ def view_product(request, pid):
     benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
     benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True,
                                                           benchmark_type__enabled=True).order_by('benchmark_type__name')
+    sla = SLA_Configuration.objects.filter(id=prod.sla_configuration_id).first()
     benchAndPercent = []
     for i in range(0, len(benchmarks)):
         benchAndPercent.append([benchmarks[i].benchmark_type, get_level(benchmarks[i])])
@@ -216,7 +217,8 @@ def view_product(request, pid):
         'product_groups': product_groups,
         'product_type_groups': product_type_groups,
         'personal_notifications_form': personal_notifications_form,
-        'enabled_notifications': get_enabled_notifications_list()})
+        'enabled_notifications': get_enabled_notifications_list(),
+        'sla': sla})
 
 
 @user_is_authorized(Product, Permissions.Component_View, 'pid')
