@@ -127,8 +127,8 @@ class BugcrowdApiParser(object):
         allowed_states = [
             "new",  # Finding from a previous pentest
             "out-of-scope",     # Fix for finding is being verified
-            "not-applicable",     # Finding is a duplicate within the pentest
-            "not-reproducible",       # Finding is found to be a false positive
+            "not_applicable",     # Finding is a duplicate within the pentest
+            "not_reproducible",       # Finding is found to be a false positive
             "triaged",      # Finding is verified and valid
             "unresolved",           # The finding is not yet verified by the pentest team
             "resolved",  # Finding is out of the scope of the pentest
@@ -164,9 +164,7 @@ class BugcrowdApiParser(object):
 # "new" "out-of-scope" "not-applicable" "not-reproducible" "triaged" "unresolved" "resolved" "informational"
 
     def is_active(self, bugcrowd_state):
-        return not self.is_mitigated(bugcrowd_state) \
-            and not self.is_false_p(bugcrowd_state) \
-            and not self.is_out_of_scope(bugcrowd_state)
+        return (bugcrowd_state == 'unresolved') or (not self.is_mitigated(bugcrowd_state) and not self.is_false_p(bugcrowd_state) and not self.is_out_of_scope(bugcrowd_state))
 
     def is_duplicate(self, bugcrowd_state):
         return bugcrowd_state == "duplicate"
@@ -181,7 +179,7 @@ class BugcrowdApiParser(object):
         return bugcrowd_state == "out-of-scope"
 
     def is_risk_accepted(self, bugcrowd_state):
-        return bugcrowd_state == "not-applicable"
+        return bugcrowd_state == "not_applicable"
 
     def is_verified(self, bugcrowd_state):
         return bugcrowd_state == "triaged" or (bugcrowd_state != "new" and bugcrowd_state != "triaging")
