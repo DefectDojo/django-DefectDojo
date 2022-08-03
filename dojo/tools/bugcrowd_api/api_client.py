@@ -1,6 +1,8 @@
 import requests
 from urllib.parse import urlencode
 from dojo.models import Tool_Type
+from concurrent import futures
+import math
 
 
 class BugcrowdAPI:
@@ -27,7 +29,28 @@ class BugcrowdAPI:
         else:
             raise Exception('bugcrowd Authentication type {} not supported'.format(tool_config.authentication_type))
 
-    def get_findings_v2(self, program, target):
+    def gen_page_url(self, program, target, page=0, page_limit=100):
+        params_default = {'filter[program]': program, 'page[limit]': page_limit, 'page[offset]': (page * page_limit), 'include': 'monetary_rewards,target', 'filter[duplicate]': 'false', 'sort': 'submitted-desc'}
+
+        if target:
+            params = params_default
+            params['filter[target]'] = target
+            params_encoded = urlencode(params)
+        else:
+            params_encoded = urlencode(params_default)
+
+        return '{}/submissions?{}'.format(self.bugcrowd_api_url, params_encoded)
+
+    def fetch_worker(self, url):
+        response = self.session.get(url)
+        if response.ok:
+            return response.json()['data']
+        else:
+            raise Exception("Unable to get asset findings due to {} - {}".format(
+                response.status_code, response.content.decode("utf-8")))
+
+    # multi-threaded version
+    def get_findings_v3(self, program, target):
         """
         Returns the findings in a paginated iterator for a given bugcrowd program and target, if target is *, everything is returned
         :param program:
@@ -35,6 +58,40 @@ class BugcrowdAPI:
         :return:
         """
         output = []
+        page_limit = 100
+        next = self.gen_page_url(program, target, 0, page_limit)
+
+        initial_response = self.session.get(url=next)
+        if initial_response.ok:
+            data = initial_response.json()
+            total_amount_of_pages = math.ceil(data['meta']['total_hits'] / page_limit)
+
+            output = data['data']  # add the first page that we fetched to the output
+
+            maxWorker = min(10, total_amount_of_pages)
+            print('Fetching ' + str(data['meta']['total_hits']) + ' bugcrowd submissions on ' + str(total_amount_of_pages) + ' pages with ' + str(maxWorker) + ' workers')
+            urls = [self.gen_page_url(program, target, page=n, page_limit=page_limit) for n in range(1, total_amount_of_pages)]
+
+            with futures.ThreadPoolExecutor(maxWorker) as executor:
+                tasks = [executor.submit(self.fetch_worker, url) for url in urls]
+            futures.wait(tasks)  # wait for all workers
+            # add the rest of the pages fetched
+            for task in tasks:
+                output += task.result()
+
+            return output
+        else:
+            raise Exception("Unable to get asset findings due to {} - {}".format(
+                initial_response.status_code, initial_response.content.decode("utf-8")))
+
+    # simple generator version
+    def get_findings_v2(self, program, target):
+        """
+        Returns the findings in a paginated iterator for a given bugcrowd program and target, if target is *, everything is returned
+        :param program:
+        :param target:
+        :return:
+        """
         params_default = {'filter[program]': program, 'page[limit]': 100, 'page[offset]': 0, 'include': 'monetary_rewards,target', 'filter[duplicate]': 'false', 'sort': 'submitted-desc'}
 
         if target:

@@ -126,7 +126,7 @@ class BugcrowdApiParser(object):
         # "new" "out-of-scope" "not-applicable" "not-reproducible" "triaged" "unresolved" "resolved" "informational"
         allowed_states = [
             "new",  # Finding from a previous pentest
-            "out-of-scope",     # Fix for finding is being verified
+            "out_of_scope",     # Fix for finding is being verified
             "not_applicable",     # Finding is a duplicate within the pentest
             "not_reproducible",       # Finding is found to be a false positive
             "triaged",      # Finding is verified and valid
@@ -138,6 +138,7 @@ class BugcrowdApiParser(object):
         if entry["attributes"]["state"] in allowed_states:
             return True
         else:
+            print(entry["attributes"]["state"] + 'NOT IN ALLOWED STATES !')
             return False
 
     def convert_log_timestamp(self, timestamp):
@@ -176,7 +177,7 @@ class BugcrowdApiParser(object):
         return bugcrowd_state == "resolved"
 
     def is_out_of_scope(self, bugcrowd_state):
-        return bugcrowd_state == "out-of-scope"
+        return bugcrowd_state == "out_of_scope"
 
     def is_risk_accepted(self, bugcrowd_state):
         return bugcrowd_state == "not_applicable"

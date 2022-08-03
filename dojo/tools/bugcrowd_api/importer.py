@@ -15,11 +15,12 @@ class BugcrowdApiImporter(object):
         client, config = self.prepare_client(test)
         logger.debug("Fetching submissions program " + str(config.service_key_1) + " and target " + str(config.service_key_2))
         # findings = client.get_findings(config.service_key_1, config.service_key_2)
-        findings = client.get_findings_v2(config.service_key_1, config.service_key_2)
-        output = []
-        for f in findings:
-            output = output + f
-        return output
+        findings = client.get_findings_v3(config.service_key_1, config.service_key_2)
+        # FOR V2
+        # output = []
+        # for f in findings:
+        #     output = output + f
+        return findings
 
     def prepare_client(self, test):
         product = test.engagement.product
