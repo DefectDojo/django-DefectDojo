@@ -37,7 +37,7 @@ class BugcrowdApiParser(object):
         else:
             data = json.load(file)
         findings = []
-        for entry in data["data"]:
+        for entry in data:
             if test.api_scan_configuration:
                 config = test.api_scan_configuration
                 links = "https://tracker.bugcrowd.com/" + str(config.service_key_1) + entry["links"]["self"]

@@ -27,6 +27,43 @@ class BugcrowdAPI:
         else:
             raise Exception('bugcrowd Authentication type {} not supported'.format(tool_config.authentication_type))
 
+    def get_findings_v2(self, program, target):
+        """
+        Returns the findings in a paginated iterator for a given bugcrowd program and target, if target is *, everything is returned
+        :param program:
+        :param target:
+        :return:
+        """
+        output = []
+        params_default = {'filter[program]': program, 'page[limit]': 100, 'page[offset]': 0, 'include': 'monetary_rewards,target', 'filter[duplicate]': 'false', 'sort': 'submitted-desc'}
+
+        if target:
+            params = params_default
+            params['filter[target]'] = target
+            params_encoded = urlencode(params)
+        else:
+            params_encoded = urlencode(params_default)
+
+        next = '{}/submissions?{}'.format(self.bugcrowd_api_url, params_encoded)
+        while next != '':
+            response = self.session.get(url=next)
+
+            if response.ok:
+                data = response.json()
+                if len(data['data']) != 0 and data['meta']['total_hits'] != data['meta']['count']:
+                    yield data['data']
+
+                # When we hit the end of the submissions, break out
+                if len(data['data']) == 0 or data['meta']['total_hits'] == data['meta']['count']:
+                    return data['data']
+
+                # Otherwise, keep updating next link
+                next = '{}{}'.format(self.bugcrowd_api_url, data["links"]["next"])
+            else:
+                next = 'over'
+                raise Exception("Unable to get asset findings due to {} - {}".format(
+                    response.status_code, response.content.decode("utf-8")))
+
     def get_findings(self, program, target):
         """
         Returns the findings for a given bugcrowd program and target, if target is *, everything is returned
@@ -34,7 +71,7 @@ class BugcrowdAPI:
         :param target:
         :return:
         """
-        output = {'data': []}
+        output = []
         params_default = {'filter[program]': program, 'page[limit]': 100, 'page[offset]': 0, 'include': 'monetary_rewards,target', 'filter[duplicate]': 'false', 'sort': 'submitted-desc'}
 
         if target:
@@ -52,11 +89,11 @@ class BugcrowdAPI:
                 data = response.json()
                 # When we hit the end of the submissions, break out
                 if len(data['data']) == 0 or data['meta']['total_hits'] == data['meta']['count']:
-                    output['data'] = output['data'] + data['data']
+                    output = output + data['data']
                     break
 
                 print('Fetched ' + str(len(data['data'])) + ' submissions')
-                output['data'] = output['data'] + data['data']
+                output = output + data['data']
 
                 # Otherwise, keep updating next link
                 next = '{}{}'.format(self.bugcrowd_api_url, data["links"]["next"])
@@ -65,7 +102,7 @@ class BugcrowdAPI:
                 raise Exception("Unable to get asset findings due to {} - {}".format(
                     response.status_code, response.content.decode("utf-8")))
 
-        print('Total gathered submissions from Bugcrowd: ' + str(len(output['data'])))
+        print('Total gathered submissions from Bugcrowd: ' + str(len(output)))
         return output
 
     def test_connection(self):
@@ -89,7 +126,7 @@ class BugcrowdAPI:
 
     def test_product_connection(self, api_scan_configuration):
         submissions = self.get_findings(api_scan_configuration.service_key_1, api_scan_configuration.service_key_2)
-        submission_number = len(submissions['data'])
+        submission_number = len(submissions)
         return f'You have access to "{submission_number}" submissions in Bugcrowd in the Program code "{api_scan_configuration.service_key_1}" and Target "{api_scan_configuration.service_key_2}" (leave service key 2 empty to get all submissions in program)'
 
     def get_headers(self):
