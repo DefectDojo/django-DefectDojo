@@ -49,6 +49,29 @@ class TestParser(DojoTestCase):
                 self.assertEqual("2.9.9", finding.component_version)
                 self.assertEqual("CVE-2018-7489", finding.vuln_id_from_tool)
                 self.assertEqual("Upgrade\n", finding.mitigation)
+                self.assertEqual(finding.component_name + ":" + finding.component_version + " | " + vulnerability_ids[0],
+                                 finding.title)
+
+    def test_spec1_report_low_first(self):
+        """Test a report from the spec itself"""
+        with open("unittests/scans/cyclonedx/spec1_lowfirst.xml") as file:
+            parser = CycloneDXParser()
+            findings = list(parser.get_findings(file, Test()))
+            for finding in findings:
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+            self.assertEqual(1, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                vulnerability_ids = finding.unsaved_vulnerability_ids
+                self.assertEqual(1, len(vulnerability_ids))
+                self.assertEqual('CVE-2018-7489', vulnerability_ids[0])
+                self.assertEqual("Critical", finding.severity)
+                self.assertIn(finding.cwe, [184, 502])  # there is 2 CWE in the report
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
+                self.assertEqual("jackson-databind", finding.component_name)
+                self.assertEqual("2.9.9", finding.component_version)
+                self.assertEqual("CVE-2018-7489", finding.vuln_id_from_tool)
+                self.assertEqual("Upgrade\n", finding.mitigation)
 
     def test_cyclonedx_bom_report(self):
         with open("unittests/scans/cyclonedx/cyclonedx_bom.xml") as file:
@@ -89,6 +112,8 @@ class TestParser(DojoTestCase):
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("apt", finding.component_name)
                 self.assertEqual("1.8.2.1", finding.component_version)
+                self.assertFalse(finding.is_mitigated)
+                self.assertTrue(finding.active)
             with self.subTest(i=5):
                 finding = findings[5]
                 self.assertEqual("Info", finding.severity)
@@ -141,6 +166,10 @@ class TestParser(DojoTestCase):
                     finding.mitigation,
                 )
                 self.assertIn(
+                    "An optional explanation of why the application is not affected by the vulnerable component.",
+                    finding.mitigation,
+                )
+                self.assertIn(
                     "GitHub Commit",
                     finding.references,
                 )
@@ -154,6 +183,8 @@ class TestParser(DojoTestCase):
                 self.assertEqual('SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111', vulnerability_ids[0])
                 self.assertEqual('CVE-2018-7489', vulnerability_ids[1])
                 self.assertEqual('CVE-2018-7489', vulnerability_ids[2])
+                self.assertTrue(finding.is_mitigated)
+                self.assertFalse(finding.active)
 
     def test_cyclonedx_1_4_json(self):
         """CycloneDX version 1.4 JSON format"""
@@ -180,6 +211,10 @@ class TestParser(DojoTestCase):
                     finding.mitigation,
                 )
                 self.assertIn(
+                    "An optional explanation of why the application is not affected by the vulnerable component.",
+                    finding.mitigation,
+                )
+                self.assertIn(
                     "GitHub Commit",
                     finding.references,
                 )
@@ -192,6 +227,8 @@ class TestParser(DojoTestCase):
                 self.assertEqual(2, len(vulnerability_ids))
                 self.assertEqual('SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111', vulnerability_ids[0])
                 self.assertEqual('CVE-2018-7489', vulnerability_ids[1])
+                self.assertTrue(finding.is_mitigated)
+                self.assertFalse(finding.active)
 
     def test_cyclonedx_1_4_jake_json(self):
         """CycloneDX version 1.4 JSON format produced by jake 1.4.1"""
@@ -260,3 +297,37 @@ class TestParser(DojoTestCase):
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertEqual(20, finding.cwe)
+
+    def test_cyclonedx_1_4_xml_cvssv31(self):
+        """CycloneDX version 1.4 XML format"""
+        with open("unittests/scans/cyclonedx/log4j.xml") as file:
+            parser = CycloneDXParser()
+            findings = parser.get_findings(file, Test())
+            for finding in findings:
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                finding.clean()
+            self.assertEqual(8, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("log4j-core:2.13.2 | CVE-2021-44228", finding.title)
+                self.assertEqual("Critical", finding.severity)
+                self.assertEqual("log4j-core", finding.component_name)
+                self.assertEqual("2.13.2", finding.component_version)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
+
+    def test_cyclonedx_1_4_json_cvssv31(self):
+        """CycloneDX version 1.4 JSON format"""
+        with open("unittests/scans/cyclonedx/log4j.json") as file:
+            parser = CycloneDXParser()
+            findings = parser.get_findings(file, Test())
+            for finding in findings:
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                finding.clean()
+            self.assertEqual(8, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("log4j-core:2.13.2 | CVE-2021-44228", finding.title)
+                self.assertEqual("Critical", finding.severity)
+                self.assertEqual("log4j-core", finding.component_name)
+                self.assertEqual("2.13.2", finding.component_version)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)

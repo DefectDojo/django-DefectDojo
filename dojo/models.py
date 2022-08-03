@@ -14,6 +14,7 @@ from django.contrib.auth.models import Group
 from django.db.models.expressions import Case, When
 from django.urls import reverse
 from django.core.validators import RegexValidator, validate_ipv46_address
+from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.db import models, connection
 from django.db.models import Q, Count
@@ -390,20 +391,6 @@ class System_Settings(models.Model):
         verbose_name=_("Enable Finding SLA's"),
         help_text=_("Enables Finding SLA's for time to remediate."))
 
-    sla_critical = models.IntegerField(default=7,
-                                          verbose_name=_('Critical Finding SLA Days'),
-                                          help_text=_('# of days to remediate a critical finding.'))
-
-    sla_high = models.IntegerField(default=30,
-                                          verbose_name=_('High Finding SLA Days'),
-                                          help_text=_('# of days to remediate a high finding.'))
-    sla_medium = models.IntegerField(default=90,
-                                          verbose_name=_('Medium Finding SLA Days'),
-                                          help_text=_('# of days to remediate a medium finding.'))
-
-    sla_low = models.IntegerField(default=120,
-                                          verbose_name=_('Low Finding SLA Days'),
-                                          help_text=_('# of days to remediate a low finding.'))
     allow_anonymous_survey_repsonse = models.BooleanField(
         default=False,
         blank=False,
@@ -487,12 +474,6 @@ class System_Settings(models.Model):
         default='',
         blank=True,
         help_text=_("New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition."))
-    staff_user_email_pattern = models.CharField(
-        max_length=200,
-        default='',
-        blank=True,
-        verbose_name=_('Email pattern for staff users'),
-        help_text=_("When the email address of a new user created by OAuth2 matches this regex pattern, their is_staff flag will be set to True."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -558,6 +539,13 @@ class NoteHistory(models.Model):
                                 default=get_current_datetime)
     current_editor = models.ForeignKey(Dojo_User, editable=False, null=True, on_delete=models.CASCADE)
 
+    def copy(self):
+        copy = self
+        copy.pk = None
+        copy.id = None
+        copy.save()
+        return copy
+
 
 class Notes(models.Model):
     note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
@@ -579,15 +567,47 @@ class Notes(models.Model):
     def __str__(self):
         return self.entry
 
+    def copy(self):
+        copy = self
+        # Save the necessary ManyToMany relationships
+        old_history = self.history.all()
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        # Save the object before setting any ManyToMany relationships
+        copy.save()
+        # Copy the history
+        for history in old_history:
+            copy.history.add(history.copy())
+
+        return copy
+
 
 class FileUpload(models.Model):
     title = models.CharField(max_length=100, unique=True)
     file = models.FileField(upload_to=UniqueUploadNameProvider('uploaded_files'))
 
+    def copy(self):
+        copy = self
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        # Add unique modifier to file name
+        copy.title = '{} - clone-{}'.format(self.title, str(uuid4())[:8])
+        # Create new unique file name
+        current_url = self.file.url
+        _, current_full_filename = current_url.rsplit('/', 1)
+        _, extension = current_full_filename.split('.', 1)
+        new_file = ContentFile(self.file.read(), name='{}.{}'.format(uuid4(), extension))
+        copy.file = new_file
+        copy.save()
+
+        return copy
+
 
 class Product_Type(models.Model):
     """Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
-
+`
        Examples:
          * IAM Team
          * Internal / 3rd Party
@@ -734,6 +754,47 @@ class DojoMeta(models.Model):
                            ('finding', 'name'))
 
 
+class SLA_Configuration(models.Model):
+    name = models.CharField(max_length=128, unique=True, blank=False, verbose_name=_('Custom SLA Name'),
+        help_text=_('A unique name for the set of SLAs.')
+    )
+
+    description = models.CharField(max_length=512, null=True, blank=True)
+    critical = models.IntegerField(default=7, verbose_name=_('Critical Finding SLA Days'),
+                                          help_text=_('number of days to remediate a critical finding.'))
+    high = models.IntegerField(default=30, verbose_name=_('High Finding SLA Days'),
+                                          help_text=_('number of days to remediate a high finding.'))
+    medium = models.IntegerField(default=90, verbose_name=_('Medium Finding SLA Days'),
+                                          help_text=_('number of days to remediate a medium finding.'))
+    low = models.IntegerField(default=120, verbose_name=_('Low Finding SLA Days'),
+                                          help_text=_('number of days to remediate a low finding.'))
+
+    def clean(self):
+
+        sla_days = [self.critical, self.high, self.medium, self.low]
+
+        for sla_day in sla_days:
+            if sla_day < 1:
+                raise ValidationError('SLA Days must be at least 1')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+
+    def delete(self, *args, **kwargs):
+        logger.debug('%d sla configuration delete', self.id)
+
+        if self.id != 1:
+            super().delete(*args, **kwargs)
+        else:
+            raise ValidationError("Unable to delete default SLA Configuration")
+
+    def get_summary(self):
+        return f'{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}'
+
+
 class Product(models.Model):
     WEB_PLATFORM = 'web'
     IOT = 'iot'
@@ -801,6 +862,12 @@ class Product(models.Model):
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
                                   null=False, blank=False, on_delete=models.CASCADE)
     updated = models.DateTimeField(auto_now=True, null=True)
+    sla_configuration = models.ForeignKey(SLA_Configuration,
+                                          related_name='sla_config',
+                                          null=False,
+                                          blank=False,
+                                          default=1,
+                                          on_delete=models.RESTRICT)
     tid = models.IntegerField(default=0, editable=False)
     members = models.ManyToManyField(Dojo_User, through='Product_Member', related_name='product_members', blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Group', related_name='product_groups', blank=True)
@@ -1178,6 +1245,36 @@ class Engagement(models.Model):
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
 
+    def copy(self):
+        copy = self
+        # Save the necessary ManyToMany relationships
+        old_notes = self.notes.all()
+        old_files = self.files.all()
+        old_tags = self.tags.all()
+        old_risk_acceptances = self.risk_acceptance.all()
+        old_tests = Test.objects.filter(engagement=self)
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        # Save the object before setting any ManyToMany relationships
+        copy.save()
+        # Copy the notes
+        for notes in old_notes:
+            copy.notes.add(notes.copy())
+        # Copy the files
+        for files in old_files:
+            copy.files.add(files.copy())
+        # Copy the tests
+        for test in old_tests:
+            test.copy(engagement=copy)
+        # Copy the risk_acceptances
+        for risk_acceptance in old_risk_acceptances:
+            copy.risk_acceptance.add(risk_acceptance.copy(engagement=copy))
+        # Assign any tags
+        copy.tags.set(old_tags)
+
+        return copy
+
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
         bc += [{'title': str(self),
@@ -1254,6 +1351,18 @@ class Endpoint_Status(models.Model):
         for field in self._meta.get_fields():
             field_values.append(str(getattr(self, field.name, '')))
         return ' '.join(field_values)
+
+    def copy(self, finding=None):
+        copy = self
+        current_endpoint = self.endpoint
+        copy.pk = None
+        copy.id = None
+        if finding:
+            copy.finding = finding
+        copy.endpoint = current_endpoint
+        copy.save()
+
+        return copy
 
     class Meta:
         indexes = [
@@ -1629,6 +1738,34 @@ class Test(models.Model):
         bc += [{'title': str(self),
                 'url': reverse('view_test', args=(self.id,))}]
         return bc
+
+    def copy(self, engagement=None):
+        copy = self
+        # Save the necessary ManyToMany relationships
+        old_notes = self.notes.all()
+        old_files = self.files.all()
+        old_tags = self.tags.all()
+        old_findings = Finding.objects.filter(test=self)
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        if engagement:
+            copy.engagement = engagement
+        # Save the object before setting any ManyToMany relationships
+        copy.save()
+        # Copy the notes
+        for notes in old_notes:
+            copy.notes.add(notes.copy())
+        # Copy the files
+        for files in old_files:
+            copy.files.add(files.copy())
+        # Copy the Findings
+        for finding in old_findings:
+            finding.copy(test=copy)
+        # Assign any tags
+        copy.tags.set(old_tags)
+
+        return copy
 
     # only used by bulk risk acceptance api
     @property
@@ -2112,6 +2249,43 @@ class Finding(models.Model):
         self.unsaved_files = None
         self.unsaved_vulnerability_ids = None
 
+    def copy(self, test=None):
+        copy = self
+        # Save the necessary ManyToMany relationships
+        old_notes = self.notes.all()
+        old_files = self.files.all()
+        old_endpoint_status = self.endpoint_status.all()
+        old_endpoints = self.endpoints.all()
+        old_reviewers = self.reviewers.all()
+        old_found_by = self.found_by.all()
+        old_tags = self.tags.all()
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        if test:
+            copy.test = test
+        # Save the object before setting any ManyToMany relationships
+        copy.save()
+        # Copy the notes
+        for notes in old_notes:
+            copy.notes.add(notes.copy())
+        # Copy the files
+        for files in old_files:
+            copy.files.add(files.copy())
+        # Copy the endpoint_status
+        for endpoint_status in old_endpoint_status:
+            copy.endpoint_status.add(endpoint_status.copy(finding=copy))
+        # Assign any endpoints
+        copy.endpoints.set(old_endpoints)
+        # Assign any reviewers
+        copy.reviewers.set(old_reviewers)
+        # Assign any found_by
+        copy.found_by.set(old_found_by)
+        # Assign any tags
+        copy.tags.set(old_tags)
+
+        return copy
+
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_finding', args=[str(self.id)])
@@ -2224,7 +2398,7 @@ class Finding(models.Model):
     # (This sometimes reports "None")
     def get_endpoints(self):
         endpoint_str = ''
-        if(self.id is None):
+        if (self.id is None):
             if len(self.unsaved_endpoints) > 0:
                 deduplicationLogger.debug("get_endpoints before the finding was saved")
                 # convert list of unsaved endpoints to the list of their canonical representation
@@ -2375,6 +2549,10 @@ class Finding(models.Model):
     def age(self):
         return self._age(self.date)
 
+    def get_sla_periods(self):
+        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
+        return sla_configuration
+
     def get_sla_start_date(self):
         if self.sla_start_date:
             return self.sla_start_date
@@ -2387,9 +2565,8 @@ class Finding(models.Model):
 
     def sla_days_remaining(self):
         sla_calculation = None
-        severity = self.severity
-        from dojo.utils import get_system_setting
-        sla_age = get_system_setting('sla_' + self.severity.lower())
+        sla_periods = self.get_sla_periods()
+        sla_age = getattr(sla_periods, self.severity.lower(), None)
         if sla_age:
             sla_calculation = sla_age - self.sla_age
         return sla_calculation
@@ -2990,6 +3167,25 @@ class Risk_Acceptance(models.Model):
 
         return None
 
+    def copy(self, engagement=None):
+        copy = self
+        # Save the necessary ManyToMany relationships
+        old_notes = self.notes.all()
+        old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        # Save the object before setting any ManyToMany relationships
+        copy.save()
+        # Copy the notes
+        for notes in old_notes:
+            copy.notes.add(notes.copy())
+        # Assign any accepted findings
+        if engagement:
+            new_accepted_findings = Finding.objects.filter(test__engagement=engagement, hash_code__in=old_accepted_findings_hash_codes, risk_accepted=True).distinct()
+            copy.accepted_findings.set(new_accepted_findings)
+        return copy
+
 
 class FileAccessToken(models.Model):
     """This will allow reports to request the images without exposing the
@@ -3227,7 +3423,7 @@ class JIRA_Issue(models.Model):
         elif type(obj) == Engagement:
             self.engagement = obj
         else:
-            raise ValueError('unknown objec type whiel creating JIRA_Issue: %s', to_str_typed(obj))
+            raise ValueError('unknown objec type whiel creating JIRA_Issue: %s' % to_str_typed(obj))
 
     def __str__(self):
         text = ""
@@ -3919,6 +4115,7 @@ admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
+admin.site.register(SLA_Configuration)
 admin.site.register(CWE)
 admin.site.register(Regulation)
 admin.site.register(Global_Role)
