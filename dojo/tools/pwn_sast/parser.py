@@ -95,7 +95,7 @@ class PWNSASTParser(object):
                         finding.nb_occurences += 1
                     else:
                         finding = Finding(
-                            title=f"Source Code Anti-Pattern Discovered in {offending_uri} Line: {line_no}",
+                            title=f"Anti-Pattern in {offending_file} Line: {line_no}",
                             test=test,
                             severity=severity,
                             description=description,
