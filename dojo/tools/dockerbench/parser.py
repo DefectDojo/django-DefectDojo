@@ -1,6 +1,7 @@
 import json
 
 from dojo.models import Finding
+from datetime import datetime
 
 
 class DockerBenchParser(object):
@@ -28,16 +29,18 @@ def get_tests(tree, test):
         description += tree['id'] + " "
     if 'text' in tree:
         description += tree['text']
+    test_start = tree.get('start')
+    test_end = tree.get('end')
     description += '\n'
 
     for node in tree['tests']:
-        items_from_results = get_results(node, test, description)
+        items_from_results = get_results(node, test, test_start, test_end, description)
         items_from_tests += items_from_results
 
     return list(items_from_tests)
 
 
-def get_results(tree, test, description):
+def get_results(tree, test, test_start, test_end, description):
     items_from_results = []
 
     if 'section' in tree:
@@ -47,22 +50,22 @@ def get_results(tree, test, description):
     description += '\n'
 
     for node in tree['results']:
-        item = get_item(node, test, description)
+        item = get_item(node, test, test_start, test_end, description)
         if item:
             items_from_results.append(item)
 
     return list(items_from_results)
 
 
-def get_item(vuln, test, description):
+def get_item(vuln, test, test_start, test_end, description):
 
-    status = vuln.get('result', None)
-    reason = vuln.get('desc', None)
+    status = vuln.get('result')
+    reason = vuln.get('desc')
 
     if status is None:
         return None
 
-    # kube-bench doesn't define severities. So we use the status to define the severity
+    # docker-bench-security doesn't define severities. So we use the status to define the severity
     if status.upper() == 'FAIL':
         severity = 'Critical'
     elif status.upper() == 'WARN' and '(Manual)' not in reason:
@@ -72,38 +75,41 @@ def get_item(vuln, test, description):
     elif status.upper() == 'NOTE' and '(Manual)' not in reason:
         severity = 'Info'
     else:
-        return None
+        return None # return here, e.g if status is PASS and don't add new finding 
 
-    test_number = vuln.get('id', 'Test number not found')
-    test_description = vuln.get('desc', 'Description not found')
+    vuln_id_from_tool = vuln.get('id')
 
-    title = test_number + ' - ' + test_description
+    test_description = vuln.get('desc', 'No description')
+    if vuln_id_from_tool:
+        title = f'{vuln_id_from_tool} - {test_description}'
+    else:
+        title = f'No test number - {test_description}'
 
-    if 'id' in vuln:
-        description += vuln['id'] + ' '
-    if 'desc' in vuln and vuln['desc'] != '':
+    if vuln_id_from_tool:
+        description += vuln_id_from_tool
+    if reason:
         description += '\n'
-        description += 'desc: {}\n'.format(vuln['desc'])
-    if 'details' in vuln:
+        description += 'desc: {}\n'.format(reason)
+    if vuln.get('details'):
+        description += '\n'
         description += vuln['details']
-    if 'audit' in vuln:
+    if vuln.get('audit'):
         description += '\n'
         description += 'Audit: {}\n'.format(vuln['audit'])
-    if 'expected_result' in vuln and vuln['expected_result'] != '':
+    if vuln.get('expected_result'):
         description += '\n'
         description += 'Expected result: {}\n'.format(vuln['expected_result'])
-    if 'actual_value' in vuln and vuln['actual_value'] != '':
+    if vuln.get('actual_value'):
         description += '\n'
         description += 'Actual value: {}\n'.format(vuln['actual_value'])
 
-    mitigation = vuln.get('remediation', '')
-    if 'remediation-impact' in vuln and vuln['remediation-impact'] != '':
+    mitigation = vuln.get('remediation')
+    if vuln.get('remediation-impact'):
         mitigation += '\n'
         mitigation += 'mitigation mpact: {}\n'.format(vuln['remediation-impact'])
 
-    vuln_id_from_tool = test_number
-
     finding = Finding(title=title,
+                      date = datetime.fromtimestamp(int(test_end)),
                       test=test,
                       description=description,
                       severity=severity,
