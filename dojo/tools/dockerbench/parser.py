@@ -75,7 +75,7 @@ def get_item(vuln, test, test_start, test_end, description):
     elif status.upper() == 'NOTE' and '(Manual)' not in reason:
         severity = 'Info'
     else:
-        return None # return here, e.g if status is PASS and don't add new finding 
+        return None  # return here, e.g if status is PASS and don't add new finding
 
     vuln_id_from_tool = vuln.get('id')
 
@@ -109,7 +109,7 @@ def get_item(vuln, test, test_start, test_end, description):
         mitigation += 'mitigation mpact: {}\n'.format(vuln['remediation-impact'])
 
     finding = Finding(title=title,
-                      date = datetime.fromtimestamp(int(test_end)),
+                      date=datetime.fromtimestamp(int(test_end)),
                       test=test,
                       description=description,
                       severity=severity,
