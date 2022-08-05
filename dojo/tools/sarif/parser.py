@@ -1,3 +1,4 @@
+from doctest import debug_script
 import json
 import logging
 import re
@@ -191,6 +192,17 @@ def get_snippet(result):
                         snippet = location['physicalLocation']['contextRegion']['snippet']['text']
     return snippet
 
+def get_codeFlowsDescription(codeFlows):
+    if not 'threadFlows' in codeFlows:
+        return ''
+
+    if not 'locations' in codeFlows['threadFlows']:
+        return ''
+
+    description = 'Code flow:\n'
+    for location in codeFlows['threadFlows']['locations']:
+        physicalLocation = location['physicalLocation']
+        description += physicalLocation['artifactLocation']['uri'] + physicalLocation['region']['startLine'] + physicalLocation['region']['startColumn'] + '\n'
 
 def get_description(result, rule):
     description = ''
@@ -212,6 +224,9 @@ def get_description(result, rule):
             fullDescription = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
             if fullDescription != message and fullDescription != shortDescription:
                 description += '**Rule full description:** {}\n'.format(fullDescription)
+
+    if 'codeFlows' in result:
+        description += get_codeFlowsDescription(result['codeFlows'])
 
     if description.endswith('\n'):
         description = description[:-1]
