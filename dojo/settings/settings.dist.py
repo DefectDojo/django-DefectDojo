@@ -1123,6 +1123,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Hydra Scan': ['title', 'description'],
     'DrHeader JSON Importer': ['title', 'description'],
     'PWN SAST': ['title', 'description'],
+    'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
     'docker-bench-security Scan': ['vuln_id_from_tool'],
 }
 
@@ -1270,6 +1271,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Hydra Scan': DEDUPE_ALGO_HASH_CODE,
     'DrHeader JSON Importer': DEDUPE_ALGO_HASH_CODE,
     'PWN SAST': DEDUPE_ALGO_HASH_CODE,
+    'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
     'docker-bench-security Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
