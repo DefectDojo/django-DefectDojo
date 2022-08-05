@@ -171,7 +171,6 @@ urlpatterns = [
     url(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history,
         name='action_history'),
     url(r'^%s' % get_system_setting('url_prefix'), include(ur)),
-    url(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token, name='api-token-auth'),
     url(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
 
     # drf-yasg = OpenAPI2
@@ -202,6 +201,10 @@ if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:
         #  django admin
         urlpatterns += [url(r'^%sadmin/' % get_system_setting('url_prefix'), admin.site.urls)]
+
+if hasattr(settings, 'API_TOKENS_ENABLED'):
+    if settings.API_TOKENS_ENABLED:
+        urlpatterns += [url(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token, name='api-token-auth')]
 
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, 'EXTRA_URL_PATTERNS'):
