@@ -687,7 +687,7 @@ def copy_finding(request, fid):
                                 title='Copying of %s' % finding.title,
                                 description='The finding "%s" was copied by %s to %s' % (finding.title, request.user, test.title),
                                 product=product,
-                                url=request.build_absolute_uri(reverse('finding_copy', args=(finding_copy.unsaved_vulnerability_ids, ))),
+                                url=request.build_absolute_uri(reverse('copy_finding', args=(finding_copy.id, ))),
                                 recipients=[finding.test.engagement.lead],
                                 icon="exclamation-triangle")
             return redirect_to_return_url_or_else(request, reverse('view_test', args=(test.id,)))
