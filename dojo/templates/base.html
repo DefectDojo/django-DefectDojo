@@ -173,7 +173,7 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="{% url 'swagger-ui_oa3' %}?docExpansion=none" target="_blank">
+                                        <a href="{% url 'swagger-ui_oa3' %}" target="_blank">
                                             <i class="fa fa-book fa-fw" title="OpenAPI v3 Docs"></i>
                                             {% trans "API v2 OpenAPI3 Docs" %}
                                         </a>
@@ -545,6 +545,13 @@
                                                     <li>
                                                         <a href="{% url 'rules' %}">
                                                             {% trans "Rules Framework" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                                {% if system_settings.enable_finding_sla and "dojo.view_sla_configuration"|has_configuration_permission %}
+                                                    <li>
+                                                        <a href="{% url 'sla_config' %}">
+                                                            {% trans "SLA Configuration" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}

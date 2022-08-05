@@ -712,6 +712,9 @@ SPECTACULAR_SETTINGS = {
     'POSTPROCESSING_HOOKS': ['dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook'],
     # show file selection dialogue, see https://github.com/tfranzel/drf-spectacular/issues/455
     "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {
+        "docExpansion": "none"
+    }
 }
 
 # ------------------------------------------------------------------------------
@@ -1121,6 +1124,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'DrHeader JSON Importer': ['title', 'description'],
     'PWN SAST': ['title', 'description'],
     'Whispers': ['vuln_id_from_tool'],
+    'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1268,6 +1272,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'DrHeader JSON Importer': DEDUPE_ALGO_HASH_CODE,
     'PWN SAST': DEDUPE_ALGO_HASH_CODE,
     'Whispers': DEDUPE_ALGO_HASH_CODE,
+    'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
