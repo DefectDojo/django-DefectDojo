@@ -229,6 +229,9 @@ env = environ.Env(
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
                                  '.html', '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
+    # When disabled, existing user tokens will not be removed but it will not be
+    # possible to create new and it will not be possible to use exising.
+    DD_API_TOKENS_ENABLED=(bool, True),
 )
 
 
@@ -671,11 +674,12 @@ DJANGO_ADMIN_ENABLED = env('DD_DJANGO_ADMIN_ENABLED')
 # API V2
 # ------------------------------------------------------------------------------
 
+API_TOKENS_ENABLED = env('DD_API_TOKENS_ENABLED')
+
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -689,18 +693,31 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'dojo.api_v2.exception_handler.custom_exception_handler'
 }
 
+if API_TOKENS_ENABLED:
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.TokenAuthentication',)
+
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        'api_key': {
+        'basicAuth': {
+            'type': 'basic'
+        },
+        'cookieAuth': {
             'type': 'apiKey',
-            'in': 'header',
-            'name': 'Authorization'
-        }
+            'in': 'cookie',
+            'name': 'sessionid'
+        },
     },
     'DOC_EXPANSION': "none",
     'JSON_EDITOR': True,
     'SHOW_REQUEST_HEADERS': True,
 }
+
+if API_TOKENS_ENABLED:
+    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['tokenAuth'] = {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'Authorization'
+    }
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Defect Dojo API v2',
