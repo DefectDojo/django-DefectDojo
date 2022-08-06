@@ -1124,7 +1124,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'DrHeader JSON Importer': ['title', 'description'],
     'PWN SAST': ['title', 'description'],
     'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
-    'docker-bench-security Scan': ['vuln_id_from_tool'],
+    'docker-bench-security Scan': ['unique_id_from_tool'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)

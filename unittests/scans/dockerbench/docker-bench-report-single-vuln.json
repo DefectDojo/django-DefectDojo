@@ -227,7 +227,8 @@
         {
           "id": "2.11",
           "desc": "Ensure base device size is not changed until needed (Scored)",
-          "result": "WARN"
+          "result": "WARN",
+          "remediation": "some kind of remediation could be here"
         },
         {
           "id": "2.12",

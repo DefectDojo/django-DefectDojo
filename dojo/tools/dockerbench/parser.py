@@ -106,7 +106,7 @@ def get_item(vuln, test, test_start, test_end, description):
     mitigation = vuln.get('remediation')
     if vuln.get('remediation-impact'):
         mitigation += '\n'
-        mitigation += 'mitigation mpact: {}\n'.format(vuln['remediation-impact'])
+        mitigation += 'mitigation impact: {}\n'.format(vuln['remediation-impact'])
 
     finding = Finding(title=title,
                       date=datetime.fromtimestamp(int(test_end)),
@@ -115,6 +115,7 @@ def get_item(vuln, test, test_start, test_end, description):
                       severity=severity,
                       mitigation=mitigation,
                       vuln_id_from_tool=vuln_id_from_tool,
+                      unique_id_from_tool=vuln_id_from_tool,
                       static_finding=True,
                       dynamic_finding=False)
 
