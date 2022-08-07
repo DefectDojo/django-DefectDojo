@@ -77,16 +77,16 @@ def get_item(vuln, test, test_start, test_end, description):
     else:
         return None  # return here, e.g if status is PASS and don't add new finding
 
-    vuln_id_from_tool = vuln.get('id')
+    unique_id_from_tool = vuln.get('id')
 
     test_description = vuln.get('desc', 'No description')
-    if vuln_id_from_tool:
-        title = f'{vuln_id_from_tool} - {test_description}'
+    if unique_id_from_tool:
+        title = f'{unique_id_from_tool} - {test_description}'
     else:
         title = f'No test number - {test_description}'
 
-    if vuln_id_from_tool:
-        description += vuln_id_from_tool
+    if unique_id_from_tool:
+        description += unique_id_from_tool
     if reason:
         description += '\n'
         description += 'desc: {}\n'.format(reason)
@@ -114,8 +114,7 @@ def get_item(vuln, test, test_start, test_end, description):
                       description=description,
                       severity=severity,
                       mitigation=mitigation,
-                      vuln_id_from_tool=vuln_id_from_tool,
-                      unique_id_from_tool=vuln_id_from_tool,
+                      unique_id_from_tool=unique_id_from_tool,
                       static_finding=True,
                       dynamic_finding=False)
 
