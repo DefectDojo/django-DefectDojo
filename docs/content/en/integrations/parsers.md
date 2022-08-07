@@ -371,6 +371,11 @@ Import of JSON report from
 Import JSON container image linter reports
 <https://github.com/goodwithtech/dockle>
 
+### docker-bench-security Scanner
+
+Import JSON reports of OWASP [docker-bench-security](https://github.com/docker/docker-bench-security).
+docker-bench-security is a script that make tests based on [CIS Docker Benchmark](https://www.cisecurity.org/benchmark/docker/).
+
 ### Detect-secrets
 
 Import of JSON report from <https://github.com/Yelp/detect-secrets>
