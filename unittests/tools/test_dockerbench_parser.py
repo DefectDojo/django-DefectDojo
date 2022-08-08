@@ -57,7 +57,7 @@ class TestDockerBenchParser(DojoTestCase):
         self.assertIn("You should not pass --experimental as a runtime parameter to the Docker daemon on production systems.", finding.mitigation)
         self.assertIn("mitigation impact: None.", finding.mitigation)
 
-        finding = findings[38]
+        finding = findings[39]
         self.assertEqual("Info", finding.severity)
         self.assertEqual("4.5", finding.unique_id_from_tool)
         self.assertIn("4.5 -", finding.title)
