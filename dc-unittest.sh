@@ -1,4 +1,4 @@
-#/bin/env bash
+#!/bin/env bash
 
 unset PROFILE
 unset TEST_CASE
