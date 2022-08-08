@@ -37,4 +37,4 @@ class TestPWNSASTParser(DojoTestCase):
         parser = PWNSASTParser()
         findings = parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
-        self.assertIsNotNone(findings[0]["title"])
+        self.assertIsNotNone(findings[0].title)
