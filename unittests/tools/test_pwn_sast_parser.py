@@ -33,8 +33,8 @@ class TestPWNSASTParser(DojoTestCase):
         self.assertEqual(1, len(findings))
 
     def test_title_is_not_none(self):
-      testfile = open("unittests/scans/pwn_sast/one_finding.json")
-      parser = PWNSASTParser()
-      findings = parser.get_findings(testfile, Test())
-      self.assertIsInstance(findings, list)
-      self.assertIsNotNone(findings.title)
+        testfile = open("unittests/scans/pwn_sast/one_finding.json")
+        parser = PWNSASTParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertIsInstance(findings, list)
+        self.assertIsNotNone(findings.title)
