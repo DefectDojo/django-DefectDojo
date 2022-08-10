@@ -485,6 +485,16 @@ def get_labels(obj):
             labels.append(system_label)
         # Update the label with the product name (underscore)
         labels.append(prod_name(obj).replace(" ", "_"))
+
+    add_vulnerability_id_to_jira_label = system_settings.add_vulnerability_id_to_jira_label
+    if add_vulnerability_id_to_jira_label and type(obj) == Finding and obj.vulnerability_ids:
+        for id in obj.vulnerability_ids:
+            labels.append(id)
+    elif add_vulnerability_id_to_jira_label and type(obj) == Finding_Group:
+        for finding in obj.findings.all():
+            for id in finding.vulnerability_ids:
+                labels.append(id)
+
     return labels
 
 
@@ -661,6 +671,8 @@ def add_jira_issue(obj, *args, **kwargs):
         tags = get_tags(obj)
         jira_labels = labels + tags
         if jira_labels:
+            # de-dup
+            jira_labels = list(dict.fromkeys(jira_labels))
             if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
                 fields['labels'] = jira_labels
 
