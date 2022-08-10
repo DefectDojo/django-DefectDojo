@@ -203,7 +203,13 @@ def get_codeFlowsDescription(codeFlows):
             description = '**Code flow:**\n'
             for location in threadFlow['locations']:
                 physicalLocation = location['location']['physicalLocation']
-                description += '\t' + physicalLocation['artifactLocation']['uri'] + ':' + str(physicalLocation['region']['startLine']) + ':' + str(physicalLocation['region']['startColumn']) + '\n'
+                region = physicalLocation['region']
+                description += '\t' + physicalLocation['artifactLocation']['uri'] + ':' + str(region['startLine']) 
+                if 'startColumn' in region:
+                    description += ':' + str(region['startColumn'])
+                if 'snippet' in region:
+                    description += '\t-\t' + region['snippet']['text']
+                description += '\n'
 
     return description
 
