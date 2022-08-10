@@ -1,8 +1,6 @@
 import json
-from datetime import datetime
-from msilib.schema import Component
 
-from dojo.models import Finding, Vulnerability_Id
+from dojo.models import Finding
 
 from .importer import BlackduckApiImporter
 
