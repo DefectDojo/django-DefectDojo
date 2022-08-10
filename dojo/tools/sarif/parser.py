@@ -193,16 +193,19 @@ def get_snippet(result):
     return snippet
 
 def get_codeFlowsDescription(codeFlows):
-    if not 'threadFlows' in codeFlows:
-        return ''
+    for codeFlow in codeFlows:
+        if not 'threadFlows' in codeFlow:
+            continue
+        for threadFlow in codeFlow['threadFlows']:
+            if not 'locations' in threadFlow:
+                continue
 
-    if not 'locations' in codeFlows['threadFlows']:
-        return ''
+            description = '**Code flow:**\n'
+            for location in threadFlow['locations']:
+                physicalLocation = location['location']['physicalLocation']
+                description += '\t' + physicalLocation['artifactLocation']['uri'] + ':' + str(physicalLocation['region']['startLine']) + ':' + str(physicalLocation['region']['startColumn']) + '\n'
 
-    description = 'Code flow:\n'
-    for location in codeFlows['threadFlows']['locations']:
-        physicalLocation = location['physicalLocation']
-        description += physicalLocation['artifactLocation']['uri'] + physicalLocation['region']['startLine'] + physicalLocation['region']['startColumn'] + '\n'
+    return description
 
 def get_description(result, rule):
     description = ''
