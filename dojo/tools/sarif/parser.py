@@ -1,4 +1,3 @@
-from doctest import debug_script
 import json
 import logging
 import re
