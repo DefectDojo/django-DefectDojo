@@ -1,5 +1,3 @@
-import json
-
 import requests
 
 
@@ -20,15 +18,14 @@ class VulnersAPI:
             raise Exception('Vulners.com Authentication type {} not supported'.format(tool_config.authentication_type))
 
     def get_findings(self):
-        print(f'[Vulners API] get findings')
         response = self.session.post(
-            url='{}/api/v3/reports/vulnsreport'.format(self.vulners_api_url),
+            url=f'{self.vulners_api_url}/api/v3/reports/vulnsreport',
             headers=self.get_headers(),
             json={
-                'reporttype':'vulnslist',
-                'skip':0,
-                'size':10000,
-                'apiKey':self.api_key
+                'reporttype': 'vulnslist',
+                'skip': 0,
+                'size': 10000,
+                'apiKey': self.api_key
             }
         )
 
@@ -51,14 +48,13 @@ class VulnersAPI:
         :param vulns_id: list Vulners vulnerabilities ID
         :return:
         """
-        print(f'[Vulners API] get vulns description for {vulns_id}')
         response = self.session.post(
-            url='{}/api/v3/search/id/'.format(self.vulners_api_url),
+            url=f'{self.vulners_api_url}/api/v3/search/id/',
             headers=self.get_headers(),
             json={
                      'id': vulns_id,
-                     'fields': ['description','cwe','enchantments','cvelist', 'cvss3'],
-                     'apiKey':self.api_key
+                     'fields': ['description', 'cwe', 'enchantments', 'cvelist', 'cvss3'],
+                     'apiKey': self.api_key
                  })
 
         if not response.ok:

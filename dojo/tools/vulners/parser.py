@@ -16,6 +16,7 @@ vulners_severity_mapping = {
     5: 'Critical'
 }
 
+
 class VulnersParser(object):
     """Parser that can load data from Vulners Scanner API"""
 
@@ -71,7 +72,7 @@ class VulnersParser(object):
                 # duplicate=False,
                 out_of_scope=False,
                 vuln_id_from_tool=id,
-                component_name= agentfqdn or agentip
+                component_name=agentfqdn or agentip
             )
 
             endpoint = Endpoint(host=agentip)
@@ -85,7 +86,7 @@ class VulnersParser(object):
 
             # CVSSv3 vector
             if vuln.get('cvss3'):
-                finding.cvssv3 = CVSS3(vuln.get('cvss3', {}).get('cvssV3', {}).get('vectorString','')).clean_vector()
+                finding.cvssv3 = CVSS3(vuln.get('cvss3', {}).get('cvssV3', {}).get('vectorString', '')).clean_vector()
 
             # References
             references = f"- https://vulners.com/{family}/{id}  \n"
@@ -96,4 +97,3 @@ class VulnersParser(object):
 
             findings.append(finding)
         return findings
-

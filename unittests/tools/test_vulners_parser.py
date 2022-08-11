@@ -10,5 +10,3 @@ class TestVulnersParser(DojoTestCase):
         parser = VulnersParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(75, len(findings))
-
-
