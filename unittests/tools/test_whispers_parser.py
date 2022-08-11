@@ -23,6 +23,7 @@ class TestWhispersParser(TestCase):
         self.assertEqual(1, len(findings))
         self.assertEqual("src/pip.conf", findings[0].file_path)
         self.assertEqual(2, findings[0].line)
+        self.assertEqual("pip.conf Password", findings[0].vuln_id_from_tool)
 
     def test_whispers_parser_with_many_vuln_has_many_findings(self):
         testfile = open("unittests/scans/whispers/whispers_many_vul.json")

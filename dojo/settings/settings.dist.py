@@ -1123,7 +1123,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Hydra Scan': ['title', 'description'],
     'DrHeader JSON Importer': ['title', 'description'],
     'PWN SAST': ['title', 'description'],
-    'Whispers': ['vuln_id_from_tool'],
+    'Whispers': ['vuln_id_from_tool', 'file_path', 'line'],
     'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
 }
 

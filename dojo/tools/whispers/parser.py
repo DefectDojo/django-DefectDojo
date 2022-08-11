@@ -1,4 +1,3 @@
-import hashlib
 import json
 
 from dojo.models import Endpoint, Finding
@@ -60,8 +59,7 @@ class WhispersParser(object):
                     file_path=vuln.get("file"),
                     line=int(
                         vuln.get("line")),
-                    vuln_id_from_tool=hashlib.sha256(
-                        str(description).encode("utf-8")).hexdigest(),
+                    vuln_id_from_tool=vuln.get("message"),
                     static_finding=True,
                     dynamic_finding=False,
                     test=test,
