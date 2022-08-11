@@ -8,13 +8,6 @@ from dojo.tools.vulners.importer import VulnersImporter
 logger = logging.getLogger(__name__)
 
 
-DESCRIPTION_TEMPLATE = """**{title}**
-**Serial Number**: {serial_number}
-**Type Index**: {type_index}
-**Confidence**: {confidence}
-**Description**: {description_text}
-"""
-
 vulners_severity_mapping = {
     1: 'Info',
     2: 'Low',
@@ -74,14 +67,14 @@ class VulnersParser(object):
                 mitigation=component.get("cumulativeFix"),
                 static_finding=False,  # by definition
                 dynamic_finding=True,  # by definition
-                false_p=False,
-                duplicate=False,
+                # false_p=False,
+                # duplicate=False,
                 out_of_scope=False,
                 vuln_id_from_tool=id,
                 component_name= agentfqdn or agentip
             )
 
-            endpoint = Endpoint(host=agentfqdn or agentip)
+            endpoint = Endpoint(host=agentip)
             finding.unsaved_endpoints = [endpoint]
             finding.unsaved_vulnerability_ids = [id]
 

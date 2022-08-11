@@ -5,15 +5,17 @@ import requests
 
 class VulnersAPI:
     """
-    A simple client for the Cobalt.io API
+    A simple client for the Vulners API
     """
 
-    vulners_api_url = "https://vulners.com"
+    DEFAULT_URL = "https://vulners.com"
+    vulners_api_url = ''
 
     def __init__(self, tool_config):
         self.session = requests.Session()
         if tool_config.authentication_type == "API":
             self.api_key = tool_config.api_key
+            self.vulners_api_url = tool_config.url or self.DEFAULT_URL
         else:
             raise Exception('Vulners.com Authentication type {} not supported'.format(tool_config.authentication_type))
 
