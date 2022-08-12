@@ -49,7 +49,7 @@ social-auth-core==4.3.0
 Python-jose==3.3.0
 gitpython==3.1.27
 debugpy==1.6.2
-python-gitlab==3.8.0
+python-gitlab==3.8.1
 google-api-python-client==2.56.0
 google-auth==2.10.0
 google-auth-oauthlib==0.5.2
@@ -75,3 +75,5 @@ drf-spectacular==0.23.1
 django-ratelimit==3.0.1
 argon2-cffi==21.3.0
 blackduck==1.0.7
+pycurl==7.45.1  # Required for Celery Broker AWS (SQS) support
+boto3==1.24.49  # Required for Celery Broker AWS (SQS) support
