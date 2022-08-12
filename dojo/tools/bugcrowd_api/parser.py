@@ -6,8 +6,10 @@ from dojo.tools.bugcrowd_api.importer import BugcrowdApiImporter
 import re
 import dateutil.parser
 
-SCAN_BUGCROWD_API = 'Bugcrowd API Import'
-pattern_URI = re.compile(r"(?i)(?P<proto>(http(s)*|ftp|ssh))(://)((?P<user>\w+)(:(?P<password>\w+))?@)?(?P<hostname>[\w\.-]+)(:(?P<port>[0-9]+))?(?P<path>.*)?")
+SCAN_BUGCROWD_API = "Bugcrowd API Import"
+pattern_URI = re.compile(
+    r"(?i)(?P<proto>(http(s)*|ftp|ssh))(://)((?P<user>\w+)(:(?P<password>\w+))?@)?(?P<hostname>[\w\.-]+)(:(?P<port>[0-9]+))?(?P<path>.*)?"
+)
 pattern_title_authorized = re.compile(r"^[a-zA-Z0-9_\s+-.]*$")
 
 
@@ -29,7 +31,7 @@ class BugcrowdApiParser(object):
         return False
 
     def requires_tool_type(self, scan_type):
-        return 'Bugcrowd API'
+        return "Bugcrowd API"
 
     def get_findings(self, file, test):
         if file is None:
@@ -37,12 +39,19 @@ class BugcrowdApiParser(object):
         else:
             data = json.load(file)
         findings = []
+
         for entry in data:
             if test.api_scan_configuration:
                 config = test.api_scan_configuration
-                links = "https://tracker.bugcrowd.com/" + str(config.service_key_1) + entry["links"]["self"]
+                links = (
+                    "https://tracker.bugcrowd.com/"
+                    + str(config.service_key_1)
+                    + entry["links"]["self"]
+                )
             else:
-                links = entry["links"]["self"]
+                if "links" in entry:
+                    if "self" in entry["links"]:
+                        links = entry["links"]["self"]
 
             if not self.include_finding(entry):
                 continue
@@ -52,8 +61,9 @@ class BugcrowdApiParser(object):
             bugcrowd_severity = entry["attributes"]["severity"]
 
             title = entry["attributes"]["title"]
+
             if not pattern_title_authorized.match(title):
-                char_to_replace = {':': ' ', '"': ' ', '@': 'at'}
+                char_to_replace = {":": " ", '"': " ", "@": "at"}
                 for key, value in char_to_replace.items():
                     title = title.replace(key, value)
 
@@ -91,7 +101,8 @@ class BugcrowdApiParser(object):
                 is_mitigated=self.is_mitigated(bugcrowd_state),
                 static_finding=False,
                 dynamic_finding=True,
-                unique_id_from_tool=unique_id_from_tool)
+                unique_id_from_tool=unique_id_from_tool,
+            )
 
             if bug_url != "" and bug_url is not None:
                 endpoint = self.convert_endpoint(bug_url)
@@ -118,27 +129,31 @@ class BugcrowdApiParser(object):
         if result:
             return Endpoint.from_uri(result.group(0))
         else:
-            return Endpoint.from_uri('')
+            return Endpoint.from_uri("")
 
     def include_finding(self, entry):
         """Determine whether this finding should be imported to DefectDojo"""
-
+        # Valid states from the Bugcrowd API
         # "new" "out-of-scope" "not-applicable" "not-reproducible" "triaged" "unresolved" "resolved" "informational"
+
         allowed_states = [
             "new",  # Finding from a previous pentest
-            "out_of_scope",     # Fix for finding is being verified
-            "not_applicable",     # Finding is a duplicate within the pentest
-            "not_reproducible",       # Finding is found to be a false positive
-            "triaged",      # Finding is verified and valid
-            "unresolved",           # The finding is not yet verified by the pentest team
+            "out_of_scope",  # Fix for finding is being verified
+            "not_applicable",  # Finding is a duplicate within the pentest
+            "not_reproducible",  # Finding is found to be a false positive
+            "triaged",  # Finding is verified and valid
+            "unresolved",  # The finding is not yet verified by the pentest team
             "resolved",  # Finding is out of the scope of the pentest
-            "informational",      # The finding is not yet verified by the pentest team
+            "informational",  # The finding is not yet verified by the pentest team
         ]
 
         if entry["attributes"]["state"] in allowed_states:
             return True
         else:
-            print(entry["attributes"]["state"] + 'NOT IN ALLOWED STATES !')
+            print(
+                entry["attributes"]["state"]
+                + "not in allowed bugcrowd submission states"
+            )
             return False
 
     def convert_log_timestamp(self, timestamp):
@@ -161,11 +176,12 @@ class BugcrowdApiParser(object):
         else:
             return "Info"
 
-# Valid states from the Bugcrowd API
-# "new" "out-of-scope" "not-applicable" "not-reproducible" "triaged" "unresolved" "resolved" "informational"
-
     def is_active(self, bugcrowd_state):
-        return (bugcrowd_state == 'unresolved') or (not self.is_mitigated(bugcrowd_state) and not self.is_false_p(bugcrowd_state) and not self.is_out_of_scope(bugcrowd_state))
+        return (bugcrowd_state == "unresolved") or (
+            not self.is_mitigated(bugcrowd_state)
+            and not self.is_false_p(bugcrowd_state)
+            and not self.is_out_of_scope(bugcrowd_state)
+        )
 
     def is_duplicate(self, bugcrowd_state):
         return bugcrowd_state == "duplicate"
@@ -183,4 +199,6 @@ class BugcrowdApiParser(object):
         return bugcrowd_state == "not_applicable"
 
     def is_verified(self, bugcrowd_state):
-        return bugcrowd_state == "triaged" or (bugcrowd_state != "new" and bugcrowd_state != "triaging")
+        return bugcrowd_state == "triaged" or (
+            bugcrowd_state != "new" and bugcrowd_state != "triaging"
+        )

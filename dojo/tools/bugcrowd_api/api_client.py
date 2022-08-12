@@ -1,8 +1,6 @@
 import requests
 from urllib.parse import urlencode
 from dojo.models import Tool_Type
-from concurrent import futures
-import math
 
 
 class BugcrowdAPI:
@@ -12,182 +10,131 @@ class BugcrowdAPI:
 
     bugcrowd_api_url = "https://api.bugcrowd.com"
     default_headers = {
-            'Accept': 'application/vnd.bugcrowd+json',
-            'User-Agent': 'DefectDojo',
-            'Bugcrowd-Version': '2021-10-28'
-                }
+        "Accept": "application/vnd.bugcrowd+json",
+        "User-Agent": "DefectDojo",
+        "Bugcrowd-Version": "2021-10-28",
+    }
 
     def __init__(self, tool_config):
-        tool_type, _ = Tool_Type.objects.get_or_create(name='Bugcrowd API')
+        tool_type, _ = Tool_Type.objects.get_or_create(name="Bugcrowd API")
 
         self.session = requests.Session()
         if tool_config.authentication_type == "API":
             self.api_token = tool_config.api_key
-            self.session.headers.update({
-                    "Authorization": 'Token {}'.format(self.api_token)})
+            self.session.headers.update(
+                {"Authorization": "Token {}".format(self.api_token)}
+            )
             self.session.headers.update(self.default_headers)
         else:
-            raise Exception('bugcrowd Authentication type {} not supported'.format(tool_config.authentication_type))
-
-    def gen_page_url(self, program, target, page=0, page_limit=100):
-        params_default = {'filter[program]': program, 'page[limit]': page_limit, 'page[offset]': (page * page_limit), 'include': 'monetary_rewards,target', 'filter[duplicate]': 'false', 'sort': 'submitted-desc'}
-
-        if target:
-            params = params_default
-            params['filter[target]'] = target
-            params_encoded = urlencode(params)
-        else:
-            params_encoded = urlencode(params_default)
-
-        return '{}/submissions?{}'.format(self.bugcrowd_api_url, params_encoded)
-
-    def fetch_worker(self, url):
-        response = self.session.get(url)
-        if response.ok:
-            return response.json()['data']
-        else:
-            raise Exception("Unable to get asset findings due to {} - {}".format(
-                response.status_code, response.content.decode("utf-8")))
-
-    # multi-threaded version
-    def get_findings_v3(self, program, target):
-        """
-        Returns the findings in a paginated iterator for a given bugcrowd program and target, if target is *, everything is returned
-        :param program:
-        :param target:
-        :return:
-        """
-        output = []
-        page_limit = 100
-        next = self.gen_page_url(program, target, 0, page_limit)
-
-        initial_response = self.session.get(url=next)
-        if initial_response.ok:
-            data = initial_response.json()
-            total_amount_of_pages = math.ceil(data['meta']['total_hits'] / page_limit)
-
-            output = data['data']  # add the first page that we fetched to the output
-
-            maxWorker = min(10, total_amount_of_pages)
-            print('Fetching ' + str(data['meta']['total_hits']) + ' bugcrowd submissions on ' + str(total_amount_of_pages) + ' pages with ' + str(maxWorker) + ' workers')
-            urls = [self.gen_page_url(program, target, page=n, page_limit=page_limit) for n in range(1, total_amount_of_pages)]
-
-            with futures.ThreadPoolExecutor(maxWorker) as executor:
-                tasks = [executor.submit(self.fetch_worker, url) for url in urls]
-            futures.wait(tasks)  # wait for all workers
-            # add the rest of the pages fetched
-            for task in tasks:
-                output += task.result()
-
-            return output
-        else:
-            raise Exception("Unable to get asset findings due to {} - {}".format(
-                initial_response.status_code, initial_response.content.decode("utf-8")))
-
-    # simple generator version
-    def get_findings_v2(self, program, target):
-        """
-        Returns the findings in a paginated iterator for a given bugcrowd program and target, if target is *, everything is returned
-        :param program:
-        :param target:
-        :return:
-        """
-        params_default = {'filter[program]': program, 'page[limit]': 100, 'page[offset]': 0, 'include': 'monetary_rewards,target', 'filter[duplicate]': 'false', 'sort': 'submitted-desc'}
-
-        if target:
-            params = params_default
-            params['filter[target]'] = target
-            params_encoded = urlencode(params)
-        else:
-            params_encoded = urlencode(params_default)
-
-        next = '{}/submissions?{}'.format(self.bugcrowd_api_url, params_encoded)
-        while next != '':
-            response = self.session.get(url=next)
-
-            if response.ok:
-                data = response.json()
-                if len(data['data']) != 0 and data['meta']['total_hits'] != data['meta']['count']:
-                    yield data['data']
-
-                # When we hit the end of the submissions, break out
-                if len(data['data']) == 0 or data['meta']['total_hits'] == data['meta']['count']:
-                    return data['data']
-
-                # Otherwise, keep updating next link
-                next = '{}{}'.format(self.bugcrowd_api_url, data["links"]["next"])
-            else:
-                next = 'over'
-                raise Exception("Unable to get asset findings due to {} - {}".format(
-                    response.status_code, response.content.decode("utf-8")))
+            raise Exception(
+                "bugcrowd Authentication type {} not supported".format(
+                    tool_config.authentication_type
+                )
+            )
 
     def get_findings(self, program, target):
         """
-        Returns the findings for a given bugcrowd program and target, if target is *, everything is returned
+        Returns the findings in a paginated iterator for a given bugcrowd program and target, if target is *, everything is returned
         :param program:
         :param target:
         :return:
         """
-        output = []
-        params_default = {'filter[program]': program, 'page[limit]': 100, 'page[offset]': 0, 'include': 'monetary_rewards,target', 'filter[duplicate]': 'false', 'sort': 'submitted-desc'}
+        params_default = {
+            "filter[duplicate]": "false",
+            "filter[program]": program,
+            "page[limit]": 100,
+            "page[offset]": 0,
+            "include": "monetary_rewards,target",
+            "sort": "submitted-desc",
+        }
 
         if target:
             params = params_default
-            params['filter[target]'] = target
+            params["filter[target]"] = target
             params_encoded = urlencode(params)
         else:
             params_encoded = urlencode(params_default)
 
-        next = '{}/submissions?{}'.format(self.bugcrowd_api_url, params_encoded)
-        while next != '':
+        next = "{}/submissions?{}".format(self.bugcrowd_api_url, params_encoded)
+        while next != "":
             response = self.session.get(url=next)
 
             if response.ok:
                 data = response.json()
+                if len(data["data"]) != 0:
+                    yield data["data"]
+
                 # When we hit the end of the submissions, break out
-                if len(data['data']) == 0 or data['meta']['total_hits'] == data['meta']['count']:
-                    output = output + data['data']
+                if len(data["data"]) == 0:
+                    next = ""
                     break
 
-                print('Fetched ' + str(len(data['data'])) + ' submissions')
-                output = output + data['data']
-
                 # Otherwise, keep updating next link
-                next = '{}{}'.format(self.bugcrowd_api_url, data["links"]["next"])
+                next = "{}{}".format(self.bugcrowd_api_url, data["links"]["next"])
             else:
-                next = 'over'
-                raise Exception("Unable to get asset findings due to {} - {}".format(
-                    response.status_code, response.content.decode("utf-8")))
-
-        print('Total gathered submissions from Bugcrowd: ' + str(len(output)))
-        return output
+                next = "over"
+                raise Exception(
+                    "Unable to get bugcrowd submissions due to {} - {}".format(
+                        response.status_code, response.content.decode("utf-8")
+                    )
+                )
 
     def test_connection(self):
         # Request programs
         response_programs = self.session.get(
-            url='{}/programs'.format(self.bugcrowd_api_url))
+            url="{}/programs".format(self.bugcrowd_api_url)
+        )
 
-        # Request assets to validate the org token
+        # Request submissions to validate the org token
         response_subs = self.session.get(
-            url='{}/submissions'.format(self.bugcrowd_api_url))
+            url="{}/submissions".format(self.bugcrowd_api_url)
+        )
 
         if response_programs.ok and response_subs.ok:
-            data = response_programs.json().get('data')
+            data = response_programs.json().get("data")
+            data_subs = response_subs.json().get("meta")
+            total_subs = str(data_subs["total_hits"])
+
             progs = list(filter(lambda prog: prog["type"] == "program", data))
-            program_names = ', '.join(list(map(lambda p: p["attributes"]["name"], progs)))
-            return f'You have access to the "{ program_names }" programs'
+            program_names = ", ".join(
+                list(map(lambda p: p["attributes"]["code"], progs))
+            )
+            # Request targets to validate the org token
+            response_targets = self.session.get(
+                url="{}/targets".format(self.bugcrowd_api_url)
+            )
+            if response_targets.ok:
+                data_targets = response_targets.json().get("data")
+                targets = list(
+                    filter(lambda prog: prog["type"] == "target", data_targets)
+                )
+                target_names = ", ".join(
+                    list(map(lambda p: p["attributes"]["name"], targets))
+                )
+                return f'With {total_subs} submissions, you have access to the "{ program_names }" programs, \
+                    you can use these as Service key 1 for filtering submissions \
+                        You also have targets "{ target_names }" that can be used in Service key 2'
         else:
-            raise Exception("Connection failed (error: {} - {})".format(
-                response_subs.status_code, response_subs.content.decode("utf-8")
-            ))
+            raise Exception(
+                "Connection failed (error: {} - {})".format(
+                    response_subs.status_code, response_subs.content.decode("utf-8")
+                )
+            )
 
     def test_product_connection(self, api_scan_configuration):
-        submissions = self.get_findings(api_scan_configuration.service_key_1, api_scan_configuration.service_key_2)
+        submissions = []
+        submission_gen = self.get_findings(
+            api_scan_configuration.service_key_1, api_scan_configuration.service_key_2
+        )
+        for page in submission_gen:
+            submissions = submissions + page
         submission_number = len(submissions)
-        return f'You have access to "{submission_number}" submissions in Bugcrowd in the Program code "{api_scan_configuration.service_key_1}" and Target "{api_scan_configuration.service_key_2}" (leave service key 2 empty to get all submissions in program)'
+        return f'You have access to "{submission_number}" submissions (no duplicates)\
+            in Bugcrowd in the Program code "{api_scan_configuration.service_key_1}" \
+            and Target "{api_scan_configuration.service_key_2}" (leave service key 2 empty to get all submissions in program)'
 
     def get_headers(self):
 
-        self.default_headers['Authorization'] = 'Token {}'.format(self.api_token)
+        self.default_headers["Authorization"] = "Token {}".format(self.api_token)
 
         return self.default_headers

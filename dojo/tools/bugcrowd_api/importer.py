@@ -13,14 +13,26 @@ class BugcrowdApiImporter(object):
 
     def get_findings(self, test):
         client, config = self.prepare_client(test)
-        logger.debug("Fetching submissions program " + str(config.service_key_1) + " and target " + str(config.service_key_2))
-        # findings = client.get_findings(config.service_key_1, config.service_key_2)
-        findings = client.get_findings_v3(config.service_key_1, config.service_key_2)
-        # FOR V2
-        # output = []
-        # for f in findings:
-        #     output = output + f
-        return findings
+        logger.debug(
+            "Fetching submissions program "
+            + str(config.service_key_1)
+            + " and target "
+            + str(config.service_key_2)
+        )
+
+        submissions_paged = client.get_findings(
+            config.service_key_1,
+            config.service_key_2,
+        )
+
+        submissions = []
+        counter = 0
+        for page in submissions_paged:
+            submissions += page
+            counter += 1
+        logger.debug("{} Bugcrowd submissions pages fetched".format(counter))
+
+        return submissions
 
     def prepare_client(self, test):
         product = test.engagement.product
@@ -28,18 +40,24 @@ class BugcrowdApiImporter(object):
             config = test.api_scan_configuration
             # Double check of config
             if config.product != product:
-                raise ValidationError('API Scan Configuration for Bugcrowd API and Product do not match.')
+                raise ValidationError(
+                    "API Scan Configuration for Bugcrowd API and Product do not match."
+                )
         else:
-            configs = Product_API_Scan_Configuration.objects.filter(product=product, tool_configuration__tool_type__name='Bugcrowd API')
+            configs = Product_API_Scan_Configuration.objects.filter(
+                product=product, tool_configuration__tool_type__name="Bugcrowd API"
+            )
             if configs.count() == 1:
                 config = configs.first()
             elif configs.count() > 1:
                 raise ValidationError(
-                    'More than one Product API Scan Configuration has been configured, but none of them has been chosen. Please specify at Test which one should be used.'
+                    "More than one Product API Scan Configuration has been configured, but none of them has been chosen.\
+                        Please specify at Test which one should be used."
                 )
             else:
                 raise ValidationError(
-                    'There are no API Scan Configurations for this Product. Please add at least one API Scan Configuration for bugcrowd to this Product.'
+                    "There are no API Scan Configurations for this Product. \
+                        Please add at least one API Scan Configuration for bugcrowd to this Product."
                 )
 
         tool_config = config.tool_configuration
