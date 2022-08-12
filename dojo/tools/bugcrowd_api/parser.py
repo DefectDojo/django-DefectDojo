@@ -43,10 +43,8 @@ class BugcrowdApiParser(object):
         for entry in data:
             if test.api_scan_configuration:
                 config = test.api_scan_configuration
-                links = (
-                    "https://tracker.bugcrowd.com/"
-                    + str(config.service_key_1)
-                    + entry["links"]["self"]
+                links = "https://tracker.bugcrowd.com/{}{}".format(
+                    str(config.service_key_1), entry["links"]["self"]
                 )
             else:
                 if "links" in entry:
@@ -151,8 +149,9 @@ class BugcrowdApiParser(object):
             return True
         else:
             print(
-                entry["attributes"]["state"]
-                + "not in allowed bugcrowd submission states"
+                "{} not in allowed bugcrowd submission states".format(
+                    entry["attributes"]["state"]
+                )
             )
             return False
 
