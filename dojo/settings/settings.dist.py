@@ -229,6 +229,9 @@ env = environ.Env(
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
                                  '.html', '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
+    # When disabled, existing user tokens will not be removed but it will not be
+    # possible to create new and it will not be possible to use exising.
+    DD_API_TOKENS_ENABLED=(bool, True),
 )
 
 
@@ -671,11 +674,12 @@ DJANGO_ADMIN_ENABLED = env('DD_DJANGO_ADMIN_ENABLED')
 # API V2
 # ------------------------------------------------------------------------------
 
+API_TOKENS_ENABLED = env('DD_API_TOKENS_ENABLED')
+
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -689,18 +693,31 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'dojo.api_v2.exception_handler.custom_exception_handler'
 }
 
+if API_TOKENS_ENABLED:
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.TokenAuthentication',)
+
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        'api_key': {
+        'basicAuth': {
+            'type': 'basic'
+        },
+        'cookieAuth': {
             'type': 'apiKey',
-            'in': 'header',
-            'name': 'Authorization'
-        }
+            'in': 'cookie',
+            'name': 'sessionid'
+        },
     },
     'DOC_EXPANSION': "none",
     'JSON_EDITOR': True,
     'SHOW_REQUEST_HEADERS': True,
 }
+
+if API_TOKENS_ENABLED:
+    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['tokenAuth'] = {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'Authorization'
+    }
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Defect Dojo API v2',
@@ -1123,6 +1140,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Hydra Scan': ['title', 'description'],
     'DrHeader JSON Importer': ['title', 'description'],
     'PWN SAST': ['title', 'description'],
+    'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
+    'docker-bench-security Scan': ['unique_id_from_tool'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1248,7 +1267,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
     'KICS Scan': DEDUPE_ALGO_HASH_CODE,
-    'SARIF': DEDUPE_ALGO_HASH_CODE,
+    'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
     'Semgrep JSON Report': DEDUPE_ALGO_HASH_CODE,
@@ -1269,6 +1288,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Hydra Scan': DEDUPE_ALGO_HASH_CODE,
     'DrHeader JSON Importer': DEDUPE_ALGO_HASH_CODE,
     'PWN SAST': DEDUPE_ALGO_HASH_CODE,
+    'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
+    'docker-bench-security Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')

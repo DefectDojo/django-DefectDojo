@@ -371,6 +371,11 @@ Import of JSON report from
 Import JSON container image linter reports
 <https://github.com/goodwithtech/dockle>
 
+### docker-bench-security Scanner
+
+Import JSON reports of OWASP [docker-bench-security](https://github.com/docker/docker-bench-security).
+docker-bench-security is a script that make tests based on [CIS Docker Benchmark](https://www.cisecurity.org/benchmark/docker/).
+
 ### Detect-secrets
 
 Import of JSON report from <https://github.com/Yelp/detect-secrets>
@@ -1025,6 +1030,16 @@ For example, a report with `Dockle` as a driver name will produce a Test with a 
 {{% alert title="Warning" color="warning" %}}
 Current implementation is limited and will aggregate all the findings in the SARIF file in one single report.
 {{% /alert %}}
+
+#### Support for de-duplication (fingerprinting)
+
+SARIF parser take into account data for fingerprinting. It's base on `fingerprints` and `partialFingerprints` properties.
+It's possible to activate de-duplication based on this data by customizing settings.
+
+```Python
+# in your settings.py file
+DEDUPLICATION_ALGORITHM_PER_PARSER["SARIF"] = DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
+```
 
 ### ScoutSuite
 
