@@ -186,7 +186,7 @@ def get_answered_questions(survey=None, read_only=False):
             question=q,
             form_tag=False)
         for q in survey.survey.questions.all()]
-    
+
     if read_only:
         for question in questions:
             question.fields['answer'].widget.attrs = {"readonly": "readonly", "disabled": "disabled"}
@@ -338,7 +338,7 @@ def create_questionnaire(request):
                 messages.ERROR,
                 'Please correct any errors displayed below.',
                 extra_tags='alert-danger')
-    
+
     add_breadcrumb(title="Create Questionnaire", top_level=False, request=request)
     return render(request, 'defectDojo-engagement-survey/create_questionnaire.html', {
         "survey": survey,
@@ -616,7 +616,7 @@ def add_empty_questionnaire(request):
                 messages.ERROR,
                 'Questionnaire could not be added.',
                 extra_tags='alert-danger')
-    
+
     form.fields["survey"].queryset = surveys
     add_breadcrumb(title="Add Empty Questionnaire", top_level=False, request=request)
     return render(request, 'defectDojo-engagement-survey/add_survey.html', {
@@ -656,7 +656,7 @@ def delete_empty_questionnaire(request, esid):
         form = Delete_Questionnaire_Form(request.POST, instance=survey)
         if form.is_valid():
             answers = Answer.objects.filter(
-                question__in=[ question.id for question in survey.survey.questions.all()],
+                question__in=[question.id for question in survey.survey.questions.all()],
                 answered_survey=survey)
             for answer in answers:
                 answer.delete()
