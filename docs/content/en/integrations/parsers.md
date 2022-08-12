@@ -1209,6 +1209,12 @@ HTTP Return Code | Severity
 407              |  Medium
 500              |  Low
 
+### Whispers
+
+Import Whispers JSON results.
+
+https://github.com/adeptex/whispers
+
 ### Xanitizer
 
 Import XML findings list report, preferably with parameter
