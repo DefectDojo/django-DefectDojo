@@ -47,9 +47,6 @@ class HorusecParser(object):
         return [test]
 
     def _get_finding(self, data, date):
-        if data["vulnerabilities"]["line"] is None or data["vulnerabilities"]["line"] == "":
-            data["vulnerabilities"]["line"] = "0"
-
         description = "\n".join(
             [
                 data["vulnerabilities"]["details"].split("\n")[-1],
@@ -65,7 +62,9 @@ class HorusecParser(object):
             severity=data["vulnerabilities"]["severity"].title(),
             description=description,
             file_path=data["vulnerabilities"]["file"],
-            line=int(data["vulnerabilities"]["line"]),
             scanner_confidence=self.CONDIFDENCE[data["vulnerabilities"]["confidence"]],
         )
+        # sometimes the attribute 'line' is empty
+        if data["vulnerabilities"].get("line") and data["vulnerabilities"]["line"].isdigit():
+            finding.line = int(data["vulnerabilities"]["line"])
         return finding
