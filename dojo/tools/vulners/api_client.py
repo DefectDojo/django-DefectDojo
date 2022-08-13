@@ -53,7 +53,7 @@ class VulnersAPI:
             headers=self.get_headers(),
             json={
                      'id': vulns_id,
-                     'fields': ['description', 'cwe', 'enchantments', 'cvelist', 'cvss3'],
+                     'fields': ['description', 'cwe', 'references', 'cvelist', 'cvss3'],
                      'apiKey': self.api_key
                  })
 

@@ -1142,7 +1142,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'PWN SAST': ['title', 'description'],
     'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
     'docker-bench-security Scan': ['unique_id_from_tool'],
-    'Vulners Scan': ['component_name', 'vuln_id_from_tool']
+    'Vulners Scan': ['vuln_id_from_tool', 'component_name']
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1493,6 +1493,7 @@ VULNERABILITY_URLS = {
     'PYSEC': 'https://osv.dev/vulnerability/',
     'SNYK': 'https://snyk.io/vuln/',
     'RUSTSEC': 'https://rustsec.org/advisories/',
+    'VNS': 'https://vulners.com/',
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
