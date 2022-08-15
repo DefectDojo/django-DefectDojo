@@ -488,7 +488,28 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         response = self.post_finding_notes_api(finding_id, 'testing note. creating it and pushing it to JIRA')
         self.patch_finding_api(finding_id, {"push_to_jira": True})
+        # Make sure the number of comments match
+        self.assertEqual(len(self.get_jira_comments(finding_id)), 1)
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+        return test_id
 
+    def test_import_add_comments_then_push_to_jira(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=False)
+        test_id = import0['test']
+
+        findings = self.get_test_findings_api(test_id)
+
+        finding_id = findings['results'][0]['id']
+
+        response = self.post_finding_notes_api(finding_id, 'testing note. creating it and pushing it to JIRA')
+        response = self.post_finding_notes_api(finding_id, 'testing second note. creating it and pushing it to JIRA')
+        self.patch_finding_api(finding_id, {"push_to_jira": True})
+
+        self.assert_jira_issue_count_in_test(test_id, 1)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # Make sure the number of comments match
+        self.assertEqual(len(self.get_jira_comments(finding_id)), 2)
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
         return test_id

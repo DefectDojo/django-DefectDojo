@@ -318,6 +318,11 @@ class DojoTestUtilsMixin(object):
         updated = jira_helper.get_jira_updated(finding)
         return updated
 
+    def get_jira_comments(self, finding_id):
+        finding = Finding.objects.get(id=finding_id)
+        comments = jira_helper.get_jira_comments(finding)
+        return comments
+
     def get_jira_issue_updated_map(self, test_id):
         findings = Test.objects.get(id=test_id).finding_set.all()
         updated_map = {}
