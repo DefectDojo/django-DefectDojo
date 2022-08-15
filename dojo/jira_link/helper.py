@@ -441,6 +441,19 @@ def get_jira_status(finding):
         return issue.fields.status
 
 
+# Used for unit testing so geting all the connections is manadatory
+def get_jira_comments(finding):
+    if finding.has_jira_issue:
+        j_issue = finding.jira_issue.jira_id
+    elif finding.finding_group and finding.finding_group.has_jira_issue:
+        j_issue = finding.finding_group.jira_issue.jira_id
+
+    if j_issue:
+        project = get_jira_project(finding)
+        issue = jira_get_issue(project, j_issue)
+        return issue.fields.comment.comments
+
+
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_generic_alert(title, description):
     create_notification(
@@ -731,6 +744,13 @@ def add_jira_issue(obj, *args, **kwargs):
         issue = jira.issue(new_issue.id)
 
         logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
+
+        # Add any notes that already exist in the finding to the JIRA
+        for find in findings:
+            if find.notes.all():
+                for note in find.notes.all().reverse():
+                    add_comment(obj, note)
+
         return True
     except TemplateDoesNotExist as e:
         logger.exception(e)
