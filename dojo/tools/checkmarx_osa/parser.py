@@ -32,9 +32,9 @@ class CheckmarxOsaParser(object):
             library = libraries_dict[item['libraryId']]
             self.check_mandatory(library, mandatory_library_fields)
             if 'name' not in item['state']:
-                raise ValueError("Invalid format: missing mandatory field %s", 'state.name')
+                raise ValueError("Invalid format: missing mandatory field state.name")
             if 'name' not in item['severity']:
-                raise ValueError("Invalid format: missing mandatory field %s", 'severity.name')
+                raise ValueError("Invalid format: missing mandatory field severity.name")
 
             # Possible status as per checkmarx 9.2: TO_VERIFY, NOT_EXPLOITABLE, CONFIRMED, URGENT, PROPOSED_NOT_EXPLOITABLE
             status = item['state']['name']
@@ -96,4 +96,4 @@ class CheckmarxOsaParser(object):
     def check_mandatory(self, item, mandatory_vulnerability_fields):
         for field in mandatory_vulnerability_fields:
             if field not in item:
-                raise ValueError("Invalid format: missing mandatory field %s", field)
+                raise ValueError("Invalid format: missing mandatory field %s" % field)

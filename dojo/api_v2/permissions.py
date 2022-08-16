@@ -1,6 +1,5 @@
 import re
 from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
-from django.conf import settings
 from dojo.api_v2.serializers import get_import_meta_data_from_dict, get_product_id_from_dict
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists,  \
@@ -46,9 +45,9 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
 class UserHasDojoGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'GET':
-            return user_has_configuration_permission(request.user, 'auth.view_group', 'staff')
+            return user_has_configuration_permission(request.user, 'auth.view_group')
         elif request.method == 'POST':
-            return user_has_configuration_permission(request.user, 'auth.add_group', 'staff')
+            return user_has_configuration_permission(request.user, 'auth.add_group')
         else:
             return True
 
@@ -56,7 +55,7 @@ class UserHasDojoGroupPermission(permissions.BasePermission):
         if request.method == 'GET':
             # Users need to be authorized to view groups in general and only the groups they are a member of
             # because with the group they can see user information that might be considered as confidential
-            return user_has_configuration_permission(request.user, 'auth.view_group', 'staff') and user_has_permission(request.user, obj, Permissions.Group_View)
+            return user_has_configuration_permission(request.user, 'auth.view_group') and user_has_permission(request.user, obj, Permissions.Group_View)
         else:
             return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Edit, Permissions.Group_Delete)
 
@@ -188,7 +187,7 @@ class UserHasImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(request.data)
+        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(request.data)
         product_type = get_target_product_type_if_exists(product_type_name)
         product = get_target_product_if_exists(product_name, product_type_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
@@ -214,7 +213,7 @@ class UserHasMetaImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, _, _, product_name, _, _ = get_import_meta_data_from_dict(request.data)
+        _, _, _, _, _, product_name, _, _, _ = get_import_meta_data_from_dict(request.data)
         product = get_target_product_if_exists(product_name)
         if not product:
             product_id = get_product_id_from_dict(request.data)
@@ -286,7 +285,7 @@ class UserHasReimportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(request.data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(request.data)
 
         product_type = get_target_product_type_if_exists(product_type_name)
         product = get_target_product_if_exists(product_name, product_type_name)
@@ -497,10 +496,10 @@ def check_auto_create_permission(user, product, product_name, engagement, engage
 
     if product and product_name and engagement_name:
         if not user_has_permission(user, product, Permissions.Engagement_Add):
-            raise PermissionDenied("No permission to create engagements in product '%s'", product_name)
+            raise PermissionDenied("No permission to create engagements in product '%s'" % product_name)
 
         if not user_has_permission(user, product, Permissions.Import_Scan_Result):
-            raise PermissionDenied("No permission to import scans into product '%s'", product_name)
+            raise PermissionDenied("No permission to import scans into product '%s'" % product_name)
 
         # all good
         return True
@@ -511,12 +510,12 @@ def check_auto_create_permission(user, product, product_name, engagement, engage
 
         if not product_type:
             if not user_has_global_permission(user, Permissions.Product_Type_Add):
-                raise PermissionDenied("No permission to create product_type '%s'", product_type_name)
+                raise PermissionDenied("No permission to create product_type '%s'" % product_type_name)
             # new product type can be created with current user as owner, so all objects in it can be created as well
             return True
         else:
             if not user_has_permission(user, product_type, Permissions.Product_Type_Add_Product):
-                raise PermissionDenied("No permission to create products in product_type '%s'", product_type)
+                raise PermissionDenied("No permission to create products in product_type '%s'" % product_type)
 
         # product can be created, so objects in it can be created as well
         return True
@@ -538,10 +537,7 @@ class UserHasConfigurationPermissionStaff(permissions.DjangoModelPermissions):
     }
 
     def has_permission(self, request, view):
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            return super().has_permission(request, view)
-        else:
-            return request.user.is_staff
+        return super().has_permission(request, view)
 
 
 class UserHasConfigurationPermissionSuperuser(permissions.DjangoModelPermissions):
@@ -558,7 +554,4 @@ class UserHasConfigurationPermissionSuperuser(permissions.DjangoModelPermissions
     }
 
     def has_permission(self, request, view):
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            return super().has_permission(request, view)
-        else:
-            return request.user.is_superuser
+        return super().has_permission(request, view)
