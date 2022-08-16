@@ -49,7 +49,7 @@ social-auth-app-django==5.0.0
 social-auth-core==4.3.0
 Python-jose==3.3.0
 gitpython==3.1.27
-debugpy==1.6.2
+debugpy==1.6.3
 python-gitlab==3.8.1
 google-api-python-client==2.56.0
 google-auth==2.10.0
