@@ -200,7 +200,7 @@ class BugcrowdApiParser(object):
             try:
                 return Endpoint.from_uri(result.group(0).strip())
             except Exception as e:
-                print(result)
+                logger.error("Error converting bugcrowd endpoint {}".format(result))
 
     def include_finding(self, entry):
         """Determine whether this finding should be imported to DefectDojo"""
