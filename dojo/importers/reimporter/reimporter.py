@@ -15,7 +15,8 @@ from dojo.importers import utils as importer_utils
 from dojo.models import (BurpRawRequestResponse, FileUpload, Finding,
                          Notes, Test_Import)
 from dojo.tools.factory import get_parser
-from dojo.utils import get_current_user
+from dojo.utils import get_current_user, is_finding_groups_enabled
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -67,7 +68,8 @@ class DojoDefaultReImporter(object):
             if not hasattr(item, 'test'):
                 item.test = test
 
-            item.service = service
+            if service:
+                item.service = service
 
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
@@ -81,13 +83,24 @@ class DojoDefaultReImporter(object):
                 finding = findings[0]
                 if finding.false_p or finding.out_of_scope or finding.risk_accepted:
                     logger.debug('%i: skipping existing finding (it is marked as false positive:%s and/or out of scope:%s or is a risk accepted:%s): %i:%s:%s:%s', i, finding.false_p, finding.out_of_scope, finding.risk_accepted, finding.id, finding, finding.component_name, finding.component_version)
-                elif finding.mitigated or finding.is_mitigated:
-                    logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                    finding.mitigated = None
-                    finding.is_mitigated = False
-                    finding.mitigated_by = None
-                    finding.active = True
-                    finding.verified = verified
+                elif finding.is_mitigated:
+                    if item.mitigated:
+                        logger.debug("item mitigated time: " + str(item.mitigated.timestamp()))
+                        logger.debug("finding mitigated time: " + str(finding.mitigated.timestamp()))
+                        if item.mitigated.timestamp() == finding.mitigated.timestamp():
+                            logger.debug("New imported finding and already existing finding have the same mitigation date, will skip as they are the same.")
+                            continue
+                        if item.mitigated.timestamp() != finding.mitigated.timestamp():
+                            logger.debug("New imported finding and already existing finding are both mitigated but have different dates, not taking action")
+                            # TODO: implement proper date-aware reimporting mechanism, if an imported finding is closed more recently than the defectdojo finding, then there might be details in the scanner that should be added
+                            continue
+                    if not item.mitigated:
+                        logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                        finding.mitigated = None
+                        finding.is_mitigated = False
+                        finding.mitigated_by = None
+                        finding.active = True
+                        finding.verified = verified
 
                     # existing findings may be from before we had component_name/version fields
                     finding.component_name = finding.component_name if finding.component_name else component_name
@@ -100,7 +113,9 @@ class DojoDefaultReImporter(object):
                         author=user)
                     note.save()
 
-                    endpoint_statuses = finding.endpoint_status.all()
+                    endpoint_statuses = finding.endpoint_status.exclude(Q(false_positive=True) |
+                                                                        Q(out_of_scope=True) |
+                                                                        Q(risk_accepted=True))
 
                     # Determine if this can be run async
                     if settings.ASYNC_FINDING_IMPORT:
@@ -119,13 +134,25 @@ class DojoDefaultReImporter(object):
                     reactivated_items.append(finding)
                     reactivated_count += 1
                 else:
+                    # if finding associated to new item is none of risk accepted, mitigated, false positive or out of scope
                     # existing findings may be from before we had component_name/version fields
                     logger.debug('%i: updating existing finding: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                    if not (finding.mitigated and finding.is_mitigated):
+                        logger.debug('Reimported item matches a finding that is currently open.')
+                        if item.mitigated:
+                            # TODO: Implement a date comparison for opened defectdojo findings before closing them by reimporting, as they could be force closed by the scanner but a DD user forces it open ?
+                            logger.debug('%i: closing: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                            finding.mitigated = item.mitigated
+                            finding.is_mitigated = True
+                            finding.mitigated_by = item.mitigated_by
+                            finding.active = False
+                            finding.verified = verified
                     if not finding.component_name or not finding.component_version:
                         finding.component_name = finding.component_name if finding.component_name else component_name
                         finding.component_version = finding.component_version if finding.component_version else component_version
                         finding.save(dedupe_option=False)
 
+                    # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
                     unchanged_items.append(finding)
                     unchanged_count += 1
                 if finding.dynamic_finding:
@@ -148,7 +175,7 @@ class DojoDefaultReImporter(object):
                 logger.debug('%i: reimport created new finding as no existing finding match: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
 
                 # only new items get auto grouped to avoid confusion around already existing items that are already grouped
-                if settings.FEATURE_FINDING_GROUPS and group_by:
+                if is_finding_groups_enabled() and group_by:
                     finding_helper.add_finding_to_auto_group(item, group_by, **kwargs)
 
                 finding_added_count += 1
@@ -200,13 +227,15 @@ class DojoDefaultReImporter(object):
                         file_upload.save()
                         finding.files.add(file_upload)
 
+                importer_utils.handle_vulnerability_ids(finding)
+
                 # existing findings may be from before we had component_name/version fields
                 finding.component_name = finding.component_name if finding.component_name else component_name
                 finding.component_version = finding.component_version if finding.component_version else component_version
 
                 # finding = new finding or existing finding still in the upload report
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
-                if settings.FEATURE_FINDING_GROUPS and finding.finding_group:
+                if is_finding_groups_enabled() and finding.finding_group:
                     finding.save()
                 else:
                     finding.save(push_to_jira=push_to_jira)
@@ -220,7 +249,7 @@ class DojoDefaultReImporter(object):
         # while it is in fact a new finding. So we substract new_items
         untouched = set(unchanged_items) - set(to_mitigate) - set(new_items)
 
-        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+        if is_finding_groups_enabled() and push_to_jira:
             for finding_group in set([finding.finding_group for finding in reactivated_items + unchanged_items + new_items if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
         sync = kwargs.get('sync', False)
@@ -253,7 +282,7 @@ class DojoDefaultReImporter(object):
                     status.save()
 
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
-                if settings.FEATURE_FINDING_GROUPS and finding.finding_group:
+                if is_finding_groups_enabled() and finding.finding_group:
                     # don't try to dedupe findings that we are closing
                     finding.save(dedupe_option=False)
                 else:
@@ -265,7 +294,7 @@ class DojoDefaultReImporter(object):
                 finding.notes.add(note)
                 mitigated_findings.append(finding)
 
-        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+        if is_finding_groups_enabled() and push_to_jira:
             for finding_group in set([finding.finding_group for finding in to_mitigate if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
 

@@ -1,11 +1,11 @@
 import logging
 
+from django.utils.translation import gettext as _
 from django.shortcuts import render
 from watson import search as watson
 from django.db.models import Q
 from dojo.forms import SimpleSearchForm
-from dojo.models import Finding, Finding_Template, Product, Test, Engagement, Languages, \
-    App_Analysis
+from dojo.models import Finding, Finding_Template, Product, Test, Engagement, Languages
 from dojo.utils import add_breadcrumb, get_page_items, get_words_for_field
 import re
 from dojo.finding.views import prefetch_for_findings
@@ -14,26 +14,22 @@ from dojo.filters import FindingFilter
 from django.conf import settings
 import shlex
 import itertools
-from dojo.product.queries import get_authorized_products
+from dojo.product.queries import get_authorized_products, get_authorized_app_analysis
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests
-from dojo.finding.queries import get_authorized_findings
+from dojo.finding.queries import get_authorized_findings, get_authorized_vulnerability_ids
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
 # explicitly use our own regex pattern here as django-watson is sensitive so we want to control it here independently of models.py etc.
-cve_pattern = re.compile(r'(^CVE-(1999|2\d{3})-(0\d{2}[0-9]|[1-9]\d{3,}))$')
-# cve_pattern = re.compile(r'(CVE-(1999|2\d{3})-(0\d{2}[0-9]|[1-9]\d{3,}))')
+vulnerability_id_pattern = re.compile(r'(^[A-Z]+-[A-Z\d-]+)$')
 
 max_results = settings.SEARCH_MAX_RESULTS
 
 
 def simple_search(request):
-    ip_addresses = []
-    dashes = []
-    query = []
     tests = None
     findings = None
     finding_templates = None
@@ -48,16 +44,15 @@ def simple_search(request):
     endpoints = None
     languages = None
     app_analysis = None
+    vulnerability_ids = None
     clean_query = ''
     cookie = False
-    terms = ''
     form = SimpleSearchForm()
 
     original_clean_query = ""
     findings_filter = None
     title_words = None
     component_words = None
-    paged_generic = None
 
     # if request.method == 'GET' and "query" in request.GET:
     if request.method == 'GET':
@@ -75,19 +70,19 @@ def simple_search(request):
                           "not-tag" in operators or "not-test-tag" in operators or "not-engagement-tag" in operators or "not-product-tag" in operators or \
                           "not-tags" in operators or "not-test-tags" in operators or "not-engagement-tags" in operators or "not-product-tags" in operators
 
-            search_cve = "cve" in operators
+            search_vulnerability_ids = "vulnerability_id" in operators or not(operators)
 
             search_finding_id = "id" in operators
-            search_findings = "finding" in operators or search_cve or search_finding_id or search_tags or not operators
+            search_findings = "finding" in operators or search_finding_id or search_tags or not (operators)
 
-            search_finding_templates = "template" in operators or search_tags or not (operators or search_finding_id or search_cve)
-            search_tests = "test" in operators or search_tags or not (operators or search_finding_id or search_cve)
-            search_engagements = "engagement" in operators or search_tags or not (operators or search_finding_id or search_cve)
+            search_finding_templates = "template" in operators or search_tags or not (operators or search_finding_id)
+            search_tests = "test" in operators or search_tags or not (operators or search_finding_id)
+            search_engagements = "engagement" in operators or search_tags or not (operators or search_finding_id)
 
-            search_products = "product" in operators or search_tags or not (operators or search_finding_id or search_cve)
-            search_endpoints = "endpoint" in operators or search_tags or not (operators or search_finding_id or search_cve)
-            search_languages = "language" in operators or search_tags or not (operators or search_finding_id or search_cve)
-            search_technologies = "technology" in operators or search_tags or not (operators or search_finding_id or search_cve)
+            search_products = "product" in operators or search_tags or not (operators or search_finding_id)
+            search_endpoints = "endpoint" in operators or search_tags or not (operators or search_finding_id)
+            search_languages = "language" in operators or search_tags or not (operators or search_finding_id)
+            search_technologies = "technology" in operators or search_tags or not (operators or search_finding_id)
 
             authorized_findings = get_authorized_findings(Permissions.Finding_View)
             authorized_tests = get_authorized_tests(Permissions.Test_View)
@@ -95,14 +90,18 @@ def simple_search(request):
             authorized_products = get_authorized_products(Permissions.Product_View)
             authorized_endpoints = get_authorized_endpoints(Permissions.Endpoint_View)
             authorized_finding_templates = Finding_Template.objects.all()
+            authorized_app_analysis = get_authorized_app_analysis(Permissions.Product_View)
+            authorized_vulnerability_ids = get_authorized_vulnerability_ids(Permissions.Finding_View)
 
-            # TODO better get findings in their own query and match on id. that would allow filtering on additional fields such cve, prod_id, etc.
+            # TODO better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
 
             findings = authorized_findings
             tests = authorized_tests
             engagements = authorized_engagements
             products = authorized_products
             endpoints = authorized_endpoints
+            app_analysis = authorized_app_analysis
+            vulnerability_ids = authorized_vulnerability_ids
 
             findings_filter = None
             title_words = None
@@ -130,7 +129,6 @@ def simple_search(request):
 
                 findings = apply_tag_filters(findings, operators)
                 findings = apply_endpoint_filter(findings, operators)
-                findings = apply_cve_filter(findings, operators)
 
                 findings = perform_keyword_search_for_operator(findings, operators, 'finding', keywords_query)
 
@@ -272,19 +270,33 @@ def simple_search(request):
             if search_technologies:
                 logger.debug('searching technologies')
 
-                app_analysis = App_Analysis.objects.filter(name__icontains=keywords_query)
+                app_analysis = authorized_app_analysis
+                app_analysis = app_analysis.filter(name__icontains=keywords_query)
                 app_analysis = app_analysis[:max_results]
             else:
                 app_analysis = None
 
-            # make sure watson only searches in authorized model instances
+            if search_vulnerability_ids:
+                logger.debug('searching vulnerability_ids')
+
+                vulnerability_ids = authorized_vulnerability_ids
+                vulnerability_ids = apply_vulnerability_id_filter(vulnerability_ids, operators)
+                if keywords_query:
+                    watson_results = watson.filter(vulnerability_ids, keywords_query)
+                    vulnerability_ids = vulnerability_ids.filter(id__in=[watson.id for watson in watson_results])
+                vulnerability_ids = vulnerability_ids.prefetch_related('finding__test__engagement__product', 'finding__test__engagement__product__tags')
+                vulnerability_ids = vulnerability_ids[:max_results]
+            else:
+                vulnerability_ids = None
+
             if keywords_query:
                 logger.debug('searching generic')
                 logger.debug('going generic with: %s', keywords_query)
                 generic = watson.search(keywords_query, models=(
                     authorized_findings, authorized_tests, authorized_engagements,
                     authorized_products, authorized_endpoints,
-                    authorized_finding_templates, App_Analysis)).prefetch_related('object')[:max_results]
+                    authorized_finding_templates, authorized_vulnerability_ids, authorized_app_analysis)) \
+                    .prefetch_related('object')[:max_results]
             else:
                 generic = None
 
@@ -303,7 +315,7 @@ def simple_search(request):
             logger.debug(form.errors)
             form = SimpleSearchForm()
 
-        add_breadcrumb(title="Simple Search", top_level=True, request=request)
+        add_breadcrumb(title=_("Simple Search"), top_level=True, request=request)
 
         activetab = 'findings' if findings \
             else 'products' if products \
@@ -311,7 +323,8 @@ def simple_search(request):
                     'tests' if tests else \
                          'endpoint' if endpoints else \
                             'tagged' if tagged_results else \
-                                'generic'
+                                'vulnerability_ids' if vulnerability_ids else \
+                                    'generic'
 
     response = render(request, 'dojo/simple_search.html', {
         'clean_query': original_clean_query,
@@ -332,7 +345,8 @@ def simple_search(request):
         'tagged_engagements': tagged_engagements,
         'engagements': engagements,
         'endpoints': endpoints,
-        'name': 'Simple Search',
+        'vulnerability_ids': vulnerability_ids,
+        'name': _('Simple Search'),
         'metric': False,
         'user': request.user,
         'form': form,
@@ -381,8 +395,8 @@ def simple_search(request):
     operators: {'tags': ['anchorse']}
     keywords:  ['some', 'space inside']
 
-    query:     tags:anchore cve:CVE-2020-1234 jquery
-    operators: {'tags': ['anchore'], 'cve': ['CVE-2020-1234']}
+    query:     tags:anchore vulnerability_id:CVE-2020-1234 jquery
+    operators: {'tags': ['anchore'], 'vulnerability_id': ['CVE-2020-1234']}
     keywords:  ['jquery']
     '''
 
@@ -405,11 +419,8 @@ def parse_search_query(clean_query):
                 operators[operator] = []
 
             operators[operator].append(parameter)
-
-            # if operator == 'cve':  # operator filters on findings, keywords go to watson
-            #     keywords.append(cve_fix(parameter))
         else:
-            keywords.append(cve_fix(query_part))
+            keywords.append(vulnerability_id_fix(query_part))
 
     logger.debug('query:     %s' % clean_query)
     logger.debug('operators: %s' % operators)
@@ -418,23 +429,23 @@ def parse_search_query(clean_query):
     return operators, keywords
 
 
-def cve_fix(keyword):
+def vulnerability_id_fix(keyword):
     # if the query contains hyphens, django-watson will escape these leading to problems.
-    # for cve we make this workaround because we really want to be able to search for CVEs
+    # for vulnerability_ids we make this workaround because we really want to be able to search for them
     # problem still remains for other case, i.e. searching for "valentijn-scholten" will return no results because of the hyphen.
     # see:
     # - https://github.com/etianen/django-watson/issues/223
     # - https://github.com/DefectDojo/django-DefectDojo/issues/1092
     # - https://github.com/DefectDojo/django-DefectDojo/issues/2081
 
-    cves = []
+    vulnerability_ids = []
     keyword_parts = keyword.split(',')
     for keyword_part in keyword_parts:
-        if bool(cve_pattern.match(keyword_part)):
-            cves.append('\'' + keyword_part + '\'')
+        if bool(vulnerability_id_pattern.match(keyword_part)):
+            vulnerability_ids.append('\'' + keyword_part + '\'')
 
-    if cves:
-        return ' '.join(cves)
+    if vulnerability_ids:
+        return ' '.join(vulnerability_ids)
     else:
         return keyword
 
@@ -510,9 +521,9 @@ def apply_endpoint_filter(qs, operators):
     return qs
 
 
-def apply_cve_filter(qs, operators):
-    if 'cve' in operators:
-        value = operators['cve']
+def apply_vulnerability_id_filter(qs, operators):
+    if 'vulnerability_id' in operators:
+        value = operators['vulnerability_id']
 
         # possible value:
         # ['CVE-2020-6754]
@@ -521,9 +532,9 @@ def apply_cve_filter(qs, operators):
         # ['CVE-2020-6754,CVE-2018-7489', 'CVE-2020-1234']
 
         # so flatten like mad:
-        cves = list(itertools.chain.from_iterable([cve.split(',') for cve in value]))
-        logger.debug('cve filter: %s', cves)
-        qs = qs.filter(Q(cve__in=cves))
+        vulnerability_ids = list(itertools.chain.from_iterable([vulnerability_id.split(',') for vulnerability_id in value]))
+        logger.debug('vulnerability_id filter: %s', vulnerability_ids)
+        qs = qs.filter(Q(vulnerability_id__in=vulnerability_ids))
 
     return qs
 

@@ -16,7 +16,7 @@ class ApiEndpointMethods(DojoTestCase):
     def test_is_defined(self):
 
         for reg, _, _ in sorted(self.registry):
-            if reg in ['import-scan', 'reimport-scan', 'notes', 'system_settings', 'users', 'roles', 'import-languages', 'endpoint_meta_import', 'test_types']:
+            if reg in ['import-scan', 'reimport-scan', 'notes', 'system_settings', 'roles', 'import-languages', 'endpoint_meta_import', 'test_types', 'sla_configurations', 'configuration_permissions']:
                 continue
 
             for method in ['get', 'post']:
@@ -26,3 +26,6 @@ class ApiEndpointMethods(DojoTestCase):
             for method in ['get', 'put', 'patch', 'delete']:
                 self.assertIsNotNone(self.schema["paths"][BASE_API_URL + '/' + reg + '/{id}/'].get(method),
                                      "Endpoint: {}, Method: {}".format(reg, method))
+
+            self.assertIsNotNone(self.schema["paths"].get(BASE_API_URL + '/' + reg + '/{id}/delete_preview/', {}).get('get'),
+                             "Endpoint: {}, Method: get - delete_preview".format(reg))

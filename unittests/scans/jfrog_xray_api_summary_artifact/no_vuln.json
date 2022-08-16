@@ -1,0 +1,14 @@
+{
+    "artifacts": [{
+            "general": {
+                "name": "component/open-liberty:21.0.0.3-1-full-alpine-java8-openj9",
+                "component_id": "component/open-liberty:21.0.0.3-1-full-alpine-java8-openj9",
+                "pkg_type": "Docker",
+                "path": "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/",
+                "sha256": "eaab06c0a28618bfb65481bf31bce7d6dd3a15dac528297690111c202a1cd468"
+            },
+            "issues": [],
+            "licenses": []
+        }
+    ]
+}

@@ -1,4 +1,3 @@
-from django.test.utils import override_settings
 from dojo.models import Finding_Group, User, Finding, JIRA_Instance
 from dojo.jira_link import helper as jira_helper
 from rest_framework.authtoken.models import Token
@@ -91,7 +90,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
         return test_id
 
-    @override_settings(FEATURE_FINDING_GROUPS=True)
     def test_import_with_groups_push_to_jira(self):
         # 7 findings, 5 unique component_name+component_version
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', group_by='component_name+component_version', push_to_jira=True)
@@ -105,8 +103,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
     def test_import_with_push_to_jira_epic_as_issue_type(self):
         jira_instance = JIRA_Instance.objects.get(id=2)
-        # we choose issue type Epic and test if it can be created succesfully.
-        # if yes, it means we have succesfully populated the Epic Name custom field which is mandatory in JIRA
+        # we choose issue type Epic and test if it can be created successfully.
+        # if yes, it means we have successfully populated the Epic Name custom field which is mandatory in JIRA
         jira_instance.default_issue_type = "Epic"
         jira_instance.save()
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
@@ -127,7 +125,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
         return test_id
 
-    @override_settings(FEATURE_FINDING_GROUPS=True)
     def test_import_with_groups_no_push_to_jira_but_push_all(self):
         self.set_jira_push_all_issues(self.get_engagement(1))
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', group_by='component_name+component_version')
@@ -148,7 +145,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
         return test_id
 
-    @override_settings(FEATURE_FINDING_GROUPS=True)
     def test_import_with_groups_with_push_to_jira_is_false_but_push_all(self):
         self.set_jira_push_all_issues(self.get_engagement(1))
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', group_by='component_name+component_version', push_to_jira=False)
@@ -194,7 +190,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
         return test_id
 
-    @override_settings(FEATURE_FINDING_GROUPS=True)
     def test_import_with_groups_no_push_to_jira_reimport_with_push_to_jira(self):
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', group_by='component_name+component_version')
         test_id = import0['test']
@@ -222,7 +217,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
         return test_id
 
-    @override_settings(FEATURE_FINDING_GROUPS=True)
     def test_import_with_groups_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues(self):
         self.set_jira_push_all_issues(self.get_engagement(1))
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', group_by='component_name+component_version')
@@ -253,7 +247,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
         return test_id
 
-    @override_settings(FEATURE_FINDING_GROUPS=True)
     def test_import_with_groups_no_push_to_jira_reimport_push_to_jira_is_false_but_push_all_issues(self):
         self.set_jira_push_all_issues(self.get_engagement(1))
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', group_by='component_name+component_version')
@@ -302,7 +295,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_issue_count_in_test(test_id1, 0)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-    @override_settings(FEATURE_FINDING_GROUPS=True)
     def test_import_with_groups_twice_push_to_jira(self):
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', group_by='component_name+component_version', push_to_jira=True)
         test_id = import0['test']
@@ -395,7 +387,6 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         self.assert_cassette_played()
 
-    @override_settings(FEATURE_FINDING_GROUPS=True)
     def test_groups_create_edit_update_finding(self):
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', group_by='component_name+component_version')
         test_id = import0['test']
@@ -497,7 +488,28 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         response = self.post_finding_notes_api(finding_id, 'testing note. creating it and pushing it to JIRA')
         self.patch_finding_api(finding_id, {"push_to_jira": True})
+        # Make sure the number of comments match
+        self.assertEqual(len(self.get_jira_comments(finding_id)), 1)
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+        return test_id
 
+    def test_import_add_comments_then_push_to_jira(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=False)
+        test_id = import0['test']
+
+        findings = self.get_test_findings_api(test_id)
+
+        finding_id = findings['results'][0]['id']
+
+        response = self.post_finding_notes_api(finding_id, 'testing note. creating it and pushing it to JIRA')
+        response = self.post_finding_notes_api(finding_id, 'testing second note. creating it and pushing it to JIRA')
+        self.patch_finding_api(finding_id, {"push_to_jira": True})
+
+        self.assert_jira_issue_count_in_test(test_id, 1)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # Make sure the number of comments match
+        self.assertEqual(len(self.get_jira_comments(finding_id)), 2)
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
         return test_id

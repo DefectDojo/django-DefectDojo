@@ -2,6 +2,7 @@ import csv
 import hashlib
 import io
 
+from dateutil import parser
 from dojo.models import Endpoint, Finding
 
 
@@ -49,7 +50,7 @@ class BugCrowdParser(object):
             Description += 'Target name: ' + row.get('target_name') + '\n' if row.get('target_name', None) else ''
             Description += 'Target category: ' + row.get('target_category') + '\n' if row.get('target_category', None) else ''
             References = 'BugCrowd Reference Nubmer: ' + row.get('reference_number') + '\n' if row.get('reference_number', None) else ''
-            References += row.get('vulnerability_references', '')
+            References += row.get('vulnerability_ids', '')
 
             finding.title = row.get('title', '')
             finding.description = Description
@@ -57,7 +58,10 @@ class BugCrowdParser(object):
             finding.impact = pre_description.get('impact', '') + '\n' + row.get('vrt_lineage', '')
             finding.steps_to_reproduce = pre_description.get('steps_to_reproduce', None)
             finding.references = References
-            finding.severity = self.convert_severity(int(row.get('priority', 0)))
+            finding.severity = self.convert_severity(row.get('priority', 0))
+
+            if row.get('submitted_at'):
+                finding.date = parser.parse(row.get('submitted_at'))
 
             if url:
                 finding.unsaved_endpoints = list()
@@ -121,17 +125,18 @@ class BugCrowdParser(object):
         ret['description'] = ''
         for item in split_des:
             lines = [line.strip() for line in ''.join(item.split('#')).splitlines() if line != '']
-            first = lines[0].strip()
-            if first == 'Impact':
-                ret['impact'] = item
-            elif first == 'Steps to reproduce':
-                ret['steps_to_reproduce'] = item
-            elif first == 'How to fix' or first == 'Fix':
-                ret['mitigation'] = item
-            elif first == 'PoC code':
-                ret['poc'] = item
-            else:
-                ret['description'] += ret['description'] + item
+            if lines:
+                first = lines[0].strip()
+                if first == 'Impact':
+                    ret['impact'] = item
+                elif first == 'Steps to reproduce':
+                    ret['steps_to_reproduce'] = item
+                elif first == 'How to fix' or first == 'Fix':
+                    ret['mitigation'] = item
+                elif first == 'PoC code':
+                    ret['poc'] = item
+                else:
+                    ret['description'] += ret['description'] + item
 
         ret = self.description_parse(ret)
 
@@ -141,6 +146,11 @@ class BugCrowdParser(object):
         return ret
 
     def convert_severity(self, sev_num):
+        # Attempt to convert to an int
+        try:
+            sev_num = int(sev_num)
+        except ValueError:
+            sev_num = 0
         severity = 'Info'
         if sev_num == 1:
             severity = 'Critical'
@@ -150,7 +160,15 @@ class BugCrowdParser(object):
             severity = 'Medium'
         elif sev_num == 4:
             severity = 'Low'
+        else:
+            # If the arg is an unexpected value, leave it as "Info"
+            pass
         return severity
 
     def get_endpoint(self, url):
-        return Endpoint.from_uri(url)
+        stripped_url = url.strip()
+        if '://' in stripped_url:  # is the host full uri?
+            endpoint = Endpoint.from_uri(stripped_url)
+        else:
+            endpoint = Endpoint.from_uri('//' + stripped_url)
+        return endpoint

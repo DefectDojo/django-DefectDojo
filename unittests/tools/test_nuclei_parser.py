@@ -127,3 +127,45 @@ class TestNucleiParser(DojoTestCase):
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(3306, finding.unsaved_endpoints[0].port)
             self.assertEqual("mysql-native-password-bruteforce", finding.vuln_id_from_tool)
+
+    def test_parse_many_findings_new(self):
+        testfile = open("unittests/scans/nuclei/many_findings_new.json")
+        parser = NucleiParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+
+        self.assertEqual(2, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("OpenSSH Username Enumeration v7.7", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual(1, finding.nb_occurences)
+            self.assertIsNotNone(finding.description)
+            self.assertIn("network", finding.unsaved_tags)
+            self.assertIn("openssh", finding.unsaved_tags)
+            self.assertIn("cve", finding.unsaved_tags)
+            self.assertIsNotNone(finding.references)
+            self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
+            self.assertEqual(22, finding.unsaved_endpoints[0].port)
+            self.assertEqual("CVE-2018-15473", finding.vuln_id_from_tool)
+            vulnerability_ids = finding.unsaved_vulnerability_ids
+            self.assertEqual(1, len(vulnerability_ids))
+            self.assertIn('CVE-2018-15473', vulnerability_ids)
+            self.assertEqual(362, finding.cwe)
+            self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
+            self.assertEqual(5.3, finding.cvssv3_score)
+
+        with self.subTest(i=1):
+            finding = findings[1]
+            self.assertEqual("Exposed Prometheus metrics", finding.title)
+            self.assertEqual("Low", finding.severity)
+            self.assertEqual(1, finding.nb_occurences)
+            self.assertEqual('', finding.description)
+            self.assertIn("config", finding.unsaved_tags)
+            self.assertIn("exposure", finding.unsaved_tags)
+            self.assertIn("prometheus", finding.unsaved_tags)
+            self.assertIsNotNone(finding.references)
+            self.assertEqual("prometheus-metrics", finding.vuln_id_from_tool)

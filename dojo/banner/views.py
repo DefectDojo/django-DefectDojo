@@ -13,7 +13,7 @@ from dojo.authorization.authorization_decorators import user_is_configuration_au
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('dojo.change_bannerconf', 'superuser')
+@user_is_configuration_authorized('dojo.change_bannerconf')
 def configure_banner(request):
     banner_config = get_object_or_404(BannerConf, id=1)
     if request.method == 'POST':

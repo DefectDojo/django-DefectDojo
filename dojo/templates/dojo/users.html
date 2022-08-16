@@ -12,7 +12,7 @@
                         {{ name }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
-                            {% if "auth.add_user"|has_configuration_permission:"superuser" %}
+                            {% if "auth.add_user"|has_configuration_permission %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -50,9 +50,6 @@
                             <th class="nowrap">Title</th>
                             <th class="nowrap">Phone Number(s)</th>
                             <th class="nowrap, text-center">{% dojo_sort request 'Active' 'is_active' %}</th>
-                            {% if not 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
-                            <th class="nowrap, text-center">{% dojo_sort request 'Staff' 'is_staff' %}</th>
-                            {% endif %}
                             <th class="nowrap, text-center">{% dojo_sort request 'Superuser' 'is_superuser' %}</th>
                             <th class="nowrap">Global Role</th>
                         </tr>
@@ -67,7 +64,7 @@
                                                     <a class="" href="{% url 'view_user' u.id %}" id="viewUser">
                                                     <i class="fa fa-list-alt"></i> View</a>
                                                 </li>
-                                                {% if "auth.change_user"|has_configuration_permission:"superuser" %}
+                                                {% if "auth.change_user"|has_configuration_permission %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'edit_user' u.id %}"  id="editUser">
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
@@ -79,7 +76,7 @@
                                                       <i class="fa fa-history"></i> View History
                                                   </a>
                                                 </li>
-                                                {% if "auth.delete_user"|has_configuration_permission:"superuser" and u.id != request.user.id %}
+                                                {% if "auth.delete_user"|has_configuration_permission and u.id != request.user.id %}
                                                 <li role="separator" class="divider"></li>
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'delete_user' u.id %}">
@@ -103,11 +100,6 @@
                                 <td class="text-center">{% if u.is_active %}
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
-                                {% if not 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
-                                <td class="text-center">{% if u.is_staff %}
-                                    <i class="text-success fa fa-check"></i>{% else %}
-                                    <i class="text-danger fa fa-times"></i>{% endif %}</td>
-                                {% endif %}
                                 <td class="text-center">{% if u.is_superuser %}
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>

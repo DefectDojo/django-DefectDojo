@@ -36,9 +36,8 @@ headers = {'content-type': 'application/json',
            'Authorization': 'Token {{ key.key }}'}
 r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
 
-for key, value in r.__dict__.iteritems():
-  print key
-  print value
-  print '------------------'
+for key, value in r.__dict__.items():
+  print(f"'{key}': '{value}'")
+  print('------------------')
 	</pre>
 {% endblock %}

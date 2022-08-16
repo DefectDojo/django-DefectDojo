@@ -3,6 +3,7 @@ import logging
 import re
 
 from dojo.models import Finding
+from dojo.tools.utils import get_npm_cwe
 
 logger = logging.getLogger(__name__)
 
@@ -90,12 +91,7 @@ def get_item(item_node, test):
         if len(npm_finding['paths']) > 25:
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
-    # Use CWE-1035 as fallback
-    cwe = 1035  # Vulnerable Third Party Component
-    if item_node['cwe']:
-        m = re.match(r"^(CWE-)?(\d+)", item_node['cwe'])
-        if m:
-            cwe = int(m.group(2))
+    cwe = get_npm_cwe(item_node)
 
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
@@ -110,7 +106,6 @@ def get_item(item_node, test):
                       str(item_node['cwe']) + "\n Access: " +
                       str(item_node['access']),
                       cwe=cwe,
-                      cve=item_node['cves'][0] if (len(item_node['cves']) > 0) else None,
                       mitigation=item_node['recommendation'],
                       references=item_node['url'],
                       component_name=item_node['module_name'],
@@ -122,5 +117,10 @@ def get_item(item_node, test):
                       impact="No impact provided",
                       static_finding=True,
                       dynamic_finding=False)
+
+    if len(item_node['cves']) > 0:
+        dojo_finding.unsaved_vulnerability_ids = list()
+        for vulnerability_id in item_node['cves']:
+            dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
 
     return dojo_finding

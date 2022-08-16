@@ -8,6 +8,7 @@ from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url, get_file_images
+import dojo.utils
 from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
@@ -36,16 +37,21 @@ markdown_tags = [
     "img",
     "a",
     "sub", "sup",
+    "center",
 ]
 
 markdown_attrs = {
     "*": ["id"],
-    "img": ["src", "alt", "title"],
+    "img": ["src", "alt", "title", "width", "height", "style"],
     "a": ["href", "alt", "target", "title"],
     "span": ["class"],  # used for code highlighting
     "pre": ["class"],  # used for code highlighting
     "div": ["class"],  # used for code highlighting
 }
+
+markdown_styles = [
+    "background-color"
+]
 
 finding_related_action_classes_dict = {
     'reset_finding_duplicate_status': 'fa fa-eraser',
@@ -76,7 +82,7 @@ def markdown_render(value):
                                                       'markdown.extensions.fenced_code',
                                                       'markdown.extensions.toc',
                                                       'markdown.extensions.tables'])
-        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs))
+        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs, markdown_styles))
 
 
 @register.filter(name='url_shortner')
@@ -255,7 +261,7 @@ def finding_sla(finding):
         if find_sla and find_sla < 0:
             status = "orange"
             find_sla = abs(find_sla)
-            status_text = 'Out of SLA: Remediatied ' + str(
+            status_text = 'Out of SLA: Remediated ' + str(
                 find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
     else:
         status = "green"
@@ -695,6 +701,12 @@ def setting_enabled(name):
     return getattr(settings, name, False)
 
 
+# this filter checks value directly against of function in utils
+@register.filter
+def system_setting_enabled(name):
+    return getattr(dojo.utils, name)()
+
+
 @register.filter
 def finding_display_status(finding):
     # add urls for some statuses
@@ -736,10 +748,46 @@ def cwe_url(cwe):
 
 
 @register.filter
-def cve_url(cve):
-    if not cve:
-        return ''
-    return 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(cve)
+def has_vulnerability_url(vulnerability_id):
+    if not vulnerability_id:
+        return False
+
+    for key in settings.VULNERABILITY_URLS:
+        if vulnerability_id.upper().startswith(key):
+            return True
+    return False
+
+
+@register.filter
+def vulnerability_url(vulnerability_id):
+    if not vulnerability_id:
+        return False
+
+    for key in settings.VULNERABILITY_URLS:
+        if vulnerability_id.upper().startswith(key):
+            return settings.VULNERABILITY_URLS[key] + str(vulnerability_id)
+    return ''
+
+
+@register.filter
+def first_vulnerability_id(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids:
+        return vulnerability_ids[0]
+    else:
+        return None
+
+
+@register.filter
+def additional_vulnerability_ids(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids and len(vulnerability_ids) > 1:
+        references = list()
+        for vulnerability_id in vulnerability_ids[1:]:
+            references.append(vulnerability_id)
+        return references
+    else:
+        return None
 
 
 @register.filter
@@ -790,9 +838,9 @@ def jira_change(obj):
 
 
 @register.filter
-def get_thumbnail(filename):
+def get_thumbnail(file):
     from pathlib import Path
-    file_format = Path(filename).suffix[1:]
+    file_format = Path(file.file.url).suffix[1:]
     return file_format in supported_file_formats
 
 
@@ -802,8 +850,9 @@ def finding_extended_title(finding):
         return ''
     result = finding.title
 
-    if finding.cve:
-        result += ' (' + finding.cve + ')'
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids:
+        result += ' (' + vulnerability_ids[0] + ')'
 
     if finding.cwe:
         result += ' (CWE-' + str(finding.cwe) + ')'

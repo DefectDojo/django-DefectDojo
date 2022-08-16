@@ -11,7 +11,7 @@ from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Ty
     Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm, Add_Product_Type_GroupForm, \
     Edit_Product_Type_Group_Form, Delete_Product_Type_GroupForm
 from dojo.models import Product_Type, Product_Type_Member, Role, Product_Type_Group
-from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
+from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs, get_setting, async_delete
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
@@ -119,10 +119,16 @@ def delete_product_type(request, ptid):
         if 'id' in request.POST and str(product_type.id) == request.POST['id']:
             form = Delete_Product_TypeForm(request.POST, instance=product_type)
             if form.is_valid():
-                product_type.delete()
+                if get_setting("ASYNC_OBJECT_DELETE"):
+                    async_del = async_delete()
+                    async_del.delete(product_type)
+                    message = 'Product Type and relationships will be removed in the background.'
+                else:
+                    message = 'Product Type and relationships removed.'
+                    product_type.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Product Type and relationships removed.',
+                                     message,
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                 title='Deletion of %s' % product_type.name,
@@ -132,9 +138,12 @@ def delete_product_type(request, ptid):
                                 icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('product_type'))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([product_type])
-    rels = collector.nested()
+    rels = ['Previewing the relationships has been disabled.', '']
+    display_preview = get_setting('DELETE_PREVIEW')
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([product_type])
+        rels = collector.nested()
 
     add_breadcrumb(title="Delete Product Type", top_level=False, request=request)
     return render(request, 'dojo/delete_product_type.html',

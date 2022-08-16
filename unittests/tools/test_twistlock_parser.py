@@ -18,6 +18,8 @@ class TestTwistlockParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
+        self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2013-7459", findings[0].unsaved_vulnerability_ids[0])
 
     def test_parse_file_with_many_vulns(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/twistlock/many_vulns.json"))
@@ -50,6 +52,8 @@ class TestTwistlockParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
+        self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-24977", findings[0].unsaved_vulnerability_ids[0])
 
     def test_parse_file_prisma_twistlock_images_long_package_name(self):
         testfile = open(

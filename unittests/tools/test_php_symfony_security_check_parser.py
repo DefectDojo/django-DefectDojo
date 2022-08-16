@@ -37,3 +37,5 @@ class TestPhpSymfonySecurityCheckerParser(DojoTestCase):
         self.assertEqual(8, len(items))
         self.assertEqual("symfony/cache", items[0].component_name)
         self.assertEqual("3.4.16", items[0].component_version)
+        self.assertEqual(1, len(items[0].unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2019-10912", items[0].unsaved_vulnerability_ids[0])

@@ -6,6 +6,7 @@ import os
 import hashlib
 import bleach
 import mimetypes
+import hyperlink
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
@@ -36,6 +37,7 @@ from django.http import HttpResponseRedirect
 import crum
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 
 
 logger = logging.getLogger(__name__)
@@ -101,6 +103,68 @@ def do_false_positive_history(new_finding, *args, **kwargs):
 # true if both findings are on an engagement that have a different "deduplication on engagement" configuration
 def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
+
+
+def get_endpoints_as_url(finding):
+    list1 = []
+    for e in finding.endpoints.all():
+        list1.append(hyperlink.parse(str(e)))
+    return list1
+
+
+def are_urls_equal(url1, url2, fields):
+    # Possible values are: scheme, host, port, path, query, fragment, userinfo, and user.
+    # For a details description see https://hyperlink.readthedocs.io/en/latest/api.html#attributes
+    deduplicationLogger.debug("Check if url %s and url %s are equal in terms of %s.", url1, url2, fields)
+    for field in fields:
+        if field == 'scheme':
+            if url1.scheme != url2.scheme:
+                return False
+        elif field == 'host':
+            if url1.host != url2.host:
+                return False
+        elif field == 'port':
+            if url1.port != url2.port:
+                return False
+        elif field == 'path':
+            if url1.path != url2.path:
+                return False
+        elif field == 'query':
+            if url1.query != url2.query:
+                return False
+        elif field == 'fragment':
+            if url1.fragment != url2.fragment:
+                return False
+        elif field == 'userinfo':
+            if url1.userinfo != url2.userinfo:
+                return False
+        elif field == 'user':
+            if url1.user != url2.user:
+                return False
+        else:
+            logger.warning('Field ' + field + ' is not supported by the endpoint dedupe algorithm, ignoring it.')
+    return True
+
+
+def are_endpoints_duplicates(new_finding, to_duplicate_finding):
+    fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
+    # shortcut if fields list is empty/feature is disabled
+    if len(fields) == 0:
+        deduplicationLogger.debug("deduplication by endpoint fields is disabled")
+        return True
+
+    list1 = get_endpoints_as_url(new_finding)
+    list2 = get_endpoints_as_url(to_duplicate_finding)
+
+    deduplicationLogger.debug("Starting deduplication by endpoint fields for finding {} with urls {} and finding {} with urls {}".format(new_finding.id, list1, to_duplicate_finding.id, list2))
+    if list1 == [] and list2 == []:
+        return True
+
+    for l1 in list1:
+        for l2 in list2:
+            if are_urls_equal(l1, l2, fields):
+                return True
+    return False
 
 
 @dojo_model_to_id
@@ -250,10 +314,10 @@ def deduplicate_unique_id_from_tool(new_finding):
             continue
         try:
             set_duplicate(new_finding, find)
+            break
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-        break
 
 
 def deduplicate_hash_code(new_finding):
@@ -280,11 +344,12 @@ def deduplicate_hash_code(new_finding):
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:
-            set_duplicate(new_finding, find)
+            if are_endpoints_duplicates(new_finding, find):
+                set_duplicate(new_finding, find)
+                break
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-        break
 
 
 def deduplicate_uid_or_hash_code(new_finding):
@@ -312,7 +377,8 @@ def deduplicate_uid_or_hash_code(new_finding):
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:
-            set_duplicate(new_finding, find)
+            if are_endpoints_duplicates(new_finding, find):
+                set_duplicate(new_finding, find)
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
@@ -360,7 +426,7 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.active = new_finding.active
     existing_finding.verified = new_finding.verified
     existing_finding.notes.create(author=existing_finding.reporter,
-                                    entry="This finding has been automatically re-openend as it was found in recent scans.")
+                                    entry="This finding has been automatically re-opened as it was found in recent scans.")
     existing_finding.save()
 
 
@@ -1438,6 +1504,10 @@ def get_system_setting(setting, default=None):
     return getattr(system_settings, setting, (default if default is not None else None))
 
 
+def get_setting(setting):
+    return getattr(settings, setting)
+
+
 @dojo_model_to_id
 @dojo_async_task
 @app.task
@@ -1446,6 +1516,7 @@ def calculate_grade(product, *args, **kwargs):
     system_settings = System_Settings.objects.get()
     if not product:
         logger.warning('ignoring calculate product for product None!')
+        return
 
     if system_settings.enable_product_grade:
         logger.debug('calculating product grade for %s:%s', product.id, product.name)
@@ -1492,8 +1563,8 @@ def get_celery_worker_status():
 
 # Used to display the counts and enabled tabs in the product view
 class Product_Tab():
-    def __init__(self, product_id, title=None, tab=None):
-        self.product = Product.objects.get(id=product_id)
+    def __init__(self, product, title=None, tab=None):
+        self.product = product
         self.title = title
         self.tab = tab
         self.engagement_count = Engagement.objects.filter(
@@ -1638,8 +1709,16 @@ def user_post_save(sender, instance, created, **kwargs):
     # This needs to be a signal to make it also work for users created via ldap, oauth and other
     # authentication backends
     if created:
-        logger.info('creating default set of notifications for: ' + str(instance))
-        notifications = Notifications(user=instance)
+        try:
+            notifications = Notifications.objects.get(template=True)
+            notifications.pk = None
+            notifications.template = False
+            notifications.user = instance
+            logger.info('creating default set (from template) of notifications for: ' + str(instance))
+        except Exception as err:
+            notifications = Notifications(user=instance)
+            logger.info('creating default set of notifications for: ' + str(instance))
+
         notifications.save()
 
         system_settings = System_Settings.objects.get()
@@ -1653,11 +1732,10 @@ def user_post_save(sender, instance, created, **kwargs):
                     role=system_settings.default_group_role)
                 dojo_group_member.save()
 
-    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-        # Superusers shall always be staff
-        if instance.is_superuser and not instance.is_staff:
-            instance.is_staff = True
-            instance.save()
+    # Superusers shall always be staff
+    if instance.is_superuser and not instance.is_staff:
+        instance.is_staff = True
+        instance.save()
 
 
 @receiver(post_save, sender=Engagement)
@@ -2026,7 +2104,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     batch = []
     total_pages = (total_count // page_size) + 2
     # logger.info('pages to process: %d', total_pages)
-    logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
+    logger.debug('%s%s out of %s models processed ...', log_prefix, i, total_count)
     for p in range(1, total_pages):
         # logger.info('page: %d', p)
         if order == 'asc':
@@ -2050,7 +2128,9 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
                 if fields:
                     model_type.objects.bulk_update(batch, fields)
                 batch = []
-                logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
+                logger.debug('%s%s out of %s models processed ...', log_prefix, i, total_count)
+
+        logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
 
     if fields:
         model_type.objects.bulk_update(batch, fields)
@@ -2116,3 +2196,112 @@ def get_enabled_notifications_list():
         if get_system_setting('enable_{}_notifications'.format(choice[0])):
             enabled.append(choice[0])
     return enabled
+
+
+def is_finding_groups_enabled():
+    """Returns true is feature is enabled otherwise false"""
+    return get_system_setting("enable_finding_groups")
+
+
+class async_delete():
+    def __init__(self, *args, **kwargs):
+        self.mapping = {
+            'Product_Type': [
+                (Endpoint, 'product__prod_type'),
+                (Finding, 'test__engagement__product__prod_type'),
+                (Test, 'engagement__product__prod_type'),
+                (Engagement, 'product__prod_type'),
+                (Product, 'prod_type')],
+            'Product': [
+                (Endpoint, 'product'),
+                (Finding, 'test__engagement__product'),
+                (Test, 'engagement__product'),
+                (Engagement, 'product')],
+            'Engagement': [
+                (Finding, 'test__engagement'),
+                (Test, 'engagement')],
+            'Test': [(Finding, 'test')]
+        }
+
+    @dojo_async_task
+    @app.task
+    def delete_chunk(self, objects, **kwargs):
+        for object in objects:
+            try:
+                object.delete()
+            except AssertionError:
+                logger.debug('ASYNC_DELETE: object has already been deleted elsewhere. Skipping')
+                # The id must be None
+                # The object has already been deleted elsewhere
+                pass
+
+    @dojo_async_task
+    @app.task
+    def delete(self, object, **kwargs):
+        logger.debug('ASYNC_DELETE: Deleting ' + self.get_object_name(object) + ': ' + str(object))
+        model_list = self.mapping.get(self.get_object_name(object), None)
+        if model_list:
+            # The object to be deleted was found in the object list
+            self.crawl(object, model_list)
+        else:
+            # The object is not supported in async delete, delete normally
+            logger.debug('ASYNC_DELETE: ' + self.get_object_name(object) + ' async delete not supported. Deleteing normally: ' + str(object))
+            object.delete()
+
+    @dojo_async_task
+    @app.task
+    def crawl(self, object, model_list, **kwargs):
+        logger.debug('ASYNC_DELETE: Crawling ' + self.get_object_name(object) + ': ' + str(object))
+        for model_info in model_list:
+            model = model_info[0]
+            model_query = model_info[1]
+            filter_dict = {model_query: object}
+            objects_to_delete = model.objects.filter(**filter_dict)
+            logger.debug('ASYNC_DELETE: Deleting ' + str(len(objects_to_delete)) + ' ' + self.get_object_name(model) + 's in chunks')
+            chunks = self.chunk_list(model, objects_to_delete)
+            for chunk in chunks:
+                print('deleting', len(chunk), self.get_object_name(model))
+                self.delete_chunk(chunk)
+        self.delete_chunk([object])
+        logger.debug('ASYNC_DELETE: Successfully deleted ' + self.get_object_name(object) + ': ' + str(object))
+
+    def chunk_list(self, model, list):
+        chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
+        # Break the list of objects into "chunk_size" lists
+        chunk_list = [list[i:i + chunk_size] for i in range(0, len(list), chunk_size)]
+        logger.debug('ASYNC_DELETE: Split ' + self.get_object_name(model) + ' into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_size))
+        return chunk_list
+
+    def get_object_name(self, object):
+        if object.__class__.__name__ == 'ModelBase':
+            return object.__name__
+        return object.__class__.__name__
+
+
+@receiver(user_logged_in)
+def log_user_login(sender, request, user, **kwargs):
+    # to cover more complex cases:
+    # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
+
+    logger.info('login user: {user} via ip: {ip}'.format(
+        user=user.username,
+        ip=request.META.get('REMOTE_ADDR')
+    ))
+
+
+@receiver(user_logged_out)
+def log_user_logout(sender, request, user, **kwargs):
+
+    logger.info('logout user: {user} via ip: {ip}'.format(
+        user=user.username,
+        ip=request.META.get('REMOTE_ADDR')
+    ))
+
+
+@receiver(user_login_failed)
+def log_user_login_failed(sender, credentials, request, **kwargs):
+
+    logger.warning('login failed for: {credentials} via ip: {ip}'.format(
+        credentials=credentials['username'],
+        ip=request.META['REMOTE_ADDR']
+    ))
