@@ -76,4 +76,4 @@ drf-spectacular==0.23.1
 django-ratelimit==3.0.1
 argon2-cffi==21.3.0
 pycurl==7.45.1  # Required for Celery Broker AWS (SQS) support
-boto3==1.24.51  # Required for Celery Broker AWS (SQS) support
+boto3==1.24.52  # Required for Celery Broker AWS (SQS) support
