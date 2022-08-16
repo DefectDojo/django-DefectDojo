@@ -114,10 +114,17 @@ class BugcrowdApiParser(object):
             bug_url = ""
             if entry["attributes"]["bug_url"]:
                 try:
-                    bug_endpoint = Endpoint.from_uri(
-                        entry["attributes"]["bug_url"].strip()
-                    )
-                except Exception as e:
+                    if "://" in entry["attributes"]["bug_url"]:  # is the host full uri?
+                        bug_endpoint = Endpoint.from_uri(
+                            entry["attributes"]["bug_url"].strip()
+                        )
+                        # can raise exception if the host is not valid URL
+                    else:
+                        bug_endpoint = Endpoint.from_uri(
+                            "//" + entry["attributes"]["bug_url"].strip()
+                        )
+                        # can raise exception if there is no way to parse the host
+                except Exception as e:  # We don't want to fail the whole import just for 1 error in the bug_url
                     logger.error(
                         "Error parsing bugrcrowd bug_url : {}".format(
                             entry["attributes"]["bug_url"].strip()
