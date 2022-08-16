@@ -5,7 +5,7 @@ celery==5.2.7
 coverage==6.4.2
 defusedxml==0.7.1
 django_celery_results==2.4.0
-django-auditlog==2.1.0
+django-auditlog==2.1.1
 django-dbbackup==4.0.1
 django-environ==0.9.0
 django-filter==21.1
@@ -49,8 +49,8 @@ social-auth-core==4.3.0
 Python-jose==3.3.0
 gitpython==3.1.27
 debugpy==1.6.2
-python-gitlab==3.6.0
-google-api-python-client==2.54.0
+python-gitlab==3.7.0
+google-api-python-client==2.55.0
 google-auth==2.9.1
 google-auth-oauthlib==0.5.2
 drf_yasg==1.21.3
@@ -71,6 +71,6 @@ hyperlink==21.0.0
 numpy==1.23.1
 django-test-migrations==1.2.0
 djangosaml2==1.5.1
-drf-spectacular==0.22.1
+drf-spectacular==0.23.1
 django-ratelimit==3.0.1
 argon2-cffi==21.3.0

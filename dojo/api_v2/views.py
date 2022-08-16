@@ -2024,6 +2024,9 @@ class ImportScanView(mixins.CreateModelMixin,
 
     When using names you can let the importer automatically create Engagements, Products and Product_Types
     by using `auto_create_context=True`.
+
+    When `auto_create_context` is set to `True` you can use `deduplication_on_engagement` to restrict deduplication for
+    imported Findings to the newly created Engagement.
     """
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
@@ -2031,7 +2034,7 @@ class ImportScanView(mixins.CreateModelMixin,
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
@@ -2162,6 +2165,9 @@ class ReImportScanView(mixins.CreateModelMixin,
 
     When using names you can let the importer automatically create Engagements, Products and Product_Types
     by using `auto_create_context=True`.
+
+    When `auto_create_context` is set to `True` you can use `deduplication_on_engagement` to restrict deduplication for
+    imported Findings to the newly created Engagement.
     """
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
@@ -2172,7 +2178,7 @@ class ReImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
