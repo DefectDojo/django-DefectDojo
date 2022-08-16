@@ -11,6 +11,47 @@ SCAN_BUGCROWD_API = "Bugcrowd API Import"
 pattern_URI = re.compile(
     r"(?i)(?P<proto>(http(s)*|ftp|ssh))(://)((?P<user>\w+)(:(?P<password>\w+))?@)?(?P<hostname>[\w\.-]+)(:(?P<port>[0-9]+))?(?P<path>.*)?"
 )
+
+# from https://github.com/spring-projects/spring-framework/blob/main/spring-web/src/main/java/org/springframework/web/util/UriComponentsBuilder.java
+
+SCHEME_PATTERN = "([^:/?#]+):"
+
+USERINFO_PATTERN = "([^@\\[/?#]*)"
+
+HOST_IPV4_PATTERN = "[^\\[/?#:]*"
+
+HOST_PATTERN = "(" + HOST_IPV4_PATTERN + ")"
+
+PORT_PATTERN = "(\\{[^}]+\\}?|[^/?#]*)"
+
+PATH_PATTERN = "([^?#]*)"
+
+QUERY_PATTERN = "([^#]*)"
+
+LAST_PATTERN = "(.*)"
+
+# Regex patterns that matches URIs. See RFC 3986, appendix B
+URI_PATTERN = re.compile(
+    "^("
+    + SCHEME_PATTERN
+    + ")?"
+    + "(//("
+    + USERINFO_PATTERN
+    + "@)?"
+    + HOST_PATTERN
+    + "(:"
+    + PORT_PATTERN
+    + ")?"
+    + ")?"
+    + PATH_PATTERN
+    + "(\\?"
+    + QUERY_PATTERN
+    + ")?"
+    + "(#"
+    + LAST_PATTERN
+    + ")?"
+)
+
 pattern_title_authorized = re.compile(r"^[a-zA-Z0-9_\s+-.]*$")
 
 logger = logging.getLogger(__name__)
@@ -69,7 +110,21 @@ class BugcrowdApiParser(object):
                     title = title.replace(key, value)
 
             date = dateutil.parser.parse(entry["attributes"]["submitted_at"])
-            bug_url = entry["attributes"]["bug_url"]
+
+            bug_url = ""
+            if entry["attributes"]["bug_url"]:
+                try:
+                    bug_endpoint = Endpoint.from_uri(
+                        entry["attributes"]["bug_url"].strip()
+                    )
+                except Exception as e:
+                    logger.error(
+                        "Error parsing bugrcrowd bug_url : {}".format(
+                            entry["attributes"]["bug_url"].strip()
+                        )
+                    )
+                bug_url = entry["attributes"]["bug_url"]
+
             description = "\n".join(
                 [
                     entry["attributes"]["description"],
@@ -105,14 +160,13 @@ class BugcrowdApiParser(object):
                 unique_id_from_tool=unique_id_from_tool,
             )
 
-            if bug_url:
+            if bug_endpoint:
                 try:
-                    endpoint = Endpoint.from_uri(bug_url.strip())
-                    finding.unsaved_endpoints = [endpoint]
+                    finding.unsaved_endpoints = [bug_endpoint]
                 except Exception as e:
                     logger.error(
                         "{} bug url from bugcrowd failed to parse to endpoint, error= {}".format(
-                            bug_url, e
+                            str(bug_endpoint), e
                         )
                     )
 
@@ -133,11 +187,13 @@ class BugcrowdApiParser(object):
     def convert_endpoint(self, url):
         """Convert bugcrowd bug url into DefectDojo endpoints"""
         url = url.strip()
-        result = pattern_URI.search(url)
+        result = URI_PATTERN.search(url)
+
         if result:
-            return Endpoint.from_uri(result.group(0))
-        else:
-            return Endpoint.from_uri("")
+            try:
+                return Endpoint.from_uri(result.group(0).strip())
+            except Exception as e:
+                print(result)
 
     def include_finding(self, entry):
         """Determine whether this finding should be imported to DefectDojo"""
