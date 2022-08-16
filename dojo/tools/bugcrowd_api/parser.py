@@ -107,10 +107,9 @@ class BugcrowdApiParser(object):
 
             if bug_url:
                 try:
-                    endpoint = Endpoint.from_uri(bug_url)
+                    endpoint = Endpoint.from_uri(bug_url.strip())
                     finding.unsaved_endpoints = [endpoint]
                 except Exception as e:
-                    finding.unsaved_endpoints = []
                     logger.error(
                         "{} bug url from bugcrowd failed to parse to endpoint, error= {}".format(
                             bug_url, e
