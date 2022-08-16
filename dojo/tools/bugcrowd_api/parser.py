@@ -5,12 +5,15 @@ from dojo.models import Endpoint, Finding
 from dojo.tools.bugcrowd_api.importer import BugcrowdApiImporter
 import re
 import dateutil.parser
+import logging
 
 SCAN_BUGCROWD_API = "Bugcrowd API Import"
 pattern_URI = re.compile(
     r"(?i)(?P<proto>(http(s)*|ftp|ssh))(://)((?P<user>\w+)(:(?P<password>\w+))?@)?(?P<hostname>[\w\.-]+)(:(?P<port>[0-9]+))?(?P<path>.*)?"
 )
 pattern_title_authorized = re.compile(r"^[a-zA-Z0-9_\s+-.]*$")
+
+logger = logging.getLogger(__name__)
 
 
 class BugcrowdApiParser(object):
@@ -102,9 +105,17 @@ class BugcrowdApiParser(object):
                 unique_id_from_tool=unique_id_from_tool,
             )
 
-            if bug_url != "" and bug_url is not None:
-                endpoint = self.convert_endpoint(bug_url)
-                finding.unsaved_endpoints = [endpoint]
+            if bug_url:
+                try:
+                    endpoint = Endpoint.from_uri(bug_url)
+                    finding.unsaved_endpoints = [endpoint]
+                except Exception as e:
+                    finding.unsaved_endpoints = []
+                    logger.error(
+                        "{} bug url from bugcrowd failed to parse to endpoint, error= {}".format(
+                            bug_url, e
+                        )
+                    )
 
             findings.append(finding)
 
@@ -148,12 +159,11 @@ class BugcrowdApiParser(object):
         if entry["attributes"]["state"] in allowed_states:
             return True
         else:
-            print(
+            raise ValueError(
                 "{} not in allowed bugcrowd submission states".format(
                     entry["attributes"]["state"]
                 )
             )
-            return False
 
     def convert_log_timestamp(self, timestamp):
         """Convert a log entry's timestamp to a DefectDojo date"""
