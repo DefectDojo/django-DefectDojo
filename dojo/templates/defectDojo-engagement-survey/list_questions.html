@@ -27,7 +27,7 @@
                         {% for question in questions %}
                             <tr>
                                 <td>
-                                    {% if "dojo.change_question"|has_configuration_permission:"staff" %}
+                                    {% if "dojo.change_question"|has_configuration_permission %}
                                     <a title="{{ question.text }}" href="{% url 'edit_question' question.id %}">{{ question.text }}</a>
                                     {% else %}
                                     {{ question.text }}
@@ -50,7 +50,7 @@
         <div class="col-md-2">
             <div class="panel panel-default filters">
                 {% if filtered.form %}
-                    {% if "dojo.add_question"|has_configuration_permission:"staff" %}
+                    {% if "dojo.add_question"|has_configuration_permission %}
                         <div class="panel-heading">Actions</div>
                         <div class="panel-body centered">
                             <a class="btn btn-sm btn-secondary" href="{% url 'create_question' %}">

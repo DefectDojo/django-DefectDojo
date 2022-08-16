@@ -40,18 +40,19 @@ class TestNexposeParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("TCP Sequence Number Approximation Vulnerability", finding.title)
-        self.assertEqual("CVE-2004-0230", finding.cve)
         self.assertEqual(3, len(finding.unsaved_endpoints))
         self.assertIn("https://www.securityfocus.com/bid/10183", finding.references)  # BID: 10183
         self.assertIn("https://www.kb.cert.org/vuls/id/415294.html", finding.references)  # CERT-VN: 415294
         self.assertIn("https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2004-0230", finding.references)  # CVE: CVE-2004-0230
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2004-0230", finding.unsaved_vulnerability_ids[0])
 
         # vuln 2
         finding = findings[2]
         self.assertEqual("Low", finding.severity)
         self.assertEqual("TCP timestamp response", finding.title)
-        self.assertIsNone(finding.cve)
         self.assertEqual(5, len(finding.unsaved_endpoints))
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
 
         # vuln 2 - endpoint
         endpoint = finding.unsaved_endpoints[0]
@@ -145,22 +146,22 @@ class TestNexposeParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("High", finding.severity)
         self.assertEqual("ICMP redirection enabled", finding.title)
-        self.assertIsNone(finding.cve)
         self.assertEqual(4, len(finding.unsaved_endpoints))
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
 
         # vuln 1
         finding = findings[1]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("No password for Grub", finding.title)
-        self.assertIsNone(finding.cve)
         self.assertEqual(4, len(finding.unsaved_endpoints))
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
 
         # vuln 2
         finding = findings[2]
         self.assertEqual("Low", finding.severity)
         self.assertEqual("User home directory mode unsafe", finding.title)
-        self.assertIsNone(finding.cve)
         self.assertEqual(16, len(finding.unsaved_endpoints))
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
 
     def test_nexpose_parser_dns(self):
         testfile = open("unittests/scans/nexpose/dns.xml")

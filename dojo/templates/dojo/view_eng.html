@@ -31,6 +31,11 @@
                                         <i class="fa fa-pencil-square-o"></i> Edit Engagement
                                         </a>
                                     </li>
+                                    <li>
+                                        <a class="" href="{% url 'copy_engagement' eng.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                        <i class="fa fa-copy"></i> Copy Engagement
+                                        </a>
+                                    </li>
                                     <li role="presentation">
                                         {% if eng.active %}
                                             <a class="" href="{% url 'close_engagement' eng.id %}">
@@ -268,12 +273,21 @@
                                                                     <a class="" href="{% url 'edit_test' test.id %}">
                                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                                 </li>
+                                                                <li>
+                                                                    <a class="" href="{% url 'copy_test' test.id %}">
+                                                                    <i class="fa fa-copy"></i> Copy</a>
+                                                                </li>
                                                             {% endif %}
                                                             {% if test|has_object_permission:"Finding_Add" %}
                                                                 <li class="divider"></li>
                                                                 <li>
                                                                     <a class="" href="{% url 'add_findings' test.id %}">
                                                                     <i class="fa fa-plus"></i> Add Finding to Test
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a title="Add Finding from Template" href="{% url 'search' test.id %}">
+                                                                    <span class="icon-add-template"></span> Finding From Template
                                                                     </a>
                                                                 </li>
                                                             {% endif %}
@@ -672,12 +686,13 @@
                             {% for file in files %}
                                 <div class="col-md-2" style="text-align: center">
                                     <div class="row">
-                                        <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
-                                        {% if file.file.url|get_thumbnail %}
-                                            <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
-                                        {% else %}
-                                            <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
-                                        {% endif %}
+                                        {% url 'access_file' fid=file.id oid=eng.id obj_type='Engagement' as image_url %}
+                                        <a href="{{ image_url }}" target="_blank">
+                                            {% if file|get_thumbnail %}
+                                                <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
+                                            {% else %}
+                                                <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
+                                            {% endif %}
                                         </a>
                                     </div>
                                     <div class="row">

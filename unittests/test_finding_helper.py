@@ -1,11 +1,14 @@
 from .dojo_test_case import DojoTestCase
-from dojo.models import Finding, Test
+from dojo.models import Finding, Test, Vulnerability_Id, Finding_Template, Vulnerability_Id_Template
 from django.contrib.auth.models import User
 from unittest import mock
+from unittest.mock import patch
 from crum import impersonate
 import datetime
 from django.utils import timezone
 import logging
+from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
+
 logger = logging.getLogger(__name__)
 
 
@@ -188,3 +191,36 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
                 # TODO marking as false positive resets verified to False, possible bug / undesired behaviour?
                 (False, False, True, False, True, frozen_datetime, self.user_1, frozen_datetime)
             )
+
+
+class TestSaveVulnerabilityIds(DojoTestCase):
+
+    @patch('dojo.finding.helper.Vulnerability_Id.objects.filter')
+    @patch('django.db.models.query.QuerySet.delete')
+    @patch('dojo.finding.helper.Vulnerability_Id.save')
+    def test_save_vulnerability_ids(self, save_mock, delete_mock, filter_mock):
+        finding = Finding()
+        new_vulnerability_ids = ['REF-1', 'REF-2', 'REF-2']
+        filter_mock.return_value = Vulnerability_Id.objects.none()
+
+        save_vulnerability_ids(finding, new_vulnerability_ids)
+
+        filter_mock.assert_called_with(finding=finding)
+        delete_mock.assert_called_once()
+        self.assertEqual(save_mock.call_count, 2)
+        self.assertEqual('REF-1', finding.cve)
+
+    @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.filter')
+    @patch('django.db.models.query.QuerySet.delete')
+    @patch('dojo.finding.helper.Vulnerability_Id_Template.save')
+    def test_save_vulnerability_id_templates(self, save_mock, delete_mock, filter_mock):
+        finding_template = Finding_Template()
+        new_vulnerability_ids = ['REF-1', 'REF-2', 'REF-2']
+        filter_mock.return_value = Vulnerability_Id_Template.objects.none()
+
+        save_vulnerability_ids_template(finding_template, new_vulnerability_ids)
+
+        filter_mock.assert_called_with(finding_template=finding_template)
+        delete_mock.assert_called_once()
+        self.assertEqual(save_mock.call_count, 2)
+        self.assertEqual('REF-1', finding_template.cve)

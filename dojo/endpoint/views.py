@@ -33,7 +33,7 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
 
     if vulnerable:
         endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
-                                     finding__duplicate=False, finding__out_of_scope=False, mitigated=False)
+                                     finding__duplicate=False, finding__out_of_scope=False)
         endpoints = endpoints.filter(endpoint_status__mitigated=False)
     else:
         endpoints = Endpoint.objects.all()
@@ -67,7 +67,7 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
             user_has_permission_or_403(request.user, product, Permissions.Product_View)
-            product_tab = Product_Tab(product.id, view_name, tab="endpoints")
+            product_tab = Product_Tab(product, view_name, tab="endpoints")
 
     return render(
         request, 'dojo/endpoints.html', {
@@ -147,7 +147,7 @@ def process_endpoint_view(request, eid, host_view=False):
     if active_findings.count() != 0:
         vulnerable = True
 
-    product_tab = Product_Tab(endpoint.product.id, "Host" if host_view else "Endpoint", tab="endpoints")
+    product_tab = Product_Tab(endpoint.product, "Host" if host_view else "Endpoint", tab="endpoints")
     return render(request,
                   "dojo/view_endpoint.html",
                   {"endpoint": endpoint,
@@ -190,7 +190,7 @@ def edit_endpoint(request, eid):
         add_breadcrumb(parent=endpoint, title="Edit", top_level=False, request=request)
         form = EditEndpointForm(instance=endpoint)
 
-    product_tab = Product_Tab(endpoint.product.id, "Endpoint", tab="endpoints")
+    product_tab = Product_Tab(endpoint.product, "Endpoint", tab="endpoints")
 
     return render(request,
                   "dojo/edit_endpoint.html",
@@ -228,7 +228,7 @@ def delete_endpoint(request, eid):
     collector.collect([endpoint])
     rels = collector.nested()
 
-    product_tab = Product_Tab(endpoint.product.id, "Delete Endpoint", tab="endpoints")
+    product_tab = Product_Tab(endpoint.product, "Delete Endpoint", tab="endpoints")
 
     return render(request, 'dojo/delete_endpoint.html',
                   {'endpoint': endpoint,
@@ -258,7 +258,7 @@ def add_endpoint(request, pid):
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
 
-    product_tab = Product_Tab(product.id, "Add Endpoint", tab="endpoints")
+    product_tab = Product_Tab(product, "Add Endpoint", tab="endpoints")
 
     return render(request, template, {
         'product_tab': product_tab,
@@ -309,7 +309,7 @@ def add_meta_data(request, eid):
         form = DojoMetaDataForm()
 
     add_breadcrumb(parent=endpoint, title="Add Metadata", top_level=False, request=request)
-    product_tab = Product_Tab(endpoint.product.id, "Add Metadata", tab="endpoints")
+    product_tab = Product_Tab(endpoint.product, "Add Metadata", tab="endpoints")
     return render(request,
                   'dojo/add_endpoint_meta_data.html',
                   {'form': form,
@@ -343,7 +343,7 @@ def edit_meta_data(request, eid):
                              extra_tags='alert-success')
         return HttpResponseRedirect(reverse('view_endpoint', args=(eid,)))
 
-    product_tab = Product_Tab(endpoint.product.id, "Edit Metadata", tab="endpoints")
+    product_tab = Product_Tab(endpoint.product, "Edit Metadata", tab="endpoints")
     return render(request,
                   'dojo/edit_endpoint_meta_data.html',
                   {'endpoint': endpoint,
@@ -397,14 +397,18 @@ def endpoint_bulk_update_all(request, pid=None):
                 if skipped_endpoint_count > 0:
                     add_error_message_to_response('Skipped mitigation of {} endpoints because you are not authorized.'.format(skipped_endpoint_count))
 
-                for endpoint in endpoints:
-                    endpoint.mitigated = not endpoint.mitigated
-                    endpoint.save()
+                eps_count = Endpoint_Status.objects.filter(endpoint__in=endpoints).update(
+                    mitigated=True,
+                    mitigated_by=request.user,
+                    mitigated_time=timezone.now(),
+                    last_modified=timezone.now()
+                )
 
                 if updated_endpoint_count > 0:
                     messages.add_message(request,
                                         messages.SUCCESS,
-                                        'Bulk mitigation of {} endpoints was successful.'.format(updated_endpoint_count),
+                                        'Bulk mitigation of {} endpoints ({} endpoint statuses) was successful.'.format(
+                                            updated_endpoint_count, eps_count),
                                         extra_tags='alert-success')
             else:
                 messages.add_message(request,
@@ -502,7 +506,7 @@ def import_endpoint_meta(request, pid):
             return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
 
     add_breadcrumb(title="Endpoint Meta Importer", top_level=False, request=request)
-    product_tab = Product_Tab(product.id, title="Endpoint Meta Importer", tab="endpoints")
+    product_tab = Product_Tab(product, title="Endpoint Meta Importer", tab="endpoints")
     return render(request, 'dojo/endpoint_meta_importer.html', {
         'product_tab': product_tab,
         'form': form,

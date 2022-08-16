@@ -3,6 +3,9 @@
 unset PROFILE
 unset TEST_CASE
 
+bash ./docker/docker-compose-check.sh
+if [[ $? -eq 1 ]]; then exit 1; fi
+
 usage() {
   echo
   echo "This script helps with running unit tests."

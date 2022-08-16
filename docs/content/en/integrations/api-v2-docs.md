@@ -20,7 +20,7 @@ The documentation is generated using [Django Rest Framework
 Yet Another Swagger Generator](https://github.com/axnsan12/drf-yasg/), and is
 interactive. On the top of API v2 docs is a link that generates an OpenAPI v2 spec.
 
-As a preparation to move to OpenAPIv3, we have added an compatible spec and documentation at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/?docExpansion=none)
+As a preparation to move to OpenAPIv3, we have added an compatible spec and documentation at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/)
 
 To interact with the documentation, a valid Authorization header value
 is needed. Visit the `/api/v2/key/` view to generate your
@@ -61,10 +61,9 @@ headers = {'content-type': 'application/json',
             'Authorization': 'Token c8572a5adf107a693aa6c72584da31f4d1f1dcff'}
 r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
 
-for key, value in r.__dict__.iteritems():
-    print key
-    print value
-    print '------------------'
+for key, value in r.__dict__.items():
+  print(f"'{key}': '{value}'")
+  print('------------------')
 {{< /highlight >}}
 
 This code will return the list of all the users defined in DefectDojo.
@@ -101,10 +100,9 @@ headers = {'content-type': 'application/json',
             'Authorization': 'Token c8572a5adf107a693aa6c72584da31f4d1f1dcff'}
 r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
 
-for key, value in r.__dict__.iteritems():
-    print key
-    print value
-    print '------------------'
+for key, value in r.__dict__.items():
+  print(f"'{key}': '{value}'")
+  print('------------------')
 {{< /highlight >}}
 
 The json object result is: :

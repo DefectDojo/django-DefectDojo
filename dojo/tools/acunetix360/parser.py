@@ -1,7 +1,7 @@
 import json
-import datetime
 import html2text
 
+from dateutil import parser
 from dojo.models import Finding, Endpoint
 
 
@@ -19,19 +19,27 @@ class Acunetix360Parser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = dict()
-        scan_date = datetime.datetime.strptime(data["Generated"], "%d/%m/%Y %H:%M %p").date()
+        scan_date = parser.parse(data["Generated"])
+        text_maker = html2text.HTML2Text()
+        text_maker.body_width = 0
 
         for item in data["Vulnerabilities"]:
             title = item["Name"]
-            findingdetail = html2text.html2text(item.get("Description", ""))
-            cwe = int(item["Classification"]["Cwe"]) if "Cwe" in item["Classification"] else None
+            findingdetail = text_maker.handle(item.get("Description", ""))
+            if "Cwe" in item["Classification"]:
+                try:
+                    cwe = int(item["Classification"]["Cwe"].split(',')[0])
+                except:
+                    cwe = None
+            else:
+                cwe = None
             sev = item["Severity"]
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'
-            mitigation = html2text.html2text(item.get("RemedialProcedure", ""))
-            references = html2text.html2text(item.get("RemedyReferences", ""))
+            mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
+            references = text_maker.handle(item.get("RemedyReferences", ""))
             url = item["Url"]
-            impact = html2text.html2text(item.get("Impact", ""))
+            impact = text_maker.handle(item.get("Impact", ""))
             dupe_key = title
             request = item["HttpRequest"]["Content"]
             if request is None or len(request) <= 0:
@@ -54,8 +62,21 @@ class Acunetix360Parser(object):
             if (item["Classification"] is not None) and (item["Classification"]["Cvss"] is not None) and (item["Classification"]["Cvss"]["Vector"] is not None):
                 finding.cvssv3 = item["Classification"]["Cvss"]["Vector"]
 
+            if item["State"] is not None:
+                state = [x.strip() for x in item["State"].split(',')]
+                if "AcceptedRisk" in state:
+                    finding.risk_accepted = True
+                    finding.active = False
+                elif "FalsePositive" in state:
+                    finding.false_p = True
+                    finding.active = False
+
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+
+            if item.get("FirstSeenDate"):
+                parseddate = parser.parse(item["FirstSeenDate"])
+                finding.date = parseddate
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]

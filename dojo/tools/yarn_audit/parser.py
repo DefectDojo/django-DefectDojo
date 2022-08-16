@@ -1,6 +1,7 @@
 import json
 
 from dojo.models import Finding
+from dojo.tools.utils import get_npm_cwe
 
 
 class YarnAuditParser(object):
@@ -54,6 +55,8 @@ def get_item(item_node, test):
         if len(finding['paths']) > 25:
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
+    cwe = get_npm_cwe(item_node)
+
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
@@ -66,8 +69,7 @@ def get_item(item_node, test):
                       str(paths) + "\n CWE: " +
                       str(item_node['cwe']) + "\n Access: " +
                       str(item_node['access']),
-                      cwe=item_node['cwe'][4:],
-                      cve=item_node['cves'][0] if (len(item_node['cves']) > 0) else None,
+                      cwe=cwe,
                       mitigation=item_node['recommendation'],
                       references=item_node['url'],
                       component_name=item_node['module_name'],
@@ -79,5 +81,10 @@ def get_item(item_node, test):
                       impact="No impact provided",
                       static_finding=True,
                       dynamic_finding=False)
+
+    if len(item_node['cves']) > 0:
+        dojo_finding.unsaved_vulnerability_ids = list()
+        for vulnerability_id in item_node['cves']:
+            dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
 
     return dojo_finding

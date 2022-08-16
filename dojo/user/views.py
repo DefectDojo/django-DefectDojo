@@ -1,21 +1,24 @@
 import logging
 from crum import get_current_user
+
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
+from django.contrib.auth.views import LoginView, PasswordResetView
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
-from django.db.models.deletion import RestrictedError
-from django.urls import reverse
-from django.conf import settings
+from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Q
+from django.db.models.deletion import RestrictedError
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
-from django.contrib.admin.utils import NestedObjects
-from django.contrib.auth.views import LoginView, PasswordResetView
-from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
+from django.urls import reverse
 from django.utils.http import urlencode
-from django.db import DEFAULT_DB_ALIAS
+from django.utils.translation import gettext as _
+
 from rest_framework.authtoken.models import Token
 
 from dojo.filters import UserFilter
@@ -51,7 +54,7 @@ def api_v2_key(request):
                 api_key = Token.objects.create(user=request.user)
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'API Key generated successfully.',
+                                 _('API Key generated successfully.'),
                                  extra_tags='alert-success')
         else:
             raise PermissionDenied
@@ -60,10 +63,10 @@ def api_v2_key(request):
             api_key = Token.objects.get(user=request.user)
         except Token.DoesNotExist:
             api_key = Token.objects.create(user=request.user)
-    add_breadcrumb(title="API Key", top_level=True, request=request)
+    add_breadcrumb(title=_("API Key"), top_level=True, request=request)
 
     return render(request, 'dojo/api_v2_key.html',
-                  {'name': 'API v2 Key',
+                  {'name': _('API v2 Key'),
                    'metric': False,
                    'user': request.user,
                    'key': api_key,
@@ -83,6 +86,8 @@ def login_view(request):
         settings.GITLAB_OAUTH2_ENABLED,
         settings.AUTH0_OAUTH2_ENABLED,
         settings.KEYCLOAK_OAUTH2_ENABLED,
+        settings.GITHUB_OAUTH2_ENABLED,
+        settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED,
         settings.SAML2_ENABLED
     ]) == 1 and not ('force_login_form' in request.GET):
         if settings.GOOGLE_OAUTH_ENABLED:
@@ -97,6 +102,10 @@ def login_view(request):
             social_auth = 'keycloak'
         elif settings.AUTH0_OAUTH2_ENABLED:
             social_auth = 'auth0'
+        elif settings.GITHUB_OAUTH2_ENABLED:
+            social_auth = 'github'
+        elif settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED:
+            social_auth = 'github-enterprise'
         else:
             return HttpResponseRedirect('/saml2/login')
         try:
@@ -116,7 +125,7 @@ def logout_view(request):
     else:
         messages.add_message(request,
                          messages.SUCCESS,
-                         'You have logged out successfully.',
+                         _('You have logged out successfully.'),
                          extra_tags='alert-success')
 
         return HttpResponseRedirect(reverse('login'))
@@ -150,7 +159,7 @@ def delete_alerts(request):
         alerts.filter().delete()
         messages.add_message(request,
                                         messages.SUCCESS,
-                                        'Alerts removed.',
+                                        _('Alerts removed.'),
                                         extra_tags='alert-success')
         return HttpResponseRedirect('alerts')
 
@@ -210,16 +219,16 @@ def view_profile(request):
                 global_role.role = previous_global_role
                 messages.add_message(request,
                                     messages.WARNING,
-                                    'Only superusers are allowed to change their global role.',
+                                    _('Only superusers are allowed to change their global role.'),
                                     extra_tags='alert-warning')
             global_role.user = user
             global_role.save()
 
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Profile updated successfully.',
+                                 _('Profile updated successfully.'),
                                  extra_tags='alert-success')
-    add_breadcrumb(title="User Profile - " + user.get_full_name(), top_level=True, request=request)
+    add_breadcrumb(title=_("User Profile - %(user_full_name)s") % {'user_full_name': user.get_full_name()}, top_level=True, request=request)
     return render(request, 'dojo/profile.html', {
         'name': 'Engineer Profile',
         'metric': False,
@@ -247,24 +256,24 @@ def change_password(request):
 
             messages.add_message(request,
                                     messages.SUCCESS,
-                                    'Your password has been changed.',
+                                    _('Your password has been changed.'),
                                     extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_profile'))
 
-    add_breadcrumb(title="Change Password", top_level=False, request=request)
+    add_breadcrumb(title=_("Change Password"), top_level=False, request=request)
     return render(request, 'dojo/change_pwd.html', {
         'name': 'ChangePassword',
         'form': form})
 
 
-@user_is_configuration_authorized('auth.view_user', 'staff')
+@user_is_configuration_authorized('auth.view_user')
 def user(request):
     users = Dojo_User.objects.all() \
         .select_related('usercontactinfo', 'global_role') \
         .order_by('username', 'last_name', 'first_name')
     users = UserFilter(request.GET, queryset=users)
     paged_users = get_page_items(request, users.qs, 25)
-    add_breadcrumb(title="All Users", top_level=True, request=request)
+    add_breadcrumb(title=_("All Users"), top_level=True, request=request)
     return render(request,
                   'dojo/users.html',
                   {"users": paged_users,
@@ -273,7 +282,7 @@ def user(request):
                    })
 
 
-@user_is_configuration_authorized('auth.add_user', 'superuser')
+@user_is_configuration_authorized('auth.add_user')
 def add_user(request):
     form = AddDojoUserForm()
     contact_form = UserContactInfoForm()
@@ -312,15 +321,15 @@ def add_user(request):
                 global_role.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    'User added successfully.',
+                                    _('User added successfully.'),
                                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_user', args=(user.id,)))
         else:
             messages.add_message(request,
                                  messages.ERROR,
-                                 'User was not added successfully.',
+                                 _('User was not added successfully.'),
                                  extra_tags='alert-danger')
-    add_breadcrumb(title="Add User", top_level=False, request=request)
+    add_breadcrumb(title=_("Add User"), top_level=False, request=request)
     return render(request, "dojo/add_user.html", {
         'name': 'Add User',
         'form': form,
@@ -329,7 +338,7 @@ def add_user(request):
         'to_add': True})
 
 
-@user_is_configuration_authorized('auth.view_user', 'staff')
+@user_is_configuration_authorized('auth.view_user')
 def view_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     product_members = get_authorized_product_members_for_user(user, Permissions.Product_View)
@@ -337,7 +346,7 @@ def view_user(request, uid):
     group_members = get_authorized_group_members_for_user(user)
     configuration_permission_form = ConfigurationPermissionsForm(user=user)
 
-    add_breadcrumb(title="View User", top_level=False, request=request)
+    add_breadcrumb(title=_("View User"), top_level=False, request=request)
     return render(request, 'dojo/view_user.html', {
         'user': user,
         'product_members': product_members,
@@ -346,7 +355,7 @@ def view_user(request, uid):
         'configuration_permission_form': configuration_permission_form})
 
 
-@user_is_configuration_authorized('auth.change_user', 'superuser')
+@user_is_configuration_authorized('auth.change_user')
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = EditDojoUserForm(instance=user)
@@ -379,12 +388,12 @@ def edit_user(request, uid):
             if not request.user.is_superuser and form.cleaned_data['is_superuser']:
                 messages.add_message(request,
                                     messages.ERROR,
-                                    'Only superusers are allowed to edit superusers. User was not saved.',
+                                    _('Only superusers are allowed to edit superusers. User was not saved.'),
                                     extra_tags='alert-danger')
             elif not request.user.is_superuser and global_role_form.cleaned_data['role']:
                 messages.add_message(request,
                                     messages.ERROR,
-                                    'Only superusers are allowed to edit users with a global role. User was not saved.',
+                                    _('Only superusers are allowed to edit users with a global role. User was not saved.'),
                                     extra_tags='alert-danger')
             else:
                 form.save()
@@ -396,14 +405,14 @@ def edit_user(request, uid):
                 global_role.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    'User saved successfully.',
+                                    _('User saved successfully.'),
                                     extra_tags='alert-success')
         else:
             messages.add_message(request,
                                 messages.ERROR,
-                                'User was not saved successfully.',
+                                _('User was not saved successfully.'),
                                 extra_tags='alert-danger')
-    add_breadcrumb(title="Edit User", top_level=False, request=request)
+    add_breadcrumb(title=_("Edit User"), top_level=False, request=request)
     return render(request, "dojo/add_user.html", {
         'name': 'Edit User',
         'form': form,
@@ -412,7 +421,7 @@ def edit_user(request, uid):
         'to_edit': user})
 
 
-@user_is_configuration_authorized('auth.delete_user', 'superuser')
+@user_is_configuration_authorized('auth.delete_user')
 def delete_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = DeleteUserForm(instance=user)
@@ -420,7 +429,7 @@ def delete_user(request, uid):
     if user.id == request.user.id:
         messages.add_message(request,
                              messages.ERROR,
-                             'You may not delete yourself.',
+                             _('You may not delete yourself.'),
                              extra_tags='alert-danger')
         return HttpResponseRedirect(reverse('edit_user', args=(user.id,)))
 
@@ -431,19 +440,19 @@ def delete_user(request, uid):
                 if not request.user.is_superuser and user.is_superuser:
                     messages.add_message(request,
                                         messages.ERROR,
-                                        'Only superusers are allowed to delete superusers. User was not removed.',
+                                        _('Only superusers are allowed to delete superusers. User was not removed.'),
                                         extra_tags='alert-danger')
                 elif not request.user.is_superuser and hasattr(user, 'global_role') and user.global_role.role:
                     messages.add_message(request,
                                         messages.ERROR,
-                                        'Only superusers are allowed to delete users with a global role. User was not removed.',
+                                        _('Only superusers are allowed to delete users with a global role. User was not removed.'),
                                         extra_tags='alert-danger')
                 else:
                     try:
                         user.delete()
                         messages.add_message(request,
                                             messages.SUCCESS,
-                                            'User and relationships removed.',
+                                            _('User and relationships removed.'),
                                             extra_tags='alert-success')
                     except RestrictedError as err:
                         messages.add_message(request,
@@ -456,7 +465,7 @@ def delete_user(request, uid):
     collector.collect([user])
     rels = collector.nested()
 
-    add_breadcrumb(title="Delete User", top_level=False, request=request)
+    add_breadcrumb(title=_("Delete User"), top_level=False, request=request)
     return render(request, 'dojo/delete_user.html',
                   {'to_delete': user,
                    'form': form,
@@ -482,10 +491,10 @@ def add_product_type_member(request, uid):
                         product_type_member.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    'Product type members added successfully.',
+                                    _('Product type members added successfully.'),
                                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_user', args=(uid, )))
-    add_breadcrumb(title="Add Product Type Member", top_level=False, request=request)
+    add_breadcrumb(title=_("Add Product Type Member"), top_level=False, request=request)
     return render(request, 'dojo/new_product_type_member_user.html', {
         'user': user,
         'form': memberform,
@@ -510,10 +519,10 @@ def add_product_member(request, uid):
                         product_member.save()
             messages.add_message(request,
                                 messages.SUCCESS,
-                                'Product members added successfully.',
+                                _('Product members added successfully.'),
                                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_user', args=(uid, )))
-    add_breadcrumb(title="Add Product Member", top_level=False, request=request)
+    add_breadcrumb(title=_("Add Product Member"), top_level=False, request=request)
     return render(request, 'dojo/new_product_member_user.html', {
         'user': user,
         'form': memberform,
@@ -539,18 +548,18 @@ def add_group_member(request, uid):
                         group_member.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Groups added successfully.',
+                                 _('Groups added successfully.'),
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_user', args=(uid,)))
 
-    add_breadcrumb(title="Add Group Member", top_level=False, request=request)
+    add_breadcrumb(title=_("Add Group Member"), top_level=False, request=request)
     return render(request, 'dojo/new_group_member_user.html', {
         'user': user,
         'form': memberform
     })
 
 
-@user_is_configuration_authorized('auth.change_permission', 'superuser')
+@user_is_configuration_authorized('auth.change_permission')
 def edit_permissions(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     if request.method == 'POST':
@@ -559,7 +568,7 @@ def edit_permissions(request, uid):
             form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Permissions updated.',
+                                 _('Permissions updated.'),
                                  extra_tags='alert-success')
     return HttpResponseRedirect(reverse('view_user', args=(uid,)))
 
