@@ -1702,7 +1702,7 @@ def get_site_url():
         return "settings.SITE_URL"
 
 
-@receiver(post_save, sender=Dojo_User)
+@receiver(post_save, sender=User)
 def user_post_save(sender, instance, created, **kwargs):
     # For new users we create a Notifications object so the default 'alert' notifications work and
     # assign them to a default group if specified in the system settings.
