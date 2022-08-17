@@ -77,27 +77,33 @@ def severity_count(queryset, method, expression):
         total=Sum(
             Case(When(**{total_expression: ('Critical', 'High', 'Medium', 'Low', 'Info')},
                         then=Value(1)),
-                    output_field=IntegerField())),
+                    output_field=IntegerField(),
+                 default=0)),
         critical=Sum(
             Case(When(**{expression: 'Critical'},
                         then=Value(1)),
-                    output_field=IntegerField())),
+                    output_field=IntegerField(),
+                 default=0)),
         high=Sum(
             Case(When(**{expression: 'High'},
                         then=Value(1)),
-                    output_field=IntegerField())),
+                    output_field=IntegerField(),
+                 default=0)),
         medium=Sum(
             Case(When(**{expression: 'Medium'},
                         then=Value(1)),
-                    output_field=IntegerField())),
+                    output_field=IntegerField(),
+                 default=0)),
         low=Sum(
             Case(When(**{expression: 'Low'},
                         then=Value(1)),
-                    output_field=IntegerField())),
+                    output_field=IntegerField(),
+                 default=0)),
         info=Sum(
             Case(When(**{expression: 'Info'},
                         then=Value(1)),
-                    output_field=IntegerField())),
+                    output_field=IntegerField(),
+                 default=0)),
     )
 
 
