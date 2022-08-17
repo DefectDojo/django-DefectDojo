@@ -65,8 +65,8 @@ def social_uid(backend, details, response, *args, **kwargs):
 
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
     pass
-    
-    
+
+
 def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
     if settings.AZUREAD_TENANT_OAUTH2_ENABLED and settings.AZUREAD_TENANT_OAUTH2_GET_GROUPS and isinstance(backend, AzureADTenantOAuth2):
         soc = user.social_auth.get()
