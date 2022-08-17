@@ -191,19 +191,20 @@ def get_snippet(result):
                         snippet = location['physicalLocation']['contextRegion']['snippet']['text']
     return snippet
 
+
 def get_codeFlowsDescription(codeFlows):
     for codeFlow in codeFlows:
-        if not 'threadFlows' in codeFlow:
+        if 'threadFlows' not in codeFlow:
             continue
         for threadFlow in codeFlow['threadFlows']:
-            if not 'locations' in threadFlow:
+            if 'locations' not in threadFlow:
                 continue
 
             description = '**Code flow:**\n'
             for location in threadFlow['locations']:
                 physicalLocation = location['location']['physicalLocation']
                 region = physicalLocation['region']
-                description += '\t' + physicalLocation['artifactLocation']['uri'] + ':' + str(region['startLine']) 
+                description += '\t' + physicalLocation['artifactLocation']['uri'] + ':' + str(region['startLine'])
                 if 'startColumn' in region:
                     description += ':' + str(region['startColumn'])
                 if 'snippet' in region:
@@ -211,6 +212,7 @@ def get_codeFlowsDescription(codeFlows):
                 description += '\n'
 
     return description
+
 
 def get_description(result, rule):
     description = ''
