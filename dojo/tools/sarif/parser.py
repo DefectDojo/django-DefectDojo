@@ -332,4 +332,45 @@ def get_item(result, rules, artifacts, run_date):
     if run_date:
         finding.date = run_date
 
+    # manage fingerprints
+    # fingerprinting in SARIF is more complete than in current implementation
+    # SARIF standard make it possible to have multiple version in the same report
+    # for now we just take the first one and keep the format to be able to compare it
+    if result.get("fingerprints"):
+        hashes = get_fingerprints_hashes(result["fingerprints"])
+        first_item = next(iter(hashes.items()))
+        finding.unique_id_from_tool = first_item[1]['value']
+    elif result.get("partialFingerprints"):
+        # for this one we keep an order to have id that could be compared
+        hashes = get_fingerprints_hashes(result["partialFingerprints"])
+        sorted_hashes = sorted(hashes.keys())
+        finding.unique_id_from_tool = "|".join([f'{key}:{hashes[key]["value"]}' for key in sorted_hashes])
     return finding
+
+
+def get_fingerprints_hashes(values):
+    """
+    Method that generate a `unique_id_from_tool` data from the `fingerprints` attribute.
+     - for now, we take the value of the last version of the first hash method.
+    """
+    fingerprints = dict()
+    for key in values:
+        if "/" in key:
+            key_method = key.split("/")[-2]
+            key_method_version = int(key.split("/")[-1].replace("v", ""))
+        else:
+            key_method = key
+            key_method_version = 0
+        value = values[key]
+        if fingerprints.get(key_method):
+            if fingerprints[key_method]["version"] < key_method_version:
+                fingerprints[key_method] = {
+                    "version": key_method_version,
+                    "value": value,
+                }
+        else:
+            fingerprints[key_method] = {
+                "version": key_method_version,
+                "value": value,
+            }
+    return fingerprints

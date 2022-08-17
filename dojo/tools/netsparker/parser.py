@@ -2,6 +2,7 @@ import json
 import html2text
 import datetime
 
+from cvss import parser as cvss_parser
 from dojo.models import Finding, Endpoint
 
 
@@ -69,7 +70,9 @@ class NetsparkerParser(object):
                 finding.risk_accepted = True
 
             if (item["Classification"] is not None) and (item["Classification"]["Cvss"] is not None) and (item["Classification"]["Cvss"]["Vector"] is not None):
-                finding.cvssv3 = item["Classification"]["Cvss"]["Vector"]
+                cvss_objects = cvss_parser.parse_cvss_from_text(item["Classification"]["Cvss"]["Vector"])
+                if len(cvss_objects) > 0:
+                    finding.cvssv3 = cvss_objects[0].clean_vector()
 
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]

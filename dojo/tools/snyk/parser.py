@@ -116,9 +116,6 @@ class SnykParser(object):
             vuln_id_from_tool=vulnerability['id'],
         )
         finding.unsaved_tags = []
-        # Add Target file if supplied
-        if target_file:
-            finding.unsaved_tags.append('target_file:{}'.format(target_file))
 
         # CVSSv3 vector
         if vulnerability.get('CVSSv3'):
@@ -164,6 +161,11 @@ class SnykParser(object):
         # Add the remediation substring to mitigation section
         if (remediation_index != -1) and (references_index != -1):
             finding.mitigation = finding.description[remediation_index:references_index]
+
+        # Add Target file if supplied
+        if target_file:
+            finding.unsaved_tags.append('target_file:{}'.format(target_file))
+            finding.mitigation += '\nUpgrade Location: {}'.format(target_file)
 
         # Add the upgrade libs list to the mitigation section
         if upgrades:

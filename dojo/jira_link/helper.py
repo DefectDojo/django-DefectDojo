@@ -441,6 +441,19 @@ def get_jira_status(finding):
         return issue.fields.status
 
 
+# Used for unit testing so geting all the connections is manadatory
+def get_jira_comments(finding):
+    if finding.has_jira_issue:
+        j_issue = finding.jira_issue.jira_id
+    elif finding.finding_group and finding.finding_group.has_jira_issue:
+        j_issue = finding.finding_group.jira_issue.jira_id
+
+    if j_issue:
+        project = get_jira_project(finding)
+        issue = jira_get_issue(project, j_issue)
+        return issue.fields.comment.comments
+
+
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_generic_alert(title, description):
     create_notification(
@@ -485,6 +498,16 @@ def get_labels(obj):
             labels.append(system_label)
         # Update the label with the product name (underscore)
         labels.append(prod_name(obj).replace(" ", "_"))
+
+    add_vulnerability_id_to_jira_label = system_settings.add_vulnerability_id_to_jira_label
+    if add_vulnerability_id_to_jira_label and type(obj) == Finding and obj.vulnerability_ids:
+        for id in obj.vulnerability_ids:
+            labels.append(id)
+    elif add_vulnerability_id_to_jira_label and type(obj) == Finding_Group:
+        for finding in obj.findings.all():
+            for id in finding.vulnerability_ids:
+                labels.append(id)
+
     return labels
 
 
@@ -661,6 +684,8 @@ def add_jira_issue(obj, *args, **kwargs):
         tags = get_tags(obj)
         jira_labels = labels + tags
         if jira_labels:
+            # de-dup
+            jira_labels = list(dict.fromkeys(jira_labels))
             if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
                 fields['labels'] = jira_labels
 
@@ -719,6 +744,13 @@ def add_jira_issue(obj, *args, **kwargs):
         issue = jira.issue(new_issue.id)
 
         logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
+
+        # Add any notes that already exist in the finding to the JIRA
+        for find in findings:
+            if find.notes.all():
+                for note in find.notes.all().reverse():
+                    add_comment(obj, note)
+
         return True
     except TemplateDoesNotExist as e:
         logger.exception(e)

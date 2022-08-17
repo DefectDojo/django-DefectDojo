@@ -1,8 +1,9 @@
 # requirements.txt for DefectDojo using Python 3.x
 asteval==0.9.27
 bleach==5.0.1
+bleach[css]
 celery==5.2.7
-coverage==6.4.2
+coverage==6.4.3
 defusedxml==0.7.1
 django_celery_results==2.4.0
 django-auditlog==2.1.1
@@ -18,11 +19,11 @@ django-slack==5.17.8
 django-tagging==0.5.0
 django-watson==1.6.2
 django-prometheus==2.2.0
-Django==3.2.14
+Django==3.2.15
 djangorestframework==3.13.1
 gunicorn==20.1.0
 html2text==2020.1.16
-humanize==4.2.3
+humanize==4.3.0
 jira==3.0.1
 PyGithub==1.55
 lxml==4.9.1
@@ -34,10 +35,10 @@ Pillow==9.2.0  # required by django-imagekit
 psycopg2-binary==2.9.3
 cryptography==37.0.4
 python-dateutil==2.8.2
-pytz==2022.1
+pytz==2022.2.1
 redis==4.3.4
 requests==2.28.1
-sqlalchemy==1.4.39  # Required by Celery broker transport
+sqlalchemy==1.4.40  # Required by Celery broker transport
 supervisor==4.2.4
 urllib3==1.26.11
 uWSGI==2.0.20
@@ -48,14 +49,14 @@ social-auth-app-django==5.0.0
 social-auth-core==4.3.0
 Python-jose==3.3.0
 gitpython==3.1.27
-debugpy==1.6.2
-python-gitlab==3.7.0
-google-api-python-client==2.55.0
-google-auth==2.9.1
+debugpy==1.6.3
+python-gitlab==3.8.1
+google-api-python-client==2.56.0
+google-auth==2.10.0
 google-auth-oauthlib==0.5.2
 drf_yasg==1.21.3
 cpe==1.2.1
-packageurl-python==0.10.0
+packageurl-python==0.10.1
 django-crum==0.7.9
 JSON-log-formatter==0.5.1
 django-split-settings==1.1.0
@@ -68,9 +69,11 @@ PyJWT==2.4.0
 cvss==2.5
 django-fieldsignals==0.7.0
 hyperlink==21.0.0
-numpy==1.23.1
+numpy==1.23.2
 django-test-migrations==1.2.0
 djangosaml2==1.5.1
 drf-spectacular==0.23.1
 django-ratelimit==3.0.1
 argon2-cffi==21.3.0
+pycurl==7.45.1  # Required for Celery Broker AWS (SQS) support
+boto3==1.24.52  # Required for Celery Broker AWS (SQS) support
