@@ -3,6 +3,7 @@ import hashlib
 import io
 import json
 
+from cvss import parser as cvss_parser
 from dateutil.parser import parse
 from dojo.models import Endpoint, Finding
 
@@ -132,7 +133,9 @@ class GenericParser(object):
                 finding.severity = 'Info'
 
             if "CVSSV3" in row:
-                finding.cvssv3 = row["CVSSV3"]
+                cvss_objects = cvss_parser.parse_cvss_from_text(row["CVSSV3"])
+                if len(cvss_objects) > 0:
+                    finding.cvssv3 = cvss_objects[0].clean_vector()
 
             # manage active/verified overrride
             if active:
