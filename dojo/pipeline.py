@@ -60,11 +60,7 @@ def social_uid(backend, details, response, *args, **kwargs):
         # Until OKTA PR in social-core is merged
         # This modified way needs to work
         else:
-            return {'uid': response.get('preferred_username')}
-
-
-def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
-    pass
+            return {'uid': response.get('preferred_username')}            
 
 
 def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
