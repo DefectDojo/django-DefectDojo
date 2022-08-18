@@ -419,7 +419,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         # close both findings
         self.patch_finding_api(findings['results'][0]['id'], {"active": False, "is_mitigated": True, "push_to_jira": True})
-        self.patch_finding_api(findings['results'][0]['id'], {"active": False, "is_mitigated": True, "push_to_jira": True})
+        self.patch_finding_api(findings['results'][1]['id'], {"active": False, "is_mitigated": True, "push_to_jira": True})
 
         post_jira_status = self.get_jira_issue_status(findings['results'][0]['id'])
 
