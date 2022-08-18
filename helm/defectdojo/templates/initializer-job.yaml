@@ -14,7 +14,7 @@ metadata:
       "helm.sh/hook": post-install,post-upgrade
     {{ toYaml .Values.initializer.metadataAnnotations | indent 4 }}
 spec:
-  ttlSecondsAfterFinished: {{ .Values.initializerKeepSeconds }}
+  ttlSecondsAfterFinished: {{ .Values.initializer.keepSeconds }}
   template:
     metadata:
       labels:
