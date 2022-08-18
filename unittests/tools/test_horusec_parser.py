@@ -132,3 +132,4 @@ class TestHorusecParser(DojoTestCase):
                 self.assertGreaterEqual(finding.scanner_confidence, 3)  # "Firm"
                 self.assertLessEqual(finding.scanner_confidence, 5)  # "Firm"
                 self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+                
