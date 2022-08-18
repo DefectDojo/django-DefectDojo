@@ -242,7 +242,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename, push_to_jira=False)
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
-        self.assert_jira_updated_map_changed(test_id, updated_map)
+        # when sending in identical data to JIRA, JIRA does NOT update the updated timestamp....
+        # self.assert_jira_updated_map_changed(test_id, updated_map)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -278,7 +279,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
         post_jira_status = self.get_jira_issue_updated(finding_id)
-        self.assert_jira_updated_change(pre_jira_status, post_jira_status)
+        # when sending in identical data to JIRA, JIRA does NOT update the updated timestamp....
+        # self.assert_jira_updated_change(pre_jira_status, post_jira_status)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -416,13 +418,11 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_group_issue_count_in_test(test_id, 1)
 
         pre_jira_status = self.get_jira_issue_status(findings['results'][0]['id'])
-
         # close both findings
         self.patch_finding_api(findings['results'][0]['id'], {"active": False, "is_mitigated": True, "push_to_jira": True})
         self.patch_finding_api(findings['results'][1]['id'], {"active": False, "is_mitigated": True, "push_to_jira": True})
 
         post_jira_status = self.get_jira_issue_status(findings['results'][0]['id'])
-
         # both findings inactive -> should update status in JIRA
         self.assertNotEqual(pre_jira_status, post_jira_status)
 
