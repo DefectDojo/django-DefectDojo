@@ -281,7 +281,9 @@ django:
 
 initializer:
   run: true
-  metadataAnnotations: {}
+  jobAnnotations: {
+     helm.sh/hook: "post-install,post-upgrade"
+  }
   annotations: {}
   keepSeconds: 60
   affinity: {}

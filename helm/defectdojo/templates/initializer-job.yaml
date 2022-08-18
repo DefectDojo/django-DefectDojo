@@ -11,8 +11,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
     annotations:
-      "helm.sh/hook": post-install,post-upgrade
-    {{ toYaml .Values.initializer.metadataAnnotations | indent 4 }}
+    {{- with .Values.initializer.jobAnnotations }}
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
 spec:
   ttlSecondsAfterFinished: {{ .Values.initializer.keepSeconds }}
   template:
