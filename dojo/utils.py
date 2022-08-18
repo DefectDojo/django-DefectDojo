@@ -26,7 +26,7 @@ from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
-    Test, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
+    Test, User, Dojo_User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
     Language_Type, Languages, Rule, Dojo_Group_Member, NOTIFICATION_CHOICES
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
@@ -1703,6 +1703,7 @@ def get_site_url():
 
 
 @receiver(post_save, sender=User)
+@receiver(post_save, sender=Dojo_User)
 def user_post_save(sender, instance, created, **kwargs):
     # For new users we create a Notifications object so the default 'alert' notifications work and
     # assign them to a default group if specified in the system settings.
