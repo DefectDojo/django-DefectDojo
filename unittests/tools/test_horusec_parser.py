@@ -113,3 +113,22 @@ class TestHorusecParser(DojoTestCase):
                 self.assertEqual(146, finding.line)
                 self.assertGreaterEqual(finding.scanner_confidence, 6)  # "Tentative"
                 self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+
+    def test_get_tests_pr_6563(self):
+        """"""
+        with open(path.join(path.dirname(__file__), "../scans/horusec/pr_6563.json")) as testfile:
+            parser = HorusecParser()
+            tests = parser.get_tests("Horusec Scan", testfile)
+            self.assertEqual(1, len(tests))
+            test = tests[0]
+            self.assertEqual(1, len(test.findings))
+            findings = test.findings
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("No use eval", finding.title)
+                self.assertEqual("Critical", finding.severity)
+                self.assertEqual("GetGestaoVisaoWeb/src/main/webapp/js/jquery/jquery-ui-1.9.1.custom.min.js", finding.file_path)
+                self.assertEqual(None, finding.line)
+                self.assertGreaterEqual(finding.scanner_confidence, 3)  # "Firm"
+                self.assertLessEqual(finding.scanner_confidence, 5)  # "Firm"
+                self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
