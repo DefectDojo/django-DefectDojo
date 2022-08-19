@@ -8,6 +8,7 @@ from dojo.notifications.helper import create_notification
 from django.urls import reverse
 from dojo.celery import app
 from dojo.models import System_Settings, Risk_Acceptance, Finding
+from dojo.tools import tool_issue_updater
 import logging
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,8 @@ def expire_now(risk_acceptance):
 
                 finding.save(dedupe_option=False)
                 reactivated_findings.append(finding)
+                # best effort external tool integration
+                tool_issue_updater.async_tool_ra_remove(finding)
                 # findings remain in this risk acceptance for reporting / metrics purposes
             else:
                 logger.debug('%i:%s already active, no changes made.', finding.id, finding)
@@ -68,6 +71,8 @@ def reinstate(risk_acceptance, old_expiration_date):
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, True)
                 finding.save(dedupe_option=False)
+                # best effort external tool integration
+                tool_issue_updater.async_tool_ra_update(finding)
                 reinstated_findings.append(finding)
             else:
                 logger.debug('%i:%s: already inactive, not making any changes', finding.id, finding)
@@ -88,6 +93,8 @@ def delete(eng, risk_acceptance):
         # Update any endpoint statuses on each of the findings
         update_endpoint_statuses(finding, False)
         finding.save(dedupe_option=False)
+        # best effort external tool integration
+        tool_issue_updater.async_tool_ra_remove(finding)
 
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, findings, unaccepted_message_creator)
@@ -113,6 +120,8 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     finding.save(dedupe_option=False)
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
+    # best effort external tool integration
+    tool_issue_updater.async_tool_ra_remove(finding)
 
 
 def add_findings_to_risk_acceptance(risk_acceptance, findings):
@@ -124,6 +133,8 @@ def add_findings_to_risk_acceptance(risk_acceptance, findings):
             # Update any endpoint statuses on each of the findings
             update_endpoint_statuses(finding, True)
             risk_acceptance.accepted_findings.add(finding)
+            # best effort external tool integration
+            tool_issue_updater.async_tool_ra_update(finding)
     risk_acceptance.save()
 
     # best effort jira integration, no status changes
@@ -284,6 +295,8 @@ def simple_risk_accept(finding, perform_save=True):
     # post_jira_comment might reload from database so see unaccepted finding. but the comment
     # only contains some text so that's ok
     post_jira_comment(finding, accepted_message_creator)
+    # best effort external tool integration
+    tool_issue_updater.async_tool_ra_update(finding)
 
 
 def risk_unaccept(finding, perform_save=True):
@@ -304,6 +317,8 @@ def risk_unaccept(finding, perform_save=True):
         # post_jira_comment might reload from database so see unaccepted finding. but the comment
         # only contains some text so that's ok
         post_jira_comment(finding, unaccepted_message_creator)
+        # best effort external tool integration
+        tool_issue_updater.async_tool_ra_remove(finding)
 
 
 def remove_from_any_risk_acceptance(finding):
