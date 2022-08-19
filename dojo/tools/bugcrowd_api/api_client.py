@@ -58,7 +58,7 @@ class BugcrowdAPI:
         next = "{}/submissions?{}".format(self.bugcrowd_api_url, params_encoded)
         while next != "":
             response = self.session.get(url=next)
-
+            response.raise_for_status()
             if response.ok:
                 data = response.json()
                 if len(data["data"]) != 0:
@@ -73,22 +73,19 @@ class BugcrowdAPI:
                 next = "{}{}".format(self.bugcrowd_api_url, data["links"]["next"])
             else:
                 next = "over"
-                raise Exception(
-                    "Unable to get bugcrowd submissions due to {} - {}".format(
-                        response.status_code, response.content.decode("utf-8")
-                    )
-                )
 
     def test_connection(self):
         # Request programs
         response_programs = self.session.get(
             url="{}/programs".format(self.bugcrowd_api_url)
         )
+        response_programs.raise_for_status()
 
         # Request submissions to validate the org token
         response_subs = self.session.get(
             url="{}/submissions".format(self.bugcrowd_api_url)
         )
+        response_subs.raise_for_status()
 
         if response_programs.ok and response_subs.ok:
             data = response_programs.json().get("data")
@@ -114,12 +111,6 @@ class BugcrowdAPI:
                 return f'With {total_subs} submissions, you have access to the "{ program_names }" programs, \
                     you can use these as Service key 1 for filtering submissions \
                         You also have targets "{ target_names }" that can be used in Service key 2'
-        else:
-            raise Exception(
-                "Connection failed (error: {} - {})".format(
-                    response_subs.status_code, response_subs.content.decode("utf-8")
-                )
-            )
 
     def test_product_connection(self, api_scan_configuration):
         submissions = []
@@ -132,9 +123,3 @@ class BugcrowdAPI:
         return f'You have access to "{submission_number}" submissions (no duplicates)\
             in Bugcrowd in the Program code "{api_scan_configuration.service_key_1}" \
             and Target "{api_scan_configuration.service_key_2}" (leave service key 2 empty to get all submissions in program)'
-
-    def get_headers(self):
-
-        self.default_headers["Authorization"] = "Token {}".format(self.api_token)
-
-        return self.default_headers
