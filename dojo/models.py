@@ -608,6 +608,20 @@ class FileUpload(models.Model):
 
         return copy
 
+    def get_accessible_url(self, obj, obj_id):
+        if isinstance(obj, Engagement):
+            obj_type = 'Engagement'
+        elif isinstance(obj, Test):
+            obj_type = 'Test'
+        elif isinstance(obj, Finding):
+            obj_type = 'Finding'
+
+        return 'access_url/{file_id}/{obj_id}/{obj_type}'.format(
+            file_id=self.id,
+            obj_id=obj_id,
+            obj_type=obj_type
+        )
+
 
 class Product_Type(models.Model):
     """Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
