@@ -282,7 +282,7 @@ django:
 initializer:
   run: true
   jobAnnotations: {
-     helm.sh/hook: "post-install,post-upgrade"
+    helm.sh/hook: "post-install,post-upgrade"
   }
   annotations: {}
   keepSeconds: 60
