@@ -1183,6 +1183,10 @@ VCG output can be imported in CSV or Xml formats.
 
 Detailed XML Report
 
+### Veracode SourceClear
+
+Import Project CSV or JSON report
+
 ### Wapiti Scan
 
 Import XML report.
