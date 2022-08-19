@@ -1143,6 +1143,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Whispers': ['vuln_id_from_tool', 'file_path', 'line'],
     'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
     'docker-bench-security Scan': ['unique_id_from_tool'],
+    'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1177,6 +1178,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Semgrep JSON Report': True,
     'Generic Findings Import': True,
     'Edgescan Scan': True,
+    'Veracode SourceClear Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1249,6 +1251,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
     'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Veracode SourceClear Scan': DEDUPE_ALGO_HASH_CODE,
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
