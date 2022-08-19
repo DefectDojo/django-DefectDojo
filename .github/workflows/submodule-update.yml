@@ -25,14 +25,14 @@ jobs:
     
       - name: Checkout DefectDojo from dev 
         uses: actions/checkout@v2
-        if: steps.list-changed.outputs.changed == 'dev'
+        if: steps.branch-target.outputs.branch == 'dev'
         with:
           ref: dev
 
       - name: Create PR to Documentation repo on dev branch
         id: create_dev_pr
         uses: releasehub-com/github-action-create-pr-parent-submodule@v1
-        if: steps.list-changed.outputs.changed == 'dev'
+        if: steps.branch-target.outputs.branch == 'dev'
         with:
           github_token: ${{ secrets.DOCUMENTATION_TOKEN }}
           parent_repository: ${{ env.PARENT_REPOSITORY }}
@@ -42,14 +42,14 @@ jobs:
           
       - name: Checkout DefectDojo from master 
         uses: actions/checkout@v2
-        if: steps.list-changed.outputs.changed == 'master'
+        if: steps.branch-target.outputs.branch == 'master'
         with:
           ref: master
 
       - name: Create PR to Documentation repo on master branch
         id: create_master_pr
         uses: releasehub-com/github-action-create-pr-parent-submodule@v1
-        if: steps.list-changed.outputs.changed == 'master'
+        if: steps.branch-target.outputs.branch == 'master'
         with:
           github_token: ${{ secrets.DOCUMENTATION_TOKEN }}
           parent_repository: ${{ env.PARENT_REPOSITORY }}
