@@ -77,7 +77,7 @@ def webhook(request, secret=None):
                     raise Http404('No finding, finding_group or engagement found for JIRA issue {}'.format(jissue.jira_key))
 
                 assignee = parsed['issue']['fields'].get('assignee')
-                assignee_name = assignee['name'] if assignee else None
+                assignee_name = assignee.get('name')
 
                 resolution = parsed['issue']['fields']['resolution']
 
