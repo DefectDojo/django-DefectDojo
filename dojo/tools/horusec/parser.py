@@ -62,7 +62,9 @@ class HorusecParser(object):
             severity=data["vulnerabilities"]["severity"].title(),
             description=description,
             file_path=data["vulnerabilities"]["file"],
-            line=int(data["vulnerabilities"]["line"]),
             scanner_confidence=self.CONDIFDENCE[data["vulnerabilities"]["confidence"]],
         )
+        # sometimes the attribute 'line' is empty
+        if data["vulnerabilities"].get("line") and data["vulnerabilities"]["line"].isdigit():
+            finding.line = int(data["vulnerabilities"]["line"])
         return finding
