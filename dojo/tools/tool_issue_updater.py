@@ -53,7 +53,7 @@ def async_tool_ra_remove(finding, *args, **kwargs):
 
 def is_tool_ra_update_needed(finding, *args, **kwargs):
     test_type = finding.test.test_type
-    return test_type.name == NEUVECTOR_SCAN_NAME
+    return test_type.name in (NEUVECTOR_SCAN_NAME, "Nessus Scan")
 
 
 @dojo_model_to_id
@@ -65,6 +65,9 @@ def tool_ra_update(finding, *args, **kwargs):
     if test_type.name == NEUVECTOR_SCAN_NAME:
         from dojo.tools.neuvector_api.updater import NeuVectorApiUpdater
         NeuVectorApiUpdater().update_risk_acceptance(finding)
+    if test_type.name == "Nessus Scan":
+        from dojo.tools.tenablesc_api.updater import TenableScApiUpdater
+        TenableScApiUpdater().update_risk_acceptance(finding)
 
 
 @dojo_model_to_id
@@ -76,3 +79,6 @@ def tool_ra_remove(finding, *args, **kwargs):
     if test_type.name == NEUVECTOR_SCAN_NAME:
         from dojo.tools.neuvector_api.updater import NeuVectorApiUpdater
         NeuVectorApiUpdater().check_remove_risk_acceptance(finding)
+    if test_type.name == "Nessus Scan":
+        from dojo.tools.tenablesc_api.updater import TenableScApiUpdater
+        TenableScApiUpdater().check_remove_risk_acceptance(finding)
