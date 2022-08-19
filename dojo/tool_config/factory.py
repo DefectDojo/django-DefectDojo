@@ -4,6 +4,7 @@ from dojo.tools.api_cobalt.api_client import CobaltAPI
 from dojo.tools.api_edgescan.api_client import EdgescanAPI
 from dojo.tools.api_sonarqube.api_client import SonarQubeAPI
 from dojo.tools.api_vulners.api_client import VulnersAPI
+from dojo.tools.neuvector_api.api_client import NeuVectorAPI
 
 
 SCAN_APIS = {
@@ -13,6 +14,7 @@ SCAN_APIS = {
                 'Edgescan': EdgescanAPI,
                 'SonarQube': SonarQubeAPI,
                 'Vulners': VulnersAPI,
+                'NeuVector': NeuVectorAPI,
              }
 
 
