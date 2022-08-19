@@ -762,6 +762,21 @@ class EngagementToFilesSerializer(serializers.Serializer):
     engagement_id = serializers.PrimaryKeyRelatedField(queryset=Engagement.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
 
+    def to_representation(self, data):
+        engagement = data.get('engagement_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(engagement, engagement.id)),
+                'title': file.title
+            })
+        new_data = {'engagement_id': engagement.id, 'files': new_files}
+        return new_data
+
 
 class AppAnalysisSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
@@ -1057,6 +1072,21 @@ class TestToNotesSerializer(serializers.Serializer):
 class TestToFilesSerializer(serializers.Serializer):
     test_id = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
+
+    def to_representation(self, data):
+        test = data.get('test_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(test, test.id)),
+                'title': file.title
+            })
+        new_data = {'test_id': test.id, 'files': new_files}
+        return new_data
 
 
 class TestImportFindingActionSerializer(serializers.ModelSerializer):
@@ -1895,6 +1925,21 @@ class FindingToNotesSerializer(serializers.Serializer):
 class FindingToFilesSerializer(serializers.Serializer):
     finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
+
+    def to_representation(self, data):
+        finding = data.get('finding_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(finding, finding.id)),
+                'title': file.title
+            })
+        new_data = {'finding_id': finding.id, 'files': new_files}
+        return new_data
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
