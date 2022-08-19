@@ -30,7 +30,7 @@ jobs:
           ref: dev
 
       - name: Create PR to Documentation repo on dev branch
-        id: run_action
+        id: create_dev_pr
         uses: releasehub-com/github-action-create-pr-parent-submodule@v1
         if: steps.list-changed.outputs.changed == 'dev'
         with:
@@ -47,7 +47,7 @@ jobs:
           ref: master
 
       - name: Create PR to Documentation repo on master branch
-        id: run_action
+        id: create_master_pr
         uses: releasehub-com/github-action-create-pr-parent-submodule@v1
         if: steps.list-changed.outputs.changed == 'master'
         with:
