@@ -85,3 +85,4 @@ vulners==2.1.2
 fontawesomefree==6.5.1
 python-ldap==3.4.3
 django-auth-ldap==4.5.0
+pyTenable>=1.4.13

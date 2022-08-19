@@ -5,6 +5,7 @@ from dojo.tools.api_edgescan.api_client import EdgescanAPI
 from dojo.tools.api_sonarqube.api_client import SonarQubeAPI
 from dojo.tools.api_vulners.api_client import VulnersAPI
 from dojo.tools.neuvector_api.api_client import NeuVectorAPI
+from dojo.tools.tenablesc_api.api_client import TenableScAPI
 
 
 SCAN_APIS = {
@@ -15,6 +16,7 @@ SCAN_APIS = {
                 'SonarQube': SonarQubeAPI,
                 'Vulners': VulnersAPI,
                 'NeuVector': NeuVectorAPI,
+                'Tenable SC': TenableScAPI,
              }
 
 
