@@ -41,9 +41,13 @@ class AuditJSParser(object):
 
         for dependency in data:
             # reading package name in format pkg:npm/PACKAGE_NAME@PACKAGE_VERSION
+            # or pkg:npm/PACKAGE_SCOPE/PACKAGE_NAME@PACKAGE_VERSION
             if "coordinates" in dependency:
                 file_path = dependency["coordinates"]
-                component_name, component_version = file_path.split('/')[1].split('@')
+                file_path_splitted = file_path.split("/")
+                pacakge_full_name = f'{file_path_splitted[1]}/{file_path_splitted[2]}' if len(file_path_splitted) == 3 else file_path_splitted[1]
+
+                component_name, component_version = pacakge_full_name.split('@')
 
             # Check if there are any vulnerabilities
             if dependency['vulnerabilities']:

@@ -224,7 +224,7 @@ def get_custom_field(jira, label):
     return field
 
 
-@user_is_configuration_authorized('dojo.add_jira_instance', 'superuser')
+@user_is_configuration_authorized('dojo.add_jira_instance')
 def express_new_jira(request):
     if request.method == 'POST':
         jform = ExpressJIRAForm(request.POST, instance=JIRA_Instance())
@@ -249,7 +249,7 @@ def express_new_jira(request):
                 issue_id = jform.cleaned_data.get('issue_key')
                 key_url = jira_server.strip('/') + '/rest/api/latest/issue/' + issue_id + '/transitions?expand=transitions.fields'
                 response = jira._session.get(key_url).json()
-                logger.debug('Retrieved JIRA issue succesfully')
+                logger.debug('Retrieved JIRA issue successfully')
                 open_key = close_key = None
                 for node in response['transitions']:
                     if node['to']['statusCategory']['name'] == 'To Do':
@@ -309,7 +309,7 @@ def express_new_jira(request):
                   {'jform': jform})
 
 
-@user_is_configuration_authorized('dojo.add_jira_instance', 'superuser')
+@user_is_configuration_authorized('dojo.add_jira_instance')
 def new_jira(request):
     if request.method == 'POST':
         jform = JIRAForm(request.POST, instance=JIRA_Instance())
@@ -344,7 +344,7 @@ def new_jira(request):
                   {'jform': jform})
 
 
-@user_is_configuration_authorized('dojo.change_jira_instance', 'superuser')
+@user_is_configuration_authorized('dojo.change_jira_instance')
 def edit_jira(request, jid):
     jira = JIRA_Instance.objects.get(pk=jid)
     jira_password_from_db = jira.password
@@ -390,7 +390,7 @@ def edit_jira(request, jid):
                   })
 
 
-@user_is_configuration_authorized('dojo.view_jira_instance', 'superuser')
+@user_is_configuration_authorized('dojo.view_jira_instance')
 def jira(request):
     jira_instances = JIRA_Instance.objects.all()
     add_breadcrumb(title="JIRA List", top_level=not len(request.GET), request=request)
@@ -400,7 +400,7 @@ def jira(request):
                    })
 
 
-@user_is_configuration_authorized('dojo.delete_jira_instance', 'superuser')
+@user_is_configuration_authorized('dojo.delete_jira_instance')
 def delete_jira(request, tid):
     jira_instance = get_object_or_404(JIRA_Instance, pk=tid)
     # eng = test.engagement
