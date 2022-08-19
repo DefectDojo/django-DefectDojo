@@ -3374,6 +3374,8 @@ class JIRA_Project(models.Model):
                                       help_text=_("Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates."))
     engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
+    custom_fields = models.JSONField(max_length=200, blank=True, null=True,
+                                   help_text=_("JIRA custom field JSON mapping of Id to value, e.g. {\"customfield_10122\": [{\"name\": \"8.0.1\"}]}"))
     push_all_issues = models.BooleanField(default=False, blank=True,
          help_text=_("Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,
