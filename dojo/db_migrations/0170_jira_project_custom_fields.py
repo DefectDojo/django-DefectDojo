@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0169_planned_remediation_date'),
+        ('dojo', '0169_jira_labels_per_product_and_engagement')
     ]
 
     operations = [

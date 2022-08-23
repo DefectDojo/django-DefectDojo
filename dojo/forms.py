@@ -2629,12 +2629,9 @@ class JIRAProjectForm(forms.ModelForm):
                     self.fields['project_key'].disabled = True
                     self.fields['issue_template_dir'].disabled = True
                     self.fields['component'].disabled = True
-<<<<<<< HEAD
                     self.fields['custom_fields'].disabled = True
-=======
                     self.fields['jira_labels'].disabled = True
                     self.fields['add_vulnerability_id_to_jira_label'].disabled = True
->>>>>>> 5bf32ef97 (Add the ability to set JIRA labels per-product or engagement)
                     self.fields['push_all_issues'].disabled = True
                     self.fields['enable_engagement_epic_mapping'].disabled = True
                     self.fields['push_notes'].disabled = True
