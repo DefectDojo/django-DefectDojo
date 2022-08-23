@@ -260,7 +260,7 @@ class DojoDefaultReImporter(object):
             serialized_untouched = [serializers.serialize('json', [finding, ]) for finding in untouched]
             return serialized_new_items, serialized_reactivated_items, serialized_to_mitigate, serialized_untouched
 
-        return new_items, reactivated_items, to_mitigate, untouched
+        return new_items, reactivated_items, to_mitigate, list(untouched)
 
     def close_old_findings(self, test, to_mitigate, scan_date_time, user, push_to_jira=None):
         logger.debug('IMPORT_SCAN: Closing findings no longer present in scan report')
