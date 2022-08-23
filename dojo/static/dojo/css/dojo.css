@@ -688,6 +688,7 @@ input#simple_search {
 }
 
 .dojo-modals-wrapper {
+    display: none;
     flex-direction: column;
     position: fixed;
     z-index: 1;
