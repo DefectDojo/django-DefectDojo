@@ -1003,6 +1003,16 @@
                 <!-- /.container-fluid -->
             </div>
             <!-- /#page-wrapper -->
+
+            <!-- .dojo-modals-wrapper -->
+            <div id="dojo-modals-wrapper" class="dojo-modals-wrapper">
+            {% block modals %}
+            {% endblock %}
+            </div>
+            <!-- /.dojo-modals-wrapper -->
+
+            <!-- #footer-wrapper -->
+            <div id="footer-wrapper">
             {% block footer %}
                 <footer class="footer">
                     <div class="container">
@@ -1035,6 +1045,8 @@
                     <p id="disable_count" class="hidden">{{ 'DISABLE_ALERT_COUNTER'|setting_enabled }}</p>
                 </footer>
             {% endblock %}
+            </div>
+            <!-- /#footer-wrapper -->
         </div>
 
         <!-- /#wrapper -->
