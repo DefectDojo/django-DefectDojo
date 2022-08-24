@@ -1140,8 +1140,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Hydra Scan': ['title', 'description'],
     'DrHeader JSON Importer': ['title', 'description'],
     'PWN SAST': ['title', 'description'],
+    'Whispers': ['vuln_id_from_tool', 'file_path', 'line'],
     'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
+    'BlackDuck API': ['unique_id_from_tool'],
     'docker-bench-security Scan': ['unique_id_from_tool'],
+    'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
     'Vulners Scan': ['vuln_id_from_tool', 'component_name']
 }
 
@@ -1177,6 +1180,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Semgrep JSON Report': True,
     'Generic Findings Import': True,
     'Edgescan Scan': True,
+    'Veracode SourceClear Scan': True,
     'Vulners Scan': True
 }
 
@@ -1250,6 +1254,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
     'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Veracode SourceClear Scan': DEDUPE_ALGO_HASH_CODE,
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1290,7 +1295,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Hydra Scan': DEDUPE_ALGO_HASH_CODE,
     'DrHeader JSON Importer': DEDUPE_ALGO_HASH_CODE,
     'PWN SAST': DEDUPE_ALGO_HASH_CODE,
+    'Whispers': DEDUPE_ALGO_HASH_CODE,
     'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
+    'BlackDuck API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'docker-bench-security Scan': DEDUPE_ALGO_HASH_CODE,
     'Vulners Scan': DEDUPE_ALGO_HASH_CODE,
 }

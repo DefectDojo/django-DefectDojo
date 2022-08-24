@@ -305,6 +305,10 @@ class System_Settings(models.Model):
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
                                    help_text=_('JIRA issue labels space seperated'))
 
+    add_vulnerability_id_to_jira_label = models.BooleanField(default=False,
+                                        verbose_name=_('Add vulnerability Id as a JIRA label'),
+                                        blank=False)
+
     enable_github = models.BooleanField(default=False,
                                       verbose_name=_('Enable GITHUB integration'),
                                       blank=False)
@@ -603,6 +607,20 @@ class FileUpload(models.Model):
         copy.save()
 
         return copy
+
+    def get_accessible_url(self, obj, obj_id):
+        if isinstance(obj, Engagement):
+            obj_type = 'Engagement'
+        elif isinstance(obj, Test):
+            obj_type = 'Test'
+        elif isinstance(obj, Finding):
+            obj_type = 'Finding'
+
+        return 'access_url/{file_id}/{obj_id}/{obj_type}'.format(
+            file_id=self.id,
+            obj_id=obj_id,
+            obj_type=obj_type
+        )
 
 
 class Product_Type(models.Model):

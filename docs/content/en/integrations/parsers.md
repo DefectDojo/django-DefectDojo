@@ -85,6 +85,23 @@ Azure Security Center recommendations can be exported from the user interface in
 
 JSON report format
 
+
+### Blackduck API
+
+Import findings from the BlackDuck API - no file required.
+
+Follow these steps to setup API importing:
+
+1.  Configure the BlackDuck API Authentication details by navigating to
+    Configuration / Tool Configuration, selecting the Tool Type to "BlackDuck API",
+    and Authentication Type "API Key". Paste your BlackDuck API token in the
+    "API Key" field.
+2.  In the Product settings select "Add API Scan Configuration" and select the
+    previously added BlackDuck API Tool Configuration. Provide the ID
+    of the project from which to import findings in the field *Service key 1*.
+    Provide the version of the project from which to import findings in the field *Service key 2*.
+3.  After this is done, you can import the findings by selecting "BlackDuck API" as the scan type.
+
 ### Blackduck Hub
 
 2 options:
@@ -1183,6 +1200,10 @@ VCG output can be imported in CSV or Xml formats.
 
 Detailed XML Report
 
+### Veracode SourceClear
+
+Import Project CSV or JSON report
+
 ### Wapiti Scan
 
 Import XML report.
@@ -1208,6 +1229,12 @@ HTTP Return Code | Severity
 403              |  Medium
 407              |  Medium
 500              |  Low
+
+### Whispers
+
+Import Whispers JSON results.
+
+https://github.com/adeptex/whispers
 
 ### Xanitizer
 

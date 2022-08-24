@@ -3055,6 +3055,19 @@ class AddGeneralQuestionnaireForm(forms.ModelForm):
         model = General_Survey
         exclude = ('num_responses', 'generated')
 
+    # date can only be today or in the past, not the future
+    def clean_expiration(self):
+        expiration = self.cleaned_data.get('expiration', None)
+        if expiration:
+            today = datetime.today().date()
+            if expiration < today:
+                raise forms.ValidationError("The expiration cannot be in the past")
+            elif expiration.day == today.day:
+                raise forms.ValidationError("The expiration cannot be today")
+        else:
+            raise forms.ValidationError("An expiration for the survey must be supplied")
+        return expiration
+
 
 class Delete_Questionnaire_Form(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -3102,8 +3115,12 @@ class EditQuestionnaireQuestionsForm(forms.ModelForm):
 
 
 class CreateQuestionForm(forms.Form):
-    type = forms.ChoiceField(choices=(("---", "-----"), ("text", "Text"), ("choice", "Choice")))
-    order = forms.IntegerField(min_value=1, widget=forms.TextInput(attrs={'data-type': 'both'}))
+    type = forms.ChoiceField(
+        choices=(("---", "-----"), ("text", "Text"), ("choice", "Choice")))
+    order = forms.IntegerField(
+        min_value=1,
+        widget=forms.TextInput(attrs={'data-type': 'both'}),
+        help_text="The order the question will appear on the questionnaire")
     optional = forms.BooleanField(help_text="If selected, user doesn't have to answer this question",
                                   initial=False,
                                   required=False,
