@@ -29,7 +29,7 @@ class ScannerTest(BaseTestCase):
     def test_check_test_file(self):
         missing_tests = ['MISSING TEST FOLDER']
         for tool in self.tools:
-            if(tool not in self.tests):
+            if tool not in self.tests:
                 missing_tests += [tool]
 
         missing_tests += ['\nNO TEST FILES']
