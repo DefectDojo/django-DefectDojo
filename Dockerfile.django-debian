@@ -23,6 +23,8 @@ RUN \
     uuid-runtime \
     # libcurl4-openssl-dev is required for installing pycurl python package
     libcurl4-openssl-dev \
+    libldap2-dev \
+    libsasl2-dev \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -64,6 +66,10 @@ RUN \
   true
 COPY --from=build /tmp/wheels /tmp/wheels
 COPY requirements.txt ./
+# fixes inability to connect to LDAPS servers
+RUN mkdir -p /etc/ldap && \
+    echo "TLS_CACERT /etc/ssl/certs/ca-certificates.crt" >> /etc/ldap/ldap.conf
+
 RUN export PYCURL_SSL_LIBRARY=openssl && \
     pip3 install \
 	--no-cache-dir \

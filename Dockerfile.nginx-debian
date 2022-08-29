@@ -18,6 +18,8 @@ RUN \
     libmariadb-dev-compat \
     libpq-dev \
     postgresql-client \
+    libldap2-dev \
+    libsasl2-dev \
     xmlsec1 \
     git \
     uuid-runtime \
