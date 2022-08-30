@@ -1122,7 +1122,12 @@ def update_epic(engagement, **kwargs):
             jira = get_jira_connection(jira_instance)
             j_issue = get_jira_issue(engagement)
             issue = jira.issue(j_issue.jira_id)
-            issue.update(summary=engagement.name, description=engagement.name)
+
+            epic_name = kwargs.get('epic_name')
+            if not epic_name:
+                epic_name = engagement.name
+
+            issue.update(summary=epic_name, description=epic_name)
             return True
         except JIRAError as e:
             logger.exception(e)
@@ -1149,17 +1154,22 @@ def add_epic(engagement, **kwargs):
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
     if jira_project.enable_engagement_epic_mapping:
+        epic_name = kwargs.get('epic_name')
+        if not epic_name:
+            epic_name = engagement.name
         issue_dict = {
             'project': {
                 'key': jira_project.project_key
             },
-            'summary': engagement.name,
-            'description': engagement.name,
+            'summary': epic_name,
+            'description': epic_name,
             'issuetype': {
                 'name': 'Epic'
             },
-            get_epic_name_field_name(jira_instance): engagement.name,
+            get_epic_name_field_name(jira_instance): epic_name,
         }
+        if kwargs.get('epic_priority'):
+            issue_dict['priority'] = {'name': kwargs.get('epic_priority')}
         try:
             jira = get_jira_connection(jira_instance)
             logger.debug('add_epic: %s', issue_dict)
@@ -1387,7 +1397,13 @@ def process_jira_epic_form(request, engagement=None):
         if jira_epic_form.is_valid():
             if jira_epic_form.cleaned_data.get('push_to_jira'):
                 logger.debug('pushing engagement to JIRA')
-                if push_to_jira(engagement):
+                epic_name = engagement.name
+                if jira_epic_form.cleaned_data.get('epic_name'):
+                    epic_name = jira_epic_form.cleaned_data.get('epic_name')
+                epic_priority = None
+                if jira_epic_form.cleaned_data.get('epic_priority'):
+                    epic_priority = jira_epic_form.cleaned_data.get('epic_priority')
+                if push_to_jira(engagement, epic_name=epic_name, epic_priority=epic_priority):
                     logger.debug('Push to JIRA for Epic queued successfully')
                     messages.add_message(
                         request,
