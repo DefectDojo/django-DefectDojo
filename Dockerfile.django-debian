@@ -92,6 +92,10 @@ COPY \
 COPY wsgi.py manage.py docker/unit-tests.sh ./
 COPY dojo/ ./dojo/
 
+# install custom CA certificates
+COPY docker/certs/*.crt /usr/local/share/ca-certificates
+RUN update-ca-certificates
+
 # Add extra fixtures to docker image which are loaded by the initializer
 COPY docker/extra_fixtures/* /app/dojo/fixtures/
 
