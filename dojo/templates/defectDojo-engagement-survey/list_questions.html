@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load display_tags %}
 {% load authorization_tags %}
+{% load event_tags %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -60,7 +61,15 @@
                     {% endif %}
                     <div class="panel-heading">Filters</div>
                     <form method="get" class="panel-body">
-                        {{ filtered.form.as_p }}
+                        {% for field in filtered.form.visible_fields %}
+                            <div class="form-group">
+                                {{ field.errors }}
+                                <label for="{{ field.auto_id }}" style="display: block;">{{ field.label }}</label>
+                                {% with placeholder="placeholder:"|add:field.label %}
+                                    {{ field|addcss:"class:form-control input-sm"|addcss:placeholder }}
+                                {% endwith %}
+                            </div>
+                        {% endfor %}
                         <div class="centered">
                             <input type="submit" class="btn btn-secondary inline top" label="submit" value="Apply"/><br/><br/>
                             <a href="{% url 'questions' %}"> [Clear Filters] </a>

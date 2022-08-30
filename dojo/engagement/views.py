@@ -221,6 +221,7 @@ def edit_engagement(request, eid):
         if form.is_valid():
             # first save engagement details
             new_status = form.cleaned_data.get('status')
+            engagement.product = form.cleaned_data.get('product')
             engagement = form.save(commit=False)
             if (new_status == "Cancelled" or new_status == "Completed"):
                 engagement.active = False
