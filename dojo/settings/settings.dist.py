@@ -4,6 +4,7 @@ from datetime import timedelta
 from celery.schedules import crontab
 from dojo import __version__
 import environ
+from netaddr import IPNetwork, IPSet
 
 # See https://defectdojo.github.io/django-DefectDojo/getting_started/configuration/ for options
 # how to tune the configuration to your needs.
@@ -153,6 +154,20 @@ env = environ.Env(
         'Lastname': 'last_name'
     }),
     DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
+    # Authentication via HTTP Proxy which put username to HTTP Header REMOTE_USER
+    DD_AUTH_REMOTEUSER_ENABLED=(bool, False),
+    # Names of headers which will be used for processing user data.
+    # WARNING: Possible spoofing of headers. Read Warning in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
+    DD_AUTH_REMOTEUSER_USERNAME_HEADER=(str, 'REMOTE_USER'),
+    DD_AUTH_REMOTEUSER_EMAIL_HEADER=(str, ''),
+    DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER=(str, ''),
+    DD_AUTH_REMOTEUSER_LASTNAME_HEADER=(str, ''),
+    DD_AUTH_REMOTEUSER_GROUPS_HEADER=(str, ''),
+    DD_AUTH_REMOTEUSER_GROUPS_CLEANUP=(bool, True),
+    # Comma separated list of IP ranges with trusted proxies
+    DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.0/32']),
+    # REMOTE_USER will be processed only on login page. Check https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only
+    DD_AUTH_REMOTEUSER_LOGIN_ONLY_HEADER=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
     DD_DOCUMENTATION_URL=(str, 'https://defectdojo.github.io/django-DefectDojo'),
     # merging findings doesn't always work well with dedupe and reimport etc.
@@ -427,6 +442,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.keycloak.KeycloakOAuth2',
     'social_core.backends.github.GithubOAuth2',
     'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
+    'dojo.remote_user.RemoteUserBackend',
     'django.contrib.auth.backends.RemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -983,6 +999,33 @@ if SAML2_ENABLED:
         },
         'valid_for': 24,  # how long is our metadata valid
     }
+
+# ------------------------------------------------------------------------------
+# REMOTE_USER
+# ------------------------------------------------------------------------------
+
+AUTH_REMOTEUSER_ENABLED = env('DD_AUTH_REMOTEUSER_ENABLED')
+if AUTH_REMOTEUSER_ENABLED:
+    AUTH_REMOTEUSER_USERNAME_HEADER = env('DD_AUTH_REMOTEUSER_USERNAME_HEADER')
+    AUTH_REMOTEUSER_EMAIL_HEADER = env('DD_AUTH_REMOTEUSER_EMAIL_HEADER')
+    AUTH_REMOTEUSER_FIRSTNAME_HEADER = env('DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
+    AUTH_REMOTEUSER_LASTNAME_HEADER = env('DD_AUTH_REMOTEUSER_LASTNAME_HEADER')
+    AUTH_REMOTEUSER_GROUPS_HEADER = env('DD_AUTH_REMOTEUSER_GROUPS_HEADER')
+    AUTH_REMOTEUSER_GROUPS_CLEANUP = env('DD_AUTH_REMOTEUSER_GROUPS_CLEANUP')
+
+    AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
+    for ip_range in env('DD_AUTH_REMOTEUSER_TRUSTED_PROXY'):
+        AUTH_REMOTEUSER_TRUSTED_PROXY.add(IPNetwork(ip_range))
+
+    if env('DD_AUTH_REMOTEUSER_LOGIN_ONLY_HEADER'):
+        RemoteUserMiddleware = 'dojo.remote_user.PersistentRemoteUserMiddleware'
+    else:
+        RemoteUserMiddleware = 'dojo.remote_user.RemoteUserMiddleware'
+    # we need to add middleware just behindAuthenticationMiddleware as described in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
+    for i in range(len(MIDDLEWARE)):
+        if MIDDLEWARE[i] == 'django.contrib.auth.middleware.AuthenticationMiddleware':
+            MIDDLEWARE.insert(i + 1, RemoteUserMiddleware)
+            break
 
 # ------------------------------------------------------------------------------
 # CELERY
