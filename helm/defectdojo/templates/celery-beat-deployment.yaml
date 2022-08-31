@@ -63,9 +63,9 @@ spec:
         args:
         - "-verbose={{ .Values.cloudsql.verbose }}"
         {{- if eq .Values.database "postgresql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
         {{- else if eq .Values.database "mysql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.master.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.primary.service.ports.mysql }}"
         {{- end }}
         {{- if .Values.cloudsql.enable_iam_login }}
         - "-enable_iam_login"
@@ -115,16 +115,19 @@ spec:
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
             {{- else }}
-              name: {{ .Values.redis.existingSecret }}
-              key: {{ .Values.redis.secretKey }}
+              name: {{ .Values.redis.auth.existingSecret }}
+              key: {{ .Values.redis.auth.existingSecretPasswordKey }}
             {{- end }}  
             {{- end }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
-              name: {{ .Values.postgresql.existingSecret }}
-              key: {{ .Values.postgresql.secretKey }}
+              name: {{ .Values.postgresql.auth.existingSecret }}
+              key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
+              {{- else if eq .Values.database "postgresqlha" }}
+              name: {{ .Values.postgresqlha.postgresql.existingSecret }}
+              key: postgresql-postgres-password
               {{- else if eq .Values.database "mysql" }}
               name: {{ .Values.mysql.auth.existingSecret }}
               key: {{ .Values.mysql.auth.secretKey }}
@@ -134,6 +137,9 @@ spec:
             secretKeyRef:
               name: {{ $fullName }}
               key: DD_SECRET_KEY
+        {{- if .Values.extraEnv }}
+        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- end }}
         resources:
           {{- toYaml .Values.celery.beat.resources | nindent 10 }}
       {{- with .Values.celery.beat.nodeSelector }}

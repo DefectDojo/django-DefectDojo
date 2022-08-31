@@ -168,6 +168,9 @@ class BurpEnterpriseParser(object):
             if details.get('Description') == '':
                 continue
             aggregateKeys = "{}{}{}{}".format(details.get('Title'), details.get('Description'), details.get('CWE'), details.get('Endpoint'))
+            detail_cwe = None
+            if details.get('CWE'):
+                detail_cwe = int(details.get('CWE'))
             find = Finding(title=details.get('Title'),
                            description=details.get('Description'),
                            test=test,
@@ -175,7 +178,7 @@ class BurpEnterpriseParser(object):
                            mitigation=details.get('Mitigation'),
                            references=details.get('References'),
                            impact=details.get('Impact'),
-                           cwe=int(details.get('CWE')),
+                           cwe=detail_cwe,
                            false_p=False,
                            duplicate=False,
                            out_of_scope=False,

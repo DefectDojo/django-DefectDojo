@@ -4,6 +4,7 @@ from crum import get_current_user
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
 from drf_yasg.inspectors.base import NotHandled
@@ -20,7 +21,8 @@ from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
-from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
+from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, SLA_Configuration, \
+    Test, Test_Import, Test_Type, Finding, \
     User, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
@@ -42,7 +44,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
 from dojo.utils import get_period_counts_legacy, get_system_setting, get_setting, async_delete
-from dojo.api_v2 import serializers, permissions, prefetch, schema
+from dojo.api_v2 import serializers, permissions, prefetch, schema, mixins as dojo_mixins
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
@@ -60,6 +62,7 @@ from dojo.jira_link.queries import get_authorized_jira_projects, get_authorized_
 from dojo.tool_product.queries import get_authorized_tool_product_settings
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from dojo.authorization.roles_permissions import Permissions
+from dojo.user.utils import get_configuration_permissions_codenames
 
 logger = logging.getLogger(__name__)
 
@@ -95,11 +98,12 @@ class DojoGroupViewSet(prefetch.PrefetchListMixin,
                        mixins.DestroyModelMixin,
                        mixins.UpdateModelMixin,
                        mixins.CreateModelMixin,
-                       viewsets.GenericViewSet):
+                       viewsets.GenericViewSet,
+                       dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.DojoGroupSerializer
     queryset = Dojo_Group.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'name')
+    filter_fields = ('id', 'name', 'social_provider')
     swagger_schema = prefetch.get_prefetch_schema(["dojo_groups_list", "dojo_groups_read"],
         serializers.DojoGroupSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupPermission)
@@ -128,7 +132,8 @@ class DojoGroupMemberViewSet(prefetch.PrefetchListMixin,
                            mixins.CreateModelMixin,
                            mixins.DestroyModelMixin,
                            mixins.UpdateModelMixin,
-                           viewsets.GenericViewSet):
+                           viewsets.GenericViewSet,
+                           dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.DojoGroupMemberSerializer
     queryset = Dojo_Group_Member.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -154,7 +159,8 @@ class GlobalRoleViewSet(prefetch.PrefetchListMixin,
                         mixins.DestroyModelMixin,
                         mixins.UpdateModelMixin,
                         mixins.CreateModelMixin,
-                        viewsets.GenericViewSet):
+                        viewsets.GenericViewSet,
+                        dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.GlobalRoleSerializer
     queryset = Global_Role.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -170,7 +176,8 @@ class EndPointViewSet(mixins.ListModelMixin,
                       mixins.UpdateModelMixin,
                       mixins.DestroyModelMixin,
                       mixins.CreateModelMixin,
-                      viewsets.GenericViewSet):
+                      viewsets.GenericViewSet,
+                      dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.EndpointSerializer
     queryset = Endpoint.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -215,7 +222,8 @@ class EndpointStatusViewSet(mixins.ListModelMixin,
                       mixins.UpdateModelMixin,
                       mixins.DestroyModelMixin,
                       mixins.CreateModelMixin,
-                      viewsets.GenericViewSet):
+                      viewsets.GenericViewSet,
+                      dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.EndpointStatusSerializer
     queryset = Endpoint_Status.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -234,7 +242,8 @@ class EngagementViewSet(mixins.ListModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
                         ra_api.AcceptedRisksMixin,
-                        viewsets.GenericViewSet):
+                        viewsets.GenericViewSet,
+                        dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.EngagementSerializer
     queryset = Engagement.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -417,7 +426,8 @@ class AppAnalysisViewSet(mixins.ListModelMixin,
                         mixins.UpdateModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
-                        viewsets.GenericViewSet):
+                        viewsets.GenericViewSet,
+                        dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.AppAnalysisSerializer
     queryset = App_Analysis.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -434,7 +444,8 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
                               mixins.UpdateModelMixin,
                               mixins.CreateModelMixin,
                               mixins.DestroyModelMixin,
-                              viewsets.GenericViewSet):
+                              viewsets.GenericViewSet,
+                              dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.FindingTemplateSerializer
     queryset = Finding_Template.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -467,7 +478,8 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                      mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
                      ra_api.AcceptedFindingsMixin,
-                     viewsets.GenericViewSet):
+                     viewsets.GenericViewSet,
+                     dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.FindingSerializer
     queryset = Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1018,7 +1030,8 @@ class JiraInstanceViewSet(mixins.ListModelMixin,
                                 mixins.DestroyModelMixin,
                                 mixins.UpdateModelMixin,
                                 mixins.CreateModelMixin,
-                                viewsets.GenericViewSet):
+                                viewsets.GenericViewSet,
+                                dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.JIRAInstanceSerializer
     queryset = JIRA_Instance.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -1032,7 +1045,8 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
                         mixins.UpdateModelMixin,
-                        viewsets.GenericViewSet):
+                        viewsets.GenericViewSet,
+                        dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.JIRAIssueSerializer
     queryset = JIRA_Issue.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1049,7 +1063,8 @@ class JiraProjectViewSet(mixins.ListModelMixin,
                   mixins.DestroyModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.CreateModelMixin,
-                  viewsets.GenericViewSet):
+                  viewsets.GenericViewSet,
+                  dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.JIRAProjectSerializer
     queryset = JIRA_Project.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1068,7 +1083,8 @@ class SonarqubeIssueViewSet(mixins.ListModelMixin,
                                 mixins.DestroyModelMixin,
                                 mixins.UpdateModelMixin,
                                 mixins.CreateModelMixin,
-                                viewsets.GenericViewSet):
+                                viewsets.GenericViewSet,
+                                dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.SonarqubeIssueSerializer
     queryset = Sonarqube_Issue.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -1082,7 +1098,8 @@ class SonarqubeIssueTransitionViewSet(mixins.ListModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
                         mixins.UpdateModelMixin,
-                        viewsets.GenericViewSet):
+                        viewsets.GenericViewSet,
+                        dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.SonarqubeIssueTransitionSerializer
     queryset = Sonarqube_Issue_Transition.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -1097,7 +1114,8 @@ class ProductAPIScanConfigurationViewSet(mixins.ListModelMixin,
                   mixins.DestroyModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.CreateModelMixin,
-                  viewsets.GenericViewSet):
+                  viewsets.GenericViewSet,
+                  dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ProductAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1129,7 +1147,8 @@ class DojoMetaViewSet(prefetch.PrefetchListMixin,
                       mixins.DestroyModelMixin,
                       mixins.CreateModelMixin,
                       mixins.UpdateModelMixin,
-                      viewsets.GenericViewSet):
+                      viewsets.GenericViewSet,
+                      dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1176,7 +1195,8 @@ class ProductViewSet(prefetch.PrefetchListMixin,
                      mixins.CreateModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.UpdateModelMixin,
-                     viewsets.GenericViewSet):
+                     viewsets.GenericViewSet,
+                     dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ProductSerializer
     # TODO: prefetch
     queryset = Product.objects.none()
@@ -1255,7 +1275,8 @@ class ProductMemberViewSet(prefetch.PrefetchListMixin,
                            mixins.CreateModelMixin,
                            mixins.DestroyModelMixin,
                            mixins.UpdateModelMixin,
-                           viewsets.GenericViewSet):
+                           viewsets.GenericViewSet,
+                           dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ProductMemberSerializer
     queryset = Product_Member.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1301,7 +1322,8 @@ class ProductGroupViewSet(prefetch.PrefetchListMixin,
                           mixins.CreateModelMixin,
                           mixins.DestroyModelMixin,
                           mixins.UpdateModelMixin,
-                          viewsets.GenericViewSet):
+                          viewsets.GenericViewSet,
+                          dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ProductGroupSerializer
     queryset = Product_Group.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1347,7 +1369,8 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
                          mixins.CreateModelMixin,
                          mixins.UpdateModelMixin,
                          mixins.DestroyModelMixin,
-                         viewsets.GenericViewSet):
+                         viewsets.GenericViewSet,
+                         dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ProductTypeSerializer
     queryset = Product_Type.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1429,7 +1452,8 @@ class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
                                mixins.CreateModelMixin,
                                mixins.DestroyModelMixin,
                                mixins.UpdateModelMixin,
-                               viewsets.GenericViewSet):
+                               viewsets.GenericViewSet,
+                               dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ProductTypeMemberSerializer
     queryset = Product_Type_Member.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1484,7 +1508,8 @@ class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
                               mixins.CreateModelMixin,
                               mixins.DestroyModelMixin,
                               mixins.UpdateModelMixin,
-                              viewsets.GenericViewSet):
+                              viewsets.GenericViewSet,
+                              dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ProductTypeGroupSerializer
     queryset = Product_Type_Group.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1516,7 +1541,8 @@ class StubFindingsViewSet(mixins.ListModelMixin,
                           mixins.CreateModelMixin,
                           mixins.UpdateModelMixin,
                           mixins.DestroyModelMixin,
-                          viewsets.GenericViewSet):
+                          viewsets.GenericViewSet,
+                          dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.StubFindingSerializer
     queryset = Stub_Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1539,7 +1565,8 @@ class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
                                     mixins.CreateModelMixin,
                                     mixins.DestroyModelMixin,
                                     mixins.UpdateModelMixin,
-                                    viewsets.GenericViewSet):
+                                    viewsets.GenericViewSet,
+                                    dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.DevelopmentEnvironmentSerializer
     queryset = Development_Environment.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -1553,7 +1580,8 @@ class TestsViewSet(mixins.ListModelMixin,
                    mixins.DestroyModelMixin,
                    mixins.CreateModelMixin,
                    ra_api.AcceptedRisksMixin,
-                   viewsets.GenericViewSet):
+                   viewsets.GenericViewSet,
+                   dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.TestSerializer
     queryset = Test.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1742,7 +1770,8 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
                       mixins.UpdateModelMixin,
                       mixins.CreateModelMixin,
                       mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+                      viewsets.GenericViewSet,
+                      dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.TestImportSerializer
     queryset = Test_Import.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1790,7 +1819,8 @@ class ToolConfigurationsViewSet(mixins.ListModelMixin,
                                 mixins.CreateModelMixin,
                                 mixins.UpdateModelMixin,
                                 mixins.DestroyModelMixin,
-                                viewsets.GenericViewSet):
+                                viewsets.GenericViewSet,
+                                dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ToolConfigurationSerializer
     queryset = Tool_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -1804,7 +1834,8 @@ class ToolProductSettingsViewSet(mixins.ListModelMixin,
                                  mixins.DestroyModelMixin,
                                  mixins.CreateModelMixin,
                                  mixins.UpdateModelMixin,
-                                 viewsets.GenericViewSet):
+                                 viewsets.GenericViewSet,
+                                 dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ToolProductSettingsSerializer
     queryset = Tool_Product_Settings.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -1822,7 +1853,8 @@ class ToolTypesViewSet(mixins.ListModelMixin,
                        mixins.DestroyModelMixin,
                        mixins.CreateModelMixin,
                        mixins.UpdateModelMixin,
-                       viewsets.GenericViewSet):
+                       viewsets.GenericViewSet,
+                       dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ToolTypeSerializer
     queryset = Tool_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -1836,7 +1868,8 @@ class RegulationsViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
                          mixins.DestroyModelMixin,
                          mixins.UpdateModelMixin,
-                         viewsets.GenericViewSet):
+                         viewsets.GenericViewSet,
+                         dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.RegulationSerializer
     queryset = Regulation.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -1850,7 +1883,8 @@ class UsersViewSet(mixins.CreateModelMixin,
                    mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
+                   viewsets.GenericViewSet,
+                   dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.UserSerializer
     queryset = User.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -1885,7 +1919,8 @@ class UserContactInfoViewSet(prefetch.PrefetchListMixin,
                              mixins.ListModelMixin,
                              mixins.RetrieveModelMixin,
                              mixins.DestroyModelMixin,
-                             viewsets.GenericViewSet):
+                             viewsets.GenericViewSet,
+                             dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.UserContactInfoSerializer
     queryset = UserContactInfo.objects.all()
     swagger_schema = prefetch.get_prefetch_schema(["user_contact_infos_list", "user_contact_infos_read"],
@@ -1948,6 +1983,9 @@ class ImportScanView(mixins.CreateModelMixin,
 
     When using names you can let the importer automatically create Engagements, Products and Product_Types
     by using `auto_create_context=True`.
+
+    When `auto_create_context` is set to `True` you can use `deduplication_on_engagement` to restrict deduplication for
+    imported Findings to the newly created Engagement.
     """
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
@@ -1955,7 +1993,7 @@ class ImportScanView(mixins.CreateModelMixin,
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
@@ -2006,7 +2044,8 @@ class LanguageTypeViewSet(mixins.ListModelMixin,
                           mixins.CreateModelMixin,
                           mixins.DestroyModelMixin,
                           mixins.UpdateModelMixin,
-                          viewsets.GenericViewSet):
+                          viewsets.GenericViewSet,
+                          dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.LanguageTypeSerializer
     queryset = Language_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -2034,7 +2073,8 @@ class LanguageViewSet(prefetch.PrefetchListMixin,
                       mixins.DestroyModelMixin,
                       mixins.UpdateModelMixin,
                       mixins.CreateModelMixin,
-                      viewsets.GenericViewSet):
+                      viewsets.GenericViewSet,
+                      dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.LanguageSerializer
     queryset = Languages.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -2084,6 +2124,9 @@ class ReImportScanView(mixins.CreateModelMixin,
 
     When using names you can let the importer automatically create Engagements, Products and Product_Types
     by using `auto_create_context=True`.
+
+    When `auto_create_context` is set to `True` you can use `deduplication_on_engagement` to restrict deduplication for
+    imported Findings to the newly created Engagement.
     """
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
@@ -2094,7 +2137,7 @@ class ReImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
@@ -2117,7 +2160,8 @@ class NoteTypeViewSet(mixins.ListModelMixin,
                        mixins.DestroyModelMixin,
                        mixins.CreateModelMixin,
                        mixins.UpdateModelMixin,
-                       viewsets.GenericViewSet):
+                       viewsets.GenericViewSet,
+                       dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.NoteTypeSerializer
     queryset = Note_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -2466,7 +2510,8 @@ class NotificationsViewSet(prefetch.PrefetchListMixin,
                            mixins.DestroyModelMixin,
                            mixins.CreateModelMixin,
                            mixins.UpdateModelMixin,
-                           viewsets.GenericViewSet):
+                           viewsets.GenericViewSet,
+                           dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.NotificationsSerializer
     queryset = Notifications.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -2481,7 +2526,8 @@ class EngagementPresetsViewset(mixins.ListModelMixin,
                          mixins.UpdateModelMixin,
                          mixins.DestroyModelMixin,
                          mixins.CreateModelMixin,
-                         viewsets.GenericViewSet):
+                         viewsets.GenericViewSet,
+                         dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.EngagementPresetsSerializer
     queryset = Engagement_Presets.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -2498,9 +2544,33 @@ class NetworkLocationsViewset(mixins.ListModelMixin,
                               mixins.UpdateModelMixin,
                               mixins.DestroyModelMixin,
                               mixins.CreateModelMixin,
-                              viewsets.GenericViewSet):
+                              viewsets.GenericViewSet,
+                              dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.NetworkLocationsSerializer
     queryset = Network_Locations.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'location')
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+
+# Authorization: superuser
+class ConfigurationPermissionViewSet(mixins.RetrieveModelMixin,
+                                     mixins.ListModelMixin,
+                                     viewsets.GenericViewSet):
+    serializer_class = serializers.ConfigurationPermissionSerializer
+    queryset = Permission.objects.filter(codename__in=get_configuration_permissions_codenames())
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'codename')
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+
+class SLAConfigurationViewset(mixins.ListModelMixin,
+                              mixins.RetrieveModelMixin,
+                              mixins.UpdateModelMixin,
+                              mixins.DestroyModelMixin,
+                              mixins.CreateModelMixin,
+                              viewsets.GenericViewSet):
+    serializer_class = serializers.SLAConfigurationSerializer
+    queryset = SLA_Configuration.objects.all()
+    filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)

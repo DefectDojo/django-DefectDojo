@@ -103,8 +103,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
     def test_import_with_push_to_jira_epic_as_issue_type(self):
         jira_instance = JIRA_Instance.objects.get(id=2)
-        # we choose issue type Epic and test if it can be created succesfully.
-        # if yes, it means we have succesfully populated the Epic Name custom field which is mandatory in JIRA
+        # we choose issue type Epic and test if it can be created successfully.
+        # if yes, it means we have successfully populated the Epic Name custom field which is mandatory in JIRA
         jira_instance.default_issue_type = "Epic"
         jira_instance.save()
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
@@ -242,7 +242,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename, push_to_jira=False)
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
-        self.assert_jira_updated_map_changed(test_id, updated_map)
+        # when sending in identical data to JIRA, JIRA does NOT update the updated timestamp....
+        # self.assert_jira_updated_map_changed(test_id, updated_map)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -278,7 +279,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
         post_jira_status = self.get_jira_issue_updated(finding_id)
-        self.assert_jira_updated_change(pre_jira_status, post_jira_status)
+        # when sending in identical data to JIRA, JIRA does NOT update the updated timestamp....
+        # self.assert_jira_updated_change(pre_jira_status, post_jira_status)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -416,13 +418,11 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_group_issue_count_in_test(test_id, 1)
 
         pre_jira_status = self.get_jira_issue_status(findings['results'][0]['id'])
-
         # close both findings
         self.patch_finding_api(findings['results'][0]['id'], {"active": False, "is_mitigated": True, "push_to_jira": True})
-        self.patch_finding_api(findings['results'][0]['id'], {"active": False, "is_mitigated": True, "push_to_jira": True})
+        self.patch_finding_api(findings['results'][1]['id'], {"active": False, "is_mitigated": True, "push_to_jira": True})
 
         post_jira_status = self.get_jira_issue_status(findings['results'][0]['id'])
-
         # both findings inactive -> should update status in JIRA
         self.assertNotEqual(pre_jira_status, post_jira_status)
 
@@ -488,7 +488,28 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         response = self.post_finding_notes_api(finding_id, 'testing note. creating it and pushing it to JIRA')
         self.patch_finding_api(finding_id, {"push_to_jira": True})
+        # Make sure the number of comments match
+        self.assertEqual(len(self.get_jira_comments(finding_id)), 1)
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+        return test_id
 
+    def test_import_add_comments_then_push_to_jira(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=False)
+        test_id = import0['test']
+
+        findings = self.get_test_findings_api(test_id)
+
+        finding_id = findings['results'][0]['id']
+
+        response = self.post_finding_notes_api(finding_id, 'testing note. creating it and pushing it to JIRA')
+        response = self.post_finding_notes_api(finding_id, 'testing second note. creating it and pushing it to JIRA')
+        self.patch_finding_api(finding_id, {"push_to_jira": True})
+
+        self.assert_jira_issue_count_in_test(test_id, 1)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # Make sure the number of comments match
+        self.assertEqual(len(self.get_jira_comments(finding_id)), 2)
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
         return test_id

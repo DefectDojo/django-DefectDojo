@@ -1070,6 +1070,7 @@ class ApiFindingFilter(DojoFilter):
     test__test_type = NumberInFilter(field_name='test__test_type', lookup_expr='in', label='Test Type')
     test__engagement = NumberInFilter(field_name='test__engagement', lookup_expr='in')
     test__engagement__product = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
+    test__engagement__product__prod_type = NumberInFilter(field_name='test__engagement__product__prod_type', lookup_expr='in')
     finding_group = NumberInFilter(field_name='finding_group', lookup_expr='in')
 
     # ReportRiskAcceptanceFilter
@@ -1175,6 +1176,8 @@ class FindingFilter(FindingFilterWithTags):
 
     endpoints__host = CharFilter(lookup_expr='icontains', label="Endpoint Host")
 
+    service = CharFilter(lookup_expr='icontains')
+
     test = ModelMultipleChoiceFilter(
         queryset=Test.objects.none(),
         label="Test")
@@ -1273,6 +1276,7 @@ class FindingFilter(FindingFilterWithTags):
             ('title', 'title'),
             ('test__engagement__product__name',
              'test__engagement__product__name'),
+            ('service', 'service'),
         ),
         field_labels={
             'numerical_severity': 'Severity',
@@ -1992,7 +1996,6 @@ class UserFilter(DojoFilter):
     username = CharFilter(lookup_expr='icontains')
     email = CharFilter(lookup_expr='icontains')
 
-    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
         o = OrderingFilter(
             # tuple-mapping retains order
             fields=(
@@ -2007,36 +2010,13 @@ class UserFilter(DojoFilter):
             field_labels={
                 'username': 'User Name',
                 'is_active': 'Active',
-                'is_superuser': 'Superuser',
-            }
-        )
-    else:
-        o = OrderingFilter(
-            # tuple-mapping retains order
-            fields=(
-                ('username', 'username'),
-                ('last_name', 'last_name'),
-                ('first_name', 'first_name'),
-                ('email', 'email'),
-                ('is_active', 'is_active'),
-                ('is_staff', 'is_staff'),
-                ('is_superuser', 'is_superuser'),
-                ('last_login', 'last_login'),
-            ),
-            field_labels={
-                'username': 'User Name',
-                'is_active': 'Active',
-                'is_staff': 'Staff',
                 'is_superuser': 'Superuser',
             }
         )
 
     class Meta:
         model = Dojo_User
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
             fields = ['is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
-        else:
-            fields = ['is_staff', 'is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
 
 
 class GroupFilter(DojoFilter):

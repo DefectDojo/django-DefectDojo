@@ -76,8 +76,9 @@ class BundlerAuditParser(object):
                     dynamic_finding=False,
                     component_name=gem_name,
                     component_version=gem_version,
-                    cve=advisory_cve,
                 )
+                if advisory_cve:
+                    find.unsaved_vulnerability_ids = [advisory_cve]
 
                 dupes[dupe_key] = find
 

@@ -1,6 +1,6 @@
 ---
 title: "Importing"
-description: "DefectDojo has the ability to import scan reports from a large number of security tools."
+description: "How DefectDojo imports and reimports security tool reports."
 draft: false
 weight: 1
 ---
@@ -58,7 +58,7 @@ An import can be performed by specifying the names of these entities in the API 
     "product_type_name": 'Good Products',
     "product_name": 'My little product',
     "engagement_name": 'Important import',
-    "auto_create_contex": True,
+    "auto_create_context": True,
 }
 ```
 
@@ -94,7 +94,7 @@ An reimport can be performed by specifying the names of these entities in the AP
     "product_type_name": 'Good Products',
     "product_name": 'My little product',
     "engagement_name": 'Important import',
-    "auto_create_contex": True,
+    "auto_create_context": True,
 }
 ```
 

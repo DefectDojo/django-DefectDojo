@@ -31,7 +31,7 @@ jobs:
           git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
           git push origin ${{ github.event.inputs.release_number }}
       - name: Install Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
           version: v3.4.0
       - name: Configure Helm repos
@@ -95,7 +95,7 @@ jobs:
           docker-image: [django, nginx]
     steps:
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -110,7 +110,7 @@ jobs:
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Cache Docker layers
         uses: actions/cache@v3
@@ -125,7 +125,7 @@ jobs:
             ${{ runner.os }}-buildx-${{ env.docker-image }}-
 
       - name: Build and push images
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         env:
           REPO_ORG: ${{ steps.set-repo-org.outputs.repoorg }}
           docker-image: ${{ matrix.docker-image }}

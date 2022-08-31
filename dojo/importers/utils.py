@@ -18,11 +18,9 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
     if not scan_date:
         scan_date = now
 
-    test.engagement.updated = now
     if test.engagement.engagement_type == 'CI/CD':
         test.engagement.target_end = max_safe([scan_date.date(), test.engagement.target_end])
 
-    test.updated = now
     test.target_end = max_safe([scan_date, test.target_end])
 
     if version:
