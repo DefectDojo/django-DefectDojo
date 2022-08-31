@@ -167,7 +167,7 @@ env = environ.Env(
     # Comma separated list of IP ranges with trusted proxies
     DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.0/32']),
     # REMOTE_USER will be processed only on login page. Check https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only
-    DD_AUTH_REMOTEUSER_LOGIN_ONLY_HEADER=(bool, False),
+    DD_AUTH_REMOTEUSER_LOGIN_ONLY=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
     DD_DOCUMENTATION_URL=(str, 'https://defectdojo.github.io/django-DefectDojo'),
     # merging findings doesn't always work well with dedupe and reimport etc.
@@ -1017,7 +1017,7 @@ if AUTH_REMOTEUSER_ENABLED:
     for ip_range in env('DD_AUTH_REMOTEUSER_TRUSTED_PROXY'):
         AUTH_REMOTEUSER_TRUSTED_PROXY.add(IPNetwork(ip_range))
 
-    if env('DD_AUTH_REMOTEUSER_LOGIN_ONLY_HEADER'):
+    if env('DD_AUTH_REMOTEUSER_LOGIN_ONLY'):
         RemoteUserMiddleware = 'dojo.remote_user.PersistentRemoteUserMiddleware'
     else:
         RemoteUserMiddleware = 'dojo.remote_user.RemoteUserMiddleware'
