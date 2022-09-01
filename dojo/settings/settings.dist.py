@@ -1145,6 +1145,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'BlackDuck API': ['unique_id_from_tool'],
     'docker-bench-security Scan': ['unique_id_from_tool'],
     'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
+    'Twistlock Image Scan': ['title', 'severity', 'component_name', 'component_version'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1180,6 +1181,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Generic Findings Import': True,
     'Edgescan Scan': True,
     'Veracode SourceClear Scan': True,
+    'Twistlock Image Scan': True
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1297,6 +1299,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
     'BlackDuck API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'docker-bench-security Scan': DEDUPE_ALGO_HASH_CODE,
+    'Twistlock Image Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
