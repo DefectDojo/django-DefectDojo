@@ -101,7 +101,7 @@ class TestCopyFindingModel(DojoTestCase):
         # Do the notes match
         self.assertEqual(finding.notes, finding_copy.notes)
 
-    def test_duplicate_finding_with_endpoints(self):
+    def test_duplicate_finding_with_endpoints(self): # TODO check
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
         product_type = self.create_product_type('prod_type')
