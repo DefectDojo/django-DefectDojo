@@ -1,6 +1,8 @@
 import logging
 from django.contrib.auth.middleware import RemoteUserMiddleware as OriginalRemoteUserMiddleware
 from django.contrib.auth.backends import RemoteUserBackend as OriginalRemoteUserBackend
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
+from rest_framework.authentication import RemoteUserAuthentication as OriginalRemoteUserAuthentication
 from netaddr import IPAddress
 from dojo.settings import settings
 from dojo.pipeline import assign_user_to_groups, cleanup_old_groups_for_user
@@ -8,12 +10,31 @@ from dojo.pipeline import assign_user_to_groups, cleanup_old_groups_for_user
 logger = logging.getLogger(__name__)
 
 
+class RemoteUserAuthentication(OriginalRemoteUserAuthentication):
+    def authenticate(self, request):
+        # process only if request is comming from the trusted proxy node
+        if IPAddress(request.META['REMOTE_ADDR']) in settings.AUTH_REMOTEUSER_TRUSTED_PROXY:
+            self.header = settings.AUTH_REMOTEUSER_USERNAME_HEADER
+            if self.header in request.META:
+                return super().authenticate(request)
+            else:
+                return None
+        else:
+            logger.debug('Requested came from untrusted proxy %s; This is list of trusted proxies: %s',
+                IPAddress(request.META['REMOTE_ADDR']),
+                settings.AUTH_REMOTEUSER_TRUSTED_PROXY)
+            return None
+
+
 class RemoteUserMiddleware(OriginalRemoteUserMiddleware):
     def process_request(self, request):
         # process only if request is comming from the trusted proxy node
         if IPAddress(request.META['REMOTE_ADDR']) in settings.AUTH_REMOTEUSER_TRUSTED_PROXY:
             self.header = settings.AUTH_REMOTEUSER_USERNAME_HEADER
-            return super().process_request(request)
+            if self.header in request.META:
+                return super().process_request(request)
+            else:
+                return
         else:
             logger.debug('Requested came from untrusted proxy %s; This is list of trusted proxies: %s',
                 IPAddress(request.META['REMOTE_ADDR']),
@@ -72,3 +93,13 @@ class RemoteUserBackend(OriginalRemoteUserBackend):
             user.save()
 
         return user
+
+
+class RemoteUserScheme(OpenApiAuthenticationExtension):
+    target_class = 'dojo.remote_user.RemoteUserAuthentication'
+    name = 'remoteUserAuth'
+    match_subclasses = True
+    priority = 1
+
+    def get_security_definition(self, auto_schema):
+        return settings.SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['remoteUserAuth']

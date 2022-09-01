@@ -1027,6 +1027,15 @@ if AUTH_REMOTEUSER_ENABLED:
             MIDDLEWARE.insert(i + 1, RemoteUserMiddleware)
             break
 
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = \
+        ('dojo.remote_user.RemoteUserAuthentication',) + \
+        REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
+
+    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['remoteUserAuth'] = {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': AUTH_REMOTEUSER_USERNAME_HEADER[5:].replace('_', '-')
+    }
 # ------------------------------------------------------------------------------
 # CELERY
 # ------------------------------------------------------------------------------
