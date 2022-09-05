@@ -66,6 +66,7 @@ spec:
           type: {{ .pathType | default "Directory" }}
           path: {{ .hostPath }}
           {{- end }}
+          defaultMode: {{ .defaultMode | default 644 }}
       {{- end }}
       {{- if .Values.django.mediaPersistentVolume.enabled }}
       - name: {{ .Values.django.mediaPersistentVolume.name }}
