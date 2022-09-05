@@ -78,6 +78,7 @@ env = environ.Env(
     DD_DATABASE_PASSWORD=(str, 'defectdojo'),
     DD_DATABASE_PORT=(int, 3306),
     DD_DATABASE_USER=(str, 'defectdojo'),
+    DD_DATABASE_OPTIONS=(dict, {}),
     DD_SECRET_KEY=(str, ''),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
@@ -347,6 +348,7 @@ else:
             'PASSWORD': env('DD_DATABASE_PASSWORD'),
             'HOST': env('DD_DATABASE_HOST'),
             'PORT': env('DD_DATABASE_PORT'),
+            'OPTIONS': env('DD_DATABASE_OPTIONS'),
         }
     }
 
