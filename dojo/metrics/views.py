@@ -433,7 +433,6 @@ def metrics(request, mtype):
     show_pt_filter = True
     view = identify_view(request)
 
-
     if mtype != 'All':
         pt = Product_Type.objects.filter(id=mtype)
         request.GET._mutable = True
