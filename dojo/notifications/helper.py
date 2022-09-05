@@ -386,7 +386,7 @@ def notify_scan_added(test, updated_count, new_findings, findings_mitigated=[], 
     new_findings.sort(key=lambda x: x.numerical_severity)
     findings_mitigated.sort(key=lambda x: x.numerical_severity)
     findings_reactivated.sort(key=lambda x: x.numerical_severity)
-    findings_untouched.sort(key=lambda x: x.numerical_severity)
+    list(findings_untouched).sort(key=lambda x: x.numerical_severity)
 
     title = 'Created/Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
     create_notification(event='scan_added', title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
