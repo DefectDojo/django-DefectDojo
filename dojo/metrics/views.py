@@ -426,16 +426,16 @@ def metrics(request, mtype):
     template = 'dojo/metrics.html'
     show_pt_filter = True
     view = identify_view(request)
-    page_name = _('Product Type Metrics by ')
+
 
     if mtype != 'All':
         pt = Product_Type.objects.filter(id=mtype)
         request.GET._mutable = True
         request.GET.appendlist('test__engagement__product__prod_type', mtype)
         request.GET._mutable = False
-        mtype = pt[0].name
+        product = pt[0].name
         show_pt_filter = False
-        page_name = '%s Metrics' % mtype
+        page_name = _('%(type)s Metrics') % {'type': mtype}
         prod_type = pt
     elif 'test__engagement__product__prod_type' in request.GET:
         prod_type = Product_Type.objects.filter(id__in=request.GET.getlist('test__engagement__product__prod_type', []))
@@ -446,10 +446,10 @@ def metrics(request, mtype):
 
     filters = dict()
     if view == 'Finding':
-        page_name += 'Findings'
+        page_name = _('Product Type Metrics by Findings')
         filters = finding_querys(prod_type, request)
     elif view == 'Endpoint':
-        page_name += 'Affected Endpoints'
+        page_name = _('Product Type Metrics by Affected Endpoints')
         filters = endpoint_querys(prod_type, request)
 
     in_period_counts, in_period_details, age_detail = get_in_period_details([
@@ -472,7 +472,7 @@ def metrics(request, mtype):
 
     if 'view' in request.GET and 'dashboard' == request.GET['view']:
         punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'], filters['weeks_between'], view)
-        page_name = (get_system_setting('team_name')) + " Metrics"
+        page_name = _('%(team_name)s Metrics') % {'team_name': get_system_setting('team_name')}
         template = 'dojo/dashboard-metrics.html'
 
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
@@ -721,10 +721,10 @@ def product_type_counts(request):
             for o in overall_in_pt:
                 aip[o['numerical_severity']] = o['numerical_severity__count']
         else:
-            messages.add_message(request, messages.ERROR, "Please choose month and year and the Product Type.",
+            messages.add_message(request, messages.ERROR, _("Please choose month and year and the Product Type."),
                                  extra_tags='alert-danger')
 
-    add_breadcrumb(title="Bi-Weekly Metrics", top_level=True, request=request)
+    add_breadcrumb(title=_("Bi-Weekly Metrics"), top_level=True, request=request)
 
     return render(request,
                   'dojo/pt_counts.html',
@@ -751,7 +751,7 @@ def engineer_metrics(request):
     users = UserFilter(request.GET, queryset=users)
     paged_users = get_page_items(request, users.qs, 25)
 
-    add_breadcrumb(title="Engineer Metrics", top_level=True, request=request)
+    add_breadcrumb(title=_("Engineer Metrics"), top_level=True, request=request)
 
     return render(request,
                   'dojo/engineer_metrics.html',
