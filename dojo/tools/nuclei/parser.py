@@ -1,5 +1,6 @@
 import json
 import hashlib
+from cvss import parser as cvss_parser
 from dojo.models import Finding, Endpoint
 
 
@@ -63,7 +64,9 @@ class NucleiParser(object):
                         cwe = classification['cwe-id'][0]
                         finding.cwe = int(cwe[4:])
                     if 'cvss-metrics' in classification and classification['cvss-metrics']:
-                        finding.cvssv3 = classification['cvss-metrics']
+                        cvss_objects = cvss_parser.parse_cvss_from_text(classification['cvss-metrics'])
+                        if len(cvss_objects) > 0:
+                            finding.cvssv3 = cvss_objects[0].clean_vector()
                     if 'cvss-score' in classification and classification['cvss-score']:
                         finding.cvssv3_score = classification['cvss-score']
 

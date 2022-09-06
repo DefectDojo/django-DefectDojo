@@ -7,7 +7,8 @@ from datetime import datetime
 from dojo.endpoint.utils import endpoint_filter
 from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists
-from dojo.models import IMPORT_ACTIONS, SEVERITIES, STATS_FIELDS, Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
+from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIELDS, Dojo_User, Finding_Group, Product, \
+    Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
@@ -761,6 +762,21 @@ class EngagementToFilesSerializer(serializers.Serializer):
     engagement_id = serializers.PrimaryKeyRelatedField(queryset=Engagement.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
 
+    def to_representation(self, data):
+        engagement = data.get('engagement_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(engagement, engagement.id)),
+                'title': file.title
+            })
+        new_data = {'engagement_id': engagement.id, 'files': new_files}
+        return new_data
+
 
 class AppAnalysisSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
@@ -1056,6 +1072,21 @@ class TestToNotesSerializer(serializers.Serializer):
 class TestToFilesSerializer(serializers.Serializer):
     test_id = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
+
+    def to_representation(self, data):
+        test = data.get('test_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(test, test.id)),
+                'title': file.title
+            })
+        new_data = {'test_id': test.id, 'files': new_files}
+        return new_data
 
 
 class TestImportFindingActionSerializer(serializers.ModelSerializer):
@@ -1895,6 +1926,21 @@ class FindingToFilesSerializer(serializers.Serializer):
     finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
 
+    def to_representation(self, data):
+        finding = data.get('finding_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(finding, finding.id)),
+                'title': file.title
+            })
+        new_data = {'finding_id': finding.id, 'files': new_files}
+        return new_data
+
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
     include_finding_notes = serializers.BooleanField(default=False)
@@ -2030,6 +2076,12 @@ class EngagementPresetsSerializer(serializers.ModelSerializer):
 class NetworkLocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Network_Locations
+        fields = '__all__'
+
+
+class SLAConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SLA_Configuration
         fields = '__all__'
 
 

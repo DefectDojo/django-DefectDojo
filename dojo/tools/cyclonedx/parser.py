@@ -294,6 +294,12 @@ class CycloneDXParser(object):
     def _get_findings_json(self, file, test):
         """Load a CycloneDX file in JSON format"""
         data = json.load(file)
+
+        # Parse timestamp to get the report date
+        report_date = None
+        if data.get("metadata") and data.get("metadata").get("timestamp"):
+            report_date = dateutil.parser.parse(data.get("metadata").get("timestamp"))
+
         # for each component we keep data
         components = {}
         for component in data.get("components", []):
@@ -348,6 +354,9 @@ class CycloneDXParser(object):
                     dynamic_finding=False,
                     vuln_id_from_tool=vulnerability.get("id"),
                 )
+
+                if report_date:
+                    finding.date = report_date
 
                 ratings = vulnerability.get("ratings", [])
                 for rating in ratings:

@@ -10,8 +10,12 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
+  annotations:
+    {{- with .Values.initializer.jobAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
-  ttlSecondsAfterFinished: {{ .Values.initializerKeepSeconds }}
+  ttlSecondsAfterFinished: {{ .Values.initializer.keepSeconds }}
   template:
     metadata:
       labels:

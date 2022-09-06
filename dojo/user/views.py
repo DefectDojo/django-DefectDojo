@@ -41,6 +41,9 @@ logger = logging.getLogger(__name__)
 # #  Django Rest Framework API v2
 
 def api_v2_key(request):
+    # This check should not be necessary because url should not be in 'urlpatterns' but we never know
+    if not settings.API_TOKENS_ENABLED:
+        raise PermissionDenied
     api_key = ''
     form = APIKeyForm(instance=request.user)
     if request.method == 'POST':  # new key requested
