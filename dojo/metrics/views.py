@@ -440,7 +440,7 @@ def metrics(request, mtype):
         request.GET._mutable = False
         product = pt[0].name
         show_pt_filter = False
-        page_name = _('%(type)s Metrics') % {'type': mtype}
+        page_name = _('%(product_type)s Metrics') % {'product_type': mtype}
         prod_type = pt
     elif 'test__engagement__product__prod_type' in request.GET:
         prod_type = Product_Type.objects.filter(id__in=request.GET.getlist('test__engagement__product__prod_type', []))
