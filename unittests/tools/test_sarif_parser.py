@@ -1,9 +1,10 @@
-from os import path
 import datetime
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from os import path
 
-from dojo.models import Test, Finding
-from dojo.tools.sarif.parser import SarifParser
+from dojo.models import Finding, Test
+from dojo.tools.sarif.parser import SarifParser, get_fingerprints_hashes
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestSarifParser(DojoTestCase):
@@ -41,7 +42,11 @@ class TestSarifParser(DojoTestCase):
 ```add_core(ptr, offset, val);
     return;```
 **Rule short description:** A variable was used without being initialized.
-**Rule full description:** A variable was used without being initialized. This can result in runtime errors such as null reference exceptions."""
+**Rule full description:** A variable was used without being initialized. This can result in runtime errors such as null reference exceptions.
+**Code flow:**
+\tcollections/list.h:15\t-\tint *ptr;
+\tcollections/list.h:15\t-\toffset = (y + z) * q + 1;
+\tcollections/list.h:25\t-\tadd_core(ptr, offset, val)"""
         self.assertEqual(description, item.description)
         self.assertEqual(datetime.datetime(2016, 7, 16, 14, 19, 1, tzinfo=datetime.timezone.utc), item.date)
         for finding in findings:
@@ -156,13 +161,18 @@ class TestSarifParser(DojoTestCase):
         self.assertIsNone(item.unsaved_vulnerability_ids)
         self.assertEqual(datetime.datetime(2021, 3, 8, 15, 39, 40, tzinfo=datetime.timezone.utc), item.date)
         # finding 6
-        item = findings[6]
-        self.assertEqual(
-            "Decimals are not supported. Either use integers only, or use bc or awk to compare.",
-            item.title,
-        )
-        self.assertEqual("Info", item.severity)
-        self.assertIsNone(item.unsaved_vulnerability_ids)
+        with self.subTest(i=6):
+            finding = findings[6]
+            self.assertEqual(
+                "Decimals are not supported. Either use integers only, or use bc or awk to compare.",
+                finding.title,
+            )
+            self.assertEqual("Info", finding.severity)
+            self.assertIsNone(finding.unsaved_vulnerability_ids)
+            self.assertEqual(
+                "scanFileHash:5b05533780915bfc|scanPrimaryLocationHash:4d655189c485c086",
+                finding.unique_id_from_tool,
+            )
         for finding in findings:
             self.common_checks(finding)
 
@@ -171,31 +181,41 @@ class TestSarifParser(DojoTestCase):
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(11, len(findings))
-        # finding 0
-        item = findings[0]
-        self.assertEqual(
-            "file:///home/damien/dd/dojo/tools/veracode/parser.py",
-            item.file_path,
-        )
-        self.assertIsNone(item.unsaved_vulnerability_ids)
-        self.assertEqual(datetime.datetime(2021, 3, 8, 15, 46, 16, tzinfo=datetime.timezone.utc), item.date)
-        # finding 2
-        item = findings[2]
-        self.assertEqual(
-            "file:///home/damien/dd/dojo/tools/qualys_infrascan_webgui/parser.py",
-            item.file_path,
-        )
-        self.assertEqual(169, item.line)
-        # finding 6
-        item = findings[6]
-        self.assertEqual(
-            "XML injection with user data from `filename in parser_helper.py:167` is used for parsing XML at `parser_helper.py:23`.",
-            item.title,
-        )
-        self.assertEqual("High", item.severity)
-        self.assertIsNone(item.unsaved_vulnerability_ids)
         for finding in findings:
             self.common_checks(finding)
+        # finding 0
+        with self.subTest(i=0):
+            item = findings[0]
+            self.assertEqual(
+                "file:///home/damien/dd/dojo/tools/veracode/parser.py",
+                item.file_path,
+            )
+            self.assertIsNone(item.unsaved_vulnerability_ids)
+            self.assertEqual(datetime.datetime(2021, 3, 8, 15, 46, 16, tzinfo=datetime.timezone.utc), item.date)
+            self.assertEqual(
+                "scanFileHash:4bc9f13947613303|scanPrimaryLocationHash:1a8bbb28fe7380df|scanTagsHash:21de8f8d0eb8d9b2",
+                finding.unique_id_from_tool,
+            )
+        # finding 2
+        with self.subTest(i=2):
+            item = findings[2]
+            self.assertEqual(
+                "file:///home/damien/dd/dojo/tools/qualys_infrascan_webgui/parser.py",
+                item.file_path,
+            )
+            self.assertEqual(169, item.line)
+            # finding 6
+            item = findings[6]
+            self.assertEqual(
+                "XML injection with user data from `filename in parser_helper.py:167` is used for parsing XML at `parser_helper.py:23`.",
+                item.title,
+            )
+            self.assertEqual("High", item.severity)
+            self.assertIsNone(item.unsaved_vulnerability_ids)
+            self.assertEqual(
+                "scanFileHash:4bc9f13947613303|scanPrimaryLocationHash:1a8bbb28fe7380df|scanTagsHash:21de8f8d0eb8d9b2",
+                finding.unique_id_from_tool,
+            )
 
     def test_njsscan(self):
         """Generated with opensecurity/njsscan (https://github.com/ajinabraham/njsscan)"""
@@ -349,6 +369,9 @@ class TestSarifParser(DojoTestCase):
             self.assertEqual(29, finding.line)
             self.assertEqual(327, finding.cwe)
             self.assertEqual("FF1048", finding.vuln_id_from_tool)
+            self.assertEqual(
+                "e6c1ad2b1d96ffc4035ed8df070600566ad240b8ded025dac30620f3fd4aa9fd", finding.unique_id_from_tool
+            )
             self.assertEqual("https://cwe.mitre.org/data/definitions/327.html", finding.references)
         with self.subTest(i=20):
             finding = findings[20]
@@ -367,6 +390,9 @@ class TestSarifParser(DojoTestCase):
             self.assertEqual(31, finding.line)
             self.assertEqual(120, finding.cwe)
             self.assertEqual("FF1004", finding.vuln_id_from_tool)
+            self.assertEqual(
+                "327fc54b75ab37bbbb31a1b71431aaefa8137ff755acc103685ad5adf88f5dda", finding.unique_id_from_tool
+            )
             self.assertEqual("https://cwe.mitre.org/data/definitions/120.html", finding.references)
         with self.subTest(i=52):
             finding = findings[52]
@@ -384,6 +410,9 @@ class TestSarifParser(DojoTestCase):
             self.assertEqual("src/cli_main.cc", finding.file_path)
             self.assertEqual(482, finding.line)
             self.assertEqual("FF1021", finding.vuln_id_from_tool)
+            self.assertEqual(
+                "ad8408027235170e870e7662751a01386beb2d2ed8beb75dd4ba8e4a70e91d65", finding.unique_id_from_tool
+            )
             self.assertEqual("https://cwe.mitre.org/data/definitions/120.html", finding.references)
 
     def test_flawfinder_interfacev2(self):
@@ -430,10 +459,13 @@ class TestSarifParser(DojoTestCase):
             self.assertEqual(31, finding.line)
             self.assertEqual(120, finding.cwe)
             self.assertEqual("FF1004", finding.vuln_id_from_tool)
-            self.assertEqual('https://cwe.mitre.org/data/definitions/120.html', finding.references)
+            self.assertEqual("https://cwe.mitre.org/data/definitions/120.html", finding.references)
         with self.subTest(i=52):
             finding = findings[52]
-            self.assertEqual("buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).", finding.title)
+            self.assertEqual(
+                "buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).",
+                finding.title,
+            )
             self.assertEqual("High", finding.severity)
             description = """**Result message:** buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).
 **Snippet:**
@@ -499,3 +531,18 @@ class TestSarifParser(DojoTestCase):
         item = findings[6]
         self.assertEqual("High", item.severity)
         self.assertEqual(7.8, item.cvssv3_score)
+
+    def test_get_fingerprints_hashes(self):
+        # example from 3.27.16 of the spec
+        data = {"fingerprints": {"stableResultHash/v2": "234567900abcd", "stableResultHash/v3": "34567900abcde"}}
+        self.assertEquals(
+            {"stableResultHash": {"version": 3, "value": "34567900abcde"}},
+            get_fingerprints_hashes(data["fingerprints"]),
+        )
+
+        # example than reverse the order
+        data2 = {"fingerprints": {"stableResultHash/v2": "234567900abcd", "stableResultHash/v1": "34567900abcde"}}
+        self.assertEquals(
+            {"stableResultHash": {"version": 2, "value": "234567900abcd"}},
+            get_fingerprints_hashes(data2["fingerprints"]),
+        )

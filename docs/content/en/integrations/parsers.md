@@ -85,6 +85,23 @@ Azure Security Center recommendations can be exported from the user interface in
 
 JSON report format
 
+
+### Blackduck API
+
+Import findings from the BlackDuck API - no file required.
+
+Follow these steps to setup API importing:
+
+1.  Configure the BlackDuck API Authentication details by navigating to
+    Configuration / Tool Configuration, selecting the Tool Type to "BlackDuck API",
+    and Authentication Type "API Key". Paste your BlackDuck API token in the
+    "API Key" field.
+2.  In the Product settings select "Add API Scan Configuration" and select the
+    previously added BlackDuck API Tool Configuration. Provide the ID
+    of the project from which to import findings in the field *Service key 1*.
+    Provide the version of the project from which to import findings in the field *Service key 2*.
+3.  After this is done, you can import the findings by selecting "BlackDuck API" as the scan type.
+
 ### Blackduck Hub
 
 2 options:
@@ -370,6 +387,11 @@ Import of JSON report from
 
 Import JSON container image linter reports
 <https://github.com/goodwithtech/dockle>
+
+### docker-bench-security Scanner
+
+Import JSON reports of OWASP [docker-bench-security](https://github.com/docker/docker-bench-security).
+docker-bench-security is a script that make tests based on [CIS Docker Benchmark](https://www.cisecurity.org/benchmark/docker/).
 
 ### Detect-secrets
 
@@ -1026,6 +1048,16 @@ For example, a report with `Dockle` as a driver name will produce a Test with a 
 Current implementation is limited and will aggregate all the findings in the SARIF file in one single report.
 {{% /alert %}}
 
+#### Support for de-duplication (fingerprinting)
+
+SARIF parser take into account data for fingerprinting. It's base on `fingerprints` and `partialFingerprints` properties.
+It's possible to activate de-duplication based on this data by customizing settings.
+
+```Python
+# in your settings.py file
+DEDUPLICATION_ALGORITHM_PER_PARSER["SARIF"] = DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
+```
+
 ### ScoutSuite
 
 Multi-Cloud security auditing tool. It uses APIs exposed by cloud
@@ -1168,6 +1200,10 @@ VCG output can be imported in CSV or Xml formats.
 
 Detailed XML Report
 
+### Veracode SourceClear
+
+Import Project CSV or JSON report
+
 ### Wapiti Scan
 
 Import XML report.
@@ -1193,6 +1229,12 @@ HTTP Return Code | Severity
 403              |  Medium
 407              |  Medium
 500              |  Low
+
+### Whispers
+
+Import Whispers JSON results.
+
+https://github.com/adeptex/whispers
 
 ### Xanitizer
 
