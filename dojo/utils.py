@@ -983,21 +983,25 @@ def get_period_counts(findings,
             except:
                 f_time = finding.date
 
-            if new_date <= f_time <= end_date:
+            if f_time <= end_date:
                 if severity == 'Critical':
-                    f_crit_count += 1
+                    if new_date <= f_time:
+                        f_crit_count += 1
                     if active:
                         active_crit_count += 1
                 elif severity == 'High':
-                    f_high_count += 1
+                    if new_date <= f_time:
+                        f_high_count += 1
                     if active:
                         active_high_count += 1
                 elif severity == 'Medium':
-                    f_med_count += 1
+                    if new_date <= f_time:
+                        f_med_count += 1
                     if active:
                         active_med_count += 1
                 elif severity == 'Low':
-                    f_low_count += 1
+                    if new_date <= f_time:
+                        f_low_count += 1
                     if active:
                         active_low_count += 1
 
