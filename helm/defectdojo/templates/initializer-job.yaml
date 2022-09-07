@@ -48,6 +48,17 @@ spec:
           path: {{ .hostPath }}
           {{- end }}
       {{- end }}
+      # we are mounting a secret which contains client TLS certificates to a
+      # temporary directory
+      {{- if .Values.postgresql.tls.enabled }}
+      - name: run
+        emptyDir: {}
+      - name: postgresql-tls-volume
+        secret:
+          secretName: {{ .Values.postgresql.tls.secretName }}
+          # we need it permissive to access as low-privileged user
+          defaultMode: 0644
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -84,8 +95,22 @@ spec:
           mountPath: {{ .path }}
           subPath: {{ .subPath }}
         {{- end }}
+        {{- if .Values.postgresql.tls.enabled }}
+        - name: run
+          # here we store client TLS certificates
+          mountPath: /run/defectdojo
+        - name: postgresql-tls-volume
+          mountPath: /run/defectdojo/{{ .Values.postgresql.tls.secretName }}
+        {{- end }}
         command:
-          - /entrypoint-initializer.sh
+          - /bin/sh
+          - -cx
+          - |
+            {{- if .Values.postgresql.tls.enabled }}
+            cp -a /run/defectdojo/{{ .Values.postgresql.tls.secretName }}/..data/* /run/defectdojo/
+            chmod 600 /run/defectdojo/{{ .Values.postgresql.tls.clientKey }}
+            {{- end }}
+            /entrypoint-initializer.sh
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
