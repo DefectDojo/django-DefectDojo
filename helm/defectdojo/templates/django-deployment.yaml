@@ -76,6 +76,15 @@ spec:
         emptyDir: {}
         {{- end }}
       {{- end }}
+      # we are mounting a secret which contains client TLS certificates to a
+      # temporary directory
+      {{- if .Values.postgresql.tls.enabled }}
+      - name: postgresql-tls-volume
+        secret:
+          secretName: {{ .Values.postgresql.tls.secretName }}
+          # we need it permissive to access as low-privileged user
+          defaultMode: 0644
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -136,6 +145,10 @@ spec:
         {{- if .Values.django.mediaPersistentVolume.enabled }}
         - name: {{ .Values.django.mediaPersistentVolume.name }}
           mountPath: {{.Values.extraConfigs.DD_MEDIA_ROOT | default "/app/media" | quote }}
+        {{- end }}
+        {{- if .Values.postgresql.tls.enabled }}
+        - name: postgresql-tls-volume
+          mountPath: /run/defectdojo/{{ .Values.postgresql.tls.secretName }}
         {{- end }}
         ports:
         - name: http
@@ -206,6 +219,17 @@ spec:
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
         {{- if .Values.extraEnv }}
         {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- end }}
+        {{- if .Values.postgresql.tls.enabled }}
+        lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -cx
+                  - |
+                    cp -a /run/defectdojo/{{ .Values.postgresql.tls.secretName }}/..data/* /run/defectdojo/
+                    chmod 600 /run/defectdojo/{{ .Values.postgresql.tls.clientKey }}
         {{- end }}
         {{- if .Values.django.uwsgi.livenessProbe.enabled }}
         livenessProbe:
