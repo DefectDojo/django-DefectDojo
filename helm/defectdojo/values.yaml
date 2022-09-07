@@ -354,6 +354,17 @@ postgresql:
   shmVolume:
     chmod:
       enabled: false
+  # mTLS support
+  tls:
+    # set to true to enable mutual TLS
+    enabled: false
+    # if enabled, define a secret containing certificates
+    secretName: pgsql-certs
+    # filenames has to correspond to entries in 'secretName' above
+    clientCert: client.crt
+    clientKey: client.key
+    caCert: ca.crt
+
 
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
