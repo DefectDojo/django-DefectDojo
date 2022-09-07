@@ -328,6 +328,7 @@ postgresql:
       replicationPasswordKey: postgresql-replication-password
   architecture: standalone
   primary:
+    name: primary
     persistence:
       enabled: true
     service:
