@@ -448,6 +448,7 @@ def close_finding(request, fid):
 
                 # only push to JIRA if there is an issue, to prevent a new one from being created
                 if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
+                    jira_helper.add_comment(finding, new_note, force_push=True)
                     finding.save(push_to_jira=True)
                 else:
                     finding.save()
