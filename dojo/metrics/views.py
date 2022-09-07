@@ -432,6 +432,7 @@ def metrics(request, mtype):
     template = 'dojo/metrics.html'
     show_pt_filter = True
     view = identify_view(request)
+    page_name = _('Metrics')
 
     if mtype != 'All':
         pt = Product_Type.objects.filter(id=mtype)
