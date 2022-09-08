@@ -49,13 +49,12 @@
 
         $(function () {
             $("textarea").each(function (index, elem) {
-
                 if (elem.hasAttribute("required")) {
                     elem.removeAttribute("required");
                     elem.id = "req"
                 }
 
-                if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids') {
+                if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids' && !$(elem).hasClass('select2-search__field')) {
                     var mde = new EasyMDE({
                         spellChecker: false,
                         element: elem,

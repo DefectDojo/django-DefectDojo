@@ -23,7 +23,7 @@ import tagulous
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
     validate_endpoints_to_add
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
-    Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
+    Check_List, SLA_Configuration, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
@@ -246,6 +246,11 @@ class ProductForm(forms.ModelForm):
                                        queryset=Product_Type.objects.none(),
                                        required=True)
 
+    sla_configuration = forms.ModelChoiceField(label='SLA Configuration',
+                                        queryset=SLA_Configuration.objects.all(),
+                                        required=True,
+                                        initial='Default')
+
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     team_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
@@ -256,7 +261,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
+        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'sla_configuration', 'regulations',
                 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
                 'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
@@ -2325,6 +2330,21 @@ class ToolConfigForm(forms.ModelForm):
         return form_data
 
 
+class SLAConfigForm(forms.ModelForm):
+    class Meta:
+        model = SLA_Configuration
+        fields = ['name', 'description', 'critical', 'high', 'medium', 'low']
+
+
+class DeleteSLAConfigForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = SLA_Configuration
+        fields = ['id']
+
+
 class DeleteObjectsSettingsForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -3058,6 +3078,19 @@ class AddGeneralQuestionnaireForm(forms.ModelForm):
         model = General_Survey
         exclude = ('num_responses', 'generated')
 
+    # date can only be today or in the past, not the future
+    def clean_expiration(self):
+        expiration = self.cleaned_data.get('expiration', None)
+        if expiration:
+            today = datetime.today().date()
+            if expiration < today:
+                raise forms.ValidationError("The expiration cannot be in the past")
+            elif expiration.day == today.day:
+                raise forms.ValidationError("The expiration cannot be today")
+        else:
+            raise forms.ValidationError("An expiration for the survey must be supplied")
+        return expiration
+
 
 class Delete_Questionnaire_Form(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -3105,8 +3138,12 @@ class EditQuestionnaireQuestionsForm(forms.ModelForm):
 
 
 class CreateQuestionForm(forms.Form):
-    type = forms.ChoiceField(choices=(("---", "-----"), ("text", "Text"), ("choice", "Choice")))
-    order = forms.IntegerField(min_value=1, widget=forms.TextInput(attrs={'data-type': 'both'}))
+    type = forms.ChoiceField(
+        choices=(("---", "-----"), ("text", "Text"), ("choice", "Choice")))
+    order = forms.IntegerField(
+        min_value=1,
+        widget=forms.TextInput(attrs={'data-type': 'both'}),
+        help_text="The order the question will appear on the questionnaire")
     optional = forms.BooleanField(help_text="If selected, user doesn't have to answer this question",
                                   initial=False,
                                   required=False,

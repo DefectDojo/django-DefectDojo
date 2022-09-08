@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "2.13.0-dev",
+  "version": "2.14.0",
   "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
@@ -32,7 +32,7 @@
     "jquery.cookie": "1.4.1",
     "jquery.flot.tooltip": "^0.9.0",
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",
-    "jszip": "^3.10.0",
+    "jszip": "^3.10.1",
     "justgage": "^1.5.1",
     "metismenu": "~3.0.7",
     "moment": "^2.29.4",
