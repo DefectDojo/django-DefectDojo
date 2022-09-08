@@ -36,19 +36,16 @@ class VulnersParser(object):
         return False
 
     def get_findings(self, file, test):
-        # API export is a JSON file
-        if file:
-            data = json.load(file)
-        else:
-            data = VulnersImporter().get_findings(test)
-
         findings = []
-        report = data.get("data", dict()).get("report", list())
-        vulns = data.get("data", dict()).get("vulns", dict())
 
-        if not file:
+        if file:
+            data = json.load(file).get("data", dict())
+            report = data.get("report", list())
+            vulns = data.get("vulns", dict())
+        else:
+            report = VulnersImporter().get_findings(test)
             vulns_id = [vuln.get("vulnID") for vuln in report]
-            vulns = VulnersImporter().get_vulns_description(test, vulns_id).get('data', dict()).get('documents', dict())
+            vulns = VulnersImporter().get_vulns_description(test, vulns_id)
 
         # for each issue found
         for component in report:
