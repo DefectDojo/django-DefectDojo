@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0164_remove_system_settings_staff_user_email_pattern'),
+        ('dojo', '0168_alter_system_settings_time_zone'),
     ]
 
     operations = [
