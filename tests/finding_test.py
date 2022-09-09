@@ -117,7 +117,7 @@ class FindingTest(BaseTestCase):
         # finding Vulnerability Ids
         driver.find_element(By.ID, "id_vulnerability_ids").send_keys("\nREF-3\nREF-4\n")
         # "Click" the Done button to Edit the finding
-        driver.find_element(By.NAME, '_Finished').click()
+        driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure

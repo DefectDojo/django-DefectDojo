@@ -25,7 +25,8 @@ from imagekit.processors import ResizeToFill
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 from dojo.filters import TemplateFindingFilter, SimilarFindingFilter, FindingFilter, AcceptedFindingFilter
-from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
+from dojo.forms import EditPlannedRemediationDateFindingForm, NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, \
+    PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings, CopyFindingForm

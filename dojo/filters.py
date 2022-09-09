@@ -1,43 +1,43 @@
 import collections
-import logging
-from datetime import datetime, timedelta
+from drf_spectacular.types import OpenApiTypes
 
-import pytz
-import six
-import tagulous
-from auditlog.models import LogEntry
+from drf_spectacular.utils import extend_schema_field
+from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY, UNDER_REVIEW_QUERY
+import logging
+from datetime import timedelta, datetime
 from django import forms
 from django.apps import apps
+from auditlog.models import LogEntry
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
-from django.forms import HiddenInput
+import six
 from django.utils.translation import ugettext_lazy as _
-from django_filters import BooleanFilter, CharFilter, DateFilter, FilterSet, ModelChoiceFilter, \
-    ModelMultipleChoiceFilter, MultipleChoiceFilter, NumberFilter, OrderingFilter, rest_framework as filters
+from django_filters import FilterSet, CharFilter, OrderingFilter, \
+    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
+    BooleanFilter, NumberFilter, DateFilter
+from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema_field
-
+import pytz
+from django.db.models import Q
+from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
+    Endpoint, Development_Environment, Finding_Template, Note_Type, \
+    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group, Vulnerability_Id
+from dojo.utils import get_system_setting
+from django.contrib.contenttypes.models import ContentType
+import tagulous
 # from tagulous.forms import TagWidget
 # import tagulous
 from dojo.authorization.roles_permissions import Permissions
-from dojo.endpoint.queries import get_authorized_endpoints
-from dojo.engagement.queries import get_authorized_engagements
-from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, \
-    INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, UNDER_REVIEW_QUERY, \
-    VERIFIED_FINDINGS_QUERY
-from dojo.finding.queries import get_authorized_findings
-from dojo.finding_group.queries import get_authorized_finding_groups
-from dojo.models import App_Analysis, ChoiceQuestion, Development_Environment, Dojo_Group, Dojo_User, \
-    ENGAGEMENT_STATUS_CHOICES, Endpoint, Endpoint_Status, Engagement, Engagement_Survey, Finding, Finding_Group, \
-    Finding_Template, Note_Type, Product, Product_API_Scan_Configuration, Product_Type, Question, SEVERITY_CHOICES, \
-    Test, Test_Import, Test_Type, TextQuestion, Vulnerability_Id
-from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
+from dojo.product.queries import get_authorized_products
+from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests
+from dojo.finding.queries import get_authorized_findings
+from dojo.endpoint.queries import get_authorized_endpoints
+from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.user.queries import get_authorized_users
-from dojo.utils import get_system_setting, is_finding_groups_enabled
+from django.forms import HiddenInput
+from dojo.utils import is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 
