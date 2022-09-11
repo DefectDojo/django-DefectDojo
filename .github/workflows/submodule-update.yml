@@ -24,7 +24,7 @@ jobs:
           fi
     
       - name: Checkout DefectDojo from dev 
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         if: steps.branch-target.outputs.branch == 'dev'
         with:
           ref: dev
@@ -41,7 +41,7 @@ jobs:
           owner: ${{ env.OWNER }}
           
       - name: Checkout DefectDojo from master 
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         if: steps.branch-target.outputs.branch == 'master'
         with:
           ref: master
