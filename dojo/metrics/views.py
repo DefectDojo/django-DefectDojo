@@ -34,6 +34,7 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.finding.queries import get_authorized_findings
 from dojo.endpoint.queries import get_authorized_endpoint_status
 from dojo.authorization.authorization import user_has_permission_or_403
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ generic metrics method
 
 def critical_product_metrics(request, mtype):
     template = 'dojo/metrics.html'
-    page_name = 'Critical Product Metrics'
+    page_name = _('Critical Product Metrics')
     critical_products = get_authorized_product_types(Permissions.Product_Type_View)
     critical_products = critical_products.filter(critical_product=True)
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
@@ -169,7 +170,7 @@ def finding_querys(prod_type, request):
         active_findings_qs = active_findings if isinstance(active_findings, QuerySet) else active_findings.qs
         messages.add_message(request,
                                      messages.ERROR,
-                                     'All objects have been filtered away. Displaying all objects',
+                                     _('All objects have been filtered away. Displaying all objects'),
                                      extra_tags='alert-danger')
 
     try:
@@ -282,7 +283,7 @@ def endpoint_querys(prod_type, request):
         active_endpoints_qs = active_endpoints if isinstance(active_endpoints, QuerySet) else active_endpoints.qs
         messages.add_message(request,
                                      messages.ERROR,
-                                     'All objects have been filtered away. Displaying all objects',
+                                     _('All objects have been filtered away. Displaying all objects'),
                                      extra_tags='alert-danger')
 
     try:
@@ -431,16 +432,16 @@ def metrics(request, mtype):
     template = 'dojo/metrics.html'
     show_pt_filter = True
     view = identify_view(request)
-    page_name = 'Product Type Metrics by '
+    page_name = _('Metrics')
 
     if mtype != 'All':
         pt = Product_Type.objects.filter(id=mtype)
         request.GET._mutable = True
         request.GET.appendlist('test__engagement__product__prod_type', mtype)
         request.GET._mutable = False
-        mtype = pt[0].name
+        product = pt[0].name
         show_pt_filter = False
-        page_name = '%s Metrics' % mtype
+        page_name = _('%(product_type)s Metrics') % {'product_type': mtype}
         prod_type = pt
     elif 'test__engagement__product__prod_type' in request.GET:
         prod_type = Product_Type.objects.filter(id__in=request.GET.getlist('test__engagement__product__prod_type', []))
@@ -451,10 +452,10 @@ def metrics(request, mtype):
 
     filters = dict()
     if view == 'Finding':
-        page_name += 'Findings'
+        page_name = _('Product Type Metrics by Findings')
         filters = finding_querys(prod_type, request)
     elif view == 'Endpoint':
-        page_name += 'Affected Endpoints'
+        page_name = _('Product Type Metrics by Affected Endpoints')
         filters = endpoint_querys(prod_type, request)
 
     in_period_counts, in_period_details, age_detail = get_in_period_details([
@@ -477,7 +478,7 @@ def metrics(request, mtype):
 
     if 'view' in request.GET and 'dashboard' == request.GET['view']:
         punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'], filters['weeks_between'], view)
-        page_name = (get_system_setting('team_name')) + " Metrics"
+        page_name = _('%(team_name)s Metrics') % {'team_name': get_system_setting('team_name')}
         template = 'dojo/dashboard-metrics.html'
 
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
@@ -516,6 +517,7 @@ simple metrics for easy reporting
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def simple_metrics(request):
+    page_name = _('Simple Metrics')
     now = timezone.now()
 
     if request.method == 'POST':
@@ -582,11 +584,11 @@ def simple_metrics(request):
 
         findings_by_product_type[pt] = findings_broken_out
 
-    add_breadcrumb(title="Simple Metrics", top_level=True, request=request)
+    add_breadcrumb(title=page_name, top_level=True, request=request)
 
     return render(request, 'dojo/simple_metrics.html', {
         'findings': findings_by_product_type,
-        'name': 'Simple Metrics',
+        'name': page_name,
         'metric': True,
         'user': request.user,
         'form': form,
@@ -725,10 +727,10 @@ def product_type_counts(request):
             for o in overall_in_pt:
                 aip[o['numerical_severity']] = o['numerical_severity__count']
         else:
-            messages.add_message(request, messages.ERROR, "Please choose month and year and the Product Type.",
+            messages.add_message(request, messages.ERROR, _("Please choose month and year and the Product Type."),
                                  extra_tags='alert-danger')
 
-    add_breadcrumb(title="Bi-Weekly Metrics", top_level=True, request=request)
+    add_breadcrumb(title=_("Bi-Weekly Metrics"), top_level=True, request=request)
 
     return render(request,
                   'dojo/pt_counts.html',
@@ -755,7 +757,7 @@ def engineer_metrics(request):
     users = UserFilter(request.GET, queryset=users)
     paged_users = get_page_items(request, users.qs, 25)
 
-    add_breadcrumb(title="Engineer Metrics", top_level=True, request=request)
+    add_breadcrumb(title=_("Engineer Metrics"), top_level=True, request=request)
 
     return render(request,
                   'dojo/engineer_metrics.html',
