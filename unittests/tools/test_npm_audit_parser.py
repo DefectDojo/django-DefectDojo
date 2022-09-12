@@ -66,7 +66,7 @@ class TestNpmAuditParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
-        self.assertEqual(94, findings[0].cwe)
+        self.assertEqual(1035, findings[0].cwe)
         self.assertEqual("growl", findings[0].component_name)
         self.assertEqual("1.9.2", findings[0].component_version)
 
