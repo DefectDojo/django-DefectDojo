@@ -51,9 +51,21 @@ def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwar
 
 
 # also get signal when id is set/changed so we can process new findings
-pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['id', 'active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope', 'risk_accepted'])
-# pre_save_changed.connect(pre_save_finding_status_change, sender=Finding)
-# post_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope'])
+pre_save_changed.connect(
+    pre_save_finding_status_change,
+    sender=Finding,
+    fields=[
+        "id",
+        "active",
+        "verified",
+        "false_p",
+        "is_mitigated",
+        "mitigated",
+        "mitigated_by",
+        "out_of_scope",
+        "risk_accepted",
+    ],
+)
 
 
 def update_finding_status(new_state_finding, user, changed_fields=None):

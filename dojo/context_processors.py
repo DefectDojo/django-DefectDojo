@@ -22,7 +22,9 @@ def globalize_vars(request):
             'SAML2_ENABLED': settings.SAML2_ENABLED,
             'SAML2_LOGIN_BUTTON_TEXT': settings.SAML2_LOGIN_BUTTON_TEXT,
             'SAML2_LOGOUT_URL': settings.SAML2_LOGOUT_URL,
-            'DOCUMENTATION_URL': settings.DOCUMENTATION_URL}
+            'DOCUMENTATION_URL': settings.DOCUMENTATION_URL,
+            'API_TOKENS_ENABLED': settings.API_TOKENS_ENABLED,
+            }
 
 
 def bind_system_settings(request):
