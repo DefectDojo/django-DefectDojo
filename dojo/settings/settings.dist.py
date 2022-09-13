@@ -301,6 +301,9 @@ env = environ.FileAwareEnv(
     DD_LDAP_GROUP_REQUIRE=(str, ''),
     DD_LDAP_USER_FLAG_ACTIVE=(str, ''),
     DD_LDAP_USER_FLAG_SUPERUSER=(str, ''),
+    DD_LDAP_FIND_GROUP_PERMS=(bool, False),
+    DD_LDAP_CACHE_TIMEOUT=(int, 3600),
+    DD_LDAP_MIRROR_GROUPS=(bool, False),
 )
 
 
@@ -410,6 +413,10 @@ AUTH_LDAP_USER_FLAGS_BY_GROUP = {
     "is_active": env('DD_LDAP_USER_FLAG_ACTIVE'),
     "is_superuser": env('DD_LDAP_USER_FLAG_SUPERUSER'),
 }
+
+AUTH_LDAP_FIND_GROUP_PERMS = env('DD_LDAP_FIND_GROUP_PERMS')
+AUTH_LDAP_CACHE_TIMEOUT = env('DD_LDAP_CACHE_TIMEOUT')
+AUTH_LDAP_MIRROR_GROUPS = env('DD_LDAP_MIRROR_GROUPS')
 
 # ------------------------------------------------------------------------------
 # DATABASE
