@@ -1,7 +1,7 @@
 from os import path
 from ..dojo_test_case import DojoTestCase
 from dojo.tools.anchore_enterprise.parser import AnchoreEnterpriseParser
-from dojo.tools.anchore_enterprise.parser import extract_cve, search_filepath
+from dojo.tools.anchore_enterprise.parser import extract_vulnerability_id, search_filepath
 from dojo.models import Test
 
 
@@ -23,6 +23,9 @@ class TestAnchoreEnterpriseParser(DojoTestCase):
             parser = AnchoreEnterpriseParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(57, len(findings))
+            finding = findings[1]
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2015-2992", finding.unsaved_vulnerability_ids[0])
 
     def test_anchore_policy_check_parser_invalid_format(self):
         with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/invalid_checks_format.json")) as testfile:
@@ -30,15 +33,15 @@ class TestAnchoreEnterpriseParser(DojoTestCase):
                 parser = AnchoreEnterpriseParser()
                 findings = parser.get_findings(testfile, Test())
 
-    def test_anchore_policy_check_extract_cve(self):
-        cve = extract_cve("CVE-2019-14540+openapi-generator-cli-4.0.0.jar:jackson-databind")
-        self.assertEqual("CVE-2019-14540", cve)
-        cve = extract_cve("RHSA-2020:0227+sqlite")
-        self.assertEqual("", cve)
-        cve = extract_cve("41cb7cdf04850e33a11f80c42bf660b3")
-        self.assertEqual("", cve)
-        cve = extract_cve("")
-        self.assertEqual("", cve)
+    def test_anchore_policy_check_extract_vulnerability_id(self):
+        vulnerability_id = extract_vulnerability_id("CVE-2019-14540+openapi-generator-cli-4.0.0.jar:jackson-databind")
+        self.assertEqual("CVE-2019-14540", vulnerability_id)
+        vulnerability_id = extract_vulnerability_id("RHSA-2020:0227+sqlite")
+        self.assertEqual(None, vulnerability_id)
+        vulnerability_id = extract_vulnerability_id("41cb7cdf04850e33a11f80c42bf660b3")
+        self.assertEqual(None, vulnerability_id)
+        vulnerability_id = extract_vulnerability_id("")
+        self.assertEqual(None, vulnerability_id)
 
     def test_anchore_policy_check_parser_search_filepath(self):
         file_path = search_filepath(

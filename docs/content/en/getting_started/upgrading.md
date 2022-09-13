@@ -5,20 +5,6 @@ draft: false
 weight: 5
 ---
 
-{{% alert title="Deprecation notice" color="warning" %}}
-Legacy authorization for changing configurations based on staff users will be
-removed with version 2.12.0 / 5. July 2022. If you have set
-`FEATURE_CONFIGURATION_AUTHORIZATION` to `False` in your local configuration,
-remove this local setting and start using the new authorization as described
-in [Configuration permissions]({{< ref "/usage/permissions#configuration-permissions" >}}).
-
-To support the transition, you can run a migration script with ``./manage.py migrate_staff_users``. This script:
-
-* creates a group for all staff users,
-* sets all configuration permissions that staff users had and
-* sets the global Owner role, if `AUTHORIZATION_STAFF_OVERRIDE` is set to `True`.
-{{% /alert %}}
-
 Docker-compose
 --------------
 
@@ -74,6 +60,45 @@ godojo installations
 --------------------
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
+
+## Upgrading to DefectDojo Version 2.13.x.
+
+The last release implemented the search for vulnerability ids, but the search database was not initialized. To populate the database table of the vulnerability ids, execute this django command from the defect dojo installation directory or from a shell of the Docker container or Kubernetes pod:
+
+`./manage.py migrate_cve`
+
+Additionally this requires a one-time rebuild of the Django-Watson search index. Execute this django command from the defect dojo installation directory or from a shell of the Docker container or Kubernetes pod:
+
+`./manage.py buildwatson`
+
+**Upgrade instructions for helm chart with postgres enabled**: The postgres database uses a statefulset by default. Before upgrading the helm chart we have to delete the statefullset and ensure that the pvc is reused, to keep the data. For more information: https://docs.bitnami.com/kubernetes/infrastructure/postgresql/administration/upgrade/ .
+
+```bash
+helm repo update
+helm dependency update ./helm/defectdojo
+
+# obtain name oft the postgres pvc
+export POSTGRESQL_PVC=$(kubectl get pvc -l app.kubernetes.io/instance=defectdojo,role=primary -o jsonpath="{.items[0].metadata.name}")
+
+# delete postgres statefulset
+kubectl delete statefulsets.apps defectdojo-postgresql --namespace default --cascade=orphan
+
+# upgrade
+helm upgrade \
+  defectdojo \
+  ./helm/defectdojo/ \
+  --set primary.persistence.existingClaim=$POSTGRESQL_PVC \
+  ... # add your custom settings
+```
+
+**Further changes:**
+
+Legacy authorization for changing configurations based on staff users has been removed.
+
+## Upgrading to DefectDojo Version 2.12.x.
+
+**Breaking change for search:** The field `cve` has been removed from the search index for Findings and the Vulnerability Ids have been added to the search index. With this the syntax to search explicitly for vulnerability ids have been changed from `cve:` to `vulnerability_id:`, e.g. `vulnerability_id:CVE-2020-27619`.
+
 
 ## Upgrading to DefectDojo Version 2.10.x.
 

@@ -7,7 +7,8 @@ from datetime import datetime
 from dojo.endpoint.utils import endpoint_filter
 from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists
-from dojo.models import IMPORT_ACTIONS, SEVERITIES, STATS_FIELDS, Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
+from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIELDS, Dojo_User, Finding_Group, Product, \
+    Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
@@ -27,6 +28,7 @@ from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.models import Permission
 from django.utils import timezone
 from django.db.utils import IntegrityError
 import six
@@ -41,6 +43,7 @@ from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImpo
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
+from dojo.user.utils import get_configuration_permissions_codenames
 
 
 logger = logging.getLogger(__name__)
@@ -73,7 +76,9 @@ def get_import_meta_data_from_dict(data):
 
     auto_create_context = data.get('auto_create_context', None)
 
-    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context
+    deduplication_on_engagement = data.get('deduplication_on_engagement', False)
+
+    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement
 
 
 def get_product_id_from_dict(data):
@@ -350,24 +355,64 @@ class UserSerializer(serializers.ModelSerializer):
     last_login = serializers.DateTimeField(read_only=True)
     password = serializers.CharField(write_only=True, style={'input_type': 'password'}, required=False,
                                      validators=[validate_password])
+    configuration_permissions = serializers.PrimaryKeyRelatedField(
+         allow_null=True,
+         queryset=Permission.objects.filter(codename__in=get_configuration_permissions_codenames()),
+         many=True,
+         required=False,
+         source='user_permissions')
 
     class Meta:
         model = Dojo_User
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_superuser', 'password')
-        else:
-            fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser', 'password')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_superuser', 'password', 'configuration_permissions')
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+
+        # This will show only "configuration_permissions" even if user has also other permissions
+        all_permissions = set(ret['configuration_permissions'])
+        allowed_configuration_permissions = set(self.fields['configuration_permissions'].child_relation.queryset.values_list('id', flat=True))
+        ret['configuration_permissions'] = list(all_permissions.intersection(allowed_configuration_permissions))
+
+        return ret
+
+    def update(self, instance, validated_data):
+        new_configuration_permissions = None
+        if 'user_permissions' in validated_data:  # This field was renamed from "configuration_permissions" in the meantime
+            new_configuration_permissions = set(validated_data.pop('user_permissions'))
+
+        instance = super().update(instance, validated_data)
+
+        # This will update only Permissions from category "configuration_permissions". Others will be untouched
+        if new_configuration_permissions:
+            allowed_configuration_permissions = set(self.fields['configuration_permissions'].child_relation.queryset.all())
+            non_configuration_permissions = set(instance.user_permissions.all()) - allowed_configuration_permissions
+            new_permissions = non_configuration_permissions.union(new_configuration_permissions)
+            instance.user_permissions.set(new_permissions)
+
+        return instance
 
     def create(self, validated_data):
         if 'password' in validated_data:
             password = validated_data.pop('password')
         else:
             password = None
+
+        new_configuration_permissions = None
+        if 'user_permissions' in validated_data:  # This field was renamed from "configuration_permissions" in the meantime
+            new_configuration_permissions = set(validated_data.pop('user_permissions'))
+
         user = Dojo_User.objects.create(**validated_data)
+
         if password:
             user.set_password(password)
         else:
             user.set_unusable_password()
+
+        # This will create only Permissions from category "configuration_permissions". There are no other Permissions.
+        if new_configuration_permissions:
+            user.user_permissions.set(new_configuration_permissions)
+
         user.save()
         return user
 
@@ -409,9 +454,55 @@ class RoleSerializer(serializers.ModelSerializer):
 
 class DojoGroupSerializer(serializers.ModelSerializer):
 
+    configuration_permissions = serializers.PrimaryKeyRelatedField(
+         allow_null=True,
+         queryset=Permission.objects.filter(codename__in=get_configuration_permissions_codenames()),
+         many=True,
+         required=False,
+         source='auth_group.permissions')
+
     class Meta:
         model = Dojo_Group
         exclude = ['auth_group']
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+
+        # This will show only "configuration_permissions" even if user has also other permissions
+        all_permissions = set(ret['configuration_permissions'])
+        allowed_configuration_permissions = set(self.fields['configuration_permissions'].child_relation.queryset.values_list('id', flat=True))
+        ret['configuration_permissions'] = list(all_permissions.intersection(allowed_configuration_permissions))
+
+        return ret
+
+    def create(self, validated_data):
+        new_configuration_permissions = None
+        if 'auth_group' in validated_data and 'permissions' in validated_data['auth_group']:  # This field was renamed from "configuration_permissions" in the meantime
+            new_configuration_permissions = set(validated_data.pop('auth_group')['permissions'])
+
+        instance = super().create(validated_data)
+
+        # This will update only Permissions from category "configuration_permissions". There are no other Permissions.
+        if new_configuration_permissions:
+            instance.auth_group.permissions.set(new_configuration_permissions)
+
+        return instance
+
+    def update(self, instance, validated_data):
+        new_configuration_permissions = None
+        if 'auth_group' in validated_data and 'permissions' in validated_data['auth_group']:  # This field was renamed from "configuration_permissions" in the meantime
+            new_configuration_permissions = set(validated_data.pop('auth_group')['permissions'])
+
+        instance = super().update(instance, validated_data)
+
+        # This will update only Permissions from category "configuration_permissions". Others will be untouched
+        if new_configuration_permissions:
+            allowed_configuration_permissions = set(self.fields['configuration_permissions'].child_relation.queryset.all())
+            non_configuration_permissions = set(instance.auth_group.permissions.all()) - allowed_configuration_permissions
+            new_permissions = non_configuration_permissions.union(new_configuration_permissions)
+            instance.auth_group.permissions.set(new_permissions)
+
+        return instance
 
 
 class DojoGroupMemberSerializer(serializers.ModelSerializer):
@@ -670,6 +761,21 @@ class EngagementToNotesSerializer(serializers.Serializer):
 class EngagementToFilesSerializer(serializers.Serializer):
     engagement_id = serializers.PrimaryKeyRelatedField(queryset=Engagement.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
+
+    def to_representation(self, data):
+        engagement = data.get('engagement_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(engagement, engagement.id)),
+                'title': file.title
+            })
+        new_data = {'engagement_id': engagement.id, 'files': new_files}
+        return new_data
 
 
 class AppAnalysisSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -967,6 +1073,21 @@ class TestToFilesSerializer(serializers.Serializer):
     test_id = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
 
+    def to_representation(self, data):
+        test = data.get('test_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(test, test.id)),
+                'title': file.title
+            })
+        new_data = {'test_id': test.id, 'files': new_files}
+        return new_data
+
 
 class TestImportFindingActionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1057,7 +1178,7 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
         return JIRAIssueSerializer(read_only=True).to_representation(issue)
 
 
-class VulnerabilityReferenceSerializer(serializers.ModelSerializer):
+class VulnerabilityIdSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vulnerability_Id
         fields = ['vulnerability_id']
@@ -1077,7 +1198,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     jira_change = serializers.SerializerMethodField(read_only=True)
     display_status = serializers.SerializerMethodField()
     finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
-    vulnerability_ids = VulnerabilityReferenceSerializer(source='vulnerability_id_set', many=True, required=False)
+    vulnerability_ids = VulnerabilityIdSerializer(source='vulnerability_id_set', many=True, required=False)
 
     class Meta:
         model = Finding
@@ -1206,7 +1327,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         default=None)
     tags = TagListSerializerField(required=False)
     push_to_jira = serializers.BooleanField(default=False)
-    vulnerability_ids = VulnerabilityReferenceSerializer(source='vulnerability_id_set', many=True, required=False)
+    vulnerability_ids = VulnerabilityIdSerializer(source='vulnerability_id_set', many=True, required=False)
+    reporter = serializers.PrimaryKeyRelatedField(required=False, queryset=User.objects.all())
 
     class Meta:
         model = Finding
@@ -1214,7 +1336,6 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         extra_kwargs = {
             'active': {'required': True},
             'verified': {'required': True},
-            'reporter': {'default': serializers.CurrentUserDefault()},
         }
 
     # Overriding this to push add Push to JIRA functionality
@@ -1255,6 +1376,10 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         return tag_object
 
     def validate(self, data):
+        if 'reporter' not in data:
+            request = self.context['request']
+            data['reporter'] = request.user
+
         if ((data['active'] or data['verified']) and data['duplicate']):
             raise serializers.ValidationError('Duplicate findings cannot be'
                                               ' verified or active')
@@ -1275,7 +1400,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         return data
 
 
-class VulnerabilityReferenceTemplateSerializer(serializers.ModelSerializer):
+class VulnerabilityIdTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vulnerability_Id_Template
         fields = ['vulnerability_id']
@@ -1283,7 +1408,7 @@ class VulnerabilityReferenceTemplateSerializer(serializers.ModelSerializer):
 
 class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
-    vulnerability_ids = VulnerabilityReferenceTemplateSerializer(source='vulnerability_id_template_set', many=True, required=False)
+    vulnerability_ids = VulnerabilityIdTemplateSerializer(source='vulnerability_id_template_set', many=True, required=False)
 
     class Meta:
         model = Finding_Template
@@ -1382,7 +1507,7 @@ class ImportScanSerializer(serializers.Serializer):
         queryset=Engagement.objects.all(), required=False)
     test_title = serializers.CharField(required=False)
     auto_create_context = serializers.BooleanField(required=False)
-
+    deduplication_on_engagement = serializers.BooleanField(required=False)
     lead = serializers.PrimaryKeyRelatedField(
         allow_null=True,
         default=None,
@@ -1442,8 +1567,8 @@ class ImportScanSerializer(serializers.Serializer):
 
         group_by = data.get('group_by', None)
 
-        _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(data)
-        engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context)
+        _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(data)
+        engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement)
 
         # have to make the scan_date_time timezone aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
         scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
@@ -1520,6 +1645,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         queryset=Test.objects.all())
     test_title = serializers.CharField(required=False)
     auto_create_context = serializers.BooleanField(required=False)
+    deduplication_on_engagement = serializers.BooleanField(required=False)
 
     push_to_jira = serializers.BooleanField(default=False)
     # Close the old findings if the parameter is not provided. This is to
@@ -1574,13 +1700,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         tags = data.get('tags', None)
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
-
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
         group_by = data.get('group_by', None)
 
-        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context = get_import_meta_data_from_dict(data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(data)
         # we passed validation, so the test is present
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
@@ -1609,7 +1734,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             elif auto_create_context:
                 # perform Import to create test
                 logger.debug('reimport for non-existing test, using import to create new test')
-                engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context)
+                engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement)
                 importer = Importer()
                 test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, lead, environment,
                                                                                                 active=active, verified=verified, tags=tags,
@@ -1706,7 +1831,7 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
         create_tags = data['create_tags']
         create_dojo_meta = data['create_dojo_meta']
 
-        _, _, _, _, _, product_name, _, _ = get_import_meta_data_from_dict(data)
+        _, _, _, _, _, product_name, _, _, _ = get_import_meta_data_from_dict(data)
         product = get_target_product_if_exists(product_name)
         if not product:
             product_id = get_product_id_from_dict(data)
@@ -1800,6 +1925,21 @@ class FindingToNotesSerializer(serializers.Serializer):
 class FindingToFilesSerializer(serializers.Serializer):
     finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
+
+    def to_representation(self, data):
+        finding = data.get('finding_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(finding, finding.id)),
+                'title': file.title
+            })
+        new_data = {'finding_id': finding.id, 'files': new_files}
+        return new_data
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
@@ -1939,6 +2079,12 @@ class NetworkLocationsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class SLAConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SLA_Configuration
+        fields = '__all__'
+
+
 class UserProfileSerializer(serializers.Serializer):
     user = UserSerializer(many=False)
     user_contact_info = UserContactInfoSerializer(many=False)
@@ -1946,3 +2092,15 @@ class UserProfileSerializer(serializers.Serializer):
     dojo_group_member = DojoGroupMemberSerializer(many=True)
     product_type_member = ProductTypeMemberSerializer(many=True)
     product_member = ProductMemberSerializer(many=True)
+
+
+class DeletePreviewSerializer(serializers.Serializer):
+    model = serializers.CharField(read_only=True)
+    id = serializers.IntegerField(read_only=True, allow_null=True)
+    name = serializers.CharField(read_only=True)
+
+
+class ConfigurationPermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        exclude = ['content_type']

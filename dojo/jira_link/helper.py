@@ -5,6 +5,7 @@ import io
 import json
 import requests
 from django.conf import settings
+from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
@@ -440,6 +441,19 @@ def get_jira_status(finding):
         return issue.fields.status
 
 
+# Used for unit testing so geting all the connections is manadatory
+def get_jira_comments(finding):
+    if finding.has_jira_issue:
+        j_issue = finding.jira_issue.jira_id
+    elif finding.finding_group and finding.finding_group.has_jira_issue:
+        j_issue = finding.finding_group.jira_issue.jira_id
+
+    if j_issue:
+        project = get_jira_project(finding)
+        issue = jira_get_issue(project, j_issue)
+        return issue.fields.comment.comments
+
+
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_generic_alert(title, description):
     create_notification(
@@ -456,7 +470,7 @@ def log_jira_alert(error, obj):
         event='jira_update',
         title='Error pushing to JIRA ' + '(' + truncate_with_dots(prod_name(obj), 25) + ')',
         description=to_str_typed(obj) + ', ' + error,
-        url=obj.get_absolute_url,
+        url=obj.get_absolute_url(),
         icon='bullseye',
         source='Push to JIRA',
         obj=obj)
@@ -484,6 +498,16 @@ def get_labels(obj):
             labels.append(system_label)
         # Update the label with the product name (underscore)
         labels.append(prod_name(obj).replace(" ", "_"))
+
+    add_vulnerability_id_to_jira_label = system_settings.add_vulnerability_id_to_jira_label
+    if add_vulnerability_id_to_jira_label and type(obj) == Finding and obj.vulnerability_ids:
+        for id in obj.vulnerability_ids:
+            labels.append(id)
+    elif add_vulnerability_id_to_jira_label and type(obj) == Finding_Group:
+        for finding in obj.findings.all():
+            for id in finding.vulnerability_ids:
+                labels.append(id)
+
     return labels
 
 
@@ -660,6 +684,8 @@ def add_jira_issue(obj, *args, **kwargs):
         tags = get_tags(obj)
         jira_labels = labels + tags
         if jira_labels:
+            # de-dup
+            jira_labels = list(dict.fromkeys(jira_labels))
             if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
                 fields['labels'] = jira_labels
 
@@ -706,7 +732,7 @@ def add_jira_issue(obj, *args, **kwargs):
             else:
                 logger.info('The following EPIC does not exist: %s', eng.name)
 
-        # only link the new issue if it was succefully created, incl attachments and epic link
+        # only link the new issue if it was successfully created, incl attachments and epic link
         logger.debug('saving JIRA_Issue for %s finding %s', new_issue.key, obj.id)
         j_issue = JIRA_Issue(
             jira_id=new_issue.id, jira_key=new_issue.key, jira_project=jira_project)
@@ -718,7 +744,18 @@ def add_jira_issue(obj, *args, **kwargs):
         issue = jira.issue(new_issue.id)
 
         logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
+
+        # Add any notes that already exist in the finding to the JIRA
+        for find in findings:
+            if find.notes.all():
+                for note in find.notes.all().reverse():
+                    add_comment(obj, note)
+
         return True
+    except TemplateDoesNotExist as e:
+        logger.exception(e)
+        log_jira_alert(str(e), obj)
+        return False
     except JIRAError as e:
         logger.exception(e)
         logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
@@ -1317,7 +1354,7 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
                                                 'JIRA Project config stored successfully.',
                                                 extra_tags='alert-success')
                         error = False
-                        logger.debug('stored JIRA_Project succesfully')
+                        logger.debug('stored JIRA_Project successfully')
             except Exception as e:
                 error = True
                 logger.exception(e)
@@ -1351,7 +1388,7 @@ def process_jira_epic_form(request, engagement=None):
             if jira_epic_form.cleaned_data.get('push_to_jira'):
                 logger.debug('pushing engagement to JIRA')
                 if push_to_jira(engagement):
-                    logger.debug('Push to JIRA for Epic queued succesfully')
+                    logger.debug('Push to JIRA for Epic queued successfully')
                     messages.add_message(
                         request,
                         messages.SUCCESS,

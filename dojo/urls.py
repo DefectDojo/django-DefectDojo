@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.conf.urls import include, url
-from django.conf.urls.static import static
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
@@ -12,7 +11,7 @@ from dojo import views
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
-    StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
+    SLAConfigurationViewset, StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
@@ -21,7 +20,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
     NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset, UserContactInfoViewSet, \
-    ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView
+    ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView, \
+    ConfigurationPermissionViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -45,6 +45,7 @@ from dojo.tool_type.urls import urlpatterns as tool_type_urls
 from dojo.tool_config.urls import urlpatterns as tool_config_urls
 from dojo.tool_product.urls import urlpatterns as tool_product_urls
 from dojo.cred.urls import urlpatterns as cred_urls
+from dojo.sla_config.urls import urlpatterns as sla_urls
 from dojo.system_settings.urls import urlpatterns as system_settings_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
@@ -67,6 +68,7 @@ admin.autodiscover()
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
 v2_api.register(r'technologies', AppAnalysisViewSet)
+v2_api.register(r'configuration_permissions', ConfigurationPermissionViewSet)
 v2_api.register(r'endpoints', EndPointViewSet)
 v2_api.register(r'endpoint_meta_import', EndpointMetaImporterView, basename='endpointmetaimport')
 v2_api.register(r'endpoint_status', EndpointStatusViewSet)
@@ -89,6 +91,7 @@ v2_api.register(r'product_type_groups', ProductTypeGroupViewSet)
 v2_api.register(r'product_groups', ProductGroupViewSet)
 v2_api.register(r'roles', RoleViewSet)
 v2_api.register(r'global_roles', GlobalRoleViewSet)
+v2_api.register(r'sla_configurations', SLAConfigurationViewset)
 v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
 v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
 v2_api.register(r'product_api_scan_configurations', ProductAPIScanConfigurationViewSet)
@@ -136,6 +139,7 @@ ur += tool_type_urls
 ur += tool_config_urls
 ur += tool_product_urls
 ur += cred_urls
+ur += sla_urls
 ur += system_settings_urls
 ur += notifications_urls
 ur += object_urls
@@ -167,7 +171,6 @@ urlpatterns = [
     url(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history,
         name='action_history'),
     url(r'^%s' % get_system_setting('url_prefix'), include(ur)),
-    url(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token, name='api-token-auth'),
     url(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
 
     # drf-yasg = OpenAPI2
@@ -179,7 +182,8 @@ urlpatterns = [
 
     url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
     url(r'^manage_files/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.manage_files, name='manage_files'),
-
+    url(r'^access_file/(?P<fid>\d+)/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.access_file, name='access_file'),
+    url(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), views.protected_serve, {'document_root': settings.MEDIA_ROOT})
 ]
 
 urlpatterns += survey_urls
@@ -198,8 +202,9 @@ if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
         #  django admin
         urlpatterns += [url(r'^%sadmin/' % get_system_setting('url_prefix'), admin.site.urls)]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if hasattr(settings, 'API_TOKENS_ENABLED'):
+    if settings.API_TOKENS_ENABLED:
+        urlpatterns += [url(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token, name='api-token-auth')]
 
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, 'EXTRA_URL_PATTERNS'):

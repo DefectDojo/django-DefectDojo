@@ -41,6 +41,11 @@
                                 <i class="fa fa-pencil-square-o"></i> Edit Test
                             </a>
                         </li>
+                        <li>
+                            <a class="" href="{% url 'copy_test' test.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                <i class="fa fa-copy"></i> Copy Test
+                            </a>
+                        </li>
                         {% endif %}
                         {% if show_re_upload %}
                         {% if test|has_object_permission:"Import_Scan_Result" %}
@@ -588,7 +593,7 @@
                                 <label style="font-size: 80%; font-weight: normal;">
                                     <input id="id_bulk_finding_group_add" name="finding_group_add" class="finding_group_option" type="checkbox" disabled/> <span>Add to...</span>
                                 </label>
-                                <select id="id_add_to_finding_group" name="add_to_finding_group" style="font-size: 80%">
+                                <select id="id_add_to_finding_group_id" name="add_to_finding_group_id" style="font-size: 80%">
                                     <option value="">Choose...</option>
                                     {% for group in finding_groups %}
                                         <option value="{{ group.id }}">{{ group.name|truncatechars_html:40 }}</option>
@@ -707,6 +712,11 @@
                                             <i class="fa fa-pencil-square-o"></i> Edit
                                             </a>
                                         </li>
+                                        <li>
+                                            <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                            <i class="fa fa-copy"></i> Copy
+                                            </a>
+                                        </li>
                                         <li class="divider"></li>
                                         {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
                                             <li role="presentation">
@@ -727,14 +737,14 @@
                                             </a>
                                         </li>
                                     {% endif %}
-                                    {% if "dojo.add_finding_template"|has_configuration_permission:"staff" %}
+                                    {% if "dojo.add_finding_template"|has_configuration_permission %}
                                         <li role="presentation">
                                             <a href="{% url 'mktemplate' finding.id %}">
                                                 <i class="fa fa-copy"></i> Make Finding a Template
                                             </a>
                                         </li>
                                     {% endif %}
-                                    {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission:"staff" %}
+                                    {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission %}
                                         <li role="presentation">
                                             <a href="{% url 'find_template_to_apply' finding.id %}">
                                                 <i class="fa fa-copy"></i> Apply Template to Finding
@@ -1136,9 +1146,10 @@
                 {% for file in files %}
                 <div class="col-md-2" style="text-align: center">
                     <div class="row">
-                        <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
-                            {% if file.file.url|get_thumbnail %}
-                                <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
+                        {% url 'access_file' fid=file.id oid=test.id obj_type='Test' as image_url %}
+                        <a href="{{ image_url }}" target="_blank">
+                            {% if file|get_thumbnail %}
+                                <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
                             {% else %}
                                 <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
                             {% endif %}

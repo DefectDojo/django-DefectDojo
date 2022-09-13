@@ -36,8 +36,6 @@ class IbmAppParser(object):
         # Now time to loop through individual issues and perform necessary actions
         for issue in root.iter("issue-group"):
             for item in issue.iter("item"):
-                impact = "N/A"
-
                 ref_link = ""
                 if item.find("issue-type/ref") is not None:
                     recommendation_data = ""
@@ -45,14 +43,17 @@ class IbmAppParser(object):
 
                     name = issue_data['name']
                     # advisory = issue_data['advisory']
+                    vulnerability_id = issue_data.get('cve')
 
-                    cve = None
-                    if "cve" in issue_data:
-                        cve = issue_data['cve']
+                    cwe = issue_data.get('cwe')
+                    if cwe:
+                        cwe = int(cwe)
 
                     url = self.get_url(root, item.find('url/ref').text)
 
                     severity = item.find('severity').text.capitalize()
+                    if severity == 'Informational':
+                        severity = 'Info'
                     issue_description = self.fetch_advisory_group(root, issue_data['advisory'])
 
                     for fix_recommendation_group in root.iter("fix-recommendation-group"):
@@ -77,14 +78,14 @@ class IbmAppParser(object):
                         # create finding
                         finding = Finding(title=name,
                                           test=test,
-                                          cve=cve,
+                                          cwe=cwe,
                                           description=issue_description,
                                           severity=severity,
                                           mitigation=recommendation_data,
-                                          impact=impact,
                                           references=ref_link,
                                           dynamic_finding=True)
-
+                        if vulnerability_id:
+                            finding.unsaved_vulnerability_ids = [vulnerability_id]
                         finding.unsaved_endpoints = list()
                         dupes[dupe_key] = finding
 
@@ -107,8 +108,16 @@ class IbmAppParser(object):
                     'fix-recommendation': item.find("fix-recommendation/ref").text
                 }
 
-                if "cve" in issue_type:
-                    issues[issue_type.attrib['id']] = {'cve': issue_type.find("cve").text}
+                cve = item.find("cve").text
+                if cve is not None:
+                    issues[item.attrib['id']]['cve'] = cve
+
+                # cwe can be a link
+                cwe = item.find("cwe/link")
+                if cwe is None:
+                    cwe = item.find("cwe")
+                if cwe.text is not None:
+                    issues[item.attrib['id']]['cwe'] = int(cwe.text)
 
         return issues
 
