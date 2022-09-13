@@ -6,6 +6,8 @@ from dojo.tools.bugcrowd_api.importer import BugcrowdApiImporter
 import re
 import dateutil.parser
 import logging
+from django.core.exceptions import ValidationError
+
 
 SCAN_BUGCROWD_API = "Bugcrowd API Import"
 
@@ -69,7 +71,7 @@ class BugcrowdApiParser(object):
             date = dateutil.parser.parse(entry["attributes"]["submitted_at"])
 
             bug_url = ""
-            bug_endpoint = Endpoint()
+            bug_endpoint = None
             if entry["attributes"]["bug_url"]:
                 try:
                     if "://" in entry["attributes"]["bug_url"]:  # is the host full uri?
@@ -82,7 +84,7 @@ class BugcrowdApiParser(object):
                             "//" + entry["attributes"]["bug_url"].strip()
                         )
                         # can raise exception if there is no way to parse the host
-                except Exception as e:  # We don't want to fail the whole import just for 1 error in the bug_url
+                except ValidationError:  # We don't want to fail the whole import just for 1 error in the bug_url
                     logger.error(
                         "Error parsing bugrcrowd bug_url : {}".format(
                             entry["attributes"]["bug_url"].strip()
@@ -124,21 +126,23 @@ class BugcrowdApiParser(object):
                 dynamic_finding=True,
                 unique_id_from_tool=unique_id_from_tool,
             )
-
-            try:
-                bug_endpoint.clean()
+            if bug_endpoint:
                 try:
-                    finding.unsaved_endpoints = [bug_endpoint]
-                except Exception as e:
+                    bug_endpoint.clean()
+                    try:
+                        finding.unsaved_endpoints = [bug_endpoint]
+                    except Exception as e:
+                        logger.error(
+                            "{} bug url from bugcrowd failed to parse to endpoint, error= {}".format(
+                                str(bug_endpoint), e
+                            )
+                        )
+                except ValidationError:
                     logger.error(
-                        "{} bug url from bugcrowd failed to parse to endpoint, error= {}".format(
-                            str(bug_endpoint), e
+                        "Broken Bugcrowd endpoint {} was skipped.".format(
+                            bug_endpoint.host
                         )
                     )
-            except:
-                logger.error(
-                    "Broken Bugcrowd endpoint {} was skipped.".format(bug_endpoint.host)
-                )
 
             findings.append(finding)
 

@@ -113,10 +113,12 @@ class BugcrowdAPI:
                     you can use these as Service key 1 for filtering submissions \
                         You also have targets "{ target_names }" that can be used in Service key 2'
             else:
-                raise Exception("Bugcrowd did not return a valid targets response")
+                raise Exception(
+                    "Bugcrowd API test not successful, no targets were defined in Bugcrowd which is used for filtering, check your configuration"
+                )
         else:
             raise Exception(
-                "Bugcrowd API test not successful, check your configuration"
+                "Bugcrowd API test not successful, could not retrieve the programs or submissions. Check your configuration"
             )
 
     def test_product_connection(self, api_scan_configuration):
