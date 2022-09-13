@@ -8,49 +8,6 @@ import dateutil.parser
 import logging
 
 SCAN_BUGCROWD_API = "Bugcrowd API Import"
-pattern_URI = re.compile(
-    r"(?i)(?P<proto>(http(s)*|ftp|ssh))(://)((?P<user>\w+)(:(?P<password>\w+))?@)?(?P<hostname>[\w\.-]+)(:(?P<port>[0-9]+))?(?P<path>.*)?"
-)
-
-# from https://github.com/spring-projects/spring-framework/blob/main/spring-web/src/main/java/org/springframework/web/util/UriComponentsBuilder.java
-
-SCHEME_PATTERN = "([^:/?#]+):"
-
-USERINFO_PATTERN = "([^@\\[/?#]*)"
-
-HOST_IPV4_PATTERN = "[^\\[/?#:]*"
-
-HOST_PATTERN = "(" + HOST_IPV4_PATTERN + ")"
-
-PORT_PATTERN = "(\\{[^}]+\\}?|[^/?#]*)"
-
-PATH_PATTERN = "([^?#]*)"
-
-QUERY_PATTERN = "([^#]*)"
-
-LAST_PATTERN = "(.*)"
-
-# Regex patterns that matches URIs. See RFC 3986, appendix B
-URI_PATTERN = re.compile(
-    "^("
-    + SCHEME_PATTERN
-    + ")?"
-    + "(//("
-    + USERINFO_PATTERN
-    + "@)?"
-    + HOST_PATTERN
-    + "(:"
-    + PORT_PATTERN
-    + ")?"
-    + ")?"
-    + PATH_PATTERN
-    + "(\\?"
-    + QUERY_PATTERN
-    + ")?"
-    + "(#"
-    + LAST_PATTERN
-    + ")?"
-)
 
 pattern_title_authorized = re.compile(r"^[a-zA-Z0-9_\s+-.]*$")
 
@@ -112,6 +69,7 @@ class BugcrowdApiParser(object):
             date = dateutil.parser.parse(entry["attributes"]["submitted_at"])
 
             bug_url = ""
+            bug_endpoint = Endpoint()
             if entry["attributes"]["bug_url"]:
                 try:
                     if "://" in entry["attributes"]["bug_url"]:  # is the host full uri?
@@ -190,17 +148,6 @@ class BugcrowdApiParser(object):
         last_index = len(log) - 1
         entry = log[last_index]
         return self.convert_log_timestamp(entry["timestamp"])
-
-    def convert_endpoint(self, url):
-        """Convert bugcrowd bug url into DefectDojo endpoints"""
-        url = url.strip()
-        result = URI_PATTERN.search(url)
-
-        if result:
-            try:
-                return Endpoint.from_uri(result.group(0).strip())
-            except Exception as e:
-                logger.error("Error converting bugcrowd endpoint {}".format(result))
 
     def include_finding(self, entry):
         """Determine whether this finding should be imported to DefectDojo"""
