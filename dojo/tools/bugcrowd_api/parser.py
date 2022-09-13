@@ -125,7 +125,8 @@ class BugcrowdApiParser(object):
                 unique_id_from_tool=unique_id_from_tool,
             )
 
-            if bug_endpoint:
+            try:
+                bug_endpoint.clean()
                 try:
                     finding.unsaved_endpoints = [bug_endpoint]
                 except Exception as e:
@@ -134,6 +135,10 @@ class BugcrowdApiParser(object):
                             str(bug_endpoint), e
                         )
                     )
+            except:
+                logger.error(
+                    "Broken Bugcrowd endpoint {} was skipped.".format(bug_endpoint.host)
+                )
 
             findings.append(finding)
 
