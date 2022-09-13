@@ -16,7 +16,7 @@ class BugcrowdAPI:
     }
 
     def __init__(self, tool_config):
-        tool_type, _ = Tool_Type.objects.get_or_create(name="Bugcrowd API")
+        Tool_Type.objects.get_or_create(name="Bugcrowd API")
 
         self.session = requests.Session()
         if tool_config.authentication_type == "API":
@@ -100,6 +100,7 @@ class BugcrowdAPI:
             response_targets = self.session.get(
                 url="{}/targets".format(self.bugcrowd_api_url)
             )
+            response_targets.raise_for_status()
             if response_targets.ok:
                 data_targets = response_targets.json().get("data")
                 targets = list(
@@ -111,6 +112,12 @@ class BugcrowdAPI:
                 return f'With {total_subs} submissions, you have access to the "{ program_names }" programs, \
                     you can use these as Service key 1 for filtering submissions \
                         You also have targets "{ target_names }" that can be used in Service key 2'
+            else:
+                raise Exception("Bugcrowd did not return a valid targets response")
+        else:
+            raise Exception(
+                "Bugcrowd API test not successful, check your configuration"
+            )
 
     def test_product_connection(self, api_scan_configuration):
         submissions = []
