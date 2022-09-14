@@ -86,7 +86,6 @@ class BugcrowdAPI:
             url="{}/submissions".format(self.bugcrowd_api_url)
         )
         response_subs.raise_for_status()
-
         if response_programs.ok and response_subs.ok:
             data = response_programs.json().get("data")
             data_subs = response_subs.json().get("meta")
@@ -114,11 +113,15 @@ class BugcrowdAPI:
                         You also have targets "{ target_names }" that can be used in Service key 2'
             else:
                 raise Exception(
-                    "Bugcrowd API test not successful, no targets were defined in Bugcrowd which is used for filtering, check your configuration"
+                    "Bugcrowd API test not successful, no targets were defined in Bugcrowd which is used for filtering, check your configuration, HTTP response was: {}".format(
+                        response_targets.text
+                    )
                 )
         else:
             raise Exception(
-                "Bugcrowd API test not successful, could not retrieve the programs or submissions. Check your configuration"
+                "Bugcrowd API test not successful, could not retrieve the programs or submissions, check your configuration, HTTP response for programs was: {}, HTTP response for submissions was: {}".format(
+                    response_programs.text, response_subs.text
+                )
             )
 
     def test_product_connection(self, api_scan_configuration):
