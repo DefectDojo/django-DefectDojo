@@ -59,16 +59,16 @@ def critical_product_metrics(request, mtype):
 
 
 def get_date_range(objects):
-    start_date = objects.earliest('date').date
-    start_date = datetime(start_date.year,
-                        start_date.month, start_date.day,
-                        tzinfo=timezone.get_current_timezone())
-    end_date = objects.latest('date').date
-    end_date = datetime(end_date.year,
-                        end_date.month, end_date.day,
-                        tzinfo=timezone.get_current_timezone())
+    tz = timezone.get_current_timezone()
 
-    return (start_date, end_date)
+    start_date = objects.earliest('date').date
+    start_date = datetime(start_date.year, start_date.month, start_date.day,
+                        tzinfo=tz)
+    end_date = objects.latest('date').date
+    end_date = datetime(end_date.year, end_date.month, end_date.day,
+                        tzinfo=tz)
+
+    return start_date, end_date
 
 
 def severity_count(queryset, method, expression):
@@ -76,33 +76,33 @@ def severity_count(queryset, method, expression):
     return getattr(queryset, method)(
         total=Sum(
             Case(When(**{total_expression: ('Critical', 'High', 'Medium', 'Low', 'Info')},
-                        then=Value(1)),
-                    output_field=IntegerField(),
+                      then=Value(1)),
+                 output_field=IntegerField(),
                  default=0)),
         critical=Sum(
             Case(When(**{expression: 'Critical'},
-                        then=Value(1)),
-                    output_field=IntegerField(),
+                      then=Value(1)),
+                 output_field=IntegerField(),
                  default=0)),
         high=Sum(
             Case(When(**{expression: 'High'},
-                        then=Value(1)),
-                    output_field=IntegerField(),
+                      then=Value(1)),
+                 output_field=IntegerField(),
                  default=0)),
         medium=Sum(
             Case(When(**{expression: 'Medium'},
-                        then=Value(1)),
-                    output_field=IntegerField(),
+                      then=Value(1)),
+                 output_field=IntegerField(),
                  default=0)),
         low=Sum(
             Case(When(**{expression: 'Low'},
-                        then=Value(1)),
-                    output_field=IntegerField(),
+                      then=Value(1)),
+                 output_field=IntegerField(),
                  default=0)),
         info=Sum(
             Case(When(**{expression: 'Info'},
-                        then=Value(1)),
-                    output_field=IntegerField(),
+                      then=Value(1)),
+                 output_field=IntegerField(),
                  default=0)),
     )
 
@@ -112,14 +112,16 @@ def identify_view(request):
     view = get_data.get('type', None)
     if view:
         return view
-    else:
-        if get_data.get('finding__severity', None):
-            return 'Endpoint'
-        elif get_data.get('false_positive', None):
-            return 'Endpoint'
+
+    finding_severity = get_data.get('finding__severity', None)
+    false_positive = get_data.get('false_positive', None)
+
     referer = request.META.get('HTTP_REFERER', None)
-    if referer and referer.find('type=Endpoint') > -1:
+    endpoint_in_referer = referer and referer.find('type=Endpoint') > -1
+
+    if finding_severity or false_positive or endpoint_in_referer:
         return 'Endpoint'
+
     return 'Finding'
 
 
@@ -140,48 +142,19 @@ def finding_querys(prod_type, request):
 
     findings_query = get_authorized_findings(Permissions.Finding_View, findings_query, request.user)
 
-    active_findings_query = Finding.objects.filter(
-        verified=True,
-        active=True,
-        severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')
-    ).select_related(
-        'reporter',
-        'test',
-        'test__engagement__product',
-        'test__engagement__product__prod_type',
-    ).prefetch_related(
-        'risk_acceptance_set',
-        'test__engagement__risk_acceptance',
-        'test__test_type',
-    )
-
-    active_findings_query = get_authorized_findings(Permissions.Finding_View, active_findings_query, request.user)
-
     findings = MetricsFindingFilter(request.GET, queryset=findings_query)
-    active_findings = MetricsFindingFilter(request.GET, queryset=active_findings_query)
-
     findings_qs = queryset_check(findings)
-    active_findings_qs = queryset_check(active_findings)
 
     if not findings_qs and not findings_query:
         findings = findings_query
-        active_findings = active_findings_query
         findings_qs = findings if isinstance(findings, QuerySet) else findings.qs
-        active_findings_qs = active_findings if isinstance(active_findings, QuerySet) else active_findings.qs
         messages.add_message(request,
                                      messages.ERROR,
                                      _('All objects have been filtered away. Displaying all objects'),
                                      extra_tags='alert-danger')
 
     try:
-        start_date = findings_qs.earliest('date').date
-        start_date = datetime(start_date.year,
-                            start_date.month, start_date.day,
-                            tzinfo=timezone.get_current_timezone())
-        end_date = findings_qs.latest('date').date
-        end_date = datetime(end_date.year,
-                            end_date.month, end_date.day,
-                            tzinfo=timezone.get_current_timezone())
+        start_date, end_date = get_date_range(findings_qs)
     except:
         start_date = timezone.now()
         end_date = timezone.now()
@@ -219,11 +192,10 @@ def finding_querys(prod_type, request):
     if weeks_between <= 0:
         weeks_between += 2
 
-    monthly_counts = get_period_counts(active_findings_qs, findings_qs, findings_closed, accepted_findings, months_between, start_date,
+    monthly_counts = get_period_counts(findings_qs, findings_closed, accepted_findings, months_between, start_date,
                                        relative_delta='months')
-    weekly_counts = get_period_counts(active_findings_qs, findings_qs, findings_closed, accepted_findings, weeks_between, start_date,
+    weekly_counts = get_period_counts(findings_qs, findings_closed, accepted_findings, weeks_between, start_date,
                                       relative_delta='weeks')
-
     top_ten = get_authorized_products(Permissions.Product_View)
     top_ten = top_ten.filter(engagement__test__finding__verified=True,
                                      engagement__test__finding__false_p=False,
@@ -259,42 +231,20 @@ def endpoint_querys(prod_type, request):
         'finding__reporter')
 
     endpoints_query = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_query, request.user)
-
-    active_endpoints_query = Endpoint_Status.objects.filter(mitigated=False,
-                                      finding__severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
-        'finding__test__engagement__product',
-        'finding__test__engagement__product__prod_type',
-        'finding__test__engagement__risk_acceptance',
-        'finding__risk_acceptance_set',
-        'finding__reporter')
-
-    active_endpoints_query = get_authorized_endpoint_status(Permissions.Endpoint_View, active_endpoints_query, request.user)
-
     endpoints = MetricsEndpointFilter(request.GET, queryset=endpoints_query)
-    active_endpoints = MetricsEndpointFilter(request.GET, queryset=active_endpoints_query)
 
     endpoints_qs = queryset_check(endpoints)
-    active_endpoints_qs = queryset_check(active_endpoints)
 
     if not endpoints_qs:
         endpoints = endpoints_query
-        active_endpoints = active_endpoints_query
         endpoints_qs = endpoints if isinstance(endpoints, QuerySet) else endpoints.qs
-        active_endpoints_qs = active_endpoints if isinstance(active_endpoints, QuerySet) else active_endpoints.qs
         messages.add_message(request,
                                      messages.ERROR,
                                      _('All objects have been filtered away. Displaying all objects'),
                                      extra_tags='alert-danger')
 
     try:
-        start_date = endpoints_qs.earliest('date').date
-        start_date = datetime(start_date.year,
-                            start_date.month, start_date.day,
-                            tzinfo=timezone.get_current_timezone())
-        end_date = endpoints_qs.latest('date').date
-        end_date = datetime(end_date.year,
-                            end_date.month, end_date.day,
-                            tzinfo=timezone.get_current_timezone())
+        start_date, end_date = get_date_range(endpoints_qs)
     except:
         start_date = timezone.now()
         end_date = timezone.now()
@@ -332,9 +282,9 @@ def endpoint_querys(prod_type, request):
     if weeks_between <= 0:
         weeks_between += 2
 
-    monthly_counts = get_period_counts(active_endpoints_qs, endpoints_qs, endpoints_closed, accepted_endpoints, months_between, start_date,
+    monthly_counts = get_period_counts(endpoints_qs, endpoints_closed, accepted_endpoints, months_between, start_date,
                                        relative_delta='months')
-    weekly_counts = get_period_counts(active_endpoints_qs, endpoints_qs, endpoints_closed, accepted_endpoints, weeks_between, start_date,
+    weekly_counts = get_period_counts(endpoints_qs, endpoints_closed, accepted_endpoints, weeks_between, start_date,
                                       relative_delta='weeks')
 
     top_ten = get_authorized_products(Permissions.Product_View)

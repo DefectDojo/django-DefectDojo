@@ -906,18 +906,17 @@ def get_period_counts_legacy(findings,
     }
 
 
-def get_period_counts(active_findings,
-                      findings,
+def get_period_counts(findings,
                       findings_closed,
                       accepted_findings,
                       period_interval,
                       start_date,
                       relative_delta='months'):
-    start_date = datetime(
-        start_date.year,
-        start_date.month,
-        start_date.day,
-        tzinfo=timezone.get_current_timezone())
+
+    tz = timezone.get_current_timezone()
+
+    start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
+
     opened_in_period = list()
     active_in_period = list()
     accepted_in_period = list()
@@ -948,77 +947,64 @@ def get_period_counts(active_findings,
                 mitigated_time__range=[new_date, end_date]).count()
 
         if accepted_findings:
+            date_range = [
+                datetime(new_date.year, new_date.month, new_date.day, tzinfo=tz),
+                datetime(end_date.year, end_date.month, end_date.day, tzinfo=tz)
+            ]
             try:
-                risks_a = accepted_findings.filter(
-                    risk_acceptance__created__date__range=[
-                        datetime(
-                            new_date.year,
-                            new_date.month,
-                            1,
-                            tzinfo=timezone.get_current_timezone()),
-                        datetime(
-                            new_date.year,
-                            new_date.month,
-                            monthrange(new_date.year, new_date.month)[1],
-                            tzinfo=timezone.get_current_timezone())
-                    ])
+                risks_a = accepted_findings.filter(risk_acceptance__created__date__range=date_range)
             except:
-                risks_a = accepted_findings.filter(
-                    date__range=[
-                        datetime(
-                            new_date.year,
-                            new_date.month,
-                            1,
-                            tzinfo=timezone.get_current_timezone()),
-                        datetime(
-                            new_date.year,
-                            new_date.month,
-                            monthrange(new_date.year, new_date.month)[1],
-                            tzinfo=timezone.get_current_timezone())
-                    ])
+                risks_a = accepted_findings.filter(date__range=date_range)
         else:
             risks_a = None
 
-        crit_count, high_count, med_count, low_count, closed_count = [
+        f_crit_count, f_high_count, f_med_count, f_low_count, f_closed_count = [
             0, 0, 0, 0, 0
         ]
+        ra_crit_count, ra_high_count, ra_med_count, ra_low_count, ra_closed_count = [
+            0, 0, 0, 0, 0
+        ]
+        active_crit_count, active_high_count, active_med_count, active_low_count, active_closed_count = [
+            0, 0, 0, 0, 0
+        ]
+
         for finding in findings:
             try:
                 severity = finding.severity
+                active = finding.active
+#                risk_accepted = finding.risk_accepted TODO: in future release
             except:
                 severity = finding.finding.severity
-            try:
-                if new_date <= datetime.combine(
-                        finding.date, datetime.min.time()
-                ).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if severity == 'Critical':
-                        crit_count += 1
-                    elif severity == 'High':
-                        high_count += 1
-                    elif severity == 'Medium':
-                        med_count += 1
-                    elif severity == 'Low':
-                        low_count += 1
-            except:
-                if new_date <= finding.date <= end_date:
-                    if severity == 'Critical':
-                        crit_count += 1
-                    elif severity == 'High':
-                        high_count += 1
-                    elif severity == 'Medium':
-                        med_count += 1
-                    elif severity == 'Low':
-                        low_count += 1
-                pass
+                active = finding.finding.active
+#                risk_accepted = finding.finding.risk_accepted
 
-        total = crit_count + high_count + med_count + low_count
-        opened_in_period.append(
-            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
-             crit_count, high_count, med_count, low_count, total,
-             closed_in_range_count])
-        crit_count, high_count, med_count, low_count, closed_count = [
-            0, 0, 0, 0, 0
-        ]
+            try:
+                f_time = datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=tz)
+            except:
+                f_time = finding.date
+
+            if f_time <= end_date:
+                if severity == 'Critical':
+                    if new_date <= f_time:
+                        f_crit_count += 1
+                    if active:
+                        active_crit_count += 1
+                elif severity == 'High':
+                    if new_date <= f_time:
+                        f_high_count += 1
+                    if active:
+                        active_high_count += 1
+                elif severity == 'Medium':
+                    if new_date <= f_time:
+                        f_med_count += 1
+                    if active:
+                        active_med_count += 1
+                elif severity == 'Low':
+                    if new_date <= f_time:
+                        f_low_count += 1
+                    if active:
+                        active_low_count += 1
+
         if risks_a is not None:
             for finding in risks_a:
                 try:
@@ -1026,52 +1012,29 @@ def get_period_counts(active_findings,
                 except:
                     severity = finding.finding.severity
                 if severity == 'Critical':
-                    crit_count += 1
+                    ra_crit_count += 1
                 elif severity == 'High':
-                    high_count += 1
+                    ra_high_count += 1
                 elif severity == 'Medium':
-                    med_count += 1
+                    ra_med_count += 1
                 elif severity == 'Low':
-                    low_count += 1
+                    ra_low_count += 1
 
-        total = crit_count + high_count + med_count + low_count
+        total = f_crit_count + f_high_count + f_med_count + f_low_count
+        opened_in_period.append(
+            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
+             f_crit_count, f_high_count, f_med_count, f_low_count, total,
+             closed_in_range_count])
+
+        total = ra_crit_count + ra_high_count + ra_med_count + ra_low_count
         accepted_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
-             crit_count, high_count, med_count, low_count, total])
-        crit_count, high_count, med_count, low_count, closed_count = [
-            0, 0, 0, 0, 0
-        ]
-        for finding in active_findings:
-            try:
-                severity = finding.severity
-            except:
-                severity = finding.finding.severity
-            try:
-                if datetime.combine(finding.date, datetime.min.time()).replace(
-                        tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if severity == 'Critical':
-                        crit_count += 1
-                    elif severity == 'High':
-                        high_count += 1
-                    elif severity == 'Medium':
-                        med_count += 1
-                    elif severity == 'Low':
-                        low_count += 1
-            except:
-                if finding.date <= end_date:
-                    if severity == 'Critical':
-                        crit_count += 1
-                    elif severity == 'High':
-                        high_count += 1
-                    elif severity == 'Medium':
-                        med_count += 1
-                    elif severity == 'Low':
-                        low_count += 1
-                pass
-        total = crit_count + high_count + med_count + low_count
+             ra_crit_count, ra_high_count, ra_med_count, ra_low_count, total])
+
+        total = active_crit_count + active_high_count + active_med_count + active_low_count
         active_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
-             crit_count, high_count, med_count, low_count, total])
+             active_crit_count, active_high_count, active_med_count, active_low_count, total])
 
     return {
         'opened_per_period': opened_in_period,
