@@ -108,6 +108,9 @@ jobs:
       - id: set-repo-org
         run: echo ::set-output name=repoorg::${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]'
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v2
@@ -131,6 +134,7 @@ jobs:
           docker-image: ${{ matrix.docker-image }}
         with:
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
           file: ./Dockerfile.${{ env.docker-image }}
           context: .
