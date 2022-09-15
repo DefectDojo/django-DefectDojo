@@ -5,7 +5,7 @@ from celery.schedules import crontab
 from dojo import __version__
 import environ
 
-# See https://defectdojo.github.io/django-DefectDojo/getting_started/configuration/ for options
+# See https://documentation.defectdojo.com/getting_started/configuration/ for options
 # how to tune the configuration to your needs.
 
 root = environ.Path(__file__) - 3  # Three folders back
@@ -154,7 +154,7 @@ env = environ.Env(
     }),
     DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
-    DD_DOCUMENTATION_URL=(str, 'https://defectdojo.github.io/django-DefectDojo'),
+    DD_DOCUMENTATION_URL=(str, 'https://documentation.defectdojo.com'),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
