@@ -1,3 +1,4 @@
+from inspect import Parameter
 import requests
 
 from dojo.models import Tool_Configuration, Tool_Type
@@ -27,6 +28,9 @@ class SonarQubeAPI:
                 )
         self.extras = tool_config.extras
         self.session = requests.Session()
+        self.default_headers = {
+            'User-Agent': 'DefectDojo'
+        }
         self.sonar_api_url = tool_config.url
         if tool_config.authentication_type == "Password":
             self.session.auth = (tool_config.username, prepare_for_view(tool_config.password))
@@ -35,21 +39,24 @@ class SonarQubeAPI:
         else:
             raise Exception('SonarQube Authentication type {} not supported'.format(tool_config.authentication_type))
 
-    def find_project(self, project_name):
+    def find_project(self, project_name, branch=None):
         """
         Search for projects by name.
         :param project_name:
         :return:
         """
-        response = self.session.get(
-            url='{}/components/search'.format(self.sonar_api_url),
-            params={
+        parameters = {
                 'q': project_name,
                 'qualifiers': 'TRK'
-            },
-            headers={
-                'User-Agent': 'DefectDojo'
-            },
+        },
+
+        if branch:
+            parameters['branch'] = branch
+
+        response = self.session.get(
+            url='{}/components/search'.format(self.sonar_api_url),
+            params=parameters,
+            headers=self.default_headers,
         )
 
         if response.ok:
@@ -70,21 +77,24 @@ class SonarQubeAPI:
                 project_name, response.status_code, response.content.decode("utf-8")
             ))
 
-    def get_project(self, project_key):
+    def get_project(self, project_key, branch=None):
         """
         Returns a component (project).
         Requires the following permission: 'Browse' on the project of the specified component.
         :param project_key:
         :return:
         """
+        parameters = {
+            'component': project_key,
+        }
+
+        if branch:
+            parameters['branch'] = branch
+        
         response = self.session.get(
             url='{}/components/show'.format(self.sonar_api_url),
-            params={
-                'component': project_key,
-            },
-            headers={
-                'User-Agent': 'DefectDojo'
-            },
+            params=parameters,
+            headers=self.default_headers,
         )
 
         if response.ok:
@@ -94,7 +104,7 @@ class SonarQubeAPI:
                 project_key, response.status_code, response.content.decode("utf-8")
             ))
 
-    def find_issues(self, component_key, types='VULNERABILITY'):
+    def find_issues(self, component_key, types='VULNERABILITY', branch=None):
         """
         Search for issues.
         At most one of the following parameters can be provided at the same time:
@@ -118,12 +128,14 @@ class SonarQubeAPI:
                 'types': types,
                 'p': page
             }
+
+            if branch:
+                request_filter['branch'] = branch
+
             response = self.session.get(
                 url='{}/issues/search'.format(self.sonar_api_url),
                 params=request_filter,
-                headers={
-                    'User-Agent': 'DefectDojo'
-                },
+                headers=self.default_headers,
             )
 
             if response.ok:
@@ -142,7 +154,7 @@ class SonarQubeAPI:
 
         return issues
 
-    def find_hotspots(self, project_key):
+    def find_hotspots(self, project_key, branch=None):
         """
         Search for hotspots.
         :param project_key: project key
@@ -157,12 +169,14 @@ class SonarQubeAPI:
                 'projectKey': project_key,
                 'p': page
             }
+
+            if branch:
+                request_filter['branch'] = branch
+
             response = self.session.get(
                 url='{}/hotspots/search'.format(self.sonar_api_url),
                 params=request_filter,
-                headers={
-                    'User-Agent': 'DefectDojo'
-                },
+                headers=self.default_headers,
             )
 
             if response.ok:
@@ -197,9 +211,7 @@ class SonarQubeAPI:
         response = self.session.get(
             url='{}/issues/search'.format(self.sonar_api_url),
             params=request_filter,
-            headers={
-                'User-Agent': 'DefectDojo'
-            },
+            headers=self.default_headers,
         )
 
         if response.ok:
@@ -232,9 +244,7 @@ class SonarQubeAPI:
             response = self.session.get(
                 url='{}/rules/show'.format(self.sonar_api_url),
                 params={'key': rule_id},
-                headers={
-                    'User-Agent': 'DefectDojo'
-                },
+                headers=self.default_headers,
             )
             if response.ok:
                 rule = response.json()['rule']
@@ -256,9 +266,7 @@ class SonarQubeAPI:
             response = self.session.get(
                 url='{}/hotspots/show'.format(self.sonar_api_url),
                 params={'hotspot': rule_id},
-                headers={
-                    'User-Agent': 'DefectDojo'
-                },
+                headers=self.default_headers,
             )
             if response.ok:
                 rule = response.json()['rule']
@@ -302,9 +310,7 @@ class SonarQubeAPI:
                 'issue': issue_key,
                 'transition': transition
             },
-            headers={
-                'User-Agent': 'DefectDojo'
-            },
+            headers=self.default_headers,
         )
         if not response.ok:
             raise Exception(
@@ -327,9 +333,7 @@ class SonarQubeAPI:
                 'issue': issue_key,
                 'text': text
             },
-            headers={
-                'User-Agent': 'DefectDojo'
-            },
+            headers=self.default_headers,
         )
         if not response.ok:
             raise Exception(
@@ -347,9 +351,7 @@ class SonarQubeAPI:
             params={
                 'qualifiers': 'TRK'
             },
-            headers={
-                'User-Agent': 'DefectDojo'
-            },
+            headers=self.default_headers,
         )
 
         if response.ok:

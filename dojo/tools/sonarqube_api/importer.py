@@ -23,7 +23,10 @@ class SonarQubeApiImporter(object):
     def get_findings(self, filename, test):
         items = self.import_issues(test)
         if settings.SONARQUBE_API_PARSER_HOTSPOTS:
-            items.extend(self.import_hotspots(test))
+            if items:
+                items.extend(self.import_hotspots(test))
+            else:
+                items = self.import_hotspots(test)
         return items
 
     @staticmethod
@@ -81,11 +84,11 @@ class SonarQubeApiImporter(object):
             client, config = self.prepare_client(test)
 
             if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-                component = client.get_project(config.service_key_1)
+                component = client.get_project(config.service_key_1, branch=test.branch_tag)
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
-                component = client.find_project(test.engagement.product.name)
+                component = client.find_project(test.engagement.product.name, branch=test.branch_tag)
 
-            issues = client.find_issues(component['key'])
+            issues = client.find_issues(component['key'], branch=test.branch_tag)
             logging.info('Found {} issues for component {}'.format(len(issues), component["key"]))
 
             for issue in issues:
@@ -168,11 +171,11 @@ class SonarQubeApiImporter(object):
             client, config = self.prepare_client(test)
 
             if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-                component = client.get_project(config.service_key_1)
+                component = client.get_project(config.service_key_1, branch=test.branch_tag)
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
-                component = client.find_project(test.engagement.product.name)
+                component = client.find_project(test.engagement.product.name, branch=test.branch_tag)
 
-            hotspots = client.find_hotspots(component['key'])
+            hotspots = client.find_hotspots(component['key'], branch=test.branch_tag)
             logging.info('Found {} hotspots for project {}'.format(len(hotspots), component["key"]))
 
             for hotspot in hotspots:
