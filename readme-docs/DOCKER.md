@@ -2,7 +2,7 @@
 
 The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment.
 
-Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. [Running in Production](https://defectdojo.github.io/django-DefectDojo/getting_started/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
+Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. [Running in Production](https://documentation.defectdojo.com/getting_started/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
 
 
 # Prerequisites
