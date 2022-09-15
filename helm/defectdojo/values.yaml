@@ -96,7 +96,7 @@ monitoring:
   # Add the nginx prometheus exporter sidecar
   prometheus:
     enabled: false
-    image: nginx/nginx-prometheus-exporter:0.10.0
+    image: nginx/nginx-prometheus-exporter:0.11.0
     imagePullPolicy: IfNotPresent
 
 annotations: {}
@@ -403,7 +403,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.31.2
+    tag: 1.32.0
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
