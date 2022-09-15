@@ -89,7 +89,7 @@ class SonarQubeAPI:
 
         if branch:
             parameters['branch'] = branch
-        
+
         response = self.session.get(
             url='{}/components/show'.format(self.sonar_api_url),
             params=parameters,
