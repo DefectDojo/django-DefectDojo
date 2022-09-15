@@ -1,4 +1,3 @@
-from inspect import Parameter
 import requests
 
 from dojo.models import Tool_Configuration, Tool_Type
