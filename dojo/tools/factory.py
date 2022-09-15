@@ -55,7 +55,9 @@ def requires_file(scan_type):
     parser = PARSERS[scan_type]
     if hasattr(parser, "requires_file"):
         return parser.requires_file(scan_type)
-    return False
+    # Set a sane default to require files since it is the
+    # more commen scenario.
+    return True
 
 
 def requires_tool_type(scan_type):

@@ -149,7 +149,7 @@ Please consult the security advisories [GHSA-f82x-m585-gj24](https://github.com/
 ## Upgrading to DefectDojo Version 2.5.x.
 
 Legacy authorization has been completely removed with version 2.5.0. This includes removal of the migration of users
-to the new authorization as described in https://defectdojo.github.io/django-DefectDojo/getting_started/upgrading/#authorization.
+to the new authorization as described in https://documentation.defectdojo.com/getting_started/upgrading/#authorization.
 If you are still using the legacy authorization, you should run the migration with ``./manage.py migrate_authorization_v2``
 before upgrading to version 2.5.0
 
@@ -201,7 +201,7 @@ of the same endpoints. The mentioned bug was fixed in 2.2.0 and if you have seen
 Follow the usual steps to upgrade as described above.
 
 BEFORE UPGRADING
-- If you are using SAML2 checkout the new [documentaion](https://defectdojo.github.io/django-DefectDojo/integrations/social-authentication/#saml-20) and update you settings following the migration section. We replaced [django-saml2-auth](https://github.com/fangli/django-saml2-auth) with [djangosaml2](https://github.com/IdentityPython/djangosaml2).
+- If you are using SAML2 checkout the new [documentaion](https://documentation.defectdojo.com/integrations/social-authentication/#saml-20) and update you settings following the migration section. We replaced [django-saml2-auth](https://github.com/fangli/django-saml2-auth) with [djangosaml2](https://github.com/IdentityPython/djangosaml2).
 
 AFTER UPGRADING
 - Usual migration process (`python manage.py migrate`) try to migrate all endpoints to new format and merge duplicates.
