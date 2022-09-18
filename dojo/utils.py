@@ -2264,7 +2264,12 @@ def log_user_logout(sender, request, user, **kwargs):
 @receiver(user_login_failed)
 def log_user_login_failed(sender, credentials, request, **kwargs):
 
-    logger.warning('login failed for: {credentials} via ip: {ip}'.format(
-        credentials=credentials['username'],
-        ip=request.META['REMOTE_ADDR']
-    ))
+    if 'username' in credentials:
+        logger.warning('login failed for: {credentials} via ip: {ip}'.format(
+            credentials=credentials['username'],
+            ip=request.META['REMOTE_ADDR']
+        ))
+    else:
+        logger.error('login failed because of missing username via ip: {ip}'.format(
+            ip=request.META['REMOTE_ADDR']
+        ))
