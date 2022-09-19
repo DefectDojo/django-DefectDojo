@@ -38,7 +38,11 @@ Create chart name and version as used by the chart label.
 {{- define "postgresql.hostname" -}}
 {{- if eq .Values.database "postgresql" -}}
 {{- if .Values.postgresql.enabled -}}
+{{- if eq .Values.postgresql.architecture "replication" -}}
+{{- printf "%s-%s-%s" .Release.Name "postgresql" .Values.postgresql.primary.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
 {{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- else -}}
 {{- printf "%s" .Values.postgresql.postgresServer -}}
 {{- end -}}
