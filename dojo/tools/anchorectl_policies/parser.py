@@ -48,7 +48,7 @@ class AnchoreCTLPoliciesParser:
                             test=test,
                             description=description,
                             severity=severity,
-                            references="Policy ID: {}\nTrigger ID: {}".format(policyid, triggerid),
+                            references="Policy ID: {}\nTrigger ID: {}".format(policy_id, trigger_id),
                             file_path=search_filepath(description),
                             component_name=repo,
                             component_version=tag,
