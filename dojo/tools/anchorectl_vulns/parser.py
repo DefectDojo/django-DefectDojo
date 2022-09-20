@@ -3,12 +3,12 @@ import json
 from dojo.models import Finding
 
 
-class AnchoreCTLParser(object):
+class AnchoreCTLVulnsParser(object):
     def get_scan_types(self):
-        return ["AnchoreCTL JSON Report"]
+        return ["AnchoreCTL Vuln Report"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "AnchoreCTL JSON Report"
+        return "AnchoreCTL Vuln Report"
 
     def get_description_for_scan_types(self, scan_type):
         return "AnchoreCTLs JSON vulnerability report format."
@@ -48,7 +48,7 @@ class AnchoreCTLParser(object):
                     # sometimes cvssv3 in 1st element will have -1 for "not set", but have data in the 2nd array item
                     if 'cvssV3' in item['vendorData'][0] and item['vendorData'][0]['cvssV3']['baseScore'] != -1:
                         cvssv3_base_score = item['vendorData'][0]['cvssV3']['baseScore']
-                    elif len(item['vendor_data']) > 1:
+                    elif len(item['vendorData']) > 1:
                         if 'cvssV3' in item['vendorData'][1] and item['vendorData'][1]['cvssV3']['baseScore'] != -1:
                             cvssv3_base_score = item['vendorData'][1]['cvssV3']['baseScore']
 
