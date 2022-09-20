@@ -103,11 +103,11 @@ spec:
           valueFrom:
             secretKeyRef:
             {{- if eq .Values.celery.broker "rabbitmq" }}
-              name: {{ .Values.rabbitmq.auth.existingPasswordSecret | default "defectdojo-rabbitmq-specific" }}
-              key: {{ .Values.rabbitmq.auth.secretPasswordKey | default "rabbitmq-password" }}  
+            name: {{ .Values.rabbitmq.auth.existingPasswordSecret | default "defectdojo-rabbitmq-specific" }}
+            key: {{ .Values.rabbitmq.auth.secretPasswordKey | default "rabbitmq-password" }}  
             {{- else if eq .Values.celery.broker "redis" }}
-              name: {{ .Values.redis.auth.existingSecret | default "defectdojo-redis-specific" }}
-              key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
+            name: {{ .Values.redis.auth.existingSecret | default "defectdojo-redis-specific" }}
+            key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
             {{- end }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
