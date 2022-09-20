@@ -35,7 +35,7 @@ class AnchoreCTLPoliciesParser:
                     try:
                         gate = result['gate']
                         description = result['description']
-                        policy_id = result['policy_id']
+                        policy_id = result['policyId']
                         status = result['status']
                         image_name = result['tag']
                         trigger_id = result['triggerId']
