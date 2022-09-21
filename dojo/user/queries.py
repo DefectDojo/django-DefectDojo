@@ -61,7 +61,7 @@ def get_authorized_users(permission, user=None):
         return Dojo_User.objects.none()
 
     if user.is_anonymous:
-        return False
+        return Dojo_User.objects.none()
 
     users = Dojo_User.objects.all().order_by('first_name', 'last_name', 'username')
 
