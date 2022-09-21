@@ -1137,7 +1137,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # Including the severity in the hash_code keeps those findings not duplicate
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'AnchoreCTL Vuln Report': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
-    'AnchoreCTL Policies Report': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
+    'AnchoreCTL Policies Report': ['title', 'severity', 'component_name', 'file_path'],
     'Anchore Enterprise Policy Check': ['title', 'severity', 'component_name', 'file_path'],
     'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Aqua Scan': ['severity', 'vulnerability_ids', 'component_name', 'component_version'],
