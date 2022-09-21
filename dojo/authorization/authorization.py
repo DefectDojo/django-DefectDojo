@@ -10,11 +10,16 @@ def user_has_configuration_permission(user, permission):
 
     if not user:
         return False
+    
+    if user.is_anonymous:
+        return False
 
     return user.has_perm(permission)
 
 
 def user_has_permission(user, obj, permission):
+    if user.is_anonymous:
+        return False
 
     if user.is_superuser:
         return True
@@ -99,6 +104,9 @@ def user_has_permission(user, obj, permission):
 def user_has_global_permission(user, permission):
 
     if not user:
+        return False
+
+    if user.is_anonymous:
         return False
 
     if user.is_superuser:
