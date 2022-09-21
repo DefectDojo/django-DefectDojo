@@ -10,7 +10,7 @@ def user_has_configuration_permission(user, permission):
 
     if not user:
         return False
-    
+
     if user.is_anonymous:
         return False
 
