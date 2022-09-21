@@ -27,7 +27,7 @@
     "font-awesome": "^4.0.0",
     "fullcalendar": "^3.10.2",
     "google-code-prettify": "^1.0.0",
-    "jquery": "^3.6.0",
+    "jquery": "^3.6.1",
     "jquery-highlight": "3.5.0",
     "jquery.cookie": "1.4.1",
     "jquery.flot.tooltip": "^0.9.0",
