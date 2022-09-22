@@ -237,4 +237,17 @@ class VeracodeParser(object):
 
         finding.unsaved_tags = ["sca"]
 
+        _is_mitigated = False
+        _mitigated_date = None
+        if ('mitigation' in xml_node.attrib and
+                xml_node.attrib["mitigation"].lower() == "true"):
+            # This happens if any mitigation (including 'Potential false positive')
+            # was accepted in VC.
+            for mitigation in xml_node.findall("x:mitigations/x:mitigation", namespaces=XML_NAMESPACE):
+                _is_mitigated = True
+                _mitigated_date = datetime.strptime(mitigation.attrib['date'], '%Y-%m-%d %H:%M:%S %Z')
+        finding.is_mitigated = _is_mitigated
+        finding.mitigated = _mitigated_date
+        finding.active = not _is_mitigated
+
         return finding
