@@ -23,7 +23,10 @@ class SonarQubeApiImporter(object):
     def get_findings(self, filename, test):
         items = self.import_issues(test)
         if settings.SONARQUBE_API_PARSER_HOTSPOTS:
-            items.extend(self.import_hotspots(test))
+            if items:
+                items.extend(self.import_hotspots(test))
+            else:
+                items = self.import_hotspots(test)
         return items
 
     @staticmethod
@@ -77,15 +80,16 @@ class SonarQubeApiImporter(object):
         items = list()
 
         try:
-
             client, config = self.prepare_client(test)
-
-            if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-                component = client.get_project(config.service_key_1)
-            else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
-                component = client.find_project(test.engagement.product.name)
-
-            issues = client.find_issues(component['key'])
+            # Get the value in the service key 2 box
+            organization = config.service_key_2 if (config and config.service_key_2) else None
+            # Get the value in the service key 1 box
+            if config and config.service_key_1:
+                component = client.get_project(config.service_key_1, organization=organization, branch=test.branch_tag)
+            else:
+                component = client.find_project(test.engagement.product.name, organization=organization, branch=test.branch_tag)
+            # Get the resource from SonarQube
+            issues = client.find_issues(component['key'], organization=organization, branch=test.branch_tag)
             logging.info('Found {} issues for component {}'.format(len(issues), component["key"]))
 
             for issue in issues:
@@ -166,13 +170,15 @@ class SonarQubeApiImporter(object):
         try:
             items = list()
             client, config = self.prepare_client(test)
+            # Get the value in the service key 2 box
+            organization = config.service_key_2 if (config and config.service_key_2) else None
+            # Get the value in the service key 1 box
+            if config and config.service_key_1:
+                component = client.get_project(config.service_key_1, organization=organization, branch=test.branch_tag)
+            else:
+                component = client.find_project(test.engagement.product.name, organization=organization, branch=test.branch_tag)
 
-            if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-                component = client.get_project(config.service_key_1)
-            else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
-                component = client.find_project(test.engagement.product.name)
-
-            hotspots = client.find_hotspots(component['key'])
+            hotspots = client.find_hotspots(component['key'], organization=organization, branch=test.branch_tag)
             logging.info('Found {} hotspots for project {}'.format(len(hotspots), component["key"]))
 
             for hotspot in hotspots:
