@@ -77,8 +77,8 @@ def get_import_meta_data_from_dict(data):
     auto_create_context = data.get('auto_create_context', None)
 
     deduplication_on_engagement = data.get('deduplication_on_engagement', False)
-
-    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement
+    do_not_reactivate = data.get('do_not_reactivate', False)
+    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement, do_not_reactivate
 
 
 def get_product_id_from_dict(data):
@@ -1628,6 +1628,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         default='Info')
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
+    do_not_reactivate = serializers.BooleanField(default=False)
     scan_type = serializers.ChoiceField(
         choices=get_choices_sorted(),
         required=True)
@@ -1687,6 +1688,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         close_old_findings = data.get('close_old_findings')
         verified = data.get('verified')
         active = data.get('active')
+        do_not_reactivate = data.get('do_not_reactivate', False)
         version = data.get('version', None)
         build_id = data.get('build_id', None)
         branch_tag = data.get('branch_tag', None)
@@ -1724,7 +1726,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings,
                                                 group_by=group_by, api_scan_configuration=api_scan_configuration,
-                                                service=service)
+                                                service=service, do_not_reactivate=do_not_reactivate)
 
                 if test_import:
                     statistics_delta = test_import.statistics
