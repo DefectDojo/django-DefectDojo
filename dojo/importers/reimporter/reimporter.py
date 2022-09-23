@@ -99,7 +99,7 @@ class DojoDefaultReImporter(object):
                         else:
                             # even if there is no mitigation time, skip it, because both the current finding and the reimported finding are is_mitigated
                             continue
-                    if not item.is_mitigated:
+                    else:
                         logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                         finding.mitigated = None
                         finding.is_mitigated = False
