@@ -27,7 +27,7 @@ class DojoDefaultReImporter(object):
     @dojo_async_task
     @app.task(ignore_result=False)
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None, **kwargs):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None, do_not_reactivate=False, **kwargs):
 
         items = parsed_findings
         original_items = list(test.finding_set.all())
@@ -84,23 +84,31 @@ class DojoDefaultReImporter(object):
                 if finding.false_p or finding.out_of_scope or finding.risk_accepted:
                     logger.debug('%i: skipping existing finding (it is marked as false positive:%s and/or out of scope:%s or is a risk accepted:%s): %i:%s:%s:%s', i, finding.false_p, finding.out_of_scope, finding.risk_accepted, finding.id, finding, finding.component_name, finding.component_version)
                 elif finding.is_mitigated:
-                    if item.mitigated:
-                        logger.debug("item mitigated time: " + str(item.mitigated.timestamp()))
-                        logger.debug("finding mitigated time: " + str(finding.mitigated.timestamp()))
-                        if item.mitigated.timestamp() == finding.mitigated.timestamp():
-                            logger.debug("New imported finding and already existing finding have the same mitigation date, will skip as they are the same.")
+                    # if the reimported item has a mitigation time, we can compare
+                    if item.is_mitigated:
+                        if item.mitigated:
+                            logger.debug("item mitigated time: " + str(item.mitigated.timestamp()))
+                            logger.debug("finding mitigated time: " + str(finding.mitigated.timestamp()))
+                            if item.mitigated.timestamp() == finding.mitigated.timestamp():
+                                logger.debug("New imported finding and already existing finding have the same mitigation date, will skip as they are the same.")
+                                continue
+                            if item.mitigated.timestamp() != finding.mitigated.timestamp():
+                                logger.debug("New imported finding and already existing finding are both mitigated but have different dates, not taking action")
+                                # TODO: implement proper date-aware reimporting mechanism, if an imported finding is closed more recently than the defectdojo finding, then there might be details in the scanner that should be added
+                                continue
+                        else:
+                            # even if there is no mitigation time, skip it, because both the current finding and the reimported finding are is_mitigated
                             continue
-                        if item.mitigated.timestamp() != finding.mitigated.timestamp():
-                            logger.debug("New imported finding and already existing finding are both mitigated but have different dates, not taking action")
-                            # TODO: implement proper date-aware reimporting mechanism, if an imported finding is closed more recently than the defectdojo finding, then there might be details in the scanner that should be added
-                            continue
-                    if not item.mitigated:
-                        logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                        finding.mitigated = None
-                        finding.is_mitigated = False
-                        finding.mitigated_by = None
-                        finding.active = True
-                        finding.verified = verified
+                    else:
+                        if not do_not_reactivate:
+                            logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                            finding.mitigated = None
+                            finding.is_mitigated = False
+                            finding.mitigated_by = None
+                            finding.active = True
+                            finding.verified = verified
+                        if do_not_reactivate:
+                            logger.debug('%i: skipping reactivating by user\'s choice do_not_reactivate: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
 
                     # existing findings may be from before we had component_name/version fields
                     finding.component_name = finding.component_name if finding.component_name else component_name
@@ -139,7 +147,8 @@ class DojoDefaultReImporter(object):
                     logger.debug('%i: updating existing finding: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                     if not (finding.mitigated and finding.is_mitigated):
                         logger.debug('Reimported item matches a finding that is currently open.')
-                        if item.mitigated:
+                        if item.is_mitigated:
+                            logger.debug('Reimported mitigated item matches a finding that is currently open, closing.')
                             # TODO: Implement a date comparison for opened defectdojo findings before closing them by reimporting, as they could be force closed by the scanner but a DD user forces it open ?
                             logger.debug('%i: closing: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                             finding.mitigated = item.mitigated
@@ -303,7 +312,7 @@ class DojoDefaultReImporter(object):
     def reimport_scan(self, scan, scan_type, test, active=True, verified=True, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None,
-                    service=None):
+                    service=None, do_not_reactivate=False):
 
         logger.debug(f'REIMPORT_SCAN: parameters: {locals()}')
 
@@ -345,7 +354,7 @@ class DojoDefaultReImporter(object):
             for findings_list in chunk_list:
                 result = self.process_parsed_findings(test, findings_list, scan_type, user, active, verified,
                                                       minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
-                                                      push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False)
+                                                      push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False, do_not_reactivate=do_not_reactivate)
                 # Since I dont want to wait until the task is done right now, save the id
                 # So I can check on the task later
                 results_list += [result]
@@ -366,7 +375,7 @@ class DojoDefaultReImporter(object):
             new_findings, reactivated_findings, findings_to_mitigate, untouched_findings = \
                 self.process_parsed_findings(test, parsed_findings, scan_type, user, active, verified,
                                              minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
-                                             push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True)
+                                             push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True, do_not_reactivate=do_not_reactivate)
 
         closed_findings = []
         if close_old_findings:
