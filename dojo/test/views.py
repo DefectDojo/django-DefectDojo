@@ -694,6 +694,7 @@ def re_import_scan_results(request, tid):
             minimum_severity = form.cleaned_data['minimum_severity']
             scan = request.FILES.get('file', None)
             active = form.cleaned_data['active']
+            do_not_reactivate = form.cleaned_data['do_not_reactivate']
             verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
             version = form.cleaned_data.get('version', None)
@@ -731,7 +732,7 @@ def re_import_scan_results(request, tid):
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings, group_by=group_by,
-                                                api_scan_configuration=api_scan_configuration, service=service)
+                                                api_scan_configuration=api_scan_configuration, service=service, do_not_reactivate=do_not_reactivate)
             except Exception as e:
                 logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
