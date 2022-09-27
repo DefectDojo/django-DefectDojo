@@ -402,7 +402,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             d = QueryDict(mutable=True)
             for item in widget.get(list(widget.keys())[0]):
                 if item['name'] in d:
-                    d.getlist(item['name']).append(item['value'])
+                    d.appendlist(item['name'], item['value'])
                 else:
                     d[item['name']] = item['value']
             from dojo.endpoint.views import get_endpoint_ids
@@ -421,7 +421,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             d = QueryDict(mutable=True)
             for item in widget.get(list(widget.keys())[0]):
                 if item['name'] in d:
-                    d.getlist(item['name']).append(item['value'])
+                    d.appendlist(item['name'], item['value'])
                 else:
                     d[item['name']] = item['value']
 
