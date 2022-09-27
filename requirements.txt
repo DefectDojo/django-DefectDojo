@@ -54,7 +54,7 @@ python-gitlab==3.9.0
 google-api-python-client==2.60.0
 google-auth==2.11.1
 google-auth-oauthlib==0.5.3
-drf_yasg==1.21.3
+drf_yasg==1.21.4
 cpe==1.2.1
 packageurl-python==0.10.3
 django-crum==0.7.9
