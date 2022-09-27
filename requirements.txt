@@ -72,7 +72,7 @@ hyperlink==21.0.0
 numpy==1.23.3
 django-test-migrations==1.2.0
 djangosaml2==1.5.3
-drf-spectacular==0.24.0
+drf-spectacular==0.24.2
 django-ratelimit==3.0.1
 argon2-cffi==21.3.0
 blackduck==1.0.7
