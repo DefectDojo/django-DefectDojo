@@ -111,8 +111,9 @@ class VeracodeScaParser(object):
                         finding.cwe = int(cwe)
 
             finding.references = "\n\n" + issue.get("_links").get("html").get("href")
+            status = issue.get('issue_status')
             if (issue.get('Ignored') and issue.get('Ignored').capitalize() == 'True' or
-                    issue.get('issue_status') and issue.get('issue_status').capitalize() == 'Resolved'):
+                    status and (status.capitalize() == 'Resolved' or status.capitalize() == 'Fixed')):
                 finding.is_mitigated = True
                 finding.active = False
 
