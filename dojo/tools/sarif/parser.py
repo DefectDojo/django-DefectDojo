@@ -192,6 +192,28 @@ def get_snippet(result):
     return snippet
 
 
+def get_codeFlowsDescription(codeFlows):
+    for codeFlow in codeFlows:
+        if 'threadFlows' not in codeFlow:
+            continue
+        for threadFlow in codeFlow['threadFlows']:
+            if 'locations' not in threadFlow:
+                continue
+
+            description = '**Code flow:**\n'
+            for location in threadFlow['locations']:
+                physicalLocation = location['location']['physicalLocation']
+                region = physicalLocation['region']
+                description += '\t' + physicalLocation['artifactLocation']['uri'] + ':' + str(region['startLine'])
+                if 'startColumn' in region:
+                    description += ':' + str(region['startColumn'])
+                if 'snippet' in region:
+                    description += '\t-\t' + region['snippet']['text']
+                description += '\n'
+
+    return description
+
+
 def get_description(result, rule):
     description = ''
     message = ''
@@ -212,6 +234,9 @@ def get_description(result, rule):
             fullDescription = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
             if fullDescription != message and fullDescription != shortDescription:
                 description += '**Rule full description:** {}\n'.format(fullDescription)
+
+    if 'codeFlows' in result:
+        description += get_codeFlowsDescription(result['codeFlows'])
 
     if description.endswith('\n'):
         description = description[:-1]

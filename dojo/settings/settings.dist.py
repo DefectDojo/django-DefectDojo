@@ -5,7 +5,7 @@ from celery.schedules import crontab
 from dojo import __version__
 import environ
 
-# See https://defectdojo.github.io/django-DefectDojo/getting_started/configuration/ for options
+# See https://documentation.defectdojo.com/getting_started/configuration/ for options
 # how to tune the configuration to your needs.
 
 root = environ.Path(__file__) - 3  # Three folders back
@@ -154,7 +154,7 @@ env = environ.Env(
     }),
     DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
-    DD_DOCUMENTATION_URL=(str, 'https://defectdojo.github.io/django-DefectDojo'),
+    DD_DOCUMENTATION_URL=(str, 'https://documentation.defectdojo.com'),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
@@ -1125,7 +1125,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
-    'Github Vulnerability Scan': ['unique_id_from_tool'],
+    'Github Vulnerability Scan': ['title', 'severity', 'component_name', 'vulnerability_ids'],
     'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
     'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
     'pip-audit Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
@@ -1142,7 +1142,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'PWN SAST': ['title', 'description'],
     'Whispers': ['vuln_id_from_tool', 'file_path', 'line'],
     'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
+    'BlackDuck API': ['unique_id_from_tool'],
     'docker-bench-security Scan': ['unique_id_from_tool'],
+    'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
+    'Twistlock Image Scan': ['title', 'severity', 'component_name', 'component_version'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1177,6 +1180,8 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Semgrep JSON Report': True,
     'Generic Findings Import': True,
     'Edgescan Scan': True,
+    'Veracode SourceClear Scan': True,
+    'Twistlock Image Scan': True
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1249,6 +1254,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
     'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Veracode SourceClear Scan': DEDUPE_ALGO_HASH_CODE,
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1265,7 +1271,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Scout Suite Scan': DEDUPE_ALGO_HASH_CODE,
     'AWS Security Hub Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
-    'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Github Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
     'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
@@ -1291,7 +1297,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'PWN SAST': DEDUPE_ALGO_HASH_CODE,
     'Whispers': DEDUPE_ALGO_HASH_CODE,
     'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
+    'BlackDuck API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'docker-bench-security Scan': DEDUPE_ALGO_HASH_CODE,
+    'Twistlock Image Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')

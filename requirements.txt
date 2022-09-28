@@ -3,7 +3,7 @@ asteval==0.9.27
 bleach==5.0.1
 bleach[css]
 celery==5.2.7
-coverage==6.4.3
+coverage==6.4.4
 defusedxml==0.7.1
 django_celery_results==2.4.0
 django-auditlog==2.1.1
@@ -24,7 +24,7 @@ djangorestframework==3.13.1
 gunicorn==20.1.0
 html2text==2020.1.16
 humanize==4.3.0
-jira==3.0.1
+jira==3.4.0
 PyGithub==1.55
 lxml==4.9.1
 Markdown==3.4.1
@@ -51,8 +51,8 @@ Python-jose==3.3.0
 gitpython==3.1.27
 debugpy==1.6.3
 python-gitlab==3.8.1
-google-api-python-client==2.56.0
-google-auth==2.10.0
+google-api-python-client==2.58.0
+google-auth==2.11.0
 google-auth-oauthlib==0.5.2
 drf_yasg==1.21.3
 cpe==1.2.1
@@ -60,7 +60,7 @@ packageurl-python==0.10.1
 django-crum==0.7.9
 JSON-log-formatter==0.5.1
 django-split-settings==1.1.0
-django-debug-toolbar==3.5.0
+django-debug-toolbar==3.6.0
 django-debug-toolbar-request-history==0.1.4
 vcrpy==4.2.0
 vcrpy-unittest==0.1.7
@@ -75,5 +75,6 @@ djangosaml2==1.5.1
 drf-spectacular==0.23.1
 django-ratelimit==3.0.1
 argon2-cffi==21.3.0
+blackduck==1.0.7
 pycurl==7.45.1  # Required for Celery Broker AWS (SQS) support
-boto3==1.24.52  # Required for Celery Broker AWS (SQS) support
+boto3==1.24.55  # Required for Celery Broker AWS (SQS) support
