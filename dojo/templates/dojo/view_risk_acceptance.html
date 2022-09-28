@@ -93,7 +93,7 @@
                     </tr>
                     <tr>
                         <td>{{ risk_acceptance.created|date }}</td>
-                        <td>{{ risk_acceptance.accepted_by.get_full_name }}</td>
+                        <td>{{ risk_acceptance.accepted_by }}</td>
                         <td>{{ risk_acceptance.name }}</td>
                         <td>{{ risk_acceptance.get_decision_display|default_if_none:"" }}</td>
                         <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->

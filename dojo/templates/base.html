@@ -1105,9 +1105,9 @@
                         $('.dropdown-alerts').empty();
                         $.each(data, function(i, elem) {
                         var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;
-                        var display_title = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';
+                        var display_title = titleField.length < 50 ? titleField : titleField.trim().substring(0,50).trim(this) + '...';
                         var description = elem.fields.description
-                        var display_description = description ? description.length < 100 ? description : jQuery.trim(description).substring(0,100).trim(this) + '...': ''
+                        var display_description = description ? description.length < 100 ? description : description.trim().substring(0,100).trim(this) + '...': ''
                         var dropdown_alert = "alert-list" + i;
                         $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa fa-' + htmlEscape(elem.fields.icon) +
                                                         ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert +

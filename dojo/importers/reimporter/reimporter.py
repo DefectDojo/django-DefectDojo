@@ -84,23 +84,28 @@ class DojoDefaultReImporter(object):
                 if finding.false_p or finding.out_of_scope or finding.risk_accepted:
                     logger.debug('%i: skipping existing finding (it is marked as false positive:%s and/or out of scope:%s or is a risk accepted:%s): %i:%s:%s:%s', i, finding.false_p, finding.out_of_scope, finding.risk_accepted, finding.id, finding, finding.component_name, finding.component_version)
                 elif finding.is_mitigated:
-                    if item.mitigated:
-                        logger.debug("item mitigated time: " + str(item.mitigated.timestamp()))
-                        logger.debug("finding mitigated time: " + str(finding.mitigated.timestamp()))
-                        if item.mitigated.timestamp() == finding.mitigated.timestamp():
-                            logger.debug("New imported finding and already existing finding have the same mitigation date, will skip as they are the same.")
+                    # if the reimported item has a mitigation time, we can compare
+                    if item.is_mitigated:
+                        if item.mitigated:
+                            logger.debug("item mitigated time: " + str(item.mitigated.timestamp()))
+                            logger.debug("finding mitigated time: " + str(finding.mitigated.timestamp()))
+                            if item.mitigated.timestamp() == finding.mitigated.timestamp():
+                                logger.debug("New imported finding and already existing finding have the same mitigation date, will skip as they are the same.")
+                                continue
+                            if item.mitigated.timestamp() != finding.mitigated.timestamp():
+                                logger.debug("New imported finding and already existing finding are both mitigated but have different dates, not taking action")
+                                # TODO: implement proper date-aware reimporting mechanism, if an imported finding is closed more recently than the defectdojo finding, then there might be details in the scanner that should be added
+                                continue
+                        else:
+                            # even if there is no mitigation time, skip it, because both the current finding and the reimported finding are is_mitigated
                             continue
-                        if item.mitigated.timestamp() != finding.mitigated.timestamp():
-                            logger.debug("New imported finding and already existing finding are both mitigated but have different dates, not taking action")
-                            # TODO: implement proper date-aware reimporting mechanism, if an imported finding is closed more recently than the defectdojo finding, then there might be details in the scanner that should be added
-                            continue
-                    if not item.mitigated:
-                    logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                    finding.mitigated = None
-                    finding.is_mitigated = False
-                    finding.mitigated_by = None
-                    finding.active = True
-                    finding.verified = verified
+                    else:
+                        logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                        finding.mitigated = None
+                        finding.is_mitigated = False
+                        finding.mitigated_by = None
+                        finding.active = True
+                        finding.verified = verified
 
                     # existing findings may be from before we had component_name/version fields
                     finding.component_name = finding.component_name if finding.component_name else component_name
@@ -139,7 +144,8 @@ class DojoDefaultReImporter(object):
                     logger.debug('%i: updating existing finding: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                     if not (finding.mitigated and finding.is_mitigated):
                         logger.debug('Reimported item matches a finding that is currently open.')
-                        if item.mitigated:
+                        if item.is_mitigated:
+                            logger.debug('Reimported mitigated item matches a finding that is currently open, closing.')
                             # TODO: Implement a date comparison for opened defectdojo findings before closing them by reimporting, as they could be force closed by the scanner but a DD user forces it open ?
                             logger.debug('%i: closing: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                             finding.mitigated = item.mitigated

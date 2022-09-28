@@ -2685,7 +2685,7 @@ class JIRAFindingForm(forms.Form):
         else:
             self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue for this finding.'})
 
-        if self.instance and self.instance.has_jira_group_issue:
+        if self.instance and hasattr(self.instance, 'has_jira_group_issue') and self.instance.has_jira_group_issue:
             self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
             self.fields['jira_issue'].help_text = 'Changing the linked JIRA issue for finding groups is not (yet) supported.'
             self.initial['jira_issue'] = self.instance.finding_group.jira_issue.jira_key
