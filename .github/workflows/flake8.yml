@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+        # if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+        if: contains(github.event.pull_request.labels.*.name, 'dependencies') || contains(github.event.pull_request.labels.*.name,'safe-to-test')
         uses: actions/checkout@v2
         # by default the pull_requst_target event checks out the base branch, i.e. dev
         # so we need to explicitly checkout the head of the PR
