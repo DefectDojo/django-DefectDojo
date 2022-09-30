@@ -13,7 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jira_project',
             name='custom_fields',
-            field=models.JSONField(
-                blank=True, help_text='JIRA custom field JSON mapping of Id to value, e.g. {"customfield_10122": [{"name": "8.0.1"}]}', max_length=200, null=True),
+            field=models.JSONField(blank=True, help_text='JIRA custom field JSON mapping of Id to value, e.g. {"customfield_10122": [{"name": "8.0.1"}]}', max_length=200, null=True),
         ),
     ]
