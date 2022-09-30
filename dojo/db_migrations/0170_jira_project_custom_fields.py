@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0168_alter_system_settings_time_zone'),
+        ('dojo', '0169_planned_remediation_date'),
     ]
 
     operations = [
