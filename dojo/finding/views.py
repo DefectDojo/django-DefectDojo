@@ -25,7 +25,8 @@ from imagekit.processors import ResizeToFill
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 from dojo.filters import TemplateFindingFilter, SimilarFindingFilter, FindingFilter, AcceptedFindingFilter
-from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
+from dojo.forms import EditPlannedRemediationDateFindingForm, NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, \
+    PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings, CopyFindingForm
@@ -910,6 +911,38 @@ def edit_finding(request, fid):
         'jform': jform,
         'gform': gform,
         'return_url': get_return_url(request)
+    })
+
+
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+def remediation_date(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    user = get_object_or_404(Dojo_User, id=request.user.id)
+
+    if request.method == 'POST':
+        form = EditPlannedRemediationDateFindingForm(request.POST)
+
+        if form.is_valid():
+            finding.planned_remediation_date = request.POST.get('planned_remediation_date', '')
+            finding.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Finding Planned Remediation Date saved.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(
+                reverse('view_finding', args=(finding.id,)))
+
+    else:
+        form = EditPlannedRemediationDateFindingForm(finding=finding)
+
+    product_tab = Product_Tab(finding.test.engagement.product, title="Planned Remediation Date", tab="findings")
+
+    return render(request, 'dojo/remediation_date.html', {
+        'finding': finding,
+        'product_tab': product_tab,
+        'user': user,
+        'form': form
     })
 
 
@@ -1886,6 +1919,11 @@ def finding_bulk_update_all(request, pid=None):
 
                     for prod in prods:
                         calculate_grade(prod)
+
+                if form.cleaned_data['planned_remediation_date']:
+                    for finding in finds:
+                        finding.planned_remediation_date = form.cleaned_data['planned_remediation_date']
+                        finding.save_no_options()
 
                 skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
