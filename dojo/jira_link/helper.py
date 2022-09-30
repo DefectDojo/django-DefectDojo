@@ -488,25 +488,37 @@ def log_jira_message(text, finding):
 
 
 def get_labels(obj):
-    # Update Label with system setttings label
+    # Update Label with system settings label
     labels = []
     system_settings = System_Settings.objects.get()
     system_labels = system_settings.jira_labels
+    prod_name_label = prod_name(obj).replace(" ", "_")
+    jira_project = get_jira_project(obj)
+
     if system_labels:
         system_labels = system_labels.split()
         for system_label in system_labels:
             labels.append(system_label)
         # Update the label with the product name (underscore)
-        labels.append(prod_name(obj).replace(" ", "_"))
+        labels.append(prod_name_label)
 
-    add_vulnerability_id_to_jira_label = system_settings.add_vulnerability_id_to_jira_label
-    if add_vulnerability_id_to_jira_label and type(obj) == Finding and obj.vulnerability_ids:
-        for id in obj.vulnerability_ids:
-            labels.append(id)
-    elif add_vulnerability_id_to_jira_label and type(obj) == Finding_Group:
-        for finding in obj.findings.all():
-            for id in finding.vulnerability_ids:
+    # labels per-product/engagement
+    if jira_project and jira_project.jira_labels:
+        project_labels = jira_project.jira_labels.split()
+        for project_label in project_labels:
+            labels.append(project_label)
+        # Update the label with the product name (underscore)
+        if prod_name_label not in labels:
+            labels.append(prod_name_label)
+
+    if system_settings.add_vulnerability_id_to_jira_label or jira_project and jira_project.add_vulnerability_id_to_jira_label:
+        if type(obj) == Finding and obj.vulnerability_ids:
+            for id in obj.vulnerability_ids:
                 labels.append(id)
+        elif type(obj) == Finding_Group:
+            for finding in obj.findings.all():
+                for id in finding.vulnerability_ids:
+                    labels.append(id)
 
     return labels
 

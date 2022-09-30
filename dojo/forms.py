@@ -2560,7 +2560,7 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ['product', 'engagement']
-        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'custom_fields', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
+        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'custom_fields', 'jira_labels', 'add_vulnerability_id_to_jira_label', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
 
     def __init__(self, *args, **kwargs):
         from dojo.jira_link import helper as jira_helper
@@ -2595,6 +2595,8 @@ class JIRAProjectForm(forms.ModelForm):
                 self.fields['issue_template_dir'].disabled = False
                 self.fields['component'].disabled = False
                 self.fields['custom_fields'].disabled = False
+                self.fields['jira_labels'].disabled = False
+                self.fields['add_vulnerability_id_to_jira_label'].disabled = False
                 self.fields['push_all_issues'].disabled = False
                 self.fields['enable_engagement_epic_mapping'].disabled = False
                 self.fields['push_notes'].disabled = False
@@ -2615,6 +2617,8 @@ class JIRAProjectForm(forms.ModelForm):
                     self.initial['issue_template_dir'] = jira_project_product.issue_template_dir
                     self.initial['component'] = jira_project_product.component
                     self.initial['custom_fields'] = jira_project_product.custom_fields
+                    self.initial['jira_labels'] = jira_project_product.jira_labels
+                    self.initial['add_vulnerability_id_to_jira_label'] = jira_project_product.add_vulnerability_id_to_jira_label
                     self.initial['push_all_issues'] = jira_project_product.push_all_issues
                     self.initial['enable_engagement_epic_mapping'] = jira_project_product.enable_engagement_epic_mapping
                     self.initial['push_notes'] = jira_project_product.push_notes
@@ -2625,7 +2629,12 @@ class JIRAProjectForm(forms.ModelForm):
                     self.fields['project_key'].disabled = True
                     self.fields['issue_template_dir'].disabled = True
                     self.fields['component'].disabled = True
+<<<<<<< HEAD
                     self.fields['custom_fields'].disabled = True
+=======
+                    self.fields['jira_labels'].disabled = True
+                    self.fields['add_vulnerability_id_to_jira_label'].disabled = True
+>>>>>>> 5bf32ef97 (Add the ability to set JIRA labels per-product or engagement)
                     self.fields['push_all_issues'].disabled = True
                     self.fields['enable_engagement_epic_mapping'].disabled = True
                     self.fields['push_notes'].disabled = True

@@ -3387,6 +3387,11 @@ class JIRA_Project(models.Model):
     component = models.CharField(max_length=200, blank=True)
     custom_fields = models.JSONField(max_length=200, blank=True, null=True,
                                    help_text=_("JIRA custom field JSON mapping of Id to value, e.g. {\"customfield_10122\": [{\"name\": \"8.0.1\"}]}"))
+    jira_labels = models.CharField(max_length=200, blank=True, null=True,
+                                   help_text=_('JIRA issue labels space seperated'))
+    add_vulnerability_id_to_jira_label = models.BooleanField(default=False,
+                                                             verbose_name=_('Add vulnerability Id as a JIRA label'),
+                                                             blank=False)
     push_all_issues = models.BooleanField(default=False, blank=True,
          help_text=_("Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,
