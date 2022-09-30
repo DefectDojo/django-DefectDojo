@@ -6,7 +6,6 @@ services:
       context: ./
       dockerfile: Dockerfile.integration-tests
     image: "defectdojo/defectdojo-integration-tests:${INTEGRATION_TESTS_VERSION:-latest}"
-    platform: linux/amd64
     profiles: 
       - mysql-rabbitmq
       - mysql-redis
@@ -25,11 +24,9 @@ services:
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-AdminsLoveIntegrationtests!}"
       DD_INTEGRATION_TEST_FILENAME: "${DD_INTEGRATION_TEST_FILENAME}"
   nginx:
-    platform: linux/amd64
     volumes:
       - defectdojo_media_integration_tests:/usr/share/nginx/html/media
   uwsgi:
-    platform: linux/amd64
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
     volumes:
       - '.:/app:z'
@@ -40,15 +37,12 @@ services:
       DD_SECRET_KEY: "${DD_SECRET_KEY:-.}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
   celerybeat:
-    platform: linux/amd64
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
   celeryworker:
-    platform: linux/amd64
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
   initializer:
-    platform: linux/amd64
     environment:
       DD_INITIALIZE: 'true'
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
@@ -57,7 +51,6 @@ services:
     volumes:
       - '.:/app:z'
   mysql:
-    platform: linux/amd64
     ports:
       - target: ${DD_DATABASE_PORT}
         published: ${DD_DATABASE_PORT}
@@ -68,7 +61,6 @@ services:
     volumes:
       - defectdojo_data_integration_tests:/var/lib/mysql
   postgres:
-    platform: linux/amd64
     ports:
       - target: ${DD_DATABASE_PORT}
         published: ${DD_DATABASE_PORT}
@@ -80,7 +72,6 @@ services:
       - defectdojo_postgres_integration_tests:/var/lib/postgresql/data
   mailhog:
     image: mailhog/mailhog:v1.0.1@sha256:8d76a3d4ffa32a3661311944007a415332c4bb855657f4f6c57996405c009bea
-    platform: linux/amd64
     ports:
       - target: 1025
         published: 1025
