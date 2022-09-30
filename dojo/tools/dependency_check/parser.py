@@ -286,13 +286,13 @@ class DependencyCheckParser(object):
                             self.add_finding(finding, dupes)
 
                             relatedDependencies = dependency.find(namespace + 'relatedDependencies')
-                                if relatedDependencies:
-                                    for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
-                                        finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
-                                        if finding:  # could be None
-                                            if scan_date:
-                                                finding.date = scan_date
-                                            self.add_finding(finding, dupes)
+                            if relatedDependencies:
+                                for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
+                                    finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
+                                    if finding:  # could be None
+                                        if scan_date:
+                                            finding.date = scan_date
+                                        self.add_finding(finding, dupes)
 
                     for suppressedVulnerability in vulnerabilities.findall(namespace + 'suppressedVulnerability'):
                         if suppressedVulnerability:
