@@ -187,7 +187,7 @@ class DependencyCheckParser(object):
                 severity = self.SEVERITY_MAPPING[severity.strip().lower()]
         else:
             severity = "Medium"
-        
+
         reference_detail = None
         references_node = vulnerability.find(namespace + 'references')
 
