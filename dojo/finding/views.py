@@ -2045,6 +2045,7 @@ def finding_bulk_update_all(request, pid=None):
                 success_count = 0
                 finding_groups = set([find.finding_group for find in finds if find.has_finding_group])
                 logger.debug('finding_groups: %s', finding_groups)
+                groups_pushed_to_jira = False
                 for group in finding_groups:
                     if form.cleaned_data.get('push_to_jira'):
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(group)
@@ -2061,6 +2062,7 @@ def finding_bulk_update_all(request, pid=None):
 
                 if success_count > 0:
                     add_success_message_to_response('%i finding groups pushed to JIRA successfully' % success_count)
+                    groups_pushed_to_jira = True
 
                 # refresh from db
                 finds = finds.all()
@@ -2081,7 +2083,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
                     # push_to_jira = jira_helper.is_push_to_jira(new_finding, form.cleaned_data.get('push_to_jira'))
-                    if jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira'):
+                    if not groups_pushed_to_jira and (jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira')):
 
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(finding)
                         if finding.has_jira_group_issue and not finding.has_jira_issue:
