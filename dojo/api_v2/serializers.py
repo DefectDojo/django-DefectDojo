@@ -144,37 +144,31 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
+        extracted_tags = []
+
         if isinstance(data, six.string_types):
             if not data:
-                data = []
+                extracted_tags = []
             try:
                 data = json.loads(data)
             except ValueError:
                 self.fail('invalid_json')
 
-        logger.debug('data as json: %s', data)
+            logger.debug('data as json: %s', data)
 
         if not isinstance(data, list):
             self.fail('not_a_list', input_type=type(data).__name__)
 
-        # data_safe = []
-        for s in data:
-            if not isinstance(s, six.string_types):
+        for entry in data:
+            if not isinstance(entry, six.string_types):
                 self.fail('not_a_str')
+            # in case we get a list inside a list, we split that up and extract the tags
+            splitted_tags = entry.split(',')
+            for tag in splitted_tags:
+                self.child.run_validation(tag)
+                extracted_tags.append(tag)
 
-            self.child.run_validation(s)
-
-            # if ' ' in s or ',' in s:
-            #     s = '"%s"' % s
-
-            # data_safe.append(s)
-
-        # internal_value = ','.join(data_safe)
-
-        internal_value = tagulous.utils.render_tags(data)
-
-        return internal_value
-        # return data
+        return extracted_tags
 
     def to_representation(self, value):
         if not isinstance(value, list):
