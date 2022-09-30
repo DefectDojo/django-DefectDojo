@@ -665,6 +665,10 @@ def add_jira_issue(obj, *args, **kwargs):
                     },
             ]
 
+        # Custom fields to specify
+        if jira_project.custom_fields:
+            fields.update(jira_project.custom_fields)
+
         # populate duedate field, but only if it's available for this project + issuetype
         if not meta:
             meta = get_jira_meta(jira, jira_project)
