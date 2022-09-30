@@ -684,7 +684,7 @@ div.page_select {
 }
 
 input#simple_search {
-    width: 100%;
+    width: 100%!important;
 }
 
 .dojo-modals-wrapper {
