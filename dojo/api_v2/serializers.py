@@ -1628,7 +1628,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         default='Info')
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
-    do_not_reactivate = serializers.BooleanField(default=False)
+    do_not_reactivate = serializers.BooleanField(default=False, required=False)
     scan_type = serializers.ChoiceField(
         choices=get_choices_sorted(),
         required=True)
