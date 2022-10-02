@@ -172,7 +172,6 @@ class SonarQubeAPI:
             if not response.ok:
                 raise Exception(f'Unable to find the issues for component {component_key} due to {response.status_code} - {response.content.decode("utf-8")}')
 
-
             issues_page = response.json().get('issues')
             if not issues_page:
                 break
