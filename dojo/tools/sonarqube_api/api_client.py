@@ -47,10 +47,11 @@ class SonarQubeAPI:
             self.extras = tool_config.extras
 
         # Validate the extras field to ensure only supported types are imported
-        split_issue_types = self.extras.split(',')
-        all_clean = all(entry in supported_issue_types for entry in split_issue_types)
-        if not all_clean:
-            raise Exception(f"Deteced unsupported issue type! Supported types are {', '.join(supported_issue_types)}")
+        if self.extras:
+            split_issue_types = self.extras.split(',')
+            all_clean = all(entry in supported_issue_types for entry in split_issue_types)
+            if not all_clean:
+                raise Exception(f"Deteced unsupported issue type! Supported types are {', '.join(supported_issue_types)}")
 
         self.session = requests.Session()
         self.default_headers = {
