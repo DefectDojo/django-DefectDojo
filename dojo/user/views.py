@@ -588,6 +588,7 @@ class DojoPasswordResetForm(PasswordResetForm):
             connection = get_connection()
             if isinstance(connection, EmailBackend):
                 connection.open()
+                connection.close()
         except Exception:
             raise ValidationError("SMTP server is not conifugred correctly...")
 
