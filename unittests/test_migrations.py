@@ -6,8 +6,8 @@ from django.utils import timezone
 
 # TODO: These tests can be removed in 2.12.x or later
 class TestOptiEndpointStatus(MigratorTestCase):
-    migrate_from = ('dojo', '0168_alter_system_settings_time_zone')
-    migrate_to = ('dojo', '0169_optimize_usage_of_endpoint_status')
+    migrate_from = ('dojo', '0171_jira_labels_per_product_and_engagement')
+    migrate_to = ('dojo', '0172_optimize_usage_of_endpoint_status')
 
     def prepare(self):
         Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
