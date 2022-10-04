@@ -137,7 +137,7 @@ def process_endpoint_view(request, eid, host_view=False):
     # closed_findings is needed as a parameter for get_periods_counts, but they are not relevant in the endpoint view
     closed_findings = Finding.objects.none()
 
-    monthly_counts = get_period_counts(active_findings, all_findings, closed_findings, None, months_between, start_date,
+    monthly_counts = get_period_counts(all_findings, closed_findings, None, months_between, start_date,
                                        relative_delta='months')
 
     paged_findings = get_page_items(request, active_findings, 25)

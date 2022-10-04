@@ -2217,6 +2217,11 @@ class Finding(models.Model):
                                verbose_name=_('Service'),
                                help_text=_('A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.'))
 
+    planned_remediation_date = models.DateField(null=True,
+                                                editable=True,
+                                                verbose_name=_('Planned Remediation Date'),
+                                                help_text=_("The date the flaw is expected to be remediated."))
+
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add."))
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
@@ -2797,7 +2802,13 @@ class Finding(models.Model):
             return None
         if self.test.engagement.source_code_management_uri is None:
             return escape(self.file_path)
-        link = self.test.engagement.source_code_management_uri + '/' + self.file_path
+        if "https://github.com/" in self.test.engagement.source_code_management_uri:
+            if self.test.engagement.commit_hash is not None:
+                link = self.test.engagement.source_code_management_uri + '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
+            elif self.test.engagement.branch_tag is not None:
+                link = self.test.engagement.source_code_management_uri + '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
+        else:
+            link = self.test.engagement.source_code_management_uri + '/' + self.file_path
         if self.line:
             link = link + '#L' + str(self.line)
         return create_bleached_link(link, self.file_path)
@@ -3374,6 +3385,13 @@ class JIRA_Project(models.Model):
                                       help_text=_("Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates."))
     engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
+    custom_fields = models.JSONField(max_length=200, blank=True, null=True,
+                                   help_text=_("JIRA custom field JSON mapping of Id to value, e.g. {\"customfield_10122\": [{\"name\": \"8.0.1\"}]}"))
+    jira_labels = models.CharField(max_length=200, blank=True, null=True,
+                                   help_text=_('JIRA issue labels space seperated'))
+    add_vulnerability_id_to_jira_label = models.BooleanField(default=False,
+                                                             verbose_name=_('Add vulnerability Id as a JIRA label'),
+                                                             blank=False)
     push_all_issues = models.BooleanField(default=False, blank=True,
          help_text=_("Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,

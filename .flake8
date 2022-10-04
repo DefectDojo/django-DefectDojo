@@ -25,6 +25,8 @@ ignore =
     E128
     # line break after binary operator
     W504
+    # Line break occurred before a binary operator (conflicting with black)
+    W503
     # undefined file name excpetion
     F821
 

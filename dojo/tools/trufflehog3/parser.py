@@ -13,7 +13,7 @@ class TruffleHog3Parser(object):
         return "Trufflehog3 Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "JSON Output of Trufflehog."
+        return "JSON Output of Trufflehog3, a fork of TruffleHog located at https://github.com/feeltheajf/truffleHog3"
 
     def get_findings(self, filename, test):
         data = json.load(filename)
