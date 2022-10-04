@@ -191,6 +191,5 @@ class TruffleHogParser(object):
                         return_string += self.walk_dict(value, tab_count=(tab_count + 1))
                         continue
                     else:
-                        print(f'\n\nAppending ({tab_count} tabs)|{tab_string}| {key}: {value}')
                         return_string += f"{tab_string}{key}: {value}\n"
         return return_string
