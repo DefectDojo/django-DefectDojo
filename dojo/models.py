@@ -3533,7 +3533,7 @@ class Tool_Product_Settings(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
     url = models.CharField(max_length=2000, null=True, blank=True)
-    product = models.ForeignKey(Product, default=1, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
     tool_configuration = models.ForeignKey(Tool_Configuration, null=False,
                                            related_name='tool_configuration', on_delete=models.CASCADE)
     tool_project_id = models.CharField(max_length=200, null=True, blank=True)
