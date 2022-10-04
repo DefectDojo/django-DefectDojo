@@ -1199,7 +1199,11 @@ JSON report of [trivy scanner](https://github.com/aquasecurity/trivy).
 
 ### Trufflehog
 
-JSON Output of Trufflehog.
+JSON Output of Trufflehog. Supports version 2 and 3 of https://github.com/trufflesecurity/trufflehog
+
+### Trufflehog3
+
+JSON Output of Trufflehog3, a fork of TruffleHog located at https://github.com/feeltheajf/truffleHog3
 
 ### Trustwave
 
