@@ -8,8 +8,7 @@ login_to_docker_registries: &login_to_docker_registries
     command: |
       # Quay.io is Domino's main Docker image registry.
       echo "$QUAY_PASSWORD" | docker login -u "$QUAY_USER" --password-stdin quay.io
-      # Login to Docker Hub to prevent getting rate-limited (https://docs.docker.com/docker-hub/download-rate-limit/).
-      echo "$DOCKERHUB_PAT_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
+
 
 setup_remote_docker_env: &setup_remote_docker_env
   setup_remote_docker:
