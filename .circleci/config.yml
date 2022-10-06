@@ -31,9 +31,10 @@ jobs:
       - *setup_remote_docker_env
       - *login_to_docker_registries
       - run:
-          name: "print docker info"
+          name: "Building containers"
           command: |
-            docker system info
+            docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
+            docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
