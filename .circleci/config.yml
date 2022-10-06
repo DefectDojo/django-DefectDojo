@@ -31,10 +31,19 @@ jobs:
       - *setup_remote_docker_env
       - *login_to_docker_registries
       - run:
-          name: "Building containers"
+          name: "Building Django container"
           command: |
-            docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
-            docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
+            docker build -t quay.io/domino/defectdojo-django:${CIRCLE_BRANCH}.${CIRCLE_SHA1} -f Dockerfile.django .
+            docker push quay.io/domino/defectdojo-django:${CIRCLE_BRANCH}.${CIRCLE_SHA1}
+            docker tag quay.io/domino/defectdojo-django:${CIRCLE_BRANCH}.${CIRCLE_SHA1} quay.io/domino/defectdojo-django:${CIRCLE_BRANCH}.latest
+            docker push quay.io/domino/defectdojo-django:${CIRCLE_BRANCH}.latest
+      - run:
+          name: "Building Nginx container"
+          command: |
+            docker build -t quay.io/domino/defectdojo-nginx:${CIRCLE_BRANCH}.${CIRCLE_SHA1} -f Dockerfile.nginx .
+            docker push quay.io/domino/defectdojo-nginx:${CIRCLE_BRANCH}.${CIRCLE_SHA1}
+            docker tag  quay.io/domino/defectdojo-nginx:${CIRCLE_BRANCH}.${CIRCLE_SHA1} quay.io/domino/defectdojo-nginx:${CIRCLE_BRANCH}.latest
+            docker push quay.io/domino/defectdojo-nginx:${CIRCLE_BRANCH}.latest
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
