@@ -1,0 +1,44 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+login_to_docker_registries: &login_to_docker_registries
+  run:
+    name: Login to Docker image registries
+    command: |
+      # Quay.io is Domino's main Docker image registry.
+      echo "$QUAY_PASSWORD" | docker login -u "$QUAY_USER" --password-stdin quay.io
+      # Login to Docker Hub to prevent getting rate-limited (https://docs.docker.com/docker-hub/download-rate-limit/).
+      echo "$DOCKERHUB_PAT_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
+
+setup_remote_docker_env: &setup_remote_docker_env
+  setup_remote_docker:
+    version: 20.10.7
+    # Not using Circle's DLC because costs outweigh the benefits, last assessed 01/2020.
+    docker_layer_caching: false
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+jobs:
+  build:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    docker:
+      - image: cimg/base:2022.06
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      - checkout
+      - *setup_remote_docker_env
+      - *login_to_docker_registries
+      - run:
+          name: "print docker info"
+          command: |
+            docker system info
+
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+workflows:
+  build-workflow:
+    jobs:
+      - build
