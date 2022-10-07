@@ -1018,19 +1018,19 @@ div.custom-search-form {
 
 @media (min-width: 320px) {
     #page-wrapper {
-        margin: 75px 0 0 0;
+        margin: 0 0 0 0;
     }
 }
 
 @media (min-width: 359px) {
     #page-wrapper {
-        margin: 100px 0 0 0;
+        margin: 0 0 0 0;
     }
 }
 
 @media (min-width: 600px) {
     #page-wrapper {
-        margin: 50px 0 0 0;
+        margin: 0 0 0 0;
     }
 }
 
@@ -1084,7 +1084,8 @@ div.custom-search-form {
     }
 
     body.min #page-wrapper {
-        margin: 0 0 0 50px;
+        margin: 0 0 0 0px;
+        padding-left: 60px;
     }
 
     body.min div.navbar-default.sidebar {
