@@ -31,7 +31,7 @@ jobs:
         
       - name: Get changed files in the docs folder
         id: dev-changed-docs-files
-        uses: tj-actions/changed-files@v31
+        uses: tj-actions/changed-files@v32
         with:
           files: |
             docs/**
@@ -55,7 +55,7 @@ jobs:
           
       - name: Get changed files in the docs folder
         id: master-changed-doc-files
-        uses: tj-actions/changed-files@v31
+        uses: tj-actions/changed-files@v32
         with:
           files: |
             docs/**
