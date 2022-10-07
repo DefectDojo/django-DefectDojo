@@ -62,6 +62,11 @@ repositoryPrefix: defectdojo
 # imagePullSecrets: defectdojoregistrykey
 tag: latest
 
+# Additional labels to add to the pods:
+# podLabels:
+#   key: value
+podLabels: {}
+
 securityContext:
   enabled: true
   djangoSecurityContext:
