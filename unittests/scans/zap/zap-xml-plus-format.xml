@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<OWASPZAPReport version="2.11.1" generated="Do., 25 Aug. 2022 10:16:56">
+		<site name="http://redacted.com" host="redacted.com" port="80" ssl="false">
+			<alerts>
+				
+					<alertitem>
+						<pluginid>10104</pluginid>
+						<alertRef>10104</alertRef>
+						<alert>User Agent Fuzzer</alert>
+						<name>User Agent Fuzzer</name>
+						<riskcode>0</riskcode>
+						<confidence>2</confidence>
+						<riskdesc>Informational (Medium)</riskdesc>
+						<confidencedesc>Medium</confidencedesc>
+						<desc>&lt;p&gt;Check for differences in response based on fuzzed User Agent (eg. mobile sites, access as a Search Engine Crawler). Compares the response statuscode and the hashcode of the response body with the original response.&lt;/p&gt;</desc>
+						<instances>
+							
+								<instance>
+									<uri>http://redacted.com</uri>
+									<method>GET</method>
+									<param>Header User-Agent</param>
+									<attack>Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)</attack>
+									<evidence></evidence>
+									<requestheader>GET http://redacted.com HTTP/1.1\r\nHost: redacted.com\r\nContent-Length: 0\r\n\r\n</requestheader>
+									<requestbody></requestbody>
+									<responseheader>HTTP/1.1 200 OK\r\nDate: Thu, 25 Aug 2022 08:15:19 GMT\r\nServer: Apache/2.4.29 (Ubuntu)\r\n\r\n</responseheader>
+									<responsebody>Hello World</responsebody>
+								</instance>
+							
+						</instances>
+						<count>1</count>
+						<solution></solution>
+						<otherinfo></otherinfo>
+						<reference>&lt;p&gt;https://owasp.org/wstg&lt;/p&gt;</reference>
+						<cweid>0</cweid>
+						<wascid>0</wascid>
+						<sourceid>907</sourceid>
+					</alertitem>
+				
+			</alerts>
+		</site>
+	
+</OWASPZAPReport>

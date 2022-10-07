@@ -194,3 +194,35 @@ class TestZapParser(DojoTestCase):
             self.assertEqual("https", endpoint.protocol)
             self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
             self.assertEqual("assets", endpoint.path)
+
+    def test_parse_xml_plus_format(self):
+        """Generated with OWASP Juicy shop"""
+        testfile = open("unittests/scans/zap/zap-xml-plus-format.xml")
+        parser = ZapParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertIsInstance(findings, list)
+        self.assertEqual(1, len(findings))
+        for finding in findings:
+            self.assertIn(finding.severity, Finding.SEVERITIES)
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("User Agent Fuzzer", finding.title)
+            self.assertEqual("Info", finding.severity)
+            self.assertEqual("10104", finding.vuln_id_from_tool)
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual("http", endpoint.protocol)
+            self.assertEqual("redacted.com", endpoint.host)
+            self.assertEqual(80, endpoint.port)
+            # Check request and response pair
+            request_pair = finding.unsaved_req_resp[0]
+            request = request_pair["req"]
+            response = request_pair["resp"]
+            self.assertEqual("HTTP/1.1 200 OK\nDate: Thu, 25 Aug 2022 08:15:19 GMT\nServer: Apache/2.4.29 (Ubuntu)\n\nHello World", response)
+            self.assertEqual("GET http://redacted.com HTTP/1.1\nHost: redacted.com\nContent-Length: 0\n\n", request)
