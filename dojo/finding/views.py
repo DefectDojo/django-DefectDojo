@@ -25,7 +25,8 @@ from imagekit.processors import ResizeToFill
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 from dojo.filters import TemplateFindingFilter, SimilarFindingFilter, FindingFilter, AcceptedFindingFilter
-from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
+from dojo.forms import EditPlannedRemediationDateFindingForm, NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, \
+    PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings, CopyFindingForm
@@ -910,6 +911,38 @@ def edit_finding(request, fid):
         'jform': jform,
         'gform': gform,
         'return_url': get_return_url(request)
+    })
+
+
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+def remediation_date(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    user = get_object_or_404(Dojo_User, id=request.user.id)
+
+    if request.method == 'POST':
+        form = EditPlannedRemediationDateFindingForm(request.POST)
+
+        if form.is_valid():
+            finding.planned_remediation_date = request.POST.get('planned_remediation_date', '')
+            finding.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Finding Planned Remediation Date saved.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(
+                reverse('view_finding', args=(finding.id,)))
+
+    else:
+        form = EditPlannedRemediationDateFindingForm(finding=finding)
+
+    product_tab = Product_Tab(finding.test.engagement.product, title="Planned Remediation Date", tab="findings")
+
+    return render(request, 'dojo/remediation_date.html', {
+        'finding': finding,
+        'product_tab': product_tab,
+        'user': user,
+        'form': form
     })
 
 
@@ -1887,6 +1920,11 @@ def finding_bulk_update_all(request, pid=None):
                     for prod in prods:
                         calculate_grade(prod)
 
+                if form.cleaned_data['planned_remediation_date']:
+                    for finding in finds:
+                        finding.planned_remediation_date = form.cleaned_data['planned_remediation_date']
+                        finding.save_no_options()
+
                 skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
                     for finding in finds:
@@ -2007,6 +2045,7 @@ def finding_bulk_update_all(request, pid=None):
                 success_count = 0
                 finding_groups = set([find.finding_group for find in finds if find.has_finding_group])
                 logger.debug('finding_groups: %s', finding_groups)
+                groups_pushed_to_jira = False
                 for group in finding_groups:
                     if form.cleaned_data.get('push_to_jira'):
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(group)
@@ -2023,6 +2062,7 @@ def finding_bulk_update_all(request, pid=None):
 
                 if success_count > 0:
                     add_success_message_to_response('%i finding groups pushed to JIRA successfully' % success_count)
+                    groups_pushed_to_jira = True
 
                 # refresh from db
                 finds = finds.all()
@@ -2043,7 +2083,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
                     # push_to_jira = jira_helper.is_push_to_jira(new_finding, form.cleaned_data.get('push_to_jira'))
-                    if jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira'):
+                    if not groups_pushed_to_jira and (jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira')):
 
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(finding)
                         if finding.has_jira_group_issue and not finding.has_jira_issue:

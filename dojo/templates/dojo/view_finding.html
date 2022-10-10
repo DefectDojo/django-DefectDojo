@@ -123,6 +123,14 @@
                             {% endif %}
                             {% if finding|has_object_permission:"Finding_Edit" %}
                                 <li role="separator" class="divider"></li>
+                                    <li role="presentation">
+                                        <a href="{% url 'remediation_date' finding.id %}">
+                                            <i class="fa fa-calendar-check-o"></i> Add/Edit Planned Remediation Date
+                                        </a>
+                                    </li>
+                            {% endif %}
+                            {% if finding|has_object_permission:"Finding_Edit" %}
+                                <li role="separator" class="divider"></li>
                                 {% if finding.mitigated %}
                                     <li role="presentation">
                                         <a href="{% url 'reopen_finding' finding.id %}">
@@ -241,6 +249,9 @@
                     {% if finding.publish_date %}
                         <th>Vuln Publish date</th>
                     {% endif %}
+                    {% if finding.planned_remediation_date %}
+                        <th>Planned Remediation</th>
+                    {% endif%}
                     <th>Reporter</th>
                     {% if finding.mitigated %}
                         <th>Date Mitigated</th>
@@ -363,6 +374,9 @@
                     <td>{{ finding.age }} days</td>
                     {% if finding.publish_date %}
                         <td>{{ finding.publish_date }}</td>
+                    {% endif %}
+                    {% if finding.planned_remediation_date %}
+                        <td>{{ finding.planned_remediation_date }}</td>
                     {% endif %}
                     <td>{{ finding.reporter }}</td>
                     {% if finding.mitigated %}

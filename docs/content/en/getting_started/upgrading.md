@@ -61,6 +61,11 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+
+## Upgrading to DefectDojo Version 2.15.x.
+
+There are no special instruction for upgrading to 2.15.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.15.0) for the contents of the release.
+
 ## Upgrading to DefectDojo Version 2.13.x.
 
 The last release implemented the search for vulnerability ids, but the search database was not initialized. To populate the database table of the vulnerability ids, execute this django command from the defect dojo installation directory or from a shell of the Docker container or Kubernetes pod:

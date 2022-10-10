@@ -551,7 +551,7 @@ Import Dependency Scanning Report vulnerabilities in JSON format: https://docs.g
 
 ### Github Vulnerability
 
-Import findings from Github vulnerability scan:
+Import findings from Github vulnerability scan (GraphQL Query):
 <https://help.github.com/en/github/managing-security-vulnerabilities>
 
 Currently the parser is able to manage only `RepositoryVulnerabilityAlert` object.
@@ -563,6 +563,7 @@ vulnerabilityAlerts (RepositoryVulnerabilityAlert object)
     + id
     + createdAt (optional)
     + vulnerableManifestPath (optional)
+    + state (optional)
     + securityVulnerability (SecurityVulnerability object)
         + severity (CRITICAL/HIGH/LOW/MODERATE)
         + package (optional)
@@ -576,7 +577,9 @@ vulnerabilityAlerts (RepositoryVulnerabilityAlert object)
                 + references (optional)
                     + url (optional)
                 + cvss (optional)
+                    + score (optional)
                     + vectorString (optional)
+                + cwes (optional)
 ```
 
 References:
@@ -1120,9 +1123,12 @@ Follow these steps to setup the SonarQube API import:
     Configuration / Tool Configuration. Note the url must be in the
     format of `https://<sonarqube_host>/api`. Select the tool
     type to be SonarQube. By default the tool will import vulnerabilities issues
-    and security hotspots only,
-    but additional filters can be setup using the Extras field separated by
-    commas (e.g. BUG,VULNERABILITY,CODE_SMELL)
+    and security hotspots only, but additional filters can be setup using the 
+    Extras field separated by commas (e.g. BUG,VULNERABILITY,CODE_SMELL). When using
+    SonarCloud, you must also specify the Organization ID in the Extras field as follows
+    `OrgID=sonarcloud-organzation-ID`. If also specifying issue type filters, please 
+    seperate the items in the Extras field by a vertical bar as follows
+    `BUG,VULNERABILITY,CODE_SMEL|OrgID=sonarcloud-organzation-ID`
 2.  In the Product settings add an API Scan Configuration. *Service key 1* must
     be the SonarQube project key, which can be found by navigating to a specific project and
     selecting the value from the url
@@ -1131,8 +1137,8 @@ Follow these steps to setup the SonarQube API import:
     use the name of the Product as the project key in SonarQube. If you would like to
     import findings from multiple projects, you can specify multiple keys as
     separated API Scan Configuration in the Product settings.
-3.  If using SonarCloud, you will need to supply your organization ID in the
-    the *Service key 2* input field. The functionality is the same after this step.
+3.  If using SonarCloud, the orginization ID can be used from step 1, but it 
+    can be ovverirdden by supplying a different orginization ID in the *Service key 2* input field.
 4.  Once all of the settings are made, the SonarQube API Import will be
     able to import all vulnerability information from the SonarQube
     instance. 
@@ -1199,7 +1205,11 @@ JSON report of [trivy scanner](https://github.com/aquasecurity/trivy).
 
 ### Trufflehog
 
-JSON Output of Trufflehog.
+JSON Output of Trufflehog. Supports version 2 and 3 of https://github.com/trufflesecurity/trufflehog
+
+### Trufflehog3
+
+JSON Output of Trufflehog3, a fork of TruffleHog located at https://github.com/feeltheajf/truffleHog3
 
 ### Trustwave
 
