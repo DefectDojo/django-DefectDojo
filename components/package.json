@@ -37,7 +37,7 @@
     "metismenu": "~3.0.7",
     "moment": "^2.29.4",
     "morris.js": "morrisjs/morris.js",
-    "pdfmake": "^0.2.5",
+    "pdfmake": "^0.2.6",
     "startbootstrap-sb-admin-2": "1.0.7"
   },
   "engines": {
