@@ -984,7 +984,16 @@ def push_status_to_jira(obj, jira_instance, jira, issue, save=False):
 
 # gets the metadata for the default issue type in this jira project
 def get_jira_meta(jira, jira_project):
-    meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
+    meta = None
+    try:
+        meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
+    except JIRAError as e:
+        message = "Invalid JIRA Project Config, can't retrieve or create metadata. status: %d, message: %s" % (e.status_code, e.text)
+        logger.warn(message)
+
+        add_error_message_to_response(message)
+
+        raise e
 
     meta_data_error = False
     if len(meta['projects']) == 0:
@@ -1036,7 +1045,7 @@ def is_jira_project_valid(jira_project):
         meta = get_jira_meta(get_jira_connection(jira_project), jira_project)
         return True
     except JIRAError as e:
-        logger.debug('invalid JIRA Project Config, can''t retrieve metadata for: ''%s''', jira_project)
+        logger.debug("invalid JIRA Project Config, can't retrieve metadata for '%s'", jira_project)
         return False
 
 
