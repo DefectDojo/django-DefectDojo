@@ -65,6 +65,11 @@ spec:
           {{- else if (eq .type "hostPath") }}
           type: {{ .pathType | default "Directory" }}
           path: {{ .hostPath }}
+          {{- else if (eq .type "csi") }}
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .secretProviderClass }}
           {{- end }}
       {{- end }}
       {{- if .Values.django.mediaPersistentVolume.enabled }}
@@ -153,6 +158,7 @@ spec:
             name: {{ $fullName }}-extrasecrets
             optional: true
         env:
+        {{- if not .Values.externalBrokerPassword }}
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -173,10 +179,12 @@ spec:
               key: {{ .Values.redis.auth.existingSecretPasswordKey }}
             {{- end }}  
             {{- end }}
+        {{- end }}
         {{- if .Values.django.uwsgi.enable_debug }}
         - name: DD_DEBUG
           value: 'True'
         {{- end }}
+        {{- if not .Values.externalDatabasePassword }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -190,6 +198,7 @@ spec:
               name: {{ .Values.mysql.auth.existingSecret }}
               key: {{ .Values.mysql.auth.secretKey }}
               {{- end }}
+        {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:
             secretKeyRef:
