@@ -811,6 +811,7 @@ class ToolConfigurationSerializer(serializers.ModelSerializer):
 
 class ToolProductSettingsSerializer(serializers.ModelSerializer):
     setting_url = serializers.CharField(source='url')
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=True)
 
     class Meta:
         model = Tool_Product_Settings
