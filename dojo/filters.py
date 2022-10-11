@@ -1105,7 +1105,7 @@ class ApiFindingFilter(DojoFilter):
     references = CharFilter(lookup_expr='icontains')
     severity = CharFilter(method=custom_filter, field_name='severity')
     severity_justification = CharFilter(lookup_expr='icontains')
-    step_to_reproduce = CharFilter(lookup_expr='icontains')
+    steps_to_reproduce = CharFilter(lookup_expr='icontains')
     unique_id_from_tool = CharFilter(lookup_expr='icontains')
     title = CharFilter(lookup_expr='icontains')
     # DateRangeFilter
