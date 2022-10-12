@@ -2802,12 +2802,13 @@ class Finding(models.Model):
             return None
         if self.test.engagement.source_code_management_uri is None:
             return escape(self.file_path)
+        link = None
         if "https://github.com/" in self.test.engagement.source_code_management_uri:
             if self.test.engagement.commit_hash is not None:
                 link = self.test.engagement.source_code_management_uri + '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
             elif self.test.engagement.branch_tag is not None:
                 link = self.test.engagement.source_code_management_uri + '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
-        else:
+        if link is None:
             link = self.test.engagement.source_code_management_uri + '/' + self.file_path
         if self.line:
             link = link + '#L' + str(self.line)
