@@ -38,7 +38,8 @@ class Acunetix360Parser(object):
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'
             mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
-            references = text_maker.handle(item.get("RemedyReferences", ""))
+            references = "https://online.acunetix360.com/issues/detail/" + item["LookupId"] + "\n"
+            references += text_maker.handle(item.get("RemedyReferences", ""))
             url = item["Url"]
             impact = text_maker.handle(item.get("Impact", ""))
             dupe_key = title
