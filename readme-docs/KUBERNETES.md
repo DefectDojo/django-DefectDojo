@@ -371,13 +371,17 @@ If you want to use a redis-sentinel setup as the Celery broker, you will need to
 
 1. Set redis.scheme to "sentinel" in values.yaml
 2. Set two additional extraEnv vars specifying the sentinel master name and port in values.yaml
-'''
+
+```yaml
+redis:
+  scheme: "sentinel"
+  
 extraEnv:
   - name: DD_CELERY_BROKER_TRANSPORT_OPTIONS
     value: '{"master_name": "mymaster"}'
   - name: 'DD_CELERY_BROKER_PORT'
     value: "26379"
-'''
+```
 
 
 
