@@ -120,6 +120,18 @@ Import Brakeman Scanner findings in JSON format.
 
 Import Bugcrowd results in CSV format.
 
+### Bugcrowd API
+
+Import Bugcrowd submissions directly from the API using the API token.
+Set your API key directly in the format `username:password` in the API Token input, it will be added to the header `'Authorization': 'Token {}'.format(self.api_token),`
+For each product, you can configure 2 things:
+- Service key 1: the bugcrowd program code (it's the slug name in the url for the program, url safe)
+- Service key 2: the bugcrowd target name (the full name, it will be url-encoded, you can find it in https://tracker.bugcrowd.com/<YOURPROGRAM>/settings/scope/target_groups)
+    - It can be left empty so that all program submissions are imported
+
+That way, per product, you can use the same program but separate by target, which is a fairly common way of filtering/grouping Bugcrowd.
+Adding support for a 3rd filtering would be possible with Service Key 3, feel free to make a PR.
+
 ### Bundler-Audit
 
 Import the text output generated with bundle-audit check
@@ -1108,9 +1120,12 @@ Follow these steps to setup the SonarQube API import:
     Configuration / Tool Configuration. Note the url must be in the
     format of `https://<sonarqube_host>/api`. Select the tool
     type to be SonarQube. By default the tool will import vulnerabilities issues
-    and security hotspots only,
-    but additional filters can be setup using the Extras field separated by
-    commas (e.g. BUG,VULNERABILITY,CODE_SMELL)
+    and security hotspots only, but additional filters can be setup using the 
+    Extras field separated by commas (e.g. BUG,VULNERABILITY,CODE_SMELL). When using
+    SonarCloud, you must also specify the Organization ID in the Extras field as follows
+    `OrgID=sonarcloud-organzation-ID`. If also specifying issue type filters, please 
+    seperate the items in the Extras field by a vertical bar as follows
+    `BUG,VULNERABILITY,CODE_SMEL|OrgID=sonarcloud-organzation-ID`
 2.  In the Product settings add an API Scan Configuration. *Service key 1* must
     be the SonarQube project key, which can be found by navigating to a specific project and
     selecting the value from the url
@@ -1119,12 +1134,26 @@ Follow these steps to setup the SonarQube API import:
     use the name of the Product as the project key in SonarQube. If you would like to
     import findings from multiple projects, you can specify multiple keys as
     separated API Scan Configuration in the Product settings.
-3.  Once all of the settings are made, the SonarQube API Import will be
+3.  If using SonarCloud, the orginization ID can be used from step 1, but it 
+    can be ovverirdden by supplying a different orginization ID in the *Service key 2* input field.
+4.  Once all of the settings are made, the SonarQube API Import will be
     able to import all vulnerability information from the SonarQube
-    instance. In the import or re-import dialog you can select which API Scan
-    Configuration shall be used. If you do not choose
-    any, DefectDojo will use the API Scan Configuration of the Product if there is
-    only one defined or the SonarQube Tool Configuration if there is only one.
+    instance. 
+
+##### Multiple SonarQube API Configurations
+
+In the import or re-import dialog you can select which API Scan
+Configuration shall be used. If you do not choose
+any, DefectDojo will use the API Scan Configuration of the Product if there is
+only one defined or the SonarQube Tool Configuration if there is only one.
+
+##### Multi Branch Scanning 
+
+If using a version of SonarQube with multi branch scanning, the branch tha be scanned can 
+be supplied in the `branch tag` fieild at import/re-import time. If the branch does not exist,
+a notification will be generated in the alerts table indicating that branch to be imported 
+does not exist. If a branch name is not supplied during import/re-import, the default branch 
+of the SonarQube project will be used. 
 
 **Note:**: If `https` is used for the SonarQube, the certificate must be
 trusted by the DefectDojo instance.
@@ -1173,7 +1202,11 @@ JSON report of [trivy scanner](https://github.com/aquasecurity/trivy).
 
 ### Trufflehog
 
-JSON Output of Trufflehog.
+JSON Output of Trufflehog. Supports version 2 and 3 of https://github.com/trufflesecurity/trufflehog
+
+### Trufflehog3
+
+JSON Output of Trufflehog3, a fork of TruffleHog located at https://github.com/feeltheajf/truffleHog3
 
 ### Trustwave
 
