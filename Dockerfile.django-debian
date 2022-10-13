@@ -49,13 +49,14 @@ RUN \
     libopenjp2-7 \
     libjpeg62 \
     libtiff5 \
-    dnsutils \
+    # dnsutils \
     # default-mysql-client \
     # libmariadb3 \
     xmlsec1 \
+    # required by gitpython module
     git \
-    uuid-runtime \
-    libpq-dev \
+    # uuid-runtime \
+    # libpq-dev \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
     # libcurl4-openssl-dev is required for installing pycurl python package
