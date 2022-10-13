@@ -80,16 +80,18 @@ RUN export PYCURL_SSL_LIBRARY=openssl && \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-  -r ./requirements.txt
+  -r ./requirements.txt && \
+  # remove tests installed by python modules
+  rm -rf /usr/local/lib/python*/site-packages/*/tests /usr/local/lib/python*/site-packages/slapdtest/certs
 
 COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-uwsgi.sh \
-  docker/entrypoint-uwsgi-dev.sh \
-  docker/entrypoint-unit-tests.sh \
-  docker/entrypoint-unit-tests-devDocker.sh \
+  # docker/entrypoint-uwsgi-dev.sh \
+  # docker/entrypoint-unit-tests.sh \
+  # docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
   docker/secret-file-loader.sh \
   docker/certs/* \
@@ -104,7 +106,7 @@ RUN update-ca-certificates
 # Add extra fixtures to docker image which are loaded by the initializer
 COPY docker/extra_fixtures/* /app/dojo/fixtures/
 
-COPY tests/ ./tests/
+# COPY tests/ ./tests/
 RUN \
   # Remove placeholder copied from docker/certs
   rm -f /readme.txt && \
