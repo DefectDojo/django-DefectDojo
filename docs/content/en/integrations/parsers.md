@@ -1037,6 +1037,10 @@ report as follows
 -   Removing both fields will allow retrieval of all findings in the
     Risk Recon instance.
 
+### Rubocop Scan
+
+Import Rubocop JSON scan report (with option -f json).
+
 ### Rusty Hog parser
 
 From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
