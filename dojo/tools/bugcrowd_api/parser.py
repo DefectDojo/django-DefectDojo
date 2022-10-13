@@ -204,10 +204,12 @@ class BugcrowdApiParser(object):
             return "Info"
 
     def is_active(self, bugcrowd_state):
-        return (bugcrowd_state == "unresolved") or (
-            not self.is_mitigated(bugcrowd_state)
-            and not self.is_false_p(bugcrowd_state)
-            and not self.is_out_of_scope(bugcrowd_state)
+        return (bugcrowd_state == "unresolved") or not (
+            self.is_mitigated(bugcrowd_state)
+            or self.is_false_p(bugcrowd_state)
+            or self.is_out_of_scope(bugcrowd_state)
+            or self.is_risk_accepted(bugcrowd_state)
+            or bugcrowd_state == "not_reproducible"
         )
 
     def is_duplicate(self, bugcrowd_state):
