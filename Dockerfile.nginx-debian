@@ -71,8 +71,13 @@ RUN pip3 install \
 
 COPY components/ ./components/
 RUN \
-  cd components && \
-  yarn
+  cd ./components && \
+  yarn && \
+  yarn autoclean --init && \
+  yarn autoclean --force
+
+# removing unnecessary bootswatch docs
+RUN rm -rf /app/static/bootswatch/docs/3
 
 COPY manage.py ./
 COPY dojo/ ./dojo/
