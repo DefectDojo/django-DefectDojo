@@ -551,7 +551,7 @@ Import Dependency Scanning Report vulnerabilities in JSON format: https://docs.g
 
 ### Github Vulnerability
 
-Import findings from Github vulnerability scan:
+Import findings from Github vulnerability scan (GraphQL Query):
 <https://help.github.com/en/github/managing-security-vulnerabilities>
 
 Currently the parser is able to manage only `RepositoryVulnerabilityAlert` object.
@@ -563,6 +563,7 @@ vulnerabilityAlerts (RepositoryVulnerabilityAlert object)
     + id
     + createdAt (optional)
     + vulnerableManifestPath (optional)
+    + state (optional)
     + securityVulnerability (SecurityVulnerability object)
         + severity (CRITICAL/HIGH/LOW/MODERATE)
         + package (optional)
@@ -576,7 +577,9 @@ vulnerabilityAlerts (RepositoryVulnerabilityAlert object)
                 + references (optional)
                     + url (optional)
                 + cvss (optional)
+                    + score (optional)
                     + vectorString (optional)
+                + cwes (optional)
 ```
 
 References:
@@ -1033,6 +1036,10 @@ report as follows
     the \"companies\" field.
 -   Removing both fields will allow retrieval of all findings in the
     Risk Recon instance.
+
+### Rubocop Scan
+
+Import Rubocop JSON scan report (with option -f json).
 
 ### Rusty Hog parser
 
