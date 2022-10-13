@@ -10,6 +10,7 @@ FROM base as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
+  apt-get -y upgrade && \
   apt-get -y install --no-install-recommends \
     gcc \
     build-essential \
@@ -44,6 +45,7 @@ ARG appuser=defectdojo
 ENV appuser ${appuser}
 RUN \
   apt-get -y update && \
+  apt-get -y upgrade && \
   # ugly fix to install postgresql-client without errors
   mkdir -p /usr/share/man/man1 /usr/share/man/man7 && \
   apt-get -y install --no-install-recommends \
