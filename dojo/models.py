@@ -2804,16 +2804,12 @@ class Finding(models.Model):
             return escape(self.file_path)
         link = self.test.engagement.source_code_management_uri
         if "https://github.com/" in self.test.engagement.source_code_management_uri:
-            if self.test.commit_hash is not None:
-                link += '/blob/' + self.test.commit_hash + '/' + self.file_path
-            elif self.test.engagement.commit_hash is not None:
-                link += '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
-            elif self.test.branch_tag is not None:
-                link += '/blob/' + self.test.branch_tag + '/' + self.file_path
+            if self.test.engagement.commit_hash is not None:
+                link = self.test.engagement.source_code_management_uri + '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
             elif self.test.engagement.branch_tag is not None:
-                link += '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
+                link = self.test.engagement.source_code_management_uri + '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
         else:
-            link += '/' + self.file_path
+            link = self.test.engagement.source_code_management_uri + '/' + self.file_path
         if self.line:
             link = link + '#L' + str(self.line)
         return create_bleached_link(link, self.file_path)
