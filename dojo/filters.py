@@ -2058,27 +2058,27 @@ class UserFilter(DojoFilter):
     username = CharFilter(lookup_expr='icontains')
     email = CharFilter(lookup_expr='icontains')
 
-        o = OrderingFilter(
-            # tuple-mapping retains order
-            fields=(
-                ('username', 'username'),
-                ('last_name', 'last_name'),
-                ('first_name', 'first_name'),
-                ('email', 'email'),
-                ('is_active', 'is_active'),
-                ('is_superuser', 'is_superuser'),
-                ('last_login', 'last_login'),
-            ),
-            field_labels={
-                'username': 'User Name',
-                'is_active': 'Active',
-                'is_superuser': 'Superuser',
-            }
-        )
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('username', 'username'),
+            ('last_name', 'last_name'),
+            ('first_name', 'first_name'),
+            ('email', 'email'),
+            ('is_active', 'is_active'),
+            ('is_superuser', 'is_superuser'),
+            ('last_login', 'last_login'),
+        ),
+        field_labels={
+            'username': 'User Name',
+            'is_active': 'Active',
+            'is_superuser': 'Superuser',
+        }
+    )
 
     class Meta:
         model = Dojo_User
-            fields = ['is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
+        fields = ['is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
 
 
 class GroupFilter(DojoFilter):

@@ -224,8 +224,8 @@ def get_group_by_group_name(finding, finding_group_by_option):
         group_name = finding.component_name
     elif finding_group_by_option == 'component_name+component_version':
         if finding.component_name or finding.component_version:
-        group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
-        (finding.component_version if finding.component_version else 'None'))
+            group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
+            (finding.component_version if finding.component_version else 'None'))
     elif finding_group_by_option == 'file_path':
         if finding.file_path:
             group_name = 'Filepath %s' % (finding.file_path)
@@ -233,7 +233,7 @@ def get_group_by_group_name(finding, finding_group_by_option):
         raise ValueError("Invalid group_by option %s" % finding_group_by_option)
 
     if group_name:
-    return 'Findings in: %s' % group_name
+        return 'Findings in: %s' % group_name
 
     return group_name
 
@@ -274,7 +274,7 @@ def add_finding_to_auto_group(finding, group_by, **kwargs):
     test = finding.test
     name = get_group_by_group_name(finding, group_by)
     if name is not None:
-    creator = get_current_user()
+        creator = get_current_user()
     if not creator:
         creator = kwargs.get('async_user', None)
     finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)

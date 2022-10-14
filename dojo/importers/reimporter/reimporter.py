@@ -69,7 +69,7 @@ class DojoDefaultReImporter(object):
                 item.test = test
 
             if service:
-            item.service = service
+                item.service = service
 
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)

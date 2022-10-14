@@ -1946,7 +1946,7 @@ class AddDojoUserForm(forms.ModelForm):
 
     class Meta:
         model = Dojo_User
-            fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
+        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1959,7 +1959,7 @@ class EditDojoUserForm(forms.ModelForm):
 
     class Meta:
         model = Dojo_User
-            fields = ['username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
+        fields = ['username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

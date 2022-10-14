@@ -104,7 +104,7 @@ class DojoDefaultImporter(object):
                 item.date = scan_date.date()
 
             if service:
-            item.service = service
+                item.service = service
 
             item.save(dedupe_option=False)
 
