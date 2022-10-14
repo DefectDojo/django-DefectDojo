@@ -25,7 +25,7 @@ gunicorn==20.1.0
 html2text==2020.1.16
 humanize==4.4.0
 jira==3.4.1
-PyGithub==1.55
+PyGithub==1.56
 lxml==4.9.1
 Markdown==3.4.1
 mysqlclient==2.1.1
@@ -33,7 +33,7 @@ openpyxl==3.0.10
 xlrd==1.2.0
 Pillow==9.2.0  # required by django-imagekit
 psycopg2-binary==2.9.4
-cryptography==38.0.1
+cryptography==38.0.2
 python-dateutil==2.8.2
 pytz==2022.4
 redis==4.3.4
