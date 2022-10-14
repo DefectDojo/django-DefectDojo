@@ -1,0 +1,23 @@
+[
+  {
+    "detail": [
+      {
+        "description": "User root found as effective user, which is not on the allowed list",
+        "gate": "dockerfile",
+        "imageId": "d26f0119b9634091a541b081dd8bdca435ab52e114e4b4328575c0bc2c69768b",
+        "policyId": "RootUser",
+        "status": "warn",
+        "tag": "test/testimage:testtag",
+        "triggerId": "b2605c2ddbdb02b8e2365c9248dada5a",
+        "triggerName": "effective_user"
+      }
+    ],
+    "digest": "sha256:8htz0bf942cfcd6hg8cf6435afd318b65d23e4c1a80044304c6e3ed20",
+    "finalAction": "stop",
+    "finalActionReason": "policy_evaluation",
+    "lastEvaluation": "2022-09-20T08:25:52Z",
+    "policyId": "9e104ade-7b57-4cdc-93fb-4949bf3b36b6",
+    "status": "fail",
+    "tag": "test/testimage:testtag"
+  }
+]

@@ -24,7 +24,7 @@ class AcceptedRiskSerializer(serializers.Serializer):
         max_length=50,
         label='Vulnerability Id',
         help_text='An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposure (CVE) or from other sources.')
-    justification = serializers.CharField(help_text='Justification for accepting findings with this CVE')
+    justification = serializers.CharField(help_text='Justification for accepting findings with this vulnerability id')
     accepted_by = serializers.CharField(max_length=200, help_text='Name or email of person who accepts the risk')
 
     def create(self, validated_data):
@@ -107,7 +107,7 @@ def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, o
                                                         decision_details=risk.justification,
                                                         accepted_by=risk.accepted_by[:200])
             acceptance.accepted_findings.set(findings)
-            findings.update(risk_accepted=True)
+            findings.update(risk_accepted=True, active=False)
             acceptance.save()
             accepted.append(acceptance)
 

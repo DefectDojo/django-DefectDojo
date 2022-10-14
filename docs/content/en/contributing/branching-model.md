@@ -26,4 +26,4 @@ PRs that relate to security issues are done through [security advisories](https:
 Diagrams created with [plantUML](https://plantuml.com). Find a web-based editor for PlantUML at https://www.planttext.com.
 
 ## Documentation
-A `dev` version of the documentation built from the `dev` branch is available at [DefectDojo Documentation - dev branch](https://defectdojo.github.io/django-DefectDojo/dev/).
+A `dev` version of the documentation built from the `dev` branch is available at [DefectDojo Documentation - dev branch](https://documentation.defectdojo.com/dev/).

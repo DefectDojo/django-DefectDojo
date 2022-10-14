@@ -6,6 +6,7 @@ import os
 import hashlib
 import bleach
 import mimetypes
+import hyperlink
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
@@ -25,7 +26,7 @@ from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
-    Dojo_User, Test, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
+    Test, User, Dojo_User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
     Language_Type, Languages, Rule, Dojo_Group_Member, NOTIFICATION_CHOICES
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
@@ -102,6 +103,68 @@ def do_false_positive_history(new_finding, *args, **kwargs):
 # true if both findings are on an engagement that have a different "deduplication on engagement" configuration
 def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
+
+
+def get_endpoints_as_url(finding):
+    list1 = []
+    for e in finding.endpoints.all():
+        list1.append(hyperlink.parse(str(e)))
+    return list1
+
+
+def are_urls_equal(url1, url2, fields):
+    # Possible values are: scheme, host, port, path, query, fragment, userinfo, and user.
+    # For a details description see https://hyperlink.readthedocs.io/en/latest/api.html#attributes
+    deduplicationLogger.debug("Check if url %s and url %s are equal in terms of %s.", url1, url2, fields)
+    for field in fields:
+        if field == 'scheme':
+            if url1.scheme != url2.scheme:
+                return False
+        elif field == 'host':
+            if url1.host != url2.host:
+                return False
+        elif field == 'port':
+            if url1.port != url2.port:
+                return False
+        elif field == 'path':
+            if url1.path != url2.path:
+                return False
+        elif field == 'query':
+            if url1.query != url2.query:
+                return False
+        elif field == 'fragment':
+            if url1.fragment != url2.fragment:
+                return False
+        elif field == 'userinfo':
+            if url1.userinfo != url2.userinfo:
+                return False
+        elif field == 'user':
+            if url1.user != url2.user:
+                return False
+        else:
+            logger.warning('Field ' + field + ' is not supported by the endpoint dedupe algorithm, ignoring it.')
+    return True
+
+
+def are_endpoints_duplicates(new_finding, to_duplicate_finding):
+    fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
+    # shortcut if fields list is empty/feature is disabled
+    if len(fields) == 0:
+        deduplicationLogger.debug("deduplication by endpoint fields is disabled")
+        return True
+
+    list1 = get_endpoints_as_url(new_finding)
+    list2 = get_endpoints_as_url(to_duplicate_finding)
+
+    deduplicationLogger.debug("Starting deduplication by endpoint fields for finding {} with urls {} and finding {} with urls {}".format(new_finding.id, list1, to_duplicate_finding.id, list2))
+    if list1 == [] and list2 == []:
+        return True
+
+    for l1 in list1:
+        for l2 in list2:
+            if are_urls_equal(l1, l2, fields):
+                return True
+    return False
 
 
 @dojo_model_to_id
@@ -251,10 +314,10 @@ def deduplicate_unique_id_from_tool(new_finding):
             continue
         try:
             set_duplicate(new_finding, find)
+            break
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-        break
 
 
 def deduplicate_hash_code(new_finding):
@@ -281,11 +344,12 @@ def deduplicate_hash_code(new_finding):
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:
-            set_duplicate(new_finding, find)
+            if are_endpoints_duplicates(new_finding, find):
+                set_duplicate(new_finding, find)
+                break
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-        break
 
 
 def deduplicate_uid_or_hash_code(new_finding):
@@ -313,7 +377,8 @@ def deduplicate_uid_or_hash_code(new_finding):
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:
-            set_duplicate(new_finding, find)
+            if are_endpoints_duplicates(new_finding, find):
+                set_duplicate(new_finding, find)
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
@@ -361,7 +426,7 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.active = new_finding.active
     existing_finding.verified = new_finding.verified
     existing_finding.notes.create(author=existing_finding.reporter,
-                                    entry="This finding has been automatically re-openend as it was found in recent scans.")
+                                    entry="This finding has been automatically re-opened as it was found in recent scans.")
     existing_finding.save()
 
 
@@ -841,18 +906,17 @@ def get_period_counts_legacy(findings,
     }
 
 
-def get_period_counts(active_findings,
-                      findings,
+def get_period_counts(findings,
                       findings_closed,
                       accepted_findings,
                       period_interval,
                       start_date,
                       relative_delta='months'):
-    start_date = datetime(
-        start_date.year,
-        start_date.month,
-        start_date.day,
-        tzinfo=timezone.get_current_timezone())
+
+    tz = timezone.get_current_timezone()
+
+    start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
+
     opened_in_period = list()
     active_in_period = list()
     accepted_in_period = list()
@@ -883,77 +947,64 @@ def get_period_counts(active_findings,
                 mitigated_time__range=[new_date, end_date]).count()
 
         if accepted_findings:
+            date_range = [
+                datetime(new_date.year, new_date.month, new_date.day, tzinfo=tz),
+                datetime(end_date.year, end_date.month, end_date.day, tzinfo=tz)
+            ]
             try:
-                risks_a = accepted_findings.filter(
-                    risk_acceptance__created__date__range=[
-                        datetime(
-                            new_date.year,
-                            new_date.month,
-                            1,
-                            tzinfo=timezone.get_current_timezone()),
-                        datetime(
-                            new_date.year,
-                            new_date.month,
-                            monthrange(new_date.year, new_date.month)[1],
-                            tzinfo=timezone.get_current_timezone())
-                    ])
+                risks_a = accepted_findings.filter(risk_acceptance__created__date__range=date_range)
             except:
-                risks_a = accepted_findings.filter(
-                    date__range=[
-                        datetime(
-                            new_date.year,
-                            new_date.month,
-                            1,
-                            tzinfo=timezone.get_current_timezone()),
-                        datetime(
-                            new_date.year,
-                            new_date.month,
-                            monthrange(new_date.year, new_date.month)[1],
-                            tzinfo=timezone.get_current_timezone())
-                    ])
+                risks_a = accepted_findings.filter(date__range=date_range)
         else:
             risks_a = None
 
-        crit_count, high_count, med_count, low_count, closed_count = [
+        f_crit_count, f_high_count, f_med_count, f_low_count, f_closed_count = [
             0, 0, 0, 0, 0
         ]
+        ra_crit_count, ra_high_count, ra_med_count, ra_low_count, ra_closed_count = [
+            0, 0, 0, 0, 0
+        ]
+        active_crit_count, active_high_count, active_med_count, active_low_count, active_closed_count = [
+            0, 0, 0, 0, 0
+        ]
+
         for finding in findings:
             try:
                 severity = finding.severity
+                active = finding.active
+#                risk_accepted = finding.risk_accepted TODO: in future release
             except:
                 severity = finding.finding.severity
-            try:
-                if new_date <= datetime.combine(
-                        finding.date, datetime.min.time()
-                ).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if severity == 'Critical':
-                        crit_count += 1
-                    elif severity == 'High':
-                        high_count += 1
-                    elif severity == 'Medium':
-                        med_count += 1
-                    elif severity == 'Low':
-                        low_count += 1
-            except:
-                if new_date <= finding.date <= end_date:
-                    if severity == 'Critical':
-                        crit_count += 1
-                    elif severity == 'High':
-                        high_count += 1
-                    elif severity == 'Medium':
-                        med_count += 1
-                    elif severity == 'Low':
-                        low_count += 1
-                pass
+                active = finding.finding.active
+#                risk_accepted = finding.finding.risk_accepted
 
-        total = crit_count + high_count + med_count + low_count
-        opened_in_period.append(
-            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
-             crit_count, high_count, med_count, low_count, total,
-             closed_in_range_count])
-        crit_count, high_count, med_count, low_count, closed_count = [
-            0, 0, 0, 0, 0
-        ]
+            try:
+                f_time = datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=tz)
+            except:
+                f_time = finding.date
+
+            if f_time <= end_date:
+                if severity == 'Critical':
+                    if new_date <= f_time:
+                        f_crit_count += 1
+                    if active:
+                        active_crit_count += 1
+                elif severity == 'High':
+                    if new_date <= f_time:
+                        f_high_count += 1
+                    if active:
+                        active_high_count += 1
+                elif severity == 'Medium':
+                    if new_date <= f_time:
+                        f_med_count += 1
+                    if active:
+                        active_med_count += 1
+                elif severity == 'Low':
+                    if new_date <= f_time:
+                        f_low_count += 1
+                    if active:
+                        active_low_count += 1
+
         if risks_a is not None:
             for finding in risks_a:
                 try:
@@ -961,52 +1012,29 @@ def get_period_counts(active_findings,
                 except:
                     severity = finding.finding.severity
                 if severity == 'Critical':
-                    crit_count += 1
+                    ra_crit_count += 1
                 elif severity == 'High':
-                    high_count += 1
+                    ra_high_count += 1
                 elif severity == 'Medium':
-                    med_count += 1
+                    ra_med_count += 1
                 elif severity == 'Low':
-                    low_count += 1
+                    ra_low_count += 1
 
-        total = crit_count + high_count + med_count + low_count
+        total = f_crit_count + f_high_count + f_med_count + f_low_count
+        opened_in_period.append(
+            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
+             f_crit_count, f_high_count, f_med_count, f_low_count, total,
+             closed_in_range_count])
+
+        total = ra_crit_count + ra_high_count + ra_med_count + ra_low_count
         accepted_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
-             crit_count, high_count, med_count, low_count, total])
-        crit_count, high_count, med_count, low_count, closed_count = [
-            0, 0, 0, 0, 0
-        ]
-        for finding in active_findings:
-            try:
-                severity = finding.severity
-            except:
-                severity = finding.finding.severity
-            try:
-                if datetime.combine(finding.date, datetime.min.time()).replace(
-                        tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if severity == 'Critical':
-                        crit_count += 1
-                    elif severity == 'High':
-                        high_count += 1
-                    elif severity == 'Medium':
-                        med_count += 1
-                    elif severity == 'Low':
-                        low_count += 1
-            except:
-                if finding.date <= end_date:
-                    if severity == 'Critical':
-                        crit_count += 1
-                    elif severity == 'High':
-                        high_count += 1
-                    elif severity == 'Medium':
-                        med_count += 1
-                    elif severity == 'Low':
-                        low_count += 1
-                pass
-        total = crit_count + high_count + med_count + low_count
+             ra_crit_count, ra_high_count, ra_med_count, ra_low_count, total])
+
+        total = active_crit_count + active_high_count + active_med_count + active_low_count
         active_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
-             crit_count, high_count, med_count, low_count, total])
+             active_crit_count, active_high_count, active_med_count, active_low_count, total])
 
     return {
         'opened_per_period': opened_in_period,
@@ -1637,6 +1665,7 @@ def get_site_url():
         return "settings.SITE_URL"
 
 
+@receiver(post_save, sender=User)
 @receiver(post_save, sender=Dojo_User)
 def user_post_save(sender, instance, created, **kwargs):
     # For new users we create a Notifications object so the default 'alert' notifications work and
@@ -1667,11 +1696,10 @@ def user_post_save(sender, instance, created, **kwargs):
                     role=system_settings.default_group_role)
                 dojo_group_member.save()
 
-    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-        # Superusers shall always be staff
-        if instance.is_superuser and not instance.is_staff:
-            instance.is_staff = True
-            instance.save()
+    # Superusers shall always be staff
+    if instance.is_superuser and not instance.is_staff:
+        instance.is_staff = True
+        instance.save()
 
 
 @receiver(post_save, sender=Engagement)
@@ -2040,7 +2068,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     batch = []
     total_pages = (total_count // page_size) + 2
     # logger.info('pages to process: %d', total_pages)
-    logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
+    logger.debug('%s%s out of %s models processed ...', log_prefix, i, total_count)
     for p in range(1, total_pages):
         # logger.info('page: %d', p)
         if order == 'asc':
@@ -2064,7 +2092,9 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
                 if fields:
                     model_type.objects.bulk_update(batch, fields)
                 batch = []
-                logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
+                logger.debug('%s%s out of %s models processed ...', log_prefix, i, total_count)
+
+        logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
 
     if fields:
         model_type.objects.bulk_update(batch, fields)
@@ -2235,7 +2265,12 @@ def log_user_logout(sender, request, user, **kwargs):
 @receiver(user_login_failed)
 def log_user_login_failed(sender, credentials, request, **kwargs):
 
-    logger.warning('login failed for: {credentials} via ip: {ip}'.format(
-        credentials=credentials['username'],
-        ip=request.META['REMOTE_ADDR']
-    ))
+    if 'username' in credentials:
+        logger.warning('login failed for: {credentials} via ip: {ip}'.format(
+            credentials=credentials['username'],
+            ip=request.META['REMOTE_ADDR']
+        ))
+    else:
+        logger.error('login failed because of missing username via ip: {ip}'.format(
+            ip=request.META['REMOTE_ADDR']
+        ))

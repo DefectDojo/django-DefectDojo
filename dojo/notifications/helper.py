@@ -1,15 +1,18 @@
-import requests
 import logging
+import requests
+
 from django.core.mail import EmailMessage
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from django.db.models import Q, Count, Prefetch
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
-from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
-from dojo.celery import app
-from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
+from django.utils.translation import gettext as _
+
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
+from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +26,9 @@ def create_notification(event=None, **kwargs):
         logger.debug('creating notifications for recipients: %s', kwargs['recipients'])
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
             # kwargs.update({'user': recipient_notifications.user})
+            logger.debug('Sent notification to %s', recipient_notifications.user)
             process_notifications(event, recipient_notifications, **kwargs)
+
     else:
         logger.debug('creating system notifications for event: %s', event)
         # send system notifications to all admin users
@@ -113,11 +118,11 @@ def create_notification(event=None, **kwargs):
 def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
         if event == 'product_added':
-            kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
+            kwargs["description"] = _('Product %(title)s has been created successfully.' % {'title': kwargs['title']})
         elif event == 'product_type_added':
-            kwargs["description"] = "Product Type " + kwargs['title'] + " has been created successfully."
+            kwargs["description"] = _('Product Type %(title)s has been created successfully.' % {'title': kwargs['title']})
         else:
-            kwargs["description"] = "Event " + str(event) + " has occurred."
+            kwargs["description"] = _('Event %(event)s  has occurred.' % {'event': str(event)})
 
     return kwargs["description"]
 
@@ -130,6 +135,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     notification_message = None
     try:
         notification_message = render_to_string(template, kwargs)
+        logger.debug("Rendering from the template %s", template)
     except TemplateDoesNotExist:
         logger.debug('template not found or not implemented yet: %s', template)
     except Exception as e:
@@ -327,25 +333,23 @@ def get_slack_user_id(user_email):
         url='https://slack.com/api/users.lookupByEmail',
         data={'token': get_system_setting('slack_token'), 'email': user_email})
 
-    users = json.loads(res.text)
+    user = json.loads(res.text)
 
     slack_user_is_found = False
-    if users:
-        if 'error' in users:
+    if user:
+        if 'error' in user:
             logger.error("Slack is complaining. See error message below.")
-            logger.error(users)
+            logger.error(user)
             raise RuntimeError('Error getting user list from Slack: ' + res.text)
         else:
-            for member in users["members"]:
-                if "email" in member["profile"]:
-                    if user_email == member["profile"]["email"]:
-                        if "id" in member:
-                            user_id = member["id"]
-                            logger.debug("Slack user ID is {}".format(user_id))
-                            slack_user_is_found = True
-                            break
-                    else:
-                        logger.warning("A user with email {} could not be found in this Slack workspace.".format(user_email))
+            if "email" in user["user"]["profile"]:
+                if user_email == user["user"]["profile"]["email"]:
+                    if "id" in user["user"]:
+                        user_id = user["user"]["id"]
+                        logger.debug("Slack user ID is {}".format(user_id))
+                        slack_user_is_found = True
+                else:
+                    logger.warning("A user with email {} could not be found in this Slack workspace.".format(user_email))
 
             if not slack_user_is_found:
                 logger.warning("The Slack user was not found.")
@@ -376,7 +380,14 @@ def notify_test_created(test):
                         url=reverse('view_test', args=(test.id,)))
 
 
-def notify_scan_added(test, updated_count, new_findings, findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
+def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
+    logger.debug("Scan added notifications")
+
+    new_findings = sorted(list(new_findings), key=lambda x: x.numerical_severity)
+    findings_mitigated = sorted(list(findings_mitigated), key=lambda x: x.numerical_severity)
+    findings_reactivated = sorted(list(findings_reactivated), key=lambda x: x.numerical_severity)
+    findings_untouched = sorted(list(findings_untouched), key=lambda x: x.numerical_severity)
+
     title = 'Created/Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
     create_notification(event='scan_added', title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
                         finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=findings_untouched,

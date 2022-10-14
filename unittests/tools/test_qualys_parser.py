@@ -46,9 +46,51 @@ class TestQualysParser(DojoTestCase):
         self.assertEqual(
             finding_cvssv3_score.severity, "High"
         )
-        self.assertEqual(
-            finding_cvssv3_vector.cvssv3, "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H"
-        )
+        self.assertEqual(finding_cvssv3_vector.cvssv3,
+                         "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H")
         self.assertEqual(
             finding_cvssv3_vector.severity, "Critical"
         )
+
+    def test_parse_file_with_no_vuln_has_no_findings_csv(self):
+        testfile = open(
+            get_unit_tests_path() + "/scans/qualys/empty.csv"
+        )
+        parser = QualysParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(0, len(findings))
+
+    def test_parse_file_with_multiple_vuln_has_multiple_findings_csv(self):
+        testfile = open(
+            get_unit_tests_path() + "/scans/qualys/Qualys_Sample_Report.csv"
+        )
+        parser = QualysParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(6, len(findings))
+
+        finding = findings[0]
+        self.assertEqual(
+            finding.title,
+            "QID-105971 | EOL/Obsolete Software: Microsoft ASP.NET 1.0 Detected")
+        self.assertEqual(
+            finding.severity, "Critical"
+        )
+        self.assertEqual(
+            finding.unsaved_endpoints[0].host, "10.98.57.180"
+        )
+
+        for finding in findings:
+            if finding.unsaved_endpoints[0].host == "10.98.57.180" and finding.title == "QID-105971 | EOL/Obsolete Software: Microsoft ASP.NET 1.0 Detected":
+
+                self.assertEqual(
+                    finding.severity, "Critical"
+                )
+                self.assertEqual(
+                    finding.cvssv3,
+                    "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:U/RC:C")
+                self.assertEqual(
+                    finding.severity, "Critical"
+                )

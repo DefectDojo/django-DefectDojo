@@ -1,6 +1,6 @@
 ---
 title: "Importing"
-description: "DefectDojo has the ability to import scan reports from a large number of security tools."
+description: "How DefectDojo imports and reimports security tool reports."
 draft: false
 weight: 1
 ---

@@ -19,7 +19,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                {% if "auth.change_user"|has_configuration_permission:"superuser" %}
+                                {% if "auth.change_user"|has_configuration_permission %}
                                 <li>
                                     <a class="" href="{% url 'edit_user' user.id %}">
                                         <i class="fa fa-pencil-square-o"></i> Edit</a>
@@ -30,7 +30,7 @@
                                     <a href="{% url 'action_history' user|content_type user.id %}">
                                         <i class="fa fa-history"></i> View History</a>
                                 </li>
-                                {% if "auth.delete_user"|has_configuration_permission:"superuser" and user.id != request.user.id %}
+                                {% if "auth.delete_user"|has_configuration_permission and user.id != request.user.id %}
                                 <li role="separator" class="divider"></li>
                                 <li>
                                     <a class="" href="{% url 'delete_user' user.id %}" id="deleteUser"> 
@@ -105,7 +105,7 @@
                 <div class="clearfix">
                     <h4 class="pull-left">Product Type Membership</h4>
                     &nbsp;
-                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                    <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
@@ -178,7 +178,7 @@
                 <div class="clearfix">
                     <h4 class="pull-left">Product Membership</h4>
                     &nbsp;
-                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                    <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
@@ -252,7 +252,7 @@
                 <div class="clearfix">
                     <h4 class="pull-left">Group Membership</h4>
                     &nbsp;
-                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/#groups" target="_blank">
+                    <a href="https://documentation.defectdojo.com/usage/permissions/#groups" target="_blank">
                         <i class="fa fa-question-circle"></i></a>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
@@ -341,18 +341,6 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        {% if not 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
-                        <tr>
-                            <td style="width: 200px;"><strong>Staff</strong></td>
-                            <td>
-                                {% if user.is_staff %}
-                                <i class="text-success fa fa-check"></i>
-                                {% else %}
-                                <i class="text-danger fa fa-times"></i>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endif %}
                         <tr>
                             <td style="width: 200px;"><strong>Superuser</strong></td>
                             <td>
@@ -382,7 +370,7 @@
             </div>
         </div>
         <!-- Configuration permissions -->
-        {% if 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled and not user.is_superuser %}
+        {% if not user.is_superuser %}
         <div class="panel panel-default-secondary" id="edit_permissions">
             <div class="panel-heading">
                 <h3 class="panel-title"><span class="fa fa-unlock-alt" aria-hidden="true"></span>&nbsp;&nbsp;Configuration Permissions</h3>

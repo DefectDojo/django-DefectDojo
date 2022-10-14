@@ -55,7 +55,9 @@ class WpscanParser(object):
                 finding.mitigation = "fixed in : " + vul["fixed_in"]
             # manage CVE
             if "cve" in vul["references"]:
-                finding.cve = "CVE-" + vul["references"]["cve"][0]
+                finding.unsaved_vulnerability_ids = list()
+                for vulnerability_id in vul["references"]["cve"]:
+                    finding.unsaved_vulnerability_ids.append(f"CVE-{vulnerability_id}")
 
             # internal de-duplication
             dupe_key = hashlib.sha256(str(finding.unique_id_from_tool).encode("utf-8")).hexdigest()

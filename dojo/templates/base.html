@@ -159,12 +159,14 @@
                                                 {{ request.user.username }}
                                             </a>
                                         </li>
-                                        <li>
-                                            <a href="{% url 'api_v2_key' %}">
-                                                <i class="fa fa-fw fa-key"></i>
-                                                {% trans "API v2 Key" %}
-                                            </a>
-                                        </li>
+                                        {% if API_TOKENS_ENABLED %}
+                                          <li>
+                                              <a href="{% url 'api_v2_key' %}">
+                                                  <i class="fa fa-fw fa-key"></i>
+                                                  {% trans "API v2 Key" %}
+                                              </a>
+                                          </li>
+                                        {% endif %}
                                     {% endif %}
                                     <li>
                                         <a href="{% url 'api_v2_schema' %}" target="_blank">
@@ -173,7 +175,7 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="{% url 'swagger-ui_oa3' %}?docExpansion=none" target="_blank">
+                                        <a href="{% url 'swagger-ui_oa3' %}" target="_blank">
                                             <i class="fa fa-book fa-fw" title="OpenAPI v3 Docs"></i>
                                             {% trans "API v2 OpenAPI3 Docs" %}
                                         </a>
@@ -315,7 +317,7 @@
                                                         {% trans "Risk Accepted Findings" %}
                                                     </a>
                                                 </li>
-                                                {% if "dojo.view_finding_template"|has_configuration_permission:"staff" %}
+                                                {% if "dojo.view_finding_template"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'templates' %}">
                                                             {% trans "Finding Templates" %}
@@ -422,7 +424,7 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
-                                        {% if "auth.view_user"|has_configuration_permission:"staff" or "auth.view_group"|has_configuration_permission:"staff" %}
+                                        {% if "auth.view_user"|has_configuration_permission or "auth.view_group"|has_configuration_permission %}
                                             <li>
                                                 <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users" id="id_user_menu">
                                                     <i class="fa fa-user fa-fw"></i>
@@ -430,14 +432,14 @@
                                                     <span class="glyphicon arrow"></span>
                                                 </a>
                                                 <ul class="nav nav-second-level">
-                                                    {% if "auth.view_user"|has_configuration_permission:"staff" %}
+                                                    {% if "auth.view_user"|has_configuration_permission %}
                                                         <li>    
                                                             <a href="{% url 'users' %}">
                                                                 {% trans "Users" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
-                                                    {% if "auth.view_group"|has_configuration_permission:"staff" %}
+                                                    {% if "auth.view_group"|has_configuration_permission %}
                                                         <li>
                                                             <a href="{% url 'groups' %}"  id="id_group_menu">
                                                                 {% trans "Groups" %}
@@ -447,14 +449,16 @@
                                                 </ul>
                                             </li>
                                         {% endif %}
+                                        {% if system_settings.enable_calendar %}
                                         <li>
                                             <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
                                                 <i class="fa fa-calendar fa-fw"></i>
                                                 <span>{% trans "Calendar" %}</span>
                                             </a>
                                         </li>
+                                        {% endif %}
                                         {% if system_settings.enable_questionnaires %}
-                                            {% if "dojo.view_engagement_survey"|has_configuration_permission:"staff" or "dojo.view_question"|has_configuration_permission:"staff" %}
+                                            {% if "dojo.view_engagement_survey"|has_configuration_permission or "dojo.view_question"|has_configuration_permission %}
                                                 <li>
                                                     <a href="#">
                                                         <i class="fa fa-hospital-o fa-fw"></i>
@@ -462,14 +466,14 @@
                                                         <span class="glyphicon arrow"></span>
                                                     </a>
                                                     <ul class="nav nav-second-level">
-                                                        {% if "dojo.view_engagement_survey"|has_configuration_permission:"staff"  %}
+                                                        {% if "dojo.view_engagement_survey"|has_configuration_permission  %}
                                                             <li>
                                                                 <a href="{% url 'questionnaire' %}">
                                                                     {% trans "All Questionnaires" %}
                                                                 </a>
                                                             </li>
                                                         {% endif %}
-                                                        {% if "dojo.view_question"|has_configuration_permission:"staff" %}
+                                                        {% if "dojo.view_question"|has_configuration_permission %}
                                                             <li>
                                                                 <a href="{% url 'questions' %}">
                                                                     {% trans "All Questions" %}
@@ -487,42 +491,42 @@
                                                 <span>{% trans "Configuration" %}</span>
                                             </a>
                                             <ul class="nav nav-second-level">
-                                                {% if system_settings.enable_credentials and "dojo.view_cred_user"|has_configuration_permission:"superuser" %}
+                                                {% if system_settings.enable_credentials and "dojo.view_cred_user"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'cred' %}">
                                                             {% trans "Credential Manager" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if system_settings.enable_github  and "dojo.view_github_conf"|has_configuration_permission:"superuser"%}
+                                                {% if system_settings.enable_github  and "dojo.view_github_conf"|has_configuration_permission%}
                                                     <li>
                                                         <a href="{% url 'github' %}">
                                                             {% trans "GitHub" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if system_settings.enable_google_sheets and "dojo.change_google_sheet"|has_configuration_permission:"superuser" %}
+                                                {% if system_settings.enable_google_sheets and "dojo.change_google_sheet"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'configure_google_sheets' %}">
                                                             {% trans "Google Sheets Sync" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if system_settings.enable_jira and "dojo.view_jira_instance"|has_configuration_permission:"superuser" %}
+                                                {% if system_settings.enable_jira and "dojo.view_jira_instance"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'jira' %}">
                                                             {% trans "JIRA" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if "dojo.change_bannerconf"|has_configuration_permission:"superuser" %}
+                                                {% if "dojo.change_bannerconf"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'configure_banner' %}">
                                                             {% trans "Login banner" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if "dojo.view_note_type"|has_configuration_permission:"superuser" %}
+                                                {% if "dojo.view_note_type"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'note_type' %}">
                                                             {% trans "Note Types" %}
@@ -539,10 +543,17 @@
                                                         {% trans "Regulations" %}
                                                     </a>
                                                 </li>
-                                                {% if system_settings.enable_rules_framework and "dojo.view_rule"|has_configuration_permission:"superuser" %}
+                                                {% if system_settings.enable_rules_framework and "dojo.view_rule"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'rules' %}">
                                                             {% trans "Rules Framework" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                                {% if system_settings.enable_finding_sla and "dojo.view_sla_configuration"|has_configuration_permission %}
+                                                    <li>
+                                                        <a href="{% url 'sla_config' %}">
+                                                            {% trans "SLA Configuration" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
@@ -553,14 +564,14 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if "dojo.view_tool_configuration"|has_configuration_permission:"superuser" %}
+                                                {% if "dojo.view_tool_configuration"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'tool_config' %}">
                                                             {% trans "Tool Configuration" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if "dojo.view_tool_type"|has_configuration_permission:"superuser" %}
+                                                {% if "dojo.view_tool_type"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'tool_type' %}">
                                                             {% trans "Tool Type" %}
@@ -992,6 +1003,16 @@
                 <!-- /.container-fluid -->
             </div>
             <!-- /#page-wrapper -->
+
+            <!-- .dojo-modals-wrapper -->
+            <div id="dojo-modals-wrapper" class="dojo-modals-wrapper">
+            {% block modals %}
+            {% endblock %}
+            </div>
+            <!-- /.dojo-modals-wrapper -->
+
+            <!-- #footer-wrapper -->
+            <div id="footer-wrapper">
             {% block footer %}
                 <footer class="footer">
                     <div class="container">
@@ -1024,6 +1045,8 @@
                     <p id="disable_count" class="hidden">{{ 'DISABLE_ALERT_COUNTER'|setting_enabled }}</p>
                 </footer>
             {% endblock %}
+            </div>
+            <!-- /#footer-wrapper -->
         </div>
 
         <!-- /#wrapper -->
@@ -1082,9 +1105,9 @@
                         $('.dropdown-alerts').empty();
                         $.each(data, function(i, elem) {
                         var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;
-                        var display_title = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';
+                        var display_title = titleField.length < 50 ? titleField : titleField.trim().substring(0,50).trim(this) + '...';
                         var description = elem.fields.description
-                        var display_description = description ? description.length < 100 ? description : jQuery.trim(description).substring(0,100).trim(this) + '...': ''
+                        var display_description = description ? description.length < 100 ? description : description.trim().substring(0,100).trim(this) + '...': ''
                         var dropdown_alert = "alert-list" + i;
                         $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa fa-' + htmlEscape(elem.fields.icon) +
                                                         ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert +

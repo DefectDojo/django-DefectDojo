@@ -193,163 +193,34 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
             )
 
 
-class TestSaveVulnerabilityReferences(DojoTestCase):
+class TestSaveVulnerabilityIds(DojoTestCase):
 
     @patch('dojo.finding.helper.Vulnerability_Id.objects.filter')
-    @patch('dojo.finding.helper.Vulnerability_Id.objects.get_or_create')
-    @patch('dojo.finding.helper.Vulnerability_Id.delete')
-    def test_previous_vr_and_new_vr(self, mock_delete, mock_create, mock_filter):
+    @patch('django.db.models.query.QuerySet.delete')
+    @patch('dojo.finding.helper.Vulnerability_Id.save')
+    def test_save_vulnerability_ids(self, save_mock, delete_mock, filter_mock):
         finding = Finding()
-        previous_vulnerability_ids = [
-            Vulnerability_Id(id=1, finding=finding, vulnerability_id='REF-1'),
-        ]
-        mock_filter.return_value = previous_vulnerability_ids
-        mock_create.return_value = None, True
-
-        new_vulnerability_ids = ['REF-2']
+        new_vulnerability_ids = ['REF-1', 'REF-2', 'REF-2']
+        filter_mock.return_value = Vulnerability_Id.objects.none()
 
         save_vulnerability_ids(finding, new_vulnerability_ids)
 
-        self.assertEqual('REF-2', finding.cve)
-        mock_filter.assert_called_once_with(finding=finding)
-        mock_create.assert_called_once_with(finding=finding, vulnerability_id='REF-2')
-        mock_delete.assert_called_once()
-
-    @patch('dojo.finding.helper.Vulnerability_Id.objects.filter')
-    @patch('dojo.finding.helper.Vulnerability_Id.objects.get_or_create')
-    @patch('dojo.finding.helper.Vulnerability_Id.delete')
-    def test_previous_vr_and_no_new_vr(self, mock_delete, mock_create, mock_filter):
-        finding = Finding()
-        previous_vulnerability_ids = [
-            Vulnerability_Id(id=1, finding=finding, vulnerability_id='REF-1'),
-        ]
-        mock_filter.return_value = previous_vulnerability_ids
-        mock_create.return_value = None, True
-
-        new_vulnerability_ids = []
-
-        save_vulnerability_ids(finding, new_vulnerability_ids)
-
-        self.assertEqual(None, finding.cve)
-        mock_filter.assert_called_once_with(finding=finding)
-        mock_create.assert_not_called()
-        mock_delete.assert_called_once()
-
-    @patch('dojo.finding.helper.Vulnerability_Id.objects.filter')
-    @patch('dojo.finding.helper.Vulnerability_Id.objects.get_or_create')
-    @patch('dojo.finding.helper.Vulnerability_Id.delete')
-    def test_no_previous_vr_and_no_new_vr(self, mock_delete, mock_create, mock_filter):
-        finding = Finding()
-        previous_vulnerability_ids = []
-        mock_filter.return_value = previous_vulnerability_ids
-        mock_create.return_value = None, True
-
-        new_vulnerability_ids = []
-
-        save_vulnerability_ids(finding, new_vulnerability_ids)
-
-        self.assertEqual(None, finding.cve)
-        mock_filter.assert_called_once_with(finding=finding)
-        mock_create.assert_not_called()
-        mock_delete.assert_not_called()
-
-    @patch('dojo.finding.helper.Vulnerability_Id.objects.filter')
-    @patch('dojo.finding.helper.Vulnerability_Id.objects.get_or_create')
-    @patch('dojo.finding.helper.Vulnerability_Id.delete')
-    def test_same_previous_vr_and_new_vr(self, mock_delete, mock_create, mock_filter):
-        finding = Finding()
-        previous_vulnerability_ids = [
-            Vulnerability_Id(id=1, finding=finding, vulnerability_id='REF-1'),
-        ]
-        mock_filter.return_value = previous_vulnerability_ids
-        mock_create.return_value = Vulnerability_Id(id=1, finding=finding, vulnerability_id='REF-1'), False
-
-        new_vulnerability_ids = ['REF-1']
-
-        save_vulnerability_ids(finding, new_vulnerability_ids)
-
+        filter_mock.assert_called_with(finding=finding)
+        delete_mock.assert_called_once()
+        self.assertEqual(save_mock.call_count, 2)
         self.assertEqual('REF-1', finding.cve)
-        mock_filter.assert_called_once_with(finding=finding)
-        mock_create.assert_called_once_with(finding=finding, vulnerability_id='REF-1')
-        mock_delete.assert_not_called()
-
-
-class TestSaveVulnerabilityReferencesTemplate(DojoTestCase):
 
     @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.filter')
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.get_or_create')
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.delete')
-    def test_previous_vr_and_new_vr(self, mock_delete, mock_create, mock_filter):
-        finding = Finding_Template()
-        previous_vulnerability_ids = [
-            Vulnerability_Id_Template(id=1, finding_template=finding, vulnerability_id='REF-1'),
-        ]
-        mock_filter.return_value = previous_vulnerability_ids
-        mock_create.return_value = None, True
+    @patch('django.db.models.query.QuerySet.delete')
+    @patch('dojo.finding.helper.Vulnerability_Id_Template.save')
+    def test_save_vulnerability_id_templates(self, save_mock, delete_mock, filter_mock):
+        finding_template = Finding_Template()
+        new_vulnerability_ids = ['REF-1', 'REF-2', 'REF-2']
+        filter_mock.return_value = Vulnerability_Id_Template.objects.none()
 
-        new_vulnerability_ids = ['REF-2']
+        save_vulnerability_ids_template(finding_template, new_vulnerability_ids)
 
-        save_vulnerability_ids_template(finding, new_vulnerability_ids)
-
-        self.assertEqual('REF-2', finding.cve)
-        mock_filter.assert_called_once_with(finding_template=finding)
-        mock_create.assert_called_once_with(finding_template=finding, vulnerability_id='REF-2')
-        mock_delete.assert_called_once()
-
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.filter')
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.get_or_create')
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.delete')
-    def test_previous_vr_and_no_new_vr(self, mock_delete, mock_create, mock_filter):
-        finding = Finding_Template()
-        previous_vulnerability_ids = [
-            Vulnerability_Id_Template(id=1, finding_template=finding, vulnerability_id='REF-1'),
-        ]
-        mock_filter.return_value = previous_vulnerability_ids
-        mock_create.return_value = None, True
-
-        new_vulnerability_ids = []
-
-        save_vulnerability_ids_template(finding, new_vulnerability_ids)
-
-        self.assertEqual(None, finding.cve)
-        mock_filter.assert_called_once_with(finding_template=finding)
-        mock_create.assert_not_called()
-        mock_delete.assert_called_once()
-
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.filter')
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.get_or_create')
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.delete')
-    def test_no_previous_vr_and_no_new_vr(self, mock_delete, mock_create, mock_filter):
-        finding = Finding_Template()
-        previous_vulnerability_ids = []
-        mock_filter.return_value = previous_vulnerability_ids
-        mock_create.return_value = None, True
-
-        new_vulnerability_ids = []
-
-        save_vulnerability_ids_template(finding, new_vulnerability_ids)
-
-        self.assertEqual(None, finding.cve)
-        mock_filter.assert_called_once_with(finding_template=finding)
-        mock_create.assert_not_called()
-        mock_delete.assert_not_called()
-
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.filter')
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.get_or_create')
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.delete')
-    def test_same_previous_vr_and_new_vr(self, mock_delete, mock_create, mock_filter):
-        finding = Finding_Template()
-        previous_vulnerability_ids = [
-            Vulnerability_Id_Template(id=1, finding_template=finding, vulnerability_id='REF-1'),
-        ]
-        mock_filter.return_value = previous_vulnerability_ids
-        mock_create.return_value = Vulnerability_Id_Template(id=1, finding_template=finding, vulnerability_id='REF-1'), False
-
-        new_vulnerability_ids = ['REF-1']
-
-        save_vulnerability_ids_template(finding, new_vulnerability_ids)
-
-        self.assertEqual('REF-1', finding.cve)
-        mock_filter.assert_called_once_with(finding_template=finding)
-        mock_create.assert_called_once_with(finding_template=finding, vulnerability_id='REF-1')
-        mock_delete.assert_not_called()
+        filter_mock.assert_called_with(finding_template=finding_template)
+        delete_mock.assert_called_once()
+        self.assertEqual(save_mock.call_count, 2)
+        self.assertEqual('REF-1', finding_template.cve)
