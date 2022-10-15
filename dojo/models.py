@@ -574,7 +574,7 @@ class Notes(models.Model):
     def copy(self):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_history = self.history.all()
+        old_history = list(self.history.all())
         # Wipe the IDs of the new object
         copy.pk = None
         copy.id = None
@@ -1266,11 +1266,11 @@ class Engagement(models.Model):
     def copy(self):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_notes = self.notes.all()
-        old_files = self.files.all()
-        old_tags = self.tags.all()
-        old_risk_acceptances = self.risk_acceptance.all()
-        old_tests = Test.objects.filter(engagement=self)
+        old_notes = list(self.notes.all())
+        old_files = list(self.files.all())
+        old_tags = list(self.tags.all())
+        old_risk_acceptances = list(self.risk_acceptance.all())
+        old_tests = list(Test.objects.filter(engagement=self))
         # Wipe the IDs of the new object
         copy.pk = None
         copy.id = None
@@ -1343,7 +1343,7 @@ class Endpoint_Params(models.Model):
 
 
 class Endpoint_Status(models.Model):
-    date = models.DateTimeField(default=get_current_date)
+    date = models.DateField(default=get_current_date)
     last_modified = models.DateTimeField(null=True, editable=False, default=get_current_datetime)
     mitigated = models.BooleanField(default=False, blank=True)
     mitigated_time = models.DateTimeField(editable=False, null=True, blank=True)
@@ -1779,10 +1779,10 @@ class Test(models.Model):
     def copy(self, engagement=None):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_notes = self.notes.all()
-        old_files = self.files.all()
-        old_tags = self.tags.all()
-        old_findings = Finding.objects.filter(test=self)
+        old_notes = list(self.notes.all())
+        old_files = list(self.files.all())
+        old_tags = list(self.tags.all())
+        old_findings = list(Finding.objects.filter(test=self))
         # Wipe the IDs of the new object
         copy.pk = None
         copy.id = None
@@ -2290,12 +2290,12 @@ class Finding(models.Model):
     def copy(self, test=None):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_notes = self.notes.all()
-        old_files = self.files.all()
-        old_status_finding = self.status_finding.all()
-        old_reviewers = self.reviewers.all()
-        old_found_by = self.found_by.all()
-        old_tags = self.tags.all()
+        old_notes = list(self.notes.all())
+        old_files = list(self.files.all())
+        old_status_findings = list(self.status_finding.all())
+        old_reviewers = list(self.reviewers.all())
+        old_found_by = list(self.found_by.all())
+        old_tags = list(self.tags.all())
         # Wipe the IDs of the new object
         copy.pk = None
         copy.id = None
@@ -2310,7 +2310,7 @@ class Finding(models.Model):
         for files in old_files:
             copy.files.add(files.copy())
         # Copy the endpoint_status
-        for endpoint_status in old_status_finding:
+        for endpoint_status in old_status_findings:
             endpoint_status.copy(finding=copy)  # adding or setting is not necessary, link is created by Endpoint_Status.copy()
         # Assign any reviewers
         copy.reviewers.set(old_reviewers)
@@ -3211,7 +3211,7 @@ class Risk_Acceptance(models.Model):
     def copy(self, engagement=None):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_notes = self.notes.all()
+        old_notes = list(self.notes.all())
         old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
         # Wipe the IDs of the new object
         copy.pk = None

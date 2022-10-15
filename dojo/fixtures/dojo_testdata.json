@@ -747,7 +747,7 @@
     "pk": 1,
     "model": "dojo.endpoint_status",
     "fields": {
-      "date": "2020-07-01T00:00:00Z",
+      "date": "2020-07-01",
       "last_modified": "2020-07-01T17:45:39.791907Z",
       "mitigated": false,
       "mitigated_time": null,

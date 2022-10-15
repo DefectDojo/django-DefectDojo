@@ -34,7 +34,7 @@ class TestOptiEndpointStatus(MigratorTestCase):
         from django.contrib.auth import get_user_model
         user = get_user_model().objects.create().pk
 
-        self.finding = Finding.objects.create(test=self.test, reporter_id=user).pk
+        self.finding = Finding.objects.create(test_id=self.test.pk, reporter_id=user).pk
         self.endpoint = Endpoint.objects.create(host='foo.bar', product_id=self.product.pk).pk
         self.endpoint_status = Endpoint_Status.objects.create(
                 finding_id=self.finding,
@@ -47,7 +47,7 @@ class TestOptiEndpointStatus(MigratorTestCase):
             Endpoint_Status.objects.get(id=self.endpoint_status)
         )
         Finding.objects.get(id=self.finding).endpoints.add(
-            Endpoint.objects.get(id=self.endpoint)
+            Endpoint.objects.get(id=self.endpoint).pk
         )
 
         self.presudotest_before_migration()
@@ -96,7 +96,7 @@ class TestOptiEndpointStatus(MigratorTestCase):
         with self.subTest('Old: Add existing endpoint to finding'):
             self.case_add_endpoint_finding(
                 Finding.objects.get(id=self.finding),
-                Endpoint.objects.get(id=self.endpoint),
+                Endpoint.objects.get(id=self.endpoint).pk,
             )
 
         with self.subTest('Old: List EPS from finding'):
@@ -107,11 +107,11 @@ class TestOptiEndpointStatus(MigratorTestCase):
             self.assertIsInstance(eps.all().first(), Endpoint_Status)
 
         with self.subTest('Old: List EPS from endpoint'):
-            eps = self.case_list_with_status_endpoint(
-                Endpoint.objects.get(id=self.endpoint),
-            )
-            self.assertEqual(eps.all().count(), 1, ep)
-            self.assertIsInstance(eps.all().first(), Endpoint_Status)
+            with self.assertRaises(AttributeError) as exc:
+                eps = self.case_list_with_status_endpoint(
+                    Endpoint.objects.get(id=self.endpoint),
+                )
+            self.assertEqual(str(exc.exception), "'Endpoint' object has no attribute 'status_endpoint'")
 
     def test_after_migration(self):
         Finding = self.new_state.apps.get_model('dojo', 'Finding')

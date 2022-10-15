@@ -2,8 +2,9 @@
 Tests for metrics database queries
 """
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from unittest.mock import patch
+import pytz
 
 from django.test import RequestFactory
 from django.urls import reverse
@@ -149,6 +150,7 @@ class EndpointQueriesTest(DojoTestCase):
         self.request = RequestFactory().get(reverse('metrics'))
         self.request.user = user
         self.request._messages = MockMessages()
+        self.maxDiff = None
 
     def test_endpoint_queries_no_data(self):
         user3 = User.objects.get(username='user3')
@@ -197,8 +199,8 @@ class EndpointQueriesTest(DojoTestCase):
                 [
                     {
                         'id': 1,
-                        'date': datetime(2020, 7, 1, 0, 0, tzinfo=timezone.utc),
-                        'last_modified': datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=timezone.utc),
+                        'date': date(2020, 7, 1),
+                        'last_modified': datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC),  # Do not understand why timezone.utc doesn't work here
                         'mitigated': False,
                         'mitigated_time': None,
                         'mitigated_by_id': None,
@@ -207,7 +209,7 @@ class EndpointQueriesTest(DojoTestCase):
                         'risk_accepted': False,
                         'endpoint_id': 2,
                         'finding_id': 2,
-                        'endpoint__product__prod_type__member': True,
+                        'endpoint__product__prod_type__member': False,
                         'endpoint__product__member': True,
                         'endpoint__product__prod_type__authorized_group': False,
                         'endpoint__product__authorized_group': False
