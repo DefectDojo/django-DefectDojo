@@ -1608,8 +1608,10 @@ class Endpoint(models.Model):
         return self.host_endpoints().count()
 
     def host_mitigated_endpoints(self):
-        # TODO
-        meps = Endpoint_Status.objects.filter(endpoint__in=self.host_endpoints(), mitigated=True)
+        meps = Endpoint_Status.objects.filter(endpoint__in=self.host_endpoints()) \
+            .filter(
+                Q(mitigated=True) |
+                Q(finding__is_mitigated=True))
         return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
     @property
