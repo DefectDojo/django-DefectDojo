@@ -101,7 +101,7 @@ class TestCopyFindingModel(DojoTestCase):
         # Do the notes match
         self.assertEqual(finding.notes, finding_copy.notes)
 
-    def test_duplicate_finding_with_endpoints(self):  # TODO check
+    def test_duplicate_finding_with_endpoints(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
         product_type = self.create_product_type('prod_type')
@@ -112,11 +112,9 @@ class TestCopyFindingModel(DojoTestCase):
         endpoint.save()
         finding = Finding.objects.create(test=test, reporter=user)
         endpoint_status = Endpoint_Status.objects.create(finding=finding, endpoint=endpoint)
-        finding.endpoints.add(endpoint)
-        finding.endpoint_status.add(endpoint_status)
         # Do the counting
         current_finding_count = Finding.objects.filter(test=test).count()
-        current_endpoint_finding_count = endpoint.findings_count()
+        current_endpoint_finding_count = endpoint.findings_count
         current_endpoint_count = Endpoint.objects.all().count()
         current_endpoint_status_count = Endpoint_Status.objects.filter(endpoint=endpoint).count()
         # Do the copy
@@ -126,7 +124,7 @@ class TestCopyFindingModel(DojoTestCase):
         # Make sure the number of endpoints stayed the same
         self.assertEqual(current_endpoint_count, Endpoint.objects.all().count())
         # Make sure the number of findings on the endpoint grew
-        self.assertEqual(current_endpoint_finding_count + 1, endpoint.findings_count())
+        self.assertEqual(current_endpoint_finding_count + 1, endpoint.findings_count)
         # Make sure the number of endpoint status objects grew
         self.assertEqual(current_endpoint_status_count + 1, Endpoint_Status.objects.filter(endpoint=endpoint).count())
         # Make sure the endpoint status objects point at different findings
