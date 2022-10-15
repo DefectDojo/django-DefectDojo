@@ -789,7 +789,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
             'false_positive': False,
             'risk_accepted': False,
             'out_of_scope': False,
-            "date": "2017-01-12T00:00",
+            "date": "2017-01-12",
         }
         self.update_fields = {'mitigated': True}
         self.test_type = TestType.OBJECT_PERMISSIONS
