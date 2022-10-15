@@ -579,6 +579,7 @@ def add_endpoints(new_finding, form):
             finding=new_finding,
             endpoint=endpoint, defaults={'date': form.cleaned_data['date'] or timezone.now()})
 
+
 def save_vulnerability_ids(finding, vulnerability_ids):
     # Remove duplicates
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
