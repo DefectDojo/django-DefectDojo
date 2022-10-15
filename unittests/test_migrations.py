@@ -4,7 +4,7 @@ from django_test_migrations.contrib.unittest_case import MigratorTestCase
 from django.utils import timezone
 
 
-# TODO: These tests can be removed in 2.12.x or later
+# TODO: These tests can be removed in 2.17.x or later
 class TestOptiEndpointStatus(MigratorTestCase):
     migrate_from = ('dojo', '0171_jira_labels_per_product_and_engagement')
     migrate_to = ('dojo', '0172_optimize_usage_of_endpoint_status')

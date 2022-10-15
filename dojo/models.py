@@ -1367,7 +1367,7 @@ class Endpoint_Status(models.Model):
     def __str__(self):
         return "'{}' on '{}'".format(str(self.finding), str(self.endpoint))
 
-    def copy(self, finding=None):  # TODO check
+    def copy(self, finding=None):
         copy = self
         current_endpoint = self.endpoint
         copy.pk = None
@@ -2284,8 +2284,7 @@ class Finding(models.Model):
         # Save the necessary ManyToMany relationships
         old_notes = self.notes.all()
         old_files = self.files.all()
-        old_endpoint_status = self.endpoint_status.all()  # TODO check
-        old_endpoints = self.endpoints.all()
+        old_status_finding = self.status_finding.all()
         old_reviewers = self.reviewers.all()
         old_found_by = self.found_by.all()
         old_tags = self.tags.all()
@@ -2303,10 +2302,8 @@ class Finding(models.Model):
         for files in old_files:
             copy.files.add(files.copy())
         # Copy the endpoint_status
-        for endpoint_status in old_endpoint_status:
-            copy.endpoint_status.add(endpoint_status.copy(finding=copy))
-        # Assign any endpoints
-        copy.endpoints.set(old_endpoints)
+        for endpoint_status in old_status_finding:
+            endpoint_status.copy(finding=copy)  # adding or setting is not necessary, link is created by Endpoint_Status.copy()
         # Assign any reviewers
         copy.reviewers.set(old_reviewers)
         # Assign any found_by

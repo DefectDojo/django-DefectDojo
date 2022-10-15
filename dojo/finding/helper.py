@@ -225,7 +225,7 @@ def get_group_by_group_name(finding, finding_group_by_option):
     elif finding_group_by_option == 'component_name+component_version':
         if finding.component_name or finding.component_version:
             group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
-            (finding.component_version if finding.component_version else 'None'))
+                (finding.component_version if finding.component_version else 'None'))
     elif finding_group_by_option == 'file_path':
         if finding.file_path:
             group_name = 'Filepath %s' % (finding.file_path)
