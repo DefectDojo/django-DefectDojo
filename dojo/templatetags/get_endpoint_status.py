@@ -24,7 +24,7 @@ def get_mitigated_endpoints(finding):
         Q(status_endpoint__mitigated=True) |
         Q(status_endpoint__false_positive=True) |
         Q(status_endpoint__out_of_scope=True) |
-        Q(status_endpoint__risk_accepted=False))
+        Q(status_endpoint__risk_accepted=True))
 
 
 @register.filter

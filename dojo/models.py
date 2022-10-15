@@ -1610,16 +1610,14 @@ class Endpoint(models.Model):
     def host_mitigated_endpoints(self):
         meps = Endpoint_Status.objects \
                   .filter(endpoint__in=self.host_endpoints()) \
-                  .exclude(mitigated=False,
-                           false_positive=False,
-                           out_of_scope=False,
-                           risk_accepted=False) \
-                  .exclude(finding_active=True,
-                           finding_verified=True,
-                           finding_out_of_scope=False,
-                           finding_mitigated__isnull=True,
-                           finding_false_p=False,
-                           finding_duplicate=False)
+                  .filter(Q(mitigated=True) |
+                          Q(false_positive=True) |
+                          Q(out_of_scope=True) |
+                          Q(risk_accepted=True) |
+                          Q(finding_out_of_scope=True) |
+                          Q(finding_mitigated__isnull=False) |
+                          Q(finding_false_p=True) |
+                          Q(finding_duplicate=True))
         return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
     @property
