@@ -1584,7 +1584,6 @@ class Endpoint(models.Model):
 
     def active_findings(self):
         findings = self.findings.filter(active=True,
-                                      verified=True,
                                       out_of_scope=False,
                                       mitigated__isnull=True,
                                       false_p=False,
@@ -1614,10 +1613,10 @@ class Endpoint(models.Model):
                           Q(false_positive=True) |
                           Q(out_of_scope=True) |
                           Q(risk_accepted=True) |
-                          Q(finding_out_of_scope=True) |
-                          Q(finding_mitigated__isnull=False) |
-                          Q(finding_false_p=True) |
-                          Q(finding_duplicate=True))
+                          Q(finding__out_of_scope=True) |
+                          Q(finding__mitigated__isnull=False) |
+                          Q(finding__false_p=True) |
+                          Q(finding__duplicate=True))
         return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
     @property
@@ -1629,11 +1628,10 @@ class Endpoint(models.Model):
 
     @property
     def host_findings_count(self):
-        return self.host_finding().count()
+        return self.host_findings().count()
 
     def host_active_findings(self):
-        findings = self.host_findings().filter(active=True,
-                                        verified=True,
+        findings = Finding.objects.filter(active=True,
                                         out_of_scope=False,
                                         mitigated__isnull=True,
                                         false_p=False,
@@ -1641,7 +1639,8 @@ class Endpoint(models.Model):
                                         status_finding__mitigated=False,
                                         status_finding__false_positive=False,
                                         status_finding__out_of_scope=False,
-                                        status_finding__risk_accepted=False).order_by('numerical_severity')
+                                        status_finding__risk_accepted=False,
+                                        endpoints__in=self.host_endpoints()).order_by('numerical_severity')
         return findings
 
     @property
