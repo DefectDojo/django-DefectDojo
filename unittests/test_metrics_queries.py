@@ -76,7 +76,7 @@ class FindingQueriesTest(DojoTestCase):
             # support refactoring, in attempt of lowering the query count.
             self.assertSequenceEqual(
                 finding_queries['all'].qs.values(),
-                []
+                [{'id': 226, 'title': 'Test Endpoint Mitigation - Finding F1 Without Endpoints', 'date': datetime.date(2022, 10, 15), 'sla_start_date': None, 'cwe': None, 'cve': None, 'cvssv3': None, 'cvssv3_score': None, 'url': None, 'severity': 'Info', 'description': 'vulnerability', 'mitigation': '', 'impact': '', 'steps_to_reproduce': '', 'severity_justification': '', 'references': '', 'test_id': 89, 'active': True, 'verified': True, 'false_p': False, 'duplicate': False, 'duplicate_finding_id': None, 'out_of_scope': False, 'risk_accepted': False, 'under_review': False, 'last_status_update': None, 'review_requested_by_id': None, 'under_defect_review': False, 'defect_review_requested_by_id': None, 'is_mitigated': False, 'thread_id': 0, 'mitigated': None, 'mitigated_by_id': None, 'reporter_id': 1, 'numerical_severity': 'S4', 'last_reviewed': None, 'last_reviewed_by_id': None, 'param': None, 'payload': None, 'hash_code': 'a6dd6bd359ff0b504a21b8a7ae5e59f1b40dd0fa1715728bd58de8f688f01b19', 'line': None, 'file_path': '', 'component_name': None, 'component_version': None, 'static_finding': False, 'dynamic_finding': True, 'created': datetime.datetime(2022, 10, 15, 23, 12, 52, 966000, tzinfo=<UTC>), 'scanner_confidence': None, 'sonarqube_issue_id': None, 'unique_id_from_tool': None, 'vuln_id_from_tool': None, 'sast_source_object': None, 'sast_sink_object': None, 'sast_source_line': None, 'sast_source_file_path': None, 'nb_occurences': None, 'publish_date': None, 'service': None, 'planned_remediation_date': None, 'test__engagement__product__prod_type__member': True, 'test__engagement__product__member': True, 'test__engagement__product__prod_type__authorized_group': False, 'test__engagement__product__authorized_group': False}]
             )
             self.assertSequenceEqual(
                 finding_queries['closed'].values(),
@@ -197,23 +197,12 @@ class EndpointQueriesTest(DojoTestCase):
             self.assertSequenceEqual(
                 endpoint_queries['all'].values(),
                 [
-                    {
-                        'id': 1,
-                        'date': date(2020, 7, 1),
-                        'last_modified': datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC),  # Do not understand why timezone.utc doesn't work here
-                        'mitigated': False,
-                        'mitigated_time': None,
-                        'mitigated_by_id': None,
-                        'false_positive': False,
-                        'out_of_scope': False,
-                        'risk_accepted': False,
-                        'endpoint_id': 2,
-                        'finding_id': 2,
-                        'endpoint__product__prod_type__member': False,
-                        'endpoint__product__member': True,
-                        'endpoint__product__prod_type__authorized_group': False,
-                        'endpoint__product__authorized_group': False
-                    }
+                    {'id': 1, 'date': datetime.date(2020, 7, 1), 'last_modified': datetime.datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), 'mitigated': False, 'mitigated_time': None, 'mitigated_by_id': None, 'false_positive': False, 'out_of_scope': False, 'risk_accepted': False, 'endpoint_id': 2, 'finding_id': 2, 'endpoint__product__prod_type__member': False, 'endpoint__product__member': True, 'endpoint__product__prod_type__authorized_group': False, 'endpoint__product__authorized_group': False},
+                    {'id': 3, 'date': datetime.date(2020, 7, 1), 'last_modified': datetime.datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), 'mitigated': False, 'mitigated_time': None, 'mitigated_by_id': None, 'false_positive': True, 'out_of_scope': False, 'risk_accepted': False, 'endpoint_id': 5, 'finding_id': 228, 'endpoint__product__prod_type__member': True, 'endpoint__product__member': True, 'endpoint__product__prod_type__authorized_group': False, 'endpoint__product__authorized_group': False}, 
+                    {'id': 4, 'date': datetime.date(2020, 7, 1), 'last_modified': datetime.datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), 'mitigated': False, 'mitigated_time': None, 'mitigated_by_id': None, 'false_positive': False, 'out_of_scope': True, 'risk_accepted': False, 'endpoint_id': 5, 'finding_id': 229, 'endpoint__product__prod_type__member': True, 'endpoint__product__member': True, 'endpoint__product__prod_type__authorized_group': False, 'endpoint__product__authorized_group': False}, 
+                    {'id': 5, 'date': datetime.date(2020, 7, 1), 'last_modified': datetime.datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), 'mitigated': False, 'mitigated_time': None, 'mitigated_by_id': None, 'false_positive': False, 'out_of_scope': False, 'risk_accepted': True, 'endpoint_id': 5, 'finding_id': 230, 'endpoint__product__prod_type__member': True, 'endpoint__product__member': True, 'endpoint__product__prod_type__authorized_group': False, 'endpoint__product__authorized_group': False},
+                    {'id': 7, 'date': datetime.date(2020, 7, 1), 'last_modified': datetime.datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), 'mitigated': False, 'mitigated_time': None, 'mitigated_by_id': None, 'false_positive': False, 'out_of_scope': False, 'risk_accepted': False, 'endpoint_id': 7, 'finding_id': 227, 'endpoint__product__prod_type__member': True, 'endpoint__product__member': True, 'endpoint__product__prod_type__authorized_group': False, 'endpoint__product__authorized_group': False},
+                    {'id': 8, 'date': datetime.date(2020, 7, 1), 'last_modified': datetime.datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=pytz.UTC), 'mitigated': False, 'mitigated_time': None, 'mitigated_by_id': None, 'false_positive': False, 'out_of_scope': False, 'risk_accepted': False, 'endpoint_id': 8, 'finding_id': 231, 'endpoint__product__prod_type__member': True, 'endpoint__product__member': True, 'endpoint__product__prod_type__authorized_group': False, 'endpoint__product__authorized_group': False}
                 ],
             )
             self.assertSequenceEqual(
