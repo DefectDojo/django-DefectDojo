@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from dojo.tools.edgescan.parser import EdgescanParser
+from dojo.tools.api_edgescan.parser import EdgescanParser
 from dojo.models import Test
 
 

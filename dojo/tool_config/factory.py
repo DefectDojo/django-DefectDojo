@@ -1,12 +1,14 @@
-from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
-from dojo.tools.cobalt_api.api_client import CobaltAPI
-from dojo.tools.edgescan.api_client import EdgescanAPI
-from dojo.tools.bugcrowd_api.api_client import BugcrowdAPI
+from dojo.tools.api_bugcrowd.api_client import BugcrowdAPI
+from dojo.tools.api_cobalt.api_client import CobaltAPI
+from dojo.tools.api_edgescan.api_client import EdgescanAPI
+from dojo.tools.api_sonarqube.api_client import SonarQubeAPI
 
-SCAN_APIS = {'SonarQube': SonarQubeAPI,
-             'Cobalt.io': CobaltAPI,
-             'Edgescan API': EdgescanAPI,
-             'Bugcrowd API': BugcrowdAPI
+
+SCAN_APIS = {
+                'Bugcrowd API': BugcrowdAPI,
+                'Cobalt.io': CobaltAPI,
+                'Edgescan API': EdgescanAPI,
+                'SonarQube': SonarQubeAPI,
              }
 
 

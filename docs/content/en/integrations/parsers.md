@@ -366,21 +366,7 @@ Import of JSON report from <https://github.com/Yelp/detect-secrets>
 
 #### Edgescan
 
-Import Edgescan vulnerabilities by JSON file or API - no file required.
-
-Follow these steps to setup API importing:
-
-1.  Configure the Edgescan Authentication details by navigating to
-    Configuration / Tool Configuration, selecting the Tool Type to "Edgescan",
-    and Authentication Type "API Key". Paste your Edgescan API key in the
-    "API Key" field.
-2.  In the Product settings select "Add API Scan Configuration" and select the
-    previously added Edgescan Tool Configuration. Provide the ID
-    of the asset from which to import findings in the field *Service key 1*.
-3.  After this is done, you can import the findings by selecting 
-    "Edgescan Scan" as the scan type. If you have more than one asset 
-    configured, you must also select which Edgescan API Scan Configuration to 
-    use.
+Import Edgescan vulnerabilities by JSON file or API - no file required (check below).
 
 #### ESLint
 
@@ -1246,6 +1232,18 @@ The ID can be found at the end of the URL when viewing the asset in your browser
 If you have more than one asset configured, you
 must also select which Cobalt.io API Scan Configuratio to use.
 
+#### Edgescan
+
+In Tool Configuration, select Tool Type to "Edgescan" and Authentication Type "API Key".
+Paste your Edgescan API key in the "API Key" field.
+
+In "Add API Scan Configuration" and select the
+    previously added Edgescan Tool Configuration. Provide the ID
+    of the asset from which to import findings in the field *Service key 1*.
+3.  After this is done, you can import the findings by selecting 
+    "Edgescan Scan" as the scan type. If you have more than one asset 
+    configured, you must also select which Edgescan API Scan Configuration to 
+    use.
 
 #### SonarQube API Import
 

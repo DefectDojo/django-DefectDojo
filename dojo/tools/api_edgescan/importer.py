@@ -1,5 +1,5 @@
 from dojo.models import Product_API_Scan_Configuration
-from dojo.tools.edgescan.api_client import EdgescanAPI
+from .api_client import EdgescanAPI
 
 
 class EdgescanImporter(object):

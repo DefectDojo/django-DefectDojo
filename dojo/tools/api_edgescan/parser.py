@@ -1,7 +1,7 @@
 import json
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.edgescan.importer import EdgescanImporter
+from .importer import EdgescanImporter
 
 ES_SEVERITIES = {1: "Info", 2: "Low", 3: "Medium", 4: "High", 5: "Critical"}
 SCANTYPE_EDGESCAN = 'Edgescan Scan'
