@@ -1,7 +1,7 @@
 import logging
 from django.core.exceptions import ValidationError
 from dojo.models import Product_API_Scan_Configuration
-from dojo.tools.bugcrowd_api.api_client import BugcrowdAPI
+from .api_client import BugcrowdAPI
 
 logger = logging.getLogger(__name__)
 

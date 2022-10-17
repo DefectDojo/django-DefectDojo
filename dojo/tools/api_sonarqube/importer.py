@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
-from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
+from .api_client import SonarQubeAPI
 
 logger = logging.getLogger(__name__)
 

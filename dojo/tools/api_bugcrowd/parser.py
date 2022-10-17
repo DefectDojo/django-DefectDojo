@@ -2,7 +2,7 @@ import json
 import textwrap
 from datetime import datetime
 from dojo.models import Endpoint, Finding
-from dojo.tools.bugcrowd_api.importer import BugcrowdApiImporter
+from .importer import BugcrowdApiImporter
 import re
 import dateutil.parser
 import logging

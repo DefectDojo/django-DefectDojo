@@ -2,7 +2,7 @@ import json
 import textwrap
 from datetime import datetime
 from dojo.models import Endpoint, Finding
-from dojo.tools.cobalt_api.importer import CobaltApiImporter
+from .importer import CobaltApiImporter
 
 
 SCAN_COBALTIO_API = 'Cobalt.io API Import'
