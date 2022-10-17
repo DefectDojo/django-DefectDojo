@@ -1196,29 +1196,39 @@ ZAP XML report format.
 
 ### Parsers using API
 
-#### Blackduck API
-
-Import findings from the BlackDuck API - no file required.
+All parsers which using API have common basic configuration step but with different values.
 
 Follow these steps to setup API importing:
 
-1.  Configure the BlackDuck API Authentication details by navigating to
-    Configuration / Tool Configuration, selecting the Tool Type to "BlackDuck API",
-    and Authentication Type "API Key". Paste your BlackDuck API token in the
-    "API Key" field.
+1.  Configure the API Authentication details by navigating to
+    Configuration / Tool Configuration, selecting related Tool Type
+    and Authentication Type "API Key". Paste your credentials to field
+    and other fields based on definitions below.
+
 2.  In the Product settings select "Add API Scan Configuration" and select the
-    previously added BlackDuck API Tool Configuration. Provide the ID
-    of the project from which to import findings in the field *Service key 1*.
-    Provide the version of the project from which to import findings in the field *Service key 2*.
-3.  After this is done, you can import the findings by selecting "BlackDuck API" as the scan type.
+    previously added Tool Configuration. Proved values based on definitions below
+
+3.  After all these steps will be done, you can import the findings by selecting related scaner type as the scan type in test.
+
+
+#### Blackduck API
+
+In Tool Configuration, select Tool Type to "BlackDuck API" and Authentication Type "API Key".
+Paste your BlackDuck API token in the "API Key" field.
+
+In "Add API Scan Configuration" provide the ID
+of the project from which to import findings in the field *Service key 1*.
+Provide the version of the project from which to import findings in the field *Service key 2*.
 
 #### Bugcrowd API
 
-Import Bugcrowd submissions directly from the API using the API token.
+In Tool Configuration, select Tool Type to "Bugcrowd API" and Authentication Type "API Key".
+Paste your BlackDuck API token in the "API Key" field.
 Set your API key directly in the format `username:password` in the API Token input, it will be added to the header `'Authorization': 'Token {}'.format(self.api_token),`
+
 For each product, you can configure 2 things:
-- Service key 1: the bugcrowd program code (it's the slug name in the url for the program, url safe)
-- Service key 2: the bugcrowd target name (the full name, it will be url-encoded, you can find it in https://tracker.bugcrowd.com/<YOURPROGRAM>/settings/scope/target_groups)
+- *Service key 1*: the bugcrowd program code (it's the slug name in the url for the program, url safe)
+- *Service key 2*: the bugcrowd target name (the full name, it will be url-encoded, you can find it in https://tracker.bugcrowd.com/<YOURPROGRAM>/settings/scope/target_groups)
     - It can be left empty so that all program submissions are imported
 
 That way, per product, you can use the same program but separate by target, which is a fairly common way of filtering/grouping Bugcrowd.
@@ -1226,41 +1236,32 @@ Adding support for a 3rd filtering would be possible with Service Key 3, feel fr
 
 #### Cobalt.io API Import
 
-Import findings from the Cobalt.io API - no file required.
+In Tool Configuration, select Tool Type to "Cobalt.io API" and Authentication Type "API Key".
+Paste your Cobalt.io API token in the "API Key" field and the desired org token in the "Extras" field.
 
-Follow these steps to setup API importing:
+In "Add API Scan Configuration" provide the ID
+of the asset from which to import findings in the field *Service key 1*.
+The ID can be found at the end of the URL when viewing the asset in your browser.
 
-1.  Configure the Cobalt.io Authentication details by navigating to
-    Configuration / Tool Configuration, selecting the Tool Type to "Cobalt.io",
-    and Authentication Type "API Key". Paste your Cobalt.io API key in the
-    "API Key" field and the desired org token in the "Extras" field.
-2.  In the Product settings select "Add API Scan Configuration" and select the
-    previously added Cobalt.io Tool Configuration. Provide the ID
-    of the asset from which to import findings in the field *Service key 1*.
-    The ID can be found at the end of the URL when viewing the asset in your browser.
-3.  After this is done, you can import the findings by selecting "Cobalt.io
-    API Import" as the scan type. If you have more than one asset configured, you
-    must also select which Cobalt.io API Scan Configuratio to use.
+If you have more than one asset configured, you
+must also select which Cobalt.io API Scan Configuratio to use.
 
 
 #### SonarQube API Import
 
-SonarQube API will be accessed to gather the report. No report file is
-required.
+In Tool Configuration, select Tool Type to "SonarQube API" and Authentication Type "API Key".
+Note the url must be in the format of `https://<sonarqube_host>/api`
+Paste your SonarQube API token in the "API Key" field.
+By default the tool will import vulnerabilities issues
+and security hotspots only, but additional filters can be setup using the 
+Extras field separated by commas (e.g. BUG,VULNERABILITY,CODE_SMELL). When using
+SonarCloud, you must also specify the Organization ID in the Extras field as follows
+`OrgID=sonarcloud-organzation-ID`. If also specifying issue type filters, please 
+seperate the items in the Extras field by a vertical bar as follows
+`BUG,VULNERABILITY,CODE_SMEL|OrgID=sonarcloud-organzation-ID`
 
-Follow these steps to setup the SonarQube API import:
-
-1.  Configure the Sonarqube authentication details by navigating to
-    Configuration / Tool Configuration. Note the url must be in the
-    format of `https://<sonarqube_host>/api`. Select the tool
-    type to be SonarQube. By default the tool will import vulnerabilities issues
-    and security hotspots only, but additional filters can be setup using the 
-    Extras field separated by commas (e.g. BUG,VULNERABILITY,CODE_SMELL). When using
-    SonarCloud, you must also specify the Organization ID in the Extras field as follows
-    `OrgID=sonarcloud-organzation-ID`. If also specifying issue type filters, please 
-    seperate the items in the Extras field by a vertical bar as follows
-    `BUG,VULNERABILITY,CODE_SMEL|OrgID=sonarcloud-organzation-ID`
-2.  In the Product settings add an API Scan Configuration. *Service key 1* must
+In "Add API Scan Configuration"
+-   *Service key 1* must
     be the SonarQube project key, which can be found by navigating to a specific project and
     selecting the value from the url
     `https://<sonarqube_host>/dashboard?id=key`.
@@ -1268,11 +1269,8 @@ Follow these steps to setup the SonarQube API import:
     use the name of the Product as the project key in SonarQube. If you would like to
     import findings from multiple projects, you can specify multiple keys as
     separated API Scan Configuration in the Product settings.
-3.  If using SonarCloud, the orginization ID can be used from step 1, but it 
+-   If using SonarCloud, the orginization ID can be used from step 1, but it 
     can be ovverirdden by supplying a different orginization ID in the *Service key 2* input field.
-4.  Once all of the settings are made, the SonarQube API Import will be
-    able to import all vulnerability information from the SonarQube
-    instance. 
 
 ###### Multiple SonarQube API Configurations
 
