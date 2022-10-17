@@ -1,7 +1,7 @@
 import json
 from unittest import mock
 
-from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
+from dojo.tools.api_sonarqube.importer import SonarQubeApiImporter
 from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuration
 

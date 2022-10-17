@@ -104,7 +104,7 @@ class TestCobaltApiImporter(DojoTestCase):
         self.assertEqual(cobalt_api.api_token, 'API_KEY')
         self.assertEqual(cobalt_api.org_token, 'EXTRAS')
 
-    @patch('dojo.tools.cobalt_api.importer.CobaltAPI.get_findings')
+    @patch('dojo.tools.api_cobalt.importer.CobaltAPI.get_findings')
     def test_get_findings(self, mock_foo):
         mock_foo.return_value = self.findings
 

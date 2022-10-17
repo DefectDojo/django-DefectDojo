@@ -102,7 +102,7 @@ class TestEdgescanImporter(TestCase):
         self.assertEqual(api_scan_configuration, self.api_scan_configuration_2)
         self.assertEqual(edgescan_api.api_key, 'API_KEY')
 
-    @patch('dojo.tools.edgescan.importer.EdgescanAPI.get_findings')
+    @patch('dojo.tools.api_edgescan.importer.EdgescanAPI.get_findings')
     def test_get_findings(self, mock_foo):
         mock_foo.return_value = self.findings
 

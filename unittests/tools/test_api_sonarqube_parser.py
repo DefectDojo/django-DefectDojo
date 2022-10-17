@@ -46,11 +46,11 @@ class TestSonarqubeApiParser(DojoTestCase):
             name="SQ1_unittests", authentication_type="API", tool_type=tool_type
         )
 
-    @mock.patch("dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project", dummy_product)
-    @mock.patch("dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule", dummy_rule)
-    @mock.patch("dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues", dummy_issues)
-    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
-    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_project", dummy_product)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule", dummy_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues)
+    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_get_findings(self):
         parser = SonarQubeAPIParser()
         findings = parser.get_findings(None, self.test)

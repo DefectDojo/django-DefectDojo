@@ -122,7 +122,7 @@ class TestBugcrowdApiImporter(TestCase):
         self.assertEqual(api_scan_configuration, self.api_scan_configuration_2)
         self.assertEqual(bugcrowd_api.api_token, "API_KEY")
 
-    @patch("dojo.tools.bugcrowd_api.importer.BugcrowdAPI.get_findings")
+    @patch("dojo.tools.api_bugcrowd.importer.BugcrowdAPI.get_findings")
     def test_get_findings(self, mock_foo):
         mock_foo.return_value = self.findings
 

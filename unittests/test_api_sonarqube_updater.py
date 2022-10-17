@@ -1,6 +1,6 @@
 from .dojo_test_case import DojoTestCase
 from dojo.models import Tool_Configuration, Tool_Type
-from dojo.tools.sonarqube_api.updater import SonarQubeApiUpdater
+from dojo.tools.api_sonarqube.updater import SonarQubeApiUpdater
 
 
 class TestSonarQubeApiUpdater(DojoTestCase):
