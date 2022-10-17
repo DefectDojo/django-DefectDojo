@@ -1,7 +1,7 @@
 import datetime
 
 from django.test import TestCase
-from dojo.tools.bugcrowd_api.parser import BugcrowdApiParser
+from dojo.tools.api_bugcrowd.parser import BugcrowdApiParser
 from dojo.models import Test
 
 

@@ -3,7 +3,7 @@ import json
 from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from unittest.mock import patch
 
-from dojo.tools.cobalt_api.parser import CobaltApiParser
+from dojo.tools.api_cobalt.parser import CobaltApiParser
 from dojo.models import Test, Test_Type
 
 

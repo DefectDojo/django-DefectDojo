@@ -9,7 +9,7 @@ from dojo.models import (
     Tool_Type,
     Tool_Configuration,
 )
-from dojo.tools.bugcrowd_api.importer import BugcrowdApiImporter
+from dojo.tools.api_bugcrowd.importer import BugcrowdApiImporter
 
 
 class TestBugcrowdApiImporter(TestCase):

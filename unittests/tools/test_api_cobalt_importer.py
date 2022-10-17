@@ -3,7 +3,7 @@ from ..dojo_test_case import DojoTestCase
 from unittest.mock import patch
 
 from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuration, Tool_Type, Tool_Configuration
-from dojo.tools.cobalt_api.importer import CobaltApiImporter
+from dojo.tools.api_cobalt.importer import CobaltApiImporter
 
 
 class TestCobaltApiImporter(DojoTestCase):
