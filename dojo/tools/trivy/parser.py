@@ -126,7 +126,7 @@ class TrivyParser:
                     vuln_id = vuln.get('VulnerabilityID', '0')
                     package_name = vuln['PkgName']
                     severity = TRIVY_SEVERITIES[vuln['Severity']]
-                    file_path = vuln['PkgPath']
+                    file_path = vuln.get('PkgPath')
                 except KeyError as exc:
                     logger.warning('skip vulnerability due %r', exc)
                     continue
