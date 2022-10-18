@@ -64,6 +64,13 @@ spec:
           path: {{ .hostPath }}
           {{- end }}
       {{- end }}
+      {{- if .Values.postgresql.tls.enabled }}
+      - name: postgresql-tls-volume
+        secret:
+          secretName: {{ .Values.postgresql.tls.secretName }}
+          # we need it permissive to access as low-privileged user
+          defaultMode: 0644
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -87,7 +94,14 @@ spec:
         {{- end }}
       {{- end }}
       - command:
-        - /entrypoint-celery-beat.sh
+        - /bin/sh
+        - -cx
+        - |
+          {{- if .Values.postgresql.tls.enabled }}
+          cp -a /run/defectdojo/{{ .Values.postgresql.tls.secretName }}/..data/* /run/defectdojo/
+          chmod 600 /run/defectdojo/{{ .Values.postgresql.tls.clientKey }}
+          {{- end }}
+          /entrypoint-celery-beat.sh
         name: celery
         image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -107,6 +121,10 @@ spec:
           readOnly: true
           mountPath: {{ .path }}
           subPath: {{ .subPath }}
+        {{- end }}
+        {{- if .Values.postgresql.tls.enabled }}
+        - name: postgresql-tls-volume
+          mountPath: /run/defectdojo/{{ .Values.postgresql.tls.secretName }}
         {{- end }}
         envFrom:
         - configMapRef:
