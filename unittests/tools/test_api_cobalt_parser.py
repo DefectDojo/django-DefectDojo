@@ -278,7 +278,7 @@ class TestCobaltApiParser(DojoTestCase):
         self.assertFalse(finding.static_finding)
         self.assertTrue(finding.dynamic_finding)
 
-    @patch('dojo.tools.cobalt_api.importer.CobaltApiImporter.get_findings')
+    @patch('dojo.tools.api_cobalt.importer.CobaltApiImporter.get_findings')
     def test_cobalt_api_parser_with_api(self, mock):
         with open(get_unit_tests_path() + '/scans/cobalt_api/cobalt_api_many_vul.json') as api_findings_file:
             api_findings = json.load(api_findings_file)
