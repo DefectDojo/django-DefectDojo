@@ -1050,6 +1050,37 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         assert not result_json["duplicate"]
         assert result_json["duplicate_finding"] is None
 
+    def test_filter_steps_to_reproduce(self):
+        # Confirm initial data
+        result = self.client.get(self.url + '?steps_to_reproduce=lorem')
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not filter on steps_to_reproduce")
+        result_json = result.json()
+        assert result_json["count"] == 0
+
+        # Set steps to reproduce
+        result = self.client.patch(self.url + "2/", data={"steps_to_reproduce": "Lorem ipsum dolor sit amet"})
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
+        assert result.json()["steps_to_reproduce"] == "Lorem ipsum dolor sit amet"
+        result = self.client.patch(self.url + "3/", data={"steps_to_reproduce": "Ut enim ad minim veniam"})
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
+        assert result.json()["steps_to_reproduce"] == "Ut enim ad minim veniam"
+
+        # Test
+        result = self.client.get(self.url + "?steps_to_reproduce=lorem")
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not filter on steps_to_reproduce")
+        result_json = result.json()
+        assert result_json["count"] == 1
+        assert result_json["results"][0]["id"] == 2
+        assert result_json["results"][0]["steps_to_reproduce"] == "Lorem ipsum dolor sit amet"
+
+        # Set steps to reproduce
+        result = self.client.patch(self.url + "2/", data={"steps_to_reproduce": ""})
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
+        assert result.json()["steps_to_reproduce"] == ""
+        result = self.client.patch(self.url + "3/", data={"steps_to_reproduce": ""})
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
+        assert result.json()["steps_to_reproduce"] == ""
+
 
 class FindingMetadataTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
