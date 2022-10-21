@@ -1283,4 +1283,4 @@ Import Yarn Audit scan report in JSON format. Use something like `yarn audit --j
 
 ### Zed Attack Proxy
 
-ZAP XML report format.
+ZAP XML report format (with or without requests and responses).
