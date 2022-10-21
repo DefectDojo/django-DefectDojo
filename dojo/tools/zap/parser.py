@@ -55,9 +55,6 @@ class ZapParser(object):
                         # Assemble the request from header and body
                         request = instance.findtext('requestheader') + instance.findtext('requestbody')
                         response = instance.findtext('responseheader') + instance.findtext('responsebody')
-                        # Turn escaped into unescaped nlbr, accounting for different types of newlines
-                        request = request.replace("\\r\\n", "\\n").replace("\\n", "\n")
-                        response = response.replace("\\r\\n", "\\n").replace("\\n", "\n")
                     else:
                         # The report is in the regular XML format, without requests and responses.
                         # Use the default settings for constructing the request and response fields.
