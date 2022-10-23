@@ -1,7 +1,7 @@
 
 # code: language=Dockerfile
 
-FROM python:3.8.12-slim-bullseye@sha256:3d3edc52cfae3ed6fb8303559f10184f962a8069194b2dee93baaac66ebedeb5 as build
+FROM python:3.8.14-slim-bullseye@sha256:8ae28a791362432b0303d485f4c9fc16479a3254f311728989e23173da9f3341 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \

@@ -2,6 +2,7 @@ import csv
 import hashlib
 import io
 
+from dateutil import parser
 from dojo.models import Endpoint, Finding
 
 
@@ -58,6 +59,9 @@ class BugCrowdParser(object):
             finding.steps_to_reproduce = pre_description.get('steps_to_reproduce', None)
             finding.references = References
             finding.severity = self.convert_severity(row.get('priority', 0))
+
+            if row.get('submitted_at'):
+                finding.date = parser.parse(row.get('submitted_at'))
 
             if url:
                 finding.unsaved_endpoints = list()

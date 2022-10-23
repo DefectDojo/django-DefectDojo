@@ -1,0 +1,38 @@
+{
+    "version": "v2.7.1",
+    "id": "069b99dd-b629-422a-ab84-c3e604db16dd",
+    "repositoryID": "00000000-0000-0000-0000-000000000000",
+    "repositoryName": "",
+    "workspaceID": "00000000-0000-0000-0000-000000000000",
+    "workspaceName": "",
+    "status": "error",
+    "errors": "Error while running tool YarnAudit: {HORUSEC_CLI} Error It looks like your project doesn't have a yarn.lock file. If you use Yarn to handle your dependencies, it would be a good idea to commit it so horusec can check for vulnerabilities; Error while running tool NpmAudit: {HORUSEC_CLI} Error It looks like your project doesn't have a package-lock.json file. If you use NPM to handle your dependencies, it would be a good idea to commit it so horusec can check for vulnerabilities",
+    "createdAt": "2022-05-06T10:20:51.708730164-03:00",
+    "finishedAt": "2022-05-06T10:20:56.195480404-03:00",
+    "analysisVulnerabilities": [
+      {
+        "vulnerabilityID": "00000000-0000-0000-0000-000000000000",
+        "analysisID": "069b99dd-b629-422a-ab84-c3e604db16dd",
+        "createdAt": "2022-05-06T10:20:56.195484682-03:00",
+        "vulnerabilities": {
+          "vulnerabilityID": "975c9a7e-38c3-44ab-a9ec-810c35a7ba06",
+          "line": "",
+          "column": "0",
+          "confidence": "MEDIUM",
+          "file": "GetGestaoVisaoWeb/src/main/webapp/js/jquery/jquery-ui-1.9.1.custom.min.js",
+          "code": "",
+          "details": "No use eval\nThe eval function is extremely dangerous. Because if any user input is not handled correctly and passed to it, it will be possible to execute code remotely in the context of your application (RCE - Remote Code Executuion). For more information checkout the CWE-94 (https://cwe.mitre.org/data/definitions/94.html) advisory.",
+          "securityTool": "HorusecEngine",
+          "language": "JavaScript",
+          "severity": "CRITICAL",
+          "type": "Vulnerability",
+          "commitAuthor": "-",
+          "commitEmail": "-",
+          "commitHash": "-",
+          "commitMessage": "-",
+          "commitDate": "-",
+          "vulnHash": "8de87f081b762ff58ab73fd5056d22ffc330a9e59a90d31cce2bfc9319e1dfcd"
+        }
+      }   
+    ]
+  }

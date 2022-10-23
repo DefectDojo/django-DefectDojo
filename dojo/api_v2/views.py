@@ -4,6 +4,7 @@ from crum import get_current_user
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
 from drf_yasg.inspectors.base import NotHandled
@@ -20,7 +21,8 @@ from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
-from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
+from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, SLA_Configuration, \
+    Test, Test_Import, Test_Type, Finding, \
     User, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
@@ -60,6 +62,7 @@ from dojo.jira_link.queries import get_authorized_jira_projects, get_authorized_
 from dojo.tool_product.queries import get_authorized_tool_product_settings
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from dojo.authorization.roles_permissions import Permissions
+from dojo.user.utils import get_configuration_permissions_codenames
 
 logger = logging.getLogger(__name__)
 
@@ -1980,6 +1983,9 @@ class ImportScanView(mixins.CreateModelMixin,
 
     When using names you can let the importer automatically create Engagements, Products and Product_Types
     by using `auto_create_context=True`.
+
+    When `auto_create_context` is set to `True` you can use `deduplication_on_engagement` to restrict deduplication for
+    imported Findings to the newly created Engagement.
     """
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
@@ -1987,7 +1993,7 @@ class ImportScanView(mixins.CreateModelMixin,
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
@@ -2118,6 +2124,9 @@ class ReImportScanView(mixins.CreateModelMixin,
 
     When using names you can let the importer automatically create Engagements, Products and Product_Types
     by using `auto_create_context=True`.
+
+    When `auto_create_context` is set to `True` you can use `deduplication_on_engagement` to restrict deduplication for
+    imported Findings to the newly created Engagement.
     """
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
@@ -2128,7 +2137,7 @@ class ReImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
@@ -2541,4 +2550,27 @@ class NetworkLocationsViewset(mixins.ListModelMixin,
     queryset = Network_Locations.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'location')
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+
+# Authorization: superuser
+class ConfigurationPermissionViewSet(mixins.RetrieveModelMixin,
+                                     mixins.ListModelMixin,
+                                     viewsets.GenericViewSet):
+    serializer_class = serializers.ConfigurationPermissionSerializer
+    queryset = Permission.objects.filter(codename__in=get_configuration_permissions_codenames())
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'codename')
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+
+class SLAConfigurationViewset(mixins.ListModelMixin,
+                              mixins.RetrieveModelMixin,
+                              mixins.UpdateModelMixin,
+                              mixins.DestroyModelMixin,
+                              mixins.CreateModelMixin,
+                              viewsets.GenericViewSet):
+    serializer_class = serializers.SLAConfigurationSerializer
+    queryset = SLA_Configuration.objects.all()
+    filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)

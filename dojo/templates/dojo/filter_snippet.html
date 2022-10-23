@@ -15,15 +15,17 @@
         {% for field in form.hidden_fields %}
             {{ field }}
         {% endfor %}
-        {% for field in form.visible_fields %}
-            <div class="form-group">
-                {{ field.errors }}
-                <label for="{{ field.auto_id }}" style="display: block;">{{ field.label }}</label>
-                {% with placeholder="placeholder:"|add:field.label %}
-                    {{ field|addcss:"class:form-control input-sm"|addcss:placeholder }}
-                {% endwith %}
-            </div>
-        {% endfor %}
+        <div class="filter-form-group">
+            {% for field in form.visible_fields %}
+                <div class="filter-form-input">
+                    {{ field.errors }}
+                    <label for="{{ field.auto_id }}" style="display: block;">{{ field.label }}</label>
+                    {% with placeholder="placeholder:"|add:field.label %}
+                        {{ field|addcss:"class: form-control filter-form-control"|addcss:placeholder }}
+                    {% endwith %}
+                </div>
+            {% endfor %}
+        </div>        
         {% if submit == 'report' %}
             {% query_string_as_hidden %}
             <div class="inline-block" style="vertical-align: text-top">
