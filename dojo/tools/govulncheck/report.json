@@ -1,0 +1,3766 @@
+{
+	"Calls": {
+		"Functions": {
+			"1": {
+				"ID": 1,
+				"Name": "main",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/app.go",
+					"Offset": 1664,
+					"Line": 45,
+					"Column": 6
+				},
+				"CallSites": null
+			},
+			"10": {
+				"ID": 10,
+				"Name": "push",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 5024,
+					"Line": 161,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 13,
+						"Name": "push",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 10432,
+							"Line": 359,
+							"Column": 16
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 13,
+						"Name": "push",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 10478,
+							"Line": 362,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 14,
+						"Name": "push",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 32683,
+							"Line": 1293,
+							"Column": 9
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 14,
+						"Name": "push",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 32772,
+							"Line": 1298,
+							"Column": 9
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 58,
+						"Name": "push",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 11080,
+							"Line": 385,
+							"Column": 16
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 58,
+						"Name": "push",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 11123,
+							"Line": 388,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 59,
+						"Name": "push",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 7776,
+							"Line": 266,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 61,
+						"Name": "push",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 7314,
+							"Line": 243,
+							"Column": 8
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "push",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 24362,
+							"Line": 929,
+							"Column": 12
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "push",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 24543,
+							"Line": 938,
+							"Column": 11
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 62,
+						"Name": "push",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 42099,
+							"Line": 1683,
+							"Column": 8
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"11": {
+				"ID": 11,
+				"Name": "repeat",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 8088,
+					"Line": 273,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 7,
+						"Name": "repeat",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 22598,
+							"Line": 855,
+							"Column": 28
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "repeat",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 23150,
+							"Line": 874,
+							"Column": 28
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"12": {
+				"ID": 12,
+				"Name": "factor",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 12845,
+					"Line": 458,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 63,
+						"Name": "factor",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 12341,
+							"Line": 433,
+							"Column": 20
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"13": {
+				"ID": 13,
+				"Name": "concat",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 10151,
+					"Line": 346,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 14,
+						"Name": "concat",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 32234,
+							"Line": 1272,
+							"Column": 10
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "concat",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 24758,
+							"Line": 952,
+							"Column": 10
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 57,
+						"Name": "concat",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 30097,
+							"Line": 1189,
+							"Column": 10
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"14": {
+				"ID": 14,
+				"Name": "parseRightParen",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 32199,
+					"Line": 1271,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 7,
+						"Name": "parseRightParen",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 21910,
+							"Line": 815,
+							"Column": 30
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"15": {
+				"ID": 15,
+				"Name": "compile",
+				"RecvType": "",
+				"PkgPath": "regexp",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/regexp.go",
+					"Offset": 7457,
+					"Line": 173,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 16,
+						"Name": "compile",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/regexp.go",
+							"Offset": 5843,
+							"Line": 137,
+							"Column": 16
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"16": {
+				"ID": 16,
+				"Name": "Compile",
+				"RecvType": "",
+				"PkgPath": "regexp",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/regexp.go",
+					"Offset": 5788,
+					"Line": 136,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 17,
+						"Name": "Compile",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/regexp.go",
+							"Offset": 11016,
+							"Line": 317,
+							"Column": 24
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 56,
+						"Name": "Compile",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/regexp.go",
+							"Offset": 17222,
+							"Line": 557,
+							"Column": 20
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"17": {
+				"ID": 17,
+				"Name": "MustCompile",
+				"RecvType": "",
+				"PkgPath": "regexp",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/regexp.go",
+					"Offset": 10959,
+					"Line": 316,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 2,
+						"Name": "MustCompile",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/function.go",
+							"Offset": 1440,
+							"Line": 83,
+							"Column": 30
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 3,
+						"Name": "MustCompile",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/xss/xss.go",
+							"Offset": 2459,
+							"Line": 107,
+							"Column": 30
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 55,
+						"Name": "MustCompile",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/xss/xss.go",
+							"Offset": 2622,
+							"Line": 113,
+							"Column": 30
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"18": {
+				"ID": 18,
+				"Name": "idor2ActionHandler",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa/vulnerability/idor",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/idor.go",
+					"Offset": 2794,
+					"Line": 119,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 19,
+						"Name": "t3",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+							"Offset": 884,
+							"Line": 39,
+							"Column": 4
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"19": {
+				"ID": 19,
+				"Name": "AuthCheck$1",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa/util/middleware",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+					"Offset": 692,
+					"Line": 32,
+					"Column": 9
+				},
+				"CallSites": [
+					{
+						"Parent": 20,
+						"Name": "t3",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+							"Offset": 1381,
+							"Line": 61,
+							"Column": 4
+						},
+						"Resolved": false
+					},
+					{
+						"Parent": 51,
+						"Name": "t10",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+							"Offset": 1804,
+							"Line": 75,
+							"Column": 5
+						},
+						"Resolved": false
+					},
+					{
+						"Parent": 50,
+						"Name": "t23",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+							"Offset": 505,
+							"Line": 25,
+							"Column": 4
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"2": {
+				"ID": 2,
+				"Name": "HTMLEscapeString",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa/vulnerability/idor",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/function.go",
+					"Offset": 1372,
+					"Line": 82,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 18,
+						"Name": "HTMLEscapeString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/idor.go",
+							"Offset": 3070,
+							"Line": 129,
+							"Column": 27
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 18,
+						"Name": "HTMLEscapeString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/idor.go",
+							"Offset": 3122,
+							"Line": 130,
+							"Column": 26
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 18,
+						"Name": "HTMLEscapeString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/idor.go",
+							"Offset": 3169,
+							"Line": 131,
+							"Column": 27
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 18,
+						"Name": "HTMLEscapeString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/idor.go",
+							"Offset": 3217,
+							"Line": 132,
+							"Column": 27
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 18,
+						"Name": "HTMLEscapeString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/idor.go",
+							"Offset": 3267,
+							"Line": 133,
+							"Column": 29
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 52,
+						"Name": "HTMLEscapeString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/idor.go",
+							"Offset": 2054,
+							"Line": 88,
+							"Column": 26
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 52,
+						"Name": "HTMLEscapeString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/idor.go",
+							"Offset": 2101,
+							"Line": 89,
+							"Column": 27
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 52,
+						"Name": "HTMLEscapeString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/idor.go",
+							"Offset": 2149,
+							"Line": 90,
+							"Column": 27
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 52,
+						"Name": "HTMLEscapeString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/idor.go",
+							"Offset": 2199,
+							"Line": 91,
+							"Column": 29
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"20": {
+				"ID": 20,
+				"Name": "CapturePanic$1",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa/util/middleware",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+					"Offset": 982,
+					"Line": 44,
+					"Column": 9
+				},
+				"CallSites": [
+					{
+						"Parent": 21,
+						"Name": "t14",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/pkg/mod/github.com/julienschmidt/httprouter@v1.3.0/router.go",
+							"Offset": 13285,
+							"Line": 387,
+							"Column": 10
+						},
+						"Resolved": false
+					},
+					{
+						"Parent": 50,
+						"Name": "t23",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+							"Offset": 505,
+							"Line": 25,
+							"Column": 4
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"21": {
+				"ID": 21,
+				"Name": "ServeHTTP",
+				"RecvType": "*github.com/julienschmidt/httprouter.Router",
+				"PkgPath": "github.com/julienschmidt/httprouter",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/pkg/mod/github.com/julienschmidt/httprouter@v1.3.0/router.go",
+					"Offset": 13036,
+					"Line": 378,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 22,
+						"Name": "t15",
+						"RecvType": "net/http.Handler",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 93472,
+							"Line": 2947,
+							"Column": 19
+						},
+						"Resolved": false
+					},
+					{
+						"Parent": 24,
+						"Name": "handler",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 199219,
+							"Line": 5908,
+							"Column": 9
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"22": {
+				"ID": 22,
+				"Name": "ServeHTTP",
+				"RecvType": "net/http.serverHandler",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 92722,
+					"Line": 2926,
+					"Column": 25
+				},
+				"CallSites": [
+					{
+						"Parent": 23,
+						"Name": "ServeHTTP",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 111643,
+							"Line": 3556,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 30,
+						"Name": "ServeHTTP",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 62418,
+							"Line": 1991,
+							"Column": 36
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"23": {
+				"ID": 23,
+				"Name": "ServeHTTP",
+				"RecvType": "net/http.initALPNRequest",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 111370,
+					"Line": 3545,
+					"Column": 26
+				},
+				"CallSites": [
+					{
+						"Parent": 24,
+						"Name": "handler",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 199219,
+							"Line": 5908,
+							"Column": 9
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"24": {
+				"ID": 24,
+				"Name": "runHandler",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 198603,
+					"Line": 5887,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 25,
+						"Name": "runHandler",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 191505,
+							"Line": 5638,
+							"Column": 2
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 31,
+						"Name": "runHandler",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 222932,
+							"Line": 6679,
+							"Column": 3
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"25": {
+				"ID": 25,
+				"Name": "processHeaders",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 187453,
+					"Line": 5527,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 26,
+						"Name": "processHeaders",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174646,
+							"Line": 5152,
+							"Column": 27
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"26": {
+				"ID": 26,
+				"Name": "processFrame",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 174215,
+					"Line": 5137,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 27,
+						"Name": "processFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 173540,
+							"Line": 5110,
+							"Column": 24
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"27": {
+				"ID": 27,
+				"Name": "processFrameFromReader",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 172677,
+					"Line": 5085,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 28,
+						"Name": "processFrameFromReader",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 157289,
+							"Line": 4607,
+							"Column": 33
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"28": {
+				"ID": 28,
+				"Name": "serve",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 155022,
+					"Line": 4536,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 4,
+						"Name": "serve",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 142548,
+							"Line": 4190,
+							"Column": 10
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"29": {
+				"ID": 29,
+				"Name": "http2ConfigureServer$1",
+				"RecvType": "",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 135485,
+					"Line": 3997,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 30,
+						"Name": "t131",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 59380,
+							"Line": 1899,
+							"Column": 7
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"3": {
+				"ID": 3,
+				"Name": "HTMLEscapeString",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa/vulnerability/xss",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/xss/xss.go",
+					"Offset": 2393,
+					"Line": 106,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 53,
+						"Name": "HTMLEscapeString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/xss/xss.go",
+							"Offset": 1730,
+							"Line": 77,
+							"Column": 25
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 54,
+						"Name": "HTMLEscapeString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/xss/xss.go",
+							"Offset": 904,
+							"Line": 42,
+							"Column": 27
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"30": {
+				"ID": 30,
+				"Name": "serve",
+				"RecvType": "*net/http.conn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 57194,
+					"Line": 1842,
+					"Column": 16
+				},
+				"CallSites": [
+					{
+						"Parent": 6,
+						"Name": "serve",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 98382,
+							"Line": 3102,
+							"Column": 3
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"31": {
+				"ID": 31,
+				"Name": "startPush$1",
+				"RecvType": "",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 221157,
+					"Line": 6637,
+					"Column": 24
+				},
+				"CallSites": [
+					{
+						"Parent": 32,
+						"Name": "t46",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 166581,
+							"Line": 4892,
+							"Column": 47
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"32": {
+				"ID": 32,
+				"Name": "startFrameWrite",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 165708,
+					"Line": 4869,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 33,
+						"Name": "startFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 169720,
+							"Line": 4992,
+							"Column": 22
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 33,
+						"Name": "startFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 169966,
+							"Line": 5002,
+							"Column": 22
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 33,
+						"Name": "startFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 170218,
+							"Line": 5010,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 33,
+						"Name": "startFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 170292,
+							"Line": 5015,
+							"Column": 22
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"33": {
+				"ID": 33,
+				"Name": "scheduleFrameWrite",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 169479,
+					"Line": 4983,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 34,
+						"Name": "scheduleFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 165472,
+							"Line": 4863,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 5,
+						"Name": "scheduleFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 172112,
+							"Line": 5066,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 39,
+						"Name": "scheduleFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 169044,
+							"Line": 4970,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 48,
+						"Name": "scheduleFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 177189,
+							"Line": 5225,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 49,
+						"Name": "scheduleFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 179737,
+							"Line": 5307,
+							"Column": 23
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"34": {
+				"ID": 34,
+				"Name": "writeFrame",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 163322,
+					"Line": 4805,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 35,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 202533,
+							"Line": 6022,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 43,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 172350,
+							"Line": 5076,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 44,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 176003,
+							"Line": 5193,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 45,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 223023,
+							"Line": 6683,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 28,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 155354,
+							"Line": 4548,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 28,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 156878,
+							"Line": 4594,
+							"Column": 17
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"35": {
+				"ID": 35,
+				"Name": "sendWindowUpdate32",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 202327,
+					"Line": 6010,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 36,
+						"Name": "sendWindowUpdate32",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 185555,
+							"Line": 5465,
+							"Column": 25
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 37,
+						"Name": "sendWindowUpdate32",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 202192,
+							"Line": 6003,
+							"Column": 24
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 37,
+						"Name": "sendWindowUpdate32",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 202250,
+							"Line": 6006,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 36,
+						"Name": "sendWindowUpdate32",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 185590,
+							"Line": 5466,
+							"Column": 25
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"36": {
+				"ID": 36,
+				"Name": "processData",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 181854,
+					"Line": 5372,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 26,
+						"Name": "processData",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174812,
+							"Line": 5158,
+							"Column": 24
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"37": {
+				"ID": 37,
+				"Name": "sendWindowUpdate",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 201786,
+					"Line": 5994,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 38,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 178633,
+							"Line": 5275,
+							"Column": 22
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 36,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 183929,
+							"Line": 5423,
+							"Column": 22
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 36,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 185145,
+							"Line": 5453,
+							"Column": 24
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 42,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 201518,
+							"Line": 5985,
+							"Column": 21
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 42,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 201713,
+							"Line": 5989,
+							"Column": 22
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 28,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 155924,
+							"Line": 4561,
+							"Column": 22
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"38": {
+				"ID": 38,
+				"Name": "closeStream",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 177854,
+					"Line": 5248,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 39,
+						"Name": "closeStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 168588,
+							"Line": 4953,
+							"Column": 18
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 39,
+						"Name": "closeStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 168829,
+							"Line": 4960,
+							"Column": 19
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 39,
+						"Name": "closeStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 168888,
+							"Line": 4963,
+							"Column": 18
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 40,
+						"Name": "closeStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 177763,
+							"Line": 5243,
+							"Column": 17
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 41,
+						"Name": "closeStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 154478,
+							"Line": 4510,
+							"Column": 17
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"39": {
+				"ID": 39,
+				"Name": "wroteFrame",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 167392,
+					"Line": 4919,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 32,
+						"Name": "wroteFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 166859,
+							"Line": 4905,
+							"Column": 16
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 28,
+						"Name": "wroteFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 156932,
+							"Line": 4596,
+							"Column": 17
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 28,
+						"Name": "wroteFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 157222,
+							"Line": 4603,
+							"Column": 19
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"4": {
+				"ID": 4,
+				"Name": "ServeConn",
+				"RecvType": "*net/http.http2Server",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 137942,
+					"Line": 4079,
+					"Column": 23
+				},
+				"CallSites": [
+					{
+						"Parent": 29,
+						"Name": "ServeConn",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 136015,
+							"Line": 4013,
+							"Column": 17
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"40": {
+				"ID": 40,
+				"Name": "processResetStream",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 177234,
+					"Line": 5229,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 26,
+						"Name": "processResetStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174874,
+							"Line": 5160,
+							"Column": 31
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"41": {
+				"ID": 41,
+				"Name": "closeAllStreamsOnConnClose",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 154379,
+					"Line": 4507,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 28,
+						"Name": "closeAllStreamsOnConnClose",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 155097,
+							"Line": 4540,
+							"Column": 2
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"42": {
+				"ID": 42,
+				"Name": "noteBodyRead",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 201440,
+					"Line": 5983,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 28,
+						"Name": "noteBodyRead",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 157461,
+							"Line": 4616,
+							"Column": 19
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"43": {
+				"ID": 43,
+				"Name": "resetStream",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 172282,
+					"Line": 5074,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 39,
+						"Name": "resetStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 168494,
+							"Line": 4951,
+							"Column": 18
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 27,
+						"Name": "resetStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 173652,
+							"Line": 5118,
+							"Column": 17
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 28,
+						"Name": "resetStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 156842,
+							"Line": 4591,
+							"Column": 19
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"44": {
+				"ID": 44,
+				"Name": "processPing",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 175373,
+					"Line": 5175,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 26,
+						"Name": "processPing",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174762,
+							"Line": 5156,
+							"Column": 24
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"45": {
+				"ID": 45,
+				"Name": "startPush",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 220342,
+					"Line": 6616,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 28,
+						"Name": "startPush",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 158146,
+							"Line": 4638,
+							"Column": 17
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"46": {
+				"ID": 46,
+				"Name": "startGracefulShutdownInternal",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 171852,
+					"Line": 5054,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 31,
+						"Name": "startGracefulShutdownInternal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 221922,
+							"Line": 6655,
+							"Column": 36
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 38,
+						"Name": "startGracefulShutdownInternal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 178469,
+							"Line": 5269,
+							"Column": 36
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 47,
+						"Name": "startGracefulShutdownInternal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 185976,
+							"Line": 5482,
+							"Column": 34
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 28,
+						"Name": "startGracefulShutdownInternal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 158048,
+							"Line": 4633,
+							"Column": 38
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"47": {
+				"ID": 47,
+				"Name": "processGoAway",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 185691,
+					"Line": 5475,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 26,
+						"Name": "processGoAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174986,
+							"Line": 5164,
+							"Column": 26
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"48": {
+				"ID": 48,
+				"Name": "processWindowUpdate",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 176099,
+					"Line": 5197,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 26,
+						"Name": "processWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174712,
+							"Line": 5154,
+							"Column": 32
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"49": {
+				"ID": 49,
+				"Name": "processSettings",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 178812,
+					"Line": 5283,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 26,
+						"Name": "processSettings",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174586,
+							"Line": 5150,
+							"Column": 28
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"5": {
+				"ID": 5,
+				"Name": "goAway",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 171943,
+					"Line": 5058,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 46,
+						"Name": "goAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 171896,
+							"Line": 5055,
+							"Column": 11
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 27,
+						"Name": "goAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 172833,
+							"Line": 5090,
+							"Column": 13
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 27,
+						"Name": "goAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 173710,
+							"Line": 5121,
+							"Column": 12
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 27,
+						"Name": "goAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 173871,
+							"Line": 5125,
+							"Column": 12
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 28,
+						"Name": "goAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 157829,
+							"Line": 4628,
+							"Column": 15
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"50": {
+				"ID": 50,
+				"Name": "LoggingMiddleware$1",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa/util/middleware",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+					"Offset": 299,
+					"Line": 21,
+					"Column": 9
+				},
+				"CallSites": [
+					{
+						"Parent": 21,
+						"Name": "t14",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/pkg/mod/github.com/julienschmidt/httprouter@v1.3.0/router.go",
+							"Offset": 13285,
+							"Line": 387,
+							"Column": 10
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"51": {
+				"ID": 51,
+				"Name": "DetectSQLMap$1",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa/util/middleware",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+					"Offset": 1479,
+					"Line": 66,
+					"Column": 9
+				},
+				"CallSites": [
+					{
+						"Parent": 20,
+						"Name": "t3",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+							"Offset": 1381,
+							"Line": 61,
+							"Column": 4
+						},
+						"Resolved": false
+					},
+					{
+						"Parent": 50,
+						"Name": "t23",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+							"Offset": 505,
+							"Line": 25,
+							"Column": 4
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"52": {
+				"ID": 52,
+				"Name": "idor1ActionHandler",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa/vulnerability/idor",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/idor/idor.go",
+					"Offset": 1747,
+					"Line": 77,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 19,
+						"Name": "t3",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+							"Offset": 884,
+							"Line": 39,
+							"Column": 4
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"53": {
+				"ID": 53,
+				"Name": "xss2Handler",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa/vulnerability/xss",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/xss/xss.go",
+					"Offset": 1563,
+					"Line": 72,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 19,
+						"Name": "t3",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+							"Offset": 884,
+							"Line": 39,
+							"Column": 4
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"54": {
+				"ID": 54,
+				"Name": "xss1Handler",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa/vulnerability/xss",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/xss/xss.go",
+					"Offset": 617,
+					"Line": 31,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 19,
+						"Name": "t3",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+							"Offset": 884,
+							"Line": 39,
+							"Column": 4
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"55": {
+				"ID": 55,
+				"Name": "removeScriptTag",
+				"RecvType": "",
+				"PkgPath": "github.com/govwa/vulnerability/xss",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/xss/xss.go",
+					"Offset": 2557,
+					"Line": 112,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 54,
+						"Name": "removeScriptTag",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/vulnerability/xss/xss.go",
+							"Offset": 994,
+							"Line": 49,
+							"Column": 25
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"56": {
+				"ID": 56,
+				"Name": "MatchString",
+				"RecvType": "",
+				"PkgPath": "regexp",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/regexp.go",
+					"Offset": 17137,
+					"Line": 556,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 51,
+						"Name": "MatchString",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/util/middleware/middleware.go",
+							"Offset": 1631,
+							"Line": 68,
+							"Column": 42
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"57": {
+				"ID": 57,
+				"Name": "parseVerticalBar",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 30061,
+					"Line": 1188,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 7,
+						"Name": "parseVerticalBar",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 21814,
+							"Line": 810,
+							"Column": 31
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"58": {
+				"ID": 58,
+				"Name": "alternate",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 10616,
+					"Line": 366,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 14,
+						"Name": "alternate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 32337,
+							"Line": 1277,
+							"Column": 13
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "alternate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 24861,
+							"Line": 957,
+							"Column": 13
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"59": {
+				"ID": 59,
+				"Name": "op",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 7699,
+					"Line": 263,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 57,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 30347,
+							"Line": 1196,
+							"Column": 7
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 21730,
+							"Line": 807,
+							"Column": 8
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 22014,
+							"Line": 821,
+							"Column": 9
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 22048,
+							"Line": 823,
+							"Column": 9
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 22129,
+							"Line": 828,
+							"Column": 9
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 22180,
+							"Line": 830,
+							"Column": 9
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 22257,
+							"Line": 835,
+							"Column": 9
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 22289,
+							"Line": 837,
+							"Column": 9
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 23359,
+							"Line": 883,
+							"Column": 10
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 23432,
+							"Line": 887,
+							"Column": 10
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 23508,
+							"Line": 891,
+							"Column": 10
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 23977,
+							"Line": 911,
+							"Column": 10
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 60,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 27321,
+							"Line": 1047,
+							"Column": 13
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 60,
+						"Name": "op",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 28308,
+							"Line": 1103,
+							"Column": 9
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"6": {
+				"ID": 6,
+				"Name": "Serve",
+				"RecvType": "*net/http.Server",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 96944,
+					"Line": 3040,
+					"Column": 20
+				},
+				"CallSites": [
+					{
+						"Parent": 8,
+						"Name": "Serve",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 95140,
+							"Line": 2999,
+							"Column": 18
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"60": {
+				"ID": 60,
+				"Name": "parsePerlFlags",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 25968,
+					"Line": 1008,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 7,
+						"Name": "parsePerlFlags",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 21649,
+							"Line": 801,
+							"Column": 33
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"61": {
+				"ID": 61,
+				"Name": "literal",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 7146,
+					"Line": 235,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 7,
+						"Name": "literal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 22874,
+							"Line": 866,
+							"Column": 14
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "literal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 23905,
+							"Line": 906,
+							"Column": 16
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "literal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 24715,
+							"Line": 947,
+							"Column": 13
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 7,
+						"Name": "literal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 21497,
+							"Line": 796,
+							"Column": 13
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"62": {
+				"ID": 62,
+				"Name": "parseClass",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 39861,
+					"Line": 1593,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 7,
+						"Name": "parseClass",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 22363,
+							"Line": 841,
+							"Column": 28
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"63": {
+				"ID": 63,
+				"Name": "collapse",
+				"RecvType": "*regexp/syntax.parser",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 12017,
+					"Line": 418,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 13,
+						"Name": "collapse",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 10489,
+							"Line": 362,
+							"Column": 26
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 12,
+						"Name": "collapse",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 14401,
+							"Line": 512,
+							"Column": 24
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 12,
+						"Name": "collapse",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 16244,
+							"Line": 569,
+							"Column": 24
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 58,
+						"Name": "collapse",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 11134,
+							"Line": 388,
+							"Column": 26
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"7": {
+				"ID": 7,
+				"Name": "parse",
+				"RecvType": "",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 20791,
+					"Line": 758,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 9,
+						"Name": "parse",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+							"Offset": 20772,
+							"Line": 755,
+							"Column": 14
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"8": {
+				"ID": 8,
+				"Name": "ListenAndServe",
+				"RecvType": "*net/http.Server",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 94921,
+					"Line": 2987,
+					"Column": 20
+				},
+				"CallSites": [
+					{
+						"Parent": 1,
+						"Name": "ListenAndServe",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/projects/portal_back/vuln_go_app/govwa/app.go",
+							"Offset": 2547,
+							"Line": 79,
+							"Column": 25
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"9": {
+				"ID": 9,
+				"Name": "Parse",
+				"RecvType": "",
+				"PkgPath": "regexp/syntax",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/regexp/syntax/parse.go",
+					"Offset": 20711,
+					"Line": 754,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 15,
+						"Name": "Parse",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/regexp/regexp.go",
+							"Offset": 7554,
+							"Line": 174,
+							"Column": 25
+						},
+						"Resolved": true
+					}
+				]
+			}
+		},
+		"Entries": [
+			1,
+			2,
+			3
+		]
+	},
+	"Imports": {
+		"Packages": {
+			"1": {
+				"ID": 1,
+				"Name": "url",
+				"Path": "net/url",
+				"Module": 1,
+				"ImportedBy": [
+					2,
+					5,
+					6,
+					9,
+					12
+				]
+			},
+			"10": {
+				"ID": 10,
+				"Name": "template",
+				"Path": "html/template",
+				"Module": 1,
+				"ImportedBy": [
+					11,
+					20,
+					24
+				]
+			},
+			"11": {
+				"ID": 11,
+				"Name": "util",
+				"Path": "github.com/govwa/util",
+				"Module": 4,
+				"ImportedBy": [
+					18,
+					19,
+					20,
+					21,
+					22,
+					23,
+					24,
+					25
+				]
+			},
+			"12": {
+				"ID": 12,
+				"Name": "mysql",
+				"Path": "github.com/go-sql-driver/mysql",
+				"Module": 2,
+				"ImportedBy": [
+					13
+				]
+			},
+			"13": {
+				"ID": 13,
+				"Name": "database",
+				"Path": "github.com/govwa/util/database",
+				"Module": 4,
+				"ImportedBy": [
+					18,
+					19,
+					20,
+					22,
+					23,
+					24
+				]
+			},
+			"14": {
+				"ID": 14,
+				"Name": "httprouter",
+				"Path": "github.com/julienschmidt/httprouter",
+				"Module": 5,
+				"ImportedBy": [
+					17,
+					18,
+					19,
+					20,
+					21,
+					22,
+					23,
+					24,
+					25
+				]
+			},
+			"15": {
+				"ID": 15,
+				"Name": "syntax",
+				"Path": "regexp/syntax",
+				"Module": 1,
+				"ImportedBy": [
+					16
+				]
+			},
+			"16": {
+				"ID": 16,
+				"Name": "regexp",
+				"Path": "regexp",
+				"Module": 1,
+				"ImportedBy": [
+					17,
+					22,
+					24
+				]
+			},
+			"17": {
+				"ID": 17,
+				"Name": "middleware",
+				"Path": "github.com/govwa/util/middleware",
+				"Module": 4,
+				"ImportedBy": [
+					18,
+					19,
+					20,
+					21,
+					22,
+					23,
+					24,
+					25
+				]
+			},
+			"18": {
+				"ID": 18,
+				"Name": "setting",
+				"Path": "github.com/govwa/setting",
+				"Module": 4,
+				"ImportedBy": [
+					25
+				]
+			},
+			"19": {
+				"ID": 19,
+				"Name": "setup",
+				"Path": "github.com/govwa/setup",
+				"Module": 4,
+				"ImportedBy": [
+					25
+				]
+			},
+			"2": {
+				"ID": 2,
+				"Name": "x509",
+				"Path": "crypto/x509",
+				"Module": 1,
+				"ImportedBy": [
+					3,
+					12
+				]
+			},
+			"20": {
+				"ID": 20,
+				"Name": "user",
+				"Path": "github.com/govwa/user",
+				"Module": 4,
+				"ImportedBy": [
+					25
+				]
+			},
+			"21": {
+				"ID": 21,
+				"Name": "csa",
+				"Path": "github.com/govwa/vulnerability/csa",
+				"Module": 4,
+				"ImportedBy": [
+					25
+				]
+			},
+			"22": {
+				"ID": 22,
+				"Name": "idor",
+				"Path": "github.com/govwa/vulnerability/idor",
+				"Module": 4,
+				"ImportedBy": [
+					25
+				]
+			},
+			"23": {
+				"ID": 23,
+				"Name": "sqli",
+				"Path": "github.com/govwa/vulnerability/sqli",
+				"Module": 4,
+				"ImportedBy": [
+					24,
+					25
+				]
+			},
+			"24": {
+				"ID": 24,
+				"Name": "xss",
+				"Path": "github.com/govwa/vulnerability/xss",
+				"Module": 4,
+				"ImportedBy": [
+					25
+				]
+			},
+			"25": {
+				"ID": 25,
+				"Name": "main",
+				"Path": "github.com/govwa",
+				"Module": 4,
+				"ImportedBy": null
+			},
+			"3": {
+				"ID": 3,
+				"Name": "tls",
+				"Path": "crypto/tls",
+				"Module": 1,
+				"ImportedBy": [
+					4,
+					6,
+					12
+				]
+			},
+			"4": {
+				"ID": 4,
+				"Name": "httptrace",
+				"Path": "net/http/httptrace",
+				"Module": 1,
+				"ImportedBy": [
+					6
+				]
+			},
+			"5": {
+				"ID": 5,
+				"Name": "httpproxy",
+				"Path": "vendor/golang.org/x/net/http/httpproxy",
+				"Module": 1,
+				"ImportedBy": [
+					6
+				]
+			},
+			"6": {
+				"ID": 6,
+				"Name": "http",
+				"Path": "net/http",
+				"Module": 1,
+				"ImportedBy": [
+					7,
+					8,
+					11,
+					14,
+					17,
+					18,
+					19,
+					20,
+					21,
+					22,
+					23,
+					24,
+					25
+				]
+			},
+			"7": {
+				"ID": 7,
+				"Name": "sessions",
+				"Path": "github.com/gorilla/sessions",
+				"Module": 3,
+				"ImportedBy": [
+					8
+				]
+			},
+			"8": {
+				"ID": 8,
+				"Name": "session",
+				"Path": "github.com/govwa/user/session",
+				"Module": 4,
+				"ImportedBy": [
+					11,
+					17,
+					18,
+					19,
+					20,
+					21,
+					22
+				]
+			},
+			"9": {
+				"ID": 9,
+				"Name": "template",
+				"Path": "text/template",
+				"Module": 1,
+				"ImportedBy": [
+					10
+				]
+			}
+		},
+		"Entries": [
+			25,
+			18,
+			19,
+			20,
+			8,
+			11,
+			13,
+			17,
+			21,
+			22,
+			23,
+			24
+		]
+	},
+	"Requires": {
+		"Modules": {
+			"1": {
+				"ID": 1,
+				"Path": "stdlib",
+				"Version": "v1.19.0",
+				"Replace": 0,
+				"RequiredBy": [
+					2,
+					3,
+					4,
+					5
+				]
+			},
+			"2": {
+				"ID": 2,
+				"Path": "github.com/go-sql-driver/mysql",
+				"Version": "v1.5.0",
+				"Replace": 0,
+				"RequiredBy": [
+					4
+				]
+			},
+			"3": {
+				"ID": 3,
+				"Path": "github.com/gorilla/sessions",
+				"Version": "v1.2.1",
+				"Replace": 0,
+				"RequiredBy": [
+					4
+				]
+			},
+			"4": {
+				"ID": 4,
+				"Path": "github.com/govwa",
+				"Version": "",
+				"Replace": 0,
+				"RequiredBy": null
+			},
+			"5": {
+				"ID": 5,
+				"Path": "github.com/julienschmidt/httprouter",
+				"Version": "v1.3.0",
+				"Replace": 0,
+				"RequiredBy": [
+					4
+				]
+			}
+		},
+		"Entries": [
+			4
+		]
+	},
+	"Vulns": [
+		{
+			"OSV": {
+				"id": "GO-2022-1039",
+				"published": "2022-10-06T16:42:07Z",
+				"modified": "2022-10-06T16:42:07Z",
+				"aliases": [
+					"CVE-2022-41715"
+				],
+				"details": "Programs which compile regular expressions from untrusted sources may be\nvulnerable to memory exhaustion or denial of service.\n\nThe parsed regexp representation is linear in the size of the input,\nbut in some cases the constant factor can be as high as 40,000,\nmaking relatively small regexps consume much larger amounts of memory.\n\nAfter fix, each regexp being parsed is limited to a 256 MB memory\nfootprint. Regular expressions whose representation would use more space\nthan that are rejected. Normal use of regular expressions is unaffected.\n",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.7"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.2"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1039"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "regexp/syntax",
+									"symbols": [
+										"Parse",
+										"parse",
+										"parser.factor",
+										"parser.push",
+										"parser.repeat"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/55949"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/439356"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/xtuG5faxtaU"
+					}
+				]
+			},
+			"Symbol": "Parse",
+			"PkgPath": "regexp/syntax",
+			"ModPath": "stdlib",
+			"CallSink": 9,
+			"ImportSink": 15,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-1039",
+				"published": "2022-10-06T16:42:07Z",
+				"modified": "2022-10-06T16:42:07Z",
+				"aliases": [
+					"CVE-2022-41715"
+				],
+				"details": "Programs which compile regular expressions from untrusted sources may be\nvulnerable to memory exhaustion or denial of service.\n\nThe parsed regexp representation is linear in the size of the input,\nbut in some cases the constant factor can be as high as 40,000,\nmaking relatively small regexps consume much larger amounts of memory.\n\nAfter fix, each regexp being parsed is limited to a 256 MB memory\nfootprint. Regular expressions whose representation would use more space\nthan that are rejected. Normal use of regular expressions is unaffected.\n",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.7"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.2"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1039"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "regexp/syntax",
+									"symbols": [
+										"Parse",
+										"parse",
+										"parser.factor",
+										"parser.push",
+										"parser.repeat"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/55949"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/439356"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/xtuG5faxtaU"
+					}
+				]
+			},
+			"Symbol": "parse",
+			"PkgPath": "regexp/syntax",
+			"ModPath": "stdlib",
+			"CallSink": 7,
+			"ImportSink": 15,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-1039",
+				"published": "2022-10-06T16:42:07Z",
+				"modified": "2022-10-06T16:42:07Z",
+				"aliases": [
+					"CVE-2022-41715"
+				],
+				"details": "Programs which compile regular expressions from untrusted sources may be\nvulnerable to memory exhaustion or denial of service.\n\nThe parsed regexp representation is linear in the size of the input,\nbut in some cases the constant factor can be as high as 40,000,\nmaking relatively small regexps consume much larger amounts of memory.\n\nAfter fix, each regexp being parsed is limited to a 256 MB memory\nfootprint. Regular expressions whose representation would use more space\nthan that are rejected. Normal use of regular expressions is unaffected.\n",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.7"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.2"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1039"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "regexp/syntax",
+									"symbols": [
+										"Parse",
+										"parse",
+										"parser.factor",
+										"parser.push",
+										"parser.repeat"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/55949"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/439356"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/xtuG5faxtaU"
+					}
+				]
+			},
+			"Symbol": "parser.factor",
+			"PkgPath": "regexp/syntax",
+			"ModPath": "stdlib",
+			"CallSink": 12,
+			"ImportSink": 15,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-1039",
+				"published": "2022-10-06T16:42:07Z",
+				"modified": "2022-10-06T16:42:07Z",
+				"aliases": [
+					"CVE-2022-41715"
+				],
+				"details": "Programs which compile regular expressions from untrusted sources may be\nvulnerable to memory exhaustion or denial of service.\n\nThe parsed regexp representation is linear in the size of the input,\nbut in some cases the constant factor can be as high as 40,000,\nmaking relatively small regexps consume much larger amounts of memory.\n\nAfter fix, each regexp being parsed is limited to a 256 MB memory\nfootprint. Regular expressions whose representation would use more space\nthan that are rejected. Normal use of regular expressions is unaffected.\n",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.7"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.2"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1039"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "regexp/syntax",
+									"symbols": [
+										"Parse",
+										"parse",
+										"parser.factor",
+										"parser.push",
+										"parser.repeat"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/55949"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/439356"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/xtuG5faxtaU"
+					}
+				]
+			},
+			"Symbol": "parser.push",
+			"PkgPath": "regexp/syntax",
+			"ModPath": "stdlib",
+			"CallSink": 10,
+			"ImportSink": 15,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-1039",
+				"published": "2022-10-06T16:42:07Z",
+				"modified": "2022-10-06T16:42:07Z",
+				"aliases": [
+					"CVE-2022-41715"
+				],
+				"details": "Programs which compile regular expressions from untrusted sources may be\nvulnerable to memory exhaustion or denial of service.\n\nThe parsed regexp representation is linear in the size of the input,\nbut in some cases the constant factor can be as high as 40,000,\nmaking relatively small regexps consume much larger amounts of memory.\n\nAfter fix, each regexp being parsed is limited to a 256 MB memory\nfootprint. Regular expressions whose representation would use more space\nthan that are rejected. Normal use of regular expressions is unaffected.\n",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.7"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.2"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1039"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "regexp/syntax",
+									"symbols": [
+										"Parse",
+										"parse",
+										"parser.factor",
+										"parser.push",
+										"parser.repeat"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/55949"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/439356"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/xtuG5faxtaU"
+					}
+				]
+			},
+			"Symbol": "parser.repeat",
+			"PkgPath": "regexp/syntax",
+			"ModPath": "stdlib",
+			"CallSink": 11,
+			"ImportSink": 15,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-0969",
+				"published": "2022-09-12T20:23:06Z",
+				"modified": "2022-09-20T15:16:04Z",
+				"aliases": [
+					"CVE-2022-27664"
+				],
+				"details": "HTTP/2 server connections can hang forever waiting for a clean shutdown\nthat was preempted by a fatal error. This condition can be exploited\nby a malicious client to cause a denial of service.\n",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.6"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.1"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-0969"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.goAway"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/x49AQzIVX-s"
+					},
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/54658"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/428735"
+					}
+				]
+			},
+			"Symbol": "Server.ListenAndServe",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 8,
+			"ImportSink": 6,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-0969",
+				"published": "2022-09-12T20:23:06Z",
+				"modified": "2022-09-20T15:16:04Z",
+				"aliases": [
+					"CVE-2022-27664"
+				],
+				"details": "HTTP/2 server connections can hang forever waiting for a clean shutdown\nthat was preempted by a fatal error. This condition can be exploited\nby a malicious client to cause a denial of service.\n",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.6"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.1"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-0969"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.goAway"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/x49AQzIVX-s"
+					},
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/54658"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/428735"
+					}
+				]
+			},
+			"Symbol": "Server.Serve",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 6,
+			"ImportSink": 6,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-0969",
+				"published": "2022-09-12T20:23:06Z",
+				"modified": "2022-09-20T15:16:04Z",
+				"aliases": [
+					"CVE-2022-27664"
+				],
+				"details": "HTTP/2 server connections can hang forever waiting for a clean shutdown\nthat was preempted by a fatal error. This condition can be exploited\nby a malicious client to cause a denial of service.\n",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.6"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.1"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-0969"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.goAway"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/x49AQzIVX-s"
+					},
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/54658"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/428735"
+					}
+				]
+			},
+			"Symbol": "http2Server.ServeConn",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 4,
+			"ImportSink": 6,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-0969",
+				"published": "2022-09-12T20:23:06Z",
+				"modified": "2022-09-20T15:16:04Z",
+				"aliases": [
+					"CVE-2022-27664"
+				],
+				"details": "HTTP/2 server connections can hang forever waiting for a clean shutdown\nthat was preempted by a fatal error. This condition can be exploited\nby a malicious client to cause a denial of service.\n",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.6"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.1"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-0969"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.goAway"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/x49AQzIVX-s"
+					},
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/54658"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/428735"
+					}
+				]
+			},
+			"Symbol": "http2serverConn.goAway",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 5,
+			"ImportSink": 6,
+			"RequireSink": 1
+		}
+	],
+	"Modules": [
+		{
+			"Path": "github.com/go-sql-driver/mysql",
+			"Version": "v1.5.0",
+			"Dir": "",
+			"Replace": null
+		},
+		{
+			"Path": "github.com/gorilla/securecookie",
+			"Version": "v1.1.1",
+			"Dir": "",
+			"Replace": null
+		},
+		{
+			"Path": "github.com/gorilla/sessions",
+			"Version": "v1.2.1",
+			"Dir": "",
+			"Replace": null
+		},
+		{
+			"Path": "github.com/govwa",
+			"Version": "",
+			"Dir": "",
+			"Replace": null
+		},
+		{
+			"Path": "github.com/julienschmidt/httprouter",
+			"Version": "v1.3.0",
+			"Dir": "",
+			"Replace": null
+		},
+		{
+			"Path": "stdlib",
+			"Version": "v1.19.0",
+			"Dir": "",
+			"Replace": null
+		}
+	]
+}
