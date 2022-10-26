@@ -1938,6 +1938,15 @@ class FindingToFilesSerializer(serializers.Serializer):
         return new_data
 
 
+class FindingCloseSerializer(serializers.ModelSerializer):
+    is_mitigated = serializers.BooleanField(required=False)
+    mitigated = serializers.DateTimeField(required=False)
+
+    class Meta:
+        model = Finding
+        fields = ('is_mitigated', 'mitigated')
+
+
 class ReportGenerateOptionSerializer(serializers.Serializer):
     include_finding_notes = serializers.BooleanField(default=False)
     include_finding_images = serializers.BooleanField(default=False)
