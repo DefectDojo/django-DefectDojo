@@ -2,7 +2,7 @@ import collections
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
-from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY
+from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, NOT_ACCEPTED_FINDINGS_QUERY, WAS_ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY, UNDER_REVIEW_QUERY
 import logging
 from datetime import timedelta, datetime
 from django import forms
@@ -21,7 +21,7 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group, Vulnerability_Reference
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group, Vulnerability_Id
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
@@ -35,6 +35,7 @@ from dojo.test.queries import get_authorized_tests
 from dojo.finding.queries import get_authorized_findings
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.finding_group.queries import get_authorized_finding_groups
+from dojo.user.queries import get_authorized_users
 from django.forms import HiddenInput
 from dojo.utils import is_finding_groups_enabled
 
@@ -52,17 +53,17 @@ def custom_filter(queryset, name, value):
     return queryset.filter(Q(**{filter: values}))
 
 
-def custom_vulnerability_reference_filter(queryset, name, value):
+def custom_vulnerability_id_filter(queryset, name, value):
     values = value.split(',')
-    ids = Vulnerability_Reference.objects \
-        .filter(vulnerability_reference__in=values) \
+    ids = Vulnerability_Id.objects \
+        .filter(vulnerability_id__in=values) \
         .values_list('finding_id', flat=True)
     return queryset.filter(id__in=ids)
 
 
-def vulnerability_reference_filter(queryset, name, value):
-    ids = Vulnerability_Reference.objects \
-        .filter(vulnerability_reference=value) \
+def vulnerability_id_filter(queryset, name, value):
+    ids = Vulnerability_Id.objects \
+        .filter(vulnerability_id=value) \
         .values_list('finding_id', flat=True)
     return queryset.filter(id__in=ids)
 
@@ -105,6 +106,9 @@ class FindingStatusFilter(ChoiceFilter):
     def closed(self, qs, name):
         return qs.filter(CLOSED_FINDINGS_QUERY)
 
+    def under_review(self, qs, name):
+        return qs.filter(UNDER_REVIEW_QUERY)
+
     options = {
         '': (_('Any'), any),
         0: (_('Open'), open),
@@ -114,6 +118,7 @@ class FindingStatusFilter(ChoiceFilter):
         4: (_('Inactive'), inactive),
         5: (_('Risk Accepted'), risk_accepted),
         6: (_('Closed'), closed),
+        7: (_('Under Review'), under_review),
     }
 
     def __init__(self, *args, **kwargs):
@@ -226,6 +231,7 @@ def get_finding_filter_fields(metrics=False, similar=False):
                 'last_status_update',
                 'mitigated',
                 'reporter',
+                'reviewers',
                 'test__engagement__product__prod_type',
                 'test__engagement__product',
                 'test__engagement',
@@ -401,6 +407,68 @@ class DateRangeFilter(ChoiceFilter):
         return self.options[value][1](qs, self.field_name)
 
 
+class DateRangeOmniFilter(ChoiceFilter):
+    options = {
+        '': (_('Any date'), lambda qs, name: qs.all()),
+        1: (_('Today'), lambda qs, name: qs.filter(**{
+            '%s__year' % name: now().year,
+            '%s__month' % name: now().month,
+            '%s__day' % name: now().day
+        })),
+        2: (_('Next 7 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=7)),
+        })),
+        3: (_('Next 30 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=30)),
+        })),
+        4: (_('Next 90 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=90)),
+        })),
+        5: (_('Past 7 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=7)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        6: (_('Past 30 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=30)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        7: (_('Past 90 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=90)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        8: (_('Current month'), lambda qs, name: qs.filter(**{
+            '%s__year' % name: now().year,
+            '%s__month' % name: now().month
+        })),
+        9: (_('Past year'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=365)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        10: (_('Current year'), lambda qs, name: qs.filter(**{
+            '%s__year' % name: now().year,
+        })),
+        11: (_('Next year'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=365)),
+        })),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(DateRangeOmniFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = ''
+        return self.options[value][1](qs, self.field_name)
+
+
 class ReportBooleanFilter(ChoiceFilter):
     options = {
         '': (_('Either'), lambda qs, name: qs.all()),
@@ -432,15 +500,12 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
 
     def accepted(self, qs, name):
         # return qs.filter(risk_acceptance__isnull=False)
-        from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
         return qs.filter(ACCEPTED_FINDINGS_QUERY)
 
     def not_accepted(self, qs, name):
-        from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
         return qs.filter(NOT_ACCEPTED_FINDINGS_QUERY)
 
     def was_accepted(self, qs, name):
-        from dojo.finding.views import WAS_ACCEPTED_FINDINGS_QUERY
         return qs.filter(WAS_ACCEPTED_FINDINGS_QUERY)
 
     options = {
@@ -587,10 +652,7 @@ class ComponentFilter(ProductComponentFilter):
 
 class EngagementDirectFilter(DojoFilter):
     name = CharFilter(lookup_expr='icontains', label='Engagement name contains')
-    lead = ModelChoiceFilter(
-        queryset=Dojo_User.objects.filter(
-            engagement__lead__isnull=False).distinct(),
-        label="Lead")
+    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
     version = CharFilter(field_name='version', lookup_expr='icontains', label='Engagement version')
     test__version = CharFilter(field_name='test__version', lookup_expr='icontains', label='Test version')
 
@@ -642,6 +704,8 @@ class EngagementDirectFilter(DojoFilter):
     def __init__(self, *args, **kwargs):
         super(EngagementDirectFilter, self).__init__(*args, **kwargs)
         self.form.fields['product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+        self.form.fields['lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+            .filter(engagement__lead__isnull=False).distinct()
 
     class Meta:
         model = Engagement
@@ -650,10 +714,7 @@ class EngagementDirectFilter(DojoFilter):
 
 class EngagementFilter(DojoFilter):
     engagement__name = CharFilter(lookup_expr='icontains', label='Engagement name contains')
-    engagement__lead = ModelChoiceFilter(
-        queryset=Dojo_User.objects.filter(
-            engagement__lead__isnull=False).distinct(),
-        label="Lead")
+    engagement__lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
     engagement__version = CharFilter(field_name='engagement__version', lookup_expr='icontains', label='Engagement version')
     engagement__test__version = CharFilter(field_name='engagement__test__version', lookup_expr='icontains', label='Test version')
 
@@ -699,6 +760,8 @@ class EngagementFilter(DojoFilter):
     def __init__(self, *args, **kwargs):
         super(EngagementFilter, self).__init__(*args, **kwargs)
         self.form.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+        self.form.fields['engagement__lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+            .filter(engagement__lead__isnull=False).distinct()
 
     class Meta:
         model = Product
@@ -706,10 +769,7 @@ class EngagementFilter(DojoFilter):
 
 
 class ProductEngagementFilter(DojoFilter):
-    lead = ModelChoiceFilter(
-        queryset=Dojo_User.objects.filter(
-            engagement__lead__isnull=False).distinct(),
-        label="Lead")
+    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
     version = CharFilter(lookup_expr='icontains', label='Engagement version')
     test__version = CharFilter(field_name='test__version', lookup_expr='icontains', label='Test version')
 
@@ -755,9 +815,14 @@ class ProductEngagementFilter(DojoFilter):
 
     )
 
+    def __init__(self, *args, **kwargs):
+        super(ProductEngagementFilter, self).__init__(*args, **kwargs)
+        self.form.fields['lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+            .filter(engagement__lead__isnull=False).distinct()
+
     class Meta:
         model = Product
-        fields = ['id', 'name']
+        fields = ['name']
 
 
 class ApiEngagementFilter(DojoFilter):
@@ -1021,10 +1086,11 @@ class ApiFindingFilter(DojoFilter):
     under_defect_review = BooleanFilter(field_name='under_defect_review')
     under_review = BooleanFilter(field_name='under_review')
     verified = BooleanFilter(field_name='verified')
+    has_jira = BooleanFilter(field_name='jira_issue', lookup_expr='isnull', exclude=True)
     # CharFilter
     component_version = CharFilter(lookup_expr='icontains')
     component_name = CharFilter(lookup_expr='icontains')
-    vulnerability_reference = CharFilter(method=custom_vulnerability_reference_filter)
+    vulnerability_id = CharFilter(method=custom_vulnerability_id_filter)
     description = CharFilter(lookup_expr='icontains')
     file_path = CharFilter(lookup_expr='icontains')
     hash_code = CharFilter(lookup_expr='icontains')
@@ -1036,7 +1102,7 @@ class ApiFindingFilter(DojoFilter):
     references = CharFilter(lookup_expr='icontains')
     severity = CharFilter(method=custom_filter, field_name='severity')
     severity_justification = CharFilter(lookup_expr='icontains')
-    step_to_reproduce = CharFilter(lookup_expr='icontains')
+    steps_to_reproduce = CharFilter(lookup_expr='icontains')
     unique_id_from_tool = CharFilter(lookup_expr='icontains')
     title = CharFilter(lookup_expr='icontains')
     # DateRangeFilter
@@ -1064,6 +1130,7 @@ class ApiFindingFilter(DojoFilter):
     test__test_type = NumberInFilter(field_name='test__test_type', lookup_expr='in', label='Test Type')
     test__engagement = NumberInFilter(field_name='test__engagement', lookup_expr='in')
     test__engagement__product = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
+    test__engagement__product__prod_type = NumberInFilter(field_name='test__engagement__product__prod_type', lookup_expr='in')
     finding_group = NumberInFilter(field_name='finding_group', lookup_expr='in')
 
     # ReportRiskAcceptanceFilter
@@ -1137,7 +1204,7 @@ class FindingFilter(FindingFilterWithTags):
     last_reviewed = DateRangeFilter()
     last_status_update = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
-    vulnerability_reference = CharFilter(method=vulnerability_reference_filter, label='Vulnerability Reference')
+    vulnerability_id = CharFilter(method=vulnerability_id_filter, label='Vulnerability Id')
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all(), label='Test Type')
@@ -1146,12 +1213,18 @@ class FindingFilter(FindingFilterWithTags):
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(label="Mitigated Date")
 
+    planned_remediation_date = DateRangeOmniFilter()
+
     file_path = CharFilter(lookup_expr='icontains')
     param = CharFilter(lookup_expr='icontains')
     payload = CharFilter(lookup_expr='icontains')
 
     reporter = ModelMultipleChoiceFilter(
-        queryset=Dojo_User.objects.all())
+        queryset=Dojo_User.objects.none())
+
+    reviewers = ModelMultipleChoiceFilter(
+        queryset=Dojo_User.objects.none())
+
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
@@ -1163,9 +1236,9 @@ class FindingFilter(FindingFilterWithTags):
         queryset=Engagement.objects.none(),
         label="Engagement")
 
-    endpoints = ModelMultipleChoiceFilter(
-        queryset=Endpoint.objects.none(),
-        label="Endpoint")
+    endpoints__host = CharFilter(lookup_expr='icontains', label="Endpoint Host")
+
+    service = CharFilter(lookup_expr='icontains')
 
     test = ModelMultipleChoiceFilter(
         queryset=Test.objects.none(),
@@ -1265,6 +1338,7 @@ class FindingFilter(FindingFilterWithTags):
             ('title', 'title'),
             ('test__engagement__product__name',
              'test__engagement__product__name'),
+            ('service', 'service'),
         ),
         field_labels={
             'numerical_severity': 'Severity',
@@ -1281,7 +1355,7 @@ class FindingFilter(FindingFilterWithTags):
         fields = get_finding_filter_fields()
 
         exclude = ['url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references',
+                   'endpoints', 'references',
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'endpoint_status',
@@ -1320,8 +1394,8 @@ class FindingFilter(FindingFilterWithTags):
             self.form.fields['test__engagement__product'].queryset = get_authorized_products(Permissions.Product_View)
         if self.form.fields.get('finding_group', None):
             self.form.fields['finding_group'].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View)
-        if self.form.fields.get('endpoints'):
-            self.form.fields['endpoints'].queryset = get_authorized_endpoints(Permissions.Endpoint_View).distinct()
+        self.form.fields['reporter'].queryset = get_authorized_users(Permissions.Finding_View)
+        self.form.fields['reviewers'].queryset = self.form.fields['reporter'].queryset
 
 
 class AcceptedFindingFilter(FindingFilter):
@@ -1330,16 +1404,17 @@ class AcceptedFindingFilter(FindingFilter):
 
     risk_acceptance__owner = \
         ModelMultipleChoiceFilter(
-            queryset=Dojo_User.objects.all(),
+            queryset=Dojo_User.objects.none(),
             label="Risk Acceptance Owner")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.form.fields['risk_acceptance__owner'].queryset = get_authorized_users(Permissions.Finding_View)
 
 
 class SimilarFindingFilter(FindingFilter):
     hash_code = MultipleChoiceFilter()
-    vulnerability_references = CharFilter(method=custom_vulnerability_reference_filter, label='Vulnerability References')
+    vulnerability_ids = CharFilter(method=custom_vulnerability_id_filter, label='Vulnerability Ids')
 
     class Meta(FindingFilter.Meta):
         model = Finding
@@ -1362,7 +1437,7 @@ class SimilarFindingFilter(FindingFilter):
             # get a mutable copy of the QueryDict
             data = data.copy()
 
-            data['vulnerability_references'] = ','.join(self.finding.vulnerability_references)
+            data['vulnerability_ids'] = ','.join(self.finding.vulnerability_ids)
             data['cwe'] = self.finding.cwe
             data['file_path'] = self.finding.file_path
             data['line'] = self.finding.line
@@ -1495,7 +1570,7 @@ class MetricsFindingFilter(FindingFilter):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
-    vulnerability_reference = CharFilter(method=vulnerability_reference_filter, label='Vulnerability Reference')
+    vulnerability_id = CharFilter(method=vulnerability_id_filter, label='Vulnerability Id')
 
     not_tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
@@ -1533,6 +1608,9 @@ class MetricsEndpointFilter(FilterSet):
         label="Engagement")
     finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES, label="Severity")
+
+    endpoint__host = CharFilter(lookup_expr='icontains', label="Endpoint Host")
+    finding_title = CharFilter(lookup_expr='icontains', label="Finding Title")
 
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
@@ -1616,12 +1694,9 @@ class MetricsEndpointFilter(FilterSet):
             self.form.fields[
                 'finding__test__engagement__product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
 
-        self.form.fields['finding'].queryset = get_authorized_findings(Permissions.Finding_View)
-        self.form.fields['endpoint'].queryset = get_authorized_endpoints(Permissions.Endpoint_View)
-
     class Meta:
         model = Endpoint_Status
-        exclude = ['last_modified']
+        exclude = ['last_modified', 'endpoint', 'finding']
 
 
 class EndpointFilter(DojoFilter):
@@ -1728,14 +1803,11 @@ class ApiEndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        fields = ['id', 'host', 'product']
+        fields = ['id', 'protocol', 'userinfo', 'host', 'port', 'path', 'query', 'fragment', 'product']
 
 
 class EngagementTestFilter(DojoFilter):
-    lead = ModelChoiceFilter(
-        queryset=Dojo_User.objects.filter(
-            engagement__lead__isnull=False).distinct(),
-        label="Lead")
+    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
     version = CharFilter(lookup_expr='icontains', label='Version')
 
     if settings.TRACK_IMPORT_HISTORY:
@@ -1790,6 +1862,8 @@ class EngagementTestFilter(DojoFilter):
         super(DojoFilter, self).__init__(*args, **kwargs)
         self.form.fields['test_type'].queryset = Test_Type.objects.filter(test__engagement=self.engagement).distinct().order_by('name')
         self.form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=self.engagement.product).distinct()
+        self.form.fields['lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+            .filter(test__lead__isnull=False).distinct()
 
 
 class ApiTestFilter(DojoFilter):
@@ -1984,51 +2058,27 @@ class UserFilter(DojoFilter):
     username = CharFilter(lookup_expr='icontains')
     email = CharFilter(lookup_expr='icontains')
 
-    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-        o = OrderingFilter(
-            # tuple-mapping retains order
-            fields=(
-                ('username', 'username'),
-                ('last_name', 'last_name'),
-                ('first_name', 'first_name'),
-                ('email', 'email'),
-                ('is_active', 'is_active'),
-                ('is_superuser', 'is_superuser'),
-                ('last_login', 'last_login'),
-            ),
-            field_labels={
-                'username': 'User Name',
-                'is_active': 'Active',
-                'is_superuser': 'Superuser',
-            }
-        )
-    else:
-        o = OrderingFilter(
-            # tuple-mapping retains order
-            fields=(
-                ('username', 'username'),
-                ('last_name', 'last_name'),
-                ('first_name', 'first_name'),
-                ('email', 'email'),
-                ('is_active', 'is_active'),
-                ('is_staff', 'is_staff'),
-                ('is_superuser', 'is_superuser'),
-                ('last_login', 'last_login'),
-            ),
-            field_labels={
-                'username': 'User Name',
-                'is_active': 'Active',
-                'is_staff': 'Staff',
-                'is_superuser': 'Superuser',
-            }
-        )
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('username', 'username'),
+            ('last_name', 'last_name'),
+            ('first_name', 'first_name'),
+            ('email', 'email'),
+            ('is_active', 'is_active'),
+            ('is_superuser', 'is_superuser'),
+            ('last_login', 'last_login'),
+        ),
+        field_labels={
+            'username': 'User Name',
+            'is_active': 'Active',
+            'is_superuser': 'Superuser',
+        }
+    )
 
     class Meta:
         model = Dojo_User
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            fields = ['is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
-        else:
-            fields = ['is_staff', 'is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
+        fields = ['is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
 
 
 class GroupFilter(DojoFilter):
@@ -2071,13 +2121,17 @@ class LogEntryFilter(DojoFilter):
     from auditlog.models import LogEntry
 
     action = MultipleChoiceFilter(choices=LogEntry.Action.choices)
-    actor = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.all())
+    actor = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())
     timestamp = DateRangeFilter()
+
+    def __init__(self, *args, **kwargs):
+        super(LogEntryFilter, self).__init__(*args, **kwargs)
+        self.form.fields['actor'].queryset = get_authorized_users(Permissions.Product_View)
 
     class Meta:
         model = LogEntry
         exclude = ['content_type', 'object_pk', 'object_id', 'object_repr',
-                   'changes', 'additional_data']
+                   'changes', 'additional_data', 'remote_addr']
 
 
 class ProductTypeFilter(DojoFilter):

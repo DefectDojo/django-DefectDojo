@@ -1,13 +1,19 @@
 import gitlab
 import re
+import logging
+import requests
+import traceback
+
 
 import social_core.pipeline.user
 from django.conf import settings
-from dojo.models import Product, Product_Member, Product_Type, System_Settings, Role
+from dojo.models import Product, Product_Member, Product_Type, Role, Dojo_Group, Dojo_Group_Member
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product.queries import get_authorized_products
+
+logger = logging.getLogger(__name__)
 
 
 def social_uid(backend, details, response, *args, **kwargs):
@@ -58,15 +64,68 @@ def social_uid(backend, details, response, *args, **kwargs):
 
 
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
-    # if user doesn't exist then user is None
-    if user is not None and kwargs.get('is_new'):
-        system_settings = System_Settings.objects.get()
-        if not settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            if system_settings.staff_user_email_pattern is not None and \
-               re.fullmatch(system_settings.staff_user_email_pattern, user.email) is not None:
-                user.is_staff = True
-            else:
-                user.is_staff = False
+    pass
+
+
+def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
+    if settings.AZUREAD_TENANT_OAUTH2_ENABLED and settings.AZUREAD_TENANT_OAUTH2_GET_GROUPS and isinstance(backend, AzureADTenantOAuth2):
+        soc = user.social_auth.get()
+        token = soc.extra_data['access_token']
+        group_names = []
+        if 'groups' not in kwargs['response'] or kwargs['response']['groups'] == "":
+            logger.warn("No groups in response. Stopping to update groups of user based on azureAD")
+            return
+        group_IDs = kwargs['response']['groups']
+        try:
+            for group_from_response in group_IDs:
+                logger.debug("Analysing Group_ID " + group_from_response)
+                request_headers = {'Authorization': 'Bearer ' + token}
+                if is_group_id(group_from_response):
+                    logger.debug("detected " + group_from_response + " as groupID and will fetch the displayName from microsoft graph")
+                    group_name_request = requests.get((str(soc.extra_data['resource']) + '/v1.0/groups/' + str(group_from_response) + '?$select=displayName'), headers=request_headers)
+                    group_name_request_json = group_name_request.json()
+                    group_name = group_name_request_json['displayName']
+                else:
+                    logger.debug("detected " + group_from_response + " as group name and will not call microsoft graph")
+                    group_name = group_from_response
+
+                if settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER == "" or re.search(settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER, group_name):
+                    group_names.append(group_name)
+                else:
+                    logger.debug("Skipping group " + group_name + " due to AZUREAD_TENANT_OAUTH2_GROUPS_FILTER " + settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER)
+                    continue
+            assign_user_to_groups(user, group_names, 'AzureAD')
+        except:
+            logger.error("Could not call microsoft graph API or save groups to member")
+            traceback.print_exc()
+        if settings.AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS:
+            cleanup_old_groups_for_user(user, group_names)
+
+
+def is_group_id(group):
+    if re.search(r'^[a-zA-Z0-9]{8,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{12,}$', group):
+        return True
+    else:
+        return False
+
+
+def assign_user_to_groups(user, group_names, social_provider):
+    for group_name in group_names:
+        group, created_group = Dojo_Group.objects.get_or_create(name=group_name, social_provider=social_provider)
+        if created_group:
+            logger.debug("Group %s for social provider %s was created", str(group), social_provider)
+        group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(group=group, user=user, defaults={
+            'role': Role.objects.get(id=Roles.Maintainer)})
+        if is_member_created:
+            logger.debug("User %s become member of group %s (social provider: %s)", user, str(group), social_provider)
+
+
+def cleanup_old_groups_for_user(user, group_names):
+    for group_member in Dojo_Group_Member.objects.select_related('group').filter(user=user):
+        group = group_member.group
+        if str(group) not in group_names:
+            logger.debug("Deleting membership of user %s from %s group %s", user, group.social_provider, str(group))
+            group_member.delete()
 
 
 def update_product_access(backend, uid, user=None, social=None, *args, **kwargs):

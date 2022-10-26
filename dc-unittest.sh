@@ -1,7 +1,10 @@
-#/bin/env bash
+#!/usr/bin/env bash
 
 unset PROFILE
 unset TEST_CASE
+
+bash ./docker/docker-compose-check.sh
+if [[ $? -eq 1 ]]; then exit 1; fi
 
 usage() {
   echo

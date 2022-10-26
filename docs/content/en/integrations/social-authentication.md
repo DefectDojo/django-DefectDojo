@@ -92,8 +92,7 @@ to be created. Closely follow the steps below to guarantee success.
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['<email@example.com>']
     {{< /highlight >}}
 
-OKTA
-----
+## OKTA
 
 In a similar fashion to that of Google, using OKTA as a OAuth2 provider
 carries the same attributes and a similar procedure. Follow along below.
@@ -137,7 +136,7 @@ carries the same attributes and a similar procedure. Follow along below.
     DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=True,
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, '**YOUR_CLIENT_ID_FROM_STEP_ABOVE**'),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, '**YOUR_CLIENT_SECRET_FROM_STEP_ABOVE**'),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2/default'),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2'),
     {{< /highlight >}}
 
 If during the login process you get the following error: *The
@@ -148,7 +147,7 @@ GET parameter starts with `http://` instead of
 `SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` in the settings.
 
 ## Azure Active Directory
-
+### Azure AD Configuration
 You can now use your corporate Azure Active Directory to authenticate
 users to Defect Dojo. Users will be using your corporate Azure AD
 account (A.K.A. Office 365 identity) to authenticate via OAuth, and all
@@ -158,7 +157,7 @@ in, it will try to match the UPN of the user to an existing e-mail from
 a user in Defect Dojo, and if no match is found, a new user will be
 created in Defect Dojo, associated with the unique id/value of the user
 provided by your Azure AD tenant. Then, you can assign roles to this
-user, such as 'staff' or 'superuser'
+user, such as 'superuser'.
 
 1.  Navigate to the following address and follow instructions to create
     a new app registration
@@ -190,6 +189,28 @@ user, such as 'staff' or 'superuser'
 
 5.  Restart your Dojo, and you should now see a **Login with Azure AD**
     button on the login page which should *magically* work
+
+### Automatic Import of User-Groups
+To import groups from Azure AD users, the following environment variable needs to be set:  
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=True
+    {{< /highlight >}}
+
+This will ensure the user is added to all the groups found in the Azure AD Token. Any missing groups will be created in DefectDojo (unless filtered). This group synchronization allows for product access via groups to limit the products a user can interact with.
+Do not activate `Emit groups as role claims` within the Azure AD "Token configuration".
+
+To prevent authorization creep, old Azure AD groups a user is not having anymore can be deleted with the following environment parameter:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS=True
+    {{< /highlight >}}
+
+ To limit the amount of groups imported from Azure AD, a regular expression can be used as the following:
+    
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER='^team-.*' # or 'teamA|teamB|groupC'
+    {{< /highlight >}}
 
 ## Gitlab
 
@@ -394,6 +415,26 @@ Up to relase 1.15.0 the SAML integration was based on [https://github.com/fangli
 * DD_SAML2_ATTRIBUTES_MAP: Syntax has changed
 * DD_SAML2_CREATE_USER: Default value changed to False, to avoid security breaches
 
+## RemoteUser
+
+This implementation is suitable if the DefectDojo instance is placed behind HTTP Authentication Proxy.
+Dojo expects that the proxy will perform authentication and pass HTTP requests to the Dojo instance with filled HTTP headers.
+The proxy should check if an attacker is not trying to add a malicious HTTP header and bypass authentication.
+
+Values which need to be set:
+
+* `DD_AUTH_REMOTEUSER_ENABLED` - Needs to be set to `True`
+* `DD_AUTH_REMOTEUSER_USERNAME_HEADER` - Name of the header which contains the username
+* `DD_AUTH_REMOTEUSER_EMAIL_HEADER`(optional) - Name of the header which contains the email
+* `DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER`(optional) - Name of the header which contains the first name
+* `DD_AUTH_REMOTEUSER_LASTNAME_HEADER`(optional) - Name of the header which contains the last name
+* `DD_AUTH_REMOTEUSER_GROUPS_HEADER`(optional) - Name of the header which contains the comma-separated list of groups; user will be assigned to these groups (missing groups will be created)
+* `DD_AUTH_REMOTEUSER_GROUPS_CLEANUP`(optional) - Same as [#automatic-import-of-user-groups](AzureAD implementation)
+* `DD_AUTH_REMOTEUSER_TRUSTED_PROXY` - Comma separated list of proxies; Simple IP and CIDR formats are supported
+* `DD_AUTH_REMOTEUSER_LOGIN_ONLY`(optional) - Check [https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only](Django documentation)
+
+*WARNING:* There is possible spoofing of headers (for all `DD_AUTH_REMOTEUSER_xxx_HEADER` values). Read Warning in [https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration](Django documentation)
+
 ## User Permissions
 
 When a new user is created via the social-auth, only the default permissions are active. This means that the newly created user does not have access to add, edit, nor delete anything within DefectDojo. There are two parameters in the System Settings to influence the permissions for newly created users:
@@ -401,14 +442,6 @@ When a new user is created via the social-auth, only the default permissions are
 ### Default group
 
 When both the parameters `Default group` and `Default group role` are set, the new user will be a member of the given group with the given role, which will give him the respective permissions.
-
-### Staff user ###
-
-Newly created users are neither staff nor superuser by default. The `is_staff` flag of a new user will be set to `True`, if the user's email address matches the regular expression in the parameter `Email pattern for staff users`. 
-
-**Example:**
-
-`.*@example.com` will make `alice@example.com` a staff user, while `bob@partner.example.com` or `chris@example.org` will be non-staff users.
 
 ## Login speed-up
 

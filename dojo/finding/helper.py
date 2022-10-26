@@ -10,7 +10,7 @@ from django.conf import settings
 from fieldsignals import pre_save_changed
 from dojo.utils import get_current_user, mass_model_updater, to_str_typed
 from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test, Endpoint, Endpoint_Status, \
-    Vulnerability_Reference, Vulnerability_Reference_Template
+    Vulnerability_Id, Vulnerability_Id_Template
 from dojo.endpoint.utils import save_endpoints_to_add
 
 
@@ -26,6 +26,7 @@ ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=True)
 NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
 WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
 CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
+UNDER_REVIEW_QUERY = Q(under_review=True)
 
 
 # this signal is triggered just before a finding is getting saved
@@ -50,9 +51,21 @@ def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwar
 
 
 # also get signal when id is set/changed so we can process new findings
-pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['id', 'active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope', 'risk_accepted'])
-# pre_save_changed.connect(pre_save_finding_status_change, sender=Finding)
-# post_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope'])
+pre_save_changed.connect(
+    pre_save_finding_status_change,
+    sender=Finding,
+    fields=[
+        "id",
+        "active",
+        "verified",
+        "false_p",
+        "is_mitigated",
+        "mitigated",
+        "mitigated_by",
+        "out_of_scope",
+        "risk_accepted",
+    ],
+)
 
 
 def update_finding_status(new_state_finding, user, changed_fields=None):
@@ -205,17 +218,24 @@ def update_finding_group(finding, finding_group):
 
 
 def get_group_by_group_name(finding, finding_group_by_option):
+    group_name = None
+
     if finding_group_by_option == 'component_name':
-        group_name = finding.component_name if finding.component_name else 'None'
+        group_name = finding.component_name
     elif finding_group_by_option == 'component_name+component_version':
-        group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
-        (finding.component_version if finding.component_version else 'None'))
+        if finding.component_name or finding.component_version:
+            group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
+                (finding.component_version if finding.component_version else 'None'))
     elif finding_group_by_option == 'file_path':
-        group_name = 'Filepath %s' % (finding.file_path if finding.file_path else 'None')
+        if finding.file_path:
+            group_name = 'Filepath %s' % (finding.file_path)
     else:
         raise ValueError("Invalid group_by option %s" % finding_group_by_option)
 
-    return 'Findings in: %s' % group_name
+    if group_name:
+        return 'Findings in: %s' % group_name
+
+    return group_name
 
 
 def group_findings_by(finds, finding_group_by_option):
@@ -230,6 +250,10 @@ def group_findings_by(finds, finding_group_by_option):
             continue
 
         group_name = get_group_by_group_name(find, finding_group_by_option)
+        if group_name is None:
+            skipped += 1
+            continue
+
         finding_group = Finding_Group.objects.filter(name=group_name).first()
         if not finding_group:
             finding_group, added, skipped = create_finding_group([find], group_name)
@@ -249,13 +273,14 @@ def group_findings_by(finds, finding_group_by_option):
 def add_finding_to_auto_group(finding, group_by, **kwargs):
     test = finding.test
     name = get_group_by_group_name(finding, group_by)
-    creator = get_current_user()
-    if not creator:
-        creator = kwargs.get('async_user', None)
-    finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)
-    if created:
-        logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)
-    finding_group.findings.add(finding)
+    if name is not None:
+        creator = get_current_user()
+        if not creator:
+            creator = kwargs.get('async_user', None)
+        finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)
+        if created:
+            logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)
+        finding_group.findings.add(finding)
 
 
 @dojo_model_to_id
@@ -318,7 +343,6 @@ def finding_pre_delete(sender, instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
 
     instance.found_by.clear()
-    instance.status_finding.clear()
 
 
 def finding_delete(instance, **kwargs):
@@ -349,7 +373,6 @@ def finding_delete(instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
     logger.debug('finding delete: clearing found by')
     instance.found_by.clear()
-    instance.status_finding.clear()
 
 
 @receiver(post_delete, sender=Finding)
@@ -554,44 +577,42 @@ def add_endpoints(new_finding, form):
     for endpoint in new_finding.endpoints.all():
         eps, created = Endpoint_Status.objects.get_or_create(
             finding=new_finding,
-            endpoint=endpoint, defaults={'date': form.cleaned_data['date'] or now})
+            endpoint=endpoint, defaults={'date': form.cleaned_data['date'] or timezone.now()})
         endpoint.endpoint_status.add(eps)
         new_finding.endpoint_status.add(eps)
 
 
-def save_vulnerability_references(finding, vulnerability_references):
+def save_vulnerability_ids(finding, vulnerability_ids):
     # Remove duplicates
-    vulnerability_references = list(dict.fromkeys(vulnerability_references))
+    vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
-    previous_vulnerability_references = set(Vulnerability_Reference.objects.filter(finding=finding))
-    for vulnerability_reference in vulnerability_references:
-        obj, created = Vulnerability_Reference.objects.get_or_create(
-            finding=finding, vulnerability_reference=vulnerability_reference)
-        if not created:
-            previous_vulnerability_references.remove(obj)
-    for vulnerability_reference in previous_vulnerability_references:
-        vulnerability_reference.delete()
+    # Remove old vulnerability ids
+    Vulnerability_Id.objects.filter(finding=finding).delete()
 
-    if vulnerability_references:
-        finding.cve = vulnerability_references[0]
+    # Save new vulnerability ids
+    for vulnerability_id in vulnerability_ids:
+        Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id).save()
+
+    # Set CVE
+    if vulnerability_ids:
+        finding.cve = vulnerability_ids[0]
     else:
         finding.cve = None
 
 
-def save_vulnerability_references_template(finding_template, vulnerability_references):
+def save_vulnerability_ids_template(finding_template, vulnerability_ids):
     # Remove duplicates
-    vulnerability_references = list(dict.fromkeys(vulnerability_references))
+    vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
-    previous_vulnerability_references = set(Vulnerability_Reference_Template.objects.filter(finding_template=finding_template))
-    for vulnerability_reference in vulnerability_references:
-        obj, created = Vulnerability_Reference_Template.objects.get_or_create(
-            finding_template=finding_template, vulnerability_reference=vulnerability_reference)
-        if not created:
-            previous_vulnerability_references.remove(obj)
-    for vulnerability_reference in previous_vulnerability_references:
-        vulnerability_reference.delete()
+    # Remove old vulnerability ids
+    Vulnerability_Id_Template.objects.filter(finding_template=finding_template).delete()
 
-    if vulnerability_references:
-        finding_template.cve = vulnerability_references[0]
+    # Save new vulnerability ids
+    for vulnerability_id in vulnerability_ids:
+        Vulnerability_Id_Template(finding_template=finding_template, vulnerability_id=vulnerability_id).save()
+
+    # Set CVE
+    if vulnerability_ids:
+        finding_template.cve = vulnerability_ids[0]
     else:
         finding_template.cve = None

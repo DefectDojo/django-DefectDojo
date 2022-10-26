@@ -30,10 +30,12 @@ class TestNpmAuditParser(DojoTestCase):
         self.assertEqual(5, len(findings))
 
         for find in findings:
-            if find.cve == "CVE-2017-16138":
-                self.assertEqual(find.file_path, "censored_by_npm_audit>send>mime")
-            elif find.cve == "CVE-2017-16119":
-                self.assertEqual(find.file_path, "express>fresh")
+            if find.file_path == "censored_by_npm_audit>send>mime":
+                self.assertEqual(1, len(find.unsaved_vulnerability_ids))
+                self.assertEqual("CVE-2017-16138", find.unsaved_vulnerability_ids[0])
+            if find.file_path == "express>fresh":
+                self.assertEqual(1, len(find.unsaved_vulnerability_ids))
+                self.assertEqual("CVE-2017-16119", find.unsaved_vulnerability_ids[0])
 
         # TODO ordering seems to be different in ci compared to local, so disable for now
         # self.assertEqual('mime', findings[4].component_name)
@@ -57,6 +59,16 @@ class TestNpmAuditParser(DojoTestCase):
         testfile.close()
         self.assertEqual(6, len(findings))
         self.assertEqual(918, findings[0].cwe)
+
+    def test_npm_audit_parser_with_one_criticle_vuln_has_null_as_cwe(self):
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/cwe_null.json"))
+        parser = NpmAuditParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        self.assertEqual(1035, findings[0].cwe)
+        self.assertEqual("growl", findings[0].component_name)
+        self.assertEqual("1.9.2", findings[0].component_version)
 
     def test_npm_audit_parser_empty_with_error(self):
         with self.assertRaises(ValueError) as context:

@@ -20,5 +20,6 @@ class TestClairParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-20839", finding.references)
-        self.assertEqual("CVE-2018-20839", finding.cve)
         self.assertEqual("CVE-2018-20839 - (systemd, 237-3ubuntu10.29)", finding.title)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2018-20839", finding.unsaved_vulnerability_ids[0])

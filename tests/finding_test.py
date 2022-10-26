@@ -80,6 +80,8 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.ID, "downloadMenu").click()
         driver.find_element(By.ID, "csv_export").click()
 
+        time.sleep(5)
+
         self.check_file(f'{self.export_path}/findings.csv')
 
     def test_excel_export(self):
@@ -88,6 +90,8 @@ class FindingTest(BaseTestCase):
 
         driver.find_element(By.ID, "downloadMenu").click()
         driver.find_element(By.ID, "excel_export").click()
+
+        time.sleep(5)
 
         self.check_file(f'{self.export_path}/findings.xlsx')
 
@@ -110,8 +114,8 @@ class FindingTest(BaseTestCase):
         Select(driver.find_element(By.ID, "id_severity")).select_by_visible_text("Critical")
         # cvssv3
         driver.find_element(By.ID, "id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
-        # finding Vulnerability References
-        driver.find_element(By.ID, "id_vulnerability_references").send_keys("\nREF-3\nREF-4\n")
+        # finding Vulnerability Ids
+        driver.find_element(By.ID, "id_vulnerability_ids").send_keys("\nREF-3\nREF-4\n")
         # "Click" the Done button to Edit the finding
         driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
@@ -122,7 +126,7 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_text_present_on_page(text='REF-2'))
         self.assertTrue(self.is_text_present_on_page(text='REF-3'))
         self.assertTrue(self.is_text_present_on_page(text='REF-4'))
-        self.assertTrue(self.is_text_present_on_page(text='Additional Vulnerability References'))
+        self.assertTrue(self.is_text_present_on_page(text='Additional Vulnerability Ids'))
 
     def test_add_image(self):
         # print("\n\nDebug Print Log: testing 'add image' \n")
@@ -519,9 +523,8 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(FindingTest('test_list_findings_all'))
     suite.addTest(FindingTest('test_list_findings_open'))
     suite.addTest(FindingTest('test_quick_report'))
-    # Export tests are not stable and therefore disabled
-    # suite.addTest(FindingTest('test_csv_export'))
-    # suite.addTest(FindingTest('test_excel_export'))
+    suite.addTest(FindingTest('test_csv_export'))
+    suite.addTest(FindingTest('test_excel_export'))
     suite.addTest(FindingTest('test_list_components'))
     suite.addTest(FindingTest('test_edit_finding'))
     suite.addTest(FindingTest('test_add_note_to_finding'))

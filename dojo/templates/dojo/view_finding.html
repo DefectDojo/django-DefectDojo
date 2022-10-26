@@ -54,6 +54,11 @@
                                         <i class="fa fa-pencil-square-o"></i> Edit Finding
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                    <i class="fa fa-copy"></i> Copy Finding
+                                    </a>
+                                </li>
                             {% endif %}
                             {% if finding|has_object_permission:"Finding_Edit" %}
                                 <li role="presentation">
@@ -84,7 +89,7 @@
                                 </li>
                             {% endif %}
                             <li role="separator" class="divider"></li>
-                            {% if "dojo.add_finding_template"|has_configuration_permission:"staff" %}
+                            {% if "dojo.add_finding_template"|has_configuration_permission %}
                                 <li role="presentation">
                                     <a href="{% url 'mktemplate' finding.id %}">
                                         <i class="fa fa-copy"></i> Make Finding a Template
@@ -102,19 +107,27 @@
                                         <input type="hidden" label="apply_template" aria-label="apply_template" name="id" value="{{ finding.id }}"/>
                                     </form>
                             {% endif %}
-                            {% if not cwe_template.cwe and "dojo.add_finding_template"|has_configuration_permission:"staff" %}
+                            {% if not cwe_template.cwe and "dojo.add_finding_template"|has_configuration_permission %}
                                     <li role="presentation">
                                         <a href="{% url 'add_template' %}">
                                             <i class="fa fa-copy"></i> Create a CWE Remediation Template
                                         </a>
                                     </li>
                             {% endif %}
-                            {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission:"staff" %}
+                            {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission %}
                                 <li role="presentation">
                                     <a href="{% url 'find_template_to_apply' finding.id %}">
                                         <i class="fa fa-copy"></i> Apply Template to Finding
                                     </a>
                                 </li>
+                            {% endif %}
+                            {% if finding|has_object_permission:"Finding_Edit" %}
+                                <li role="separator" class="divider"></li>
+                                    <li role="presentation">
+                                        <a href="{% url 'remediation_date' finding.id %}">
+                                            <i class="fa fa-calendar-check-o"></i> Add/Edit Planned Remediation Date
+                                        </a>
+                                    </li>
                             {% endif %}
                             {% if finding|has_object_permission:"Finding_Edit" %}
                                 <li role="separator" class="divider"></li>
@@ -236,13 +249,16 @@
                     {% if finding.publish_date %}
                         <th>Vuln Publish date</th>
                     {% endif %}
+                    {% if finding.planned_remediation_date %}
+                        <th>Planned Remediation</th>
+                    {% endif%}
                     <th>Reporter</th>
                     {% if finding.mitigated %}
                         <th>Date Mitigated</th>
                         <th>Mitigated By</th>
                     {% endif %}
                         <th>CWE</th>
-                        <th>Vulnerability Reference</th>
+                        <th>Vulnerability Id</th>
                     <th>Found by</th>
                 </tr>
                 <tr>
@@ -359,6 +375,9 @@
                     {% if finding.publish_date %}
                         <td>{{ finding.publish_date }}</td>
                     {% endif %}
+                    {% if finding.planned_remediation_date %}
+                        <td>{{ finding.planned_remediation_date }}</td>
+                    {% endif %}
                     <td>{{ finding.reporter }}</td>
                     {% if finding.mitigated %}
                         <td>{{ finding.mitigated }}</td>
@@ -372,14 +391,14 @@
                         {% endif %}
                         </td>
                     <td>
-                    {% with finding|first_vulnerability_reference as first_vulnerability_reference %}
-                    {% if first_vulnerability_reference %}
-                        {% if first_vulnerability_reference|has_vulnerability_url %}
-                            <a target="_blank" href="{{ first_vulnerability_reference|vulnerability_url }}">
-                                <i class="fa fa-external-link"></i> {{ first_vulnerability_reference }}
+                    {% with finding|first_vulnerability_id as first_vulnerability_id %}
+                    {% if first_vulnerability_id %}
+                        {% if first_vulnerability_id|has_vulnerability_url %}
+                            <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                                <i class="fa fa-external-link"></i> {{ first_vulnerability_id }}
                             </a>
                         {% else %}
-                            {{ first_vulnerability_reference }}
+                            {{ first_vulnerability_id }}
                         {% endif %}
                     {% endif %}
                     </td>
@@ -392,21 +411,21 @@
         </div>
     </div>
 
-    {% with finding|additional_vulnerability_references as additional_vulnerability_references %}
-    {% if additional_vulnerability_references %}
+    {% with finding|additional_vulnerability_ids as additional_vulnerability_ids %}
+    {% if additional_vulnerability_ids %}
     <div class="panel panel-default">
         <table id="additional_finding_references" class="table-striped table table-condensed table-hover centered">
             <tr>
-                <th>Additional Vulnerability References</th>
+                <th>Additional Vulnerability Ids</th>
             </tr>
             <tr>
                 <td>
-                    {% for vulnerability_reference in additional_vulnerability_references %}
-                        {% if vulnerability_reference|has_vulnerability_url%}
-                            <a target="_blank" href="{{ vulnerability_reference|vulnerability_url }}">
-                                <i class="fa fa-external-link"></i> {{ vulnerability_reference }}</a>
+                    {% for vulnerability_id in additional_vulnerability_ids %}
+                        {% if vulnerability_id|has_vulnerability_url%}
+                            <a target="_blank" href="{{ vulnerability_id|vulnerability_url }}">
+                                <i class="fa fa-external-link"></i> {{ vulnerability_id }}</a>
                         {% else %}
-                            {{ vulnerability_reference }}
+                            {{ vulnerability_id }}
                         {% endif %}
                         {% if not forloop.last %}, {% endif %}
                     {% endfor %}
@@ -657,7 +676,7 @@
                 <h4 class="has-filters">Similar Findings ({{ similar_findings.paginator.count }})
                     <i class="fa fa-question-circle has-popover" data-trigger="hover"
                        data-content="Opening this panel shows findings that are not exact duplicates,
-                        but have similar values for Vulnerability Reference, CWE, file_path, line number, unique_id_from_tool.
+                        but have similar values for Vulnerability Id, CWE, file_path, line number, unique_id_from_tool.
                         It has a filter panel where filtering can be made less or more strict, and across
                         product boundaries. The resulting findings can be view, marked as duplicate or original.
                         Clear filters will empty all filters. Restart will start over by matching against the fields
@@ -763,9 +782,10 @@
                             {% for file in files %}
                             <div class="col-md-2" style="text-align: center">
                                 <div class="row">
-                                    <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
-                                        {% if file.file.url|get_thumbnail %}
-                                            <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
+                                    {% url 'access_file' fid=file.id oid=finding.id obj_type='Finding' as image_url %}
+                                    <a href="{{ image_url }}" target="_blank">
+                                        {% if file|get_thumbnail %}
+                                            <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
                                         {% else %}
                                             <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
                                         {% endif %}

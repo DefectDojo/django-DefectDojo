@@ -40,7 +40,7 @@ class AnchoreGrypeParser(object):
             rel_urls = None
             rel_description = None
             rel_cvss = None
-            vulnerability_references = None
+            vulnerability_ids = None
             related_vulnerabilities = item.get('relatedVulnerabilities')
             if related_vulnerabilities:
                 related_vulnerability = related_vulnerabilities[0]
@@ -48,7 +48,7 @@ class AnchoreGrypeParser(object):
                 rel_urls = related_vulnerability.get('urls')
                 rel_description = related_vulnerability.get('description')
                 rel_cvss = related_vulnerability.get('cvss')
-            vulnerability_references = self.get_vulnerability_references(vuln_id, related_vulnerabilities)
+            vulnerability_ids = self.get_vulnerability_ids(vuln_id, related_vulnerabilities)
 
             matches = item['matchDetails']
 
@@ -56,6 +56,9 @@ class AnchoreGrypeParser(object):
             artifact_name = artifact.get('name')
             artifact_version = artifact.get('version')
             artifact_purl = artifact.get('purl')
+            artifact_location = artifact.get('locations')
+            if artifact_location and len(artifact_location) > 0 and artifact_location[0].get('path'):
+                file_path = artifact_location[0].get('path')
 
             finding_title = f'{vuln_id} in {artifact_name}:{artifact_version}'
 
@@ -146,8 +149,9 @@ class AnchoreGrypeParser(object):
                             static_finding=True,
                             dynamic_finding=False,
                             nb_occurences=1,
+                            file_path=file_path,
                         )
-                dupes[dupe_key].unsaved_vulnerability_references = vulnerability_references
+                dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
 
         return list(dupes.values())
 
@@ -168,15 +172,15 @@ class AnchoreGrypeParser(object):
                     return vector
         return None
 
-    def get_vulnerability_references(self, vuln_id, related_vulnerabilities):
-        vulnerability_references = list()
+    def get_vulnerability_ids(self, vuln_id, related_vulnerabilities):
+        vulnerability_ids = list()
         if vuln_id:
-            vulnerability_references.append(vuln_id)
+            vulnerability_ids.append(vuln_id)
         if related_vulnerabilities:
             for related_vulnerability in related_vulnerabilities:
                 if related_vulnerability.get('id'):
-                    vulnerability_references.append(related_vulnerability.get('id'))
-        if vulnerability_references:
-            return vulnerability_references
+                    vulnerability_ids.append(related_vulnerability.get('id'))
+        if vulnerability_ids:
+            return vulnerability_ids
         else:
             return None

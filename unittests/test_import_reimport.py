@@ -76,6 +76,7 @@ class ImportReimportMixin(object):
         self.veracode_same_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_same_hash_code_different_unique_id.xml'
         self.veracode_same_unique_id_different_hash_code = self.scans_path + 'veracode/many_findings_same_unique_id_different_hash_code.xml'
         self.veracode_different_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_different_hash_code_different_unique_id.xml'
+        self.veracode_mitigated_findings = self.scans_path + 'veracode/mitigated_finding.xml'
         self.scan_type_veracode = 'Veracode Scan'
 
         self.clair_few_findings = self.scans_path + 'clair/few_vuln.json'
@@ -368,6 +369,44 @@ class ImportReimportMixin(object):
         self.assertEqual(notes_count_before, self.db_notes_count())
 
         return test_id
+
+    # import veracode and then reimport veracode again
+    # - reimport, findings stay the same, stay active
+    # - active = True, verified = True
+    # - existing findings with verified is true should stay verified
+    def test_import_veracode_reimport_veracode_active_verified_mitigated(self):
+        logger.debug('reimporting exact same original veracode mitigated xml report again')
+
+        import_veracode_many_findings = self.import_scan_with_params(self.veracode_mitigated_findings, scan_type=self.scan_type_veracode, verified=True)
+
+        test_id = import_veracode_many_findings['test']
+
+        notes_count_before = self.db_notes_count()
+
+        # reimport exact same report
+        # not specifying the untouched because untouched won't be flagged, even though we will have 0 reactivated...
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0, closed=0, reactivated=0):
+            reimport_veracode_mitigated_findings = self.reimport_scan_with_params(test_id, self.veracode_mitigated_findings, scan_type=self.scan_type_veracode)
+
+        test_id = reimport_veracode_mitigated_findings['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # reimported count must match count in veracode report
+        # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(1, findings)
+
+        # inversely, we should see no findings with verified=False
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
+
+        # reimporting the exact same scan shouldn't create any notes
+        self.assertEqual(notes_count_before, self.db_notes_count())
+        mitigated_findings = self.get_test_findings_api(test_id, is_mitigated=True)
+        self.assert_finding_count_json(1, mitigated_findings)
 
     # import 0 and then reimport 0 again
     # - reimport, findings stay the same, stay active
@@ -1141,27 +1180,27 @@ class ImportReimportMixin(object):
         for finding in active_findings_after['results']:
             if 'v0.0.0-20190219172222-a4c6cb3142f2' == finding['component_version']:
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['vulnerability_references'][0]['vulnerability_reference'])
+                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/crypto", finding['component_name'])
                 count = count + 1
             elif 'v0.0.0-20190308221718-c2843e01d9a2' == finding['component_version']:
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['vulnerability_references'][0]['vulnerability_reference'])
+                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/crypto", finding['component_name'])
                 count = count + 1
             elif 'v0.0.0-20200302210943-78000ba7a073' == finding['component_version']:
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['vulnerability_references'][0]['vulnerability_reference'])
+                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/crypto", finding['component_name'])
                 count = count + 1
             elif 'v0.3.0' == finding['component_version']:
                 self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
-                self.assertEqual("CVE-2020-14040", finding['vulnerability_references'][0]['vulnerability_reference'])
+                self.assertEqual("CVE-2020-14040", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/text", finding['component_name'])
                 count = count + 1
             elif 'v0.3.2' == finding['component_version']:
                 self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
-                self.assertEqual("CVE-2020-14040", finding['vulnerability_references'][0]['vulnerability_reference'])
+                self.assertEqual("CVE-2020-14040", finding['vulnerability_ids'][0]['vulnerability_id'])
                 self.assertEqual("golang.org/x/text", finding['component_name'])
                 count = count + 1
 
@@ -1388,8 +1427,8 @@ class ImportReimportMixin(object):
         self.assertEqual(endpoint_status_count_before_active + 1, self.db_endpoint_status_count(mitigated=False))
         self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
 
-    # test handling of vulnerability references with import
-    def test_import_reimport_vulnerability_references(self):
+    # test handling of vulnerability ids with import
+    def test_import_reimport_vulnerability_ids(self):
 
         import0 = self.import_scan_with_params(self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
 
@@ -1398,9 +1437,9 @@ class ImportReimportMixin(object):
         findings = Finding.objects.filter(test=test)
         self.assertEqual(4, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
-        self.assertEqual(2, len(findings[3].vulnerability_references))
-        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_references[0])
-        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_references[1])
+        self.assertEqual(2, len(findings[3].vulnerability_ids))
+        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
+        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_ids[1])
 
         test_type = Test_Type.objects.get(name=self.anchore_grype_scan_type)
         reimport_test = Test(
@@ -1416,9 +1455,9 @@ class ImportReimportMixin(object):
         findings = Finding.objects.filter(test=reimport_test)
         self.assertEqual(4, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
-        self.assertEqual(2, len(findings[3].vulnerability_references))
-        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_references[0])
-        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_references[1])
+        self.assertEqual(2, len(findings[3].vulnerability_ids))
+        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
+        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_ids[1])
 
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):

@@ -143,7 +143,10 @@ class DojoTestUtilsMixin(object):
             'jira-project-form-jira_instance': 2,
             'jira-project-form-enable_engagement_epic_mapping': 'on',
             'jira-project-form-push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'
+            'jira-project-form-product_jira_sla_notification': 'on',
+            'jira-project-form-custom_fields': 'null',
+            'sla_configuration': 1
+
         }
 
     def get_new_product_without_jira_project_data(self):
@@ -151,6 +154,7 @@ class DojoTestUtilsMixin(object):
             'name': 'new product',
             'description': 'new description',
             'prod_type': 1,
+            'sla_configuration': 1
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
@@ -167,7 +171,10 @@ class DojoTestUtilsMixin(object):
             'jira-project-form-jira_instance': 2,
             'jira-project-form-enable_engagement_epic_mapping': 'on',
             'jira-project-form-push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'
+            'jira-project-form-product_jira_sla_notification': 'on',
+            'jira-project-form-custom_fields': 'null',
+            'sla_configuration': 1
+
         }
 
     def get_product_with_jira_project_data2(self, product):
@@ -179,7 +186,10 @@ class DojoTestUtilsMixin(object):
             'jira-project-form-jira_instance': 2,
             'jira-project-form-enable_engagement_epic_mapping': 'on',
             'jira-project-form-push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'
+            'jira-project-form-product_jira_sla_notification': 'on',
+            'jira-project-form-custom_fields': 'null',
+            'sla_configuration': 1
+
         }
 
     def get_product_with_empty_jira_project_data(self, product):
@@ -187,6 +197,9 @@ class DojoTestUtilsMixin(object):
             'name': product.name,
             'description': product.description,
             'prod_type': product.prod_type.id,
+            'sla_configuration': 1,
+
+            'jira-project-form-custom_fields': 'null',
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
@@ -317,6 +330,11 @@ class DojoTestUtilsMixin(object):
         finding = Finding.objects.get(id=finding_id)
         updated = jira_helper.get_jira_updated(finding)
         return updated
+
+    def get_jira_comments(self, finding_id):
+        finding = Finding.objects.get(id=finding_id)
+        comments = jira_helper.get_jira_comments(finding)
+        return comments
 
     def get_jira_issue_updated_map(self, test_id):
         findings = Test.objects.get(id=test_id).finding_set.all()
