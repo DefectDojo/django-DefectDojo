@@ -205,6 +205,7 @@
                     </div>
                 </div>
             {% endif %}
+
             <div class="row">
                 {% if opened_per_month %}
                     <div class="col-lg-6">
@@ -232,7 +233,6 @@
                         <!-- /.panel -->
                     </div>
                 {% endif %}
-
                 {% if accepted_per_month %}
                     <div class="col-lg-6">
                         <div class="panel panel-default">
@@ -248,7 +248,7 @@
                         <!-- /.panel -->
                     </div>
                 {% endif %}
-                {% if  not critical_prods %}
+                {% if not critical_prods %}
                     <div class="col-lg-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -631,9 +631,10 @@
                         </div>
                     </div>
                 {% endif %}
-    <br/>
-    <br/>
-    <br/>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
