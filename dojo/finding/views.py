@@ -985,7 +985,7 @@ def risk_unaccept(request, fid):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+@user_is_authorized(Finding, Permissions.Finding_View, 'fid')
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
