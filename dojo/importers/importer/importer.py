@@ -223,7 +223,7 @@ class DojoDefaultImporter(object):
             old_finding.notes.create(author=user,
                                         entry="This finding has been automatically closed"
                                         " as it is not present anymore in recent scans.")
-            endpoint_status = old_finding.endpoint_status.all()
+            endpoint_status = old_finding.status_finding.all()
             for status in endpoint_status:
                 status.mitigated_by = user
                 status.mitigated_time = timezone.now()

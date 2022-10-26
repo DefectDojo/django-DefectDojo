@@ -578,8 +578,6 @@ def add_endpoints(new_finding, form):
         eps, created = Endpoint_Status.objects.get_or_create(
             finding=new_finding,
             endpoint=endpoint, defaults={'date': form.cleaned_data['date'] or timezone.now()})
-        endpoint.endpoint_status.add(eps)
-        new_finding.endpoint_status.add(eps)
 
 
 def save_vulnerability_ids(finding, vulnerability_ids):

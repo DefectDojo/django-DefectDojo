@@ -215,10 +215,9 @@ def prefetch_for_findings(findings, prefetch_type='all'):
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
-        prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
-        prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
-        prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
-        prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
+        prefetched_findings = prefetched_findings.prefetch_related('status_finding')
+        prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('status_finding__id', filter=Q(status_finding__mitigated=False)))
+        prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('status_finding__id', filter=Q(status_finding__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__members')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__members')
@@ -439,7 +438,7 @@ def close_finding(request, fid):
                 finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
-                endpoint_status = finding.endpoint_status.all()
+                endpoint_status = finding.status_finding.all()
                 for status in endpoint_status:
                     status.mitigated_by = request.user
                     status.mitigated_time = timezone.now()
@@ -575,7 +574,7 @@ def reopen_finding(request, fid):
     finding.is_mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
-    endpoint_status = finding.endpoint_status.all()
+    endpoint_status = finding.status_finding.all()
     for status in endpoint_status:
         status.mitigated_by = None
         status.mitigated_time = None

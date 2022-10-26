@@ -59,7 +59,7 @@ def update_endpoint_status(existing_finding, new_finding, user):
     # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
     # So we only need to mitigate endpoints that are no longer present
     # using `.all()` will mark as mitigated also `endpoint_status` with flags `false_positive`, `out_of_scope` and `risk_accepted`. This is a known issue. This is not a bug. This is a future.
-    existing_finding_endpoint_status_list = existing_finding.endpoint_status.all()
+    existing_finding_endpoint_status_list = existing_finding.status_finding.all()
     new_finding_endpoints_list = new_finding.unsaved_endpoints
     endpoint_status_to_mitigate = list(
         filter(
