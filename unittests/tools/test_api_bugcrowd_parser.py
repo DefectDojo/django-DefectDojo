@@ -2,7 +2,7 @@ import datetime
 
 from django.test import TestCase
 from dojo.tools.api_bugcrowd.parser import BugcrowdApiParser
-from dojo.models import Test
+from dojo.models import Test, Product_API_Scan_Configuration
 
 
 class TestBugcrowdApiParser(TestCase):
@@ -24,7 +24,10 @@ class TestBugcrowdApiParser(TestCase):
 
             # Bugcrowd link: /submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a"""
             parser = BugcrowdApiParser()
-            findings = parser.get_findings(testfile, Test())
+            test = Test()
+            test.api_scan_configuration = Product_API_Scan_Configuration()
+            test.api_scan_configuration.service_key_1 = "example"
+            findings = parser.get_findings(testfile, test)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual(finding.title, "JWT Alg none")
@@ -39,6 +42,7 @@ class TestBugcrowdApiParser(TestCase):
             self.assertEqual(
                 finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a"
             )
+            self.assertTrue("https://tracker.bugcrowd.com/example/submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a" in finding.references)
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
 
