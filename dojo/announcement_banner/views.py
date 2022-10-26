@@ -13,7 +13,7 @@ from dojo.authorization.authorization_decorators import user_is_configuration_au
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('dojo.change_announcementbanner', 'superuser')
+@user_is_configuration_authorized('dojo.change_announcementbanner')
 def configure_announcement_banner(request):
     try:
         announcement_banner, created = AnnouncementBanner.objects.get_or_create(id=1)
