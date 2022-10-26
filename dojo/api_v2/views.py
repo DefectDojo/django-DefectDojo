@@ -536,6 +536,48 @@ class FindingViewSet(prefetch.PrefetchListMixin,
             return serializers.FindingSerializer
 
     @extend_schema(
+        methods=['POST'],
+        request=serializers.FindingCloseSerializer,
+        responses={status.HTTP_200_OK: serializers.FindingCloseSerializer}
+    )
+    @swagger_auto_schema(
+        method='post',
+        request_body=serializers.FindingCloseSerializer,
+        responses={status.HTTP_200_OK: serializers.FindingCloseSerializer}
+    )
+    @action(detail=True, methods=["post"])
+    def close(self, request, pk=None):
+        finding = self.get_object()
+
+        if request.method == 'POST':
+            finding_close = serializers.FindingCloseSerializer(data=request.data)
+            if finding_close.is_valid():
+                finding.is_mitigated = finding_close.validated_data['is_mitigated']
+                if settings.EDITABLE_MITIGATED_DATA:
+                    finding.mitigated = finding_close.validated_data['mitigated'] or timezone.now()
+                else:
+                    finding.mitigated = timezone.now()
+                finding.mitigated_by = request.user
+                finding.active = False
+
+                endpoints_status = finding.endpoint_status.all()
+                for e_status in endpoints_status:
+                    e_status.mitigated_by = request.user
+                    if settings.EDITABLE_MITIGATED_DATA:
+                        e_status.mitigated_time = finding_close.validated_data["mitigated"] or timezone.now()
+                    else:
+                        e_status.mitigated_time = timezone.now()
+                    e_status.mitigated = True
+                    e_status.last_modified = timezone.now()
+                    e_status.save()
+                finding.save()
+            else:
+                return Response(finding_close.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+        serialized_finding = serializers.FindingCloseSerializer(finding)
+        return Response(serialized_finding.data)
+
+    @extend_schema(
         methods=['GET'],
         responses={status.HTTP_200_OK: serializers.TagSerializer}
     )
