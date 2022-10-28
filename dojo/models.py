@@ -3248,12 +3248,14 @@ class FileAccessToken(models.Model):
             self.token = uuid4()
         return super(FileAccessToken, self).save(*args, **kwargs)
 
+
 ANNOUNCEMENT_STYLE_CHOICES = (
-    ('info','Info'),
-    ('success','Success'),
-    ('warning','Warning'),
-    ('danger','Danger')
+    ('info', 'Info'),
+    ('success', 'Success'),
+    ('warning', 'Warning'),
+    ('danger', 'Danger')
 )
+
 
 class Announcement(models.Model):
     message = models.CharField(max_length=500,
@@ -3263,9 +3265,11 @@ class Announcement(models.Model):
     style = models.CharField(max_length=64, choices=ANNOUNCEMENT_STYLE_CHOICES, default='info',
                             help_text=_("The style of banner to display. (info, success, warning, danger)"))
 
+
 class UserAnnouncement(models.Model):
     announcement = models.ForeignKey(Announcement, null=True, editable=False, on_delete=models.CASCADE, related_name='user_announcement')
     user = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
+
 
 class BannerConf(models.Model):
     banner_enable = models.BooleanField(default=False, null=True, blank=True)

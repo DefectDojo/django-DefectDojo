@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from dojo.utils import add_breadcrumb
 
 from dojo.forms import AnnouncementCreateForm, AnnouncementRemoveForm
-from dojo.models import Announcement, UserAnnouncement, Dojo_User, get_current_datetime
+from dojo.models import Announcement, UserAnnouncement, Dojo_User
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
 logger = logging.getLogger(__name__)
@@ -15,9 +15,6 @@ logger = logging.getLogger(__name__)
 
 @user_is_configuration_authorized('dojo.change_announcement')
 def configure_announcement(request):
-    # Modify this, get, if none exists, post to create
-    # If one exists, allow update/remove
-    # Also remove "Enable" field, if an announcement exists, it is enabled, otherwise it is gone completely
     remove = False
     if request.method == 'GET':
         try:
@@ -58,8 +55,7 @@ def configure_announcement(request):
             return HttpResponseRedirect(reverse("configure_announcement"))
 
     add_breadcrumb(title="Announcement Configuration", top_level=True, request=request)
-    return render(request, 
-        'dojo/announcement.html', {
+    return render(request, 'dojo/announcement.html', {
         'form': form,
         'remove': remove
     })

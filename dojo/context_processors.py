@@ -39,6 +39,7 @@ def bind_alert_count(request):
             return {'alert_count': Alerts.objects.filter(user_id=request.user).count()}
     return {}
 
+
 def bind_announcement(request):
     from dojo.models import UserAnnouncement
     try:
