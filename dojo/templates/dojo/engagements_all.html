@@ -50,9 +50,9 @@
                                 <tr>
                                     <td class="nowrap">
                                         <div class="align-top">
-                                            <div class="dropdown" style="position: fixed!important;">
+                                            <div class="dropdown">
                                                 <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
-                                                <ul class="dropdown-menu" style="position: unset!important;">
+                                                <ul class="dropdown-menu">
                                                     <li>
                                                         <a class="" href="{% url 'view_engagement' e.id %}">
                                                             <i class="fa fa-list-alt"></i> View
@@ -177,7 +177,29 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-
+    <script>
+        $(function() {
+            $('.table-responsive').on('shown.bs.dropdown', function(e) {
+                var t = $(this),
+                m = $(e.target).find('.dropdown-menu'),
+                tb = t.offset().top + t.height(),
+                mb = m.offset().top + m.outerHeight(true),
+                d = 20; // Space for shadow + scrollbar.   
+            if (t[0].scrollWidth > t.innerWidth()) {
+                if (mb + d > tb) {
+                    t.css('padding-bottom', ((mb + d) - tb));
+                }
+            } else {
+                t.css('overflow', 'visible');
+            }
+            }).on('hidden.bs.dropdown', function() {
+                $(this).css({
+                    'padding-bottom': '',
+                    'overflow': ''
+                });
+            });
+        });
+    </script>
     <script>
         $(function () {
             var availableTags = [
