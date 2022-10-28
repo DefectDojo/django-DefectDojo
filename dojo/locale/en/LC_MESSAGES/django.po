@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-26 20:15-0400\n"
+"POT-Creation-Date: 2022-02-12 15:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,269 +12,197 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: api_v2/serializers.py:128 api_v2/serializers.py:257
+#: dojo/api_v2/serializers.py:120 dojo/api_v2/serializers.py:249
 #, python-brace-format
 msgid "Expected a list of items but got type \"{input_type}\"."
 msgstr ""
 
-#: api_v2/serializers.py:129 api_v2/serializers.py:258
+#: dojo/api_v2/serializers.py:121 dojo/api_v2/serializers.py:250
 msgid ""
 "Invalid json list. A tag list submitted in string form must be valid json."
 msgstr ""
 
-#: api_v2/serializers.py:131
+#: dojo/api_v2/serializers.py:123
 msgid "All list items must be of string type."
 msgstr ""
 
-#: api_v2/serializers.py:260
+#: dojo/api_v2/serializers.py:252
 msgid "All list items must be of dict type with keys 'request' and 'response'"
 msgstr ""
 
-#: api_v2/serializers.py:261
+#: dojo/api_v2/serializers.py:253
 msgid "All values in the dict must be of string type."
 msgstr ""
 
-#: filters.py:113 filters.py:2231
+#: dojo/filters.py:93 dojo/filters.py:2161
 msgid "Any"
 msgstr ""
 
-#: filters.py:114
+#: dojo/filters.py:94
 msgid "Open"
 msgstr ""
 
-#: filters.py:115 models.py:2008
+#: dojo/filters.py:95 dojo/models.py:1766
 msgid "Verified"
 msgstr ""
 
-#: filters.py:116 models.py:2024
+#: dojo/filters.py:96 dojo/models.py:1782
 msgid "Out Of Scope"
 msgstr ""
 
-#: filters.py:117 models.py:2011
+#: dojo/filters.py:97 dojo/models.py:1769
 msgid "False Positive"
 msgstr ""
 
-#: filters.py:118
+#: dojo/filters.py:98
 msgid "Inactive"
 msgstr ""
 
-#: filters.py:119 models.py:2027
+#: dojo/filters.py:99 dojo/models.py:1785
 msgid "Risk Accepted"
 msgstr ""
 
-#: filters.py:120
+#: dojo/filters.py:100
 msgid "Closed"
 msgstr ""
 
-#: filters.py:121 models.py:2030
-msgid "Under Review"
-msgstr ""
-
-#: filters.py:366 filters.py:412 filters.py:590
+#: dojo/filters.py:345 dojo/filters.py:510
 msgid "Any date"
 msgstr ""
 
-#: filters.py:367 filters.py:413
+#: dojo/filters.py:346
 msgid "Today"
 msgstr ""
 
-#: filters.py:372 filters.py:430 filters.py:584
+#: dojo/filters.py:351 dojo/filters.py:504
 msgid "Past 7 days"
 msgstr ""
 
-#: filters.py:376 filters.py:434 filters.py:583
+#: dojo/filters.py:355 dojo/filters.py:503
 msgid "Past 30 days"
 msgstr ""
 
-#: filters.py:380 filters.py:438 filters.py:585
+#: dojo/filters.py:359 dojo/filters.py:505
 msgid "Past 90 days"
 msgstr ""
 
-#: filters.py:384 filters.py:442 filters.py:586
+#: dojo/filters.py:363 dojo/filters.py:506
 msgid "Current month"
 msgstr ""
 
-#: filters.py:388 filters.py:450 filters.py:587
+#: dojo/filters.py:367 dojo/filters.py:507
 msgid "Current year"
 msgstr ""
 
-#: filters.py:391 filters.py:446 filters.py:589
+#: dojo/filters.py:370 dojo/filters.py:509
 msgid "Past year"
 msgstr ""
 
-#: filters.py:418
-msgid "Next 7 days"
-msgstr ""
-
-#: filters.py:422
-msgid "Next 30 days"
-msgstr ""
-
-#: filters.py:426
-msgid "Next 90 days"
-msgstr ""
-
-#: filters.py:453
-msgid "Next year"
-msgstr ""
-
-#: filters.py:474 filters.py:512
+#: dojo/filters.py:391 dojo/filters.py:432
 msgid "Either"
 msgstr ""
 
-#: filters.py:475 filters.py:513
+#: dojo/filters.py:392 dojo/filters.py:433
 msgid "Yes"
 msgstr ""
 
-#: filters.py:478 filters.py:514
+#: dojo/filters.py:395 dojo/filters.py:434
 msgid "No"
 msgstr ""
 
-#: filters.py:515
+#: dojo/filters.py:435
 msgid "Was"
 msgstr ""
 
-#: filters.py:588
+#: dojo/filters.py:508
 msgid "Past 6 Months"
 msgstr ""
 
-#: filters.py:2232
+#: dojo/filters.py:2162
 msgid "Text Question"
 msgstr ""
 
-#: filters.py:2233
+#: dojo/filters.py:2163
 msgid "Choice Question"
 msgstr ""
 
-#: metrics/views.py:50 templates/base.html:402
-msgid "Critical Product Metrics"
-msgstr ""
-
-#: metrics/views.py:153 metrics/views.py:243 product/views.py:419
-msgid "All objects have been filtered away. Displaying all objects"
-msgstr ""
-
-#: metrics/views.py:385 templates/base.html:391 templates/base.html:657
-#: templates/dojo/view_product_details.html:123
-msgid "Metrics"
-msgstr ""
-
-#: metrics/views.py:394
-#, python-format
-msgid "%(product_type)s Metrics"
-msgstr ""
-
-#: metrics/views.py:405
-msgid "Product Type Metrics by Findings"
-msgstr ""
-
-#: metrics/views.py:408
-msgid "Product Type Metrics by Affected Endpoints"
-msgstr ""
-
-#: metrics/views.py:431
-#, python-format
-msgid "%(team_name)s Metrics"
-msgstr ""
-
-#: metrics/views.py:470 templates/base.html:417
-msgid "Simple Metrics"
-msgstr ""
-
-#: metrics/views.py:680
-msgid "Please choose month and year and the Product Type."
-msgstr ""
-
-#: metrics/views.py:683
-msgid "Bi-Weekly Metrics"
-msgstr ""
-
-#: metrics/views.py:710 templates/base.html:422
-msgid "Engineer Metrics"
-msgstr ""
-
-#: models.py:134
+#: dojo/models.py:133
 msgid "Privacy"
 msgstr ""
 
-#: models.py:135
+#: dojo/models.py:134
 msgid "Finance"
 msgstr ""
 
-#: models.py:136
+#: dojo/models.py:135
 msgid "Education"
 msgstr ""
 
-#: models.py:137
+#: dojo/models.py:136
 msgid "Medical"
 msgstr ""
 
-#: models.py:138
+#: dojo/models.py:137
 msgid "Corporate"
 msgstr ""
 
-#: models.py:139
+#: dojo/models.py:138
 msgid "Other"
 msgstr ""
 
-#: models.py:142
+#: dojo/models.py:141
 msgid "The name of the regulation."
 msgstr ""
 
-#: models.py:143
+#: dojo/models.py:142
 msgid "A shortened representation of the name."
 msgstr ""
 
-#: models.py:144
+#: dojo/models.py:143
 msgid "The subject of the regulation."
 msgstr ""
 
-#: models.py:145
+#: dojo/models.py:144
 msgid "The territory over which the regulation applies."
 msgstr ""
 
-#: models.py:146
+#: dojo/models.py:145
 msgid "Information about the regulation's purpose."
 msgstr ""
 
-#: models.py:147
+#: dojo/models.py:146
 msgid "An external URL for more information."
 msgstr ""
 
-#: models.py:205 models.py:209 models.py:213
+#: dojo/models.py:204 dojo/models.py:208 dojo/models.py:212
 msgid ""
 "Phone number must be entered in the format: '+999999999'. Up to 15 digits "
 "allowed."
 msgstr ""
 
-#: models.py:217
+#: dojo/models.py:216
 msgid "Email address associated with your slack account"
 msgstr ""
 
-#: models.py:217
+#: dojo/models.py:216
 msgid "Slack Email Address"
 msgstr ""
 
-#: models.py:219
+#: dojo/models.py:218
 msgid ""
 "Instead of async deduping a finding the findings will be deduped "
 "synchronously and will 'block' the user until completion."
 msgstr ""
 
-#: models.py:220
+#: dojo/models.py:219
 msgid "Forces this user to reset their password on next login."
 msgstr ""
 
-#: models.py:226
-msgid "AzureAD"
-msgstr ""
-
-#: models.py:253
+#: dojo/models.py:247
 msgid "Enable audit logging"
 msgstr ""
 
-#: models.py:254
+#: dojo/models.py:248
 msgid ""
 "With this setting turned on, Dojo maintains an audit log of changes made to "
 "entities (Findings, Tests, Engagements, Procuts, ...)If you run big import "
@@ -282,11 +210,11 @@ msgid ""
 "works, there's a big performance hit. Especially during (re-)imports."
 msgstr ""
 
-#: models.py:262
+#: dojo/models.py:256
 msgid "Deduplicate findings"
 msgstr ""
 
-#: models.py:263
+#: dojo/models.py:257
 msgid ""
 "With this setting turned on, Dojo deduplicates findings by comparing "
 "endpoints, cwe fields, and titles. If two findings share a URL and have the "
@@ -295,164 +223,160 @@ msgid ""
 "engagement view."
 msgstr ""
 
-#: models.py:269
+#: dojo/models.py:263
 msgid "Requires next setting: maximum number of duplicates to retain."
 msgstr ""
 
-#: models.py:271
+#: dojo/models.py:265
 msgid "Max Duplicates"
 msgstr ""
 
-#: models.py:272
+#: dojo/models.py:266
 msgid ""
 "When enabled, if a single issue reaches the maximum number of duplicates, "
 "the oldest will be deleted. Duplicate will not be deleted when left empty. A "
 "value of 0 will remove all duplicates."
 msgstr ""
 
-#: models.py:280
+#: dojo/models.py:274
 msgid "Enable JIRA integration"
 msgstr ""
 
-#: models.py:284
+#: dojo/models.py:278
 msgid "Enable JIRA web hook"
 msgstr ""
 
-#: models.py:285
+#: dojo/models.py:279
 msgid ""
 "Please note: It is strongly recommended to use a secret below and / or IP "
 "whitelist the JIRA server using a proxy such as Nginx."
 msgstr ""
 
-#: models.py:289
+#: dojo/models.py:283
 msgid "Disable web hook secret"
 msgstr ""
 
-#: models.py:290
+#: dojo/models.py:284
 msgid ""
 "Allows incoming requests without a secret (discouraged legacy behaviour)"
 msgstr ""
 
-#: models.py:294
+#: dojo/models.py:288
 msgid "JIRA Webhook URL"
 msgstr ""
 
-#: models.py:295
+#: dojo/models.py:289
 msgid "Secret needed in URL for incoming JIRA Webhook"
 msgstr ""
 
-#: models.py:306 models.py:3416
+#: dojo/models.py:300
 msgid "JIRA issue labels space seperated"
 msgstr ""
 
-#: models.py:309 models.py:3418
-msgid "Add vulnerability Id as a JIRA label"
-msgstr ""
-
-#: models.py:313
+#: dojo/models.py:303
 msgid "Enable GITHUB integration"
 msgstr ""
 
-#: models.py:318
+#: dojo/models.py:308
 msgid "Enable Slack notifications"
 msgstr ""
 
-#: models.py:321
+#: dojo/models.py:311
 msgid "Optional. Needed if you want to send global notifications."
 msgstr ""
 
-#: models.py:323
+#: dojo/models.py:313
 msgid ""
 "Token required for interacting with Slack. Get one at https://api.slack.com/"
 "tokens"
 msgstr ""
 
-#: models.py:327
+#: dojo/models.py:317
 msgid "Optional. Will take your bot name otherwise."
 msgstr ""
 
-#: models.py:330
+#: dojo/models.py:320
 msgid "Enable Microsoft Teams notifications"
 msgstr ""
 
-#: models.py:333
+#: dojo/models.py:323
 msgid "The full URL of the incoming webhook"
 msgstr ""
 
-#: models.py:338
+#: dojo/models.py:328
 msgid ""
 "DefectDojo will automatically mark the finding as a false positive if the "
 "finding has been previously marked as a false positive. Not needed when "
 "using deduplication, advised to not combine these two."
 msgstr ""
 
-#: models.py:340
+#: dojo/models.py:330
 msgid "URL prefix if DefectDojo is installed in it's own virtual subdirectory."
 msgstr ""
 
-#: models.py:345
+#: dojo/models.py:335
 msgid "Enable Product Grading"
 msgstr ""
 
-#: models.py:345
+#: dojo/models.py:335
 msgid "Displays a grade letter next to a product to show the overall health."
 msgstr ""
 
-#: models.py:348
+#: dojo/models.py:338
 msgid "Grade A"
 msgstr ""
 
-#: models.py:349
+#: dojo/models.py:339
 msgid "Percentage score for an 'A' >="
 msgstr ""
 
-#: models.py:352
+#: dojo/models.py:342
 msgid "Grade B"
 msgstr ""
 
-#: models.py:353
+#: dojo/models.py:343
 msgid "Percentage score for a 'B' >="
 msgstr ""
 
-#: models.py:356
+#: dojo/models.py:346
 msgid "Grade C"
 msgstr ""
 
-#: models.py:357
+#: dojo/models.py:347
 msgid "Percentage score for a 'C' >="
 msgstr ""
 
-#: models.py:360
+#: dojo/models.py:350
 msgid "Grade D"
 msgstr ""
 
-#: models.py:361
+#: dojo/models.py:351
 msgid "Percentage score for a 'D' >="
 msgstr ""
 
-#: models.py:364
+#: dojo/models.py:354
 msgid "Grade F"
 msgstr ""
 
-#: models.py:365
+#: dojo/models.py:355
 msgid "Percentage score for an 'F' <="
 msgstr ""
 
-#: models.py:370
+#: dojo/models.py:360
 msgid "Enable Benchmarks"
 msgstr ""
 
-#: models.py:371
+#: dojo/models.py:361
 msgid ""
 "Enables Benchmarks such as the OWASP ASVS (Application Security Verification "
 "Standard)"
 msgstr ""
 
-#: models.py:377
+#: dojo/models.py:367
 msgid "Enable Remediation Advice"
 msgstr ""
 
-#: models.py:378
+#: dojo/models.py:368
 msgid ""
 "Enables global remediation advice and matching on CWE and Title. The text "
 "will be replaced for mitigation, impact and references on a finding. Useful "
@@ -460,689 +384,641 @@ msgid ""
 "scanner."
 msgstr ""
 
-#: models.py:383
+#: dojo/models.py:373
 msgid "Enable Engagement Auto-Close"
 msgstr ""
 
-#: models.py:384
+#: dojo/models.py:374
 msgid ""
 "Closes an engagement after 3 days (default) past due date including last "
 "update."
 msgstr ""
 
-#: models.py:389
+#: dojo/models.py:379
 msgid "Engagement Auto-Close Days"
 msgstr ""
 
-#: models.py:390
+#: dojo/models.py:380
 msgid ""
 "Closes an engagement after the specified number of days past due date "
 "including last update."
 msgstr ""
 
-#: models.py:395
+#: dojo/models.py:385
 msgid "Enable Finding SLA's"
 msgstr ""
 
-#: models.py:396
+#: dojo/models.py:386
 msgid "Enables Finding SLA's for time to remediate."
 msgstr ""
 
-#: models.py:401
+#: dojo/models.py:389
+msgid "Critical Finding SLA Days"
+msgstr ""
+
+#: dojo/models.py:390
+msgid "# of days to remediate a critical finding."
+msgstr ""
+
+#: dojo/models.py:393
+msgid "High Finding SLA Days"
+msgstr ""
+
+#: dojo/models.py:394
+msgid "# of days to remediate a high finding."
+msgstr ""
+
+#: dojo/models.py:396
+msgid "Medium Finding SLA Days"
+msgstr ""
+
+#: dojo/models.py:397
+msgid "# of days to remediate a medium finding."
+msgstr ""
+
+#: dojo/models.py:400
+msgid "Low Finding SLA Days"
+msgstr ""
+
+#: dojo/models.py:401
+msgid "# of days to remediate a low finding."
+msgstr ""
+
+#: dojo/models.py:405
 msgid "Allow Anonymous Survey Responses"
 msgstr ""
 
-#: models.py:402
+#: dojo/models.py:406
 msgid "Enable anyone with a link to the survey to answer a survey"
 msgstr ""
 
-#: models.py:406
+#: dojo/models.py:410
 msgid "Custom Disclaimer"
 msgstr ""
 
-#: models.py:407
+#: dojo/models.py:411
 msgid ""
 "Include this custom disclaimer on all notifications and generated reports"
 msgstr ""
 
-#: models.py:411
+#: dojo/models.py:415
 msgid "Default expiry period for risk acceptance form."
 msgstr ""
 
-#: models.py:413
+#: dojo/models.py:417
 msgid "Risk acceptance expiration heads up days"
 msgstr ""
 
-#: models.py:413
+#: dojo/models.py:417
 msgid "Notify X days before risk acceptance expires. Leave empty to disable."
 msgstr ""
 
-#: models.py:417
+#: dojo/models.py:421
 msgid "Enable credentials"
 msgstr ""
 
-#: models.py:418
+#: dojo/models.py:422
 msgid ""
 "With this setting turned off, credentials will be disabled in the user "
 "interface."
 msgstr ""
 
-#: models.py:422
+#: dojo/models.py:426
 msgid "Enable questionnaires"
 msgstr ""
 
-#: models.py:423
+#: dojo/models.py:427
 msgid ""
 "With this setting turned off, questionnaires will be disabled in the user "
 "interface."
 msgstr ""
 
-#: models.py:427
+#: dojo/models.py:431
 msgid "Enable checklists"
 msgstr ""
 
-#: models.py:428
+#: dojo/models.py:432
 msgid ""
 "With this setting turned off, checklists will be disabled in the user "
 "interface."
 msgstr ""
 
-#: models.py:432
+#: dojo/models.py:436
 msgid "Enable Endpoint Metadata Import"
 msgstr ""
 
-#: models.py:433
+#: dojo/models.py:437
 msgid ""
 "With this setting turned off, endpoint metadata import will be disabled in "
 "the user interface."
 msgstr ""
 
-#: models.py:437
+#: dojo/models.py:441
 msgid "Enable Google Sheets Integration"
 msgstr ""
 
-#: models.py:438
+#: dojo/models.py:442
 msgid ""
 "With this setting turned off, the Google sheets integration will be disabled "
 "in the user interface."
 msgstr ""
 
-#: models.py:442
+#: dojo/models.py:446
 msgid "Enable Rules Framework"
 msgstr ""
 
-#: models.py:443
+#: dojo/models.py:447
 msgid ""
 "With this setting turned off, the rules framwork will be disabled in the "
 "user interface."
 msgstr ""
 
-#: models.py:447
+#: dojo/models.py:451
 msgid "Enable user profile for writing"
 msgstr ""
 
-#: models.py:448
+#: dojo/models.py:452
 msgid "When turned on users can edit their profiles"
 msgstr ""
 
-#: models.py:452
+#: dojo/models.py:456
 msgid "Enable Product Tracking Files"
 msgstr ""
 
-#: models.py:453
+#: dojo/models.py:457
 msgid ""
 "With this setting turned off, the product tracking files will be disabled in "
 "the user interface."
 msgstr ""
 
-#: models.py:457
-msgid "Enable Finding Groups"
-msgstr ""
-
-#: models.py:458
-msgid "With this setting turned off, the Finding Groups will be disabled."
-msgstr ""
-
-#: models.py:462
-msgid "Enable Calendar"
-msgstr ""
-
-#: models.py:463
-msgid ""
-"With this setting turned off, the Calendar will be disabled in the user "
-"interface."
-msgstr ""
-
-#: models.py:468
+#: dojo/models.py:462
 msgid "New users will be assigned to this group."
 msgstr ""
 
-#: models.py:474
+#: dojo/models.py:468
 msgid "New users will be assigned to their default group with this role."
 msgstr ""
 
-#: models.py:480
+#: dojo/models.py:474
 msgid ""
 "New users will only be assigned to the default group, when their email "
 "address matches this regex pattern. This is optional condition."
 msgstr ""
 
-#: models.py:510
+#: dojo/models.py:479
+msgid "Email pattern for staff users"
+msgstr ""
+
+#: dojo/models.py:480
+msgid ""
+"When the email address of a new user created by OAuth2 matches this regex "
+"pattern, their is_staff flag will be set to True."
+msgstr ""
+
+#: dojo/models.py:510
 msgid "This role determines the permissions of the user to manage the group."
 msgstr ""
 
-#: models.py:510
+#: dojo/models.py:510
 msgid "Group role"
 msgstr ""
 
-#: models.py:516
+#: dojo/models.py:516
 msgid "The global role will be applied to all product types and products."
 msgstr ""
 
-#: models.py:516
+#: dojo/models.py:516
 msgid "Global role"
 msgstr ""
 
-#: models.py:776
-msgid "Custom SLA Name"
-msgstr ""
-
-#: models.py:777
-msgid "A unique name for the set of SLAs."
-msgstr ""
-
-#: models.py:781
-msgid "Critical Finding SLA Days"
-msgstr ""
-
-#: models.py:782
-msgid "number of days to remediate a critical finding."
-msgstr ""
-
-#: models.py:783
-msgid "High Finding SLA Days"
-msgstr ""
-
-#: models.py:784
-msgid "number of days to remediate a high finding."
-msgstr ""
-
-#: models.py:785
-msgid "Medium Finding SLA Days"
-msgstr ""
-
-#: models.py:786
-msgid "number of days to remediate a medium finding."
-msgstr ""
-
-#: models.py:787
-msgid "Low Finding SLA Days"
-msgstr ""
-
-#: models.py:788
-msgid "number of days to remediate a low finding."
-msgstr ""
-
-#: models.py:823
+#: dojo/models.py:729
 msgid "API"
 msgstr ""
 
-#: models.py:824
+#: dojo/models.py:730
 msgid "Desktop"
 msgstr ""
 
-#: models.py:825
+#: dojo/models.py:731
 msgid "Internet of Things"
 msgstr ""
 
-#: models.py:826
+#: dojo/models.py:732
 msgid "Mobile"
 msgstr ""
 
-#: models.py:827
+#: dojo/models.py:733
 msgid "Web"
 msgstr ""
 
-#: models.py:834
+#: dojo/models.py:740
 msgid "Construction"
 msgstr ""
 
-#: models.py:835
+#: dojo/models.py:741
 msgid "Production"
 msgstr ""
 
-#: models.py:836
+#: dojo/models.py:742
 msgid "Retirement"
 msgstr ""
 
-#: models.py:846
+#: dojo/models.py:752
 msgid "Third Party Library"
 msgstr ""
 
-#: models.py:847
+#: dojo/models.py:753
 msgid "Purchased"
 msgstr ""
 
-#: models.py:848
+#: dojo/models.py:754
 msgid "Contractor Developed"
 msgstr ""
 
-#: models.py:849
+#: dojo/models.py:755
 msgid "Internally Developed"
 msgstr ""
 
-#: models.py:850
+#: dojo/models.py:756
 msgid "Open Source"
 msgstr ""
 
-#: models.py:851
+#: dojo/models.py:757
 msgid "Outsourced"
 msgstr ""
 
-#: models.py:861
+#: dojo/models.py:767
 msgid "Very High"
 msgstr ""
 
-#: models.py:862 templates/dojo/metrics.html:314
-#: templates/dojo/metrics.html:371 templates/dojo/metrics.html:391
-#: templates/dojo/metrics.html:418 templates/dojo/metrics.html:438
-#: templates/dojo/metrics.html:467 templates/dojo/metrics.html:487
-#: templates/dojo/metrics.html:514 templates/dojo/metrics.html:538
-#: templates/dojo/metrics.html:565 templates/dojo/metrics.html:587
-#: templates/dojo/pt_counts.html:32 templates/dojo/pt_counts.html:69
-#: templates/dojo/pt_counts.html:105 templates/dojo/pt_counts.html:143
-#: templates/dojo/pt_counts.html:197 templates/dojo/simple_metrics.html:25
+#: dojo/models.py:768
 msgid "High"
 msgstr ""
 
-#: models.py:863 templates/dojo/metrics.html:315
-#: templates/dojo/metrics.html:372 templates/dojo/metrics.html:392
-#: templates/dojo/metrics.html:419 templates/dojo/metrics.html:439
-#: templates/dojo/metrics.html:468 templates/dojo/metrics.html:488
-#: templates/dojo/metrics.html:515 templates/dojo/metrics.html:539
-#: templates/dojo/metrics.html:566 templates/dojo/metrics.html:588
-#: templates/dojo/pt_counts.html:33 templates/dojo/pt_counts.html:70
-#: templates/dojo/pt_counts.html:106 templates/dojo/pt_counts.html:144
-#: templates/dojo/pt_counts.html:198 templates/dojo/simple_metrics.html:26
+#: dojo/models.py:769
 msgid "Medium"
 msgstr ""
 
-#: models.py:864 templates/dojo/metrics.html:316
-#: templates/dojo/metrics.html:373 templates/dojo/metrics.html:393
-#: templates/dojo/metrics.html:420 templates/dojo/metrics.html:440
-#: templates/dojo/metrics.html:469 templates/dojo/metrics.html:489
-#: templates/dojo/metrics.html:516 templates/dojo/metrics.html:540
-#: templates/dojo/metrics.html:567 templates/dojo/metrics.html:589
-#: templates/dojo/pt_counts.html:34 templates/dojo/pt_counts.html:71
-#: templates/dojo/pt_counts.html:107 templates/dojo/pt_counts.html:145
-#: templates/dojo/pt_counts.html:199 templates/dojo/simple_metrics.html:27
+#: dojo/models.py:770
 msgid "Low"
 msgstr ""
 
-#: models.py:865
+#: dojo/models.py:771
 msgid "Very Low"
 msgstr ""
 
-#: models.py:866 templates/dojo/simple_search.html:280
+#: dojo/models.py:772
 msgid "None"
 msgstr ""
 
-#: models.py:899
+#: dojo/models.py:799
 msgid "Estimate the number of user records within the application."
 msgstr ""
 
-#: models.py:900
+#: dojo/models.py:800
 msgid "Estimate the application's revenue."
 msgstr ""
 
-#: models.py:901
+#: dojo/models.py:801
 msgid "Specify if the application is used by people outside the organization."
 msgstr ""
 
-#: models.py:902
+#: dojo/models.py:802
 msgid "Specify if the application is accessible from the public internet."
 msgstr ""
 
-#: models.py:905
+#: dojo/models.py:805
 msgid ""
 "Add tags that help describe this product. Choose from the list or add new "
 "tags. Press Enter key to add."
 msgstr ""
 
-#: models.py:907
+#: dojo/models.py:807
 msgid "Allows simple risk acceptance by checking/unchecking a checkbox."
 msgstr ""
 
-#: models.py:908
+#: dojo/models.py:808
 msgid ""
 "Allows full risk acceptance using a risk acceptance form, expiration date, "
 "uploaded proof, etc."
 msgstr ""
 
-#: models.py:1081
+#: dojo/models.py:981
 msgid "Additional definitions that will be consumed by scanner"
 msgstr ""
 
-#: models.py:1086
+#: dojo/models.py:986
 msgid "Title for SSH/API Key"
 msgstr ""
 
-#: models.py:1089 user/views.py:71
+#: dojo/models.py:989
 msgid "API Key"
 msgstr ""
 
-#: models.py:1157
+#: dojo/models.py:1057
 msgid "Location of network testing: Examples: VPN, Internet or Internal."
 msgstr ""
 
-#: models.py:1164
+#: dojo/models.py:1064
 msgid "Brief description of preset."
 msgstr ""
 
-#: models.py:1167
+#: dojo/models.py:1067
 msgid ""
 "Description of what needs to be tested or setting up environment for testing"
 msgstr ""
 
-#: models.py:1168
+#: dojo/models.py:1068
 msgid "Scope of Engagement testing, IP's/Resources/URL's)"
 msgstr ""
 
-#: models.py:1191
+#: dojo/models.py:1091
 msgid "Version of the product the engagement tested."
 msgstr ""
 
-#: models.py:1197
+#: dojo/models.py:1097
 msgid "Settings and notes for performing this engagement."
 msgstr ""
 
-#: models.py:1204
+#: dojo/models.py:1104
 msgid "Link to epic or ticket system with changes to version."
 msgstr ""
 
-#: models.py:1229
+#: dojo/models.py:1129
 msgid "Build ID of the product the engagement tested."
 msgstr ""
 
-#: models.py:1229 models.py:1734 models.py:1874
+#: dojo/models.py:1129 dojo/models.py:1556 dojo/models.py:1629
 msgid "Build ID"
 msgstr ""
 
-#: models.py:1231
+#: dojo/models.py:1131
 msgid "Commit hash from repo"
 msgstr ""
 
-#: models.py:1231 models.py:1736 models.py:1876
+#: dojo/models.py:1131 dojo/models.py:1558 dojo/models.py:1631
 msgid "Commit Hash"
 msgstr ""
 
-#: models.py:1233
+#: dojo/models.py:1133
 msgid "Tag or branch of the product the engagement tested."
 msgstr ""
 
-#: models.py:1233 models.py:1738 models.py:1878
+#: dojo/models.py:1133 dojo/models.py:1560 dojo/models.py:1633
 msgid "Branch/Tag"
 msgstr ""
 
-#: models.py:1234
+#: dojo/models.py:1134
 msgid "Build Server"
 msgstr ""
 
-#: models.py:1234
+#: dojo/models.py:1134
 msgid "Build server responsible for CI/CD test"
 msgstr ""
 
-#: models.py:1235
+#: dojo/models.py:1135
 msgid "SCM Server"
 msgstr ""
 
-#: models.py:1235
+#: dojo/models.py:1135
 msgid "Source code server for CI/CD test"
 msgstr ""
 
-#: models.py:1236
+#: dojo/models.py:1136
 msgid "Repo"
 msgstr ""
 
-#: models.py:1236
+#: dojo/models.py:1136
 msgid "Resource link to source code"
 msgstr ""
 
-#: models.py:1237
+#: dojo/models.py:1137
 msgid "Orchestration Engine"
 msgstr ""
 
-#: models.py:1237
+#: dojo/models.py:1137
 msgid "Orchestration service responsible for CI/CD test"
 msgstr ""
 
-#: models.py:1238
+#: dojo/models.py:1138
 msgid "Deduplication within this engagement only"
 msgstr ""
 
-#: models.py:1238
+#: dojo/models.py:1138
 msgid ""
 "If enabled deduplication will only mark a finding in this engagement as "
 "duplicate of another finding if both findings are in this engagement. If "
 "disabled, deduplication is on the product level."
 msgstr ""
 
-#: models.py:1240
+#: dojo/models.py:1140
 msgid ""
 "Add tags that help describe this engagement. Choose from the list or add new "
 "tags. Press Enter key to add."
 msgstr ""
 
-#: models.py:1397
+#: dojo/models.py:1252
 msgid "The communication protocol/scheme such as 'http', 'ftp', 'dns', etc."
 msgstr ""
 
-#: models.py:1399
+#: dojo/models.py:1254
 msgid "User info as 'alice', 'bob', etc."
 msgstr ""
 
-#: models.py:1401
+#: dojo/models.py:1256
 msgid ""
 "The host name or IP address. It must not include the port number. For "
 "example '127.0.0.1', 'localhost', 'yourdomain.com'."
 msgstr ""
 
-#: models.py:1404
+#: dojo/models.py:1259
 msgid "The network port associated with the endpoint."
 msgstr ""
 
-#: models.py:1406
+#: dojo/models.py:1261
 msgid ""
 "The location of the resource, it must not start with a '/'. For example "
 "endpoint/420/edit"
 msgstr ""
 
-#: models.py:1409
+#: dojo/models.py:1264
 msgid ""
 "The query string, the question mark should be omitted.For example "
 "'group=4&team=8'"
 msgstr ""
 
-#: models.py:1412
+#: dojo/models.py:1267
 msgid ""
 "The fragment identifier which follows the hash mark. The hash mark should be "
 "omitted. For example 'section-13', 'paragraph-2'."
 msgstr ""
 
-#: models.py:1418
+#: dojo/models.py:1274
 msgid ""
 "Add tags that help describe this endpoint. Choose from the list or add new "
 "tags. Press Enter key to add."
 msgstr ""
 
-#: models.py:1688
+#: dojo/models.py:1510
 msgid "SonarQube issue key"
 msgstr ""
 
-#: models.py:1689
+#: dojo/models.py:1511
 msgid "SonarQube issue status"
 msgstr ""
 
-#: models.py:1690
+#: dojo/models.py:1512
 msgid "SonarQube issue type"
 msgstr ""
 
-#: models.py:1729
+#: dojo/models.py:1551
 msgid ""
 "Add tags that help describe this test. Choose from the list or add new tags. "
 "Press Enter key to add."
 msgstr ""
 
-#: models.py:1734 models.py:1874
+#: dojo/models.py:1556 dojo/models.py:1629
 msgid "Build ID that was tested, a reimport may update this field."
 msgstr ""
 
-#: models.py:1736 models.py:1876
+#: dojo/models.py:1558 dojo/models.py:1631
 msgid "Commit hash tested, a reimport may update this field."
 msgstr ""
 
-#: models.py:1738 models.py:1878
+#: dojo/models.py:1560 dojo/models.py:1633
 msgid "Tag or branch that was tested, a reimport may update this field."
 msgstr ""
 
-#: models.py:1739
+#: dojo/models.py:1561
 msgid "API Scan Configuration"
 msgstr ""
 
-#: models.py:1926 templates/dojo/simple_search.html:223
-#: templates/dojo/simple_search.html:300 templates/dojo/simple_search.html:449
+#: dojo/models.py:1681
 msgid "Title"
 msgstr ""
 
-#: models.py:1927
+#: dojo/models.py:1682
 msgid "A short description of the flaw."
 msgstr ""
 
-#: models.py:1929 templates/dojo/pt_counts.html:240
-#: templates/dojo/simple_search.html:191 templates/dojo/simple_search.html:226
+#: dojo/models.py:1684
 msgid "Date"
 msgstr ""
 
-#: models.py:1930
+#: dojo/models.py:1685
 msgid "The date the flaw was discovered."
 msgstr ""
 
-#: models.py:1935
+#: dojo/models.py:1690
 msgid "SLA Start Date"
 msgstr ""
 
-#: models.py:1936
+#: dojo/models.py:1691
 msgid ""
 "(readonly)The date used as start date for SLA calculation. Set by expiring "
 "risk acceptances. Empty by default, causing a fallback to 'date'."
 msgstr ""
 
-#: models.py:1939
+#: dojo/models.py:1694
 msgid "CWE"
 msgstr ""
 
-#: models.py:1940
+#: dojo/models.py:1695
 msgid "The CWE number associated with this flaw."
 msgstr ""
 
-#: models.py:1944 templates/dojo/simple_search.html:115
-msgid "Vulnerability Id"
+#: dojo/models.py:1702
+msgid "CVE"
 msgstr ""
 
-#: models.py:1945
+#: dojo/models.py:1703
 msgid ""
-"An id of a vulnerability in a security advisory associated with this "
-"finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other "
-"sources."
+"The Common Vulnerabilities and Exposures (CVE) associated with this flaw."
 msgstr ""
 
-#: models.py:1950
+#: dojo/models.py:1708
 msgid "CVSS v3"
 msgstr ""
 
-#: models.py:1951
+#: dojo/models.py:1709
 msgid ""
 "Common Vulnerability Scoring System version 3 (CVSSv3) score associated with "
 "this flaw."
 msgstr ""
 
-#: models.py:1954
+#: dojo/models.py:1712
 msgid "CVSSv3 score"
 msgstr ""
 
-#: models.py:1955
+#: dojo/models.py:1713
 msgid ""
 "Numerical CVSSv3 score for the vulnerability. If the vector is given, the "
 "score is updated while saving the finding"
 msgstr ""
 
-#: models.py:1960
+#: dojo/models.py:1718
 msgid "URL"
 msgstr ""
 
-#: models.py:1961
+#: dojo/models.py:1719
 msgid "External reference that provides more information about this flaw."
 msgstr ""
 
-#: models.py:1963 templates/dojo/metrics.html:338
-#: templates/dojo/pt_counts.html:241 templates/dojo/simple_search.html:448
+#: dojo/models.py:1721
 msgid "Severity"
 msgstr ""
 
-#: models.py:1964
+#: dojo/models.py:1722
 msgid ""
 "The severity level of this flaw (Critical, High, Medium, Low, Informational)."
 msgstr ""
 
-#: models.py:1965 templates/dojo/metrics.html:339
-#: templates/dojo/simple_search.html:163 templates/dojo/simple_search.html:301
-#: templates/dojo/simple_search.html:450
-#: templates/dojo/view_product_details.html:18
+#: dojo/models.py:1723
 msgid "Description"
 msgstr ""
 
-#: models.py:1966
+#: dojo/models.py:1724
 msgid "Longer more descriptive information about the flaw."
 msgstr ""
 
-#: models.py:1967
+#: dojo/models.py:1725
 msgid "Mitigation"
 msgstr ""
 
-#: models.py:1970
+#: dojo/models.py:1728
 msgid "Text describing how to best fix the flaw."
 msgstr ""
 
-#: models.py:1971
+#: dojo/models.py:1729
 msgid "Impact"
 msgstr ""
 
-#: models.py:1974
+#: dojo/models.py:1732
 msgid ""
 "Text describing the impact this flaw has on systems, products, enterprise, "
 "etc."
 msgstr ""
 
-#: models.py:1977
+#: dojo/models.py:1735
 msgid "Steps to Reproduce"
 msgstr ""
 
-#: models.py:1978
+#: dojo/models.py:1736
 msgid ""
 "Text describing the steps that must be followed in order to reproduce the "
 "flaw / bug."
 msgstr ""
 
-#: models.py:1981
+#: dojo/models.py:1739
 msgid "Severity Justification"
 msgstr ""
 
-#: models.py:1982
+#: dojo/models.py:1740
 msgid "Text describing why a certain severity was associated with this flaw."
 msgstr ""
 
-#: models.py:1985 templates/base.html:347 templates/base.html:775
-#: templates/dojo/simple_search.html:69
+#: dojo/models.py:1743 dojo/templates/base.html:272
+#: dojo/templates/base.html:482
 msgid "Endpoints"
 msgstr ""
 
@@ -1150,7 +1026,7 @@ msgstr ""
 msgid "The hosts within the product that are susceptible to this flaw. + The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...)."
 msgstr ""
 
-#: models.py:1990
+#: dojo/models.py:1748
 msgid "Endpoint Status"
 msgstr ""
 
@@ -1158,1986 +1034,1303 @@ msgstr ""
 msgid "References"
 msgstr ""
 
-#: models.py:1996
+#: dojo/models.py:1754
 msgid "The external documentation available for this flaw."
 msgstr ""
 
-#: models.py:2000 templates/dojo/simple_search.html:118
-#: templates/dojo/simple_search.html:383 test/views.py:125
+#: dojo/models.py:1758
 msgid "Test"
 msgstr ""
 
-#: models.py:2001
+#: dojo/models.py:1759
 msgid "The test that is associated with this flaw."
 msgstr ""
 
-#: models.py:2003
+#: dojo/models.py:1761
 msgid "Active"
 msgstr ""
 
-#: models.py:2004
+#: dojo/models.py:1762
 msgid "Denotes if this flaw is active or not."
 msgstr ""
 
-#: models.py:2009
+#: dojo/models.py:1767
 msgid "Denotes if this flaw has been manually verified by the tester."
 msgstr ""
 
-#: models.py:2012
+#: dojo/models.py:1770
 msgid "Denotes if this flaw has been deemed a false positive by the tester."
 msgstr ""
 
-#: models.py:2014
+#: dojo/models.py:1772
 msgid "Duplicate"
 msgstr ""
 
-#: models.py:2015
+#: dojo/models.py:1773
 msgid "Denotes if this flaw is a duplicate of other flaws reported."
 msgstr ""
 
-#: models.py:2021
+#: dojo/models.py:1779
 msgid "Duplicate Finding"
 msgstr ""
 
-#: models.py:2022
+#: dojo/models.py:1780
 msgid "Link to the original finding if this finding is a duplicate."
 msgstr ""
 
-#: models.py:2025
+#: dojo/models.py:1783
 msgid ""
 "Denotes if this flaw falls outside the scope of the test and/or engagement."
 msgstr ""
 
-#: models.py:2028
+#: dojo/models.py:1786
 msgid "Denotes if this finding has been marked as an accepted risk."
 msgstr ""
 
-#: models.py:2031
+#: dojo/models.py:1788
+msgid "Under Review"
+msgstr ""
+
+#: dojo/models.py:1789
 msgid "Denotes is this flaw is currently being reviewed."
 msgstr ""
 
-#: models.py:2037
+#: dojo/models.py:1795
 msgid "Last Status Update"
 msgstr ""
 
-#: models.py:2038
+#: dojo/models.py:1796
 msgid "Timestamp of latest status update (change in status related fields)."
 msgstr ""
 
-#: models.py:2045
+#: dojo/models.py:1803
 msgid "Review Requested By"
 msgstr ""
 
-#: models.py:2046
+#: dojo/models.py:1804
 msgid "Documents who requested a review for this finding."
 msgstr ""
 
-#: models.py:2049
+#: dojo/models.py:1807
 msgid "Reviewers"
 msgstr ""
 
-#: models.py:2050
+#: dojo/models.py:1808
 msgid "Documents who reviewed the flaw."
 msgstr ""
 
-#: models.py:2054
+#: dojo/models.py:1812
 msgid "Under Defect Review"
 msgstr ""
 
-#: models.py:2055
+#: dojo/models.py:1813
 msgid "Denotes if this finding is under defect review."
 msgstr ""
 
-#: models.py:2061
+#: dojo/models.py:1819
 msgid "Defect Review Requested By"
 msgstr ""
 
-#: models.py:2062
+#: dojo/models.py:1820
 msgid "Documents who requested a defect review for this flaw."
 msgstr ""
 
-#: models.py:2064
+#: dojo/models.py:1822
 msgid "Is Mitigated"
 msgstr ""
 
-#: models.py:2065
+#: dojo/models.py:1823
 msgid "Denotes if this flaw has been fixed."
 msgstr ""
 
-#: models.py:2068
+#: dojo/models.py:1826
 msgid "Thread ID"
 msgstr ""
 
-#: models.py:2072
+#: dojo/models.py:1830
 msgid "Mitigated"
 msgstr ""
 
-#: models.py:2073
+#: dojo/models.py:1831
 msgid "Denotes if this flaw has been fixed by storing the date it was fixed."
 msgstr ""
 
-#: models.py:2079
+#: dojo/models.py:1837
 msgid "Mitigated By"
 msgstr ""
 
-#: models.py:2080
+#: dojo/models.py:1838
 msgid "Documents who has marked this flaw as fixed."
 msgstr ""
 
-#: models.py:2086 templates/dojo/metrics.html:342
+#: dojo/models.py:1844
 msgid "Reporter"
 msgstr ""
 
-#: models.py:2087
+#: dojo/models.py:1845
 msgid "Documents who reported the flaw."
 msgstr ""
 
-#: models.py:2091
+#: dojo/models.py:1849
 msgid "Notes"
 msgstr ""
 
-#: models.py:2092
+#: dojo/models.py:1850
 msgid "Stores information pertinent to the flaw or the mitigation."
 msgstr ""
 
-#: models.py:2094
+#: dojo/models.py:1852
 msgid "Numerical Severity"
 msgstr ""
 
-#: models.py:2095
+#: dojo/models.py:1853
 msgid "The numerical representation of the severity (S0, S1, S2, S3, S4)."
 msgstr ""
 
-#: models.py:2098
+#: dojo/models.py:1856
 msgid "Last Reviewed"
 msgstr ""
 
-#: models.py:2099
+#: dojo/models.py:1857
 msgid "Provides the date the flaw was last 'touched' by a tester."
 msgstr ""
 
-#: models.py:2105
+#: dojo/models.py:1863
 msgid "Last Reviewed By"
 msgstr ""
 
-#: models.py:2106
+#: dojo/models.py:1864
 msgid "Provides the person who last reviewed the flaw."
 msgstr ""
 
-#: models.py:2110
+#: dojo/models.py:1868
 msgid "Files"
 msgstr ""
 
-#: models.py:2111
+#: dojo/models.py:1869
 msgid "Files(s) related to the flaw."
 msgstr ""
 
-#: models.py:2115
+#: dojo/models.py:1873
 msgid "Parameter"
 msgstr ""
 
-#: models.py:2116
+#: dojo/models.py:1874
 msgid "Parameter used to trigger the issue (DAST)."
 msgstr ""
 
-#: models.py:2120
+#: dojo/models.py:1878
 msgid "Payload"
 msgstr ""
 
-#: models.py:2121
+#: dojo/models.py:1879
 msgid ""
 "Payload used to attack the service / application and trigger the bug / "
 "problem."
 msgstr ""
 
-#: models.py:2126
+#: dojo/models.py:1884
 msgid "Hash Code"
 msgstr ""
 
-#: models.py:2127
+#: dojo/models.py:1885
 msgid ""
 "A hash over a configurable set of fields that is used for findings "
 "deduplication."
 msgstr ""
 
-#: models.py:2130
+#: dojo/models.py:1888
 msgid "Line number"
 msgstr ""
 
-#: models.py:2131 models.py:2196
+#: dojo/models.py:1889 dojo/models.py:1954
 msgid "Source line number of the attack vector."
 msgstr ""
 
-#: models.py:2135
+#: dojo/models.py:1893
 msgid "File path"
 msgstr ""
 
-#: models.py:2136
+#: dojo/models.py:1894
 msgid "Identified file(s) containing the flaw."
 msgstr ""
 
-#: models.py:2140
+#: dojo/models.py:1898
 msgid "Component name"
 msgstr ""
 
-#: models.py:2141
+#: dojo/models.py:1899
 msgid "Name of the affected component (library name, part of a system, ...)."
 msgstr ""
 
-#: models.py:2145
+#: dojo/models.py:1903
 msgid "Component version"
 msgstr ""
 
-#: models.py:2146
+#: dojo/models.py:1904
 msgid "Version of the affected component."
 msgstr ""
 
-#: models.py:2149
+#: dojo/models.py:1907
 msgid "Found by"
 msgstr ""
 
-#: models.py:2150
+#: dojo/models.py:1908
 msgid "The name of the scanner that identified the flaw."
 msgstr ""
 
-#: models.py:2152
+#: dojo/models.py:1910
 msgid "Static finding (SAST)"
 msgstr ""
 
-#: models.py:2153
+#: dojo/models.py:1911
 msgid ""
 "Flaw has been detected from a Static Application Security Testing tool "
 "(SAST)."
 msgstr ""
 
-#: models.py:2155
+#: dojo/models.py:1913
 msgid "Dynamic finding (DAST)"
 msgstr ""
 
-#: models.py:2156
+#: dojo/models.py:1914
 msgid ""
 "Flaw has been detected from a Dynamic Application Security Testing tool "
 "(DAST)."
 msgstr ""
 
-#: models.py:2159
+#: dojo/models.py:1917
 msgid "Created"
 msgstr ""
 
-#: models.py:2160
+#: dojo/models.py:1918
 msgid "The date the finding was created inside DefectDojo."
 msgstr ""
 
-#: models.py:2165
+#: dojo/models.py:1923
 msgid "Scanner confidence"
 msgstr ""
 
-#: models.py:2166
+#: dojo/models.py:1924
 msgid "Confidence level of vulnerability which is supplied by the scanner."
 msgstr ""
 
-#: models.py:2170
+#: dojo/models.py:1928
 msgid "The SonarQube issue associated with this finding."
 msgstr ""
 
-#: models.py:2171
+#: dojo/models.py:1929
 msgid "SonarQube issue"
 msgstr ""
 
-#: models.py:2176
+#: dojo/models.py:1934
 msgid "Unique ID from tool"
 msgstr ""
 
-#: models.py:2177
+#: dojo/models.py:1935
 msgid ""
 "Vulnerability technical id from the source tool. Allows to track unique "
 "vulnerabilities."
 msgstr ""
 
-#: models.py:2181
+#: dojo/models.py:1939
 msgid "Vulnerability ID from tool"
 msgstr ""
 
-#: models.py:2182
+#: dojo/models.py:1940
 msgid ""
 "Non-unique technical id from the source tool associated with the "
 "vulnerability type."
 msgstr ""
 
-#: models.py:2186
+#: dojo/models.py:1944
 msgid "SAST Source Object"
 msgstr ""
 
-#: models.py:2187
+#: dojo/models.py:1945
 msgid "Source object (variable, function...) of the attack vector."
 msgstr ""
 
-#: models.py:2191
+#: dojo/models.py:1949
 msgid "SAST Sink Object"
 msgstr ""
 
-#: models.py:2192
+#: dojo/models.py:1950
 msgid "Sink object (variable, function...) of the attack vector."
 msgstr ""
 
-#: models.py:2195
+#: dojo/models.py:1953
 msgid "SAST Source Line number"
 msgstr ""
 
-#: models.py:2200
+#: dojo/models.py:1958
 msgid "SAST Source File Path"
 msgstr ""
 
-#: models.py:2201
+#: dojo/models.py:1959
 msgid "Source file path of the attack vector."
 msgstr ""
 
-#: models.py:2204
+#: dojo/models.py:1962
 msgid "Number of occurences"
 msgstr ""
 
-#: models.py:2205
+#: dojo/models.py:1963
 msgid ""
 "Number of occurences in the source tool when several vulnerabilites were "
 "found and aggregated by the scanner."
 msgstr ""
 
-#: models.py:2210
+#: dojo/models.py:1968
 msgid "Publish date"
 msgstr ""
 
-#: models.py:2211
+#: dojo/models.py:1969
 msgid "Date when this vulnerability was made publicly available."
 msgstr ""
 
-#: models.py:2217
+#: dojo/models.py:1975
 msgid "Service"
 msgstr ""
 
-#: models.py:2218
+#: dojo/models.py:1976
 msgid ""
 "A service is a self-contained piece of functionality within a Product. This "
 "is an optional field which is used in deduplication of findings when set."
 msgstr ""
 
-#: models.py:2222
-msgid "Planned Remediation Date"
-msgstr ""
-
-#: models.py:2223
-msgid "The date the flaw is expected to be remediated."
-msgstr ""
-
-#: models.py:2225
+#: dojo/models.py:1978
 msgid ""
 "Add tags that help describe this finding. Choose from the list or add new "
 "tags. Press Enter key to add."
 msgstr ""
 
-#: models.py:3007
+#: dojo/models.py:2667
 msgid "Template Match Enabled"
 msgstr ""
 
-#: models.py:3007
+#: dojo/models.py:2667
 msgid ""
 "Enables this template for matching remediation advice. Match will be applied "
 "to all active, verified findings by CWE."
 msgstr ""
 
-#: models.py:3008
+#: dojo/models.py:2668
 msgid "Match Template by Title and CWE"
 msgstr ""
 
-#: models.py:3008
+#: dojo/models.py:2668
 msgid "Matches by title text (contains search) and CWE."
 msgstr ""
 
-#: models.py:3010
+#: dojo/models.py:2670
 msgid ""
 "Add tags that help describe this finding template. Choose from the list or "
 "add new tags. Press Enter key to add."
 msgstr ""
 
-#: models.py:3142
+#: dojo/models.py:2774
 msgid ""
 "Descriptive name which in the future may also be used to group risk "
 "acceptances together across engagements and products"
 msgstr ""
 
-#: models.py:3146
+#: dojo/models.py:2778
 msgid "Recommendation from the security team."
 msgstr ""
 
-#: models.py:3146
+#: dojo/models.py:2778
 msgid "Security Recommendation"
 msgstr ""
 
-#: models.py:3150
+#: dojo/models.py:2782
 msgid "Explanation of security recommendation"
 msgstr ""
 
-#: models.py:3150
+#: dojo/models.py:2782
 msgid "Security Recommendation Details"
 msgstr ""
 
-#: models.py:3152
+#: dojo/models.py:2784
 msgid "Risk treatment decision by risk owner"
 msgstr ""
 
-#: models.py:3153
+#: dojo/models.py:2785
 msgid ""
 "If a compensating control exists to mitigate the finding or reduce risk, "
 "then list the compensating control(s)."
 msgstr ""
 
-#: models.py:3155
+#: dojo/models.py:2787
 msgid "Accepted By"
 msgstr ""
 
-#: models.py:3155
+#: dojo/models.py:2787
 msgid "The person that accepts the risk, can be outside of DefectDojo."
 msgstr ""
 
-#: models.py:3158
+#: dojo/models.py:2790
 msgid "Proof"
 msgstr ""
 
-#: models.py:3159
+#: dojo/models.py:2791
 msgid ""
 "User in DefectDojo owning this acceptance. Only the owner and staff users "
 "can edit the risk acceptance."
 msgstr ""
 
-#: models.py:3161
+#: dojo/models.py:2793
 msgid ""
 "When the risk acceptance expires, the findings will be reactivated (unless "
 "disabled below)."
 msgstr ""
 
-#: models.py:3162
+#: dojo/models.py:2794
 msgid ""
 "(readonly) Date at which notice about the risk acceptance expiration was "
 "sent."
 msgstr ""
 
-#: models.py:3163
+#: dojo/models.py:2795
 msgid ""
 "(readonly) When the risk acceptance expiration was handled (manually or by "
 "the daily job)."
 msgstr ""
 
-#: models.py:3164
+#: dojo/models.py:2796
 msgid "Reactivate findings on expiration"
 msgstr ""
 
-#: models.py:3164
+#: dojo/models.py:2796
 msgid "Reactivate findings when risk acceptance expires?"
 msgstr ""
 
-#: models.py:3165
+#: dojo/models.py:2797
 msgid "Restart SLA on expiration"
 msgstr ""
 
-#: models.py:3165
+#: dojo/models.py:2797
 msgid ""
 "When enabled, the SLA for findings is restarted when the risk acceptance "
 "expires."
 msgstr ""
 
-#: models.py:3255
-msgid ""
-"This dismissable message will be displayed on all pages for authenticated "
-"users. It can contain basic html tags, for example <a href='https://www.fred."
-"com' style='color: #337ab7;' target='_blank'>https://example.com</a>"
-msgstr ""
-
-#: models.py:3259
-msgid "The style of banner to display. (info, success, warning, danger)"
-msgstr ""
-
-#: models.py:3268
+#: dojo/models.py:2861
 msgid ""
 "This message will be displayed on the login page. It can contain basic html "
 "tags, for example <a href='https://www.fred.com' style='color: #337ab7;' "
 "target='_blank'>https://example.com</a>"
 msgstr ""
 
-#: models.py:3272 models.py:3313
+#: dojo/models.py:2865 dojo/models.py:2906
 msgid "Enter a name to give to this configuration"
 msgstr ""
 
-#: models.py:3273
+#: dojo/models.py:2866
 msgid "Enter your Github API Key"
 msgstr ""
 
-#: models.py:3281
+#: dojo/models.py:2874
 msgid "GitHub issue URL"
 msgstr ""
 
-#: models.py:3303
+#: dojo/models.py:2896
 msgid "Github project"
 msgstr ""
 
-#: models.py:3303
+#: dojo/models.py:2896
 msgid "Specify your project location. (:user/:repo)"
 msgstr ""
 
-#: models.py:3304
+#: dojo/models.py:2897
 msgid "Github Configuration"
 msgstr ""
 
-#: models.py:3306
+#: dojo/models.py:2899
 msgid ""
 "Notes added to findings will be automatically added to the corresponding "
 "github issue"
 msgstr ""
 
-#: models.py:3314
+#: dojo/models.py:2907
 msgid "JIRA URL"
 msgstr ""
 
-#: models.py:3314
+#: dojo/models.py:2907
 msgid ""
 "For more information how to configure Jira, read the DefectDojo "
 "documentation."
 msgstr ""
 
-#: models.py:3332
+#: dojo/models.py:2925
 msgid "You can define extra issue types in settings.py"
 msgstr ""
 
-#: models.py:3336 models.py:3410
+#: dojo/models.py:2929 dojo/models.py:3003
 msgid ""
 "Choose the folder containing the Django templates used to render the JIRA "
 "issue description. These are stored in dojo/templates/issue-trackers. Leave "
 "empty to use the default jira_full templates."
 msgstr ""
 
-#: models.py:3337
+#: dojo/models.py:2930
 msgid ""
 "To obtain the 'Epic name id' visit https://<YOUR JIRA URL>/rest/api/2/field "
 "and search for Epic Name. Copy the number out of cf[number] and paste it "
 "here."
 msgstr ""
 
-#: models.py:3338
+#: dojo/models.py:2931
 msgid "Reopen Transition ID"
 msgstr ""
 
-#: models.py:3338
+#: dojo/models.py:2931
 msgid ""
 "Transition ID to Re-Open JIRA issues, visit https://<YOUR JIRA URL>/rest/api/"
 "latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields to "
 "find the ID for your JIRA instance"
 msgstr ""
 
-#: models.py:3339
+#: dojo/models.py:2932
 msgid "Close Transition ID"
 msgstr ""
 
-#: models.py:3339
+#: dojo/models.py:2932
 msgid ""
 "Transition ID to Close JIRA issues, visit https://<YOUR JIRA URL>/rest/api/"
 "latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields to "
 "find the ID for your JIRA instance"
 msgstr ""
 
-#: models.py:3340
+#: dojo/models.py:2933
 msgid "Maps to the 'Priority' field in Jira. For example: Info"
 msgstr ""
 
-#: models.py:3341
+#: dojo/models.py:2934
 msgid "Maps to the 'Priority' field in Jira. For example: Low"
 msgstr ""
 
-#: models.py:3342
+#: dojo/models.py:2935
 msgid "Maps to the 'Priority' field in Jira. For example: Medium"
 msgstr ""
 
-#: models.py:3343
+#: dojo/models.py:2936
 msgid "Maps to the 'Priority' field in Jira. For example: High"
 msgstr ""
 
-#: models.py:3344
+#: dojo/models.py:2937
 msgid "Maps to the 'Priority' field in Jira. For example: Critical"
 msgstr ""
 
-#: models.py:3345
+#: dojo/models.py:2938
 msgid ""
 "Additional text that will be added to the finding in Jira. For example "
 "including how the finding was created or who to contact for more information."
 msgstr ""
 
-#: models.py:3346
+#: dojo/models.py:2939
 msgid ""
 "JIRA resolution names (comma-separated values) that maps to an Accepted "
 "Finding"
 msgstr ""
 
-#: models.py:3347
+#: dojo/models.py:2940
 msgid ""
 "JIRA resolution names (comma-separated values) that maps to a False Positive "
 "Finding"
 msgstr ""
 
-#: models.py:3348
+#: dojo/models.py:2941
 msgid "Globally send SLA notifications as comment?"
 msgstr ""
 
-#: models.py:3348
+#: dojo/models.py:2941
 msgid "This setting can be overidden at the Product level"
 msgstr ""
 
-#: models.py:3403
+#: dojo/models.py:2996
 msgid "JIRA Instance"
 msgstr ""
 
-#: models.py:3414
-msgid ""
-"JIRA custom field JSON mapping of Id to value, e.g. {\"customfield_10122\": "
-"[{\"name\": \"8.0.1\"}]}"
-msgstr ""
-
-#: models.py:3421
+#: dojo/models.py:3007
 msgid ""
 "Automatically maintain parity with JIRA. Always create and update JIRA "
 "tickets for findings in this Product."
 msgstr ""
 
-#: models.py:3425
+#: dojo/models.py:3011
 msgid "Send SLA notifications as comment?"
 msgstr ""
 
-#: models.py:3426
+#: dojo/models.py:3012
 msgid "Send Risk Acceptance expiration notifications as comment?"
 msgstr ""
 
-#: models.py:3472
+#: dojo/models.py:3058
 msgid "Jira creation"
 msgstr ""
 
-#: models.py:3473
+#: dojo/models.py:3059
 msgid "The date a Jira issue was created from this finding."
 msgstr ""
 
-#: models.py:3476
+#: dojo/models.py:3062
 msgid "Jira last update"
 msgstr ""
 
-#: models.py:3477
+#: dojo/models.py:3063
 msgid "The date the linked Jira issue was last modified."
 msgstr ""
 
-#: models.py:3512
+#: dojo/models.py:3095
 msgid ""
 "Triggered whenever an (re-)import has been done that created/updated/closed "
 "findings."
 msgstr ""
 
-#: models.py:3513
+#: dojo/models.py:3096
 msgid "JIRA problems"
 msgstr ""
 
-#: models.py:3513
+#: dojo/models.py:3096
 msgid ""
 "JIRA sync happens in the background, errors will be shown as notifications/"
 "alerts so make sure to subscribe"
 msgstr ""
 
-#: models.py:3526
+#: dojo/models.py:3108
 msgid "SLA breach"
 msgstr ""
 
-#: models.py:3527
+#: dojo/models.py:3109
 msgid "Get notified of (upcoming) SLA breaches"
 msgstr ""
 
-#: models.py:3529
+#: dojo/models.py:3111
 msgid "Risk Acceptance Expiration"
 msgstr ""
 
-#: models.py:3530
+#: dojo/models.py:3112
 msgid "Get notified of (upcoming) Risk Acceptance expiries"
 msgstr ""
 
-#: models.py:3592
+#: dojo/models.py:3174
 msgid "Succesfully"
 msgstr ""
 
-#: models.py:3631
+#: dojo/models.py:3213
 msgid "Login is valid"
 msgstr ""
 
-#: models.py:3643
+#: dojo/models.py:3225
 msgid "Credential"
 msgstr ""
 
-#: models.py:3652
+#: dojo/models.py:3234
 msgid "Authentication Provider"
 msgstr ""
 
-#: models.py:3661
+#: dojo/models.py:3243
 msgid "HTML color"
 msgstr ""
 
-#: models.py:3671
+#: dojo/models.py:3253
 msgid "Number of files"
 msgstr ""
 
-#: models.py:3672
+#: dojo/models.py:3254
 msgid "Number of blank lines"
 msgstr ""
 
-#: models.py:3673
+#: dojo/models.py:3255
 msgid "Number of comment lines"
 msgstr ""
 
-#: models.py:3674
+#: dojo/models.py:3256
 msgid "Number of code lines"
 msgstr ""
 
-#: models.py:3688
+#: dojo/models.py:3270
 msgid "Confidence level"
 msgstr ""
 
-#: models.py:3689
+#: dojo/models.py:3271
 msgid "Version Number"
 msgstr ""
 
-#: models.py:3712
+#: dojo/models.py:3294
 msgid "Full file path"
 msgstr ""
 
-#: models.py:3714
+#: dojo/models.py:3296
 msgid "Folder"
 msgstr ""
 
-#: models.py:3716
+#: dojo/models.py:3298
 msgid "Artifact"
 msgstr ""
 
-#: models.py:3721
+#: dojo/models.py:3303
 msgid ""
 "Add tags that help describe this object. Choose from the list or add new "
 "tags. Press Enter key to add."
 msgstr ""
 
-#: models.py:3749
+#: dojo/models.py:3331
 msgid "Test Unique Identifier"
 msgstr ""
 
-#: models.py:3750
+#: dojo/models.py:3332
 msgid "Name of the test"
 msgstr ""
 
-#: models.py:3751
+#: dojo/models.py:3333
 msgid "Summary of the test"
 msgstr ""
 
-#: models.py:3752
+#: dojo/models.py:3334
 msgid "Objective of the test"
 msgstr ""
 
-#: models.py:3753
+#: dojo/models.py:3335
 msgid "How to test the objective"
 msgstr ""
 
-#: models.py:3754
+#: dojo/models.py:3336
 msgid "What the results look like for a test"
 msgstr ""
 
-#: models.py:3780
+#: dojo/models.py:3362
 msgid "Benchmark Type"
 msgstr ""
 
-#: models.py:3816
+#: dojo/models.py:3398
 msgid "Pass"
 msgstr ""
 
-#: models.py:3817
+#: dojo/models.py:3399
 msgid "Does the product meet the requirement?"
 msgstr ""
 
-#: models.py:3819
+#: dojo/models.py:3401
 msgid "Applicable for this specific product."
 msgstr ""
 
-#: models.py:3843 models.py:3845 models.py:3847
+#: dojo/models.py:3425 dojo/models.py:3427 dojo/models.py:3429
 msgid "Total number of active benchmarks for this application."
 msgstr ""
 
-#: models.py:3844
+#: dojo/models.py:3426
 msgid "ASVS Level 1 Score"
 msgstr ""
 
-#: models.py:3846
+#: dojo/models.py:3428
 msgid "ASVS Level 2 Score"
 msgstr ""
 
-#: models.py:3848
+#: dojo/models.py:3430
 msgid "ASVS Level 3 Score"
 msgstr ""
 
-#: models.py:3849
+#: dojo/models.py:3431
 msgid "Publish score to Product."
 msgstr ""
 
-#: models.py:3944
+#: dojo/models.py:3526
 msgid "The render order"
 msgstr ""
 
-#: models.py:3948
+#: dojo/models.py:3530
 msgid "If selected, user doesn't have to answer this question"
 msgstr ""
 
-#: models.py:3950
+#: dojo/models.py:3532
 msgid "The question text"
 msgstr ""
 
-#: models.py:3992
+#: dojo/models.py:3574
 msgid "Select one or more"
 msgstr ""
 
-#: models.py:4014
+#: dojo/models.py:3596
 msgid "Engagement Survey"
 msgstr ""
 
-#: models.py:4042
+#: dojo/models.py:3624
 msgid "Answered Engagement Survey"
 msgstr ""
 
-#: models.py:4043
+#: dojo/models.py:3625
 msgid "Answered Engagement Surveys"
 msgstr ""
 
-#: models.py:4056
+#: dojo/models.py:3638
 msgid "General Engagement Survey"
 msgstr ""
 
-#: models.py:4057
+#: dojo/models.py:3639
 msgid "General Engagement Surveys"
 msgstr ""
 
-#: models.py:4077
+#: dojo/models.py:3659
 msgid "The answer text"
 msgstr ""
 
-#: models.py:4087
+#: dojo/models.py:3669
 msgid "The selected choices as the answer"
 msgstr ""
 
-#: notes/views.py:50
-msgid "Note deleted."
-msgstr ""
-
-#: notes/views.py:55
-msgid "Note was not succesfully deleted."
-msgstr ""
-
-#: notes/views.py:117
-msgid "Note edited."
-msgstr ""
-
-#: notes/views.py:123
-msgid "Note was not succesfully edited."
-msgstr ""
-
-#: notifications/helper.py:121
-#, python-format
-msgid "Product %(title)s has been created successfully."
-msgstr ""
-
-#: notifications/helper.py:123
-#, python-format
-msgid "Product Type %(title)s has been created successfully."
-msgstr ""
-
-#: notifications/helper.py:125
-#, python-format
-msgid "Event %(event)s  has occurred."
-msgstr ""
-
-#: notifications/views.py:40 notifications/views.py:62
-#: notifications/views.py:84
-msgid "Settings saved."
-msgstr ""
-
-#: notifications/views.py:43
-msgid "Personal notification settings"
-msgstr ""
-
-#: notifications/views.py:65
-msgid "System notification settings"
-msgstr ""
-
-#: notifications/views.py:87
-msgid "Template notification settings"
-msgstr ""
-
-#: product/views.py:85
-msgid "Product List"
-msgstr ""
-
-#: product/views.py:197 product/views.py:227 product/views.py:606
-#: product/views.py:938 templates/dojo/metrics.html:312
-#: templates/dojo/metrics.html:337 templates/dojo/metrics.html:389
-#: templates/dojo/metrics.html:436 templates/dojo/metrics.html:485
-#: templates/dojo/pt_counts.html:195 templates/dojo/pt_counts.html:243
-#: templates/dojo/simple_search.html:116 templates/dojo/simple_search.html:190
-#: templates/dojo/simple_search.html:224 templates/dojo/simple_search.html:263
-#: templates/dojo/simple_search.html:326 templates/dojo/simple_search.html:351
-#: templates/dojo/simple_search.html:410 templates/dojo/simple_search.html:447
-msgid "Product"
-msgstr ""
-
-#: product/views.py:668 templates/base.html:273
-msgid "All Engagements"
-msgstr ""
-
-#: product/views.py:752
-msgid "Product added successfully."
-msgstr ""
-
-#: product/views.py:765
-msgid "GitHub information added successfully."
-msgstr ""
-
-#: product/views.py:770
-msgid "This label is automatically applied to all issues created by DefectDojo"
-msgstr ""
-
-#: product/views.py:807
-msgid "New Product"
-msgstr ""
-
-#: product/views.py:840
-msgid "Product updated successfully."
-msgstr ""
-
-#: product/views.py:861
-msgid "GITHUB information updated successfully."
-msgstr ""
-
-#: product/views.py:883
-msgid "Edit Product"
-msgstr ""
-
-#: product/views.py:908
-msgid "Product and relationships will be removed in the background."
-msgstr ""
-
-#: product/views.py:910
-msgid "Product and relationships removed."
-msgstr ""
-
-#: product/views.py:917
-#, python-format
-msgid "Deletion of %(name)s"
-msgstr ""
-
-#: product/views.py:919
-#, python-format
-msgid "The product \"%(name)s\" was deleted by %(user)s"
-msgstr ""
-
-#: product/views.py:997
-msgid "Engagement added successfully."
-msgstr ""
-
-#: product/views.py:1026
-msgid "New CI/CD Engagement"
-msgstr ""
-
-#: product/views.py:1028
-msgid "New Interactive Engagement"
-msgstr ""
-
-#: product/views.py:1049
-msgid "Technology added successfully."
-msgstr ""
-
-#: product/views.py:1054
-msgid "Add Technology"
-msgstr ""
-
-#: product/views.py:1071
-msgid "Technology changed successfully."
-msgstr ""
-
-#: product/views.py:1075
-msgid "Edit Technology"
-msgstr ""
-
-#: product/views.py:1092
-msgid "Technology deleted successfully."
-msgstr ""
-
-#: product/views.py:1096
-msgid "Delete Technology"
-msgstr ""
-
-#: product/views.py:1119
-msgid "Metadata added successfully."
-msgstr ""
-
-#: product/views.py:1128
-msgid "Add Metadata"
-msgstr ""
-
-#: product/views.py:1156
-msgid "Metadata edited successfully."
-msgstr ""
-
-#: product/views.py:1160
-msgid "Edit Metadata"
-msgstr ""
-
-#: product/views.py:1170
-msgid "Pen Test"
-msgstr ""
-
-#: product/views.py:1173 product/views.py:1183
-msgid "Ad Hoc Engagement"
-msgstr ""
-
-#: product/views.py:1201 test/views.py:427 test/views.py:557
-msgid "Can not set a finding as inactive without adding all mandatory notes"
-msgstr ""
-
-#: product/views.py:1204 test/views.py:429 test/views.py:559
-msgid ""
-"Can not set a finding as false positive without adding all mandatory notes"
-msgstr ""
-
-#: product/views.py:1212 test/views.py:437 test/views.py:567
-msgid ""
-"Can not set a finding as inactive or false positive without adding all "
-"mandatory notes"
-msgstr ""
-
-#: product/views.py:1285
-msgid "Finding added successfully."
-msgstr ""
-
-#: product/views.py:1294 test/views.py:518 test/views.py:603
-msgid "The form has errors, please correct them below."
-msgstr ""
-
-#: product/views.py:1309 test/views.py:526 test/views.py:631
-msgid "Add Finding"
-msgstr ""
-
-#: product/views.py:1328
-msgid "Engagement Presets"
-msgstr ""
-
-#: product/views.py:1341
-msgid "Edit Engagement Preset"
-msgstr ""
-
-#: product/views.py:1350
-msgid "Engagement Preset Successfully Updated."
-msgstr ""
-
-#: product/views.py:1375
-msgid "Engagement Preset Successfully Created."
-msgstr ""
-
-#: product/views.py:1381
-msgid "New Engagement Preset"
-msgstr ""
-
-#: product/views.py:1398
-msgid "Engagement presets and engagement relationships removed."
-msgstr ""
-
-#: product/views.py:1406
-msgid "Delete Engagement Preset"
-msgstr ""
-
-#: product/views.py:1433
-msgid "Notification settings updated."
-msgstr ""
-
-#: product/views.py:1450
-msgid "You are not permitted to add users as owners."
-msgstr ""
-
-#: product/views.py:1464 user/views.py:527
-msgid "Product members added successfully."
-msgstr ""
-
-#: product/views.py:1467 user/views.py:530
-msgid "Add Product Member"
-msgstr ""
-
-#: product/views.py:1486
-msgid "You are not permitted to make users to owners."
-msgstr ""
-
-#: product/views.py:1492
-msgid "Product member updated successfully."
-msgstr ""
-
-#: product/views.py:1498
-msgid "Edit Product Member"
-msgstr ""
-
-#: product/views.py:1517
-msgid "Product member deleted successfully."
-msgstr ""
-
-#: product/views.py:1526
-msgid "Delete Product Member"
-msgstr ""
-
-#: product/views.py:1548 product/views.py:1610
-#, python-format
-msgid "API connection successful with message: %(result)s."
-msgstr ""
-
-#: product/views.py:1553
-msgid "API Scan Configuration added successfully."
-msgstr ""
-
-#: product/views.py:1568 templates/base.html:888
-#: templates/dojo/view_product_details.html:47
-msgid "Add API Scan Configuration"
-msgstr ""
-
-#: product/views.py:1582
-msgid "API Scan Configurations"
-msgstr ""
-
-#: product/views.py:1616
-msgid "API Scan Configuration successfully updated."
-msgstr ""
-
-#: product/views.py:1628
-msgid "Edit API Scan Configuration"
-msgstr ""
-
-#: product/views.py:1650
-msgid "API Scan Configuration deleted."
-msgstr ""
-
-#: product/views.py:1656
-msgid "Delete Tool Configuration"
-msgstr ""
-
-#: product/views.py:1678
-msgid "You are not permitted to make groups owners."
-msgstr ""
-
-#: product/views.py:1684
-msgid "Product group updated successfully."
-msgstr ""
-
-#: product/views.py:1691 product/views.py:1756
-msgid "Edit Product Group"
-msgstr ""
-
-#: product/views.py:1710
-msgid "Product group deleted successfully."
-msgstr ""
-
-#: product/views.py:1719
-msgid "Delete Product Group"
-msgstr ""
-
-#: product/views.py:1739
-msgid "You are not permitted to add groups as owners."
-msgstr ""
-
-#: product/views.py:1753
-msgid "Product groups added successfully."
-msgstr ""
-
-#: search/views.py:318 search/views.py:349
-#, fuzzy
-#| msgid "Search"
-msgid "Simple Search"
-msgstr "Поиск"
-
-#: templates/base.html:127 templates/dojo/simple_search.html:24
+#: dojo/templates/base.html:130
 msgid "Search"
 msgstr "Поиск"
 
-#: templates/base.html:167 user/views.py:74
+#: dojo/templates/base.html:162
 msgid "API v2 Key"
 msgstr ""
 
-#: templates/base.html:175
+#: dojo/templates/base.html:165
 msgid "API v2 OpenAPI2 Docs"
 msgstr ""
 
-#: templates/base.html:181
+#: dojo/templates/base.html:168
 msgid "API v2 OpenAPI3 Docs"
 msgstr ""
 
-#: templates/base.html:187
+#: dojo/templates/base.html:171
 msgid "Documentation"
 msgstr ""
 
-#: templates/base.html:196
+#: dojo/templates/base.html:176
 msgid "SAML Logout"
 msgstr ""
 
-#: templates/base.html:203
+#: dojo/templates/base.html:178
 msgid "Logout"
 msgstr ""
 
-#: templates/base.html:222
+#: dojo/templates/base.html:195
 msgid "Dashboard"
 msgstr ""
 
-#: templates/base.html:228 templates/dojo/simple_search.html:54
+#: dojo/templates/base.html:201
 msgid "Products"
 msgstr ""
 
-#: templates/base.html:234
+#: dojo/templates/base.html:205
 msgid "All Products"
 msgstr ""
 
-#: templates/base.html:240
+#: dojo/templates/base.html:207
 msgid "Add Product"
 msgstr ""
 
-#: templates/base.html:246
+#: dojo/templates/base.html:209
 msgid "All Product Types"
 msgstr ""
 
-#: templates/base.html:252
+#: dojo/templates/base.html:211
 msgid "Add Product Type"
 msgstr ""
 
-#: templates/base.html:262 templates/base.html:664
-#: templates/dojo/simple_search.html:59
+#: dojo/templates/base.html:219 dojo/templates/base.html:445
 msgid "Engagements"
 msgstr ""
 
-#: templates/base.html:268
+#: dojo/templates/base.html:223
 msgid "Active Engagements"
 msgstr ""
 
-#: templates/base.html:278
+#: dojo/templates/base.html:224
+msgid "All Engagements"
+msgstr ""
+
+#: dojo/templates/base.html:225
 msgid "Engagements by Product"
 msgstr ""
 
-#: templates/base.html:283
+#: dojo/templates/base.html:226
 msgid "Test Types"
 msgstr ""
 
-#: templates/base.html:288
+#: dojo/templates/base.html:227
 msgid "Environments"
 msgstr ""
 
-#: templates/base.html:297 templates/base.html:700
-#: templates/dojo/simple_search.html:44
+#: dojo/templates/base.html:234 dojo/templates/base.html:459
 msgid "Findings"
 msgstr ""
 
-#: templates/base.html:303 templates/dojo/simple_search.html:264
+#: dojo/templates/base.html:239
 msgid "Open Findings"
 msgstr ""
 
-#: templates/base.html:308
+#: dojo/templates/base.html:242
 msgid "All Findings"
 msgstr ""
 
-#: templates/base.html:313 templates/dojo/metrics.html:299
+#: dojo/templates/base.html:245
 msgid "Closed Findings"
 msgstr ""
 
-#: templates/base.html:318
+#: dojo/templates/base.html:248
 msgid "Risk Accepted Findings"
 msgstr ""
 
-#: templates/base.html:324 templates/dojo/simple_search.html:74
+#: dojo/templates/base.html:252
 msgid "Finding Templates"
 msgstr ""
 
-#: templates/base.html:334 templates/base.html:651
+#: dojo/templates/base.html:261 dojo/templates/base.html:440
 msgid "Components"
 msgstr ""
 
-#: templates/base.html:339
+#: dojo/templates/base.html:265
 msgid "All Components"
 msgstr ""
 
-#: templates/base.html:353
+#: dojo/templates/base.html:277
 msgid "All Endpoints"
 msgstr ""
 
-#: templates/base.html:358
+#: dojo/templates/base.html:280
 msgid "All Hosts"
 msgstr ""
 
-#: templates/base.html:363
+#: dojo/templates/base.html:283
 msgid "Vulnerable Endpoints"
 msgstr ""
 
-#: templates/base.html:368
+#: dojo/templates/base.html:286
 msgid "Vulnerable Hosts"
 msgstr ""
 
-#: templates/base.html:374
+#: dojo/templates/base.html:290
 msgid "Migrate Endpoints"
 msgstr ""
 
-#: templates/base.html:383
+#: dojo/templates/base.html:298
 msgid "Reports"
 msgstr ""
 
-#: templates/base.html:397
+#: dojo/templates/base.html:306 dojo/templates/base.html:441
+msgid "Metrics"
+msgstr ""
+
+#: dojo/templates/base.html:310
 msgid "Metrics Dashboard"
 msgstr ""
 
-#: templates/base.html:407
+#: dojo/templates/base.html:311
+msgid "Critical Product Metrics"
+msgstr ""
+
+#: dojo/templates/base.html:312
 msgid "Product Type Metrics"
 msgstr ""
 
-#: templates/base.html:412
+#: dojo/templates/base.html:313
 msgid "Product Type Counts"
 msgstr ""
 
-#: templates/base.html:432 templates/base.html:439
+#: dojo/templates/base.html:314
+msgid "Simple Metrics"
+msgstr ""
+
+#: dojo/templates/base.html:315
+msgid "Engineer Metrics"
+msgstr ""
+
+#: dojo/templates/base.html:323 dojo/templates/base.html:328
 msgid "Users"
 msgstr ""
 
-#: templates/base.html:446 templates/dojo/view_product_details.html:333
+#: dojo/templates/base.html:331
 msgid "Groups"
 msgstr ""
 
-#: templates/base.html:457
+#: dojo/templates/base.html:339
 msgid "Calendar"
 msgstr ""
 
-#: templates/base.html:466
+#: dojo/templates/base.html:345
 msgid "Questionnaires"
 msgstr ""
 
-#: templates/base.html:473
+#: dojo/templates/base.html:349
 msgid "All Questionnaires"
 msgstr ""
 
-#: templates/base.html:480
+#: dojo/templates/base.html:352
 msgid "All Questions"
 msgstr ""
 
-#: templates/base.html:492
+#: dojo/templates/base.html:363
 msgid "Configuration"
 msgstr ""
 
-#: templates/base.html:498
-msgid "Announcement"
-msgstr ""
-
-#: templates/base.html:505
+#: dojo/templates/base.html:367
 msgid "Credential Manager"
 msgstr ""
 
-#: templates/base.html:512
+#: dojo/templates/base.html:370
 msgid "GitHub"
 msgstr ""
 
-#: templates/base.html:519
+#: dojo/templates/base.html:373
 msgid "Google Sheets Sync"
 msgstr ""
 
-#: templates/base.html:526 templates/dojo/simple_search.html:451
-#: templates/dojo/view_product_details.html:470
+#: dojo/templates/base.html:376
 msgid "JIRA"
 msgstr ""
 
-#: templates/base.html:533
-msgid "Login Banner"
+#: dojo/templates/base.html:379
+msgid "Login banner"
 msgstr ""
 
-#: templates/base.html:540
+#: dojo/templates/base.html:382
 msgid "Note Types"
 msgstr ""
 
-#: templates/base.html:546 templates/dojo/view_product_details.html:585
+#: dojo/templates/base.html:384
 msgid "Notifications"
 msgstr ""
 
-#: templates/base.html:551 templates/dojo/view_product_details.html:193
+#: dojo/templates/base.html:385
 msgid "Regulations"
 msgstr ""
 
-#: templates/base.html:557
+#: dojo/templates/base.html:387
 msgid "Rules Framework"
 msgstr ""
 
-#: templates/base.html:564
-msgid "SLA Configuration"
-msgstr ""
-
-#: templates/base.html:571
+#: dojo/templates/base.html:390
 msgid "System Settings"
 msgstr ""
 
-#: templates/base.html:578
+#: dojo/templates/base.html:393
 msgid "Tool Configuration"
 msgstr ""
 
-#: templates/base.html:585
+#: dojo/templates/base.html:396
 msgid "Tool Type"
 msgstr ""
 
-#: templates/base.html:596
+#: dojo/templates/base.html:405
 msgid "Collapse Menu"
 msgstr ""
 
-#: templates/base.html:645
+#: dojo/templates/base.html:439
 msgid "Overview"
 msgstr ""
 
-#: templates/base.html:675
+#: dojo/templates/base.html:448
 msgid "View Engagements"
 msgstr ""
 
-#: templates/base.html:683
+#: dojo/templates/base.html:451
 msgid "Add New Interactive Engagement"
 msgstr ""
 
-#: templates/base.html:689
+#: dojo/templates/base.html:452
 msgid "Add New CI/CD Engagement"
 msgstr ""
 
-#: templates/base.html:711
+#: dojo/templates/base.html:462
 msgid "View Active Findings"
 msgstr ""
 
-#: templates/base.html:717
+#: dojo/templates/base.html:463
 msgid "View Active Verified Findings"
 msgstr ""
 
-#: templates/base.html:723
+#: dojo/templates/base.html:464
 msgid "View Critical Findings"
 msgstr ""
 
-#: templates/base.html:729
+#: dojo/templates/base.html:465
 msgid "View Findings from Last 7 Days"
 msgstr ""
 
-#: templates/base.html:736
+#: dojo/templates/base.html:467
 msgid "View Risk Accepted Findings"
 msgstr ""
 
-#: templates/base.html:742
+#: dojo/templates/base.html:468
 msgid "View All Findings"
 msgstr ""
 
-#: templates/base.html:748
+#: dojo/templates/base.html:469
 msgid "View Closed Findings"
 msgstr ""
 
-#: templates/base.html:756
+#: dojo/templates/base.html:472
 msgid "Add New Finding"
 msgstr ""
 
-#: templates/base.html:764
+#: dojo/templates/base.html:475
 msgid "Import Scan Results"
 msgstr ""
 
-#: templates/base.html:786
+#: dojo/templates/base.html:485
 msgid "View Endpoints"
 msgstr ""
 
-#: templates/base.html:792
+#: dojo/templates/base.html:486
 msgid "View Hosts"
 msgstr ""
 
-#: templates/base.html:798
+#: dojo/templates/base.html:487
 msgid "View Vulnerable Endpoints"
 msgstr ""
 
-#: templates/base.html:804
+#: dojo/templates/base.html:488
 msgid "View Vulnerable Hosts"
 msgstr ""
 
-#: templates/base.html:811
+#: dojo/templates/base.html:490
 msgid "Endpoint Report"
 msgstr ""
 
-#: templates/base.html:819
+#: dojo/templates/base.html:493
 msgid "Add New Endpoint"
 msgstr ""
 
-#: templates/base.html:827
+#: dojo/templates/base.html:496
 msgid "Import Endpoint Meta"
 msgstr ""
 
-#: templates/base.html:839
+#: dojo/templates/base.html:505
 msgid "Benchmarks"
 msgstr ""
 
-#: templates/base.html:861
+#: dojo/templates/base.html:519
 msgid "Settings"
 msgstr ""
 
-#: templates/base.html:868 templates/dojo/view_product_details.html:29
-#: templates/dojo/view_product_details.html:164
-#: templates/dojo/view_product_details.html:289
-#: templates/dojo/view_product_details.html:377
+#: dojo/templates/base.html:525
 msgid "Edit"
 msgstr ""
 
-#: templates/base.html:875 templates/dojo/view_product_details.html:35
+#: dojo/templates/base.html:531
 msgid "Add Custom Fields"
 msgstr ""
 
-#: templates/base.html:881 templates/dojo/view_product_details.html:41
+#: dojo/templates/base.html:537
 msgid "Edit Custom Fields"
 msgstr ""
 
-#: templates/base.html:894 templates/dojo/view_product_details.html:53
+#: dojo/templates/base.html:543
+msgid "Add API Scan Configuration"
+msgstr ""
+
+#: dojo/templates/base.html:549
 msgid "View API Scan Configurations"
 msgstr ""
 
-#: templates/base.html:902 templates/dojo/view_product_details.html:62
+#: dojo/templates/base.html:556
 msgid "Add Product Tracking Files"
 msgstr ""
 
-#: templates/base.html:908 templates/dojo/view_product_details.html:69
+#: dojo/templates/base.html:561
 msgid "View Product Tracking Files"
 msgstr ""
 
-#: templates/base.html:917
+#: dojo/templates/base.html:569
 msgid "Add Credentials"
 msgstr ""
 
-#: templates/base.html:923
+#: dojo/templates/base.html:574
 msgid "View Credentials"
 msgstr ""
 
-#: templates/base.html:931
+#: dojo/templates/base.html:581
 msgid "Add Tools"
 msgstr ""
 
-#: templates/base.html:937
+#: dojo/templates/base.html:586
 msgid "View Tools"
 msgstr ""
 
-#: templates/base.html:944
+#: dojo/templates/base.html:592
 msgid "Add Engagement Presets"
 msgstr ""
 
-#: templates/base.html:950
+#: dojo/templates/base.html:597
 msgid "View Engagement Presets"
 msgstr ""
 
-#: templates/base.html:957 templates/dojo/view_product_details.html:96
+#: dojo/templates/base.html:603
 msgid "View History"
 msgstr ""
 
-#: templates/base.html:966 templates/dojo/view_product_details.html:104
-#: templates/dojo/view_product_details.html:170
-#: templates/dojo/view_product_details.html:295
-#: templates/dojo/view_product_details.html:383
+#: dojo/templates/base.html:611
 msgid "Delete"
 msgstr ""
 
-#: templates/base.html:1042
+#: dojo/templates/base.html:676
 msgid "DefectDojo Chop"
 msgstr ""
 
-#: templates/base.html:1139
+#: dojo/templates/base.html:769
 msgid "See All Alerts"
 msgstr ""
 
-#: templates/base.html:1141
+#: dojo/templates/base.html:771
 msgid "Clear All Alerts"
 msgstr ""
 
-#: templates/base.html:1145
-msgid "No alerts found"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:31
-#, python-format
-msgid "%(name)s for %(start_date.date)s - %(end_date.date)s"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:42 templates/dojo/metrics.html:139
-msgid "Measures Findings"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:47 templates/dojo/metrics.html:144
-msgid "Measure Affected Endpoints"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:58 templates/dojo/metrics.html:213
-msgid "Open Bug Count by Month"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:69 templates/dojo/metrics.html:241
-msgid "Risk Accepted Bug Count by Month"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:80 templates/dojo/metrics.html:256
-msgid "Open Bug Count by Week"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:91 templates/dojo/metrics.html:269
-msgid "Risk Accepted Bug Count by Week"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:105
-#, python-format
-msgid "Top %(top_ten_products|length)s Products By Bug Severity"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:117
-msgid "Total Findings In Period By Severity"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:128
-msgid "Total Findings Risk Accepted In Period By Severity"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:139
-msgid "Total Findings Closed In Period By Severity"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:152
-msgid "Weekly activity, displayed by day, of findings reported.*"
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:156
-msgid "Week begins on date displayed."
-msgstr ""
-
-#: templates/dojo/dashboard-metrics.html:160
-msgid "* Weeks are only displayed if findings are available."
-msgstr ""
-
-#: templates/dojo/edit_note.html:5
-msgid "Edit Note"
-msgstr ""
-
-#: templates/dojo/edit_note.html:10
-msgid "Save"
-msgstr ""
-
-#: templates/dojo/edit_tool_type.html:7
-msgid "Edit Tool Type Configuration"
-msgstr ""
-
-#: templates/dojo/edit_tool_type.html:12 templates/dojo/new_tool_type.html:11
-#: templates/dojo/notifications.html:97
-msgid "Submit"
-msgstr ""
-
-#: templates/dojo/metrics.html:172
-#, python-format
-msgid ""
-"%(c_prod.name)s is affected by <b>both</b> critical and\n"
-"                                        high severity vulnerabilities."
-msgstr ""
-
-#: templates/dojo/metrics.html:176 templates/dojo/metrics.html:186
-msgid "Critical Severity Vulnerabilities"
-msgstr ""
-
-#: templates/dojo/metrics.html:179 templates/dojo/metrics.html:193
-msgid "High Severity Vulnerabilities"
-msgstr ""
-
-#: templates/dojo/metrics.html:181
-#, python-format
-msgid ""
-"\n"
-"                                        %(c_prod.name)s is affected by "
-"critical vulnerabilities."
-msgstr ""
-
-#: templates/dojo/metrics.html:188
-#, python-format
-msgid ""
-"\n"
-"                                        %(c_prod.name)s is affected by high "
-"severity vulnerabilities."
-msgstr ""
-
-#: templates/dojo/metrics.html:197
-msgid "Full Metrics"
-msgstr ""
-
-#: templates/dojo/metrics.html:205
-msgid "No Critical Products registered"
-msgstr ""
-
-#: templates/dojo/metrics.html:226
-msgid "Active Bug Count by Month"
-msgstr ""
-
-#: templates/dojo/metrics.html:284
-msgid "Metric Counts"
-msgstr ""
-
-#: templates/dojo/metrics.html:292
-msgid "Top 10 Products <br/> by bug severity"
-msgstr ""
-
-#: templates/dojo/metrics.html:296
-msgid "Detail Breakdown"
-msgstr ""
-
-#: templates/dojo/metrics.html:297
-msgid "Opened Findings"
-msgstr ""
-
-#: templates/dojo/metrics.html:298
-msgid "Accepted Findings"
-msgstr ""
-
-#: templates/dojo/metrics.html:300
-msgid "Trending Open<br/>Bug Count"
-msgstr ""
-
-#: templates/dojo/metrics.html:302
-msgid "Trending Accepted <br/> Bug Count"
-msgstr ""
-
-#: templates/dojo/metrics.html:304
-msgid "Age of Issues"
-msgstr ""
-
-#: templates/dojo/metrics.html:313 templates/dojo/metrics.html:370
-#: templates/dojo/metrics.html:390 templates/dojo/metrics.html:417
-#: templates/dojo/metrics.html:437 templates/dojo/metrics.html:466
-#: templates/dojo/metrics.html:486 templates/dojo/metrics.html:513
-#: templates/dojo/metrics.html:537 templates/dojo/metrics.html:564
-#: templates/dojo/metrics.html:586 templates/dojo/pt_counts.html:31
-#: templates/dojo/pt_counts.html:68 templates/dojo/pt_counts.html:104
-#: templates/dojo/pt_counts.html:142 templates/dojo/pt_counts.html:196
-#: templates/dojo/simple_metrics.html:24
-msgid "Critical"
-msgstr ""
-
-#: templates/dojo/metrics.html:317 templates/dojo/metrics.html:375
-#: templates/dojo/metrics.html:395 templates/dojo/metrics.html:422
-#: templates/dojo/metrics.html:442 templates/dojo/metrics.html:471
-#: templates/dojo/metrics.html:491 templates/dojo/metrics.html:517
-#: templates/dojo/metrics.html:541 templates/dojo/metrics.html:568
-#: templates/dojo/metrics.html:590 templates/dojo/pt_counts.html:35
-#: templates/dojo/pt_counts.html:72 templates/dojo/pt_counts.html:108
-#: templates/dojo/pt_counts.html:200 templates/dojo/simple_metrics.html:23
-msgid "Total"
-msgstr ""
-
-#: templates/dojo/metrics.html:336
-msgid "Team"
-msgstr ""
-
-#: templates/dojo/metrics.html:340
-msgid "Days<br/>Open"
-msgstr ""
-
-#: templates/dojo/metrics.html:341 templates/dojo/simple_search.html:192
-#: templates/dojo/simple_search.html:227
-msgid "Status"
-msgstr ""
-
-#: templates/dojo/metrics.html:366
-msgid "Opened During Period"
-msgstr ""
-
-#: templates/dojo/metrics.html:374 templates/dojo/metrics.html:394
-#: templates/dojo/metrics.html:421 templates/dojo/metrics.html:441
-#: templates/dojo/metrics.html:470 templates/dojo/metrics.html:490
-#: templates/dojo/simple_metrics.html:28
-msgid "Info"
-msgstr ""
-
-#: templates/dojo/metrics.html:413
-msgid "Accepted in Period"
-msgstr ""
-
-#: templates/dojo/metrics.html:462
-msgid "Closed in Period"
-msgstr ""
-
-#: templates/dojo/metrics.html:512
-msgid "Weekly"
-msgstr ""
-
-#: templates/dojo/metrics.html:518 templates/dojo/metrics.html:542
-msgid "Closed*"
-msgstr ""
-
-#: templates/dojo/metrics.html:536
-msgid "Monthly"
-msgstr ""
-
-#: templates/dojo/metrics.html:556
-msgid "*Closed findings may have been opened outside of requested period."
-msgstr ""
-
-#: templates/dojo/metrics.html:563
-msgid "By Week"
-msgstr ""
-
-#: templates/dojo/metrics.html:585
-msgid "By Month"
-msgstr ""
-
-#: templates/dojo/metrics.html:609
-msgid "Days"
-msgstr ""
-
-#: templates/dojo/metrics.html:610
-msgid "Bug Count"
-msgstr ""
-
-#: templates/dojo/metrics.html:613
-msgid "0 - 30 Days"
-msgstr ""
-
-#: templates/dojo/metrics.html:617
-msgid "31 - 60 Days"
-msgstr ""
-
-#: templates/dojo/metrics.html:621
-msgid "61 - 90 Days"
-msgstr ""
-
-#: templates/dojo/metrics.html:625
-msgid "91+ Days"
-msgstr ""
-
-#: templates/dojo/new_tool_type.html:6
-msgid "Add a Tool Type Configuration"
-msgstr ""
-
-#: templates/dojo/notifications.html:10 templates/dojo/notifications.html:14
-#: templates/dojo/notifications.html:23
-msgid "System"
-msgstr ""
-
-#: templates/dojo/notifications.html:12 templates/dojo/notifications.html:24
-msgid "Personal"
-msgstr ""
-
-#: templates/dojo/notifications.html:16
-msgid "Notification Settings"
-msgstr ""
-
-#: templates/dojo/notifications.html:21
-msgid "Scope"
-msgstr ""
-
-#: templates/dojo/notifications.html:21
-msgid ""
-"Destinations for system notifications are configured in System Settings. "
-"Destinations for personal notifications are taken from your personal contact "
-"details (personal Slack notifications will be sent to you as a direct "
-"message)."
-msgstr ""
-
-#: templates/dojo/notifications.html:25
-msgid "Template"
-msgstr ""
-
-#: templates/dojo/notifications.html:33
-msgid ""
-"These notification settings apply <u>globally</u> to all products and will "
-"be sent to all superusers."
-msgstr ""
-
-#: templates/dojo/notifications.html:35
-msgid ""
-"These notification settings apply <u>globally</u> to all products that you "
-"have read access to and will be sent to you only."
-msgstr ""
-
-#: templates/dojo/notifications.html:36
-msgid ""
-"If you want only notifications for certain products you should disable "
-"everything here and enable notifications on those products."
-msgstr ""
-
-#: templates/dojo/notifications.html:38
-msgid "These template <u>template</u>"
-msgstr ""
-
-#: templates/dojo/notifications.html:50
-msgid "Event"
-msgstr ""
-
-#: templates/dojo/notifications.html:52
-#: templates/dojo/view_product_details.html:596
-msgid "Slack"
-msgstr ""
-
-#: templates/dojo/notifications.html:55
-msgid "Microsoft Teams"
-msgstr ""
-
-#: templates/dojo/notifications.html:58
-#: templates/dojo/view_product_details.html:599
-msgid "Mail"
-msgstr ""
-
-#: templates/dojo/notifications.html:60
-#: templates/dojo/view_product_details.html:601
-msgid "Alert"
-msgstr ""
-
-#: templates/dojo/password_reset.html:5
-#: templates/dojo/password_reset_complete.html:5
-#: templates/dojo/password_reset_done.html:5
+#: dojo/templates/dojo/password_reset.html:5
+#: dojo/templates/dojo/password_reset_complete.html:5
+#: dojo/templates/dojo/password_reset_done.html:5
 msgid "Password reset"
 msgstr ""
 
-#: templates/dojo/password_reset.html:6
+#: dojo/templates/dojo/password_reset.html:6
 msgid ""
 "Forgotten your password? Enter your email address below, and we’ll email "
 "instructions for setting a new one."
 msgstr ""
 
-#: templates/dojo/password_reset.html:13
+#: dojo/templates/dojo/password_reset.html:13
 msgid "Reset my password"
 msgstr ""
 
-#: templates/dojo/password_reset_complete.html:7
+#: dojo/templates/dojo/password_reset_complete.html:7
 msgid "Your password has been set.  You may go ahead and log in now."
 msgstr ""
 
-#: templates/dojo/password_reset_complete.html:10
+#: dojo/templates/dojo/password_reset_complete.html:10
 msgid "Log in"
 msgstr ""
 
-#: templates/dojo/password_reset_confirm.html:5
+#: dojo/templates/dojo/password_reset_confirm.html:5
 msgid "Password reset confirmation"
 msgstr ""
 
-#: templates/dojo/password_reset_confirm.html:7
+#: dojo/templates/dojo/password_reset_confirm.html:7
 msgid ""
 "Please enter your new password twice so we can verify you typed it in "
 "correctly."
 msgstr ""
 
-#: templates/dojo/password_reset_confirm.html:13
+#: dojo/templates/dojo/password_reset_confirm.html:13
 msgid "Change my password"
 msgstr ""
 
-#: templates/dojo/password_reset_confirm.html:20
+#: dojo/templates/dojo/password_reset_confirm.html:20
 msgid ""
 "The password reset link was invalid, possibly because it has already been "
 "used.  Please request a new password reset."
 msgstr ""
 
-#: templates/dojo/password_reset_done.html:7
+#: dojo/templates/dojo/password_reset_done.html:7
 msgid ""
 "We’ve emailed you instructions for setting your password, if an account "
 "exists with the email you entered. You should receive them shortly."
 msgstr ""
 
-#: templates/dojo/password_reset_done.html:8
+#: dojo/templates/dojo/password_reset_done.html:8
 msgid ""
 "If you don’t receive an email, please make sure you’ve entered the address "
 "you registered with, and check your spam folder."
@@ -3147,151 +2340,34 @@ msgstr ""
 msgid "The password must contain at least 1 digit, 0-9."
 msgstr ""
 
-#: user/validators.py:17
+#: dojo/user/validators.py:17
 msgid "Your password must contain at least 1 digit, 0-9."
 msgstr ""
 
-#: user/validators.py:25
+#: dojo/user/validators.py:25
 msgid "The password must contain at least 1 uppercase letter, A-Z."
 msgstr ""
 
-#: user/validators.py:31
+#: dojo/user/validators.py:31
 msgid "Your password must contain at least 1 uppercase letter, A-Z."
 msgstr ""
 
-#: user/validators.py:39
+#: dojo/user/validators.py:39
 msgid "The password must contain at least 1 lowercase letter, a-z."
 msgstr ""
 
-#: user/validators.py:45
+#: dojo/user/validators.py:45
 msgid "Your password must contain at least 1 lowercase letter, a-z."
 msgstr ""
 
-#: user/validators.py:53
+#: dojo/user/validators.py:53
 msgid ""
 "The password must contain at least 1 symbol: ()[]{}|\\`~!@#$%^&*_-+=;:'\","
 "<>./?"
 msgstr ""
 
-#: user/validators.py:60
+#: dojo/user/validators.py:60
 msgid ""
 "Your password must contain at least 1 symbol: ()[]{}|\\`~!@#$%^&*_-+=;:'\","
 "<>./?"
-msgstr ""
-
-#: user/views.py:62
-msgid "API Key generated successfully."
-msgstr ""
-
-#: user/views.py:133
-msgid "You have logged out successfully."
-msgstr ""
-
-#: user/views.py:167
-msgid "Alerts removed."
-msgstr ""
-
-#: user/views.py:227
-msgid "Only superusers are allowed to change their global role."
-msgstr ""
-
-#: user/views.py:234
-msgid "Profile updated successfully."
-msgstr ""
-
-#: user/views.py:236
-#, python-format
-msgid "User Profile - %(user_full_name)s"
-msgstr ""
-
-#: user/views.py:264
-msgid "Your password has been changed."
-msgstr ""
-
-#: user/views.py:268
-msgid "Change Password"
-msgstr ""
-
-#: user/views.py:281
-msgid "All Users"
-msgstr ""
-
-#: user/views.py:329
-msgid "User added successfully."
-msgstr ""
-
-#: user/views.py:335
-msgid "User was not added successfully."
-msgstr ""
-
-#: user/views.py:337
-msgid "Add User"
-msgstr ""
-
-#: user/views.py:354
-msgid "View User"
-msgstr ""
-
-#: user/views.py:396
-msgid "Only superusers are allowed to edit superusers. User was not saved."
-msgstr ""
-
-#: user/views.py:401
-msgid ""
-"Only superusers are allowed to edit users with a global role. User was not "
-"saved."
-msgstr ""
-
-#: user/views.py:413
-msgid "User saved successfully."
-msgstr ""
-
-#: user/views.py:418
-msgid "User was not saved successfully."
-msgstr ""
-
-#: user/views.py:420
-msgid "Edit User"
-msgstr ""
-
-#: user/views.py:437
-msgid "You may not delete yourself."
-msgstr ""
-
-#: user/views.py:448
-msgid "Only superusers are allowed to delete superusers. User was not removed."
-msgstr ""
-
-#: user/views.py:453
-msgid ""
-"Only superusers are allowed to delete users with a global role. User was not "
-"removed."
-msgstr ""
-
-#: user/views.py:460
-msgid "User and relationships removed."
-msgstr ""
-
-#: user/views.py:473
-msgid "Delete User"
-msgstr ""
-
-#: user/views.py:499
-msgid "Product type members added successfully."
-msgstr ""
-
-#: user/views.py:502
-msgid "Add Product Type Member"
-msgstr ""
-
-#: user/views.py:556
-msgid "Groups added successfully."
-msgstr ""
-
-#: user/views.py:560
-msgid "Add Group Member"
-msgstr ""
-
-#: user/views.py:576
-msgid "Permissions updated."
 msgstr ""
