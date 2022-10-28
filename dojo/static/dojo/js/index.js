@@ -1,5 +1,4 @@
 $(function () {
-    announcement();
     $('body').append('<a id="toTop" title="Back to Top" class="btn btn-primary btn-circle"><i class="fa fa-fw fa-arrow-up"></i></a>');
     $(window).scroll(function () {
         if ($(this).scrollTop() > 300) {

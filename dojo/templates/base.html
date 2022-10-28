@@ -491,10 +491,10 @@
                                                 <span>{% trans "Configuration" %}</span>
                                             </a>
                                             <ul class="nav nav-second-level">
-                                                {% if "dojo.change_announcementbanner"|has_configuration_permission %}
+                                                {% if "dojo.change_announcement"|has_configuration_permission %}
                                                     <li>
-                                                        <a href="{% url 'configure_announcement_banner' %}">
-                                                            {% trans "Announcement Banner" %}
+                                                        <a href="{% url 'configure_announcement' %}">
+                                                            {% trans "Announcement" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
@@ -605,15 +605,15 @@
             {% endblock %}
             <!-- Page Content -->
             <div id="page-wrapper">
-                {% if request.user.is_authenticated and announcement_banner and announcement_banner.enable %}
+                {% if request.user.is_authenticated and announcement %}
                     {% load announcement_banner_tags %}
-                    <div role="alert" class="announcement-banner alert alert-{{ announcement_banner.style }} {% if announcement_banner.dismissable %}alert-dismissible{% endif %} show">
-                    {% if announcement_banner.dismissable %}
-                        <a href="{% url 'dismiss_announcement_banner' %}" class="close" aria-label="Close">
+                    <div role="alert" class="announcement-banner alert alert-{{ announcement.style }} {% if announcement.dismissable %}alert-dismissible{% endif %} show">
+                    {% if announcement.dismissable %}
+                        <a href="{% url 'dismiss_announcement' %}" class="close" aria-label="Close">
                             <span aria-hidden="true">×</span>
                         </a>
                     {% endif %}
-                    {{ announcement_banner.message|bleach_announcement_message }}
+                    {{ announcement.message|bleach_announcement_message }}
                     </div>
                 {% endif %}
                 <div class="container-fluid">

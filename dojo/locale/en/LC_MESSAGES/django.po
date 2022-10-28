@@ -2536,7 +2536,7 @@ msgid "Configuration"
 msgstr ""
 
 #: templates/base.html:498
-msgid "Announcement Banner"
+msgid "Announcement"
 msgstr ""
 
 #: templates/base.html:505

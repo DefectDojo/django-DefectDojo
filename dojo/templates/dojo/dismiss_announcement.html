@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
     {{ block.super }}
-    <h3> Dismiss Announcement Banner {{ product }}</h3>
+    <h3> Dismiss Announcement {{ product }}</h3>
     <p>
-        Dismissing the announcement banner will remove the current announcement from your view
+        Dismissing the announcement will remove the current announcement from your view
     </p>
     <div class="danger-zone panel panel-danger">
         <div class="panel-heading">
@@ -14,7 +14,7 @@
             {{ form }}
 
             <div class="form-group">
-                <button class="btn btn-danger" type="submit" name="dismiss_announcement_banner_name" value="dismiss_announcement_banner">Dismiss Announcement</button>
+                <button class="btn btn-danger" type="submit" name="dismiss_announcement_name" value="dismiss_announcement">Dismiss Announcement</button>
             </div>
         </form>
     </div>

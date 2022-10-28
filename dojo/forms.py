@@ -22,7 +22,7 @@ import tagulous
 
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
     validate_endpoints_to_add
-from dojo.models import AnnouncementBanner, Finding, Finding_Group, Product_Type, Product, Note_Type, \
+from dojo.models import ANNOUNCEMENT_STYLE_CHOICES, Announcement, Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, SLA_Configuration, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
@@ -2883,22 +2883,23 @@ class LoginBanner(forms.Form):
         cleaned_data = super().clean()
         return cleaned_data
 
-class AnnouncementBannerForm(forms.ModelForm):
-    enable = forms.BooleanField(
-        label="Enable announcement",
-        initial=False,
-        required=False,
-        help_text='Ticking this box displays the announcement banner on all pages for authenticated users'
-    )
+class AnnouncementCreateForm(forms.ModelForm):
     dismissable = forms.BooleanField(
         label="Dismissable?",
         initial=False,
         required=False,
-        help_text='Ticking this box allows users to dismiss the current announcement banner'
+        help_text='Ticking this box allows users to dismiss the current announcement'
     )
     class Meta:
-        model = AnnouncementBanner
+        model = Announcement
         fields = ['message', 'style']
+
+class AnnouncementRemoveForm(AnnouncementCreateForm):
+    def __init__(self, *args, **kwargs):
+        super(AnnouncementRemoveForm, self).__init__(*args, **kwargs)
+        self.fields['dismissable'].disabled = True
+        self.fields['message'].disabled = True
+        self.fields['style'].disabled = True
 
 # ==============================
 # Defect Dojo Engaegment Surveys

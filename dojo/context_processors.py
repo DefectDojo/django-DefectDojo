@@ -1,8 +1,6 @@
 # import the settings file
 from django.conf import settings
 
-from dojo import announcement_banner
-
 
 def globalize_vars(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
@@ -41,12 +39,12 @@ def bind_alert_count(request):
             return {'alert_count': Alerts.objects.filter(user_id=request.user).count()}
     return {}
 
-def bind_announcement_banner(request):
-    from dojo.models import AnnouncementBanner
+def bind_announcement(request):
+    from dojo.models import UserAnnouncement
     try:
         if request.user.is_authenticated:
-            announcement_banner = AnnouncementBanner.objects.select_related('dismissal').get(id=1)
-            return {'announcement_banner': announcement_banner}
+            user_announcement = UserAnnouncement.objects.select_related('announcement').get(user=request.user)
+            return {'announcement': user_announcement.announcement}
         return {}
     except Exception:
         return {}
