@@ -39,6 +39,9 @@ class Acunetix360Parser(object):
                 sev = 'Info'
             mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
             references = text_maker.handle(item.get("RemedyReferences", ""))
+            if "LookupId" in item:
+                lookupId = item["LookupId"]
+                references = f"https://online.acunetix360.com/issues/detail/{lookupId}\n" + references
             url = item["Url"]
             impact = text_maker.handle(item.get("Impact", ""))
             dupe_key = title

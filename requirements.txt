@@ -32,7 +32,7 @@ mysqlclient==2.1.1
 openpyxl==3.0.10
 xlrd==1.2.0
 Pillow==9.2.0  # required by django-imagekit
-psycopg2-binary==2.9.4
+psycopg2-binary==2.9.5
 cryptography==38.0.2
 python-dateutil==2.8.2
 pytz==2022.5
@@ -53,7 +53,7 @@ debugpy==1.6.3
 python-gitlab==3.10.0
 google-api-python-client==2.65.0
 google-auth==2.13.0
-google-auth-oauthlib==0.6.0
+google-auth-oauthlib==0.7.0
 drf_yasg==1.21.4
 cpe==1.2.1
 packageurl-python==0.10.4
@@ -77,5 +77,5 @@ django-ratelimit==3.0.1
 argon2-cffi==21.3.0
 blackduck==1.0.7
 pycurl==7.45.1  # Required for Celery Broker AWS (SQS) support
-boto3==1.25.0  # Required for Celery Broker AWS (SQS) support
+boto3==1.25.2  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0

@@ -1400,9 +1400,9 @@ class ImportReimportMixin(object):
 
         test = self.get_test_api(test_id)['id']
         finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
-        self.assertEqual(finding.endpoint_status.count(), 1)
+        self.assertEqual(finding.status_finding.count(), 1)
 
-        original_date = finding.endpoint_status.first().date
+        original_date = finding.status_finding.first().date
 
         self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
         self.assertEqual(endpoint_status_count_before_active + 1, self.db_endpoint_status_count(mitigated=False))
@@ -1418,9 +1418,9 @@ class ImportReimportMixin(object):
         self.assert_finding_count_json(1, findings)
 
         finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
-        self.assertEqual(finding.endpoint_status.count(), 1)
+        self.assertEqual(finding.status_finding.count(), 1)
 
-        reimported_date = finding.endpoint_status.first().date
+        reimported_date = finding.status_finding.first().date
         self.assertEqual(original_date, reimported_date)
 
         self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
