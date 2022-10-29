@@ -2713,19 +2713,26 @@ class JIRAFindingForm(forms.Form):
 
         logger.debug('self.cleaned_data.push_to_jira: %s', self.cleaned_data.get('push_to_jira', None))
 
-        if self.cleaned_data.get('push_to_jira', None) and finding.has_jira_group_issue:
-            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(self.instance.finding_group, self.finding_form)
+        if self.cleaned_data.get('push_to_jira', None) and finding and finding.has_jira_group_issue:
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(finding.finding_group, self.finding_form)
             if not can_be_pushed_to_jira:
                 self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
                 # for field in error_fields:
                 #     self.finding_form.add_error(field, error)
 
-        elif self.cleaned_data.get('push_to_jira', None):
-            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(self.instance, self.finding_form)
+        elif self.cleaned_data.get('push_to_jira', None) and finding:
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(finding, self.finding_form)
             if not can_be_pushed_to_jira:
                 self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
                 # for field in error_fields:
                 #     self.finding_form.add_error(field, error)
+        elif self.cleaned_data.get('push_to_jira', None):
+            active = self.finding_form['active'].value()
+            verified = self.finding_form['verified'].value()
+            if not active or not verified:
+                logger.debug('Findings must be active and verified to be pushed to JIRA')
+                error_message = 'Findings must be active and verified to be pushed to JIRA'
+                self.add_error('push_to_jira', ValidationError(error_message, code='not_active_or_verified'))
 
         if jira_issue_key_new and (not finding or not finding.has_jira_group_issue):
             # when there is a group jira issue, we skip all the linking/unlinking as this is not supported (yet)
