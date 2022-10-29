@@ -110,7 +110,7 @@ jobs:
   setting_minikube_cluster:
     name: Kubernetes Deployment
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     needs: build
 

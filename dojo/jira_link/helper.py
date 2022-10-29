@@ -984,7 +984,16 @@ def push_status_to_jira(obj, jira_instance, jira, issue, save=False):
 
 # gets the metadata for the default issue type in this jira project
 def get_jira_meta(jira, jira_project):
-    meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
+    meta = None
+    try:
+        meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
+    except JIRAError as e:
+        message = "Invalid JIRA Project Config, can't retrieve or create metadata. status: %d, message: %s" % (e.status_code, e.text)
+        logger.warn(message)
+
+        add_error_message_to_response(message)
+
+        raise e
 
     meta_data_error = False
     if len(meta['projects']) == 0:
@@ -1036,7 +1045,7 @@ def is_jira_project_valid(jira_project):
         meta = get_jira_meta(get_jira_connection(jira_project), jira_project)
         return True
     except JIRAError as e:
-        logger.debug('invalid JIRA Project Config, can''t retrieve metadata for: ''%s''', jira_project)
+        logger.debug("invalid JIRA Project Config, can't retrieve metadata for '%s'", jira_project)
         return False
 
 
@@ -1138,7 +1147,12 @@ def update_epic(engagement, **kwargs):
             jira = get_jira_connection(jira_instance)
             j_issue = get_jira_issue(engagement)
             issue = jira.issue(j_issue.jira_id)
-            issue.update(summary=engagement.name, description=engagement.name)
+
+            epic_name = kwargs.get('epic_name')
+            if not epic_name:
+                epic_name = engagement.name
+
+            issue.update(summary=epic_name, description=epic_name)
             return True
         except JIRAError as e:
             logger.exception(e)
@@ -1165,17 +1179,22 @@ def add_epic(engagement, **kwargs):
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
     if jira_project.enable_engagement_epic_mapping:
+        epic_name = kwargs.get('epic_name')
+        if not epic_name:
+            epic_name = engagement.name
         issue_dict = {
             'project': {
                 'key': jira_project.project_key
             },
-            'summary': engagement.name,
-            'description': engagement.name,
+            'summary': epic_name,
+            'description': epic_name,
             'issuetype': {
                 'name': 'Epic'
             },
-            get_epic_name_field_name(jira_instance): engagement.name,
+            get_epic_name_field_name(jira_instance): epic_name,
         }
+        if kwargs.get('epic_priority'):
+            issue_dict['priority'] = {'name': kwargs.get('epic_priority')}
         try:
             jira = get_jira_connection(jira_instance)
             logger.debug('add_epic: %s', issue_dict)
@@ -1403,7 +1422,13 @@ def process_jira_epic_form(request, engagement=None):
         if jira_epic_form.is_valid():
             if jira_epic_form.cleaned_data.get('push_to_jira'):
                 logger.debug('pushing engagement to JIRA')
-                if push_to_jira(engagement):
+                epic_name = engagement.name
+                if jira_epic_form.cleaned_data.get('epic_name'):
+                    epic_name = jira_epic_form.cleaned_data.get('epic_name')
+                epic_priority = None
+                if jira_epic_form.cleaned_data.get('epic_priority'):
+                    epic_priority = jira_epic_form.cleaned_data.get('epic_priority')
+                if push_to_jira(engagement, epic_name=epic_name, epic_priority=epic_priority):
                     logger.debug('Push to JIRA for Epic queued successfully')
                     messages.add_message(
                         request,

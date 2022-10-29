@@ -288,9 +288,10 @@ def endpoint_querys(prod_type, request):
                                       relative_delta='weeks')
 
     top_ten = get_authorized_products(Permissions.Product_View)
-    top_ten = top_ten.filter(engagement__test__finding__endpoint_status__mitigated=False,
-                                     engagement__test__finding__endpoint_status__false_positive=False,
-                                     engagement__test__finding__endpoint_status__out_of_scope=False,
+    top_ten = top_ten.filter(engagement__test__finding__status_finding__mitigated=False,
+                                     engagement__test__finding__status_finding__false_positive=False,
+                                     engagement__test__finding__status_finding__out_of_scope=False,
+                                     engagement__test__finding__status_finding__risk_accepted=False,
                                      engagement__test__finding__severity__in=(
                                          'Critical', 'High', 'Medium', 'Low'),
                                      prod_type__in=prod_type)

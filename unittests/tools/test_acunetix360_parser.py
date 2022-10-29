@@ -25,6 +25,7 @@ class TestAcunetix360Parser(DojoTestCase):
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual(str(endpoint), "http://php.testsparker.com/auth/login.php")
             self.assertEqual(finding.date, datetime(2021, 6, 16, 12, 30))
+            self.assertTrue("https://online.acunetix360.com/issues/detail/735f4503-e9eb-4b4c-4306-ad49020a4c4b" in finding.references)
 
     def test_parse_file_with_one_finding_false_positive(self):
         testfile = open("unittests/scans/acunetix360/acunetix360_one_finding_false_positive.json")
