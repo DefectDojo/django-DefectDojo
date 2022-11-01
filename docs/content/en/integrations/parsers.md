@@ -1077,6 +1077,10 @@ It's possible to activate de-duplication based on this data by customizing setti
 DEDUPLICATION_ALGORITHM_PER_PARSER["SARIF"] = DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
 ```
 
+### Scantist Scan
+Scantist is an open source management platform. Scan and remediate open source security, licensing and compliance risks across your software development lifecycle.
+Here you can find more information: <https://scantist.com/>
+
 ### ScoutSuite
 
 Multi-Cloud security auditing tool. It uses APIs exposed by cloud
