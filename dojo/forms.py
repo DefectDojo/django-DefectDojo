@@ -1509,7 +1509,10 @@ class CloseFindingForm(forms.ModelForm):
 
     mitigated = forms.DateField(required=False, help_text='Date and time when the flaw has been fixed', widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     mitigated_by = forms.ModelChoiceField(required=False, queryset=Dojo_User.objects.none())
-
+    false_positive = forms.BooleanField(initial=False, required=False, label='False Positive')
+    out_of_scope = forms.BooleanField(initial=False, required=False, label='Out of Scope')
+    duplicate = forms.BooleanField(initial=False, required=False, label='Duplicate')
+    
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('missing_note_types')
         super(CloseFindingForm, self).__init__(*args, **kwargs)
@@ -1540,7 +1543,7 @@ class CloseFindingForm(forms.ModelForm):
 
     class Meta:
         model = Notes
-        fields = ['note_type', 'entry', 'mitigated', 'mitigated_by']
+        fields = ['note_type', 'entry', 'mitigated', 'mitigated_by', 'false_positive', 'out_of_scope', 'duplicate']
 
 
 class EditPlannedRemediationDateFindingForm(forms.ModelForm):
