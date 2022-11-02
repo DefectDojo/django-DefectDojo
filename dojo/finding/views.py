@@ -438,9 +438,9 @@ def close_finding(request, fid):
                 finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
-                finding.false_p = form.cleaned_data.get("false_positive",False)
-                finding.out_of_scope = form.cleaned_data.get("out_of_scope",False)
-                finding.duplicate = form.cleaned_data.get("duplicate",False)
+                finding.false_p = form.cleaned_data.get("false_positive", False)
+                finding.out_of_scope = form.cleaned_data.get("out_of_scope", False)
+                finding.duplicate = form.cleaned_data.get("duplicate", False)
                 endpoint_status = finding.status_finding.all()
                 for status in endpoint_status:
                     status.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
