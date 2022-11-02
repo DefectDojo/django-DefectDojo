@@ -559,7 +559,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                     finding.mitigated = timezone.now()
                 finding.mitigated_by = request.user
                 finding.active = False
-                finding.false_p = finding_close.validated_data['false_positive']
+                finding.false_p = finding_close.validated_data['false_p']
                 finding.duplicate = finding_close.validated_data['duplicate']
                 finding.out_of_scope = finding_close.validated_data['out_of_scope']
 
