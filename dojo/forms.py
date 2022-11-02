@@ -418,7 +418,7 @@ class ImportScanForm(forms.Form):
         allow_empty_file=True,
         required=False)
 
-    __old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
+    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
                                                         "If service has been set, only the findings for this service will be closed. "
                                                         "This affects the whole engagement/product depending on your deduplication scope.",
                                             required=False, initial=False)
