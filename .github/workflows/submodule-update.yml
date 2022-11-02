@@ -32,6 +32,7 @@ jobs:
         
       - name: Get changed files in the docs folder
         id: dev-changed-docs-files
+        if: steps.branch-target.outputs.branch == 'dev'
         uses: tj-actions/changed-files@v34
         with:
           files: |
@@ -58,6 +59,7 @@ jobs:
       - name: Get changed files in the docs folder
         id: master-changed-doc-files
         uses: tj-actions/changed-files@v34
+        if: steps.branch-target.outputs.branch == 'master'
         with:
           files: |
             docs/**
