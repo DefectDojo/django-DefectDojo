@@ -113,19 +113,27 @@ def login_view(request):
             social_auth = 'github-enterprise'
         else:
             return HttpResponseRedirect('/saml2/login')
-        return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', args=[social_auth]),
+        try:
+            return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', args=[social_auth]),
                                                    urlencode({'next': request.GET.get('next')})))
+        except:
+            return HttpResponseRedirect(reverse('social:begin', args=[social_auth]))
     else:
         return LoginView.as_view(template_name='dojo/login.html', authentication_form=AuthenticationForm)(request)
 
 
 def logout_view(request):
     logout(request)
-    messages.add_message(request,
+
+    if not settings.SHOW_LOGIN_FORM:
+        return login_view(request)
+    else:
+        messages.add_message(request,
                          messages.SUCCESS,
                          _('You have logged out successfully.'),
                          extra_tags='alert-success')
-    return HttpResponseRedirect(reverse('login'))
+
+        return HttpResponseRedirect(reverse('login'))
 
 
 @user_passes_test(lambda u: u.is_active)
