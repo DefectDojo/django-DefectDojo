@@ -28,6 +28,7 @@ jobs:
         if: steps.branch-target.outputs.branch == 'dev'
         with:
           ref: dev
+          fetch-depth: 0
         
       - name: Get changed files in the docs folder
         id: dev-changed-docs-files
@@ -52,6 +53,7 @@ jobs:
         if: steps.branch-target.outputs.branch == 'master'
         with:
           ref: master
+          fetch-depth: 0
           
       - name: Get changed files in the docs folder
         id: master-changed-doc-files
