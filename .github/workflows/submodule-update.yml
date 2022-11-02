@@ -28,18 +28,11 @@ jobs:
         if: steps.branch-target.outputs.branch == 'dev'
         with:
           ref: dev
-        
-      - name: Get changed files in the docs folder
-        id: dev-changed-docs-files
-        uses: tj-actions/changed-files@v34
-        with:
-          files: |
-            docs/**
 
       - name: Create PR to Documentation repo on dev branch
         id: create_dev_pr
         uses: releasehub-com/github-action-create-pr-parent-submodule@v1
-        if: steps.branch-target.outputs.branch == 'dev' && steps.changed-files-specific.outputs.any_changed == 'true'
+        if: steps.branch-target.outputs.branch == 'dev'
         with:
           github_token: ${{ secrets.DOCUMENTATION_TOKEN }}
           parent_repository: ${{ env.PARENT_REPOSITORY }}
@@ -52,18 +45,11 @@ jobs:
         if: steps.branch-target.outputs.branch == 'master'
         with:
           ref: master
-          
-      - name: Get changed files in the docs folder
-        id: master-changed-doc-files
-        uses: tj-actions/changed-files@v34
-        with:
-          files: |
-            docs/**
 
       - name: Create PR to Documentation repo on master branch
         id: create_master_pr
         uses: releasehub-com/github-action-create-pr-parent-submodule@v1
-        if: steps.branch-target.outputs.branch == 'master' && steps.changed-files-specific.outputs.any_changed == 'true'
+        if: steps.branch-target.outputs.branch == 'master'
         with:
           github_token: ${{ secrets.DOCUMENTATION_TOKEN }}
           parent_repository: ${{ env.PARENT_REPOSITORY }}
