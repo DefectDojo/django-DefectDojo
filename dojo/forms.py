@@ -1512,7 +1512,7 @@ class CloseFindingForm(forms.ModelForm):
     false_p = forms.BooleanField(initial=False, required=False, label='False Positive')
     out_of_scope = forms.BooleanField(initial=False, required=False, label='Out of Scope')
     duplicate = forms.BooleanField(initial=False, required=False, label='Duplicate')
-    
+
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('missing_note_types')
         super(CloseFindingForm, self).__init__(*args, **kwargs)
