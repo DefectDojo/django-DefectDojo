@@ -559,6 +559,9 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                     finding.mitigated = timezone.now()
                 finding.mitigated_by = request.user
                 finding.active = False
+                finding.false_p = finding_close.validated_data['false_positive']
+                finding.duplicate = finding_close.validated_data['duplicate']
+                finding.out_of_scope = finding_close.validated_data['out_of_scope']
 
                 endpoints_status = finding.endpoint_status.all()
                 for e_status in endpoints_status:
