@@ -72,6 +72,11 @@ class VeracodeParser(object):
         for component in root.findall('x:software_composition_analysis/x:vulnerable_components'
                                              '/x:component', namespaces=XML_NAMESPACE):
             _library = component.attrib['library']
+            if 'library_id' in component.attrib and component.attrib['library_id'].startswith("maven:"):
+                # Set the library name from the maven component if it's available to align with CycloneDX + Veracode SCA
+                split_library_id = component.attrib['library_id'].split(":")
+                if len(split_library_id) > 2:
+                    _library = split_library_id[2]
             _vendor = component.attrib['vendor']
             _version = component.attrib['version']
 

@@ -62,6 +62,11 @@ repositoryPrefix: defectdojo
 # imagePullSecrets: defectdojoregistrykey
 tag: latest
 
+# Additional labels to add to the pods:
+# podLabels:
+#   key: value
+podLabels: {}
+
 securityContext:
   enabled: true
   djangoSecurityContext:
@@ -276,8 +281,14 @@ django:
     # could be emptyDir (not for production) or pvc
     type: emptyDir
     # in case if pvc specified, should point to the already existing pvc
-    persistentVolumeClaim: media
-
+    persistentVolumeClaim:
+      # set to true to create a new pvc and if django.mediaPersistentVolume.type is set to pvc
+      create: false
+      name:
+      size: 5Gi
+      accessModes:
+      - ReadWriteMany  # check KUBERNETES.md doc first for option to choose
+      storageClassName:
 
 initializer:
   run: true
@@ -404,7 +415,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.32.0
+    tag: 1.33.0
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""

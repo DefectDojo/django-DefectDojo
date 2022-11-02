@@ -2,7 +2,7 @@ import collections
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
-from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY, UNDER_REVIEW_QUERY
+from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, NOT_ACCEPTED_FINDINGS_QUERY, WAS_ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY, UNDER_REVIEW_QUERY
 import logging
 from datetime import timedelta, datetime
 from django import forms
@@ -500,15 +500,12 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
 
     def accepted(self, qs, name):
         # return qs.filter(risk_acceptance__isnull=False)
-        from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
         return qs.filter(ACCEPTED_FINDINGS_QUERY)
 
     def not_accepted(self, qs, name):
-        from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
         return qs.filter(NOT_ACCEPTED_FINDINGS_QUERY)
 
     def was_accepted(self, qs, name):
-        from dojo.finding.views import WAS_ACCEPTED_FINDINGS_QUERY
         return qs.filter(WAS_ACCEPTED_FINDINGS_QUERY)
 
     options = {
@@ -1105,7 +1102,7 @@ class ApiFindingFilter(DojoFilter):
     references = CharFilter(lookup_expr='icontains')
     severity = CharFilter(method=custom_filter, field_name='severity')
     severity_justification = CharFilter(lookup_expr='icontains')
-    step_to_reproduce = CharFilter(lookup_expr='icontains')
+    steps_to_reproduce = CharFilter(lookup_expr='icontains')
     unique_id_from_tool = CharFilter(lookup_expr='icontains')
     title = CharFilter(lookup_expr='icontains')
     # DateRangeFilter
@@ -1196,7 +1193,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'thread_id', 'notes', 'files',
-                   'line', 'endpoint_status', 'cve']
+                   'line', 'cve']
 
 
 class FindingFilter(FindingFilterWithTags):
@@ -1361,7 +1358,7 @@ class FindingFilter(FindingFilterWithTags):
                    'endpoints', 'references',
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
-                   'hash_code', 'endpoint_status',
+                   'hash_code',
                    'reviewers',
                    'created', 'files', 'sla_start_date', 'cvssv3',
                    'severity_justification', 'steps_to_reproduce']
@@ -1785,7 +1782,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['endpoint_status']
+        exclude = ['findings']
 
 
 class ApiEndpointFilter(DojoFilter):
@@ -1968,7 +1965,7 @@ class EndpointReportFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['product', 'endpoint_status']
+        exclude = ['product']
 
 
 class ReportFindingFilter(FindingFilterWithTags):
@@ -1997,8 +1994,8 @@ class ReportFindingFilter(FindingFilterWithTags):
         model = Finding
         # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references', 'test', 'sonarqube_issue',
-                   'thread_id', 'notes', 'endpoints', 'endpoint_status',
+                   'references', 'test', 'sonarqube_issue',
+                   'thread_id', 'notes', 'endpoints',
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 

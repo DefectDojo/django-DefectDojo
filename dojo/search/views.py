@@ -70,10 +70,10 @@ def simple_search(request):
                           "not-tag" in operators or "not-test-tag" in operators or "not-engagement-tag" in operators or "not-product-tag" in operators or \
                           "not-tags" in operators or "not-test-tags" in operators or "not-engagement-tags" in operators or "not-product-tags" in operators
 
-            search_vulnerability_ids = "vulnerability_id" in operators or not(operators)
+            search_vulnerability_ids = "vulnerability_id" in operators or not operators
 
             search_finding_id = "id" in operators
-            search_findings = "finding" in operators or search_finding_id or search_tags or not (operators)
+            search_findings = "finding" in operators or search_finding_id or search_tags or not operators
 
             search_finding_templates = "template" in operators or search_tags or not (operators or search_finding_id)
             search_tests = "test" in operators or search_tags or not (operators or search_finding_id)
