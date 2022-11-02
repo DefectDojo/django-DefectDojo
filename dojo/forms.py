@@ -418,7 +418,7 @@ class ImportScanForm(forms.Form):
         allow_empty_file=True,
         required=False)
 
-    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
+    __old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
                                                         "If service has been set, only the findings for this service will be closed. "
                                                         "This affects the whole engagement/product depending on your deduplication scope.",
                                             required=False, initial=False)
@@ -1509,7 +1509,7 @@ class CloseFindingForm(forms.ModelForm):
 
     mitigated = forms.DateField(required=False, help_text='Date and time when the flaw has been fixed', widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     mitigated_by = forms.ModelChoiceField(required=False, queryset=Dojo_User.objects.none())
-    false_positive = forms.BooleanField(initial=False, required=False, label='False Positive')
+    false_p = forms.BooleanField(initial=False, required=False, label='False Positive')
     out_of_scope = forms.BooleanField(initial=False, required=False, label='Out of Scope')
     duplicate = forms.BooleanField(initial=False, required=False, label='Duplicate')
     
@@ -1543,7 +1543,7 @@ class CloseFindingForm(forms.ModelForm):
 
     class Meta:
         model = Notes
-        fields = ['note_type', 'entry', 'mitigated', 'mitigated_by', 'false_positive', 'out_of_scope', 'duplicate']
+        fields = ['note_type', 'entry', 'mitigated', 'mitigated_by', 'false_p', 'out_of_scope', 'duplicate']
 
 
 class EditPlannedRemediationDateFindingForm(forms.ModelForm):
