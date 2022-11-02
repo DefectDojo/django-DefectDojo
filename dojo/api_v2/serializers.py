@@ -1941,10 +1941,13 @@ class FindingToFilesSerializer(serializers.Serializer):
 class FindingCloseSerializer(serializers.ModelSerializer):
     is_mitigated = serializers.BooleanField(required=False)
     mitigated = serializers.DateTimeField(required=False)
-
+    false_positive = serializers.BooleanField(required=False)
+    out_of_scope = serializers.BooleanField(required=False)
+    duplicate = serializers.BooleanField(required=False)
+    
     class Meta:
         model = Finding
-        fields = ('is_mitigated', 'mitigated')
+        fields = ('is_mitigated', 'mitigated', 'false_p', 'out_of_scope', 'duplicate')
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
