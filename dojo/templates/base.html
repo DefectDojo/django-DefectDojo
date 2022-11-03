@@ -95,8 +95,16 @@
             {% endblock %}
         </style>
     </head>
-    <body class="{% dojo_body_class %}" style="display: contents;">
-        <div id="wrapper" style="filter: invert(1); background-color: inherit;">
+    <body class="{% dojo_body_class %}" style="display: contents;" >
+        <div id="wrapper" style="filter: invert(0); background-color: inherit;">
+            <script type="text/javascript">
+                var element = document.getElementById("wrapper");
+                if (localStorage.isDark === "true") {
+                    element.style.filter = "invert(1)"
+                } else {
+                    element.style.filter = "invert(0)"
+                }
+            </script>
             {% block navigation %}
                 <!-- Navigation -->
                 <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
@@ -143,6 +151,11 @@
                                 <ul class="dropdown-menu dropdown-alerts">
                                 </ul>
                                 <!-- /.dropdown-alerts -->
+                            </li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" type="submit" href="#" onclick="darkModeClick()">
+                                    <i class="fa fa-sun-o fa-fw"></i>
+                                </a>
                             </li>
                         {% endif %}
                         <li class="dropdown">
@@ -220,7 +233,7 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a id="product-side-menu" href="#" aria-expanded="false" aria-label="Products">
+                                            <a id="product-side-menu" href="{% url 'product' %}" aria-expanded="false" aria-label="Products">
                                                 <i class="fa fa-list fa-fw"></i>
                                                 <span>{% trans "Products" %}</span>
                                                 <span class="glyphicon arrow"></span>
@@ -254,7 +267,7 @@
                                             <!-- /.nav-second-level -->
                                         </li>
                                         <li>
-                                            <a href="#" aria-expanded="false" aria-label="Engagements">
+                                            <a href="{% url 'engagement' %}" aria-expanded="false" aria-label="Engagements">
                                                 <i class="fa fa-inbox fa-fw"></i>
                                                 <span>{% trans "Engagements" %}</span>
                                                 <span class="glyphicon arrow"></span>
@@ -289,7 +302,7 @@
                                             <!-- /.nav-second-level -->
                                         </li>
                                         <li>
-                                            <a href="#" aria-expanded="false" aria-label="Findings">
+                                            <a href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                                 <i class="fa fa-bug fa-fw"></i>
                                                 <span>{% trans "Findings" %}</span>
                                                 <span class="glyphicon arrow"></span>
@@ -339,7 +352,7 @@
                                             </ul>
                                         </li>
                                         <li>
-                                            <a href="#" aria-expanded="false" aria-label="Endpoints">
+                                            <a href="{% url 'endpoint' %}" aria-expanded="false" aria-label="Endpoints">
                                                 <i class="fa fa-sitemap fa-fw"></i>
                                                 <span>{% trans "Endpoints" %}</span>
                                                 <span class="glyphicon arrow"></span>
@@ -383,7 +396,7 @@
                                             <!-- /.nav-second-level -->
                                         </li>
                                         <li>
-                                            <a href="#" aria-expanded="false" aria-label="Metrics">
+                                            <a href="{% url 'metrics' %}?date=5&view=dashboard" aria-expanded="false" aria-label="Metrics">
                                                 <i class="fa fa-bar-chart fa-fw"></i>
                                                 <span>{% trans "Metrics" %}</span>
                                                 <span class="glyphicon arrow"></span>
@@ -424,7 +437,7 @@
                                         </li>
                                         {% if "auth.view_user"|has_configuration_permission or "auth.view_group"|has_configuration_permission %}
                                             <li>
-                                                <a href="#" aria-disabled="true" aria-expanded="false" aria-label="Users" id="id_user_menu">
+                                                <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users" id="id_user_menu">
                                                     <i class="fa fa-user fa-fw"></i>
                                                     <span>{% trans "Users" %}</span>
                                                     <span class="glyphicon arrow"></span>
@@ -1132,6 +1145,17 @@
                 $('.selectpicker').selectpicker('render');
 
             });
+            
+            function darkModeClick() {
+                var element = document.getElementById("wrapper");
+                if (element.style.filter === "invert(1)" ) {
+                    element.style.filter = "invert(0)"
+                    localStorage.isDark = false
+                } else{
+                    element.style.filter = "invert(1)"
+                    localStorage.isDark = true
+                }
+            }
         </script>
         {% block extra_javascript %}
         {% endblock %}
