@@ -374,6 +374,30 @@ This will also work with shell inserted variables:
 
 You will still need to set a host value as well.
 
+### Using an existing redis setup with redis-sentinel
+If you want to use a redis-sentinel setup as the Celery broker, you will need to set the following.
+
+1. Set redis.scheme to "sentinel" in values.yaml
+2. Set two additional extraEnv vars specifying the sentinel master name and port in values.yaml
+
+```yaml
+celery:
+  broker: "redis"
+
+redis:
+  redisServer: "PutYourRedisSentinelAddress"
+  scheme: "sentinel"
+
+extraEnv:
+  - name: DD_CELERY_BROKER_TRANSPORT_OPTIONS
+    value: '{"master_name": "mymaster"}'
+  - name: 'DD_CELERY_BROKER_PORT'
+    value: "26379"
+```
+
+
+
+
 ### kubectl commands
 ```zsh
 # View logs of a specific pod
