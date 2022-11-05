@@ -37,20 +37,15 @@ class SolarAppscreenerParser(object):
             finding = Finding(test=test)
             finding.title = row.get('Vulnerability', '')
             finding.description = row.get('Description', '')
-            finding.mitigation = row.get('Recommendations', '')
-            finding.references = row.get('Links', '')
+            finding.mitigation = row.get('Recommendations')
+            finding.references = row.get('Links')
             finding.severity = row.get('Severity Level', 'Info')
-            finding.file_path = row.get('File', '')
-            finding.sast_source_file_path = row.get('File', '')
-            finding.line = row.get('Line', '')
+            finding.file_path = row.get('File')
+            finding.sast_source_file_path = row.get('File')
+            finding.line = row.get('Line')
 
-            if not finding.line.isdigit():
-                finding.line = finding.line.split("-")[0]
-                
-            if finding.line == '':
-                finding.line = 0
-                
-            finding.line = int(finding.line)
+            if finding.line and not finding.line.isdigit():
+                finding.line = int(finding.line.split("-")[0])
 
             finding.sast_source_line = finding.line
 
