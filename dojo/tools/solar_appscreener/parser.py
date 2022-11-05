@@ -44,8 +44,10 @@ class SolarAppscreenerParser(object):
             finding.sast_source_file_path = row.get('File')
             finding.line = row.get('Line')
 
-            if finding.line and not finding.line.isdigit():
-                finding.line = int(finding.line.split("-")[0])
+            if finding.line:
+              if not finding.line.isdigit():
+                finding.line = finding.line.split("-")[0]
+              finding.line = int(finding.line)
 
             finding.sast_source_line = finding.line
 
