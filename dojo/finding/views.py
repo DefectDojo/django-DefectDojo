@@ -743,10 +743,10 @@ def edit_finding(request, fid):
         if finding.active:
             if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
                 note_type_activation = Note_Type.objects.filter(is_active=True).count()
-                closing_disabled = 0
+                closing_disabled = 1
                 if note_type_activation:
-                    closing_disabled = len(get_missing_mandatory_notetypes(finding))
-                if closing_disabled != 0:
+                    closing_disabled = 0
+                if closing_disabled:
                     error_inactive = ValidationError('Can not set a finding as inactive without adding all mandatory notes',
                                                      code='inactive_without_mandatory_notes')
                     error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
