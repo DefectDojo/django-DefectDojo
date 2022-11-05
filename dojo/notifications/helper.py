@@ -63,7 +63,7 @@ def create_notification(event=None, **kwargs):
 
         # System notifications
         try:
-            system_notifications = Notifications.objects.get(user=None)
+            system_notifications = Notifications.objects.get(user=None, template=False)
         except Exception:
             system_notifications = Notifications()
 
