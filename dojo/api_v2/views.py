@@ -519,7 +519,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                                                     'finding_group_set',
                                                     'files',
                                                     'burprawrequestresponse_set',
-                                                    'endpoint_status',
+                                                    'status_finding',
                                                     'finding_meta',
                                                     'test__test_type',
                                                     'test__engagement',
@@ -534,6 +534,48 @@ class FindingViewSet(prefetch.PrefetchListMixin,
             return serializers.FindingCreateSerializer
         else:
             return serializers.FindingSerializer
+
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.FindingCloseSerializer,
+        responses={status.HTTP_200_OK: serializers.FindingCloseSerializer}
+    )
+    @swagger_auto_schema(
+        method='post',
+        request_body=serializers.FindingCloseSerializer,
+        responses={status.HTTP_200_OK: serializers.FindingCloseSerializer}
+    )
+    @action(detail=True, methods=["post"])
+    def close(self, request, pk=None):
+        finding = self.get_object()
+
+        if request.method == 'POST':
+            finding_close = serializers.FindingCloseSerializer(data=request.data)
+            if finding_close.is_valid():
+                finding.is_mitigated = finding_close.validated_data['is_mitigated']
+                if settings.EDITABLE_MITIGATED_DATA:
+                    finding.mitigated = finding_close.validated_data['mitigated'] or timezone.now()
+                else:
+                    finding.mitigated = timezone.now()
+                finding.mitigated_by = request.user
+                finding.active = False
+
+                endpoints_status = finding.endpoint_status.all()
+                for e_status in endpoints_status:
+                    e_status.mitigated_by = request.user
+                    if settings.EDITABLE_MITIGATED_DATA:
+                        e_status.mitigated_time = finding_close.validated_data["mitigated"] or timezone.now()
+                    else:
+                        e_status.mitigated_time = timezone.now()
+                    e_status.mitigated = True
+                    e_status.last_modified = timezone.now()
+                    e_status.save()
+                finding.save()
+            else:
+                return Response(finding_close.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+        serialized_finding = serializers.FindingCloseSerializer(finding)
+        return Response(serialized_finding.data)
 
     @extend_schema(
         methods=['GET'],
@@ -1786,7 +1828,7 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
                                         'test_import_finding_action_set',
                                         'findings_affected',
                                         'findings_affected__endpoints',
-                                        'findings_affected__endpoint_status',
+                                        'findings_affected__status_finding',
                                         'findings_affected__finding_meta',
                                         'findings_affected__jira_issue',
                                         'findings_affected__burprawrequestresponse_set',

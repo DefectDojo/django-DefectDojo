@@ -1037,6 +1037,10 @@ report as follows
 -   Removing both fields will allow retrieval of all findings in the
     Risk Recon instance.
 
+### Rubocop Scan
+
+Import Rubocop JSON scan report (with option -f json).
+
 ### Rusty Hog parser
 
 From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
@@ -1072,6 +1076,10 @@ It's possible to activate de-duplication based on this data by customizing setti
 # in your settings.py file
 DEDUPLICATION_ALGORITHM_PER_PARSER["SARIF"] = DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
 ```
+
+### Scantist Scan
+Scantist is an open source management platform. Scan and remediate open source security, licensing and compliance risks across your software development lifecycle.
+Here you can find more information: <https://scantist.com/>
 
 ### ScoutSuite
 
@@ -1283,4 +1291,4 @@ Import Yarn Audit scan report in JSON format. Use something like `yarn audit --j
 
 ### Zed Attack Proxy
 
-ZAP XML report format.
+ZAP XML report format (with or without requests and responses).

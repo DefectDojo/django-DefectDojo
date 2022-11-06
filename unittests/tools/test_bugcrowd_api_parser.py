@@ -2,7 +2,7 @@ import datetime
 
 from django.test import TestCase
 from dojo.tools.bugcrowd_api.parser import BugcrowdApiParser
-from dojo.models import Test
+from dojo.models import Test, Product_API_Scan_Configuration
 
 
 class TestBugcrowdApiParser(TestCase):
@@ -24,7 +24,10 @@ class TestBugcrowdApiParser(TestCase):
 
             # Bugcrowd link: /submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a"""
             parser = BugcrowdApiParser()
-            findings = parser.get_findings(testfile, Test())
+            test = Test()
+            test.api_scan_configuration = Product_API_Scan_Configuration()
+            test.api_scan_configuration.service_key_1 = "example"
+            findings = parser.get_findings(testfile, test)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual(finding.title, "JWT Alg none")
@@ -39,6 +42,7 @@ class TestBugcrowdApiParser(TestCase):
             self.assertEqual(
                 finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a"
             )
+            self.assertTrue("https://tracker.bugcrowd.com/example/submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a" in finding.references)
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
 
@@ -90,11 +94,12 @@ class TestBugcrowdApiParser(TestCase):
 
             self.assertEqual(finding_1.active, False)
             self.assertEqual(finding_2.active, True)
-            self.assertEqual(finding_3.active, True)
+            self.assertEqual(finding_3.active, False)
 
             self.assertEqual(finding_1.is_mitigated, True)
             self.assertEqual(finding_2.is_mitigated, False)
             self.assertEqual(finding_3.is_mitigated, False)
+            self.assertEqual(finding_3.risk_accepted, True)
 
             self.assertEqual(
                 finding_1.unique_id_from_tool, "3b0e6b2a-c21e-493e-bd19-de40f525016e"
@@ -105,3 +110,33 @@ class TestBugcrowdApiParser(TestCase):
             self.assertEqual(
                 finding_3.unique_id_from_tool, "335a7ba5-57ba-485a-b40e-2f9aa4e19786"
             )
+
+    def test_parse_file_with_not_reproducible_finding(self):
+        with open("unittests/scans/bugcrowd_api/bugcrowd_not_reproducible.json") as testfile:
+
+            #             description = """
+            # Vulnerability Name: JWT alg none
+
+            # Bugcrowd details:
+            # - Severity: P5
+            # - Bug Url: https://example.com/
+
+            # Bugcrowd link: /submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a"""
+            parser = BugcrowdApiParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual(finding.title, "JWT Alg none")
+            self.assertEqual(
+                datetime.datetime.date(finding.date), datetime.date(2002, 4, 1)
+            )
+            self.assertEqual(str(finding.unsaved_endpoints[0]), "https://example.com")
+            self.assertEqual(finding.severity, "Info")
+            # self.assertEqual(finding.description, description)
+            self.assertEqual(finding.mitigation, "Properly do JWT")
+            self.assertEqual(finding.active, False)
+            self.assertEqual(
+                finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a"
+            )
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()

@@ -122,7 +122,7 @@ class CheckmarxParser(object):
         active = self.isActive(state)
         verified = self.isVerified(state)
 
-        if not(aggregateKeys in dupes):
+        if not (aggregateKeys in dupes):
             find = Finding(title=title,
                            cwe=int(cwe),
                            test=test,
@@ -151,13 +151,13 @@ class CheckmarxParser(object):
             if queryId not in vuln_ids_from_tool[aggregateKeys]:
                 vuln_ids_from_tool[aggregateKeys].append(queryId)
             # If at least one of the findings in the aggregate is exploitable, the defectdojo finding should not be "false positive"
-            if(false_p == "False"):
+            if (false_p == "False"):
                 dupes[aggregateKeys].false_p = False
             # If at least one of the findings in the aggregate is active, the defectdojo finding should be active
-            if(active):
+            if (active):
                 dupes[aggregateKeys].active = True
             # If at least one of the findings in the aggregate is verified, the defectdojo finding should be verified
-            if(verified):
+            if (verified):
                 dupes[aggregateKeys].verified = True
 
     # Iterate over function calls / assignments to extract finding description and last pathnode
@@ -168,7 +168,7 @@ class CheckmarxParser(object):
         for path in result.findall('Path'):
             firstPathnode = True
             for pathnode in path.findall('PathNode'):
-                if(firstPathnode):
+                if (firstPathnode):
                     sourceFilename, sourceLineNumber, sourceObject = self.get_pathnode_elements(pathnode)
                     firstPathnode = False
         # At this point we have iterated over all path nodes (function calls) and pathnode is at the sink of the vulnerability
@@ -187,7 +187,7 @@ class CheckmarxParser(object):
         state = result.get('state')
         # Loop over <Path> (there should be only one)
         paths = result.findall('Path')
-        if(len(paths)) > 1:
+        if (len(paths)) > 1:
             logger.warning("Checkmarx scan: more than one path found: " + str(len(paths)) + ". Only the last one will be used")
 
         for path in paths:
@@ -205,7 +205,7 @@ class CheckmarxParser(object):
             for pathnode in path.findall('PathNode'):
                 findingdetail = self.get_description_detailed(pathnode, findingdetail)
                 nodeId = pathnode.find('NodeId').text
-                if(nodeId == "1"):
+                if (nodeId == "1"):
                     sourceFilename, sourceLineNumber, sourceObject = self.get_pathnode_elements(pathnode)
             # the last pathnode is the sink
             sinkFilename, sinkLineNumber, sinkObject = self.get_pathnode_elements(pathnode)

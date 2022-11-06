@@ -5,6 +5,7 @@ from celery.schedules import crontab
 from dojo import __version__
 import environ
 from netaddr import IPNetwork, IPSet
+import json
 
 # See https://documentation.defectdojo.com/getting_started/configuration/ for options
 # how to tune the configuration to your needs.
@@ -60,6 +61,7 @@ env = environ.Env(
     DD_CELERY_BROKER_PORT=(int, -1),
     DD_CELERY_BROKER_PATH=(str, '/dojo.celerydb.sqlite'),
     DD_CELERY_BROKER_PARAMS=(str, ''),
+    DD_CELERY_BROKER_TRANSPORT_OPTIONS=(str, ''),
     DD_CELERY_TASK_IGNORE_RESULT=(bool, True),
     DD_CELERY_RESULT_BACKEND=(str, 'django-db'),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
@@ -1061,6 +1063,9 @@ CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 CELERY_TASK_SERIALIZER = env('DD_CELERY_TASK_SERIALIZER')
 CELERY_PASS_MODEL_BY_ID = env('DD_CELERY_PASS_MODEL_BY_ID')
 
+if len(env('DD_CELERY_BROKER_TRANSPORT_OPTIONS')) > 0:
+    CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env('DD_CELERY_BROKER_TRANSPORT_OPTIONS'))
+
 CELERY_IMPORTS = ('dojo.tools.tool_issue_updater', )
 
 # Celery beat scheduled tasks
@@ -1170,6 +1175,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Symfony Security Check': ['title', 'vulnerability_ids'],
     'DSOP Scan': ['vulnerability_ids'],
     'Acunetix Scan': ['title', 'description'],
+    'Acunetix360 Scan': ['title', 'description'],
     'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
     'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
@@ -1205,6 +1211,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Twistlock Image Scan': ['title', 'severity', 'component_name', 'component_version'],
     'NeuVector (REST)': ['title', 'severity', 'component_name', 'component_version'],
     'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
+    'Wpscan': ['title', 'description', 'severity'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1232,6 +1239,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Qualys Scan': True,
     'DSOP Scan': True,
     'Acunetix Scan': True,
+    'Acunetix360 Scan': True,
     'Trivy Scan': True,
     'SpotBugs Scan': False,
     'Scout Suite Scan': True,
@@ -1245,7 +1253,8 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Bugcrowd API': True,
     'Veracode SourceClear Scan': True,
     'Vulners Scan': True,
-    'Twistlock Image Scan': True
+    'Twistlock Image Scan': True,
+    'Wpscan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1317,6 +1326,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
+    'Acunetix360 Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
@@ -1370,7 +1380,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Vulners Scan': DEDUPE_ALGO_HASH_CODE,
     'Twistlock Image Scan': DEDUPE_ALGO_HASH_CODE,
     'NeuVector (REST)': DEDUPE_ALGO_HASH_CODE,
-    'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE
+    'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
+    'Wpscan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')

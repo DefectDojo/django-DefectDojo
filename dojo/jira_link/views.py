@@ -77,6 +77,7 @@ def webhook(request, secret=None):
                     raise Http404(f'No finding, finding_group or engagement found for JIRA issue {jissue.jira_key}')
 
                 assignee = parsed['issue']['fields'].get('assignee')
+                assignee_name = 'Jira User'
                 if assignee is not None:
                     # First look for the 'name' field. If not present, try 'displayName'. Else put None
                     assignee_name = assignee.get('name', assignee.get('displayName'))

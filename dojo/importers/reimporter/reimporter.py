@@ -118,7 +118,7 @@ class DojoDefaultReImporter(object):
                         author=user)
                     note.save()
 
-                    endpoint_statuses = finding.endpoint_status.exclude(Q(false_positive=True) |
+                    endpoint_statuses = finding.status_finding.exclude(Q(false_positive=True) |
                                                                         Q(out_of_scope=True) |
                                                                         Q(risk_accepted=True))
 
@@ -233,7 +233,8 @@ class DojoDefaultReImporter(object):
                         file_upload.save()
                         finding.files.add(file_upload)
 
-                importer_utils.handle_vulnerability_ids(finding)
+                if finding.unsaved_vulnerability_ids:
+                    importer_utils.handle_vulnerability_ids(finding)
 
                 # existing findings may be from before we had component_name/version fields
                 finding.component_name = finding.component_name if finding.component_name else component_name
@@ -279,7 +280,7 @@ class DojoDefaultReImporter(object):
                 finding.mitigated_by = user
                 finding.active = False
 
-                endpoint_status = finding.endpoint_status.all()
+                endpoint_status = finding.status_finding.all()
                 for status in endpoint_status:
                     status.mitigated_by = user
                     status.mitigated_time = timezone.now()
