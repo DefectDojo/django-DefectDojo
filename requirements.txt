@@ -77,5 +77,5 @@ django-ratelimit==3.0.1
 argon2-cffi==21.3.0
 blackduck==1.0.7
 pycurl==7.45.1  # Required for Celery Broker AWS (SQS) support
-boto3==1.26.1  # Required for Celery Broker AWS (SQS) support
+boto3==1.26.2  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
