@@ -741,7 +741,7 @@ def edit_finding(request, fid):
                            can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
 
         if finding.active:
-            if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+            if (form['active'].value() is False or form['false_p'].value() or form['out_of_scope'].value()) and form['duplicate'].value() is False:
                 note_type_activation = Note_Type.objects.filter(is_active=True).count()
                 closing_disabled = 0
                 if note_type_activation:
@@ -751,13 +751,17 @@ def edit_finding(request, fid):
                                                      code='inactive_without_mandatory_notes')
                     error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
                                                     code='false_p_without_mandatory_notes')
+                    error_out_of_scope = ValidationError('Can not set a finding as out of scope without adding all mandatory notes',
+                                                         code='out_of_scope_without_mandatory_notes')
                     if form['active'].value() is False:
                         form.add_error('active', error_inactive)
                     if form['false_p'].value():
                         form.add_error('false_p', error_false_p)
+                    if form['out_of_scope'].value():
+                        form.add_error('out_of_scope', error_out_of_scope)
                     messages.add_message(request,
                                          messages.ERROR,
-                                         'Can not set a finding as inactive or false positive without adding all mandatory notes',
+                                         'Can not set a finding as inactive, false positive or out of scope without adding all mandatory notes',
                                          extra_tags='alert-danger')
 
         if use_jira:
@@ -800,7 +804,7 @@ def edit_finding(request, fid):
 
             # If active is not checked and CAN_EDIT_MIIGATED_DATA, mitigate the finding and the associated endpoints status
             if finding_helper.can_edit_mitigated_data(request.user):
-                if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+                if (form['active'].value() is False or form['false_p'].value() or form['out_of_scope'].value()) and form['duplicate'].value() is False:
                     now = timezone.now()
                     new_finding.is_mitigated = True
                     endpoint_status = new_finding.endpoint_status.all()
