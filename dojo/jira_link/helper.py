@@ -631,6 +631,49 @@ def add_jira_issue_for_finding(finding, *args, **kwargs):
 def add_jira_issue_for_finding_group(finding_group, *args, **kwargs):
     return add_jira_issue(finding_group, *args, **kwargs)
 
+def prepare_jira_issue_fields(
+        project_key,
+        issuetype_name,
+        summary,
+        description,
+        component_name   = None,
+        custom_fields    = None,
+        labels           = None,
+        environment      = None,
+        priority_name    = None,
+        epic_name_field  = None,
+        duedate          = None,
+        issuetype_fields = []):
+
+    fields = {
+            'project':      { 'key': project_key },
+            'issuetype':    { 'name': issuetype_name },
+            'summary':      summary,
+            'description':  description,
+    }
+
+    if component_name:
+        fields['components'] = [{ 'name': component_name }]
+
+    if custom_fields:
+        fields.update(custom_fields)
+
+    if labels and 'labels' in issuetype_fields:
+        fields['labels'] = labels
+
+    if environment and 'environment' in issuetype_fields:
+        fields['environment'] = environment
+
+    if priority_name and 'priority' in issuetype_fields:
+        fields['priority'] = { 'name': priority_name }
+
+    if epic_name_field and epic_name_field in issuetype_fields:
+        fields[epic_name_field] = summary
+
+    if duedate and 'duedate' in issuetype_fields:
+        fields['duedate'] = duedate.strftime('%Y-%m-%d')
+
+    return fields
 
 def add_jira_issue(obj, *args, **kwargs):
     logger.info('trying to create a new jira issue for %d:%s', obj.id, to_str_typed(obj))
@@ -654,73 +697,38 @@ def add_jira_issue(obj, *args, **kwargs):
         logger.warn("The JIRA issue will NOT be created.")
         return False
     logger.debug('Trying to create a new JIRA issue for %s...', to_str_typed(obj))
-    meta = None
     try:
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
 
-        fields = {
-                'project': {
-                    'key': jira_project.project_key
-                },
-                'summary': jira_summary(obj),
-                'description': jira_description(obj),
-                'issuetype': {
-                    'name': jira_instance.default_issue_type
-                },
-        }
+        labels = get_labels(obj) + get_tags(obj)
+        if labels:
+            labels = list(dict.fromkeys(labels)) # de-dup
 
-        if jira_project.component:
-            fields['components'] = [
-                    {
-                        'name': jira_project.component
-                    },
-            ]
-
-        # Custom fields to specify
-        if jira_project.custom_fields:
-            fields.update(jira_project.custom_fields)
-
-        # populate duedate field, but only if it's available for this project + issuetype
-        if not meta:
-            meta = get_jira_meta(jira, jira_project)
-
-        epic_name_field = get_epic_name_field_name(jira_instance)
-        if epic_name_field in meta['projects'][0]['issuetypes'][0]['fields']:
-            # epic name is present in this issuetype
-            # epic name is always mandatory in jira, so we populate it
-            fields[epic_name_field] = fields['summary']
-
-        if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
-            fields['priority'] = {
-                                    'name': jira_priority(obj)
-                                }
-
-        labels = get_labels(obj)
-        tags = get_tags(obj)
-        jira_labels = labels + tags
-        if jira_labels:
-            # de-dup
-            jira_labels = list(dict.fromkeys(jira_labels))
-            if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
-                fields['labels'] = jira_labels
-
+        duedate = None
         if System_Settings.objects.get().enable_finding_sla:
+            duedate = obj.sla_deadline()
 
-            if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
-                # jira wants YYYY-MM-DD
-                duedate = obj.sla_deadline()
-                if duedate:
-                    fields['duedate'] = duedate.strftime('%Y-%m-%d')
+        issuetype_fields = []
+        meta = get_jira_meta(jira, jira_project)
+        issuetype_fields = meta['projects'][0]['issuetypes'][0]['fields'].keys()
 
-        if not meta:
-            meta = get_jira_meta(jira, jira_project)
+        fields = prepare_jira_issue_fields(
+                project_key      = jira_project.project_key,
+                issuetype_name   = jira_instance.default_issue_type,
+                summary          = jira_summary(obj),
+                description      = jira_description(obj),
+                component_name   = jira_project.component,
+                custom_fields    = jira_project.custom_fields,
+                labels           = labels,
+                environment      = jira_environment(obj),
+                priority_name    = jira_priority(obj),
+                epic_name_field  = get_epic_name_field_name(jira_instance),
+                duedate          = duedate,
+                issuetype_fields = issuetype_fields)
 
-        if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
-            fields['environment'] = jira_environment(obj)
 
         logger.debug('sending fields to JIRA: %s', fields)
-
         new_issue = jira.create_issue(fields)
 
         # Upload dojo finding screenshots to Jira
@@ -813,47 +821,36 @@ def update_jira_issue(obj, *args, **kwargs):
         return False
 
     j_issue = obj.jira_issue
-    meta = None
     try:
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
-
         issue = jira.issue(j_issue.jira_id)
 
-        fields = {}
-        # Only update the component if it didn't exist earlier in Jira, this is to avoid assigning multiple components to an item
-        if issue.fields.components:
-            log_jira_alert(
-                "Component not updated, exists in Jira already. Update from Jira instead.",
-                obj)
-        elif jira_project.component:
-            # Add component to the Jira issue
-            component = [
-                {
-                    'name': jira_project.component
-                },
-            ]
-            fields = {"components": component}
+        labels = get_labels(obj) + get_tags(obj)
+        if labels:
+            labels = list(dict.fromkeys(labels)) # de-dup
 
-        if not meta:
-            meta = get_jira_meta(jira, jira_project)
+        issuetype_fields = []
+        meta = get_jira_meta(jira, jira_project)
+        issuetype_fields = meta['projects'][0]['issuetypes'][0]['fields'].keys()
 
-        labels = get_labels(obj)
-        tags = get_tags(obj)
-        jira_labels = labels + tags
-        if jira_labels:
-            if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
-                fields['labels'] = jira_labels
-
-        if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
-            fields['environment'] = jira_environment(obj)
+        fields = prepare_jira_issue_fields(
+                project_key      = jira_project.project_key,
+                issuetype_name   = jira_instance.default_issue_type,
+                summary          = jira_summary(obj),
+                description      = jira_description(obj),
+                component_name   = jira_project.component if not issue.fields.components else None,
+                labels           = labels,
+                environment      = jira_environment(obj),
+                priority_name    = jira_priority(obj),
+                issuetype_fields = issuetype_fields)
 
         logger.debug('sending fields to JIRA: %s', fields)
 
         issue.update(
-            summary=jira_summary(obj),
-            description=jira_description(obj),
-            priority={'name': jira_priority(obj)},
+            summary=fields['summary'],
+            description=fields['description'],
+            priority=fields['priority'],
             fields=fields)
 
         push_status_to_jira(obj, jira_instance, jira, issue)
@@ -894,7 +891,6 @@ def update_jira_issue(obj, *args, **kwargs):
         logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
         log_jira_alert(e.text, obj)
         return False
-
 
 def get_jira_issue_from_jira(find):
     logger.debug('getting jira issue from JIRA for %d:%s', find.id, find)
