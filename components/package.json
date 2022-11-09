@@ -16,7 +16,7 @@
     "components-jqueryui": "^1.0.0",
     "datatables.net": "^1.12.1",
     "datatables.net-buttons-bs": "^2.2.3",
-    "datatables.net-buttons-dt": "^2.2.3",
+    "datatables.net-buttons-dt": "^2.3.2",
     "datatables.net-colreorder": "^1.5.6",
     "datatables.net-dt": "^1.12.1",
     "drmonty-datatables-plugins": "^1.0.0",
