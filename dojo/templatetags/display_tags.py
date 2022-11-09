@@ -243,7 +243,9 @@ def group_sla(group):
         return ""
 
     # if there is at least 1 finding, there will be date, severity etc to calculate sla
-    return finding_sla(group)
+    # Get the first finding with the highests severity
+    finding = group.findings.all().order_by('severity').first()
+    return finding_sla(finding)
 
 
 @register.filter(name='finding_sla')
