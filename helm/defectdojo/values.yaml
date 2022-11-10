@@ -320,9 +320,8 @@ mysql:
     service:
       ports:
         mysql: 3306
-  # To use an external mySQL instance, set enabled to false and uncomment
-  # the line below / add external address:
-  # mysqlServer: "127.0.0.1"
+  # To use an external mySQL instance, set enabled to false and set this value to the external address
+  mysqlServer: "127.0.0.1"
 
 postgresql:
   enabled: true
@@ -366,9 +365,8 @@ postgresql:
     chmod:
       enabled: false
 
-  # To use an external PostgreSQL instance, set enabled to false and uncomment
-  # the line below:
-  # postgresServer: "127.0.0.1"
+  # To use an external PostgreSQL instance, set enabled to false and set a value here
+  postgresServer: "127.0.0.1"
 
 postgresqlha:
   enabled: false
@@ -476,9 +474,8 @@ redis:
     existingSecretPasswordKey: redis-password
     password: ""
   architecture: standalone
-  # To use an external Redis instance, set enabled to false and uncomment
-  # the line below:
-  # redisServer: myrediscluster
+  # To use an external Redis instance, set enabled to false and set the following to the external host
+  redisServer: localhost
 
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it
