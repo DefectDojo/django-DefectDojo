@@ -16,6 +16,7 @@ RUN \
     dnsutils \
     default-mysql-client \
     libmariadb-dev-compat \
+    libpq-dev \
     postgresql-client \
     xmlsec1 \
     git \
