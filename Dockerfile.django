@@ -16,6 +16,7 @@ RUN \
     dnsutils \
     default-mysql-client \
     libmariadb-dev-compat \
+    libpq-dev \
     postgresql-client \
     xmlsec1 \
     git \
@@ -52,6 +53,7 @@ RUN \
     xmlsec1 \
     git \
     uuid-runtime \
+    libpq-dev \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
     # libcurl4-openssl-dev is required for installing pycurl python package
