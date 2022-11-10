@@ -15,7 +15,7 @@ from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter, NumberFilter, DateFilter
 from django_filters import rest_framework as filters
-from django_filters.filters import ChoiceFilter, _truncate, CharFilter
+from django_filters.filters import ChoiceFilter, _truncate
 from django.db.models import JSONField
 import pytz
 from django.db.models import Q
