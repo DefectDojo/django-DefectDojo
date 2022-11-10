@@ -1023,17 +1023,11 @@ msgid "Endpoints"
 msgstr ""
 
 #: dojo/models.py:1744
-msgid "The hosts within the product that are susceptible to this flaw."
+msgid "The hosts within the product that are susceptible to this flaw. + The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...)."
 msgstr ""
 
 #: dojo/models.py:1748
 msgid "Endpoint Status"
-msgstr ""
-
-#: dojo/models.py:1749
-msgid ""
-"The status of the endpoint associated with this flaw (Vulnerable, "
-"Mitigated, ...)."
 msgstr ""
 
 #: dojo/models.py:1753

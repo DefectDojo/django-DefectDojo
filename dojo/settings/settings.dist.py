@@ -5,6 +5,7 @@ from celery.schedules import crontab
 from dojo import __version__
 import environ
 from netaddr import IPNetwork, IPSet
+import json
 
 # See https://documentation.defectdojo.com/getting_started/configuration/ for options
 # how to tune the configuration to your needs.
@@ -60,6 +61,7 @@ env = environ.Env(
     DD_CELERY_BROKER_PORT=(int, -1),
     DD_CELERY_BROKER_PATH=(str, '/dojo.celerydb.sqlite'),
     DD_CELERY_BROKER_PARAMS=(str, ''),
+    DD_CELERY_BROKER_TRANSPORT_OPTIONS=(str, ''),
     DD_CELERY_TASK_IGNORE_RESULT=(bool, True),
     DD_CELERY_RESULT_BACKEND=(str, 'django-db'),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
@@ -1061,6 +1063,9 @@ CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 CELERY_TASK_SERIALIZER = env('DD_CELERY_TASK_SERIALIZER')
 CELERY_PASS_MODEL_BY_ID = env('DD_CELERY_PASS_MODEL_BY_ID')
 
+if len(env('DD_CELERY_BROKER_TRANSPORT_OPTIONS')) > 0:
+    CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env('DD_CELERY_BROKER_TRANSPORT_OPTIONS'))
+
 CELERY_IMPORTS = ('dojo.tools.tool_issue_updater', )
 
 # Celery beat scheduled tasks
@@ -1136,6 +1141,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
+    'AnchoreCTL Vuln Report': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
+    'AnchoreCTL Policies Report': ['title', 'severity', 'component_name', 'file_path'],
     'Anchore Enterprise Policy Check': ['title', 'severity', 'component_name', 'file_path'],
     'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Aqua Scan': ['severity', 'vulnerability_ids', 'component_name', 'component_version'],
@@ -1168,6 +1175,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Symfony Security Check': ['title', 'vulnerability_ids'],
     'DSOP Scan': ['vulnerability_ids'],
     'Acunetix Scan': ['title', 'description'],
+    'Acunetix360 Scan': ['title', 'description'],
     'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
     'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
@@ -1178,7 +1186,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
-    'Github Vulnerability Scan': ['unique_id_from_tool'],
+    'Github Vulnerability Scan': ['title', 'severity', 'component_name', 'vulnerability_ids'],
     'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
     'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
     'pip-audit Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
@@ -1200,6 +1208,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'docker-bench-security Scan': ['unique_id_from_tool'],
     'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
     'Twistlock Image Scan': ['title', 'severity', 'component_name', 'component_version'],
+    'NeuVector (REST)': ['title', 'severity', 'component_name', 'component_version'],
+    'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
+    'Wpscan': ['title', 'description', 'severity'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1207,6 +1218,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
 # Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
 HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Engine Scan': True,
+    'AnchoreCTL Vuln Report': True,
+    'AnchoreCTL Policies Report': True,
     'Anchore Enterprise Policy Check': True,
     'Anchore Grype': True,
     'AWS Prowler Scan': True,
@@ -1225,6 +1238,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Qualys Scan': True,
     'DSOP Scan': True,
     'Acunetix Scan': True,
+    'Acunetix360 Scan': True,
     'Trivy Scan': True,
     'SpotBugs Scan': False,
     'Scout Suite Scan': True,
@@ -1237,7 +1251,8 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Edgescan Scan': True,
     'Bugcrowd API': True,
     'Veracode SourceClear Scan': True,
-    'Twistlock Image Scan': True
+    'Twistlock Image Scan': True,
+    'Wpscan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1278,6 +1293,8 @@ DEDUPE_ALGO_ENDPOINT_FIELDS = ['host', 'path']
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
+    'AnchoreCTL Vuln Report': DEDUPE_ALGO_HASH_CODE,
+    'AnchoreCTL Policies Report': DEDUPE_ALGO_HASH_CODE,
     'Anchore Enterprise Policy Check': DEDUPE_ALGO_HASH_CODE,
     'Anchore Grype': DEDUPE_ALGO_HASH_CODE,
     'Aqua Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1307,6 +1324,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
+    'Acunetix360 Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
@@ -1328,7 +1346,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Scout Suite Scan': DEDUPE_ALGO_HASH_CODE,
     'AWS Security Hub Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
-    'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Github Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
     'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
@@ -1358,6 +1376,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'BlackDuck API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'docker-bench-security Scan': DEDUPE_ALGO_HASH_CODE,
     'Twistlock Image Scan': DEDUPE_ALGO_HASH_CODE,
+    'NeuVector (REST)': DEDUPE_ALGO_HASH_CODE,
+    'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
+    'Wpscan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')

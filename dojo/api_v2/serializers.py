@@ -811,6 +811,7 @@ class ToolConfigurationSerializer(serializers.ModelSerializer):
 
 class ToolProductSettingsSerializer(serializers.ModelSerializer):
     setting_url = serializers.CharField(source='url')
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=True)
 
     class Meta:
         model = Tool_Product_Settings
@@ -835,8 +836,6 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('This endpoint-finding relation already exists')
             else:
                 raise
-        endpoint.endpoint_status.add(status)
-        finding.endpoint_status.add(status)
         status.mitigated = validated_data.get('mitigated', False)
         status.false_positive = validated_data.get('false_positive', False)
         status.out_of_scope = validated_data.get('out_of_scope', False)
@@ -1937,6 +1936,15 @@ class FindingToFilesSerializer(serializers.Serializer):
             })
         new_data = {'finding_id': finding.id, 'files': new_files}
         return new_data
+
+
+class FindingCloseSerializer(serializers.ModelSerializer):
+    is_mitigated = serializers.BooleanField(required=False)
+    mitigated = serializers.DateTimeField(required=False)
+
+    class Meta:
+        model = Finding
+        fields = ('is_mitigated', 'mitigated')
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):

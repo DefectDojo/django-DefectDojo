@@ -13,7 +13,6 @@ from django.contrib.auth.models import Permission
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
-from django.forms import utils as form_utils
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
@@ -426,6 +425,7 @@ class ImportScanForm(forms.Form):
 
     if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+        create_finding_groups_for_all_findings = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
 
     def __init__(self, *args, **kwargs):
         super(ImportScanForm, self).__init__(*args, **kwargs)
@@ -906,6 +906,7 @@ class AddFindingForm(forms.ModelForm):
                                widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    planned_remediation_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
@@ -952,8 +953,8 @@ class AddFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers', 'cve',
-                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve',
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoints', 'sla_start_date')
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -980,6 +981,7 @@ class AdHocFindingForm(forms.ModelForm):
                                widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    planned_remediation_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
@@ -1081,52 +1083,7 @@ class PromoteFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ('reporter', 'url', 'numerical_severity', 'active', 'false_p', 'verified', 'endpoint_status', 'cve',
-                   'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
-
-
-class SplitDateTimeWidget(forms.MultiWidget):
-    supports_microseconds = False
-    template_name = 'dojo/field-datetime.html'
-
-    def __init__(self):
-        widgets = (
-            forms.TextInput(attrs={'type': 'date', 'autocomplete': 'off'}),
-            forms.TextInput(attrs={'type': 'time', 'autocomplete': 'off'}),
-        )
-        super().__init__(widgets)
-
-    def decompress(self, value):
-        if value:
-            value = form_utils.to_current_timezone(value)
-            return [value.date(), value.time()]
-        return [None, None]
-
-
-class SplitDateTimeField(forms.MultiValueField):
-    widget = SplitDateTimeWidget
-    hidden_widget = forms.SplitHiddenDateTimeWidget
-
-    def __init__(self, **kwargs):
-        fields = (
-            forms.DateField(),
-            forms.TimeField(),
-        )
-        super().__init__(fields, **kwargs)
-
-    def compress(self, data_list):
-        if data_list:
-            # preserve default dojo behavior and set current time if any part is empty
-            if data_list[0] in self.empty_values:
-                selected_date = date.today()
-            else:
-                selected_date = data_list[0]
-            if data_list[1] in self.empty_values:
-                selected_time = datetime.now().time()
-            else:
-                selected_time = data_list[1]
-            # keep potential tzinfo
-            return form_utils.from_current_timezone(datetime.combine(selected_date, selected_time, *data_list[2:]))
-        return None
+                   'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'planned_remediation_date')
 
 
 class FindingForm(forms.ModelForm):
@@ -1154,10 +1111,11 @@ class FindingForm(forms.ModelForm):
                                widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
 
-    mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
-    mitigated_by = forms.ModelChoiceField(required=True, queryset=get_authorized_users(Permissions.Finding_View), initial=get_current_user)
+    mitigated = forms.DateField(required=False, help_text='Date and time when the flaw has been fixed', widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
+    mitigated_by = forms.ModelChoiceField(required=False, queryset=Dojo_User.objects.none())
 
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    planned_remediation_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
@@ -1176,6 +1134,7 @@ class FindingForm(forms.ModelForm):
         super(FindingForm, self).__init__(*args, **kwargs)
 
         self.fields['endpoints'].queryset = Endpoint.objects.filter(product=self.instance.test.engagement.product)
+        self.fields['mitigated_by'].queryset = get_authorized_users(Permissions.Test_Edit)
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
         # if checked, always show to allow unaccept also with full risk acceptance enabled
@@ -1355,6 +1314,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     risk_accept = forms.BooleanField(required=False)
     risk_unaccept = forms.BooleanField(required=False)
 
+    planned_remediation_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'datepicker'}))
     finding_group = forms.BooleanField(required=False)
     finding_group_create = forms.BooleanField(required=False)
     finding_group_create_name = forms.CharField(required=False)
@@ -1389,13 +1349,14 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = ('severity', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'is_mitigated')
+        fields = ('severity', 'planned_remediation_date', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                  'is_mitigated')
 
 
 class EditEndpointForm(forms.ModelForm):
     class Meta:
         model = Endpoint
-        exclude = ['product', 'endpoint_status']
+        exclude = ['product']
 
     def __init__(self, *args, **kwargs):
         self.product = None
@@ -1546,6 +1507,9 @@ class CloseFindingForm(forms.ModelForm):
                                      'required, please use the text area '
                                      'below to provide documentation.')})
 
+    mitigated = forms.DateField(required=False, help_text='Date and time when the flaw has been fixed', widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
+    mitigated_by = forms.ModelChoiceField(required=False, queryset=Dojo_User.objects.none())
+
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('missing_note_types')
         super(CloseFindingForm, self).__init__(*args, **kwargs)
@@ -1554,9 +1518,48 @@ class CloseFindingForm(forms.ModelForm):
         else:
             self.fields['note_type'] = forms.ModelChoiceField(queryset=queryset, label='Note Type', required=True)
 
+        self.can_edit_mitigated_data = kwargs.pop('can_edit_mitigated_data') if 'can_edit_mitigated_data' in kwargs \
+            else False
+
+        if self.can_edit_mitigated_data:
+            self.fields['mitigated_by'].queryset = get_authorized_users(Permissions.Test_Edit)
+            self.fields['mitigated'].initial = self.instance.mitigated
+            self.fields['mitigated_by'].initial = self.instance.mitigated_by
+
+    def _post_clean(self):
+        super(CloseFindingForm, self)._post_clean()
+
+        if self.can_edit_mitigated_data:
+            opts = self.instance._meta
+            if not self.cleaned_data.get('active'):
+                try:
+                    opts.get_field('mitigated').save_form_data(self.instance, self.cleaned_data.get('mitigated'))
+                    opts.get_field('mitigated_by').save_form_data(self.instance, self.cleaned_data.get('mitigated_by'))
+                except forms.ValidationError as e:
+                    self._update_errors(e)
+
     class Meta:
         model = Notes
-        fields = ['note_type', 'entry']
+        fields = ['note_type', 'entry', 'mitigated', 'mitigated_by']
+
+
+class EditPlannedRemediationDateFindingForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        finding = None
+        if 'finding' in kwargs:
+            finding = kwargs.pop('finding')
+
+        super(EditPlannedRemediationDateFindingForm, self).__init__(*args, **kwargs)
+
+        self.fields['planned_remediation_date'].required = True
+        self.fields['planned_remediation_date'].widget = forms.DateInput(attrs={'class': 'datepicker'})
+
+        if finding is not None:
+            self.fields['planned_remediation_date'].initial = finding.planned_remediation_date
+
+    class Meta:
+        model = Finding
+        fields = ['planned_remediation_date']
 
 
 class DefectFindingForm(forms.ModelForm):
@@ -2536,7 +2539,7 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ['product', 'engagement']
-        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
+        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'custom_fields', 'jira_labels', 'add_vulnerability_id_to_jira_label', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
 
     def __init__(self, *args, **kwargs):
         from dojo.jira_link import helper as jira_helper
@@ -2570,6 +2573,9 @@ class JIRAProjectForm(forms.ModelForm):
                 self.fields['project_key'].disabled = False
                 self.fields['issue_template_dir'].disabled = False
                 self.fields['component'].disabled = False
+                self.fields['custom_fields'].disabled = False
+                self.fields['jira_labels'].disabled = False
+                self.fields['add_vulnerability_id_to_jira_label'].disabled = False
                 self.fields['push_all_issues'].disabled = False
                 self.fields['enable_engagement_epic_mapping'].disabled = False
                 self.fields['push_notes'].disabled = False
@@ -2589,6 +2595,9 @@ class JIRAProjectForm(forms.ModelForm):
                     self.initial['project_key'] = jira_project_product.project_key
                     self.initial['issue_template_dir'] = jira_project_product.issue_template_dir
                     self.initial['component'] = jira_project_product.component
+                    self.initial['custom_fields'] = jira_project_product.custom_fields
+                    self.initial['jira_labels'] = jira_project_product.jira_labels
+                    self.initial['add_vulnerability_id_to_jira_label'] = jira_project_product.add_vulnerability_id_to_jira_label
                     self.initial['push_all_issues'] = jira_project_product.push_all_issues
                     self.initial['enable_engagement_epic_mapping'] = jira_project_product.enable_engagement_epic_mapping
                     self.initial['push_notes'] = jira_project_product.push_notes
@@ -2599,6 +2608,9 @@ class JIRAProjectForm(forms.ModelForm):
                     self.fields['project_key'].disabled = True
                     self.fields['issue_template_dir'].disabled = True
                     self.fields['component'].disabled = True
+                    self.fields['custom_fields'].disabled = True
+                    self.fields['jira_labels'].disabled = True
+                    self.fields['add_vulnerability_id_to_jira_label'].disabled = True
                     self.fields['push_all_issues'].disabled = True
                     self.fields['enable_engagement_epic_mapping'].disabled = True
                     self.fields['push_notes'].disabled = True
@@ -2685,7 +2697,7 @@ class JIRAFindingForm(forms.Form):
         else:
             self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue for this finding.'})
 
-        if self.instance and self.instance.has_jira_group_issue:
+        if self.instance and hasattr(self.instance, 'has_jira_group_issue') and self.instance.has_jira_group_issue:
             self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
             self.fields['jira_issue'].help_text = 'Changing the linked JIRA issue for finding groups is not (yet) supported.'
             self.initial['jira_issue'] = self.instance.finding_group.jira_issue.jira_key
@@ -2701,19 +2713,26 @@ class JIRAFindingForm(forms.Form):
 
         logger.debug('self.cleaned_data.push_to_jira: %s', self.cleaned_data.get('push_to_jira', None))
 
-        if self.cleaned_data.get('push_to_jira', None) and finding.has_jira_group_issue:
-            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(self.instance.finding_group, self.finding_form)
+        if self.cleaned_data.get('push_to_jira', None) and finding and finding.has_jira_group_issue:
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(finding.finding_group, self.finding_form)
             if not can_be_pushed_to_jira:
                 self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
                 # for field in error_fields:
                 #     self.finding_form.add_error(field, error)
 
-        elif self.cleaned_data.get('push_to_jira', None):
-            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(self.instance, self.finding_form)
+        elif self.cleaned_data.get('push_to_jira', None) and finding:
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(finding, self.finding_form)
             if not can_be_pushed_to_jira:
                 self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
                 # for field in error_fields:
                 #     self.finding_form.add_error(field, error)
+        elif self.cleaned_data.get('push_to_jira', None):
+            active = self.finding_form['active'].value()
+            verified = self.finding_form['verified'].value()
+            if not active or not verified:
+                logger.debug('Findings must be active and verified to be pushed to JIRA')
+                error_message = 'Findings must be active and verified to be pushed to JIRA'
+                self.add_error('push_to_jira', ValidationError(error_message, code='not_active_or_verified'))
 
         if jira_issue_key_new and (not finding or not finding.has_jira_group_issue):
             # when there is a group jira issue, we skip all the linking/unlinking as this is not supported (yet)
@@ -2791,6 +2810,8 @@ class JIRAEngagementForm(forms.Form):
                 self.fields['push_to_jira'].help_text = 'Checking this will update the existing EPIC in JIRA.'
 
     push_to_jira = forms.BooleanField(required=False, label="Create EPIC", help_text="Checking this will create an EPIC in JIRA for this engagement.")
+    epic_name = forms.CharField(max_length=200, required=False, help_text="EPIC name in JIRA. If not specified, it defaults to the engagement name")
+    epic_priority = forms.CharField(max_length=200, required=False, help_text="EPIC priority. If not specified, the JIRA default priority will be used")
 
 
 class GoogleSheetFieldsForm(forms.Form):

@@ -8,8 +8,10 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.views import LoginView, PasswordResetView
+from django.core.mail import get_connection
+from django.core.mail.backends.smtp import EmailBackend
 from django.core import serializers
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Q
 from django.db.models.deletion import RestrictedError
@@ -111,19 +113,27 @@ def login_view(request):
             social_auth = 'github-enterprise'
         else:
             return HttpResponseRedirect('/saml2/login')
-        return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', args=[social_auth]),
+        try:
+            return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', args=[social_auth]),
                                                    urlencode({'next': request.GET.get('next')})))
+        except:
+            return HttpResponseRedirect(reverse('social:begin', args=[social_auth]))
     else:
         return LoginView.as_view(template_name='dojo/login.html', authentication_form=AuthenticationForm)(request)
 
 
 def logout_view(request):
     logout(request)
-    messages.add_message(request,
+
+    if not settings.SHOW_LOGIN_FORM:
+        return login_view(request)
+    else:
+        messages.add_message(request,
                          messages.SUCCESS,
                          _('You have logged out successfully.'),
                          extra_tags='alert-success')
-    return HttpResponseRedirect(reverse('login'))
+
+        return HttpResponseRedirect(reverse('login'))
 
 
 @user_passes_test(lambda u: u.is_active)
@@ -577,10 +587,18 @@ class DojoPasswordResetForm(PasswordResetForm):
         url = hyperlink.parse(settings.SITE_URL)
         context['site_name'] = url.host
         context['protocol'] = url.scheme
-        context['domain'] = settings.SITE_URL[len(url.scheme + '://'):]
+        context['domain'] = settings.SITE_URL[len(f'{url.scheme}://'):]
 
-        super().send_mail(subject_template_name, email_template_name,
-                          context, from_email, to_email, html_email_template_name)
+        super().send_mail(subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name)
+
+    def clean(self):
+        try:
+            connection = get_connection()
+            if isinstance(connection, EmailBackend):
+                connection.open()
+                connection.close()
+        except Exception:
+            raise ValidationError("SMTP server is not configured correctly...")
 
 
 class DojoPasswordResetView(PasswordResetView):
