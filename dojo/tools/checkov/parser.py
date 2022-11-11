@@ -86,9 +86,9 @@ def get_item(vuln, test, check_type):
     if 'resource' in vuln:
         resource = vuln['resource']
 
-    # Checkov doesn't define severities. Sine the findings are
-    # vulnerabilities, we set them to Medium
     severity = 'Medium'
+    if 'severity' in vuln:
+        severity = vuln['severity'].capitalize()
 
     mitigation = ''
 
