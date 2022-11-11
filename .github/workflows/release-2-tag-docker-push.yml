@@ -52,29 +52,18 @@ jobs:
           echo "chart_version=$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')" >> $GITHUB_ENV
 
       - name: Create release ${{ github.event.inputs.release_number }}
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.event.inputs.release_number }}  # this does not create a tag
-          release_name: Release ${{ github.event.inputs.release_number }}
-          body: |
-            Run the release drafter to populate the release notes.
+          name: Release ${{ github.event.inputs.release_number }}
+          tag_name: ${{ github.event.inputs.release_number }}
+          body: Run the release drafter to populate the release notes.
           draft: true
           prerelease: false
-      
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
+          files: ./build/defectdojo-${{ env.chart_version }}.tgz
+          token: ${{ secrets.GITHUB_TOKEN }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/defectdojo-${{ env.chart_version }}.tgz
-          asset_name: defectdojo-${{ env.chart_version }}.tgz
-          asset_content_type: application/tar+gzip
-      
+          GITHUB_REPOSITORY: DefectDojo/django-DefectDojo
+
       - name: Update Helm repository index
         id: update-helm-repository-index
         run: |
