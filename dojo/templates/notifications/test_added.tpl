@@ -41,7 +41,7 @@
 {% elif type == 'alert' %}
     New test added for engagement {{ engagement.product }}: {{ test.test_type }}.
 {% elif type == 'slack' %}
-    New test added for engagement {{ engagement.product }}.
+    New test added for engagement {{engagement.name }} in product {{ engagement.product}}.
     Title: {{test.title}}
     Type: {{ test.test_type }}
     You can find details here: {{ url|full_url }}

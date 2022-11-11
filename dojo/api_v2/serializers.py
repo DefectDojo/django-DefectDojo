@@ -7,7 +7,8 @@ from datetime import datetime
 from dojo.endpoint.utils import endpoint_filter
 from dojo.importers.reimporter.utils import get_or_create_engagement, get_target_engagement_if_exists, get_target_product_by_id_if_exists, \
     get_target_product_if_exists, get_target_test_if_exists
-from dojo.models import IMPORT_ACTIONS, SEVERITIES, STATS_FIELDS, Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
+from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIELDS, Dojo_User, Finding_Group, Product, \
+    Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
@@ -585,7 +586,7 @@ class NoteSerializer(serializers.ModelSerializer):
     history = NoteHistorySerializer(read_only=True, many=True)
 
     def update(self, instance, validated_data):
-        instance.entry = validated_data['entry']
+        instance.entry = validated_data.get('entry')
         instance.edited = True
         instance.editor = self.context['request'].user
         instance.edit_time = timezone.now()
@@ -739,7 +740,7 @@ class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def validate(self, data):
         if self.context['request'].method == 'POST':
-            if data['target_start'] > data['target_end']:
+            if data.get('target_start') > data.get('target_end'):
                 raise serializers.ValidationError(
                     'Your target start date exceeds your target end date')
         return data
@@ -760,6 +761,21 @@ class EngagementToNotesSerializer(serializers.Serializer):
 class EngagementToFilesSerializer(serializers.Serializer):
     engagement_id = serializers.PrimaryKeyRelatedField(queryset=Engagement.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
+
+    def to_representation(self, data):
+        engagement = data.get('engagement_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(engagement, engagement.id)),
+                'title': file.title
+            })
+        new_data = {'engagement_id': engagement.id, 'files': new_files}
+        return new_data
 
 
 class AppAnalysisSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -795,6 +811,7 @@ class ToolConfigurationSerializer(serializers.ModelSerializer):
 
 class ToolProductSettingsSerializer(serializers.ModelSerializer):
     setting_url = serializers.CharField(source='url')
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=True)
 
     class Meta:
         model = Tool_Product_Settings
@@ -807,8 +824,8 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        endpoint = validated_data['endpoint']
-        finding = validated_data['finding']
+        endpoint = validated_data.get('endpoint')
+        finding = validated_data.get('finding')
         try:
             status = Endpoint_Status.objects.create(
                 finding=finding,
@@ -819,8 +836,6 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('This endpoint-finding relation already exists')
             else:
                 raise
-        endpoint.endpoint_status.add(status)
-        finding.endpoint_status.add(status)
         status.mitigated = validated_data.get('mitigated', False)
         status.false_positive = validated_data.get('false_positive', False)
         status.out_of_scope = validated_data.get('out_of_scope', False)
@@ -1057,6 +1072,21 @@ class TestToFilesSerializer(serializers.Serializer):
     test_id = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
 
+    def to_representation(self, data):
+        test = data.get('test_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(test, test.id)),
+                'title': file.title
+            })
+        new_data = {'test_id': test.id, 'files': new_files}
+        return new_data
+
 
 class TestImportFindingActionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1255,8 +1285,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
                 raise serializers.ValidationError('Simple risk acceptance is disabled for this product, use the UI to accept this finding.')
 
         if is_active and is_risk_accepted:
-            raise serializers.ValidationError('Active findings cannot '
-                                        'be risk accepted.')
+            raise serializers.ValidationError('Active findings cannot be risk accepted.')
 
         return data
 
@@ -1349,22 +1378,19 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
             request = self.context['request']
             data['reporter'] = request.user
 
-        if ((data['active'] or data['verified']) and data['duplicate']):
-            raise serializers.ValidationError('Duplicate findings cannot be'
-                                              ' verified or active')
-        if data['false_p'] and data['verified']:
-            raise serializers.ValidationError('False positive findings cannot '
-                                              'be verified.')
+        if ((data.get('active') or data.get('verified')) and data.get('duplicate')):
+            raise serializers.ValidationError('Duplicate findings cannot be verified or active')
+        if data.get('false_p') and data.get('verified'):
+            raise serializers.ValidationError('False positive findings cannot be verified.')
 
-        if 'risk_accepted' in data and data['risk_accepted']:
-            test = data['test']
+        if 'risk_accepted' in data and data.get('risk_accepted'):
+            test = data.get('test')
             # test = Test.objects.get(id=test_id)
             if not test.engagement.product.enable_simple_risk_acceptance:
                 raise serializers.ValidationError('Simple risk acceptance is disabled for this product, use the UI to accept this finding.')
 
-        if data['active'] and 'risk_accepted' in data and data['risk_accepted']:
-            raise serializers.ValidationError('Active findings cannot '
-                                        'be risk accepted.')
+        if data.get('active') and 'risk_accepted' in data and data.get('risk_accepted'):
+            raise serializers.ValidationError('Active findings cannot be risk accepted.')
 
         return data
 
@@ -1512,11 +1538,11 @@ class ImportScanSerializer(serializers.Serializer):
 
     def save(self, push_to_jira=False):
         data = self.validated_data
-        close_old_findings = data['close_old_findings']
-        active = data['active']
-        verified = data['verified']
-        minimum_severity = data['minimum_severity']
-        endpoint_to_add = data['endpoint_to_add']
+        close_old_findings = data.get('close_old_findings')
+        active = data.get('active')
+        verified = data.get('verified')
+        minimum_severity = data.get('minimum_severity')
+        endpoint_to_add = data.get('endpoint_to_add')
         scan_date = data.get('scan_date', None)
         # Will save in the provided environment or in the `Development` one if absent
         version = data.get('version', None)
@@ -1529,7 +1555,7 @@ class ImportScanSerializer(serializers.Serializer):
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
         tags = data.get('tags', None)
-        lead = data['lead']
+        lead = data.get('lead')
 
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
@@ -1602,7 +1628,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=get_choices_sorted())
+        choices=get_choices_sorted(),
+        required=True)
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                           default=None,
                                                           required=False)
@@ -1652,13 +1679,13 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     def save(self, push_to_jira=False):
         logger.debug('push_to_jira: %s', push_to_jira)
         data = self.validated_data
-        scan_type = data['scan_type']
-        endpoint_to_add = data['endpoint_to_add']
-        minimum_severity = data['minimum_severity']
+        scan_type = data.get('scan_type')
+        endpoint_to_add = data.get('endpoint_to_add')
+        minimum_severity = data.get('minimum_severity')
         scan_date = data.get('scan_date', None)
-        close_old_findings = data['close_old_findings']
-        verified = data['verified']
-        active = data['active']
+        close_old_findings = data.get('close_old_findings')
+        verified = data.get('verified')
+        active = data.get('active')
         version = data.get('version', None)
         build_id = data.get('build_id', None)
         branch_tag = data.get('branch_tag', None)
@@ -1794,11 +1821,11 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
 
     def save(self):
         data = self.validated_data
-        file = data.get('file', None)
+        file = data.get('file')
 
-        create_endpoints = data['create_endpoints']
-        create_tags = data['create_tags']
-        create_dojo_meta = data['create_dojo_meta']
+        create_endpoints = data.get('create_endpoints', True)
+        create_tags = data.get('create_tags', True)
+        create_dojo_meta = data.get('create_dojo_meta', False)
 
         _, _, _, _, _, product_name, _, _, _ = get_import_meta_data_from_dict(data)
         product = get_target_product_if_exists(product_name)
@@ -1894,6 +1921,30 @@ class FindingToNotesSerializer(serializers.Serializer):
 class FindingToFilesSerializer(serializers.Serializer):
     finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
     files = FileSerializer(many=True)
+
+    def to_representation(self, data):
+        finding = data.get('finding_id')
+        files = data.get('files')
+        new_files = []
+        for file in files:
+            new_files.append({
+                'id': file.id,
+                'file': '{site_url}/{file_access_url}'.format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(finding, finding.id)),
+                'title': file.title
+            })
+        new_data = {'finding_id': finding.id, 'files': new_files}
+        return new_data
+
+
+class FindingCloseSerializer(serializers.ModelSerializer):
+    is_mitigated = serializers.BooleanField(required=False)
+    mitigated = serializers.DateTimeField(required=False)
+
+    class Meta:
+        model = Finding
+        fields = ('is_mitigated', 'mitigated')
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
@@ -2030,6 +2081,12 @@ class EngagementPresetsSerializer(serializers.ModelSerializer):
 class NetworkLocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Network_Locations
+        fields = '__all__'
+
+
+class SLAConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SLA_Configuration
         fields = '__all__'
 
 

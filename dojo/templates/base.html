@@ -159,12 +159,14 @@
                                                 {{ request.user.username }}
                                             </a>
                                         </li>
-                                        <li>
-                                            <a href="{% url 'api_v2_key' %}">
-                                                <i class="fa fa-fw fa-key"></i>
-                                                {% trans "API v2 Key" %}
-                                            </a>
-                                        </li>
+                                        {% if API_TOKENS_ENABLED %}
+                                          <li>
+                                              <a href="{% url 'api_v2_key' %}">
+                                                  <i class="fa fa-fw fa-key"></i>
+                                                  {% trans "API v2 Key" %}
+                                              </a>
+                                          </li>
+                                        {% endif %}
                                     {% endif %}
                                     <li>
                                         <a href="{% url 'api_v2_schema' %}" target="_blank">
@@ -545,6 +547,13 @@
                                                     <li>
                                                         <a href="{% url 'rules' %}">
                                                             {% trans "Rules Framework" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                                {% if system_settings.enable_finding_sla and "dojo.view_sla_configuration"|has_configuration_permission %}
+                                                    <li>
+                                                        <a href="{% url 'sla_config' %}">
+                                                            {% trans "SLA Configuration" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
@@ -994,6 +1003,16 @@
                 <!-- /.container-fluid -->
             </div>
             <!-- /#page-wrapper -->
+
+            <!-- .dojo-modals-wrapper -->
+            <div id="dojo-modals-wrapper" class="dojo-modals-wrapper">
+            {% block modals %}
+            {% endblock %}
+            </div>
+            <!-- /.dojo-modals-wrapper -->
+
+            <!-- #footer-wrapper -->
+            <div id="footer-wrapper">
             {% block footer %}
                 <footer class="footer">
                     <div class="container">
@@ -1026,6 +1045,8 @@
                     <p id="disable_count" class="hidden">{{ 'DISABLE_ALERT_COUNTER'|setting_enabled }}</p>
                 </footer>
             {% endblock %}
+            </div>
+            <!-- /#footer-wrapper -->
         </div>
 
         <!-- /#wrapper -->
@@ -1084,9 +1105,9 @@
                         $('.dropdown-alerts').empty();
                         $.each(data, function(i, elem) {
                         var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;
-                        var display_title = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';
+                        var display_title = titleField.length < 50 ? titleField : titleField.trim().substring(0,50).trim(this) + '...';
                         var description = elem.fields.description
-                        var display_description = description ? description.length < 100 ? description : jQuery.trim(description).substring(0,100).trim(this) + '...': ''
+                        var display_description = description ? description.length < 100 ? description : description.trim().substring(0,100).trim(this) + '...': ''
                         var dropdown_alert = "alert-list" + i;
                         $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa fa-' + htmlEscape(elem.fields.icon) +
                                                         ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert +

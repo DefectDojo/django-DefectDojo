@@ -54,10 +54,10 @@ jobs:
               sed -e "s/\-dev//" -i helm/defectdojo/Chart.yaml
           else
               echo "x.y.z without -dev found in Chart.yaml, probably releasing a new bug fix version"
-              CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml)
+              CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
               NEW_CHART_VERSION=$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')
               echo "bumping the chart version from $CURRENT_CHART_VERSION to $NEW_CHART_VERSION"
-              sed -ri "s/version: \S+/$NEW_CHART_VERSION/" helm/defectdojo/Chart.yaml
+              sed -ri "0,/version/s/version: \S+/$NEW_CHART_VERSION/" helm/defectdojo/Chart.yaml
           fi
 
       - name: Check version numbers
@@ -68,7 +68,7 @@ jobs:
           grep -H version helm/defectdojo/Chart.yaml
 
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@v4.14.1
+        uses: stefanzweifel/git-auto-commit-action@v4.15.3
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"

@@ -441,6 +441,19 @@ def get_jira_status(finding):
         return issue.fields.status
 
 
+# Used for unit testing so geting all the connections is manadatory
+def get_jira_comments(finding):
+    if finding.has_jira_issue:
+        j_issue = finding.jira_issue.jira_id
+    elif finding.finding_group and finding.finding_group.has_jira_issue:
+        j_issue = finding.finding_group.jira_issue.jira_id
+
+    if j_issue:
+        project = get_jira_project(finding)
+        issue = jira_get_issue(project, j_issue)
+        return issue.fields.comment.comments
+
+
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_generic_alert(title, description):
     create_notification(
@@ -475,16 +488,38 @@ def log_jira_message(text, finding):
 
 
 def get_labels(obj):
-    # Update Label with system setttings label
+    # Update Label with system settings label
     labels = []
     system_settings = System_Settings.objects.get()
     system_labels = system_settings.jira_labels
+    prod_name_label = prod_name(obj).replace(" ", "_")
+    jira_project = get_jira_project(obj)
+
     if system_labels:
         system_labels = system_labels.split()
         for system_label in system_labels:
             labels.append(system_label)
         # Update the label with the product name (underscore)
-        labels.append(prod_name(obj).replace(" ", "_"))
+        labels.append(prod_name_label)
+
+    # labels per-product/engagement
+    if jira_project and jira_project.jira_labels:
+        project_labels = jira_project.jira_labels.split()
+        for project_label in project_labels:
+            labels.append(project_label)
+        # Update the label with the product name (underscore)
+        if prod_name_label not in labels:
+            labels.append(prod_name_label)
+
+    if system_settings.add_vulnerability_id_to_jira_label or jira_project and jira_project.add_vulnerability_id_to_jira_label:
+        if type(obj) == Finding and obj.vulnerability_ids:
+            for id in obj.vulnerability_ids:
+                labels.append(id)
+        elif type(obj) == Finding_Group:
+            for finding in obj.findings.all():
+                for id in finding.vulnerability_ids:
+                    labels.append(id)
+
     return labels
 
 
@@ -642,6 +677,10 @@ def add_jira_issue(obj, *args, **kwargs):
                     },
             ]
 
+        # Custom fields to specify
+        if jira_project.custom_fields:
+            fields.update(jira_project.custom_fields)
+
         # populate duedate field, but only if it's available for this project + issuetype
         if not meta:
             meta = get_jira_meta(jira, jira_project)
@@ -661,6 +700,8 @@ def add_jira_issue(obj, *args, **kwargs):
         tags = get_tags(obj)
         jira_labels = labels + tags
         if jira_labels:
+            # de-dup
+            jira_labels = list(dict.fromkeys(jira_labels))
             if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
                 fields['labels'] = jira_labels
 
@@ -719,6 +760,13 @@ def add_jira_issue(obj, *args, **kwargs):
         issue = jira.issue(new_issue.id)
 
         logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
+
+        # Add any notes that already exist in the finding to the JIRA
+        for find in findings:
+            if find.notes.all():
+                for note in find.notes.all().reverse():
+                    add_comment(obj, note)
+
         return True
     except TemplateDoesNotExist as e:
         logger.exception(e)
@@ -936,7 +984,16 @@ def push_status_to_jira(obj, jira_instance, jira, issue, save=False):
 
 # gets the metadata for the default issue type in this jira project
 def get_jira_meta(jira, jira_project):
-    meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
+    meta = None
+    try:
+        meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
+    except JIRAError as e:
+        message = "Invalid JIRA Project Config, can't retrieve or create metadata. status: %d, message: %s" % (e.status_code, e.text)
+        logger.warn(message)
+
+        add_error_message_to_response(message)
+
+        raise e
 
     meta_data_error = False
     if len(meta['projects']) == 0:
@@ -988,7 +1045,7 @@ def is_jira_project_valid(jira_project):
         meta = get_jira_meta(get_jira_connection(jira_project), jira_project)
         return True
     except JIRAError as e:
-        logger.debug('invalid JIRA Project Config, can''t retrieve metadata for: ''%s''', jira_project)
+        logger.debug("invalid JIRA Project Config, can't retrieve metadata for '%s'", jira_project)
         return False
 
 
@@ -1090,7 +1147,12 @@ def update_epic(engagement, **kwargs):
             jira = get_jira_connection(jira_instance)
             j_issue = get_jira_issue(engagement)
             issue = jira.issue(j_issue.jira_id)
-            issue.update(summary=engagement.name, description=engagement.name)
+
+            epic_name = kwargs.get('epic_name')
+            if not epic_name:
+                epic_name = engagement.name
+
+            issue.update(summary=epic_name, description=epic_name)
             return True
         except JIRAError as e:
             logger.exception(e)
@@ -1117,17 +1179,22 @@ def add_epic(engagement, **kwargs):
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
     if jira_project.enable_engagement_epic_mapping:
+        epic_name = kwargs.get('epic_name')
+        if not epic_name:
+            epic_name = engagement.name
         issue_dict = {
             'project': {
                 'key': jira_project.project_key
             },
-            'summary': engagement.name,
-            'description': engagement.name,
+            'summary': epic_name,
+            'description': epic_name,
             'issuetype': {
                 'name': 'Epic'
             },
-            get_epic_name_field_name(jira_instance): engagement.name,
+            get_epic_name_field_name(jira_instance): epic_name,
         }
+        if kwargs.get('epic_priority'):
+            issue_dict['priority'] = {'name': kwargs.get('epic_priority')}
         try:
             jira = get_jira_connection(jira_instance)
             logger.debug('add_epic: %s', issue_dict)
@@ -1355,7 +1422,13 @@ def process_jira_epic_form(request, engagement=None):
         if jira_epic_form.is_valid():
             if jira_epic_form.cleaned_data.get('push_to_jira'):
                 logger.debug('pushing engagement to JIRA')
-                if push_to_jira(engagement):
+                epic_name = engagement.name
+                if jira_epic_form.cleaned_data.get('epic_name'):
+                    epic_name = jira_epic_form.cleaned_data.get('epic_name')
+                epic_priority = None
+                if jira_epic_form.cleaned_data.get('epic_priority'):
+                    epic_priority = jira_epic_form.cleaned_data.get('epic_priority')
+                if push_to_jira(engagement, epic_name=epic_name, epic_priority=epic_priority):
                     logger.debug('Push to JIRA for Epic queued successfully')
                     messages.add_message(
                         request,

@@ -73,7 +73,7 @@ To obtain \'epic name id\': If you have admin access to JIRA:
 4.  **Note**: dojojira uses the same celery functionality as
     reports. Make sure the celery runner is setup correctly as
     described:
-    <https://defectdojo.github.io/django-DefectDojo/basics/features/#reports>
+    <https://documentation.defectdojo.com/basics/features/#reports>
 
 Or
 

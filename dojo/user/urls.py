@@ -25,7 +25,6 @@ urlpatterns = [
         name='edit_user'),
     url(r'^user/(?P<uid>\d+)/delete', views.delete_user,
         name='delete_user'),
-    url(r'^api/key-v2$', views.api_v2_key, name='api_v2_key'),
     url(r'^user/(?P<uid>\d+)/add_product_type_member$', views.add_product_type_member,
         name='add_product_type_member_user'),
     url(r'^user/(?P<uid>\d+)/add_product_member$', views.add_product_member,
@@ -50,3 +49,6 @@ if settings.FORGOT_PASSWORD:
             template_name='dojo/password_reset_complete.html',
         ), name='password_reset_complete'),
     ])
+
+if settings.API_TOKENS_ENABLED:
+    urlpatterns += [url(r'^api/key-v2$', views.api_v2_key, name='api_v2_key')]
