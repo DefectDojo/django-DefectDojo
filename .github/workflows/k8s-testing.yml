@@ -101,7 +101,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
 
       - name: Upload image ${{ env.docker-image }} as artifact
-        uses:  actions/upload-artifact@v2
+        uses:  actions/upload-artifact@v3
         with:
           name: ${{ matrix.docker-image }}
           path: ${{ matrix.docker-image }}_img
@@ -176,11 +176,11 @@ jobs:
       - name: Set confings into Outputs
         id: set
         run: |-
-              echo ::set-output name=pgsql:: "${{ env.HELM_PG_DATABASE_SETTINGS }}"
-              echo ::set-output name=pgsqlha:: "${{ env.HELM_PGHA_DATABASE_SETTINGS }}"
-              echo ::set-output name=mysql:: "${{ env.HELM_MYSQL_DATABASE_SETTINGS }}"
-              echo ::set-output name=redis:: "${{ env.HELM_REDIS_BROKER_SETTINGS }}"
-              echo ::set-output name=rabbit:: "${{ env.HELM_RABBIT_BROKER_SETTINGS }}"
+              echo "pgsql=${{ env.HELM_PG_DATABASE_SETTINGS }}" >> $GITHUB_ENV
+              echo "pgsqlha=${{ env.HELM_PGHA_DATABASE_SETTINGS }}" >> $GITHUB_ENV
+              echo "mysql=${{ env.HELM_MYSQL_DATABASE_SETTINGS }}" >> $GITHUB_ENV
+              echo "redis=${{ env.HELM_REDIS_BROKER_SETTINGS }}" >> $GITHUB_ENV
+              echo "rabbit=${{ env.HELM_RABBIT_BROKER_SETTINGS }}" >> $GITHUB_ENV
 
       # - name: Create image pull Secrets
       #   run: |-
@@ -194,8 +194,8 @@ jobs:
                ./helm/defectdojo \
                --set django.ingress.enabled=true \
                --set imagePullPolicy=Never \
-               ${{ steps.set.outputs[matrix.databases] }} \
-               ${{ steps.set.outputs[matrix.brokers] }} \
+               ${{ env[matrix.databases] }} \
+               ${{ env[matrix.brokers] }} \
                --set createSecret=true \
                # --set imagePullSecrets=defectdojoregistrykey
 
