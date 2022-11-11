@@ -76,10 +76,10 @@ jobs:
           commit_message: "Update versions in application files"
           branch: ${{ env.NEW_BRANCH }}
       - id: set-repo-org
-        run: echo ::set-output name=repoorg::${GITHUB_REPOSITORY%%/*}
+        run: echo "repoorg::${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
       - name: Create Pull Request
         env:
-          REPO_ORG: ${{ steps.set-repo-org.outputs.repoorg }}
+          REPO_ORG: ${{ env.repoorg }}
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
