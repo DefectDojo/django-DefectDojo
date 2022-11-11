@@ -72,3 +72,13 @@ class TestCheckovParser(DojoTestCase):
             'https://docs.bridgecrew.io/docs/ensure-that-a-user-for-the-container-has-been-created',
             first_dockerfile_finding.references
         )
+
+    def test_parse_file_with_specified_severity(self):
+        testfile = open("unittests/scans/checkov/checkov-report-severity.json")
+        parser = CheckovParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(4, len(findings))
+        self.assertEqual("Medium", findings[0].severity)
+        self.assertEqual("Medium", findings[1].severity)
+        self.assertEqual("Low", findings[2].severity)
+        self.assertEqual("High", findings[3].severity)
