@@ -95,8 +95,16 @@
             {% endblock %}
         </style>
     </head>
-    <body class="{% dojo_body_class %}">
-        <div id="wrapper">
+    <body class="{% dojo_body_class %}" style="display: contents;" >
+        <div id="wrapper" style="filter: invert(0); background-color: inherit;">
+            <script type="text/javascript">
+                var element = document.getElementById("wrapper");
+                if (localStorage.isDark === "true") {
+                    element.style.filter = "invert(1)"
+                } else {
+                    element.style.filter = "invert(0)"
+                }
+            </script>
             {% block navigation %}
                 <!-- Navigation -->
                 <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
@@ -143,6 +151,11 @@
                                 <ul class="dropdown-menu dropdown-alerts">
                                 </ul>
                                 <!-- /.dropdown-alerts -->
+                            </li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" type="submit" href="#" onclick="darkModeClick()">
+                                    <i class="fa fa-sun-o fa-fw"></i>
+                                </a>
                             </li>
                         {% endif %}
                         <li class="dropdown">
@@ -211,8 +224,8 @@
                     <!-- /.navbar-top-links -->
 
                     {% if request.user.is_authenticated %}
-                        <div class="navbar-default sidebar navbar-fixed-top" role="navigation">
-                            <div class="sidebar-nav navbar-collapse">
+                        <div class="navbar-default sidebar" role="navigation">
+                            <div class="sidebar-nav navbar-collapse collapse" style="max-height: max-content; height: 1px" aria-expanded="false">
                                 <ul class="nav" id="side-menu">
                                     {% block sidebar-items %}
                                         <li>
@@ -597,7 +610,7 @@
                 </nav>
             {% endblock %}
             <!-- Page Content -->
-            <div id="page-wrapper">
+            <div id="page-wrapper" style="padding-top: 100px;">
                 <div class="container-fluid">
                     <!-- start of tabs -->
                     {% block tab_bar %}
@@ -1153,6 +1166,17 @@
                 $('.selectpicker').selectpicker('render');
 
             });
+            
+            function darkModeClick() {
+                var element = document.getElementById("wrapper");
+                if (element.style.filter === "invert(1)" ) {
+                    element.style.filter = "invert(0)"
+                    localStorage.isDark = false
+                } else{
+                    element.style.filter = "invert(1)"
+                    localStorage.isDark = true
+                }
+            }
         </script>
         {% block extra_javascript %}
         {% endblock %}
