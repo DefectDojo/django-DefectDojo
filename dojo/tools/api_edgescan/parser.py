@@ -24,6 +24,9 @@ class ApiEdgescanParser(object):
     def requires_tool_type(self, scan_type):
         return "Edgescan"
 
+    def api_scan_configuration_hint(self):
+        return 'the field <b>Service key 1</b> has to be set with the Edgescan asset id.'
+
     def get_findings(self, file, test):
         if file:
             data = json.load(file)

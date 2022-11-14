@@ -28,6 +28,9 @@ class ApiCobaltParser(object):
     def requires_tool_type(self, scan_type):
         return 'Cobalt.io'
 
+    def api_scan_configuration_hint(self):
+        return 'the field <b>Service key 1</b> has to be set with the Cobalt.io asset id. <b>Service key 2</b> will be populated with the asset name while saving the configuration.'
+
     def get_findings(self, file, test):
         if file is None:
             data = CobaltApiImporter().get_findings(test)

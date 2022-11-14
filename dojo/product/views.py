@@ -51,6 +51,7 @@ from dojo.product.queries import get_authorized_products, get_authorized_members
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type, \
     get_authorized_product_types
 from dojo.tool_config.factory import create_API
+from dojo.tools.factory import get_api_scan_configuration_hints
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
@@ -1572,6 +1573,7 @@ def add_api_scan_configuration(request, pid):
                   {'form': form,
                    'product_tab': product_tab,
                    'product': product,
+                   'api_scan_configuration_hints': get_api_scan_configuration_hints(),
                    })
 
 

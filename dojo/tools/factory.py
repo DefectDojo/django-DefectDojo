@@ -1,7 +1,7 @@
 import re
 import logging
 from django.conf import settings
-from dojo.models import Test_Type
+from dojo.models import Test_Type, Tool_Type, Tool_Configuration
 
 PARSERS = {}
 
@@ -61,6 +61,23 @@ def requires_file(scan_type):
     return True
 
 
+def get_api_scan_configuration_hints():
+    res = list()
+    for name, parser in PARSERS.items():
+        if hasattr(parser, "api_scan_configuration_hint"):
+            scan_types = parser.get_scan_types()
+            for scan_type in scan_types:
+                tool_type = parser.requires_tool_type(scan_type)
+                res.append({
+                    'name': name,
+                    'tool_type_name': tool_type,
+                    'tool_types': Tool_Type.objects.filter(name=tool_type),
+                    'tool_configurations': Tool_Configuration.objects.filter(tool_type__name=tool_type),
+                    'hint': parser.api_scan_configuration_hint(),
+                })
+    return sorted(res, key=lambda x: x['name'].lower())
+
+
 def requires_tool_type(scan_type):
     if scan_type not in PARSERS:
         return None
@@ -81,7 +98,7 @@ package_dir = str(Path(__file__).resolve().parent)
 for module_name in os.listdir(package_dir):
     # check if it's dir
     if os.path.isdir(os.path.join(package_dir, module_name)):
-        try:
+        try:            
             # check if it's a Python module
             if find_spec(f"dojo.tools.{module_name}.parser"):
                 # import the module and iterate through its attributes

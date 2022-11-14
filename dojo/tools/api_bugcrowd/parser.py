@@ -36,6 +36,9 @@ class ApiBugcrowdParser(object):
     def requires_tool_type(self, scan_type):
         return "Bugcrowd API"
 
+    def api_scan_configuration_hint(self):
+        return 'the field <b>Service key 1</b> has to be set with the Bugcrowd program code. <b>Service key 2</b> can be set with the target in the Bugcrowd program (will be url encoded for the api call), if not supplied, will fetch all submissions in the program'
+
     def get_findings(self, file, test):
         if file is None:
             data = BugcrowdApiImporter().get_findings(test)
