@@ -5,6 +5,7 @@ from dojo.models import Test_Type
 
 PARSERS = {}
 
+logger = logging.getLogger(__name__)
 
 def register(parser_type):
     for scan_type in parser_type().get_scan_types():
@@ -15,7 +16,7 @@ def register(parser_type):
 
 
 def register_parser(scan_type, parser):
-    logging.debug(f"register scan_type:{scan_type} with parser:{parser}")
+    logger.debug(f"register scan_type:{scan_type} with parser:{parser}")
     # check double registration or registration with an existing key
     if scan_type in PARSERS:
         raise ValueError(f"Try to register an existing parser '{scan_type}'")
@@ -90,4 +91,4 @@ for module_name in os.listdir(package_dir):
                     if isclass(attribute) and attribute_name.lower() == module_name.replace("_", "") + "parser":
                         register(attribute)
         except:
-            logging.exception(f"failed to load {module_name}")
+            logger.exception(f"failed to load {module_name}")
