@@ -70,10 +70,13 @@ class SonarQubeApiImporter(object):
                 raise ValidationError(
                     'More than one Product API Scan Configuration has been configured, but none of them has been chosen. Please specify which one should be used.'
                 )
-            else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
-                config = None
+            else:  # We are not handeling cases no. 1-3 anymore - https://github.com/DefectDojo/django-DefectDojo/pull/4676
+                raise Exception(
+                    'There are no API Scan Configurations for this Product.\n'
+                    'Please add at least one API Scan Configuration for SonarQube to this Product.'
+                )
 
-        return SonarQubeAPI(tool_config=config.tool_configuration if config else None), config
+        return SonarQubeAPI(tool_config=config.tool_configuration), config
 
     def import_issues(self, test):
 

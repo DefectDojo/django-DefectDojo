@@ -2,8 +2,6 @@ import requests
 import json
 from json.decoder import JSONDecodeError
 
-from dojo.models import Tool_Configuration, Tool_Type
-
 
 class EdgescanAPI(object):
     """
@@ -12,23 +10,7 @@ class EdgescanAPI(object):
 
     DEFAULT_URL = "https://live.edgescan.com"
 
-    def __init__(self, tool_config=None):
-        tool_type, _ = Tool_Type.objects.get_or_create(name='Edgescan')
-
-        if not tool_config:
-            try:
-                tool_config = Tool_Configuration.objects.get(tool_type=tool_type)
-            except Tool_Configuration.DoesNotExist:
-                raise Exception(
-                    'No Edgescan tool is configured. \n'
-                    'Create a new Tool at Settings -> Tool Configuration'
-                )
-            except Tool_Configuration.MultipleObjectsReturned:
-                raise Exception(
-                    'More than one Tool Configuration for Edgescan exists. \n'
-                    'Please specify at Product configuration which one should be used.'
-                )
-
+    def __init__(self, tool_config):
         if tool_config.authentication_type == "API":
             self.api_key = tool_config.api_key
             self.url = tool_config.url or self.DEFAULT_URL

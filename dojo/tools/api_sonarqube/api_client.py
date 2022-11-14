@@ -1,30 +1,13 @@
 import requests
 
-from dojo.models import Tool_Configuration, Tool_Type
 from dojo.utils import prepare_for_view
 
 
 class SonarQubeAPI:
 
-    def __init__(self, tool_config=None):
+    def __init__(self, tool_config):
 
         self.rules_cache = {}
-
-        tool_type, _ = Tool_Type.objects.get_or_create(name='SonarQube')
-
-        if not tool_config:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
-            try:
-                tool_config = Tool_Configuration.objects.get(tool_type=tool_type)  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 2
-            except Tool_Configuration.DoesNotExist:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 1
-                raise Exception(
-                    'No SonarQube tool is configured. \n'
-                    'Create a new Tool at Settings -> Tool Configuration'
-                )
-            except Tool_Configuration.MultipleObjectsReturned:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 3
-                raise Exception(
-                    'More than one Tool Configuration for SonarQube exists. \n'
-                    'Please specify at Product configuration which one should be used.'
-                )
 
         supported_issue_types = ["BUG", "VULNERABILITY", "CODE_SMELL"]
         self.org_id = None

@@ -1,6 +1,5 @@
 import requests
 from urllib.parse import urlencode
-from dojo.models import Tool_Type
 
 
 class BugcrowdAPI:
@@ -16,8 +15,6 @@ class BugcrowdAPI:
     }
 
     def __init__(self, tool_config):
-        Tool_Type.objects.get_or_create(name="Bugcrowd API")
-
         self.session = requests.Session()
         if tool_config.authentication_type == "API":
             self.api_token = tool_config.api_key
