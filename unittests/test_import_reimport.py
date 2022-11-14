@@ -377,15 +377,15 @@ class ImportReimportMixin(object):
     def test_import_veracode_reimport_veracode_active_verified_mitigated(self):
         logger.debug('reimporting exact same original veracode mitigated xml report again')
 
-        import_veracode_many_findings = self.import_scan_with_params(self.veracode_mitigated_findings, scan_type=self.scan_type_veracode, verified=True)
+        import_veracode_many_findings = self.import_scan_with_params(self.veracode_mitigated_findings, scan_type=self.scan_type_veracode,
+                                                                     verified=True, forceActive=True, forceVerified=True)
 
         test_id = import_veracode_many_findings['test']
 
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
-        # not specifying the untouched because untouched won't be flagged, even though we will have 0 reactivated...
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0, closed=0, reactivated=0):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0, closed=0, reactivated=0, untouched=1):
             reimport_veracode_mitigated_findings = self.reimport_scan_with_params(test_id, self.veracode_mitigated_findings, scan_type=self.scan_type_veracode)
 
         test_id = reimport_veracode_mitigated_findings['test']
@@ -1805,11 +1805,26 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         test = Test.objects.get(id=response.url.split('/')[-1])
         return {'test': test.id}
 
-    def import_scan_with_params_ui(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, scan_date=None, service=None):
+    def import_scan_with_params_ui(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
+                                   push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, scan_date=None, service=None,
+                                   forceActive=False, forceVerified=False):
+
+        activePayload = "not_specified"
+        if forceActive:
+            activePayload = "force_to_true"
+        elif not active:
+            activePayload = "force_to_false"
+
+        verifiedPayload = "not_specified"
+        if forceVerified:
+            verifiedPayload = "force_to_true"
+        elif not verified:
+            verifiedPayload = "force_to_false"
+
         payload = {
                 "minimum_severity": minimum_severity,
-                "active": active,
-                "verified": verified,
+                "active": activePayload,
+                "verified": verifiedPayload,
                 "scan_type": scan_type,
                 "file": open(get_unit_tests_path() + filename),
                 "environment": 1,
@@ -1835,10 +1850,18 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         return self.import_scan_ui(engagement, payload)
 
     def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
+        # Mimic old functionality for active/verified to avoid breaking tests
+        activePayload = "force_to_true"
+        if not active:
+            activePayload = "force_to_false"
+        verifiedPayload = "force_to_true"
+        if not verified:
+            verifiedPayload = "force_to_false"
+
         payload = {
                 "minimum_severity": minimum_severity,
-                "active": active,
-                "verified": verified,
+                "active": activePayload,
+                "verified": verifiedPayload,
                 "scan_type": scan_type,
                 "file": open(get_unit_tests_path() + filename),
                 "version": "1.0.1",
