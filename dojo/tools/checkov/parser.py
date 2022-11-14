@@ -15,7 +15,7 @@ class CheckovParser(object):
         return "Import JSON reports of Infrastructure as Code vulnerabilities."
 
     def get_findings(self, json_output, test):
-        findings = list()
+        findings = []
         if json_output:
             deserialized = self.parse_json(json_output)
             for tree in deserialized:
@@ -44,15 +44,13 @@ class CheckovParser(object):
         except:
             raise Exception("Invalid format")
 
-        if type(deserialized) is not list:
-            return [deserialized]
-        else:
-            return deserialized
+        return [deserialized] if type(deserialized) is not list else deserialized
 
     def get_items(self, tree, test, check_type):
         items = []
 
-        for node in tree['results']['failed_checks']:
+        failed_checks = tree.get('results', {}).get('failed_checks', [])
+        for node in failed_checks:
             item = get_item(node, test, check_type)
             if item:
                 items.append(item)
@@ -61,51 +59,22 @@ class CheckovParser(object):
 
 
 def get_item(vuln, test, check_type):
-    title = ''
-    if 'check_name' in vuln:
-        title = vuln['check_name']
-    else:
-        title = 'check_name not found'
-
-    description = 'Check Type: {}\n'.format(check_type)
+    title = vuln['check_name'] if 'check_name' in vuln else 'check_name not found'
+    description = f'Check Type: {check_type}\n'
     if 'check_id' in vuln:
-        description += 'Check Id: {}\n'.format(vuln['check_id'])
+        description += f"Check Id: {vuln['check_id']}\n"
     if 'check_name' in vuln:
-        description += '{}\n'.format(vuln['check_name'])
+        description += f"{vuln['check_name']}\n"
 
-    file_path = None
-    if 'file_path' in vuln:
-        file_path = vuln['file_path']
-
+    file_path = vuln['file_path'] if 'file_path' in vuln else None
     source_line = None
     if 'file_line_range' in vuln:
         lines = vuln['file_line_range']
         source_line = lines[0]
 
-    resource = None
-    if 'resource' in vuln:
-        resource = vuln['resource']
-
-    severity = 'Medium'
-    if 'severity' in vuln:
-        severity = vuln['severity'].capitalize()
-
+    resource = vuln['resource'] if 'resource' in vuln else None
+    severity = vuln['severity'].capitalize() if 'severity' in vuln else 'Medium'
     mitigation = ''
 
-    references = ''
-    if 'guideline' in vuln:
-        references = vuln['guideline']
-
-    finding = Finding(title=title,
-                      test=test,
-                      description=description,
-                      severity=severity,
-                      mitigation=mitigation,
-                      references=references,
-                      file_path=file_path,
-                      line=source_line,
-                      component_name=resource,
-                      static_finding=True,
-                      dynamic_finding=False)
-
-    return finding
+    references = vuln['guideline'] if 'guideline' in vuln else ''
+    return Finding(title=title, test=test, description=description, severity=severity, mitigation=mitigation, references=references, file_path=file_path, line=source_line, component_name=resource, static_finding=True, dynamic_finding=False)
