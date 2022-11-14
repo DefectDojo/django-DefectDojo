@@ -1,0 +1,229 @@
+name: "NCA: build Docker images and package Helm chart"
+
+env:
+  DD_REGISTRY_INTERNAL: "docker-registry-internal.extranet.netcetera.biz"
+  DD_REGISTRY_INTERNAL_RELEASE: "docker-registry-internal-release.extranet.netcetera.biz"
+  DD_PATH: "/nca-459-7/defectdojo"
+  GIT_USERNAME: "DefectDojo NCA release bot"
+  GIT_EMAIL: "dojo-nca-release-bot@users.noreply.github.com"
+  HELM_CHARTS_BRANCH_PREFIX: "helm-charts-nca"
+
+on:
+  workflow_dispatch:
+  push:
+    branch:
+      # uncomment this (and update to the current major version) if you want an
+      # image built for each commit
+      #- tag-2.16.1-NCA
+      # nca/X naming is used in actions below, adjust accordingly if needed
+      - nca/feature/*
+    tag:
+      - nca/release/*
+
+# On each push to the aforementioned branches or tags with names matching the
+# pattern above, the following happens:
+#
+# - Depending on Git reference name (branch or tag name) we determine a release
+#   for a would-be artifact.
+#   - nca/release/<RESULTING NAME>
+#   - nca/feature/<RESULTING NAME>
+#   - tag-VERSION-NCA --> VERSION-nca-GIT_SHA_FIRST_8_CHARS, i.e. 2.16.1-nca-abcdef
+#
+# - Note that when pushing to nca/feature branch or creating a nca/release tag,
+#   the artifacts will have the same name (will overwrite the previous
+#   versions). However, when pushing to tag-VERSION-NCA branch, each resulting
+#   artifact will be unique.
+#
+# - We also determine if it is a release build or just a test build. This
+#   affects on where the resulting image will be pushed to.
+#
+# - Docker images (nginx and django) are built. They are tagged with release
+#   determined above and pushed to repositories stated in environment variables
+#   above. The same image is pushed to both repositories.
+#
+# - Helm chart is packaged.
+#   - Helm package is pushed to the release named as 'helm-<RESULTING NAME>'.
+#   - The package is stored under a subdirectory named in the same way as Docker
+#     image (described above).
+#   - index.yaml file is pushed to a branch named 'helm-charts-nca-<RESULTING name>'.
+#     The branch is created from helm-charts upstream branch. Changes are pushed
+#     force flag.
+
+
+jobs:
+  build_images:
+    name: build and push DefectDojo Docker images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+          docker-image: [django, nginx]
+    steps:
+      - name: set Docker tag to the release
+        if: ${{ startsWith(github.ref_name, 'nca/release/') }}
+        run: |
+          echo "RELEASE_VERSION=${GITHUB_REF_NAME#nca/release/}" >> $GITHUB_ENV
+          echo "DD_REGISTRY=${DD_REGISTRY_INTERNAL_RELEASE}" >> $GITHUB_ENV
+          echo "DD_REPO=${DD_REGISTRY_INTERNAL_RELEASE}${DD_PATH}" >> $GITHUB_ENV
+          echo "NCA_HELM_BRANCH=${HELM_CHARTS_BRANCH_PREFIX}" >> $GITHUB_ENV
+
+      - name: set Docker tag to the feature branch name
+        if: ${{ startsWith(github.ref_name, 'nca/feature/') }}
+        run: |
+          echo "RELEASE_VERSION=${GITHUB_REF_NAME#nca/feature/}" >> $GITHUB_ENV
+          echo "DD_REGISTRY=${DD_REGISTRY_INTERNAL}" >> $GITHUB_ENV
+          echo "DD_REPO=${DD_REGISTRY_INTERNAL}${DD_PATH}" >> $GITHUB_ENV
+          echo "NCA_HELM_BRANCH=${HELM_CHARTS_BRANCH_PREFIX}-${RELEASE_VERSION}" >> $GITHUB_ENV
+
+      - name: set Docker tag to the main branch name and hash
+        if: ${{ startsWith(github.ref_name, 'tag-') }}
+        run: |
+          RELEASE_VERSION="${GITHUB_REF_NAME#tag-}"
+          echo "RELEASE_VERSION=$(echo $RELEASE_VERSION | tr '[:upper:]' '[:lower:]')-${GITHUB_SHA:0:8}" >> $GITHUB_ENV
+          echo "DD_REGISTRY=${DD_REGISTRY_INTERNAL}" >> $GITHUB_ENV
+          echo "DD_REPO=${DD_REGISTRY_INTERNAL}${DD_PATH}" >> $GITHUB_ENV
+          echo "NCA_HELM_BRANCH=${HELM_CHARTS_BRANCH_PREFIX}-${RELEASE_VERSION}" >> $GITHUB_ENV
+
+      - name: reporting the resulting versions
+        run: |
+          echo building docker image tag ${{ env.RELEASE_VERSION }}
+          echo packaging Helm chart into ${{ env.NCA_HELM_BRANCH }} branch
+
+      - name: checkout the repo
+        uses: actions/checkout@v3
+
+      - name: login to Docker repository
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DD_REGISTRY }}
+          username: ${{ secrets.NCA_REPO_USERNAME }}
+          password: ${{ secrets.NCA_REPO_PASSWORD }}
+
+      - name: setup Docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: cache Docker layers
+        uses: actions/cache@v3
+        env:
+          docker-image: ${{ matrix.docker-image }}
+        with:
+          path: /tmp/.buildx-cache-${{ env.docker-image }}
+          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.sha }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.sha }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-
+
+      - name: storing Netcetera Active Directory certificate in would-be container
+        env:
+          AD_CERT: ${{ secrets.AD_CERT }}
+        run: echo "$AD_CERT" > docker/certs/ad-ca.crt
+
+      - name: build and push image
+        uses: docker/build-push-action@v3
+        env:
+          docker-image: ${{ matrix.docker-image }}
+        with:
+          push: true
+          tags: ${{ env.DD_REPO }}/defectdojo-${{ env.docker-image}}:${{ env.RELEASE_VERSION }}
+          file: ./Dockerfile.${{ env.docker-image }}-debian
+          context: .
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
+
+  package_helm:
+    name: package Helm chart
+    runs-on: ubuntu-latest
+    steps:
+      # the first steps must be copy-pasted from above
+      - name: set Docker tag to the release
+        if: ${{ startsWith(github.ref_name, 'nca/release/') }}
+        run: |
+          echo "RELEASE_VERSION=${GITHUB_REF_NAME#nca/release/}" >> $GITHUB_ENV
+          echo "DD_REGISTRY=${DD_REGISTRY_INTERNAL_RELEASE}" >> $GITHUB_ENV
+          echo "DD_REPO=${DD_REGISTRY_INTERNAL_RELEASE}${DD_PATH}" >> $GITHUB_ENV
+          echo "NCA_HELM_BRANCH=${HELM_CHARTS_BRANCH_PREFIX}" >> $GITHUB_ENV
+
+      - name: set Docker tag to the feature branch name
+        if: ${{ startsWith(github.ref_name, 'nca/feature/') }}
+        run: |
+          echo "RELEASE_VERSION=${GITHUB_REF_NAME#nca/feature/}" >> $GITHUB_ENV
+          echo "DD_REGISTRY=${DD_REGISTRY_INTERNAL}" >> $GITHUB_ENV
+          echo "DD_REPO=${DD_REGISTRY_INTERNAL}${DD_PATH}" >> $GITHUB_ENV
+          echo "NCA_HELM_BRANCH=${HELM_CHARTS_BRANCH_PREFIX}-${RELEASE_VERSION}" >> $GITHUB_ENV
+
+      - name: set Docker tag to the main branch name and hash
+        if: ${{ startsWith(github.ref_name, 'tag-') }}
+        run: |
+          RELEASE_VERSION="${GITHUB_REF_NAME#tag-}"
+          echo "RELEASE_VERSION=$(echo $RELEASE_VERSION | tr '[:upper:]' '[:lower:]')-${GITHUB_SHA:0:8}" >> $GITHUB_ENV
+          echo "DD_REGISTRY=${DD_REGISTRY_INTERNAL}" >> $GITHUB_ENV
+          echo "DD_REPO=${DD_REGISTRY_INTERNAL}${DD_PATH}" >> $GITHUB_ENV
+          echo "NCA_HELM_BRANCH=${HELM_CHARTS_BRANCH_PREFIX}-${RELEASE_VERSION}" >> $GITHUB_ENV
+
+      - name: reporting the resulting versions
+        run: |
+          echo building docker image tag ${{ env.RELEASE_VERSION }}
+          echo packaging Helm chart into ${{ env.NCA_HELM_BRANCH }} branch
+
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: install Helm
+        uses: azure/setup-helm@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: configure Helm repos
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm dependency list ./helm/defectdojo
+          helm dependency update ./helm/defectdojo
+
+      - name: package Helm chart
+        id: package-helm-chart
+        run: |
+          mkdir build
+          helm package helm/defectdojo/ --destination ./build
+          echo "chart_version=$(ls build | sed 's|defectdojo-||' | sed 's|\.tgz||')" >> $GITHUB_ENV
+          app_version=$(helm show chart helm/defectdojo/ | grep appVersion)
+          echo "app_version=${app_version#appVersion: }" >> $GITHUB_ENV
+          echo "NCA_HELM_RELEASE=helm-${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
+
+      - name: create a release
+        id: create_release
+        uses: ncipollo/release-action@v1.11.2
+        with:
+          commit: ${{ github.sha }}
+          tag: ${{ env.NCA_HELM_RELEASE }}
+          draft: false
+          prerelease: false
+          removeArtifacts: true
+          name: Release ${{ env.NCA_HELM_RELEASE }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/defectdojo-${{ env.chart_version }}.tgz
+          asset_name: defectdojo-${{ env.chart_version }}.tgz
+          asset_content_type: application/tar+gzip
+
+      - name: update Helm repository index
+        run: |
+          git config --global user.name "${{ env.GIT_USERNAME }}"
+          git config --global user.email "${{ env.GIT_EMAIL }}"
+          git remote update
+          git fetch --all
+          git checkout -b "${{ env.NCA_HELM_BRANCH }}" origin/helm-charts
+          if [ ! -f ./index.yaml ]; then
+            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ env.NCA_HELM_RELEASE }}/"
+          else
+            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ env.NCA_HELM_RELEASE }}/" --merge ./index.yaml
+          fi
+          cp -f ./build/index.yaml ./index.yaml
+          git add ./index.yaml
+          git commit -m "Update index.yaml"
+          git push -f -u origin "${{ env.NCA_HELM_BRANCH }}"
