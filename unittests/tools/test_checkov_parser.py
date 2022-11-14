@@ -11,6 +11,12 @@ class TestCheckovParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
+    def test_parse_file_with_no_vuln_has_no_findings_v2(self):
+        testfile = open("unittests/scans/checkov/checkov2-report-0-vuln.json")
+        parser = CheckovParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(0, len(findings))
+
     def test_parse_file_with_one_vuln_has_one_finding(self):
         testfile = open("unittests/scans/checkov/checkov-report-1-vuln.json")
         parser = CheckovParser()
