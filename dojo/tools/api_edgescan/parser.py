@@ -7,7 +7,7 @@ ES_SEVERITIES = {1: "Info", 2: "Low", 3: "Medium", 4: "High", 5: "Critical"}
 SCANTYPE_EDGESCAN = 'Edgescan Scan'
 
 
-class EdgescanParser(object):
+class ApiEdgescanParser(object):
     """
     Import from Edgescan API or JSON file
     """

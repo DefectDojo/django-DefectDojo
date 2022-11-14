@@ -4,7 +4,7 @@ from .importer import SonarQubeApiImporter
 SCAN_SONARQUBE_API = 'SonarQube API Import'
 
 
-class SonarQubeAPIParser(object):
+class ApiSonarQubeParser(object):
 
     def get_scan_types(self):
         return [SCAN_SONARQUBE_API]

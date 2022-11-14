@@ -8,7 +8,7 @@ from .importer import CobaltApiImporter
 SCAN_COBALTIO_API = 'Cobalt.io API Import'
 
 
-class CobaltApiParser(object):
+class ApiCobaltParser(object):
     """
     Import from Cobalt.io API /findings
     """

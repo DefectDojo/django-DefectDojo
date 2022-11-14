@@ -1,15 +1,15 @@
 
 from dojo.models import Test, SEVERITIES
-from dojo.tools.api_blackduck.parser import BlackduckApiParser
+from dojo.tools.api_blackduck.parser import ApiBlackduckParser
 
 from ..dojo_test_case import DojoTestCase
 
 
-class TestBlackduckApiParser(DojoTestCase):
+class TestApiBlackduckParser(DojoTestCase):
 
     def test_bandit_parser_has_many_findings(self):
         testfile = open("unittests/scans/blackduck_api/many_vulns.json")
-        parser = BlackduckApiParser()
+        parser = ApiBlackduckParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         for finding in findings:

@@ -16,7 +16,7 @@ pattern_title_authorized = re.compile(r"^[a-zA-Z0-9_\s+-.]*$")
 logger = logging.getLogger(__name__)
 
 
-class BugcrowdApiParser(object):
+class ApiBugcrowdParser(object):
     """
     Import from Bugcrowd API /submissions
     """

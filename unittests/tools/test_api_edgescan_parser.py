@@ -1,20 +1,20 @@
 from django.test import TestCase
 
-from dojo.tools.api_edgescan.parser import EdgescanParser
+from dojo.tools.api_edgescan.parser import ApiEdgescanParser
 from dojo.models import Test
 
 
-class TestEdgescanParser(TestCase):
+class TestApiEdgescanParser(TestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open("unittests/scans/edgescan/no_vuln.json") as testfile:
-            parser = EdgescanParser()
+            parser = ApiEdgescanParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
         with open("unittests/scans/edgescan/one_vuln.json") as testfile:
-            parser = EdgescanParser()
+            parser = ApiEdgescanParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
@@ -34,7 +34,7 @@ class TestEdgescanParser(TestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         with open("unittests/scans/edgescan/many_vulns.json") as testfile:
-            parser = EdgescanParser()
+            parser = ApiEdgescanParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
             finding_1 = findings[0]

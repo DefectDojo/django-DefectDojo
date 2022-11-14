@@ -1,14 +1,14 @@
 import datetime
 
 from django.test import TestCase
-from dojo.tools.api_bugcrowd.parser import BugcrowdApiParser
+from dojo.tools.api_bugcrowd.parser import ApiBugcrowdParser
 from dojo.models import Test, Product_API_Scan_Configuration
 
 
-class TestBugcrowdApiParser(TestCase):
+class TestApiBugcrowdParser(TestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open("unittests/scans/bugcrowd_api/bugcrowd_empty.json") as testfile:
-            parser = BugcrowdApiParser()
+            parser = ApiBugcrowdParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
@@ -23,7 +23,7 @@ class TestBugcrowdApiParser(TestCase):
             # - Bug Url: https://example.com/
 
             # Bugcrowd link: /submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a"""
-            parser = BugcrowdApiParser()
+            parser = ApiBugcrowdParser()
             test = Test()
             test.api_scan_configuration = Product_API_Scan_Configuration()
             test.api_scan_configuration.service_key_1 = "example"
@@ -48,7 +48,7 @@ class TestBugcrowdApiParser(TestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         with open("unittests/scans/bugcrowd_api/bugcrowd_many.json") as testfile:
-            parser = BugcrowdApiParser()
+            parser = ApiBugcrowdParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
             finding_1 = findings[0]
@@ -122,7 +122,7 @@ class TestBugcrowdApiParser(TestCase):
             # - Bug Url: https://example.com/
 
             # Bugcrowd link: /submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a"""
-            parser = BugcrowdApiParser()
+            parser = ApiBugcrowdParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]

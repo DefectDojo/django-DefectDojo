@@ -1,7 +1,7 @@
 import json
 from unittest import mock
 
-from dojo.tools.api_sonarqube.parser import SonarQubeAPIParser
+from dojo.tools.api_sonarqube.parser import ApiSonarQubeParser
 from ..dojo_test_case import DojoTestCase
 from dojo.models import Tool_Type, Tool_Configuration, Product_Type, Product, Engagement, Test
 
@@ -34,7 +34,7 @@ def empty_list(self, *args, **kwargs):
     return list()
 
 
-class TestSonarqubeApiParser(DojoTestCase):
+class TestApiSonarQubeParser(DojoTestCase):
     def setUp(self):
         product_type, _ = Product_Type.objects.get_or_create(name="Fake unit tests")
         product, _ = Product.objects.get_or_create(name="product", prod_type=product_type)
@@ -52,6 +52,6 @@ class TestSonarqubeApiParser(DojoTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_get_findings(self):
-        parser = SonarQubeAPIParser()
+        parser = ApiSonarQubeParser()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))

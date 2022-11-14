@@ -7,7 +7,7 @@ from .importer import BlackduckApiImporter
 SCAN_TYPE_ID = 'BlackDuck API'
 
 
-class BlackduckApiParser(object):
+class ApiBlackduckParser(object):
     """
     Import from Synopsys BlackDuck API /findings
     """
