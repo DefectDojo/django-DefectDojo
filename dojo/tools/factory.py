@@ -7,6 +7,7 @@ PARSERS = {}
 
 logger = logging.getLogger(__name__)
 
+
 def register(parser_type):
     for scan_type in parser_type().get_scan_types():
         parser = parser_type()
@@ -98,7 +99,7 @@ package_dir = str(Path(__file__).resolve().parent)
 for module_name in os.listdir(package_dir):
     # check if it's dir
     if os.path.isdir(os.path.join(package_dir, module_name)):
-        try:            
+        try:
             # check if it's a Python module
             if find_spec(f"dojo.tools.{module_name}.parser"):
                 # import the module and iterate through its attributes
