@@ -248,11 +248,19 @@ mediaPersistentVolume:
   name: media
   # could be emptyDir (not for production) or pvc
   type: pvc
-  # in case if pvc specified, should point to already existing pvc
-  persistentVolumeClaim: media
+  # there are two options to create pvc 1) when you want the chart to create pvc for you, set django.mediaPersistentVolume.persistentVolumeClaim.create to true and do not specify anything for django.mediaPersistentVolume.PersistentVolumeClaim.name  2) when you want to create pvc outside the chart, pass the pvc name via django.mediaPersistentVolume.PersistentVolumeClaim.name and ensure django.mediaPersistentVolume.PersistentVolumeClaim.create is set to false
+  persistentVolumeClaim:
+    create: true 
+    name:
+    size: 5Gi
+    accessModes:
+    - ReadWriteMany
+    storageClassName:
 ```
 
-In the example above, we want that media content to be preserved to `pvc` named `media` as `persistentVolumeClaim` k8s resource.
+In the example above, we want the media content to be preserved to `pvc` as `persistentVolumeClaim` k8s resource and what we are basically doing is enabling the pvc to be created conditionally if the user wants to create it using the chart (in this case the pvc name 'defectdojo-media' will be inherited from template file used to deploy the pvc). By default the volume type is emptyDir which does not require a pvc. But when the type is set to pvc then we need a kubernetes Persistent Volume Claim and this is where the django.mediaPersistentVolume.persistentVolumeClaim.name comes into play.
+
+The accessMode is set to ReadWriteMany by default to accommodate using more than one replica. Ensure storage support ReadWriteMany before setting this option, otherwise set accessMode to ReadWriteOnce.
 
 NOTE: PersistrentVolume needs to be prepared in front before helm installation/update is triggered.
 
@@ -365,6 +373,30 @@ This will also work with shell inserted variables:
 ` --set "alternativeHosts={defectdojo.${TLS_CERT_DOMAIN},localhost}"`
 
 You will still need to set a host value as well.
+
+### Using an existing redis setup with redis-sentinel
+If you want to use a redis-sentinel setup as the Celery broker, you will need to set the following.
+
+1. Set redis.scheme to "sentinel" in values.yaml
+2. Set two additional extraEnv vars specifying the sentinel master name and port in values.yaml
+
+```yaml
+celery:
+  broker: "redis"
+
+redis:
+  redisServer: "PutYourRedisSentinelAddress"
+  scheme: "sentinel"
+
+extraEnv:
+  - name: DD_CELERY_BROKER_TRANSPORT_OPTIONS
+    value: '{"master_name": "mymaster"}'
+  - name: 'DD_CELERY_BROKER_PORT'
+    value: "26379"
+```
+
+
+
 
 ### kubectl commands
 ```zsh

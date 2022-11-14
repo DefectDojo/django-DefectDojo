@@ -49,12 +49,23 @@ class ZapParser(object):
                 finding.unsaved_req_resp = []
                 for instance in item.findall("instances/instance"):
                     endpoint = Endpoint.from_uri(instance.findtext("uri"))
-                    request = f"{instance.findtext('method')} {endpoint.query}#{endpoint.fragment}"
+                    # If the requestheader key is set, the report is in the "XML with requests and responses"
+                    # format - load requests and responses and add them to the database
+                    if instance.findtext('requestheader') is not None:
+                        # Assemble the request from header and body
+                        request = instance.findtext('requestheader') + instance.findtext('requestbody')
+                        response = instance.findtext('responseheader') + instance.findtext('responsebody')
+                    else:
+                        # The report is in the regular XML format, without requests and responses.
+                        # Use the default settings for constructing the request and response fields.
+                        request = f"{instance.findtext('method')} {endpoint.query}#{endpoint.fragment}"
+                        response = f"{instance.findtext('evidence')}"
+
                     # we remove query and fragment because with some configuration
                     # the tool generate them on-the-go and it produces a lot of fake endpoints
                     endpoint.query = None
                     endpoint.fragment = None
                     finding.unsaved_endpoints.append(endpoint)
-                    finding.unsaved_req_resp.append({"req": request, "resp": f"{instance.findtext('evidence')}"})
+                    finding.unsaved_req_resp.append({"req": request, "resp": response})
                 items.append(finding)
         return items

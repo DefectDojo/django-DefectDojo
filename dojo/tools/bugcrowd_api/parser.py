@@ -44,18 +44,18 @@ class BugcrowdApiParser(object):
         findings = []
 
         for entry in data:
+            if not self.include_finding(entry):
+                continue
+
             if test.api_scan_configuration:
                 config = test.api_scan_configuration
                 links = "https://tracker.bugcrowd.com/{}{}".format(
                     str(config.service_key_1), entry["links"]["self"]
                 )
             else:
-                if "links" in entry:
-                    if "self" in entry["links"]:
-                        links = entry["links"]["self"]
-
-            if not self.include_finding(entry):
-                continue
+                links = None
+                if "links" in entry and "self" in entry["links"]:
+                    links = entry["links"]["self"]
 
             bugcrowd_state = entry["attributes"]["state"]
             bugcrowd_duplicate = entry["attributes"]["duplicate"]
@@ -86,7 +86,7 @@ class BugcrowdApiParser(object):
                         # can raise exception if there is no way to parse the host
                 except ValidationError:  # We don't want to fail the whole import just for 1 error in the bug_url
                     logger.error(
-                        "Error parsing bugrcrowd bug_url : {}".format(
+                        "Error parsing bugcrowd bug_url : {}".format(
                             entry["attributes"]["bug_url"].strip()
                         )
                     )
@@ -125,6 +125,7 @@ class BugcrowdApiParser(object):
                 static_finding=False,
                 dynamic_finding=True,
                 unique_id_from_tool=unique_id_from_tool,
+                references=links
             )
             if bug_endpoint:
                 try:
@@ -204,10 +205,12 @@ class BugcrowdApiParser(object):
             return "Info"
 
     def is_active(self, bugcrowd_state):
-        return (bugcrowd_state == "unresolved") or (
-            not self.is_mitigated(bugcrowd_state)
-            and not self.is_false_p(bugcrowd_state)
-            and not self.is_out_of_scope(bugcrowd_state)
+        return (bugcrowd_state == "unresolved") or not (
+            self.is_mitigated(bugcrowd_state)
+            or self.is_false_p(bugcrowd_state)
+            or self.is_out_of_scope(bugcrowd_state)
+            or self.is_risk_accepted(bugcrowd_state)
+            or bugcrowd_state == "not_reproducible"
         )
 
     def is_duplicate(self, bugcrowd_state):

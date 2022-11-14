@@ -83,6 +83,8 @@ Create chart name and version as used by the chart label.
 {{- if eq .Values.celery.broker "redis" -}}
 {{- if .Values.redis.transportEncryption.enabled -}}
 {{- printf "rediss" -}}
+{{- else if eq .Values.redis.scheme "sentinel" -}}
+{{- printf "sentinel" -}}
 {{- else -}}
 {{- printf "redis" -}}
 {{- end -}}
@@ -121,5 +123,16 @@ Create chart name and version as used by the chart label.
 {{- printf "%s,%s" $hosts (join "," .Values.alternativeHosts) -}}
 {{- else -}}
 {{ .Values.host }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+  Creates the persistentVolumeName
+*/}}
+{{- define "django.pvc_name" -}}
+{{- if .Values.django.mediaPersistentVolume.persistentVolumeClaim.create -}}
+{{- printf "%s-django-media" .Release.Name -}}
+{{- else -}}
+{{ .Values.django.mediaPersistentVolume.persistentVolumeClaim.name }}
 {{- end -}}
 {{- end -}}

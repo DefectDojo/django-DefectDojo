@@ -19,7 +19,7 @@ class CheckovParser(object):
         if json_output:
             deserialized = self.parse_json(json_output)
             for tree in deserialized:
-                check_type = tree['check_type']
+                check_type = tree.get('check_type', '')
                 findings += self.get_items(tree, test, check_type)
 
         return findings
@@ -86,9 +86,9 @@ def get_item(vuln, test, check_type):
     if 'resource' in vuln:
         resource = vuln['resource']
 
-    # Checkov doesn't define severities. Sine the findings are
-    # vulnerabilities, we set them to Medium
     severity = 'Medium'
+    if 'severity' in vuln:
+        severity = vuln['severity'].capitalize()
 
     mitigation = ''
 
