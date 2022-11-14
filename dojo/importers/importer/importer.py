@@ -190,24 +190,13 @@ class DojoDefaultImporter(object):
         return new_findings
 
     def close_old_findings(self, test, scan_date_time, user, push_to_jira=None, service=None):
-        old_findings = []
         # Close old active findings that are not reported by this scan.
         new_hash_codes = test.finding_set.values('hash_code')
 
-        # TODO I don't think these criteria are 100% correct, why are findings with the same hash_code excluded?
-        # Would it make more sense to exclude duplicates? But the deduplication process can be unfinished because it's
-        # run in a celery async task...
-        if test.engagement.deduplication_on_engagement:
-            old_findings = Finding.objects.exclude(test=test) \
-                                            .exclude(hash_code__in=new_hash_codes) \
-                                            .filter(test__engagement=test.engagement,
-                                                test__test_type=test.test_type,
-                                                active=True)
-        else:
-            # TODO BUG? this will violate the deduplication_on_engagement setting for other engagements
-            old_findings = Finding.objects.exclude(test=test) \
-                                            .exclude(hash_code__in=new_hash_codes) \
-                                            .filter(test__engagement__product=test.engagement.product,
+        # Close old findings of the same test type in the same engagement
+        old_findings = Finding.objects.exclude(test=test) \
+                                        .exclude(hash_code__in=new_hash_codes) \
+                                        .filter(test__engagement=test.engagement,
                                                 test__test_type=test.test_type,
                                                 active=True)
 
@@ -223,7 +212,7 @@ class DojoDefaultImporter(object):
             old_finding.notes.create(author=user,
                                         entry="This finding has been automatically closed"
                                         " as it is not present anymore in recent scans.")
-            endpoint_status = old_finding.endpoint_status.all()
+            endpoint_status = old_finding.status_finding.all()
             for status in endpoint_status:
                 status.mitigated_by = user
                 status.mitigated_time = timezone.now()

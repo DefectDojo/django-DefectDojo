@@ -841,7 +841,7 @@
                             {% else %}
                               {% if finding.endpoints.all %}
                                 <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
-                                    {% for endpoint_status in finding.endpoint_status.all %}
+                                    {% for endpoint_status in finding.status_finding.all %}
                                         {% if endpoint_status.mitigated %}
                                             &#10003;
                                         {% else %}

@@ -94,7 +94,7 @@ class TestCobaltApiParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("SQL Injection", finding.title)
         self.assertEqual("2021-01-01", finding.date)
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Critical", finding.severity)
         self.assertIn("A SQL injection attack...", finding.description)
         self.assertEqual("Ensure this...", finding.mitigation)
         self.assertEqual("Do this than that...", finding.steps_to_reproduce)
@@ -178,7 +178,7 @@ class TestCobaltApiParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("SQL Injection", finding.title)
         self.assertEqual("2021-01-01", finding.date)
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Info", finding.severity)
         self.assertIn("A SQL injection attack...", finding.description)
         self.assertEqual("Ensure this...", finding.mitigation)
         self.assertEqual("Do this than that...", finding.steps_to_reproduce)
