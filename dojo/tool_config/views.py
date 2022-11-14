@@ -43,6 +43,8 @@ def new_tool_config(request):
                                      extra_tags='alert-danger')
     else:
         tform = ToolConfigForm()
+        if 'tool_type' in request.GET:
+            tform.fields['tool_type'].initial = request.GET.get('tool_type')
         add_breadcrumb(title="New Tool Configuration", top_level=False, request=request)
     return render(request, 'dojo/new_tool_config.html',
                   {'tform': tform})

@@ -28,6 +28,8 @@ def new_tool_type(request):
             return HttpResponseRedirect(reverse('tool_type', ))
     else:
         tform = ToolTypeForm()
+        if 'name' in request.GET:
+            tform.fields['name'].initial = request.GET.get('name')
         add_breadcrumb(title=_("New Tool Type Configuration"), top_level=False, request=request)
 
     return render(request, 'dojo/new_tool_type.html', {'tform': tform})
