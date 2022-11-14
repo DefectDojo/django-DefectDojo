@@ -64,7 +64,7 @@ jobs:
           
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
-        uses:  actions/upload-artifact@v2
+        uses:  actions/upload-artifact@v3
         with:
           name: ${{ matrix.docker-image }}
           path: ${{ matrix.docker-image }}_img

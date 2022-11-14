@@ -16,6 +16,7 @@ from django_filters import FilterSet, CharFilter, OrderingFilter, \
     BooleanFilter, NumberFilter, DateFilter
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
+from django.db.models import JSONField
 import pytz
 from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
@@ -2132,6 +2133,14 @@ class LogEntryFilter(DojoFilter):
         model = LogEntry
         exclude = ['content_type', 'object_pk', 'object_id', 'object_repr',
                    'changes', 'additional_data', 'remote_addr']
+        filter_overrides = {
+            JSONField: {
+                'filter_class': CharFilter,
+                'extra': lambda f: {
+                    'lookup_expr': 'icontains',
+                }
+            }
+        }
 
 
 class ProductTypeFilter(DojoFilter):
