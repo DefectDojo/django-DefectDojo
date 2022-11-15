@@ -103,7 +103,7 @@ jobs:
           ref: ${{ github.event.inputs.release_number }}
 
       - id: set-repo-org
-        run: echo "repoorg=${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]'" >> $GITHUB_ENV
+        run: echo "repoorg=${GITHUB_REPOSITORY%%/* | tr '[:upper:]' '[:lower:]'}" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         id: buildx
