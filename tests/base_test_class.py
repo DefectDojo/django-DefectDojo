@@ -393,7 +393,7 @@ class BaseTestCase(unittest.TestCase):
             accepted_javascript_messages = r"(zoom\-in\.cur.*)404\ \(Not\ Found\)|Uncaught TypeError: Cannot read properties of null \(reading \'trigger\'\)|Uncaught TypeError: Cannot read properties of null \(reading \'innerHTML\'\)"
 
             if entry["level"] == "SEVERE":
-                print(self.driver.current_url)
+                # print(self.driver.current_url)
                 # TODO actually this seems to be the previous url
                 # self.driver.save_screenshot("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.png")
                 # with open("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.html", "w") as f:
