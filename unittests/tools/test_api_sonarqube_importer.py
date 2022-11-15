@@ -77,7 +77,7 @@ class TestSonarqubeImporterNoSQToolConfig(DojoTestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'No SonarQube tool is configured.'):
+        with self.assertRaisesRegex(Exception, 'There are no API Scan Configurations for this Product.'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -94,19 +94,9 @@ class TestSonarqubeImporterOneSQToolConfig(DojoTestCase):
         engagement = Engagement(product=product)
         self.test = Test(engagement=engagement)
 
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_project', dummy_product)
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule', dummy_rule)
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues', dummy_issues)
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
-        self.assertEqual(2, len(findings))
-        finding = findings[0]
-        self.assertEqual("AWKWIl8pZpu0CyehMfc4", finding.unique_id_from_tool)
-        finding = findings[1]
-        self.assertEqual("AWKWIlkyZpu0CyehMfb7", finding.unique_id_from_tool)
+        with self.assertRaisesRegex(Exception, 'There are no API Scan Configurations for this Product.'):
+            SonarQubeApiImporter.prepare_client(self.test)
 
 
 class TestSonarqubeImporterMultipleSQToolConfig(DojoTestCase):
@@ -124,7 +114,7 @@ class TestSonarqubeImporterMultipleSQToolConfig(DojoTestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'More than one Tool Configuration for SonarQube exists.'):
+        with self.assertRaisesRegex(Exception, 'There are no API Scan Configurations for this Product'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -315,6 +305,7 @@ class TestSonarqubeImporterTwoIssuesNoHotspots(DojoTestCase):
     fixtures = [
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_sqcWithKey.json',
         'unit_sonarqube_product.json'
     ]
 
@@ -323,7 +314,7 @@ class TestSonarqubeImporterTwoIssuesNoHotspots(DojoTestCase):
         engagement = Engagement(product=product)
         self.test = Test(engagement=engagement)
 
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project', dummy_product)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues', dummy_issues)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
@@ -339,6 +330,7 @@ class TestSonarqubeImporterNoIssuesOneHotspot(DojoTestCase):
     fixtures = [
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_sqcWithKey.json',
         'unit_sonarqube_product.json'
     ]
 
@@ -347,7 +339,7 @@ class TestSonarqubeImporterNoIssuesOneHotspot(DojoTestCase):
         engagement = Engagement(product=product)
         self.test = Test(engagement=engagement)
 
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project', dummy_product)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues', empty_list)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
@@ -363,6 +355,7 @@ class TestSonarqubeImporterNoIssuesTwoHotspots(DojoTestCase):
     fixtures = [
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_sqcWithKey.json',
         'unit_sonarqube_product.json'
     ]
 
@@ -371,7 +364,7 @@ class TestSonarqubeImporterNoIssuesTwoHotspots(DojoTestCase):
         engagement = Engagement(product=product)
         self.test = Test(engagement=engagement)
 
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project', dummy_product)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues', empty_list)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
@@ -387,6 +380,7 @@ class TestSonarqubeImporterTwoIssuesTwoHotspots(DojoTestCase):
     fixtures = [
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_sqcWithKey.json',
         'unit_sonarqube_product.json'
     ]
 
@@ -395,7 +389,7 @@ class TestSonarqubeImporterTwoIssuesTwoHotspots(DojoTestCase):
         engagement = Engagement(product=product)
         self.test = Test(engagement=engagement)
 
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project', dummy_product)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues', dummy_issues)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
@@ -411,6 +405,7 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
     fixtures = [
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_sqcWithKey.json',
         'unit_sonarqube_product.json'
     ]
 
@@ -419,7 +414,7 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
         engagement = Engagement(product=product)
         self.test = Test(engagement=engagement)
 
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project', dummy_product)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues', empty_list)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
@@ -479,6 +474,7 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
     fixtures = [
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_sqcWithKey.json',
         'unit_sonarqube_product.json'
     ]
 
@@ -487,7 +483,7 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
         engagement = Engagement(product=product)
         self.test = Test(engagement=engagement)
 
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project', dummy_product)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues', empty_list)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule_wo_risk_description)
