@@ -1,0 +1,410 @@
+{
+    "check_type":"terraform",
+    "results":{
+       "passed_checks":[
+          
+       ],
+       "failed_checks":[
+          {
+             "check_id":"CKV_GCP_29",
+             "bc_check_id":"BC_GCP_GCS_2",
+             "check_name":"Ensure that Cloud Storage buckets have uniform bucket-level access enabled",
+             "check_result":{
+                "result":"FAILED",
+                "evaluated_keys":[
+                   "uniform_bucket_level_access"
+                ]
+             },
+             "code_block":[
+                [
+                   1,
+                   "resource \"google_storage_bucket\" \"terragoat_website\" {\n"
+                ],
+                [
+                   2,
+                   "  name          = \"terragot-${var.environment}\"\n"
+                ],
+                [
+                   3,
+                   "  location      = var.location\n"
+                ],
+                [
+                   4,
+                   "  force_destroy = true\n"
+                ],
+                [
+                   5,
+                   "  labels = {\n"
+                ],
+                [
+                   6,
+                   "    git_commit           = \"2bdc0871a5f4505be58244029cc6485d45d7bb8e\"\n"
+                ],
+                [
+                   7,
+                   "    git_file             = \"terraform__gcp__gcs_tf\"\n"
+                ],
+                [
+                   8,
+                   "    git_last_modified_at = \"2022-01-19-17-02-27\"\n"
+                ],
+                [
+                   9,
+                   "    git_last_modified_by = \"jameswoolfenden\"\n"
+                ],
+                [
+                   10,
+                   "    git_modifiers        = \"jameswoolfenden__nimrodkor\"\n"
+                ],
+                [
+                   11,
+                   "    git_org              = \"bridgecrewio\"\n"
+                ],
+                [
+                   12,
+                   "    git_repo             = \"terragoat\"\n"
+                ],
+                [
+                   13,
+                   "    yor_trace            = \"bd00cd2e-f53f-4daf-8d4d-74c47846c1cc\"\n"
+                ],
+                [
+                   14,
+                   "  }\n"
+                ],
+                [
+                   15,
+                   "}\n"
+                ]
+             ],
+             "file_path":"/gcs.tf",
+             "file_abs_path":"/tf/gcs.tf",
+             "repo_file_path":"/gcs.tf",
+             "file_line_range":[
+                1,
+                15
+             ],
+             "resource":"google_storage_bucket.terragoat_website",
+             "evaluations":null,
+             "check_class":"checkov.terraform.checks.resource.gcp.GoogleStorageBucketUniformAccess",
+             "fixed_definition":null,
+             "entity_tags":null,
+             "caller_file_path":null,
+             "caller_file_line_range":null,
+             "resource_address":null,
+             "severity":"MEDIUM",
+             "bc_category":"Storage",
+             "benchmarks":{
+                "CIS GCP V1.1":[
+                   {
+                      "name":"5.2",
+                      "description":"Ensure that Cloud Storage buckets have uniform bucket-level access enabled"
+                   }
+                ]
+             },
+             "description":null,
+             "short_description":null,
+             "vulnerability_details":null,
+             "connected_node":null,
+             "guideline":"https://docs.bridgecrew.io/docs/bc_gcp_gcs_2",
+             "details":[
+                
+             ]
+          },
+          {
+             "check_id":"CKV_GCP_62",
+             "bc_check_id":"BC_GCP_GCS_3",
+             "check_name":"Bucket should log access",
+             "check_result":{
+                "result":"FAILED",
+                "evaluated_keys":[
+                   "logging/[0]/log_bucket"
+                ]
+             },
+             "code_block":[
+                [
+                   1,
+                   "resource \"google_storage_bucket\" \"terragoat_website\" {\n"
+                ],
+                [
+                   2,
+                   "  name          = \"terragot-${var.environment}\"\n"
+                ],
+                [
+                   3,
+                   "  location      = var.location\n"
+                ],
+                [
+                   4,
+                   "  force_destroy = true\n"
+                ],
+                [
+                   5,
+                   "  labels = {\n"
+                ],
+                [
+                   6,
+                   "    git_commit           = \"2bdc0871a5f4505be58244029cc6485d45d7bb8e\"\n"
+                ],
+                [
+                   7,
+                   "    git_file             = \"terraform__gcp__gcs_tf\"\n"
+                ],
+                [
+                   8,
+                   "    git_last_modified_at = \"2022-01-19-17-02-27\"\n"
+                ],
+                [
+                   9,
+                   "    git_last_modified_by = \"jameswoolfenden\"\n"
+                ],
+                [
+                   10,
+                   "    git_modifiers        = \"jameswoolfenden__nimrodkor\"\n"
+                ],
+                [
+                   11,
+                   "    git_org              = \"bridgecrewio\"\n"
+                ],
+                [
+                   12,
+                   "    git_repo             = \"terragoat\"\n"
+                ],
+                [
+                   13,
+                   "    yor_trace            = \"bd00cd2e-f53f-4daf-8d4d-74c47846c1cc\"\n"
+                ],
+                [
+                   14,
+                   "  }\n"
+                ],
+                [
+                   15,
+                   "}\n"
+                ]
+             ],
+             "file_path":"/gcs.tf",
+             "file_abs_path":"/tf/gcs.tf",
+             "repo_file_path":"/gcs.tf",
+             "file_line_range":[
+                1,
+                15
+             ],
+             "resource":"google_storage_bucket.terragoat_website",
+             "evaluations":null,
+             "check_class":"checkov.terraform.checks.resource.gcp.CloudStorageLogging",
+             "fixed_definition":null,
+             "entity_tags":null,
+             "caller_file_path":null,
+             "caller_file_line_range":null,
+             "resource_address":null,
+             "severity":"MEDIUM",
+             "bc_category":"Storage",
+             "benchmarks":{
+                
+             },
+             "description":null,
+             "short_description":null,
+             "vulnerability_details":null,
+             "connected_node":null,
+             "guideline":"https://docs.bridgecrew.io/docs/bc_gcp_logging_2",
+             "details":[
+                
+             ]
+          },
+          {
+             "check_id":"CKV_GCP_78",
+             "bc_check_id":"BC_GCP_GENERAL_39",
+             "check_name":"Ensure Cloud storage has versioning enabled",
+             "check_result":{
+                "result":"FAILED",
+                "evaluated_keys":[
+                   "versioning/[0]/enabled"
+                ]
+             },
+             "code_block":[
+                [
+                   1,
+                   "resource \"google_storage_bucket\" \"terragoat_website\" {\n"
+                ],
+                [
+                   2,
+                   "  name          = \"terragot-${var.environment}\"\n"
+                ],
+                [
+                   3,
+                   "  location      = var.location\n"
+                ],
+                [
+                   4,
+                   "  force_destroy = true\n"
+                ],
+                [
+                   5,
+                   "  labels = {\n"
+                ],
+                [
+                   6,
+                   "    git_commit           = \"2bdc0871a5f4505be58244029cc6485d45d7bb8e\"\n"
+                ],
+                [
+                   7,
+                   "    git_file             = \"terraform__gcp__gcs_tf\"\n"
+                ],
+                [
+                   8,
+                   "    git_last_modified_at = \"2022-01-19-17-02-27\"\n"
+                ],
+                [
+                   9,
+                   "    git_last_modified_by = \"jameswoolfenden\"\n"
+                ],
+                [
+                   10,
+                   "    git_modifiers        = \"jameswoolfenden__nimrodkor\"\n"
+                ],
+                [
+                   11,
+                   "    git_org              = \"bridgecrewio\"\n"
+                ],
+                [
+                   12,
+                   "    git_repo             = \"terragoat\"\n"
+                ],
+                [
+                   13,
+                   "    yor_trace            = \"bd00cd2e-f53f-4daf-8d4d-74c47846c1cc\"\n"
+                ],
+                [
+                   14,
+                   "  }\n"
+                ],
+                [
+                   15,
+                   "}\n"
+                ]
+             ],
+             "file_path":"/gcs.tf",
+             "file_abs_path":"/tf/gcs.tf",
+             "repo_file_path":"/gcs.tf",
+             "file_line_range":[
+                1,
+                15
+             ],
+             "resource":"google_storage_bucket.terragoat_website",
+             "evaluations":null,
+             "check_class":"checkov.terraform.checks.resource.gcp.CloudStorageVersioningEnabled",
+             "fixed_definition":null,
+             "entity_tags":null,
+             "caller_file_path":null,
+             "caller_file_line_range":null,
+             "resource_address":null,
+             "severity":"LOW",
+             "bc_category":"General",
+             "benchmarks":{
+                
+             },
+             "description":null,
+             "short_description":null,
+             "vulnerability_details":null,
+             "connected_node":null,
+             "guideline":"https://docs.bridgecrew.io/docs/ensure-gcp-cloud-storage-has-versioning-enabled",
+             "details":[
+                
+             ]
+          },
+          {
+             "check_id":"CKV_GCP_28",
+             "bc_check_id":"BC_GCP_PUBLIC_1",
+             "check_name":"Ensure that Cloud Storage bucket is not anonymously or publicly accessible",
+             "check_result":{
+                "result":"FAILED",
+                "evaluated_keys":[
+                   "members",
+                   "member"
+                ]
+             },
+             "code_block":[
+                [
+                   17,
+                   "resource \"google_storage_bucket_iam_binding\" \"allow_public_read\" {\n"
+                ],
+                [
+                   18,
+                   "  bucket  = google_storage_bucket.terragoat_website.id\n"
+                ],
+                [
+                   19,
+                   "  members = [\"allUsers\"]\n"
+                ],
+                [
+                   20,
+                   "  role    = \"roles/storage.objectViewer\"\n"
+                ],
+                [
+                   21,
+                   "}"
+                ]
+             ],
+             "file_path":"/gcs.tf",
+             "file_abs_path":"/tf/gcs.tf",
+             "repo_file_path":"/gcs.tf",
+             "file_line_range":[
+                17,
+                21
+             ],
+             "resource":"google_storage_bucket_iam_binding.allow_public_read",
+             "evaluations":null,
+             "check_class":"checkov.terraform.checks.resource.gcp.GoogleStorageBucketNotPublic",
+             "fixed_definition":null,
+             "entity_tags":null,
+             "caller_file_path":null,
+             "caller_file_line_range":null,
+             "resource_address":null,
+             "severity":"HIGH",
+             "bc_category":"Public",
+             "benchmarks":{
+                "ISO27001":[
+                   {
+                      "name":"A.8.2.3",
+                      "description":"Disciplinary process"
+                   },
+                   {
+                      "name":"A.14.1.3",
+                      "description":"Protecting application service transactions"
+                   }
+                ],
+                "CIS GCP V1.1":[
+                   {
+                      "name":"5.1",
+                      "description":"Ensure that Cloud Storage bucket is not anonymously or publicly accessible"
+                   }
+                ]
+             },
+             "description":null,
+             "short_description":null,
+             "vulnerability_details":null,
+             "connected_node":null,
+             "guideline":"https://docs.bridgecrew.io/docs/bc_gcp_public_1",
+             "details":[
+                
+             ]
+          }
+       ],
+       "skipped_checks":[
+          
+       ],
+       "parsing_errors":[
+          
+       ]
+    },
+    "summary":{
+       "passed":0,
+       "failed":4,
+       "skipped":0,
+       "parsing_errors":0,
+       "resource_count":2,
+       "checkov_version":"2.2.34"
+    },
+    "url":"https://www.bridgecrew.cloud/projects?repository=*********/tf&branch=bc-47d01eb_master&runId=latest"
+ }
