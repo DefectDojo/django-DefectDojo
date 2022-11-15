@@ -1197,7 +1197,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'CycloneDX Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'SSLyze Scan (JSON)': ['title', 'description'],
     'Harbor Vulnerability Scan': ['title'],
-    'Rusty Hog Scan': ['title', 'description'],
+    'Rusty Hog Scan': ['file_path', 'payload'],
     'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'Hydra Scan': ['title', 'description'],
     'DrHeader JSON Importer': ['title', 'description'],
