@@ -72,8 +72,14 @@ def get_item(vuln, test, check_type):
         lines = vuln['file_line_range']
         source_line = lines[0]
 
-    resource = vuln['resource'] if 'resource' in vuln else None
-    severity = vuln['severity'].capitalize() if 'severity' in vuln else 'Medium'
+    resource = None
+    if 'resource' in vuln:
+        resource = vuln['resource']
+
+    severity = 'Medium'
+    if 'severity' in vuln:
+        severity = vuln['severity'].capitalize()
+
     mitigation = ''
 
     references = vuln['guideline'] if 'guideline' in vuln else ''
