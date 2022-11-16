@@ -37,7 +37,11 @@ Clicking on a reimport changset will show the affected findings, as well as a st
 ![Import History details](../../images/import_history_details1.png)
 
 ### Triage-less scanners
-Some scanners might not include triage information in their reports, such as tfsec for example. They simply scan code or dependencies, flag issues, and return everything. Removing some findings requires you to add comments in your code perhaps, but there is no simple way to filter out findings from the reports. That is why DefectDojo also includes a "Do not reactivate" checkbox in uploading reports (also in the reimport API), so you can persist the triages that have been done in Defectdojo without reactivating issues on every upload. For context, see [#6892](https://github.com/DefectDojo/django-DefectDojo/issues/6892)
+Some scanners might not include triage information in their reports, such as tfsec for example. They simply scan code or dependencies, flag issues, and return everything. Removing some findings requires you to add comments in your code perhaps, but there is no simple way to filter out findings from the reports. 
+
+That is why DefectDojo also includes a "Do not reactivate" checkbox in uploading reports (also in the reimport API), so you can persist the triages that have been done in Defectdojo without reactivating issues on every upload. 
+
+For context, see [#6892](https://github.com/DefectDojo/django-DefectDojo/issues/6892)
 
 # API
 This section focuses on Import and Reimport via the API. Please see the [full documentation details of all API Endpoints](../api-v2-docs/) for more details.
