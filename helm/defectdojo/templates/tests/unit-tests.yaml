@@ -50,9 +50,12 @@ spec:
               key: postgresql-postgres-password
               {{- else if eq .Values.database "mysql" }}
               name: {{ .Values.mysql.auth.existingSecret }}
+              {{- if .Values.mysql.auth.secretKey }}
               key: {{ .Values.mysql.auth.secretKey }}
+              {{- else }}
+              key: mysql-root-password
               {{- end }}
-              key: {{ if eq .Values.database "postgresql" }}{{ .Values.database }}-password{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.database }}-password{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.database }}-root-password{{ end }}
+              {{- end }}
         - name: DD_DEBUG
           value: 'True'
         - name: DD_SECRET_KEY
