@@ -173,8 +173,15 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
                 Product_Member.objects.filter(product=product, user=user).delete()
 
 
+def sanitize_username(username):
+    allowed_chars_regex = re.compile(r'[\w@.+_-]')
+    allowed_chars = filter(lambda char: allowed_chars_regex.match(char), list(username))
+    return "".join(allowed_chars)
+
+
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if not settings.SOCIAL_AUTH_CREATE_USER:
         return
     else:
+        details["username"] = sanitize_username(details.get("username"))
         return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)
