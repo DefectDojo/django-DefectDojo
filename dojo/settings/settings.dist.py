@@ -1197,7 +1197,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'CycloneDX Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'SSLyze Scan (JSON)': ['title', 'description'],
     'Harbor Vulnerability Scan': ['title'],
-    'Rusty Hog Scan': ['title', 'description'],
+    'Rusty Hog Scan': ['file_path', 'payload'],
     'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'Hydra Scan': ['title', 'description'],
     'DrHeader JSON Importer': ['title', 'description'],
@@ -1253,12 +1253,13 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Veracode SourceClear Scan': True,
     'Twistlock Image Scan': True,
     'Wpscan': True,
+    'Rusty Hog Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'vulnerability_ids', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'vulnerability_ids', 'line', 'file_path', 'payload', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
 
 # Adding fields to the hash_code calculation regardless of the previous settings
 HASH_CODE_FIELDS_ALWAYS = ['service']
