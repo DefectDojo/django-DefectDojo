@@ -394,6 +394,12 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Enable Finding SLA's"),
         help_text=_("Enables Finding SLA's for time to remediate."))
+    
+    enable_notify_sla = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Notifiy SLA's Breach"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached."))
 
     allow_anonymous_survey_repsonse = models.BooleanField(
         default=False,
