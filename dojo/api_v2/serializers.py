@@ -1525,6 +1525,7 @@ class ImportScanSerializer(serializers.Serializer):
                   "This affects the whole engagement/product depending on your deduplication scope.")
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+    create_finding_groups_for_all_findings = serializers.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, default=True)
 
     # extra fields populated in response
     # need to use the _id suffix as without the serializer framework gets confused
@@ -1561,6 +1562,7 @@ class ImportScanSerializer(serializers.Serializer):
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
         group_by = data.get('group_by', None)
+        create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)
 
         _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(data)
         engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement)
@@ -1581,7 +1583,8 @@ class ImportScanSerializer(serializers.Serializer):
                                                                                             group_by=group_by,
                                                                                             api_scan_configuration=api_scan_configuration,
                                                                                             service=service,
-                                                                                            title=test_title)
+                                                                                            title=test_title,
+                                                                                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
 
             if test:
                 data['test'] = test.id
@@ -1666,6 +1669,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     tags = TagListSerializerField(required=False)
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+    create_finding_groups_for_all_findings = serializers.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, default=True)
 
     # extra fields populated in response
     # need to use the _id suffix as without the serializer framework gets confused
@@ -1700,6 +1704,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
         group_by = data.get('group_by', None)
+        create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)
 
         test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(data)
         # we passed validation, so the test is present
@@ -1744,7 +1749,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                                                                                 group_by=group_by,
                                                                                                 api_scan_configuration=api_scan_configuration,
                                                                                                 service=service,
-                                                                                                title=test_title)
+                                                                                                title=test_title,
+                                                                                                create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
 
             else:
                 # should be captured by validation / permission check already
