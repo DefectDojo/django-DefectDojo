@@ -100,6 +100,7 @@ jobs:
           "tests/dedupe_test.py",
           "tests/check_various_pages.py",
           "tests/notifications_test.py",
+          "tests/tool_config.py",
         ]
         profile: ["mysql-rabbitmq", "postgres-redis"]
       fail-fast: false
