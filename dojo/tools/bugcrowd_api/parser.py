@@ -37,6 +37,7 @@ class BugcrowdApiParser(object):
         return "Bugcrowd API"
 
     def get_findings(self, file, test):
+        api_scan_config = None
         if file is None:
             data, api_scan_config = BugcrowdApiImporter().get_findings(test)
         else:
@@ -51,7 +52,7 @@ class BugcrowdApiParser(object):
                 links = "https://tracker.bugcrowd.com/{}{}".format(
                     str(config.service_key_1), entry["links"]["self"]
                 )
-            if api_scan_config:
+            if api_scan_config is not None:
                 links = "https://tracker.bugcrowd.com/{}{}".format(
                     str(api_scan_config.service_key_1), entry["links"]["self"]
                 )
