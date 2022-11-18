@@ -26,7 +26,7 @@ Please see [the parser guide](https://documentation.defectdojo.com/contributing/
 
 ## Modifying DefectDojo and Testing
 
-Please use [these test scripts](./tests) to test your changes. These are the scripts we run in our [integration tests](DOCKER.md#run-the-tests-with-docker).
+Please use [these test scripts](../tests) to test your changes. These are the scripts we run in our [integration tests](DOCKER.md#run-the-tests-with-docker-compose).
 
 For changes that require additional settings, you can now use local_settings.py file. See the logging section below for more information.
 

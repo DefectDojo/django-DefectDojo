@@ -1,0 +1,14 @@
+---
+version: '3.8'
+services:
+  uwsgi:
+    build:
+      dockerfile: Dockerfile.django-alpine
+      target: django-alpine
+    image: "defectdojo/defectdojo-django-alpine:${DJANGO_VERSION:-latest}"
+  celerybeat:
+    image: "defectdojo/defectdojo-django-alpine:${DJANGO_VERSION:-latest}"
+  celeryworker:
+    image: "defectdojo/defectdojo-django-alpine:${DJANGO_VERSION:-latest}"
+  initializer:
+    image: "defectdojo/defectdojo-django-alpine:${DJANGO_VERSION:-latest}"

@@ -92,22 +92,34 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+  Determine django image distro
+*/}}
+{{- define "defectdojo.django.distro" -}}
+{{- if eq .Values.djangoImageDistro "alpine" -}}
+{{- printf "-alpine" -}}
+{{- else -}}
+{{- printf "" -}}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
   Builds the repository names for use with local or private registries
 */}}
 {{- define "celery.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-django
+{{- printf "%s/defectdojo-django%s" .Values.repositoryPrefix (include "defectdojo.django.distro" .) -}}
 {{- end -}}
 
 {{- define "django.nginx.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-nginx
+{{- printf "%s/defectdojo-nginx" .Values.repositoryPrefix -}}
 {{- end -}}
 
 {{- define "django.uwsgi.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-django
+{{- printf "%s/defectdojo-django%s" .Values.repositoryPrefix (include "defectdojo.django.distro" .) -}}
 {{- end -}}
 
 {{- define "initializer.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-django
+{{- printf "%s/defectdojo-django%s" .Values.repositoryPrefix (include "defectdojo.django.distro" .) -}}
 {{- end -}}
 
 {{- define "initializer.jobname" -}}

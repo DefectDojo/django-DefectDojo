@@ -9,7 +9,8 @@ override_file_debug='docker-compose.override.debug.yml'
 override_file_unit_tests='docker-compose.override.unit_tests.yml'
 override_file_unit_tests_cicd='docker-compose.override.unit_tests_cicd.yml'
 override_file_integration_tests='docker-compose.override.integration_tests.yml'
-
+override_file_django_alpine='docker-compose.override.django_alpine.yml'
+override_file_integration_tests_django_alpine='docker-compose.override.integration_tests_django_alpine.yml'
 
 # Get the current environment and tells what are the options
 function show_current {
@@ -23,7 +24,7 @@ function show_current {
 function get_current {
     if [ -L ${override_link} ]
     then
-        # Check for Mac OSX 
+        # Check for Mac OSX
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # readlink is not native to mac, so this will work in it's place.
             symlink=$(python3 -c "import os; print(os.path.realpath('docker-compose.override.yml'))")
@@ -40,7 +41,7 @@ function get_current {
 # Tell to which environments we can switch
 function say_switch {
     echo "Using '${current_env}' configuration."
-    for one_env in dev debug unit_tests integration_tests release
+    for one_env in dev debug unit_tests integration_tests release django_alpine integration_tests_django_alpine
     do
         if [ "${current_env}" != ${one_env} ]; then
             echo "-> You can switch to '${one_env}' with '${0} ${one_env}'"
@@ -128,10 +129,36 @@ function set_integration_tests {
     fi
 }
 
+function set_django_alpine {
+    get_current
+    if [ "${current_env}" != django_alpine ]
+    then
+        docker-compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
+        rm -f ${override_link}
+        ln -s ${override_file_django_alpine} ${override_link}
+        echo "Now using 'django_alpine' configuration."
+    else
+        echo "Already using 'django_alpine' configuration."
+    fi
+}
+
+function set_integration_tests_django_alpine {
+    get_current
+    if [ "${current_env}" != integration_tests_django_alpine ]
+    then
+        docker-compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
+        rm -f ${override_link}
+        ln -s ${override_file_integration_tests_django_alpine} ${override_link}
+        echo "Now using 'integration_tests_django_alpine' configuration."
+    else
+        echo "Already using 'integration_tests_django_alpine' configuration."
+    fi
+}
+
 # Change directory to allow working with relative paths.
 cd ${target_dir}
 
-if [ ${#} -eq 1 ] && [[ 'dev debug unit_tests unit_tests_cicd integration_tests release' =~ "${1}" ]]
+if [ ${#} -eq 1 ] && [[ 'dev debug unit_tests unit_tests_cicd integration_tests release django_alpine integration_tests_django_alpine' =~ "${1}" ]]
 then
     set_"${1}"
 else
