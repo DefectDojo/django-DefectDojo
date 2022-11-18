@@ -388,13 +388,13 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Engagement Auto-Close Days"),
         help_text=_("Closes an engagement after the specified number of days past due date including last update."))
-    
+
     enable_finding_sla = models.BooleanField(
         default=True,
         blank=False,
         verbose_name=_("Enable Finding SLA's"),
         help_text=_("Enables Finding SLA's for time to remediate."))
-    
+
     enable_notify_sla = models.BooleanField(
         default=False,
         blank=False,
