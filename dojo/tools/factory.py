@@ -71,6 +71,7 @@ def get_api_scan_configuration_hints():
                 tool_type = parser.requires_tool_type(scan_type)
                 res.append({
                     'name': name,
+                    'id': name.lower().replace(' ','_').replace('.',''),
                     'tool_type_name': tool_type,
                     'tool_types': Tool_Type.objects.filter(name=tool_type),
                     'tool_configurations': Tool_Configuration.objects.filter(tool_type__name=tool_type),

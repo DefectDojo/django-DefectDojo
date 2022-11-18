@@ -206,6 +206,10 @@ class BaseTestCase(unittest.TestCase):
         self.wait_for_datatable_if_content("no_findings", "open_findings_wrapper")
         return driver
 
+    def goto_add_api_scan_configuration(self, driver, product):
+        driver.get(self.base_url + str(product) + '/add_api_scan_configuration')
+        return driver
+
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         no_content = None
         try:
