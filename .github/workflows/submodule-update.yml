@@ -18,28 +18,21 @@ jobs:
         id: branch-target
         run: |
           if [ ! -z ${GITHUB_BASE_REF} ]; then
-            echo ::set-output name=branch::${GITHUB_BASE_REF}
+            echo "branch=${GITHUB_BASE_REF}" >> $GITHUB_ENV
           else
-            echo ::set-output name=branch::${GITHUB_REF#refs/heads/}
+            echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
           fi
     
       - name: Checkout DefectDojo from dev 
         uses: actions/checkout@v3
-        if: steps.branch-target.outputs.branch == 'dev'
+        if: env.branch == 'dev'
         with:
           ref: dev
-        
-      - name: Get changed files in the docs folder
-        id: dev-changed-docs-files
-        uses: tj-actions/changed-files@v34
-        with:
-          files: |
-            docs/**
 
       - name: Create PR to Documentation repo on dev branch
         id: create_dev_pr
         uses: releasehub-com/github-action-create-pr-parent-submodule@v1
-        if: steps.branch-target.outputs.branch == 'dev' && steps.changed-files-specific.outputs.any_changed == 'true'
+        if: env.branch == 'dev'
         with:
           github_token: ${{ secrets.DOCUMENTATION_TOKEN }}
           parent_repository: ${{ env.PARENT_REPOSITORY }}
@@ -49,21 +42,14 @@ jobs:
           
       - name: Checkout DefectDojo from master 
         uses: actions/checkout@v3
-        if: steps.branch-target.outputs.branch == 'master'
+        if: env.branch == 'master'
         with:
           ref: master
-          
-      - name: Get changed files in the docs folder
-        id: master-changed-doc-files
-        uses: tj-actions/changed-files@v34
-        with:
-          files: |
-            docs/**
 
       - name: Create PR to Documentation repo on master branch
         id: create_master_pr
         uses: releasehub-com/github-action-create-pr-parent-submodule@v1
-        if: steps.branch-target.outputs.branch == 'master' && steps.changed-files-specific.outputs.any_changed == 'true'
+        if: env.branch == 'master'
         with:
           github_token: ${{ secrets.DOCUMENTATION_TOKEN }}
           parent_repository: ${{ env.PARENT_REPOSITORY }}

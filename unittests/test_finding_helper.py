@@ -192,6 +192,24 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
                 (False, False, True, False, True, frozen_datetime, self.user_1, frozen_datetime)
             )
 
+    @mock.patch('dojo.finding.helper.timezone.now')
+    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
+    def test_set_active_as_out_of_scope(self, mock_can_edit, mock_tz):
+        mock_tz.return_value = frozen_datetime
+
+        with impersonate(self.user_1):
+            test = Test.objects.last()
+            finding = Finding(test=test)
+            finding.save()
+            finding.out_of_scope = True
+            finding.save()
+
+            self.assertEqual(
+                self.get_status_fields(finding),
+                # TODO marking as false positive resets verified to False, possible bug / undesired behaviour?
+                (False, False, False, True, True, frozen_datetime, self.user_1, frozen_datetime)
+            )
+
 
 class TestSaveVulnerabilityIds(DojoTestCase):
 
