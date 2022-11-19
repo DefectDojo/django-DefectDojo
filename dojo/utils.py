@@ -1806,18 +1806,18 @@ def sla_compute_and_notify(*args, **kwargs):
             jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
 
     # exit early on flags
-    if not settings.SLA_NOTIFY_ACTIVE and not settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
+    system_settings = System_Settings.objects.get()
+    if not (settings.SLA_NOTIFY_ACTIVE or system_settings.enable_notify_sla) and not settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
         logger.info("Will not notify on SLA breach per user configured settings")
         return
 
     jira_issue = None
     jira_instance = None
     try:
-        system_settings = System_Settings.objects.get()
         if system_settings.enable_finding_sla:
             logger.info("About to process findings for SLA notifications.")
             logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}, post-breach {}".format(
-                settings.SLA_NOTIFY_ACTIVE,
+                settings.SLA_NOTIFY_ACTIVE or system_settings.enable_notify_sla,
                 settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY,
                 settings.SLA_NOTIFY_WITH_JIRA_ONLY,
                 settings.SLA_NOTIFY_PRE_BREACH,
@@ -1825,7 +1825,7 @@ def sla_compute_and_notify(*args, **kwargs):
             ))
 
             query = None
-            if settings.SLA_NOTIFY_ACTIVE:
+            if settings.SLA_NOTIFY_ACTIVE or system_settings.enable_notify_sla:
                 query = Q(active=True, is_mitigated=False, duplicate=False)
             if settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
                 query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
