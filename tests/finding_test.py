@@ -502,7 +502,8 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Finding deleted successfully'))
+        # self.assertTrue(self.is_success_message_present(text='Finding deleted successfully')) # there's no alert when deleting this way
+        self.assertTrue(self.is_text_present_on_page(text='Finding deleted successfully'))
         # check that user was redirect back to url where it came from based on return_url
 
     def test_list_components(self):
