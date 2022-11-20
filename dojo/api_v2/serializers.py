@@ -77,8 +77,8 @@ def get_import_meta_data_from_dict(data):
     auto_create_context = data.get('auto_create_context', None)
 
     deduplication_on_engagement = data.get('deduplication_on_engagement', False)
-
-    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement
+    do_not_reactivate = data.get('do_not_reactivate', False)
+    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement, do_not_reactivate
 
 
 def get_product_id_from_dict(data):
@@ -1564,7 +1564,7 @@ class ImportScanSerializer(serializers.Serializer):
         group_by = data.get('group_by', None)
         create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)
 
-        _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(data)
+        _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement, do_not_reactivate = get_import_meta_data_from_dict(data)
         engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement)
 
         # have to make the scan_date_time timezone aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
@@ -1630,6 +1630,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         default='Info')
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
+    do_not_reactivate = serializers.BooleanField(default=False, required=False)
     scan_type = serializers.ChoiceField(
         choices=get_choices_sorted(),
         required=True)
@@ -1690,6 +1691,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         close_old_findings = data.get('close_old_findings')
         verified = data.get('verified')
         active = data.get('active')
+        do_not_reactivate = data.get('do_not_reactivate', False)
         version = data.get('version', None)
         build_id = data.get('build_id', None)
         branch_tag = data.get('branch_tag', None)
@@ -1706,7 +1708,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         group_by = data.get('group_by', None)
         create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)
 
-        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = get_import_meta_data_from_dict(data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement, do_not_reactivate = get_import_meta_data_from_dict(data)
         # we passed validation, so the test is present
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
@@ -1728,7 +1730,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings,
                                                 group_by=group_by, api_scan_configuration=api_scan_configuration,
-                                                service=service)
+                                                service=service, do_not_reactivate=do_not_reactivate)
 
                 if test_import:
                     statistics_delta = test_import.statistics
@@ -1833,7 +1835,7 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
         create_tags = data.get('create_tags', True)
         create_dojo_meta = data.get('create_dojo_meta', False)
 
-        _, _, _, _, _, product_name, _, _, _ = get_import_meta_data_from_dict(data)
+        _, _, _, _, _, product_name, _, _, _, _ = get_import_meta_data_from_dict(data)
         product = get_target_product_if_exists(product_name)
         if not product:
             product_id = get_product_id_from_dict(data)
