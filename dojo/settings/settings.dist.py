@@ -1191,13 +1191,13 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
     'pip-audit Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'Edgescan Scan': ['unique_id_from_tool'],
-    'Bugcrowd API': ['unique_id_from_tool'],
+    'Bugcrowd API Import': ['unique_id_from_tool'],
     'Rubocop Scan': ['vuln_id_from_tool', 'file_path', 'line'],
     'JFrog Xray Scan': ['title', 'description', 'component_name', 'component_version'],
     'CycloneDX Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'SSLyze Scan (JSON)': ['title', 'description'],
     'Harbor Vulnerability Scan': ['title'],
-    'Rusty Hog Scan': ['title', 'description'],
+    'Rusty Hog Scan': ['file_path', 'payload'],
     'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'Hydra Scan': ['title', 'description'],
     'DrHeader JSON Importer': ['title', 'description'],
@@ -1206,7 +1206,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
     'BlackDuck API': ['unique_id_from_tool'],
     'docker-bench-security Scan': ['unique_id_from_tool'],
-    'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
+    'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version', 'severity'],
     'Vulners Scan': ['vuln_id_from_tool', 'component_name'],
     'Twistlock Image Scan': ['title', 'severity', 'component_name', 'component_version'],
     'NeuVector (REST)': ['title', 'severity', 'component_name', 'component_version'],
@@ -1250,17 +1250,18 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Semgrep JSON Report': True,
     'Generic Findings Import': True,
     'Edgescan Scan': True,
-    'Bugcrowd API': True,
+    'Bugcrowd API Import': True,
     'Veracode SourceClear Scan': True,
     'Vulners Scan': True,
     'Twistlock Image Scan': True,
     'Wpscan': True,
+    'Rusty Hog Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'vulnerability_ids', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'vulnerability_ids', 'line', 'file_path', 'payload', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
 
 # Adding fields to the hash_code calculation regardless of the previous settings
 HASH_CODE_FIELDS_ALWAYS = ['service']
