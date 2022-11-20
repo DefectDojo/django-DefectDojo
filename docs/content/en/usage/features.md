@@ -287,7 +287,9 @@ days teams have to remediate a finding.
 There are 5 variables in the settings.py file that you can configure, to
 act on the global behavior. By default, any findings across the instance
 that are in `Active, Verified` state will be considered for
-notifications.
+notifications. Alternatively, since version 2.17 it is possible to activate
+the notification in the system settings. The configuration of the notification
+can be done in the SLA configurations.
 
 {{< highlight python >}}
 SLA_NOTIFY_ACTIVE = False
