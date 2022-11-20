@@ -212,7 +212,7 @@
             "remediation_advice": "Do things properly2",
             "severity": 1,
             "source": "external_form",
-            "state": "informational",
+            "state": "unresolved",
             "submitted_at": "2000-01-02T19:22:10.916Z",
             "title": "you did something wrong",
             "vrt_id": "server_security_misconfiguration.clickjacking.non_sensitive_action",

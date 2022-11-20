@@ -37,8 +37,9 @@ class BugcrowdApiParser(object):
         return "Bugcrowd API"
 
     def get_findings(self, file, test):
+        api_scan_config = None
         if file is None:
-            data = BugcrowdApiImporter().get_findings(test)
+            data, api_scan_config = BugcrowdApiImporter().get_findings(test)
         else:
             data = json.load(file)
         findings = []
@@ -46,11 +47,14 @@ class BugcrowdApiParser(object):
         for entry in data:
             if not self.include_finding(entry):
                 continue
-
             if test.api_scan_configuration:
                 config = test.api_scan_configuration
                 links = "https://tracker.bugcrowd.com/{}{}".format(
                     str(config.service_key_1), entry["links"]["self"]
+                )
+            if api_scan_config is not None:
+                links = "https://tracker.bugcrowd.com/{}{}".format(
+                    str(api_scan_config.service_key_1), entry["links"]["self"]
                 )
             else:
                 links = None
@@ -98,9 +102,9 @@ class BugcrowdApiParser(object):
                     "",
                     "Bugcrowd details:",
                     f"- Severity: P{ bugcrowd_severity }",
-                    f"- Bug Url: { bug_url }",
+                    f"- Bug Url: [{bug_url}]({ bug_url })",
                     "",
-                    f"Bugcrowd link: {links}",
+                    f"Bugcrowd link: [{links}]({links})",
                 ]
             )
             mitigation = entry["attributes"]["remediation_advice"]
@@ -118,14 +122,13 @@ class BugcrowdApiParser(object):
                 active=self.is_active(bugcrowd_state),
                 verified=self.is_verified(bugcrowd_state),
                 false_p=self.is_false_p(bugcrowd_state),
-                duplicate=bugcrowd_duplicate,
                 out_of_scope=self.is_out_of_scope(bugcrowd_state),
                 risk_accepted=self.is_risk_accepted(bugcrowd_state),
                 is_mitigated=self.is_mitigated(bugcrowd_state),
                 static_finding=False,
                 dynamic_finding=True,
                 unique_id_from_tool=unique_id_from_tool,
-                references=links
+                references=links,
             )
             if bug_endpoint:
                 try:
@@ -211,6 +214,7 @@ class BugcrowdApiParser(object):
             or self.is_out_of_scope(bugcrowd_state)
             or self.is_risk_accepted(bugcrowd_state)
             or bugcrowd_state == "not_reproducible"
+            or bugcrowd_state == "informational"
         )
 
     def is_duplicate(self, bugcrowd_state):
