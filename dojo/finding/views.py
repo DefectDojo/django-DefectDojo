@@ -430,7 +430,7 @@ def close_finding(request, fid):
                 'Note Saved.',
                 extra_tags='alert-success')
 
-            if len(missing_note_types) == 0:
+            if len(missing_note_types) <= 1:
                 finding.active = False
                 now = timezone.now()
                 finding.mitigated = form.cleaned_data.get("mitigated") or now
