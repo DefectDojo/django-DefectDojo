@@ -1498,6 +1498,7 @@ class ImportScanSerializer(serializers.Serializer):
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
+    source_code_management_uri = serializers.URLField(max_length=600, required=False, help_text="Resource link to source code")
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), required=False)
     test_title = serializers.CharField(required=False)
@@ -1552,6 +1553,7 @@ class ImportScanSerializer(serializers.Serializer):
         commit_hash = data.get('commit_hash', None)
         api_scan_configuration = data.get('api_scan_configuration', None)
         service = data.get('service', None)
+        source_code_management_uri = data.get('source_code_management_uri', None)
 
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
@@ -1565,7 +1567,8 @@ class ImportScanSerializer(serializers.Serializer):
         create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)
 
         _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement, do_not_reactivate = get_import_meta_data_from_dict(data)
-        engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement)
+        engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context,
+                                              deduplication_on_engagement, source_code_management_uri=source_code_management_uri)
 
         # have to make the scan_date_time timezone aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
         scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
@@ -1641,6 +1644,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
+    source_code_management_uri = serializers.URLField(max_length=600, required=False, help_text="Resource link to source code")
     test = serializers.PrimaryKeyRelatedField(required=False,
         queryset=Test.objects.all())
     test_title = serializers.CharField(required=False)
@@ -1704,6 +1708,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         environment = Development_Environment.objects.get(name=environment_name)
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
+        source_code_management_uri = data.get('source_code_management_uri', None)
 
         group_by = data.get('group_by', None)
         create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)
@@ -1737,7 +1742,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             elif auto_create_context:
                 # perform Import to create test
                 logger.debug('reimport for non-existing test, using import to create new test')
-                engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement)
+                engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context,
+                                                      deduplication_on_engagement, source_code_management_uri=source_code_management_uri)
                 importer = Importer()
                 test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, lead, environment,
                                                                                                 active=active, verified=verified, tags=tags,
