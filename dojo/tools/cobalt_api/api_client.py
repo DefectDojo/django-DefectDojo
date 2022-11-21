@@ -33,7 +33,7 @@ class CobaltAPI:
     def get_assets(self):
         """Returns all org assets"""
         response = self.session.get(
-            url='{}/assets'.format(self.cobalt_api_url),
+            url='{}/assets?limit=1000'.format(self.cobalt_api_url),
             headers=self.get_headers(),
         )
 
@@ -51,7 +51,7 @@ class CobaltAPI:
         :return:
         """
         response = self.session.get(
-            url='{}/findings?asset={}'.format(self.cobalt_api_url, asset_id),
+            url='{}/findings?limit=1000&asset={}'.format(self.cobalt_api_url, asset_id),
             headers=self.get_headers(),
         )
 

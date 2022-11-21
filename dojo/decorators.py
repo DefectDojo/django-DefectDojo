@@ -158,7 +158,7 @@ def on_exception_log_kwarg(func):
             f = open("/tmp/selenium_page_source.html", "w", encoding='utf-8')
             f.writelines(self.driver.page_source)
             # time.sleep(30)
-            raise(e)
+            raise e
 
     return wrapper
 

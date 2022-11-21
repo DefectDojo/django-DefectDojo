@@ -415,6 +415,8 @@ class CycloneDXParser(object):
         if reference not in components:
             LOGGER.warning(f"reference:{reference} not found in the BOM")
             return (None, None)
+        if "version" not in components[reference]:
+            return (components[reference]["name"], None)
         return (components[reference]["name"], components[reference]["version"])
 
     def fix_severity(self, severity):

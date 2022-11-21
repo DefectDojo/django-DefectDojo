@@ -574,7 +574,7 @@ class Notes(models.Model):
     def copy(self):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_history = self.history.all()
+        old_history = list(self.history.all())
         # Wipe the IDs of the new object
         copy.pk = None
         copy.id = None
@@ -1266,11 +1266,11 @@ class Engagement(models.Model):
     def copy(self):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_notes = self.notes.all()
-        old_files = self.files.all()
-        old_tags = self.tags.all()
-        old_risk_acceptances = self.risk_acceptance.all()
-        old_tests = Test.objects.filter(engagement=self)
+        old_notes = list(self.notes.all())
+        old_files = list(self.files.all())
+        old_tags = list(self.tags.all())
+        old_risk_acceptances = list(self.risk_acceptance.all())
+        old_tests = list(Test.objects.filter(engagement=self))
         # Wipe the IDs of the new object
         copy.pk = None
         copy.id = None
@@ -1343,7 +1343,7 @@ class Endpoint_Params(models.Model):
 
 
 class Endpoint_Status(models.Model):
-    date = models.DateTimeField(default=get_current_date)
+    date = models.DateField(default=get_current_date)
     last_modified = models.DateTimeField(null=True, editable=False, default=get_current_datetime)
     mitigated = models.BooleanField(default=False, blank=True)
     mitigated_time = models.DateTimeField(editable=False, null=True, blank=True)
@@ -1365,10 +1365,7 @@ class Endpoint_Status(models.Model):
         return days if days > 0 else 0
 
     def __str__(self):
-        field_values = []
-        for field in self._meta.get_fields():
-            field_values.append(str(getattr(self, field.name, '')))
-        return ' '.join(field_values)
+        return "'{}' on '{}'".format(str(self.finding), str(self.endpoint))
 
     def copy(self, finding=None):
         copy = self
@@ -1413,7 +1410,10 @@ class Endpoint(models.Model):
                                           "be omitted. For example 'section-13', 'paragraph-2'."))
     product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE)
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True, editable=False)
-    endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
+    findings = models.ManyToManyField("Finding",
+                                      blank=True,
+                                      verbose_name=_('Findings'),
+                                      through=Endpoint_Status)
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add."))
 
@@ -1572,27 +1572,29 @@ class Endpoint(models.Model):
 
     @property
     def mitigated(self):
-        return not self.vulnerable()
+        return not self.vulnerable
 
+    @property
     def vulnerable(self):
-        return self.active_findings_count() > 0
+        return self.active_findings_count > 0
 
-    def findings(self):
-        return Finding.objects.filter(endpoints=self).distinct()
-
+    @property
     def findings_count(self):
-        return self.findings().count()
+        return self.findings.all().count()
 
     def active_findings(self):
-        findings = self.findings().filter(active=True,
-                                      verified=True,
+        findings = self.findings.filter(active=True,
                                       out_of_scope=False,
                                       mitigated__isnull=True,
                                       false_p=False,
-                                      duplicate=False).order_by('numerical_severity')
-        findings = findings.filter(endpoint_status__mitigated=False)
+                                      duplicate=False,
+                                      status_finding__mitigated=False,
+                                      status_finding__false_positive=False,
+                                      status_finding__out_of_scope=False,
+                                      status_finding__risk_accepted=False).order_by('numerical_severity')
         return findings
 
+    @property
     def active_findings_count(self):
         return self.active_findings().count()
 
@@ -1600,32 +1602,48 @@ class Endpoint(models.Model):
         return Endpoint.objects.filter(host=self.host,
                                        product=self.product).distinct()
 
+    @property
     def host_endpoints_count(self):
         return self.host_endpoints().count()
 
     def host_mitigated_endpoints(self):
-        meps = Endpoint_Status.objects.filter(endpoint__in=self.host_endpoints(), mitigated=True)
-        return Endpoint.objects.filter(endpoint_status__in=meps).distinct()
+        meps = Endpoint_Status.objects \
+                  .filter(endpoint__in=self.host_endpoints()) \
+                  .filter(Q(mitigated=True) |
+                          Q(false_positive=True) |
+                          Q(out_of_scope=True) |
+                          Q(risk_accepted=True) |
+                          Q(finding__out_of_scope=True) |
+                          Q(finding__mitigated__isnull=False) |
+                          Q(finding__false_p=True) |
+                          Q(finding__duplicate=True))
+        return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
+    @property
     def host_mitigated_endpoints_count(self):
         return self.host_mitigated_endpoints().count()
 
     def host_findings(self):
         return Finding.objects.filter(endpoints__in=self.host_endpoints()).distinct()
 
+    @property
     def host_findings_count(self):
-        return self.host_finding().count()
+        return self.host_findings().count()
 
     def host_active_findings(self):
-        findings = self.host_findings().filter(active=True,
-                                           verified=True,
-                                           out_of_scope=False,
-                                           mitigated__isnull=True,
-                                           false_p=False,
-                                           duplicate=False).order_by('numerical_severity')
-        findings = findings.filter(endpoint_status__mitigated=False)
+        findings = Finding.objects.filter(active=True,
+                                        out_of_scope=False,
+                                        mitigated__isnull=True,
+                                        false_p=False,
+                                        duplicate=False,
+                                        status_finding__mitigated=False,
+                                        status_finding__false_positive=False,
+                                        status_finding__out_of_scope=False,
+                                        status_finding__risk_accepted=False,
+                                        endpoints__in=self.host_endpoints()).order_by('numerical_severity')
         return findings
 
+    @property
     def host_active_findings_count(self):
         return self.host_active_findings().count()
 
@@ -1760,10 +1778,10 @@ class Test(models.Model):
     def copy(self, engagement=None):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_notes = self.notes.all()
-        old_files = self.files.all()
-        old_tags = self.tags.all()
-        old_findings = Finding.objects.filter(test=self)
+        old_notes = list(self.notes.all())
+        old_files = list(self.files.all())
+        old_tags = list(self.tags.all())
+        old_findings = list(Finding.objects.filter(test=self))
         # Wipe the IDs of the new object
         copy.pk = None
         copy.id = None
@@ -1983,12 +2001,8 @@ class Finding(models.Model):
     endpoints = models.ManyToManyField(Endpoint,
                                        blank=True,
                                        verbose_name=_('Endpoints'),
-                                       help_text=_("The hosts within the product that are susceptible to this flaw."))
-    endpoint_status = models.ManyToManyField(Endpoint_Status,
-                                             blank=True,
-                                             related_name="finding_endpoint_status",
-                                             verbose_name=_('Endpoint Status'),
-                                             help_text=_('The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...).'))
+                                       help_text=_("The hosts within the product that are susceptible to this flaw. + The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...)."),
+                                       through=Endpoint_Status)
     references = models.TextField(null=True,
                                   blank=True,
                                   db_column="refs",
@@ -2275,13 +2289,12 @@ class Finding(models.Model):
     def copy(self, test=None):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_notes = self.notes.all()
-        old_files = self.files.all()
-        old_endpoint_status = self.endpoint_status.all()
-        old_endpoints = self.endpoints.all()
-        old_reviewers = self.reviewers.all()
-        old_found_by = self.found_by.all()
-        old_tags = self.tags.all()
+        old_notes = list(self.notes.all())
+        old_files = list(self.files.all())
+        old_status_findings = list(self.status_finding.all())
+        old_reviewers = list(self.reviewers.all())
+        old_found_by = list(self.found_by.all())
+        old_tags = list(self.tags.all())
         # Wipe the IDs of the new object
         copy.pk = None
         copy.id = None
@@ -2296,10 +2309,8 @@ class Finding(models.Model):
         for files in old_files:
             copy.files.add(files.copy())
         # Copy the endpoint_status
-        for endpoint_status in old_endpoint_status:
-            copy.endpoint_status.add(endpoint_status.copy(finding=copy))
-        # Assign any endpoints
-        copy.endpoints.set(old_endpoints)
+        for endpoint_status in old_status_findings:
+            endpoint_status.copy(finding=copy)  # adding or setting is not necessary, link is created by Endpoint_Status.copy()
         # Assign any reviewers
         copy.reviewers.set(old_reviewers)
         # Assign any found_by
@@ -2864,12 +2875,7 @@ class FindingAdmin(admin.ModelAdmin):
     # IDs rather than multi-select
     raw_id_fields = (
         'endpoints',
-        'endpoint_status',
     )
-
-
-Finding.endpoints.through.__str__ = lambda \
-    x: "Endpoint: " + str(x.endpoint)
 
 
 class Vulnerability_Id(models.Model):
@@ -3139,7 +3145,7 @@ class Risk_Acceptance(models.Model):
         (TREATMENT_TRANSFER, 'Transfer (The risk is transferred to a 3rd party)'),
     ]
 
-    name = models.CharField(max_length=100, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
+    name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 
     accepted_findings = models.ManyToManyField(Finding)
 
@@ -3204,7 +3210,7 @@ class Risk_Acceptance(models.Model):
     def copy(self, engagement=None):
         copy = self
         # Save the necessary ManyToMany relationships
-        old_notes = self.notes.all()
+        old_notes = list(self.notes.all())
         old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
         # Wipe the IDs of the new object
         copy.pk = None
