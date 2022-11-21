@@ -3,6 +3,7 @@ from selenium.webdriver.support.ui import Select
 import unittest
 import sys
 from base_test_class import BaseTestCase, on_exception_html_source_logger
+from product_test import ProductTest
 
 
 class ToolConfigTest(BaseTestCase):
@@ -13,7 +14,7 @@ class ToolConfigTest(BaseTestCase):
         # Navigate to the 'Add test API Scan Configuration' page
         self.goto_add_api_scan_configuration(driver, 1)
         # Check that there is no "Edgescan" definition
-        self.assertEqual(driver.find_elements(By.ID, "link_tt_edgescan_scan")[0].text, "Parser <b>Edgescan Scan</b> requires created tool type <b>Edgescan</b>.")
+        self.assertEqual(driver.find_elements(By.ID, "link_tt_edgescan_scan")[0].text, "Parser Edgescan Scan requires created tool type Edgescan.")
 
     @on_exception_html_source_logger
     def test_setup_tt_via_api_scan_configuration(self):
@@ -23,7 +24,7 @@ class ToolConfigTest(BaseTestCase):
         # Follow instuctions to create ToolType
         driver.find_element(By.ID, "link_tt_edgescan_scan").click()
         # Check if form is prefieled
-        self.assertEqual(driver.find_elements(By.ID, "id_name")[0].text, "Edgescan")
+        self.assertEqual(driver.find_elements(By.ID, "id_name")[0].get_attribute('value'), "Edgescan")
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
@@ -36,7 +37,7 @@ class ToolConfigTest(BaseTestCase):
         # Navigate to the 'Add test API Scan Configuration' page
         self.goto_add_api_scan_configuration(driver, 1)
         # Check that there is no "Edgescan" definition
-        self.assertEqual(driver.find_elements(By.ID, "link_tc_edgescan_scan")[0].text, "Tool type <b>Edgescan</b> exists however parser <b>Edgescan Scan</b> requires at least one tool configuration.")
+        self.assertEqual(driver.find_elements(By.ID, "link_tc_edgescan_scan")[0].text, "Tool type Edgescan exists however parser Edgescan Scan requires at least one tool configuration.")
 
     @on_exception_html_source_logger
     def test_setup_tc_via_api_scan_configuration(self):
@@ -46,7 +47,7 @@ class ToolConfigTest(BaseTestCase):
         # Follow instuctions to create ToolType
         driver.find_element(By.ID, "link_tc_edgescan_scan").click()
         # Check if ToolType is selected
-        self.assertTrue(driver.find_element(By.XPATH, "//select[@id='id_tool_type']/option[@text='Edgescan']").is_selected())
+        self.assertTrue(driver.find_element(By.XPATH, "//select[@id='id_tool_type']/option[contains(text(),'Edgescan')]").is_selected())
         # Fill in th ToolConfig name
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("First Edgescan Tool Config")
@@ -86,12 +87,14 @@ def suite():
 
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(BaseTestCase('disable_block_execution'))
+    suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ToolConfigTest('test_list_api_scan_configuration_tt_and_tc_missing'))
     suite.addTest(ToolConfigTest('test_setup_tt_via_api_scan_configuration'))
     suite.addTest(ToolConfigTest('test_list_api_scan_configuration_tt_ready_tc_missing'))
     suite.addTest(ToolConfigTest('test_setup_tc_via_api_scan_configuration'))
     suite.addTest(ToolConfigTest('test_list_api_scan_configuration_tt_and_tc_ready'))
     suite.addTest(ToolConfigTest('test_setup_api_scan_configuration'))
+    suite.addTest(ProductTest('test_delete_product'))
 
     return suite
 
