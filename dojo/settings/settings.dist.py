@@ -176,7 +176,7 @@ env = environ.Env(
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
     # SLA Notifications via alerts and JIRA comments
-    # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature. Alternatively, activate this in the system_settings
+    # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature. Alternatively, activate this in the system_settings.
     DD_SLA_NOTIFY_ACTIVE=(bool, False),
     DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, False),
     # finetuning settings for when enabled
