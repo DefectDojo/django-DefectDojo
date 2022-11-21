@@ -1735,7 +1735,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings,
                                                 group_by=group_by, api_scan_configuration=api_scan_configuration,
-                                                service=service, do_not_reactivate=do_not_reactivate)
+                                                service=service, do_not_reactivate=do_not_reactivate,
+                                                create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
 
                 if test_import:
                     statistics_delta = test_import.statistics
