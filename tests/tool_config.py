@@ -83,7 +83,7 @@ class ToolConfigTest(BaseTestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    
+
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(ToolConfigTest('test_list_api_scan_configuration_tt_and_tc_missing'))
