@@ -7,25 +7,25 @@ from dojo.models import Tool_Type, Tool_Configuration, Product_Type, Product, En
 
 
 def dummy_product(self, *args, **kwargs):
-    with open("unittests/scans/sonarqube_api/product.json") as json_file:
+    with open("unittests/scans/api_sonarqube/product.json") as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_issues(self, *args, **kwargs):
-    with open("unittests/scans/sonarqube_api/issues.json") as json_file:
+    with open("unittests/scans/api_sonarqube/issues.json") as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_rule(self, *args, **kwargs):
-    with open("unittests/scans/sonarqube_api/rule.json") as json_file:
+    with open("unittests/scans/api_sonarqube/rule.json") as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_hotspot_rule(self, *args, **kwargs):
-    with open(get_unit_tests_path() + '/scans/sonarqube_api/hotspots/rule.json') as json_file:
+    with open(get_unit_tests_path() + '/scans/api_sonarqube/hotspots/rule.json') as json_file:
         data = json.load(json_file)
         return data
 

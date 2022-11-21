@@ -10,14 +10,14 @@ from dojo.models import Test, Test_Type
 class TestApiCobaltParser(DojoTestCase):
 
     def test_cobalt_api_parser_with_no_vuln_has_no_findings(self):
-        testfile = open("unittests/scans/cobalt_api/cobalt_api_zero_vul.json")
+        testfile = open("unittests/scans/api_cobalt/cobalt_api_zero_vul.json")
         parser = ApiCobaltParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_cobalt_api_parser_with_many_vuln_has_many_findings(self):
-        testfile = open("unittests/scans/cobalt_api/cobalt_api_many_vul.json")
+        testfile = open("unittests/scans/api_cobalt/cobalt_api_many_vul.json")
         parser = ApiCobaltParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -27,7 +27,7 @@ class TestApiCobaltParser(DojoTestCase):
         self.assertEqual(3, len(findings))
 
     def test_cobalt_api_parser_with_carried_over_finding(self):
-        testfile = open("unittests/scans/cobalt_api/cobalt_api_one_vul_carried_over.json")
+        testfile = open("unittests/scans/api_cobalt/cobalt_api_one_vul_carried_over.json")
         parser = ApiCobaltParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -55,7 +55,7 @@ class TestApiCobaltParser(DojoTestCase):
         self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_check_fix_finding(self):
-        testfile = open("unittests/scans/cobalt_api/cobalt_api_one_vul_check_fix.json")
+        testfile = open("unittests/scans/api_cobalt/cobalt_api_one_vul_check_fix.json")
         parser = ApiCobaltParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -83,7 +83,7 @@ class TestApiCobaltParser(DojoTestCase):
         self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_invalid_finding(self):
-        testfile = open("unittests/scans/cobalt_api/cobalt_api_one_vul_invalid.json")
+        testfile = open("unittests/scans/api_cobalt/cobalt_api_one_vul_invalid.json")
         parser = ApiCobaltParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -111,7 +111,7 @@ class TestApiCobaltParser(DojoTestCase):
         self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_need_fix_finding(self):
-        testfile = open("unittests/scans/cobalt_api/cobalt_api_one_vul_need_fix.json")
+        testfile = open("unittests/scans/api_cobalt/cobalt_api_one_vul_need_fix.json")
         parser = ApiCobaltParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -139,7 +139,7 @@ class TestApiCobaltParser(DojoTestCase):
         self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_new_finding(self):
-        testfile = open("unittests/scans/cobalt_api/cobalt_api_one_vul_new.json")
+        testfile = open("unittests/scans/api_cobalt/cobalt_api_one_vul_new.json")
         parser = ApiCobaltParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -167,7 +167,7 @@ class TestApiCobaltParser(DojoTestCase):
         self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_out_of_scope_finding(self):
-        testfile = open("unittests/scans/cobalt_api/cobalt_api_one_vul_out_of_scope.json")
+        testfile = open("unittests/scans/api_cobalt/cobalt_api_one_vul_out_of_scope.json")
         parser = ApiCobaltParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -195,7 +195,7 @@ class TestApiCobaltParser(DojoTestCase):
         self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_triaging_finding(self):
-        testfile = open("unittests/scans/cobalt_api/cobalt_api_one_vul_triaging.json")
+        testfile = open("unittests/scans/api_cobalt/cobalt_api_one_vul_triaging.json")
         parser = ApiCobaltParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -223,7 +223,7 @@ class TestApiCobaltParser(DojoTestCase):
         self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_valid_fix_finding(self):
-        testfile = open("unittests/scans/cobalt_api/cobalt_api_one_vul_valid_fix.json")
+        testfile = open("unittests/scans/api_cobalt/cobalt_api_one_vul_valid_fix.json")
         parser = ApiCobaltParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -251,7 +251,7 @@ class TestApiCobaltParser(DojoTestCase):
         self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_wont_fix_finding(self):
-        testfile = open("unittests/scans/cobalt_api/cobalt_api_one_vul_wont_fix.json")
+        testfile = open("unittests/scans/api_cobalt/cobalt_api_one_vul_wont_fix.json")
         parser = ApiCobaltParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -280,7 +280,7 @@ class TestApiCobaltParser(DojoTestCase):
 
     @patch('dojo.tools.api_cobalt.importer.CobaltApiImporter.get_findings')
     def test_cobalt_api_parser_with_api(self, mock):
-        with open(get_unit_tests_path() + '/scans/cobalt_api/cobalt_api_many_vul.json') as api_findings_file:
+        with open(get_unit_tests_path() + '/scans/api_cobalt/cobalt_api_many_vul.json') as api_findings_file:
             api_findings = json.load(api_findings_file)
         mock.return_value = api_findings
 
