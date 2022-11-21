@@ -31,7 +31,7 @@ class BugcrowdApiImporter(object):
             counter += 1
         logger.debug("{} Bugcrowd submissions pages fetched".format(counter))
 
-        return submissions
+        return submissions, config
 
     def prepare_client(self, test):
         product = test.engagement.product

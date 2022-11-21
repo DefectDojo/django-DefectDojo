@@ -27,7 +27,7 @@ class DojoDefaultReImporter(object):
     @dojo_async_task
     @app.task(ignore_result=False)
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None, **kwargs):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None, do_not_reactivate=False, **kwargs):
 
         items = parsed_findings
         original_items = list(test.finding_set.all())
@@ -100,13 +100,22 @@ class DojoDefaultReImporter(object):
                             # even if there is no mitigation time, skip it, because both the current finding and the reimported finding are is_mitigated
                             continue
                     else:
-                        logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                        finding.mitigated = None
-                        finding.is_mitigated = False
-                        finding.mitigated_by = None
-                        finding.active = True
-                        finding.verified = verified
-
+                        if not do_not_reactivate:
+                            logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                            finding.mitigated = None
+                            finding.is_mitigated = False
+                            finding.mitigated_by = None
+                            finding.active = True
+                            finding.verified = verified
+                        if do_not_reactivate:
+                            logger.debug('%i: skipping reactivating by user\'s choice do_not_reactivate: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                            note = Notes(
+                                entry="Finding has skipped reactivation from %s re-upload with user decision do_not_reactivate." % scan_type,
+                                author=user)
+                            note.save()
+                            finding.notes.add(note)
+                            finding.save(dedupe_option=False)
+                            continue
                     # existing findings may be from before we had component_name/version fields
                     finding.component_name = finding.component_name if finding.component_name else component_name
                     finding.component_version = finding.component_version if finding.component_version else component_version
@@ -310,7 +319,7 @@ class DojoDefaultReImporter(object):
     def reimport_scan(self, scan, scan_type, test, active=True, verified=True, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None,
-                    service=None):
+                    service=None, do_not_reactivate=False):
 
         logger.debug(f'REIMPORT_SCAN: parameters: {locals()}')
 
@@ -352,7 +361,7 @@ class DojoDefaultReImporter(object):
             for findings_list in chunk_list:
                 result = self.process_parsed_findings(test, findings_list, scan_type, user, active, verified,
                                                       minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
-                                                      push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False)
+                                                      push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False, do_not_reactivate=do_not_reactivate)
                 # Since I dont want to wait until the task is done right now, save the id
                 # So I can check on the task later
                 results_list += [result]
@@ -373,7 +382,7 @@ class DojoDefaultReImporter(object):
             new_findings, reactivated_findings, findings_to_mitigate, untouched_findings = \
                 self.process_parsed_findings(test, parsed_findings, scan_type, user, active, verified,
                                              minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
-                                             push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True)
+                                             push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True, do_not_reactivate=do_not_reactivate)
 
         closed_findings = []
         if close_old_findings:

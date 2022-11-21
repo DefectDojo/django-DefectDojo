@@ -474,6 +474,10 @@ Example:
 }
 ```
 
+#### Ggshield
+
+Import [Ggshield](https://github.com/GitGuardian/ggshield) findings in JSON format.
+
 #### Gosec Scanner
 
 Import Gosec Scanner findings in JSON format.
