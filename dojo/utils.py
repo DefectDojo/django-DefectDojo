@@ -1807,7 +1807,7 @@ def sla_compute_and_notify(*args, **kwargs):
 
     # exit early on flags
     system_settings = System_Settings.objects.get()
-    if not (settings.SLA_NOTIFY_ACTIVE or system_settings.enable_notify_sla_active) and not (settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY or system_settings.enable_notify_sla_active_verified):
+    if not system_settings.enable_notify_sla_active and not system_settings.enable_notify_sla_active_verified:
         logger.info("Will not notify on SLA breach per user configured settings")
         return
 
@@ -1817,22 +1817,22 @@ def sla_compute_and_notify(*args, **kwargs):
         if system_settings.enable_finding_sla:
             logger.info("About to process findings for SLA notifications.")
             logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}, post-breach {}".format(
-                settings.SLA_NOTIFY_ACTIVE or system_settings.enable_notify_sla_active,
-                settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY or system_settings.enable_notify_sla_active_verified,
-                settings.SLA_NOTIFY_WITH_JIRA_ONLY,
+                system_settings.enable_notify_sla_active,
+                system_settings.enable_notify_sla_active_verified,
+                system_settings.enable_notify_sla_jira_only,
                 settings.SLA_NOTIFY_PRE_BREACH,
                 settings.SLA_NOTIFY_POST_BREACH,
             ))
 
             query = None
-            if settings.SLA_NOTIFY_ACTIVE or system_settings.enable_notify_sla_active:
+            if system_settings.enable_notify_sla_active:
                 query = Q(active=True, is_mitigated=False, duplicate=False)
-            if settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY or system_settings.enable_notify_sla_active_verified:
+            if system_settings.enable_notify_sla_active_verified:
                 query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
             logger.debug("My query: {}".format(query))
 
             no_jira_findings = {}
-            if settings.SLA_NOTIFY_WITH_JIRA_ONLY:
+            if system_settings.enable_notify_sla_jira_only:
                 logger.debug("Ignoring findings that are not linked to a JIRA issue")
                 no_jira_findings = Finding.objects.exclude(jira_issue__isnull=False)
 
