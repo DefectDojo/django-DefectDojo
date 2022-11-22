@@ -35,7 +35,7 @@ def migrate_notify_sla_from_settings_file(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0174_system_settings_enable_notify_sla.py'),
+        ('dojo', '0174_system_settings_enable_notify_sla'),
     ]
 
     operations = [
