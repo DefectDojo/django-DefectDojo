@@ -31,6 +31,17 @@ def migrate_notify_sla_from_settings_file(apps, schema_editor):
             # for a clean installation there is no system_settings record, so just ignore it
             pass
 
+    if hasattr(settings, 'SLA_NOTIFY_WITH_JIRA_ONLY'):
+        system_settings_model = apps.get_model('dojo', 'System_Settings')
+        logger.info('Migrating value from SLA_NOTIFY_WITH_JIRA_ONLY into system settings model')
+        try:
+            system_setting = system_settings_model.objects.get()
+            system_setting.enable_notify_sla_jira_only = settings.SLA_NOTIFY_WITH_JIRA_ONLY
+            system_setting.save()
+        except:
+            # for a clean installation there is no system_settings record, so just ignore it
+            pass
+
 
 class Migration(migrations.Migration):
 
