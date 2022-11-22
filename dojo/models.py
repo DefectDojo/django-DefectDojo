@@ -407,6 +407,12 @@ class System_Settings(models.Model):
         verbose_name=_("Enable Notifiy SLA's Breach for active, verified Findings"),
         help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for active, verified Findings."))
 
+    enable_notify_sla_jira_only = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Notifiy SLA's Breach for Findings linked to JIRA"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for Findings that are linked to JIRA issues."))
+
     allow_anonymous_survey_repsonse = models.BooleanField(
         default=False,
         blank=False,
