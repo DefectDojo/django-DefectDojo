@@ -20,4 +20,9 @@ class Migration(migrations.Migration):
             name='enable_notify_sla_active_verified',
             field=models.BooleanField(default=False, help_text="Enables Notify when time to remediate according to Finding SLA's is breached for active, verified Findings.", verbose_name="Enable Notifiy SLA's Breach for active, verified Findings"),
         ),
+        migrations.AddField(
+            model_name='system_settings',
+            name='enable_notify_sla_jira_only',
+            field=models.BooleanField(default=False, help_text="Enables Notify when time to remediate according to Finding SLA's is breached for Findings that are linked to JIRA issues.", verbose_name="Enable Notifiy SLA's Breach for Findings linked to JIRA"),
+        ),
     ]
