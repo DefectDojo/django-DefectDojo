@@ -65,6 +65,12 @@ logger = logging.getLogger(__name__)
 
 admin.autodiscover()
 
+# custom handlers
+handler404 = 'dojo.views.custom_page_not_found_view'
+handler500 = 'dojo.views.custom_error_view'
+handler403 = 'dojo.views.custom_permission_denied_view'
+handler400 = 'dojo.views.custom_bad_request_view'
+
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
 v2_api.register(r'technologies', AppAnalysisViewSet)
