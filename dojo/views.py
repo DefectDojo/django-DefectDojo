@@ -20,6 +20,21 @@ from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
+def custom_page_not_found_view(request, exception):
+    return render(request, "404.html", {})
+
+
+def custom_error_view(request, exception=None):
+    return render(request, "500.html", {})
+
+
+def custom_permission_denied_view(request, exception=None):
+    return render(request, "403.html", {})
+
+
+def custom_bad_request_view(request, exception=None):
+    return render(request, "400.html", {})
+
 
 def action_history(request, cid, oid):
     try:
