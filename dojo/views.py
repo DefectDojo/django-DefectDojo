@@ -21,7 +21,7 @@ from dojo.authorization.roles_permissions import Permissions
 logger = logging.getLogger(__name__)
 
 
-def custom_page_not_found_view(request, exception):
+def custom_page_not_found_view(request, exception=None):
     return render(request, "404.html", {})
 
 
