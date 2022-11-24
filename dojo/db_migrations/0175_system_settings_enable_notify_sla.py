@@ -46,7 +46,7 @@ def migrate_notify_sla_from_settings_file(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0173_alter_risk_acceptance_name'),
+        ('dojo', '0174_jira_project_default_assignee'),
     ]
 
     operations = [
