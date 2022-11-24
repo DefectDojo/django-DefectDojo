@@ -6,14 +6,14 @@ class VulnersAPI:
     A simple client for the Vulners API
     """
 
-    DEFAULT_URL = "https://vulners.com"
-    vulners_api_url = ''
-    api_key = ''
+    vulners_api_url = None
+    api_key = None
 
     def __init__(self, tool_config):
         if tool_config.authentication_type == "API":
             self.api_key = tool_config.api_key
-            self.vulners_api_url = tool_config.url or self.DEFAULT_URL
+            if tool_config.url:
+                self.vulners_api_url = tool_config.url
         else:
             raise Exception('Vulners.com Authentication type {} not supported'.format(tool_config.authentication_type))
 
