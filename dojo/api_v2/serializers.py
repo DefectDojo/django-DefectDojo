@@ -1498,7 +1498,7 @@ class ImportScanSerializer(serializers.Serializer):
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
-    engagement_end_date = serializers.DateField(required=False)
+    engagement_end_date = serializers.DateField(required=False, help_text="End Date for Engagement. Default is current time + 365 days. Required format year-month-day")
     source_code_management_uri = serializers.URLField(max_length=600, required=False, help_text="Resource link to source code")
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), required=False)
@@ -1646,7 +1646,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
-    engagement_end_date = serializers.DateField(required=False)
+    engagement_end_date = serializers.DateField(required=False, help_text="End Date for Engagement. Default is current time + 365 days. Required format year-month-day")
     source_code_management_uri = serializers.URLField(max_length=600, required=False, help_text="Resource link to source code")
     test = serializers.PrimaryKeyRelatedField(required=False,
         queryset=Test.objects.all())
