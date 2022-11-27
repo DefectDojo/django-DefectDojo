@@ -2277,8 +2277,9 @@ def log_user_login_failed(sender, credentials, request, **kwargs):
 
 
 def get_password_requirements_string():
-    s = 'Password must contain at least {minimum_length} characters'.format(
-        minimum_length=int(get_system_setting('minimum_password_length')))
+    s = 'Password must contain {minimum_length} to {maximum_length} characters'.format(
+        minimum_length=int(get_system_setting('minimum_password_length')),
+        maximum_length=int(get_system_setting('maximum_password_length')))
 
     if bool(get_system_setting('lowercase_character_required')):
         s += ', one lowercase letter (a-z)'

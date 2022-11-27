@@ -589,7 +589,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'dojo.user.validators.LengthValidator'
+        'NAME': 'dojo.user.validators.MinLengthValidator'
+    },
+    {
+        'NAME': 'dojo.user.validators.MaxLengthValidator'
     },
     {
         'NAME': 'dojo.user.validators.NumberValidator'

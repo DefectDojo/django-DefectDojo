@@ -481,7 +481,11 @@ class System_Settings(models.Model):
     minimum_password_length = models.IntegerField(
         default=9,
         verbose_name=_('Minimum password length'),
-        help_text=_("Requires user to set passwords of set minimum length."))
+        help_text=_("Requires user to set passwords greater than minimum length."))
+    maximum_password_length = models.IntegerField(
+        default=48,
+        verbose_name=_('Maximum password length'),
+        help_text=_("Requires user to set passwords less than maximum length."))
     number_character_required = models.BooleanField(
         default=True,
         blank=False,

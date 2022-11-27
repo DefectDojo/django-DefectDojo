@@ -5,7 +5,7 @@ from django.utils.translation import ugettext
 from dojo.models import System_Settings
 
 
-class LengthValidator(object):
+class MinLengthValidator(object):
     settings = System_Settings.objects.get()
 
     def validate(self, password, user=None):
@@ -20,6 +20,23 @@ class LengthValidator(object):
     def get_help_text(self):
         return ugettext('Password must be at least {minimum_length} characters long.'.format(
             minimum_length=self.settings.minimum_password_length))
+
+
+class MaxLengthValidator(object):
+    settings = System_Settings.objects.get()
+
+    def validate(self, password, user=None):
+        if len(password) > self.settings.maximum_password_length:
+            raise ValidationError(
+                ugettext('Password must be less than {maximum_length} characters long.'.format(
+                    maximum_length=self.settings.maximum_password_length)),
+                code='password_too_short')
+        else:
+            return None
+
+    def get_help_text(self):
+        return ugettext('Password must be less than {maximum_length} characters long.'.format(
+            maximum_length=self.settings.maximum_password_length))
 
 
 class NumberValidator(object):
