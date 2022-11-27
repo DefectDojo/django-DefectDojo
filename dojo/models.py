@@ -491,7 +491,7 @@ class System_Settings(models.Model):
         default=True,
         blank=False,
         verbose_name=_("Password must contain one special character"),
-        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)."))
+        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)."))  # noqa W605
     lowercase_character_required = models.BooleanField(
         default=True,
         blank=False,
