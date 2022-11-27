@@ -14,6 +14,8 @@ class LengthValidator(object):
                 ugettext("Password must be at least {minimum_length} characters long.".format(
                     minimum_length=self.settings.minimum_password_length)),
                 code='password_too_short')
+        else:
+            return None
 
     def get_help_text(self):
         return ugettext("Password must be at least {minimum_length} characters long.".format(
@@ -28,6 +30,8 @@ class NumberValidator(object):
             raise ValidationError(
                 ugettext("Password must contain at least 1 digit, 0-9."),
                 code='password_no_number')
+        else:
+            return None
 
     def get_help_text(self):
         return ugettext("Password must contain at least 1 digit, 0-9.")
@@ -41,6 +45,8 @@ class UppercaseValidator(object):
             raise ValidationError(
                 ugettext("Password must contain at least 1 uppercase letter, A-Z."),
                 code='password_no_upper')
+        else:
+            return None
 
     def get_help_text(self):
         return ugettext("Password must contain at least 1 uppercase letter, A-Z.")
@@ -54,6 +60,8 @@ class LowercaseValidator(object):
             raise ValidationError(
                 ugettext("Password must contain at least 1 lowercase letter, a-z."),
                 code='password_no_lower')
+        else:
+            return None
 
     def get_help_text(self):
         return ugettext("Password must contain at least 1 lowercase letter, a-z.")
@@ -69,6 +77,8 @@ class SymbolValidator(object):
                 ugettext("The password must contain at least 1 special character, " + \
                     "()[]{}|\`~!@#$%^&*_-+=;:'\",<>./?."),
                 code='password_no_symbol')
+        else:
+            return None
 
     def get_help_text(self):
         return ugettext("The password must contain at least 1 special character, " + \
