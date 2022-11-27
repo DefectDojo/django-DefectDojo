@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='system_settings',
             name='special_character_required',
-            field=models.BooleanField(default=True, help_text='Requires user passwords to contain at least one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'",<>./?).', verbose_name='Password must contain one special character'),
+            field=models.BooleanField(default=True, help_text='Requires user passwords to contain at least one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?).', verbose_name='Password must contain one special character'),
         ),
         migrations.AddField(
             model_name='system_settings',
