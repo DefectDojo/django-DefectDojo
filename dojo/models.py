@@ -478,6 +478,30 @@ class System_Settings(models.Model):
         default='',
         blank=True,
         help_text=_("New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition."))
+    minimum_password_length = models.IntegerField(
+        default=9,
+        verbose_name=_('Minimum password length'),
+        help_text=_("Requires user to set passwords of set minimum length."))
+    number_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one digit"),
+        help_text=_("Requires user passwords to contain at least one digit (0-9)."))
+    special_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one special character"),
+        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)."))
+    lowercase_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one lowercase letter"),
+        help_text=_("Requires user passwords to contain at least one lowercase letter (a-z)."))
+    uppercase_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one uppercase letter"),
+        help_text=_("Requires user passwords to contain at least one uppercase letter (A-Z)."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()

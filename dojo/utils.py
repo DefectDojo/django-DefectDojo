@@ -2274,3 +2274,24 @@ def log_user_login_failed(sender, credentials, request, **kwargs):
         logger.error('login failed because of missing username via ip: {ip}'.format(
             ip=request.META['REMOTE_ADDR']
         ))
+
+
+def get_password_requirements_string():
+    s = 'Password must contain at least {minimum_length} characters'.format(
+        minimum_length=int(get_system_setting('minimum_password_length')))
+    
+    if bool(get_system_setting('lowercase_character_required')):
+        s += ', one lowercase letter (a-z)'
+    if bool(get_system_setting('uppercase_character_required')):
+        s += ', one uppercase letter (A-Z)'
+    if bool(get_system_setting('number_character_required')):
+        s += ', one number (0-9)'
+    if bool(get_system_setting('special_character_required')):
+        s += ', one special chacter (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)'
+    
+    if s.count(', ') == 1:
+        password_requirements_string = s.rsplit(', ', 1)[0] + ' and ' + s.rsplit(', ', 1)[1]
+    elif s.count(', ') > 1:
+        password_requirements_string = s.rsplit(', ', 1)[0] + ', and ' + s.rsplit(', ', 1)[1]
+    
+    return password_requirements_string + '.'
