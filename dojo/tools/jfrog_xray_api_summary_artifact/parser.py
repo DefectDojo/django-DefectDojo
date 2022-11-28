@@ -56,6 +56,7 @@ def get_item(vulnerability, service, test):
 
     # Some entries have no CVE entries, despite they exist. Example CVE-2017-1000502.
     cves = vulnerability.get('cves', [])
+    vulnerability_ids = list()
     if cves:
         if len(cves[0].get('cwe', [])) > 0:
             cwe = decode_cwe_number(cves[0].get('cwe', [])[0])
@@ -92,6 +93,8 @@ def get_item(vulnerability, service, test):
         dynamic_finding=False,
         unique_id_from_tool=unique_id_from_tool
     )
+    if vulnerability_ids:
+        finding.unsaved_vulnerability_ids = vulnerability_ids
 
     # Add vulnerability ids
     vulnerability_ids = list()

@@ -47,11 +47,6 @@ cd django-DefectDojo
 minikube start
 minikube addons enable ingress
 ```
-Helm <= v2
-```zsh
-helm init
-helm repo update
-```
 
 Helm >= v3
 ```zsh
@@ -84,21 +79,6 @@ DJANGO_INGRESS_ACTIVATE_TLS=false
 ```
 
 Warning: Use the `createSecret*=true` flags only upon first install. For re-installs, see `§Re-install the chart`
-
-Helm <= v2:
-
-```zsh
-helm install \
-  ./helm/defectdojo \
-  --name=defectdojo \
-  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
-  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
-  --set createSecret=true \
-  --set createRabbitMqSecret=true \
-  --set createRedisSecret=true \
-  --set createMysqlSecret=true \
-  --set createPostgresqlSecret=true
-```
 
 Helm >= v3:
 
@@ -268,11 +248,19 @@ mediaPersistentVolume:
   name: media
   # could be emptyDir (not for production) or pvc
   type: pvc
-  # in case if pvc specified, should point to already existing pvc
-  persistentVolumeClaim: media
+  # there are two options to create pvc 1) when you want the chart to create pvc for you, set django.mediaPersistentVolume.persistentVolumeClaim.create to true and do not specify anything for django.mediaPersistentVolume.PersistentVolumeClaim.name  2) when you want to create pvc outside the chart, pass the pvc name via django.mediaPersistentVolume.PersistentVolumeClaim.name and ensure django.mediaPersistentVolume.PersistentVolumeClaim.create is set to false
+  persistentVolumeClaim:
+    create: true 
+    name:
+    size: 5Gi
+    accessModes:
+    - ReadWriteMany
+    storageClassName:
 ```
 
-In the example above, we want that media content to be preserved to `pvc` named `media` as `persistentVolumeClaim` k8s resource.
+In the example above, we want the media content to be preserved to `pvc` as `persistentVolumeClaim` k8s resource and what we are basically doing is enabling the pvc to be created conditionally if the user wants to create it using the chart (in this case the pvc name 'defectdojo-media' will be inherited from template file used to deploy the pvc). By default the volume type is emptyDir which does not require a pvc. But when the type is set to pvc then we need a kubernetes Persistent Volume Claim and this is where the django.mediaPersistentVolume.persistentVolumeClaim.name comes into play.
+
+The accessMode is set to ReadWriteMany by default to accommodate using more than one replica. Ensure storage support ReadWriteMany before setting this option, otherwise set accessMode to ReadWriteOnce.
 
 NOTE: PersistrentVolume needs to be prepared in front before helm installation/update is triggered.
 
@@ -283,8 +271,8 @@ For more detail how how to create proper PVC see [example](https://github.com/De
 ```zsh
 # Install Helm chart. Choose a host name that matches the certificate above
 helm install \
+  defectdojo \
   ./helm/defectdojo \
-  --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
@@ -296,8 +284,8 @@ helm install \
 
 # For high availability deploy multiple instances of Django, Celery and RabbitMQ
 helm install \
+  defectdojo \
   ./helm/defectdojo \
-  --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
@@ -313,8 +301,8 @@ helm install \
 # Run highly available PostgreSQL cluster instead of MySQL - recommended setup
 # for production environment.
 helm install \
+  defectdojo \
   ./helm/defectdojo \
-  --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.replicas=3 \
@@ -338,11 +326,7 @@ helm install \
 # To prevent recreating the secret, add --set createSecret=false` to your
 # command.
 
-# Run test. If there are any errors, re-run the command without `--cleanup` and
-# inspect the test container.
-# helm 2
-helm test defectdojo --cleanup
-# helm 3
+# Run test.
 helm test defectdojo
 
 # Navigate to <https://defectdojo.default.minikube.local>.
@@ -370,6 +354,10 @@ It's possible to enable Nginx prometheus exporter by setting `--set monitoring.e
 
 ## Useful stuff
 
+### Setting your own domain
+The `site_url` in values.yaml controls what domain is configured in Django, and also what the celery workers will put as links in Jira tickets for example.
+Set this to your `https://<yourdomain>` in values.yaml
+
 ### Multiple Hostnames
 Django requires a list of all hostnames that are valid for requests.
 You can add additional hostnames via helm or values file as an array.
@@ -385,6 +373,30 @@ This will also work with shell inserted variables:
 ` --set "alternativeHosts={defectdojo.${TLS_CERT_DOMAIN},localhost}"`
 
 You will still need to set a host value as well.
+
+### Using an existing redis setup with redis-sentinel
+If you want to use a redis-sentinel setup as the Celery broker, you will need to set the following.
+
+1. Set redis.scheme to "sentinel" in values.yaml
+2. Set two additional extraEnv vars specifying the sentinel master name and port in values.yaml
+
+```yaml
+celery:
+  broker: "redis"
+
+redis:
+  redisServer: "PutYourRedisSentinelAddress"
+  scheme: "sentinel"
+
+extraEnv:
+  - name: DD_CELERY_BROKER_TRANSPORT_OPTIONS
+    value: '{"master_name": "mymaster"}'
+  - name: 'DD_CELERY_BROKER_PORT'
+    value: "26379"
+```
+
+
+
 
 ### kubectl commands
 ```zsh
@@ -404,12 +416,6 @@ kubectl exec -it $(kubectl get pod --selector=defectdojo.org/component=${POD} \
 ```
 
 ### Clean up Kubernetes
-Helm <= v2
-```zsh
-# Uninstall Helm chart
-helm delete defectdojo --purge
-```
-
 Helm >= v3
 ```
 helm uninstall defectdojo

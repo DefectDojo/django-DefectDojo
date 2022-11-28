@@ -109,7 +109,7 @@
                                 {% if not product_tab %}
                                   <td>
                                     <a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
                                   </td>
                                 {% endif %}
                                 <td class="text-center">
@@ -147,9 +147,9 @@
                 </div>
             {% else %}
                 {% if host_view %}
-                    <h5> No hosts </h5>
+                  <div id="no_hosts"><p class="text-center">No hosts found.</p></div>
                 {% else %}
-                    <h5> No endpoints </h5>
+                  <div id="no_endpoints"><p class="text-center">No endpoints found.</p></div>
                 {% endif %}
             {% endif %}
         </div>

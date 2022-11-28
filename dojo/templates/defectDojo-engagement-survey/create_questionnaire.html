@@ -12,7 +12,7 @@
                     <input class="btn btn-primary" type="submit" label="create_questionnaire" name="create_questionnaire" value="Update Questionnaire"/>
                     <input class="btn btn-primary" type="submit" label="add_questions" name="add_questions"
                            value="Edit Questions"/>
-                    {% if "dojo.delete_engagement_survey"|has_configuration_permission:"staff" %}
+                    {% if "dojo.delete_engagement_survey"|has_configuration_permission %}
                     <a class="btn btn-danger" href="{% url 'delete_questionnaire' survey.id %}">Delete Questionnaire</a>
                     {% endif %}
                 {% else %}

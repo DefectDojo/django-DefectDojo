@@ -1,0 +1,17 @@
+[
+    {
+        "feed": "vulnerabilities",
+        "feedGroup": "debian:9",
+        "fix": "None",
+        "package": "libgnutls30-3.5.8-5+deb9u4",
+        "packageCpe": "None",
+        "packageName": "libgnutls30",
+        "packagePath": "None",
+        "packageType": "dpkg",
+        "packageVersion": "3.5.8-5+deb9u4",
+        "severity": "Medium",
+        "description": "That test description",
+        "url": "https://security-tracker.debian.org/tracker/CVE-2011-3389",
+        "vuln": "CVE-2011-3389"
+    }
+]

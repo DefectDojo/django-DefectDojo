@@ -101,7 +101,7 @@
       "is_staff": false,
       "last_login": null,
       "groups": [],
-      "user_permissions": [],
+      "user_permissions": [218, 220, 26, 28],
       "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
       "email": "",
       "date_joined": "2018-04-13T07:59:51.527Z"
@@ -652,7 +652,6 @@
       "deduplication_on_engagement": true
     }
   },
-
   {
     "pk": 1,
     "model": "dojo.endpoint",
@@ -670,7 +669,7 @@
     "pk": 2,
     "model": "dojo.endpoint",
     "fields": {
-      "product": 1,
+      "product": 2,
       "protocol": "ftp",
       "fragment": null,
       "host": "localhost",
@@ -693,10 +692,75 @@
     }
   },
   {
+    "pk": 4,
+    "model": "dojo.endpoint",
+    "fields": {
+      "product": 1,
+      "protocol": "ftp",
+      "fragment": null,
+      "host": "foo.bar",
+      "query": null,
+      "path": null,
+      "port": 21
+    }
+  },
+  {
+    "pk": 5,
+    "model": "dojo.endpoint",
+    "fields": {
+      "product": 1,
+      "protocol": "http",
+      "fragment": null,
+      "host": "foo.bar",
+      "query": null,
+      "path": null,
+      "port": 80
+    }
+  },
+  {
+    "pk": 6,
+    "model": "dojo.endpoint",
+    "fields": {
+      "product": 1,
+      "protocol": "http",
+      "fragment": null,
+      "host": "bar.foo",
+      "query": null,
+      "path": null,
+      "port": 80
+    }
+  },
+  {
+    "pk": 7,
+    "model": "dojo.endpoint",
+    "fields": {
+      "product": 1,
+      "protocol": "https",
+      "fragment": null,
+      "host": "bar.foo",
+      "query": null,
+      "path": null,
+      "port": 443
+    }
+  },
+  {
+    "pk": 8,
+    "model": "dojo.endpoint",
+    "fields": {
+      "product": 1,
+      "protocol": "https",
+      "fragment": null,
+      "host": "bar.foo",
+      "query": null,
+      "path": "f6",
+      "port": 443
+    }
+  },
+  {
     "pk": 1,
     "model": "dojo.endpoint_status",
     "fields": {
-      "date": "2020-07-01T00:00:00Z",
+      "date": "2020-07-01",
       "last_modified": "2020-07-01T17:45:39.791907Z",
       "mitigated": false,
       "mitigated_time": null,
@@ -706,6 +770,118 @@
       "mitigated_by": null,
       "endpoint": 2,
       "finding": 2
+    }
+  },
+  {
+    "pk": 2,
+    "model": "dojo.endpoint_status",
+    "fields": {
+      "date": "2020-07-01",
+      "last_modified": "2020-07-01T17:45:39.791907Z",
+      "mitigated": true,
+      "mitigated_time": "2020-07-01T17:45:39.791907Z",
+      "false_positive": false,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "mitigated_by": null,
+      "endpoint": 5,
+      "finding": 227
+    }
+  },
+  {
+    "pk": 3,
+    "model": "dojo.endpoint_status",
+    "fields": {
+      "date": "2020-07-01",
+      "last_modified": "2020-07-01T17:45:39.791907Z",
+      "mitigated": false,
+      "mitigated_time": null,
+      "false_positive": true,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "mitigated_by": null,
+      "endpoint": 5,
+      "finding": 228
+    }
+  },
+  {
+    "pk": 4,
+    "model": "dojo.endpoint_status",
+    "fields": {
+      "date": "2020-07-01",
+      "last_modified": "2020-07-01T17:45:39.791907Z",
+      "mitigated": false,
+      "mitigated_time": null,
+      "false_positive": false,
+      "out_of_scope": true,
+      "risk_accepted": false,
+      "mitigated_by": null,
+      "endpoint": 5,
+      "finding": 229
+    }
+  },
+  {
+    "pk": 5,
+    "model": "dojo.endpoint_status",
+    "fields": {
+      "date": "2020-07-01",
+      "last_modified": "2020-07-01T17:45:39.791907Z",
+      "mitigated": false,
+      "mitigated_time": null,
+      "false_positive": false,
+      "out_of_scope": false,
+      "risk_accepted": true,
+      "mitigated_by": null,
+      "endpoint": 5,
+      "finding": 230
+    }
+  },
+  {
+    "pk": 6,
+    "model": "dojo.endpoint_status",
+    "fields": {
+      "date": "2020-07-01",
+      "last_modified": "2020-07-01T17:45:39.791907Z",
+      "mitigated": true,
+      "mitigated_time": "2020-07-01T17:45:39.791907Z",
+      "false_positive": false,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "mitigated_by": null,
+      "endpoint": 6,
+      "finding": 227
+    }
+  },
+  {
+    "pk": 7,
+    "model": "dojo.endpoint_status",
+    "fields": {
+      "date": "2020-07-01",
+      "last_modified": "2020-07-01T17:45:39.791907Z",
+      "mitigated": false,
+      "mitigated_time": null,
+      "false_positive": false,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "mitigated_by": null,
+      "endpoint": 7,
+      "finding": 227
+    }
+  },
+  {
+    "pk": 8,
+    "model": "dojo.endpoint_status",
+    "fields": {
+      "date": "2020-07-01",
+      "last_modified": "2020-07-01T17:45:39.791907Z",
+      "mitigated": false,
+      "mitigated_time": null,
+      "false_positive": false,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "mitigated_by": null,
+      "endpoint": 8,
+      "finding": 231
     }
   },
   {
@@ -868,6 +1044,24 @@
     }
   },
   {
+    "pk": 89,
+    "model": "dojo.test",
+    "fields": {
+      "lead": null,
+      "estimated_time": "00:00:00",
+      "test_type": 1,
+      "scan_type": "ZAP Scan",
+      "title": "Endpoint mitigation tests",
+      "engagement": 2,
+      "environment": 1,
+      "target_start": "2017-12-01T00:00:00Z",
+      "notes": [],
+      "percent_complete": 100,
+      "actual_time": "00:00:00",
+      "target_end": "2017-12-10T00:00:00Z"
+    }
+  },
+  {
     "pk": 2,
     "model": "dojo.finding",
     "fields": {
@@ -885,6 +1079,7 @@
       "severity": "High",
       "title": "High Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": false,
       "mitigation": "test mitigation",
       "found_by": [
@@ -910,9 +1105,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [
-        2
-      ],
       "last_reviewed": null
     }
   },
@@ -934,6 +1126,7 @@
       "severity": "High",
       "title": "High Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": true,
       "mitigation": "test mitigation",
       "found_by": [
@@ -959,7 +1152,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -981,6 +1173,7 @@
       "severity": "High",
       "title": "High Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": true,
       "mitigation": "test mitigation",
       "found_by": [
@@ -1006,7 +1199,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1028,6 +1220,7 @@
       "severity": "High",
       "title": "High Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": true,
       "mitigation": "test mitigation",
       "found_by": [
@@ -1053,7 +1246,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1075,6 +1267,7 @@
       "severity": "High",
       "title": "High Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": true,
       "mitigation": "test mitigation",
       "found_by": [
@@ -1100,7 +1293,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1122,6 +1314,7 @@
       "severity": "High",
       "title": "DUMMY FINDING",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": false,
       "mitigation": "MITIGATION",
       "found_by": [
@@ -1149,7 +1342,6 @@
       ],
       "dynamic_finding": false,
       "hash_code": "c89d25e445b088ba339908f68e15e3177b78d22f3039d1bfea51c4be251bf4e0",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1172,6 +1364,7 @@
       "severity": "Low",
       "title": "Low Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": false,
       "mitigation": "test mitigation",
       "found_by": [
@@ -1197,7 +1390,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1219,6 +1411,7 @@
       "severity": "Low",
       "title": "Low Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": true,
       "mitigation": "test mitigation",
       "found_by": [
@@ -1244,7 +1437,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1266,6 +1458,7 @@
       "severity": "Low",
       "title": "Low Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": true,
       "mitigation": "test mitigation",
       "found_by": [
@@ -1291,7 +1484,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1314,6 +1506,7 @@
       "severity": "Low",
       "title": "Low Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": false,
       "mitigation": "test mitigation",
       "found_by": [
@@ -1339,7 +1532,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1362,6 +1554,7 @@
       "severity": "Low",
       "title": "Low Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": true,
       "mitigation": "test mitigation",
       "found_by": [
@@ -1387,7 +1580,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1410,6 +1602,7 @@
       "severity": "Low",
       "title": "UID Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": false,
       "mitigation": "test mitigation",
       "found_by": [
@@ -1435,7 +1628,6 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "6f8d0bf970c14175e597843f4679769a4775742549d90f902ff803de9244c7e1",
-      "endpoints": [],
       "last_reviewed": null
     }
   },
@@ -1458,6 +1650,7 @@
       "severity": "Low",
       "title": "UID Impact Test Finding",
       "param": null,
+      "created": "2017-12-01T00:00:00Z",
       "duplicate": true,
       "mitigation": "test mitigation",
       "found_by": [
@@ -1483,8 +1676,313 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "6f8d0bf970c14175e597843f4679769a4775742549d90f902ff803de9244c7e1",
-      "endpoints": [],
       "last_reviewed": null
+    }
+  },
+  {
+    "model": "dojo.finding",
+    "pk": 226,
+    "fields": {
+      "title": "Test Endpoint Mitigation - Finding F1 Without Endpoints",
+      "date": "2022-10-15",
+      "severity": "Info",
+      "description": "vulnerability",
+      "mitigation": "",
+      "impact": "",
+      "steps_to_reproduce": "",
+      "severity_justification": "",
+      "references": "",
+      "test": 89,
+      "active": true,
+      "verified": true,
+      "false_p": false,
+      "duplicate": false,
+      "duplicate_finding": null,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "under_review": false,
+      "review_requested_by": null,
+      "under_defect_review": false,
+      "defect_review_requested_by": null,
+      "is_mitigated": false,
+      "mitigated": null,
+      "mitigated_by": null,
+      "reporter": 1,
+      "numerical_severity": "S4",
+      "hash_code": "a6dd6bd359ff0b504a21b8a7ae5e59f1b40dd0fa1715728bd58de8f688f01b19",
+      "static_finding": false,
+      "dynamic_finding": true,
+      "created": "2022-10-15T23:12:52.966Z",
+      "last_reviewed_by": null,
+      "reviewers": [],
+      "files": [],
+      "payload": null,
+      "param": null,
+      "found_by": [
+        1
+      ],
+      "thread_id": 0,
+      "last_reviewed": null,
+      "url": null,
+      "notes": [],
+      "line": null,
+      "cwe": null,
+      "file_path": ""
+    }
+  },
+  {
+    "model": "dojo.finding",
+    "pk": 227,
+    "fields": {
+      "title": "Test Endpoint Mitigation - Finding F2 With Many Endpoints",
+      "date": "2022-10-15",
+      "severity": "Info",
+      "description": "vulnerability",
+      "mitigation": "",
+      "impact": "",
+      "steps_to_reproduce": "",
+      "severity_justification": "",
+      "references": "",
+      "test": 89,
+      "active": true,
+      "verified": true,
+      "false_p": false,
+      "duplicate": false,
+      "duplicate_finding": null,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "under_review": false,
+      "review_requested_by": null,
+      "under_defect_review": false,
+      "defect_review_requested_by": null,
+      "is_mitigated": false,
+      "mitigated": null,
+      "mitigated_by": null,
+      "reporter": 1,
+      "numerical_severity": "S4",
+      "hash_code": "fde7dd425475851bd90a21e376eccbe753f84f94680c4394521a831846bd3aeb",
+      "static_finding": false,
+      "dynamic_finding": true,
+      "created": "2022-10-15T23:13:23.760Z",
+      "last_reviewed_by": null,
+      "reviewers": [],
+      "files": [],
+      "payload": null,
+      "param": null,
+      "found_by": [
+        1
+      ],
+      "thread_id": 0,
+      "last_reviewed": null,
+      "url": null,
+      "notes": [],
+      "line": null,
+      "cwe": null,
+      "file_path": ""
+    }
+  },
+  {
+    "model": "dojo.finding",
+    "pk": 228,
+    "fields": {
+      "title": "Test Endpoint Mitigation - Finding F3 EPS False Positive",
+      "date": "2022-10-15",
+      "severity": "Info",
+      "description": "vulnerability",
+      "mitigation": "",
+      "impact": "",
+      "steps_to_reproduce": "",
+      "severity_justification": "",
+      "references": "",
+      "test": 89,
+      "active": true,
+      "verified": true,
+      "false_p": false,
+      "duplicate": false,
+      "duplicate_finding": null,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "under_review": false,
+      "review_requested_by": null,
+      "under_defect_review": false,
+      "defect_review_requested_by": null,
+      "is_mitigated": false,
+      "mitigated": null,
+      "mitigated_by": null,
+      "reporter": 1,
+      "numerical_severity": "S4",
+      "hash_code": "24cd769b8b4404d95b689902931317a614c3803bbd5b161e36076eaa6a08c672",
+      "static_finding": false,
+      "dynamic_finding": true,
+      "created": "2022-10-15T23:13:49.275Z",
+      "last_reviewed_by": null,
+      "reviewers": [],
+      "files": [],
+      "payload": null,
+      "param": null,
+      "found_by": [
+        1
+      ],
+      "thread_id": 0,
+      "last_reviewed": null,
+      "url": null,
+      "notes": [],
+      "line": null,
+      "cwe": null,
+      "file_path": ""
+    }
+  },
+  {
+    "model": "dojo.finding",
+    "pk": 229,
+    "fields": {
+      "title": "Test Endpoint Mitigation - Finding F4 EPS Out of Scope",
+      "date": "2022-10-15",
+      "severity": "Info",
+      "description": "vulnerability",
+      "mitigation": "",
+      "impact": "",
+      "steps_to_reproduce": "",
+      "severity_justification": "",
+      "references": "",
+      "test": 89,
+      "active": true,
+      "verified": true,
+      "false_p": false,
+      "duplicate": false,
+      "duplicate_finding": null,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "under_review": false,
+      "review_requested_by": null,
+      "under_defect_review": false,
+      "defect_review_requested_by": null,
+      "is_mitigated": false,
+      "mitigated": null,
+      "mitigated_by": null,
+      "reporter": 1,
+      "numerical_severity": "S4",
+      "hash_code": "ab2a512956a76441ac537b0e78316709413be2599d37283caa7e20d92f8fa9fe",
+      "static_finding": false,
+      "dynamic_finding": true,
+      "created": "2022-10-15T23:14:13.898Z",
+      "last_reviewed_by": null,
+      "reviewers": [],
+      "files": [],
+      "payload": null,
+      "param": null,
+      "found_by": [
+        1
+      ],
+      "thread_id": 0,
+      "last_reviewed": null,
+      "url": null,
+      "notes": [],
+      "line": null,
+      "cwe": null,
+      "file_path": ""
+    }
+  },
+  {
+    "model": "dojo.finding",
+    "pk": 230,
+    "fields": {
+      "title": "Test Endpoint Mitigation - Finding F5 EPS Risk Accepted",
+      "date": "2022-10-15",
+      "severity": "Info",
+      "description": "vulnerability",
+      "mitigation": "",
+      "impact": "",
+      "steps_to_reproduce": "",
+      "severity_justification": "",
+      "references": "",
+      "test": 89,
+      "active": true,
+      "verified": true,
+      "false_p": false,
+      "duplicate": false,
+      "duplicate_finding": null,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "under_review": false,
+      "review_requested_by": null,
+      "under_defect_review": false,
+      "defect_review_requested_by": null,
+      "is_mitigated": false,
+      "mitigated": null,
+      "mitigated_by": null,
+      "reporter": 1,
+      "numerical_severity": "S4",
+      "hash_code": "9a80eb44b140b5d11adaac4e478f3cb74c92625a42892ab8cba4fbba72e6d733",
+      "static_finding": false,
+      "dynamic_finding": true,
+      "created": "2022-10-15T23:14:38.406Z",
+      "last_reviewed_by": null,
+      "reviewers": [],
+      "files": [],
+      "payload": null,
+      "param": null,
+      "found_by": [
+        1
+      ],
+      "thread_id": 0,
+      "last_reviewed": null,
+      "url": null,
+      "notes": [],
+      "line": null,
+      "cwe": null,
+      "file_path": ""
+    }
+  },
+  {
+    "model": "dojo.finding",
+    "pk": 231,
+    "fields": {
+      "title": "Test Endpoint Mitigation - Finding F6 Mitigated",
+      "date": "2022-10-15",
+      "severity": "Info",
+      "description": "vulnerability",
+      "mitigation": "",
+      "impact": "",
+      "steps_to_reproduce": "",
+      "severity_justification": "",
+      "references": "",
+      "test": 89,
+      "active": false,
+      "verified": true,
+      "false_p": false,
+      "duplicate": false,
+      "duplicate_finding": null,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "under_review": false,
+      "review_requested_by": null,
+      "under_defect_review": false,
+      "defect_review_requested_by": null,
+      "is_mitigated": true,
+      "mitigated": "2022-10-15T23:17:03.431Z",
+      "mitigated_by": 1,
+      "reporter": 1,
+      "numerical_severity": "S4",
+      "last_reviewed": "2022-10-15T23:17:03.431Z",
+      "last_reviewed_by": 1,
+      "hash_code": "6eb2b8bffe1ca07719a7249ef18403057a5bc0c834866b0a49d0f706bcec913e",
+      "static_finding": false,
+      "dynamic_finding": true,
+      "created": "2022-10-15T23:15:34.814Z",
+      "reviewers": [],
+      "files": [],
+      "payload": null,
+      "param": null,
+      "found_by": [
+        1
+      ],
+      "thread_id": 0,
+      "url": null,
+      "notes": [],
+      "line": null,
+      "cwe": null,
+      "file_path": ""
     }
   },
   {
@@ -2352,6 +2850,78 @@
       "product": 1,
       "user": 2,
       "product_type_added": ["slack"]
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 217,
+    "fields": {
+      "name": "Can add finding_ template",
+      "content_type": 55,
+      "codename": "add_finding_template"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 218,
+    "fields": {
+      "name": "Can change finding_ template",
+      "content_type": 55,
+      "codename": "change_finding_template"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 219,
+    "fields": {
+      "name": "Can delete finding_ template",
+      "content_type": 55,
+      "codename": "delete_finding_template"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 220,
+    "fields": {
+      "name": "Can view finding_ template",
+      "content_type": 55,
+      "codename": "view_finding_template"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 25,
+    "fields": {
+      "name": "Can add log entry",
+      "content_type": 7,
+      "codename": "add_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 26,
+    "fields": {
+      "name": "Can change log entry",
+      "content_type": 7,
+      "codename": "change_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 27,
+    "fields": {
+      "name": "Can delete log entry",
+      "content_type": 7,
+      "codename": "delete_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 28,
+    "fields": {
+      "name": "Can view log entry",
+      "content_type": 7,
+      "codename": "view_logentry"
     }
   }
 ]

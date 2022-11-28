@@ -60,12 +60,15 @@ class DojoDefaultImporter(object):
     @dojo_async_task
     @app.task(ignore_result=False)
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None, **kwargs):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None,
+                                create_finding_groups_for_all_findings=True, **kwargs):
         logger.debug('endpoints_to_add: %s', endpoints_to_add)
         new_findings = []
         items = parsed_findings
         logger.debug('starting import of %i items.', len(items) if items else 0)
         i = 0
+        group_names_to_findings_dict = {}
+
         for item in items:
             # FIXME hack to remove when all parsers have unit tests for this attribute
             if item.severity.lower().startswith('info') and item.severity != 'Info':
@@ -103,12 +106,19 @@ class DojoDefaultImporter(object):
             if scan_date:
                 item.date = scan_date.date()
 
-            item.service = service
+            if service:
+                item.service = service
 
             item.save(dedupe_option=False)
 
             if is_finding_groups_enabled() and group_by:
-                finding_helper.add_finding_to_auto_group(item, group_by, **kwargs)
+                # If finding groups are enabled, group all findings by group name
+                name = finding_helper.get_group_by_group_name(item, group_by)
+                if name is not None:
+                    if name in group_names_to_findings_dict:
+                        group_names_to_findings_dict[name].append(item)
+                    else:
+                        group_names_to_findings_dict[name] = [item]
 
             if (hasattr(item, 'unsaved_req_resp') and
                     len(item.unsaved_req_resp) > 0):
@@ -158,38 +168,35 @@ class DojoDefaultImporter(object):
 
             new_findings.append(item)
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if is_finding_groups_enabled() and item.finding_group:
+            if is_finding_groups_enabled() and group_by:
                 item.save()
             else:
                 item.save(push_to_jira=push_to_jira)
 
-        if is_finding_groups_enabled() and push_to_jira:
-            for finding_group in set([finding.finding_group for finding in new_findings if finding.finding_group is not None]):
-                jira_helper.push_to_jira(finding_group)
+        for (group_name, findings) in group_names_to_findings_dict.items():
+            # Only create a finding group if we have more than one finding for a given finding group, unless configured otherwise
+            if create_finding_groups_for_all_findings or len(findings) > 1:
+                for finding in findings:
+                    finding_helper.add_finding_to_auto_group(finding, group_by, **kwargs)
+            if push_to_jira:
+                if findings[0].finding_group is not None:
+                    jira_helper.push_to_jira(findings[0].finding_group)
+                else:
+                    jira_helper.push_to_jira(findings[0])
+
         sync = kwargs.get('sync', False)
         if not sync:
             return [serializers.serialize('json', [finding, ]) for finding in new_findings]
         return new_findings
 
     def close_old_findings(self, test, scan_date_time, user, push_to_jira=None, service=None):
-        old_findings = []
         # Close old active findings that are not reported by this scan.
         new_hash_codes = test.finding_set.values('hash_code')
 
-        # TODO I don't think these criteria are 100% correct, why are findings with the same hash_code excluded?
-        # Would it make more sense to exclude duplicates? But the deduplication process can be unfinished because it's
-        # run in a celery async task...
-        if test.engagement.deduplication_on_engagement:
-            old_findings = Finding.objects.exclude(test=test) \
-                                            .exclude(hash_code__in=new_hash_codes) \
-                                            .filter(test__engagement=test.engagement,
-                                                test__test_type=test.test_type,
-                                                active=True)
-        else:
-            # TODO BUG? this will violate the deduplication_on_engagement setting for other engagements
-            old_findings = Finding.objects.exclude(test=test) \
-                                            .exclude(hash_code__in=new_hash_codes) \
-                                            .filter(test__engagement__product=test.engagement.product,
+        # Close old findings of the same test type in the same engagement
+        old_findings = Finding.objects.exclude(test=test) \
+                                        .exclude(hash_code__in=new_hash_codes) \
+                                        .filter(test__engagement=test.engagement,
                                                 test__test_type=test.test_type,
                                                 active=True)
 
@@ -205,7 +212,7 @@ class DojoDefaultImporter(object):
             old_finding.notes.create(author=user,
                                         entry="This finding has been automatically closed"
                                         " as it is not present anymore in recent scans.")
-            endpoint_status = old_finding.endpoint_status.all()
+            endpoint_status = old_finding.status_finding.all()
             for status in endpoint_status:
                 status.mitigated_by = user
                 status.mitigated_time = timezone.now()
@@ -231,7 +238,7 @@ class DojoDefaultImporter(object):
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None,
-                    service=None, title=None):
+                    service=None, title=None, create_finding_groups_for_all_findings=True):
 
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
@@ -306,7 +313,8 @@ class DojoDefaultImporter(object):
                 result = self.process_parsed_findings(test, findings_list, scan_type, user, active,
                                                             verified, minimum_severity=minimum_severity,
                                                             endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False)
+                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False,
+                                                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
                 # Since I dont want to wait until the task is done right now, save the id
                 # So I can check on the task later
                 results_list += [result]
@@ -323,7 +331,8 @@ class DojoDefaultImporter(object):
             new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                             verified, minimum_severity=minimum_severity,
                                                             endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True)
+                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True,
+                                                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
 
         closed_findings = []
         if close_old_findings:

@@ -1,5 +1,6 @@
 import json
 import hashlib
+from cvss import parser as cvss_parser
 from dojo.models import Finding, Endpoint
 
 
@@ -53,6 +54,21 @@ class NucleiParser(object):
                 if info.get('reference'):
                     finding.references = info.get('reference')
                 finding.unsaved_endpoints.append(endpoint)
+
+                classification = info.get('classification')
+                if classification:
+                    if 'cve-id' in classification and classification['cve-id']:
+                        cve_ids = classification['cve-id']
+                        finding.unsaved_vulnerability_ids = list(map(lambda x: x.upper(), cve_ids))
+                    if 'cwe-id' in classification and classification['cwe-id'] and len(classification['cwe-id']) > 0:
+                        cwe = classification['cwe-id'][0]
+                        finding.cwe = int(cwe[4:])
+                    if 'cvss-metrics' in classification and classification['cvss-metrics']:
+                        cvss_objects = cvss_parser.parse_cvss_from_text(classification['cvss-metrics'])
+                        if len(cvss_objects) > 0:
+                            finding.cvssv3 = cvss_objects[0].clean_vector()
+                    if 'cvss-score' in classification and classification['cvss-score']:
+                        finding.cvssv3_score = classification['cvss-score']
 
                 dupe_key = hashlib.sha256(
                     (template_id + type).encode('utf-8')

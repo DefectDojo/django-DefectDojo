@@ -32,9 +32,17 @@ logger = logging.getLogger(__name__)
 def process_endpoints_view(request, host_view=False, vulnerable=False):
 
     if vulnerable:
-        endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
-                                     finding__duplicate=False, finding__out_of_scope=False)
-        endpoints = endpoints.filter(endpoint_status__mitigated=False)
+        endpoints = Endpoint.objects.filter(
+            finding__active=True,
+            finding__verified=True,
+            finding__out_of_scope=False,
+            finding__mitigated__isnull=True,
+            finding__false_p=False,
+            finding__duplicate=False,
+            status_endpoint__mitigated=False,
+            status_endpoint__false_positive=False,
+            status_endpoint__out_of_scope=False,
+            status_endpoint__risk_accepted=False)
     else:
         endpoints = Endpoint.objects.all()
 
@@ -120,7 +128,7 @@ def process_endpoint_view(request, eid, host_view=False):
     else:
         endpoints = None
         endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
-        all_findings = endpoint.findings()
+        all_findings = endpoint.findings.all()
         active_findings = endpoint.active_findings()
 
     if all_findings:
@@ -137,7 +145,7 @@ def process_endpoint_view(request, eid, host_view=False):
     # closed_findings is needed as a parameter for get_periods_counts, but they are not relevant in the endpoint view
     closed_findings = Finding.objects.none()
 
-    monthly_counts = get_period_counts(active_findings, all_findings, closed_findings, None, months_between, start_date,
+    monthly_counts = get_period_counts(all_findings, closed_findings, None, months_between, start_date,
                                        relative_delta='months')
 
     paged_findings = get_page_items(request, active_findings, 25)
