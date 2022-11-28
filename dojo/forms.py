@@ -38,7 +38,8 @@ from django.urls import reverse
 from tagulous.forms import TagField
 import logging
 from crum import get_current_user
-from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled
+from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled, \
+    get_password_requirements_string
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
@@ -1897,18 +1898,20 @@ class ChangePasswordForm(forms.Form):
     current_password = forms.CharField(widget=forms.PasswordInput,
         required=True)
     new_password = forms.CharField(widget=forms.PasswordInput,
-        required=True, validators=[validate_password],
-        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
-                   and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?).')  # noqa W605
+        required=True,
+        validators=[validate_password],
+        help_text='')
     confirm_password = forms.CharField(widget=forms.PasswordInput,
-        required=True, validators=[validate_password],
-        help_text='Password must match the new password entered above, following the same password rules.')
+        required=True,
+        validators=[validate_password],
+        help_text='Password must match the new password entered above.')
 
     def __init__(self, *args, **kwargs):
         self.user = None
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
         super(ChangePasswordForm, self).__init__(*args, **kwargs)
+        self.fields['new_password'].help_text = get_password_requirements_string()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1929,9 +1932,9 @@ class ChangePasswordForm(forms.Form):
 
 class AddDojoUserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput,
-        required=False, validators=[validate_password],
-        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
-                   and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?). Leave blank to set an unusable password for this user.')  # noqa W605
+        required=False,
+        validators=[validate_password],
+        help_text='')
 
     class Meta:
         model = Dojo_User
@@ -1942,6 +1945,7 @@ class AddDojoUserForm(forms.ModelForm):
         current_user = get_current_user()
         if not current_user.is_superuser:
             self.fields['is_superuser'].disabled = True
+        self.fields['password'].help_text = get_password_requirements_string()
 
 
 class EditDojoUserForm(forms.ModelForm):
