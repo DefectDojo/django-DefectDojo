@@ -25,6 +25,7 @@ class JIRAConfigEngagementBase(object):
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'IUNSEC',
             'jira-project-form-product_jira_sla_notification': 'on',
+            'jira-project-form-custom_fields': 'null',
         }
 
     def get_new_engagement_with_jira_project_data_and_epic_mapping(self):
@@ -42,6 +43,7 @@ class JIRAConfigEngagementBase(object):
             'jira-project-form-product_jira_sla_notification': 'on',
             'jira-project-form-enable_engagement_epic_mapping': 'on',
             'jira-epic-form-push_to_jira': 'on',
+            'jira-project-form-custom_fields': 'null',
         }
 
     def get_new_engagement_without_jira_project_data(self):
@@ -74,6 +76,7 @@ class JIRAConfigEngagementBase(object):
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'ISEC',
             'jira-project-form-product_jira_sla_notification': 'on',
+            'jira-project-form-custom_fields': 'null',
         }
 
     def get_engagement_with_jira_project_data2(self, engagement):
@@ -89,6 +92,7 @@ class JIRAConfigEngagementBase(object):
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'ISEC2',
             'jira-project-form-product_jira_sla_notification': 'on',
+            'jira-project-form-custom_fields': 'null',
         }
 
     def get_engagement_with_empty_jira_project_data(self, engagement):

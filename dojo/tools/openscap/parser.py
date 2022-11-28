@@ -59,16 +59,9 @@ class OpenscapParser(object):
                     "**IdRef:** `" + rule_result.attrib['idref'] + "`",
                     "**Title:** `" + title + "`",
                 ])
-                cves = []
-                for cve in rule_result.findall("./{0}ident[@system='http://cve.mitre.org']".format(namespace)):
-                    cves.append(cve.text)
-                # if finding has only one cve then ok. otherwise insert it in description field.
-                if len(cves) > 1:
-                    cve_desc = ""
-                    for cve in cves:
-                        cve_desc += '[{0}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={0})'.format(cve) + ", "
-
-                    description += "**Related CVE's:** " + cve_desc[:-2]
+                vulnerability_ids = []
+                for vulnerability_id in rule_result.findall("./{0}ident[@system='http://cve.mitre.org']".format(namespace)):
+                    vulnerability_ids.append(vulnerability_id.text)
                 # get severity.
                 severity = rule_result.attrib.get('severity', 'medium').lower().capitalize()
                 # according to the spec 'unknown' is a possible value
@@ -89,8 +82,8 @@ class OpenscapParser(object):
                     static_finding=False,
                     unique_id_from_tool=rule_result.attrib['idref'],
                 )
-                if len(cves) == 1:
-                    finding.cve = cves[0]
+                if vulnerability_ids:
+                    finding.unsaved_vulnerability_ids = vulnerability_ids
                 finding.unsaved_endpoints = []
                 for ip in ips:
                     try:

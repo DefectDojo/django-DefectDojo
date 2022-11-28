@@ -80,7 +80,8 @@ class TestWpscanParser(DojoTestCase):
             self.assertEqual("7391118e-eef5-4ff8-a8ea-f6b65f442c63", finding.unique_id_from_tool)
             self.assertNotEqual("Info", finding.severity)  # it is a vulnerability so not 'Info'
             self.assertEqual("Contact Form 7 < 5.3.2 - Unrestricted File Upload", finding.title)
-            self.assertEqual("CVE-2020-35489", finding.cve)
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2020-35489", finding.unsaved_vulnerability_ids[0])
             self.assertEqual(datetime.datetime(2021, 3, 17, 12, 21, 6), finding.date)
             self.assertEqual("", finding.get_scanner_confidence_text())  # data are => 100%
 
@@ -125,6 +126,12 @@ class TestWpscanParser(DojoTestCase):
             self.assertEqual("fixed in : 2.10", finding.mitigation)
             self.assertEqual(7, finding.scanner_confidence)
             self.assertEqual("Tentative", finding.get_scanner_confidence_text())  # data are at 30%
+        with self.subTest(i=19):
+            finding = findings[19]
+            self.assertEqual("WordPress 3.7-4.9.1 - MediaElement Cross-Site Scripting (XSS)", finding.title)
+            self.assertEqual(2, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2018-5776", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("CVE-2016-9263", finding.unsaved_vulnerability_ids[1])
         with self.subTest(i=30):
             finding = findings[0]
             self.assertEqual("16353d45-75d1-4820-b93f-daad90c322a8", finding.unique_id_from_tool)

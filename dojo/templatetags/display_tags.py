@@ -82,7 +82,7 @@ def markdown_render(value):
                                                       'markdown.extensions.fenced_code',
                                                       'markdown.extensions.toc',
                                                       'markdown.extensions.tables'])
-        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs, markdown_styles))
+        return mark_safe(bleach.clean(markdown_text, tags=markdown_tags, attributes=markdown_attrs, css_sanitizer=markdown_styles))
 
 
 @register.filter(name='url_shortner')
@@ -243,7 +243,9 @@ def group_sla(group):
         return ""
 
     # if there is at least 1 finding, there will be date, severity etc to calculate sla
-    return finding_sla(group)
+    # Get the first finding with the highests severity
+    finding = group.findings.all().order_by('severity').first()
+    return finding_sla(finding)
 
 
 @register.filter(name='finding_sla')
@@ -254,14 +256,14 @@ def finding_sla(finding):
     title = ""
     severity = finding.severity
     find_sla = finding.sla_days_remaining()
-    sla_age = get_system_setting('sla_' + severity.lower())
+    sla_age = getattr(finding.get_sla_periods(), severity.lower(), None)
     if finding.mitigated:
         status = "blue"
         status_text = 'Remediated within SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
         if find_sla and find_sla < 0:
             status = "orange"
             find_sla = abs(find_sla)
-            status_text = 'Out of SLA: Remediatied ' + str(
+            status_text = 'Out of SLA: Remediated ' + str(
                 find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
     else:
         status = "green"
@@ -838,9 +840,9 @@ def jira_change(obj):
 
 
 @register.filter
-def get_thumbnail(filename):
+def get_thumbnail(file):
     from pathlib import Path
-    file_format = Path(filename).suffix[1:]
+    file_format = Path(file.file.url).suffix[1:]
     return file_format in supported_file_formats
 
 

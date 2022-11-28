@@ -54,6 +54,11 @@
                                         <i class="fa fa-pencil-square-o"></i> Edit Finding
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                    <i class="fa fa-copy"></i> Copy Finding
+                                    </a>
+                                </li>
                             {% endif %}
                             {% if finding|has_object_permission:"Finding_Edit" %}
                                 <li role="presentation">
@@ -84,7 +89,7 @@
                                 </li>
                             {% endif %}
                             <li role="separator" class="divider"></li>
-                            {% if "dojo.add_finding_template"|has_configuration_permission:"staff" %}
+                            {% if "dojo.add_finding_template"|has_configuration_permission %}
                                 <li role="presentation">
                                     <a href="{% url 'mktemplate' finding.id %}">
                                         <i class="fa fa-copy"></i> Make Finding a Template
@@ -102,19 +107,27 @@
                                         <input type="hidden" label="apply_template" aria-label="apply_template" name="id" value="{{ finding.id }}"/>
                                     </form>
                             {% endif %}
-                            {% if not cwe_template.cwe and "dojo.add_finding_template"|has_configuration_permission:"staff" %}
+                            {% if not cwe_template.cwe and "dojo.add_finding_template"|has_configuration_permission %}
                                     <li role="presentation">
                                         <a href="{% url 'add_template' %}">
                                             <i class="fa fa-copy"></i> Create a CWE Remediation Template
                                         </a>
                                     </li>
                             {% endif %}
-                            {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission:"staff" %}
+                            {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission %}
                                 <li role="presentation">
                                     <a href="{% url 'find_template_to_apply' finding.id %}">
                                         <i class="fa fa-copy"></i> Apply Template to Finding
                                     </a>
                                 </li>
+                            {% endif %}
+                            {% if finding|has_object_permission:"Finding_Edit" %}
+                                <li role="separator" class="divider"></li>
+                                    <li role="presentation">
+                                        <a href="{% url 'remediation_date' finding.id %}">
+                                            <i class="fa fa-calendar-check-o"></i> Add/Edit Planned Remediation Date
+                                        </a>
+                                    </li>
                             {% endif %}
                             {% if finding|has_object_permission:"Finding_Edit" %}
                                 <li role="separator" class="divider"></li>
@@ -236,6 +249,9 @@
                     {% if finding.publish_date %}
                         <th>Vuln Publish date</th>
                     {% endif %}
+                    {% if finding.planned_remediation_date %}
+                        <th>Planned Remediation</th>
+                    {% endif%}
                     <th>Reporter</th>
                     {% if finding.mitigated %}
                         <th>Date Mitigated</th>
@@ -358,6 +374,9 @@
                     <td>{{ finding.age }} days</td>
                     {% if finding.publish_date %}
                         <td>{{ finding.publish_date }}</td>
+                    {% endif %}
+                    {% if finding.planned_remediation_date %}
+                        <td>{{ finding.planned_remediation_date }}</td>
                     {% endif %}
                     <td>{{ finding.reporter }}</td>
                     {% if finding.mitigated %}
@@ -763,9 +782,10 @@
                             {% for file in files %}
                             <div class="col-md-2" style="text-align: center">
                                 <div class="row">
-                                    <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
-                                        {% if file.file.url|get_thumbnail %}
-                                            <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
+                                    {% url 'access_file' fid=file.id oid=finding.id obj_type='Finding' as image_url %}
+                                    <a href="{{ image_url }}" target="_blank">
+                                        {% if file|get_thumbnail %}
+                                            <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
                                         {% else %}
                                             <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
                                         {% endif %}

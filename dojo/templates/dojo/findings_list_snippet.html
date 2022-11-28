@@ -90,9 +90,9 @@
                                 <option value="High">High</option>
                                 <option value="Critical">Critical</option>
                             </select><br/><br/>
-
+                            <label style="display: block" for="id_bulk_planned_remediation_date">Planned Remediation Date</label>
+                                <input id="id_bulk_planned_remediation_date" name="planned_remediation_date" type="date" alt="Select the date the Finding will be remediated"/><br/>
                             <label><b>Status</b><input id="id_bulk_status" name="status" type="checkbox" alt="Select to enable"/></label><br/>
-
                             <label style="font-size: 80%; font-weight: normal; display: block">
                                 <input id="id_bulk_active" name="active" type="checkbox" disabled/> <span>Active</span>
                             </label>
@@ -219,6 +219,7 @@
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
                             {% endif %}
                             <th>Service</th>
+                            <th>Planned Remediation</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -248,6 +249,11 @@
                                           <i class="fa fa-pencil-square-o"></i> Edit
                                           </a>
                                        </li>
+                                       <li>
+                                          <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                          <i class="fa fa-copy"></i> Copy
+                                          </a>
+                                        </li>
                                        {% endif %}
                                        {% if finding|has_object_permission:"Finding_Edit" %}
                                           <li class="divider"></li>
@@ -272,14 +278,14 @@
                                               </a>
                                           </li>
                                        {% endif %}
-                                       {% if "dojo.add_finding_template"|has_configuration_permission:"staff" %}
+                                       {% if "dojo.add_finding_template"|has_configuration_permission %}
                                           <li role="presentation">
                                               <a href="{% url 'mktemplate' finding.id %}">
                                                   <i class="fa fa-copy"></i> Make Finding a Template
                                               </a>
                                           </li>
                                        {% endif %}
-                                       {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission:"staff" %}
+                                       {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission %}
                                           <li role="presentation">
                                               <a href="{% url 'find_template_to_apply' finding.id %}">
                                                   <i class="fa fa-copy"></i> Apply Template to Finding
@@ -369,7 +375,7 @@
                                   {% else %}
                                     {% if finding.endpoints.all %}
                                       <i class="fa fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
-                                      {% for endpoint_status in finding.endpoint_status.all %}
+                                      {% for endpoint_status in finding.status_finding.all %}
                                         {% if endpoint_status.mitigated %}
                                           &#10003; {{ endpoint_status.endpoint }}<br/>
                                         {% else %}
@@ -390,7 +396,7 @@
                                         ({{ finding.notes.count }})
                                     </a>
                                   {% endif %}
-                                  {% include "dojo/snippets/tags.html" with tags=finding.tags.alll %}
+                                  {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                 </td>
                                 <td class="nowrap">
                                   {% if finding.cwe > 0 %}
@@ -480,6 +486,11 @@
                                     {{ finding.service }}
                                     {% endif %}
                                 </td>
+                                <td class="nowrap">
+                                    {% if finding.planned_remediation_date %}
+                                    {{ finding.planned_remediation_date }}
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -534,6 +545,7 @@
                     { "data": "product" },
                 {% endif %}
                 { "data": "service" },
+                { "data": "planned_remediation_date" },
               ];
 
             // Filter the list of items to display based on what is shown.
