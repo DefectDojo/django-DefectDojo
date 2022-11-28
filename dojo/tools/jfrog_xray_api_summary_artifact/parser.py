@@ -9,8 +9,7 @@ from dojo.models import Finding
 
 class JFrogXrayApiSummaryArtifactParser(object):
 
-    # This function return a list of all the scan_type supported by your parser. This identifiers are used internally. Your parser can support more than one scan_type
-    # For example some parsers use different identifier to modify the behavior of the parser (aggregate, filter, etc…)
+    # This function return a list of all the scan_type supported by your parser
     def get_scan_types(self):
         return ["JFrog Xray API Summary Artifact Scan"]
 
