@@ -1,5 +1,6 @@
 import json
 import re
+import hashlib
 
 from cvss import CVSS3
 
@@ -37,7 +38,6 @@ class JFrogXrayApiSummaryArtifactParser(object):
                     service = decode_service(artifact_general['name'])
                     item = get_item(node, str(service), test)
                     items.append(item)
-
         return items
 
 
@@ -46,9 +46,6 @@ def get_item(vulnerability, service, test):
     cve = None
     cwe = None
     cvssv3 = None
-    cvssv3_score = 0.0
-    unique_id_from_tool = None
-    impact_paths = None
     impact_path = ImpactPath("", "", "")
 
     if 'severity' in vulnerability:
@@ -62,8 +59,6 @@ def get_item(vulnerability, service, test):
     # Some entries have no CVE entries, despite they exist. Example CVE-2017-1000502.
     cves = vulnerability.get('cves', [])
     if cves:
-        if 'cve' in cves[0]:
-            cve = cves[0]['cve']
         if len(cves[0].get('cwe', [])) > 0:
             cwe = decode_cwe_number(cves[0].get('cwe', [])[0])
         if 'cvss_v3' in cves[0]:
@@ -74,22 +69,20 @@ def get_item(vulnerability, service, test):
     if len(impact_paths) > 0:
         impact_path = decode_impact_path(impact_paths[0])
 
-    # The unique_id_from_tool is set only when a given component (SHA) has a specific unique Finding (XRAY or CVE)
     if 'issue_id' in vulnerability:
-        title = vulnerability['issue_id'] + " - " + impact_path.name + ":" + impact_path.version
-        unique_id_from_tool = vulnerability['issue_id'] + " " + impact_path.sha
+        unique_id_from_tool = str(hash(impact_path.name + impact_path.version + vulnerability['issue_id']))
+        vuln_id_from_tool = vulnerability['issue_id']
     elif cve:
-        title = str(cve) + " - " + impact_path.name + ":" + impact_path.version
-        unique_id_from_tool = str(cve) + " " + impact_path.sha
+        unique_id_from_tool = str(hash(impact_path.name + impact_path.version + cve))
     else:
-        title = impact_path.name + ":" + impact_path.version
-        unique_id_from_tool = None
+        unique_id_from_tool = str(hash(impact_path.name + impact_path.version + vulnerability['summary']))
+        vuln_id_from_tool = ""
 
     finding = Finding(
+        vuln_id_from_tool=vuln_id_from_tool,
         service=service,
-        title=title,
+        title=vulnerability['summary'],
         cwe=cwe,
-        cve=cve,
         cvssv3=cvssv3,
         severity=severity,
         description=vulnerability['description'],
@@ -101,6 +94,15 @@ def get_item(vulnerability, service, test):
         dynamic_finding=False,
         unique_id_from_tool=unique_id_from_tool
     )
+
+    # Add vulnerability ids
+    vulnerability_ids = list()
+    if 'cve' in cves[0]:
+        vulnerability_ids.append(cves[0]['cve'])
+    if 'issue_id' in vulnerability:
+        vulnerability_ids.append(vulnerability['issue_id'])
+    if vulnerability_ids:
+        finding.unsaved_vulnerability_ids = vulnerability_ids
 
     return finding
 
@@ -122,42 +124,42 @@ def decode_cwe_number(value):
 
 
 def decode_impact_path(path):
-    impactPath = ImpactPath("", "", "")
+    impact_path = ImpactPath("", "", "")
 
     match = re.match(r".*\/(.*)$", str(path), re.IGNORECASE)
     if match is None:
-        return impactPath
+        return impact_path
     fullname = match[1]
 
     match = re.match(r".*sha256__(.*).tar", path, re.IGNORECASE)
     if match:
-        impactPath.sha = (match[1][:64]) if len(match[1]) > 64 else match[1]
+        impact_path.sha = (match[1][:64]) if len(match[1]) > 64 else match[1]
 
     if fullname.__contains__(".jar"):
         match = re.match(r"(.*)-", fullname, re.IGNORECASE)
         if match:
-            impactPath.name = match[1]
+            impact_path.name = match[1]
         match = re.match(r".*-(.*).jar", fullname, re.IGNORECASE)
         if match:
-            impactPath.version = match[1]
+            impact_path.version = match[1]
     elif fullname.__contains__(":"):
         match = re.match(r"(.*):", fullname, re.IGNORECASE)
         if match:
-            impactPath.name = match[1]
+            impact_path.name = match[1]
         match = re.match(r".*:(.*)", fullname, re.IGNORECASE)
         if match:
-            impactPath.version = match[1]
+            impact_path.version = match[1]
     elif fullname.__contains__(".js"):
         match = re.match(r"(.*)-", fullname, re.IGNORECASE)
         if match:
-            impactPath.name = match[1]
+            impact_path.name = match[1]
         match = re.match(r".*-(.*).js", fullname, re.IGNORECASE)
         if match:
-            impactPath.version = match[1]
+            impact_path.version = match[1]
     else:
-        impactPath.name = fullname
+        impact_path.name = fullname
 
-    return impactPath
+    return impact_path
 
 
 class ImpactPath:
