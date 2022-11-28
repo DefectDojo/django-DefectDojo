@@ -1,6 +1,5 @@
 import json
 import re
-import hashlib
 
 from cvss import CVSS3
 
