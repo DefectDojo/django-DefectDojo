@@ -816,6 +816,7 @@ INSTALLED_APPS = (
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
+    'dojo.middleware.APITrailingSlashMiddleware',
     'dojo.middleware.DojoSytemSettingsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
