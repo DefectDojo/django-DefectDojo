@@ -144,9 +144,9 @@ class APITrailingSlashMiddleware:
     def __call__(self, request):
         response = self.get_response(request)
         path = request.path_info.lstrip('/')
-        if 'api/v2/' in path and path[-1] == '/' and response.status_code == 400:
+        if request.method == 'POST' and 'api/v2/' in path and path[-1] != '/' and response.status_code == 400:
             response.data = {'message': 'Please add a trailing slash to your request.'}
-            # you need to change private attribute `_is_render` 
+            # you need to change private attribute `_is_render`
             # to call render second time
             response._is_rendered = False
             response.render()
