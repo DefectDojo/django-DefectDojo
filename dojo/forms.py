@@ -38,7 +38,8 @@ from django.urls import reverse
 from tagulous.forms import TagField
 import logging
 from crum import get_current_user
-from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled
+from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled, \
+    get_password_requirements_string
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
@@ -412,6 +413,7 @@ class ImportScanForm(forms.Form):
     service = forms.CharField(max_length=200, required=False,
         help_text="A service is a self-contained piece of functionality within a Product. "
                   "This is an optional field which is used in deduplication and closing of old findings when set.")
+    source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
@@ -501,9 +503,11 @@ class ReImportScanForm(forms.Form):
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
     api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
     service = forms.CharField(max_length=200, required=False, help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
+    source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")
 
     if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
+        create_finding_groups_for_all_findings = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
 
     def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
@@ -1894,18 +1898,20 @@ class ChangePasswordForm(forms.Form):
     current_password = forms.CharField(widget=forms.PasswordInput,
         required=True)
     new_password = forms.CharField(widget=forms.PasswordInput,
-        required=True, validators=[validate_password],
-        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
-                   and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?).')  # noqa W605
+        required=True,
+        validators=[validate_password],
+        help_text='')
     confirm_password = forms.CharField(widget=forms.PasswordInput,
-        required=True, validators=[validate_password],
-        help_text='Password must match the new password entered above, following the same password rules.')
+        required=True,
+        validators=[validate_password],
+        help_text='Password must match the new password entered above.')
 
     def __init__(self, *args, **kwargs):
         self.user = None
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
         super(ChangePasswordForm, self).__init__(*args, **kwargs)
+        self.fields['new_password'].help_text = get_password_requirements_string()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1926,9 +1932,9 @@ class ChangePasswordForm(forms.Form):
 
 class AddDojoUserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput,
-        required=False, validators=[validate_password],
-        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
-                   and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?). Leave blank to set an unusable password for this user.')  # noqa W605
+        required=False,
+        validators=[validate_password],
+        help_text='')
 
     class Meta:
         model = Dojo_User
@@ -1939,6 +1945,7 @@ class AddDojoUserForm(forms.ModelForm):
         current_user = get_current_user()
         if not current_user.is_superuser:
             self.fields['is_superuser'].disabled = True
+        self.fields['password'].help_text = get_password_requirements_string()
 
 
 class EditDojoUserForm(forms.ModelForm):
@@ -2546,7 +2553,7 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ['product', 'engagement']
-        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'custom_fields', 'jira_labels', 'add_vulnerability_id_to_jira_label', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
+        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'custom_fields', 'jira_labels', 'default_assignee', 'add_vulnerability_id_to_jira_label', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
 
     def __init__(self, *args, **kwargs):
         from dojo.jira_link import helper as jira_helper
@@ -2581,6 +2588,7 @@ class JIRAProjectForm(forms.ModelForm):
                 self.fields['issue_template_dir'].disabled = False
                 self.fields['component'].disabled = False
                 self.fields['custom_fields'].disabled = False
+                self.fields['default_assignee'].disabled = False
                 self.fields['jira_labels'].disabled = False
                 self.fields['add_vulnerability_id_to_jira_label'].disabled = False
                 self.fields['push_all_issues'].disabled = False
@@ -2603,6 +2611,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.initial['issue_template_dir'] = jira_project_product.issue_template_dir
                     self.initial['component'] = jira_project_product.component
                     self.initial['custom_fields'] = jira_project_product.custom_fields
+                    self.initial['default_assignee'] = jira_project_product.default_assignee
                     self.initial['jira_labels'] = jira_project_product.jira_labels
                     self.initial['add_vulnerability_id_to_jira_label'] = jira_project_product.add_vulnerability_id_to_jira_label
                     self.initial['push_all_issues'] = jira_project_product.push_all_issues
@@ -2616,6 +2625,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.fields['issue_template_dir'].disabled = True
                     self.fields['component'].disabled = True
                     self.fields['custom_fields'].disabled = True
+                    self.fields['default_assignee'].disabled = True
                     self.fields['jira_labels'].disabled = True
                     self.fields['add_vulnerability_id_to_jira_label'].disabled = True
                     self.fields['push_all_issues'].disabled = True

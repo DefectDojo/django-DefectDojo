@@ -518,9 +518,10 @@
     <div class="panel-heading">
       <h3 class="panel-title"><span class="fa fa-language" aria-hidden="true"></span>{% trans "Languages" %} ({{ languages.count }})</h3>
     </div>
-    <div class="panel-body">
+    <div class="panel-body" style="text-align: center;">
+      <div style="display: inline-block; padding: 0px 15px 0px 15px; vertical-align: top;">
         <div class="chart" id="donut-lang"></div>
-        <div style="padding-top: 10px;">
+        <div style="padding: 10px 0px 10px 0px;">
             {%  if langSummary.files__sum > 0 %}
             <strong>{{ langSummary.files__sum|intcomma }}</strong> {% trans "files" %} {%  if langSummary.code__sum %} {% trans "and" %} {%endif%}
             {% endif %}
@@ -528,6 +529,10 @@
             <strong>{{ langSummary.code__sum|intcomma }}</strong> {% trans "lines of code" %}
             {% endif %}
         </div>
+      </div>
+      <div style="display: inline-block; padding: 0px 15px 0px 15px; white-space: nowrap; overflow-x: scroll; text-align: left;">
+        <div id="donut-lang-container"></div>
+      </div>
     </div>
   </div>
 {% endif %}

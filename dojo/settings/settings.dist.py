@@ -176,11 +176,13 @@ env = environ.Env(
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
     # SLA Notifications via alerts and JIRA comments
-    # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature
+    # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature.
+    # If desired you can enable to only notify for Findings that are linked to JIRA issues.
+    # All three flags are moved to system_settings, will be removed from settings file
     DD_SLA_NOTIFY_ACTIVE=(bool, False),
     DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, False),
-    # finetuning settings for when enabled
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
+    # finetuning settings for when enabled
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
     # Use business day's to calculate SLA's and age instead of calendar days
@@ -557,6 +559,7 @@ DOCUMENTATION_URL = env('DD_DOCUMENTATION_URL')
 # If you import thousands of Active findings through your pipeline everyday,
 # and make the choice of enabling SLA notifications for non-verified findings,
 # be mindful of performance.
+# 'SLA_NOTIFY_ACTIVE', 'SLA_NOTIFY_ACTIVE_VERIFIED_ONLY' and 'SLA_NOTIFY_WITH_JIRA_ONLY' are moved to system settings, will be removed here
 SLA_NOTIFY_ACTIVE = env('DD_SLA_NOTIFY_ACTIVE')  # this will include 'verified' findings as well as non-verified.
 SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env('DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY')
 SLA_NOTIFY_WITH_JIRA_ONLY = env('DD_SLA_NOTIFY_WITH_JIRA_ONLY')  # Based on the 2 above, but only with a JIRA link
@@ -586,13 +589,13 @@ LOGIN_EXEMPT_URLS = (
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 9,
-        }
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'dojo.user.validators.MinLengthValidator'
+    },
+    {
+        'NAME': 'dojo.user.validators.MaxLengthValidator'
     },
     {
         'NAME': 'dojo.user.validators.NumberValidator'

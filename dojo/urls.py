@@ -65,6 +65,10 @@ logger = logging.getLogger(__name__)
 
 admin.autodiscover()
 
+# custom handlers
+handler500 = 'dojo.views.custom_error_view'
+handler400 = 'dojo.views.custom_bad_request_view'
+
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
 v2_api.register(r'technologies', AppAnalysisViewSet)

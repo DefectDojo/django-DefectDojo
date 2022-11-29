@@ -1480,24 +1480,26 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class ImportScanSerializer(serializers.Serializer):
-    scan_date = serializers.DateField(required=False)
+    scan_date = serializers.DateField(required=False, help_text="Scan completion date will be used on all findings.")
 
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
-        default='Info')
-    active = serializers.BooleanField(default=True)
-    verified = serializers.BooleanField(default=True)
+        default='Info', help_text='Minimum severity level to be imported')
+    active = serializers.BooleanField(default=True, help_text="Select if these findings are currently active.")
+    verified = serializers.BooleanField(default=True, help_text="Select if these findings have been verified.")
     scan_type = serializers.ChoiceField(
         choices=get_choices_sorted())
     # TODO why do we allow only existing endpoints?
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                          required=False,
-                                                         default=None)
+                                                         default=None,
+                                                         help_text="The IP address, host name or full URL. It must be valid")
     file = serializers.FileField(allow_empty_file=True, required=False)
 
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
+    source_code_management_uri = serializers.URLField(max_length=600, required=False, help_text="Resource link to source code")
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), required=False)
     test_title = serializers.CharField(required=False)
@@ -1507,16 +1509,16 @@ class ImportScanSerializer(serializers.Serializer):
         allow_null=True,
         default=None,
         queryset=User.objects.all())
-    tags = TagListSerializerField(required=False)
+    tags = TagListSerializerField(required=False, help_text="Add tags that help describe this scan.")
     close_old_findings = serializers.BooleanField(required=False, default=False,
         help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
                   "If service has been set, only the findings for this service will be closed.")
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
-    version = serializers.CharField(required=False)
-    build_id = serializers.CharField(required=False)
-    branch_tag = serializers.CharField(required=False)
-    commit_hash = serializers.CharField(required=False)
+    version = serializers.CharField(required=False, help_text="Version that was scanned.")
+    build_id = serializers.CharField(required=False, help_text="ID of the build that was scanned.")
+    branch_tag = serializers.CharField(required=False, help_text="Branch or Tag that was scanned.")
+    commit_hash = serializers.CharField(required=False, help_text="Commit that was scanned.")
     api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Product_API_Scan_Configuration.objects.all())
     service = serializers.CharField(required=False,
@@ -1525,7 +1527,7 @@ class ImportScanSerializer(serializers.Serializer):
                   "This affects the whole engagement/product depending on your deduplication scope.")
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
-    create_finding_groups_for_all_findings = serializers.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, default=True)
+    create_finding_groups_for_all_findings = serializers.BooleanField(help_text="If set to false, finding groups will only be created when there is more than one grouped finding", required=False, default=True)
 
     # extra fields populated in response
     # need to use the _id suffix as without the serializer framework gets confused
@@ -1552,6 +1554,7 @@ class ImportScanSerializer(serializers.Serializer):
         commit_hash = data.get('commit_hash', None)
         api_scan_configuration = data.get('api_scan_configuration', None)
         service = data.get('service', None)
+        source_code_management_uri = data.get('source_code_management_uri', None)
 
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
@@ -1565,7 +1568,8 @@ class ImportScanSerializer(serializers.Serializer):
         create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)
 
         _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement, do_not_reactivate = get_import_meta_data_from_dict(data)
-        engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement)
+        engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context,
+                                              deduplication_on_engagement, source_code_management_uri=source_code_management_uri)
 
         # have to make the scan_date_time timezone aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
         scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
@@ -1624,13 +1628,14 @@ class ImportScanSerializer(serializers.Serializer):
 
 
 class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
-    scan_date = serializers.DateField(required=False)
+    scan_date = serializers.DateField(required=False, help_text="Scan completion date will be used on all findings.")
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
-        default='Info')
-    active = serializers.BooleanField(default=True)
-    verified = serializers.BooleanField(default=True)
-    do_not_reactivate = serializers.BooleanField(default=False, required=False)
+        default='Info', help_text='Minimum severity level to be imported')
+    active = serializers.BooleanField(default=True, help_text="Select if these findings are currently active.")
+    verified = serializers.BooleanField(default=True, help_text="Select if these findings have been verified.")
+    help_do_not_reactivate = 'Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs.'
+    do_not_reactivate = serializers.BooleanField(default=False, required=False, help_text=help_do_not_reactivate)
     scan_type = serializers.ChoiceField(
         choices=get_choices_sorted(),
         required=True)
@@ -1641,6 +1646,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
+    source_code_management_uri = serializers.URLField(max_length=600, required=False, help_text="Resource link to source code")
     test = serializers.PrimaryKeyRelatedField(required=False,
         queryset=Test.objects.all())
     test_title = serializers.CharField(required=False)
@@ -1651,11 +1657,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     # Close the old findings if the parameter is not provided. This is to
     # mentain the old API behavior after reintroducing the close_old_findings parameter
     # also for ReImport.
-    close_old_findings = serializers.BooleanField(required=False, default=True)
-    version = serializers.CharField(required=False)
-    build_id = serializers.CharField(required=False)
-    branch_tag = serializers.CharField(required=False)
-    commit_hash = serializers.CharField(required=False)
+    close_old_findings = serializers.BooleanField(required=False, default=True,
+                                                  help_text="Select if old findings no longer present in the report get closed as mitigated when importing.")
+    version = serializers.CharField(required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")
+    build_id = serializers.CharField(required=False, help_text="ID of the build that was scanned.")
+    branch_tag = serializers.CharField(required=False, help_text="Branch or Tag that was scanned.")
+    commit_hash = serializers.CharField(required=False, help_text="Commit that was scanned.")
     api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Product_API_Scan_Configuration.objects.all())
     service = serializers.CharField(required=False,
@@ -1667,10 +1674,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         allow_null=True,
         default=None,
         queryset=User.objects.all())
-    tags = TagListSerializerField(required=False)
+    tags = TagListSerializerField(required=False, help_text="Modify existing tags that help describe this scan.")
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
-    create_finding_groups_for_all_findings = serializers.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, default=True)
+    create_finding_groups_for_all_findings = serializers.BooleanField(help_text="If set to false, finding groups will only be created when there is more than one grouped finding", required=False, default=True)
 
     # extra fields populated in response
     # need to use the _id suffix as without the serializer framework gets confused
@@ -1704,6 +1711,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         environment = Development_Environment.objects.get(name=environment_name)
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
+        source_code_management_uri = data.get('source_code_management_uri', None)
 
         group_by = data.get('group_by', None)
         create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)
@@ -1730,14 +1738,16 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings,
                                                 group_by=group_by, api_scan_configuration=api_scan_configuration,
-                                                service=service, do_not_reactivate=do_not_reactivate)
+                                                service=service, do_not_reactivate=do_not_reactivate,
+                                                create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
 
                 if test_import:
                     statistics_delta = test_import.statistics
             elif auto_create_context:
                 # perform Import to create test
                 logger.debug('reimport for non-existing test, using import to create new test')
-                engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement)
+                engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context,
+                                                      deduplication_on_engagement, source_code_management_uri=source_code_management_uri)
                 importer = Importer()
                 test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, lead, environment,
                                                                                                 active=active, verified=verified, tags=tags,

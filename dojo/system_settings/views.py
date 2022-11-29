@@ -57,6 +57,11 @@ def system_settings(request):
                     messages.WARNING,
                     'Settings cannot be saved: Default group and Default group role must either both be set or both be empty.',
                     extra_tags='alert-warning')
+            elif form.cleaned_data['minimum_password_length'] >= form.cleaned_data['maximum_password_length']:
+                messages.add_message(request,
+                    messages.WARNING,
+                    'Settings cannot be saved: Minimum required password length must be less than maximum required password length.',
+                    extra_tags='alert-warning')
             else:
                 new_settings = form.save()
                 enable_disable_auditlog(enable=new_settings.enable_auditlog)
