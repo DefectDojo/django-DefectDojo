@@ -1,7 +1,7 @@
 import json
 
 from cvss.cvss3 import CVSS3
-from dojo.models import Finding
+from dojo.models import Finding, Endpoint
 
 
 class SnykParser(object):
@@ -54,7 +54,6 @@ class SnykParser(object):
                 unique_key = node['title'] + str(node['packageName'] + str(
                     node['version']) + str(node['from']) + str(node['id']))
                 items[unique_key] = item
-
         return list(items.values())
 
     def get_item(self, vulnerability, test, target_file=None, upgrades=None):

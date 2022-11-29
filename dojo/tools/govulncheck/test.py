@@ -24,34 +24,42 @@ def getVulns(data):
         descrip_vuln = vuln['OSV']
         title = descrip_vuln['id']
         date = descrip_vuln['published']
-        cve = descrip_vuln['aliases']
+        date = date[0:10]
+        cve = descrip_vuln['aliases'][0]
         ignore.append(cve)
         description = descrip_vuln['details']
         url = descrip_vuln['affected'][0]['database_specific']['url']
         impact = descrip_vuln['affected'][0]['ecosystem_specific']['imports'][0]['symbols']
+        impact = '\n'.join(str(i) for i in impact)
         endpoints.append(location_of_use)
         for i in descrip_vuln['references']:
             references.append(i['url'])
 
         for vuln2 in data['Vulns']:
-            if vuln2['OSV']['aliases'] == cve:
+            if vuln2['OSV']['aliases'][0] == cve:
                 endpoints.append(getPos(vuln2))
 
-        finding = Finding(
-            title=title,
-            cve=cve,
-            references=references,
-            description=description,
-            url=url,
-            date=date,
-            impact=impact
-        )
-        findings.append(finding)
+
+        # finding = Finding(
+        #     title=title,
+        #     cve=cve,
+        #     references=references,
+        #     description=description,
+        #     url=url,
+        #     date=date,
+        #     impact=impact
+        # )
+        # findings.append(finding)
     return findings
 
 
 with open(SCAN_FILE) as f:
     scan_data = f.read()
+    pos_json = scan_data.find('{')
+    scan_data = scan_data[pos_json:]
     data = json.loads(scan_data)
     print(getVulns(data))
+
+
+
 
