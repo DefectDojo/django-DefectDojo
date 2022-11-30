@@ -1632,7 +1632,8 @@ def edit_api_scan_configuration(request, pid, pascid):
                   'dojo/edit_product_api_scan_configuration.html',
                   {
                       'form': form,
-                      'product_tab': product_tab
+                      'product_tab': product_tab,
+                      'api_scan_configuration_hints': get_api_scan_configuration_hints(),
                   })
 
 
