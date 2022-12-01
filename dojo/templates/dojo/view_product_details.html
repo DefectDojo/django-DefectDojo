@@ -244,7 +244,7 @@
             <div class="clearfix">
                 <h4 class="pull-left">{% trans "Members" %}</h4>
                 &nbsp;
-                <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                     <i class="fa fa-question-circle"></i></a>
                 {% if prod|has_object_permission:"Product_Manage_Members" %}
                 <div class="dropdown pull-right">
@@ -332,7 +332,7 @@
               <div class="clearfix">
                   <h4 class="pull-left">{% trans "Groups" %}</h4>
                   &nbsp;
-                  <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                  <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                       <i class="fa fa-question-circle"></i></a>
                   {% if prod|has_object_permission:"Product_Group_Add" %}
                   <div class="dropdown pull-right">
@@ -478,15 +478,50 @@
   </div>
 
 <!-- End metadata -->
+<!-- SLA -->
+    {% if system_settings.enable_finding_sla %}
+    <div class="panel panel-default panel-default-secondary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="fa fa-calendar-check-o fa-fw" aria-hidden="true"></span>&nbsp;Service Level Agreement</h3>
+    </div><div class="panel-body">
+        <p>{{ sla.name }}</p>
+        <p>{{ sla.description }}</p>
+      </div>
+    <div class="table-responsive">
+      <table class="table table-striped" >
+        <tbody>
+          <tr>
+            <td style="width: 160px;"><strong>Critical</strong></td>
+            <td>{{ sla.critical }} days to remediate</td>
+          </tr>
+          <tr>
+            <td style="width: 160px;"><strong>High</strong></td>
+            <td>{{ sla.high }} days to remediate</td>
+          </tr>
+          <tr>
+            <td style="width: 160px;"><strong>Medium</strong></td>
+            <td>{{ sla.medium }} days to remediate</td>
+          </tr>
+          <tr>
+            <td style="width: 160px;"><strong>Low</strong></td>
+            <td>{{ sla.low }} days to remediate</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+<!-- End SLA -->
 <!-- Lang -->
 {% if languages %}
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
       <h3 class="panel-title"><span class="fa fa-language" aria-hidden="true"></span>{% trans "Languages" %} ({{ languages.count }})</h3>
     </div>
-    <div class="panel-body">
+    <div class="panel-body" style="text-align: center;">
+      <div style="display: inline-block; padding: 0px 15px 0px 15px; vertical-align: top;">
         <div class="chart" id="donut-lang"></div>
-        <div style="padding-top: 10px;">
+        <div style="padding: 10px 0px 10px 0px;">
             {%  if langSummary.files__sum > 0 %}
             <strong>{{ langSummary.files__sum|intcomma }}</strong> {% trans "files" %} {%  if langSummary.code__sum %} {% trans "and" %} {%endif%}
             {% endif %}
@@ -494,6 +529,10 @@
             <strong>{{ langSummary.code__sum|intcomma }}</strong> {% trans "lines of code" %}
             {% endif %}
         </div>
+      </div>
+      <div style="display: inline-block; padding: 0px 15px 0px 15px; white-space: nowrap; overflow-x: scroll; text-align: left;">
+        <div id="donut-lang-container"></div>
+      </div>
     </div>
   </div>
 {% endif %}

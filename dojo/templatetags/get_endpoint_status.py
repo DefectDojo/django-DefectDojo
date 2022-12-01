@@ -1,5 +1,6 @@
 from django import template
 from dojo.models import Endpoint_Status
+from django.db.models import Q
 register = template.Library()
 
 
@@ -10,30 +11,38 @@ def has_endpoints(finding):
 
 @register.filter(name='get_vulnerable_endpoints')
 def get_vulnerable_endpoints(finding):
-    # TODO - remove `.all()`, use 'select_related' endpoints and change for-loop to select -> to decrease number of queries
-    status_list = finding.endpoint_status.all().filter(mitigated=False)
-    return [status.endpoint for status in status_list]
+    return finding.endpoints.filter(
+        status_endpoint__mitigated=False,
+        status_endpoint__false_positive=False,
+        status_endpoint__out_of_scope=False,
+        status_endpoint__risk_accepted=False)
 
 
 @register.filter(name='get_mitigated_endpoints')
 def get_mitigated_endpoints(finding):
-    # TODO - remove `.all()`, use 'select_related' endpoints and change for-loop to select -> to decrease number of queries
-    status_list = finding.endpoint_status.all().filter(mitigated=True)
-    return [status.endpoint for status in status_list]
+    return finding.endpoints.filter(
+        Q(status_endpoint__mitigated=True) |
+        Q(status_endpoint__false_positive=True) |
+        Q(status_endpoint__out_of_scope=True) |
+        Q(status_endpoint__risk_accepted=True))
 
 
 @register.filter
 def endpoint_display_status(endpoint, finding):
     status = Endpoint_Status.objects.get(endpoint=endpoint, finding=finding)
+    statuses = []
     if status.false_positive:
-        return "False Positive"
+        statuses.append("False Positive")
     if status.risk_accepted:
-        return "Risk Accepted"
+        statuses.append("Risk Accepted")
     if status.out_of_scope:
-        return "Out of Scope"
+        statuses.append("Out of Scope")
     if status.mitigated:
-        return "Mitigated"
-    return "Active"
+        statuses.append("Mitigated")
+    if statuses:
+        return ', '.join(statuses)
+    else:
+        return "Active"
 
 
 @register.filter

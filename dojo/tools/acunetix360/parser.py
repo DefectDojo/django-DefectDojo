@@ -1,6 +1,7 @@
 import json
 import html2text
 
+from cvss import parser as cvss_parser
 from dateutil import parser
 from dojo.models import Finding, Endpoint
 
@@ -38,6 +39,9 @@ class Acunetix360Parser(object):
                 sev = 'Info'
             mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
             references = text_maker.handle(item.get("RemedyReferences", ""))
+            if "LookupId" in item:
+                lookupId = item["LookupId"]
+                references = f"https://online.acunetix360.com/issues/detail/{lookupId}\n" + references
             url = item["Url"]
             impact = text_maker.handle(item.get("Impact", ""))
             dupe_key = title
@@ -60,7 +64,9 @@ class Acunetix360Parser(object):
                               static_finding=True)
 
             if (item["Classification"] is not None) and (item["Classification"]["Cvss"] is not None) and (item["Classification"]["Cvss"]["Vector"] is not None):
-                finding.cvssv3 = item["Classification"]["Cvss"]["Vector"]
+                cvss_objects = cvss_parser.parse_cvss_from_text(item["Classification"]["Cvss"]["Vector"])
+                if len(cvss_objects) > 0:
+                    finding.cvssv3 = cvss_objects[0].clean_vector()
 
             if item["State"] is not None:
                 state = [x.strip() for x in item["State"].split(',')]

@@ -72,6 +72,11 @@ class VeracodeParser(object):
         for component in root.findall('x:software_composition_analysis/x:vulnerable_components'
                                              '/x:component', namespaces=XML_NAMESPACE):
             _library = component.attrib['library']
+            if 'library_id' in component.attrib and component.attrib['library_id'].startswith("maven:"):
+                # Set the library name from the maven component if it's available to align with CycloneDX + Veracode SCA
+                split_library_id = component.attrib['library_id'].split(":")
+                if len(split_library_id) > 2:
+                    _library = split_library_id[2]
             _vendor = component.attrib['vendor']
             _version = component.attrib['version']
 
@@ -236,5 +241,18 @@ class VeracodeParser(object):
         finding.description = _description
 
         finding.unsaved_tags = ["sca"]
+
+        _is_mitigated = False
+        _mitigated_date = None
+        if ('mitigation' in xml_node.attrib and
+                xml_node.attrib["mitigation"].lower() == "true"):
+            # This happens if any mitigation (including 'Potential false positive')
+            # was accepted in VC.
+            for mitigation in xml_node.findall("x:mitigations/x:mitigation", namespaces=XML_NAMESPACE):
+                _is_mitigated = True
+                _mitigated_date = datetime.strptime(mitigation.attrib['date'], '%Y-%m-%d %H:%M:%S %Z')
+        finding.is_mitigated = _is_mitigated
+        finding.mitigated = _mitigated_date
+        finding.active = not _is_mitigated
 
         return finding

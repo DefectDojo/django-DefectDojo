@@ -21,6 +21,14 @@ from dojo.authorization.roles_permissions import Permissions
 logger = logging.getLogger(__name__)
 
 
+def custom_error_view(request, exception=None):
+    return render(request, "500.html", {})
+
+
+def custom_bad_request_view(request, exception=None):
+    return render(request, "400.html", {})
+
+
 def action_history(request, cid, oid):
     try:
         ct = ContentType.objects.get_for_id(cid)

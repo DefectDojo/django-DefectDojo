@@ -60,6 +60,9 @@ def get_authorized_users(permission, user=None):
     if user is None:
         return Dojo_User.objects.none()
 
+    if user.is_anonymous:
+        return Dojo_User.objects.none()
+
     users = Dojo_User.objects.all().order_by('first_name', 'last_name', 'username')
 
     if user.is_superuser or user_has_global_permission(user, permission):

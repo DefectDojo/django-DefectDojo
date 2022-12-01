@@ -92,8 +92,7 @@ to be created. Closely follow the steps below to guarantee success.
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['<email@example.com>']
     {{< /highlight >}}
 
-OKTA
-----
+## OKTA
 
 In a similar fashion to that of Google, using OKTA as a OAuth2 provider
 carries the same attributes and a similar procedure. Follow along below.
@@ -415,6 +414,26 @@ Up to relase 1.15.0 the SAML integration was based on [https://github.com/fangli
 * DD_SAML2_NEW_USER_PROFILE: not possible any more - default profile is used, see User Permissions
 * DD_SAML2_ATTRIBUTES_MAP: Syntax has changed
 * DD_SAML2_CREATE_USER: Default value changed to False, to avoid security breaches
+
+## RemoteUser
+
+This implementation is suitable if the DefectDojo instance is placed behind HTTP Authentication Proxy.
+Dojo expects that the proxy will perform authentication and pass HTTP requests to the Dojo instance with filled HTTP headers.
+The proxy should check if an attacker is not trying to add a malicious HTTP header and bypass authentication.
+
+Values which need to be set:
+
+* `DD_AUTH_REMOTEUSER_ENABLED` - Needs to be set to `True`
+* `DD_AUTH_REMOTEUSER_USERNAME_HEADER` - Name of the header which contains the username
+* `DD_AUTH_REMOTEUSER_EMAIL_HEADER`(optional) - Name of the header which contains the email
+* `DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER`(optional) - Name of the header which contains the first name
+* `DD_AUTH_REMOTEUSER_LASTNAME_HEADER`(optional) - Name of the header which contains the last name
+* `DD_AUTH_REMOTEUSER_GROUPS_HEADER`(optional) - Name of the header which contains the comma-separated list of groups; user will be assigned to these groups (missing groups will be created)
+* `DD_AUTH_REMOTEUSER_GROUPS_CLEANUP`(optional) - Same as [#automatic-import-of-user-groups](AzureAD implementation)
+* `DD_AUTH_REMOTEUSER_TRUSTED_PROXY` - Comma separated list of proxies; Simple IP and CIDR formats are supported
+* `DD_AUTH_REMOTEUSER_LOGIN_ONLY`(optional) - Check [Django documentation](https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only)
+
+*WARNING:* There is possible spoofing of headers (for all `DD_AUTH_REMOTEUSER_xxx_HEADER` values). Read Warning in [Django documentation](https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration)
 
 ## User Permissions
 

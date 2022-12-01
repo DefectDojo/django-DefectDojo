@@ -71,6 +71,7 @@ class TestSnykParser(DojoTestCase):
         self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L", finding.cvssv3)
         self.assertEqual(
             "## Remediation\nUpgrade `org.apache.santuario:xmlsec` to version 2.1.4 or higher.\n\n" +
+            "Upgrade Location: pom.xml\n" +
             "Upgrade from org.apache.santuario:xmlsec@2.1.1 to org.apache.santuario:xmlsec@2.1.4 to fix this issue, as well as updating the following:\n - org.apache.santuario:xmlsec@2.1.1",
             finding.mitigation,
         )

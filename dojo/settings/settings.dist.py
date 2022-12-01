@@ -4,8 +4,10 @@ from datetime import timedelta
 from celery.schedules import crontab
 from dojo import __version__
 import environ
+from netaddr import IPNetwork, IPSet
+import json
 
-# See https://defectdojo.github.io/django-DefectDojo/getting_started/configuration/ for options
+# See https://documentation.defectdojo.com/getting_started/configuration/ for options
 # how to tune the configuration to your needs.
 
 root = environ.Path(__file__) - 3  # Three folders back
@@ -59,6 +61,7 @@ env = environ.Env(
     DD_CELERY_BROKER_PORT=(int, -1),
     DD_CELERY_BROKER_PATH=(str, '/dojo.celerydb.sqlite'),
     DD_CELERY_BROKER_PARAMS=(str, ''),
+    DD_CELERY_BROKER_TRANSPORT_OPTIONS=(str, ''),
     DD_CELERY_TASK_IGNORE_RESULT=(bool, True),
     DD_CELERY_RESULT_BACKEND=(str, 'django-db'),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
@@ -153,17 +156,33 @@ env = environ.Env(
         'Lastname': 'last_name'
     }),
     DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
+    # Authentication via HTTP Proxy which put username to HTTP Header REMOTE_USER
+    DD_AUTH_REMOTEUSER_ENABLED=(bool, False),
+    # Names of headers which will be used for processing user data.
+    # WARNING: Possible spoofing of headers. Read Warning in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
+    DD_AUTH_REMOTEUSER_USERNAME_HEADER=(str, 'REMOTE_USER'),
+    DD_AUTH_REMOTEUSER_EMAIL_HEADER=(str, ''),
+    DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER=(str, ''),
+    DD_AUTH_REMOTEUSER_LASTNAME_HEADER=(str, ''),
+    DD_AUTH_REMOTEUSER_GROUPS_HEADER=(str, ''),
+    DD_AUTH_REMOTEUSER_GROUPS_CLEANUP=(bool, True),
+    # Comma separated list of IP ranges with trusted proxies
+    DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.0/32']),
+    # REMOTE_USER will be processed only on login page. Check https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only
+    DD_AUTH_REMOTEUSER_LOGIN_ONLY=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
-    DD_DOCUMENTATION_URL=(str, 'https://defectdojo.github.io/django-DefectDojo'),
+    DD_DOCUMENTATION_URL=(str, 'https://documentation.defectdojo.com'),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
     # SLA Notifications via alerts and JIRA comments
-    # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature
+    # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature.
+    # If desired you can enable to only notify for Findings that are linked to JIRA issues.
+    # All three flags are moved to system_settings, will be removed from settings file
     DD_SLA_NOTIFY_ACTIVE=(bool, False),
     DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, False),
-    # finetuning settings for when enabled
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
+    # finetuning settings for when enabled
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
     # Use business day's to calculate SLA's and age instead of calendar days
@@ -229,6 +248,9 @@ env = environ.Env(
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
                                  '.html', '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
+    # When disabled, existing user tokens will not be removed but it will not be
+    # possible to create new and it will not be possible to use exising.
+    DD_API_TOKENS_ENABLED=(bool, True),
 )
 
 
@@ -424,6 +446,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.keycloak.KeycloakOAuth2',
     'social_core.backends.github.GithubOAuth2',
     'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
+    'dojo.remote_user.RemoteUserBackend',
     'django.contrib.auth.backends.RemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -536,6 +559,7 @@ DOCUMENTATION_URL = env('DD_DOCUMENTATION_URL')
 # If you import thousands of Active findings through your pipeline everyday,
 # and make the choice of enabling SLA notifications for non-verified findings,
 # be mindful of performance.
+# 'SLA_NOTIFY_ACTIVE', 'SLA_NOTIFY_ACTIVE_VERIFIED_ONLY' and 'SLA_NOTIFY_WITH_JIRA_ONLY' are moved to system settings, will be removed here
 SLA_NOTIFY_ACTIVE = env('DD_SLA_NOTIFY_ACTIVE')  # this will include 'verified' findings as well as non-verified.
 SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env('DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY')
 SLA_NOTIFY_WITH_JIRA_ONLY = env('DD_SLA_NOTIFY_WITH_JIRA_ONLY')  # Based on the 2 above, but only with a JIRA link
@@ -565,13 +589,13 @@ LOGIN_EXEMPT_URLS = (
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 9,
-        }
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'dojo.user.validators.MinLengthValidator'
+    },
+    {
+        'NAME': 'dojo.user.validators.MaxLengthValidator'
     },
     {
         'NAME': 'dojo.user.validators.NumberValidator'
@@ -671,11 +695,12 @@ DJANGO_ADMIN_ENABLED = env('DD_DJANGO_ADMIN_ENABLED')
 # API V2
 # ------------------------------------------------------------------------------
 
+API_TOKENS_ENABLED = env('DD_API_TOKENS_ENABLED')
+
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -689,18 +714,31 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'dojo.api_v2.exception_handler.custom_exception_handler'
 }
 
+if API_TOKENS_ENABLED:
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.TokenAuthentication',)
+
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        'api_key': {
+        'basicAuth': {
+            'type': 'basic'
+        },
+        'cookieAuth': {
             'type': 'apiKey',
-            'in': 'header',
-            'name': 'Authorization'
-        }
+            'in': 'cookie',
+            'name': 'sessionid'
+        },
     },
     'DOC_EXPANSION': "none",
     'JSON_EDITOR': True,
     'SHOW_REQUEST_HEADERS': True,
 }
+
+if API_TOKENS_ENABLED:
+    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['tokenAuth'] = {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'Authorization'
+    }
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Defect Dojo API v2',
@@ -968,6 +1006,42 @@ if SAML2_ENABLED:
     }
 
 # ------------------------------------------------------------------------------
+# REMOTE_USER
+# ------------------------------------------------------------------------------
+
+AUTH_REMOTEUSER_ENABLED = env('DD_AUTH_REMOTEUSER_ENABLED')
+if AUTH_REMOTEUSER_ENABLED:
+    AUTH_REMOTEUSER_USERNAME_HEADER = env('DD_AUTH_REMOTEUSER_USERNAME_HEADER')
+    AUTH_REMOTEUSER_EMAIL_HEADER = env('DD_AUTH_REMOTEUSER_EMAIL_HEADER')
+    AUTH_REMOTEUSER_FIRSTNAME_HEADER = env('DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
+    AUTH_REMOTEUSER_LASTNAME_HEADER = env('DD_AUTH_REMOTEUSER_LASTNAME_HEADER')
+    AUTH_REMOTEUSER_GROUPS_HEADER = env('DD_AUTH_REMOTEUSER_GROUPS_HEADER')
+    AUTH_REMOTEUSER_GROUPS_CLEANUP = env('DD_AUTH_REMOTEUSER_GROUPS_CLEANUP')
+
+    AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
+    for ip_range in env('DD_AUTH_REMOTEUSER_TRUSTED_PROXY'):
+        AUTH_REMOTEUSER_TRUSTED_PROXY.add(IPNetwork(ip_range))
+
+    if env('DD_AUTH_REMOTEUSER_LOGIN_ONLY'):
+        RemoteUserMiddleware = 'dojo.remote_user.PersistentRemoteUserMiddleware'
+    else:
+        RemoteUserMiddleware = 'dojo.remote_user.RemoteUserMiddleware'
+    # we need to add middleware just behindAuthenticationMiddleware as described in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
+    for i in range(len(MIDDLEWARE)):
+        if MIDDLEWARE[i] == 'django.contrib.auth.middleware.AuthenticationMiddleware':
+            MIDDLEWARE.insert(i + 1, RemoteUserMiddleware)
+            break
+
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = \
+        ('dojo.remote_user.RemoteUserAuthentication',) + \
+        REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
+
+    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['remoteUserAuth'] = {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': AUTH_REMOTEUSER_USERNAME_HEADER[5:].replace('_', '-')
+    }
+# ------------------------------------------------------------------------------
 # CELERY
 # ------------------------------------------------------------------------------
 
@@ -991,6 +1065,9 @@ CELERY_BEAT_SCHEDULE_FILENAME = env('DD_CELERY_BEAT_SCHEDULE_FILENAME')
 CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 CELERY_TASK_SERIALIZER = env('DD_CELERY_TASK_SERIALIZER')
 CELERY_PASS_MODEL_BY_ID = env('DD_CELERY_PASS_MODEL_BY_ID')
+
+if len(env('DD_CELERY_BROKER_TRANSPORT_OPTIONS')) > 0:
+    CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env('DD_CELERY_BROKER_TRANSPORT_OPTIONS'))
 
 CELERY_IMPORTS = ('dojo.tools.tool_issue_updater', )
 
@@ -1067,6 +1144,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
+    'AnchoreCTL Vuln Report': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
+    'AnchoreCTL Policies Report': ['title', 'severity', 'component_name', 'file_path'],
+    'Anchore Enterprise Policy Check': ['title', 'severity', 'component_name', 'file_path'],
     'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Aqua Scan': ['severity', 'vulnerability_ids', 'component_name', 'component_version'],
     'Bandit Scan': ['file_path', 'line', 'vuln_id_from_tool'],
@@ -1098,6 +1178,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Symfony Security Check': ['title', 'vulnerability_ids'],
     'DSOP Scan': ['vulnerability_ids'],
     'Acunetix Scan': ['title', 'description'],
+    'Acunetix360 Scan': ['title', 'description'],
     'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
     'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
@@ -1108,21 +1189,31 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
-    'Github Vulnerability Scan': ['unique_id_from_tool'],
+    'Github Vulnerability Scan': ['title', 'severity', 'component_name', 'vulnerability_ids'],
     'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
     'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
     'pip-audit Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'Edgescan Scan': ['unique_id_from_tool'],
+    'Bugcrowd API Import': ['unique_id_from_tool'],
     'Rubocop Scan': ['vuln_id_from_tool', 'file_path', 'line'],
     'JFrog Xray Scan': ['title', 'description', 'component_name', 'component_version'],
     'CycloneDX Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'SSLyze Scan (JSON)': ['title', 'description'],
     'Harbor Vulnerability Scan': ['title'],
-    'Rusty Hog Scan': ['title', 'description'],
+    'Rusty Hog Scan': ['file_path', 'payload'],
     'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'Hydra Scan': ['title', 'description'],
     'DrHeader JSON Importer': ['title', 'description'],
     'PWN SAST': ['title', 'description'],
+    'Whispers': ['vuln_id_from_tool', 'file_path', 'line'],
+    'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
+    'BlackDuck API': ['unique_id_from_tool'],
+    'docker-bench-security Scan': ['unique_id_from_tool'],
+    'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version', 'severity'],
+    'Twistlock Image Scan': ['title', 'severity', 'component_name', 'component_version'],
+    'NeuVector (REST)': ['title', 'severity', 'component_name', 'component_version'],
+    'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
+    'Wpscan': ['title', 'description', 'severity'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1130,6 +1221,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
 # Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
 HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Engine Scan': True,
+    'AnchoreCTL Vuln Report': True,
+    'AnchoreCTL Policies Report': True,
+    'Anchore Enterprise Policy Check': True,
     'Anchore Grype': True,
     'AWS Prowler Scan': True,
     'Checkmarx Scan': False,
@@ -1147,6 +1241,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Qualys Scan': True,
     'DSOP Scan': True,
     'Acunetix Scan': True,
+    'Acunetix360 Scan': True,
     'Trivy Scan': True,
     'SpotBugs Scan': False,
     'Scout Suite Scan': True,
@@ -1157,12 +1252,17 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Semgrep JSON Report': True,
     'Generic Findings Import': True,
     'Edgescan Scan': True,
+    'Bugcrowd API Import': True,
+    'Veracode SourceClear Scan': True,
+    'Twistlock Image Scan': True,
+    'Wpscan': True,
+    'Rusty Hog Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'vulnerability_ids', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'vulnerability_ids', 'line', 'file_path', 'payload', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
 
 # Adding fields to the hash_code calculation regardless of the previous settings
 HASH_CODE_FIELDS_ALWAYS = ['service']
@@ -1197,6 +1297,9 @@ DEDUPE_ALGO_ENDPOINT_FIELDS = ['host', 'path']
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
+    'AnchoreCTL Vuln Report': DEDUPE_ALGO_HASH_CODE,
+    'AnchoreCTL Policies Report': DEDUPE_ALGO_HASH_CODE,
+    'Anchore Enterprise Policy Check': DEDUPE_ALGO_HASH_CODE,
     'Anchore Grype': DEDUPE_ALGO_HASH_CODE,
     'Aqua Scan': DEDUPE_ALGO_HASH_CODE,
     'AuditJS Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
@@ -1225,10 +1328,12 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
+    'Acunetix360 Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
     'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Veracode SourceClear Scan': DEDUPE_ALGO_HASH_CODE,
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1245,10 +1350,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Scout Suite Scan': DEDUPE_ALGO_HASH_CODE,
     'AWS Security Hub Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
-    'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Github Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
     'KICS Scan': DEDUPE_ALGO_HASH_CODE,
-    'SARIF': DEDUPE_ALGO_HASH_CODE,
+    'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
     'Semgrep JSON Report': DEDUPE_ALGO_HASH_CODE,
@@ -1259,6 +1364,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Gitleaks Scan': DEDUPE_ALGO_HASH_CODE,
     'pip-audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Edgescan Scan': DEDUPE_ALGO_HASH_CODE,
+    'Bugcrowd API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Rubocop Scan': DEDUPE_ALGO_HASH_CODE,
     'JFrog Xray Scan': DEDUPE_ALGO_HASH_CODE,
     'CycloneDX Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1269,6 +1375,14 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Hydra Scan': DEDUPE_ALGO_HASH_CODE,
     'DrHeader JSON Importer': DEDUPE_ALGO_HASH_CODE,
     'PWN SAST': DEDUPE_ALGO_HASH_CODE,
+    'Whispers': DEDUPE_ALGO_HASH_CODE,
+    'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
+    'BlackDuck API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'docker-bench-security Scan': DEDUPE_ALGO_HASH_CODE,
+    'Twistlock Image Scan': DEDUPE_ALGO_HASH_CODE,
+    'NeuVector (REST)': DEDUPE_ALGO_HASH_CODE,
+    'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
+    'Wpscan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')

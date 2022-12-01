@@ -25,7 +25,8 @@ from imagekit.processors import ResizeToFill
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 from dojo.filters import TemplateFindingFilter, SimilarFindingFilter, FindingFilter, AcceptedFindingFilter
-from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
+from dojo.forms import EditPlannedRemediationDateFindingForm, NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, \
+    PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings, CopyFindingForm
@@ -214,10 +215,9 @@ def prefetch_for_findings(findings, prefetch_type='all'):
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
-        prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
-        prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
-        prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
-        prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
+        prefetched_findings = prefetched_findings.prefetch_related('status_finding')
+        prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('status_finding__id', filter=Q(status_finding__mitigated=False)))
+        prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('status_finding__id', filter=Q(status_finding__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__members')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__members')
@@ -420,7 +420,7 @@ def close_finding(request, fid):
             now = timezone.now()
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = now
+            new_note.date = form.cleaned_data.get("mitigated") or now
             new_note.save()
             finding.notes.add(new_note)
 
@@ -430,24 +430,28 @@ def close_finding(request, fid):
                 'Note Saved.',
                 extra_tags='alert-success')
 
-            if len(missing_note_types) == 0:
+            if len(missing_note_types) <= 1:
                 finding.active = False
                 now = timezone.now()
-                finding.mitigated = now
-                finding.mitigated_by = request.user
+                finding.mitigated = form.cleaned_data.get("mitigated") or now
+                finding.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
                 finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
-                endpoint_status = finding.endpoint_status.all()
+                finding.false_p = form.cleaned_data.get("false_p", False)
+                finding.out_of_scope = form.cleaned_data.get("out_of_scope", False)
+                finding.duplicate = form.cleaned_data.get("duplicate", False)
+                endpoint_status = finding.status_finding.all()
                 for status in endpoint_status:
-                    status.mitigated_by = request.user
-                    status.mitigated_time = timezone.now()
+                    status.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
+                    status.mitigated_time = form.cleaned_data.get("mitigated") or now
                     status.mitigated = True
                     status.last_modified = timezone.now()
                     status.save()
 
                 # only push to JIRA if there is an issue, to prevent a new one from being created
                 if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
+                    jira_helper.add_comment(finding, new_note, force_push=True)
                     finding.save(push_to_jira=True)
                 else:
                     finding.save()
@@ -573,7 +577,7 @@ def reopen_finding(request, fid):
     finding.is_mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
-    endpoint_status = finding.endpoint_status.all()
+    endpoint_status = finding.status_finding.all()
     for status in endpoint_status:
         status.mitigated_by = None
         status.mitigated_time = None
@@ -740,7 +744,7 @@ def edit_finding(request, fid):
                            can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
 
         if finding.active:
-            if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+            if (form['active'].value() is False or form['false_p'].value() or form['out_of_scope'].value()) and form['duplicate'].value() is False:
                 note_type_activation = Note_Type.objects.filter(is_active=True).count()
                 closing_disabled = 0
                 if note_type_activation:
@@ -750,13 +754,17 @@ def edit_finding(request, fid):
                                                      code='inactive_without_mandatory_notes')
                     error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
                                                     code='false_p_without_mandatory_notes')
+                    error_out_of_scope = ValidationError('Can not set a finding as out of scope without adding all mandatory notes',
+                                                         code='out_of_scope_without_mandatory_notes')
                     if form['active'].value() is False:
                         form.add_error('active', error_inactive)
                     if form['false_p'].value():
                         form.add_error('false_p', error_false_p)
+                    if form['out_of_scope'].value():
+                        form.add_error('out_of_scope', error_out_of_scope)
                     messages.add_message(request,
                                          messages.ERROR,
-                                         'Can not set a finding as inactive or false positive without adding all mandatory notes',
+                                         'Can not set a finding as inactive, false positive or out of scope without adding all mandatory notes',
                                          extra_tags='alert-danger')
 
         if use_jira:
@@ -796,6 +804,19 @@ def edit_finding(request, fid):
             new_finding.last_reviewed_by = request.user
 
             new_finding.tags = form.cleaned_data['tags']
+
+            # If active is not checked and CAN_EDIT_MIIGATED_DATA, mitigate the finding and the associated endpoints status
+            if finding_helper.can_edit_mitigated_data(request.user):
+                if (form['active'].value() is False or form['false_p'].value() or form['out_of_scope'].value()) and form['duplicate'].value() is False:
+                    now = timezone.now()
+                    new_finding.is_mitigated = True
+                    endpoint_status = new_finding.endpoint_status.all()
+                    for status in endpoint_status:
+                        status.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
+                        status.mitigated_time = form.cleaned_data.get("mitigated") or now
+                        status.mitigated = True
+                        status.last_modified = timezone.now()
+                        status.save()
 
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
@@ -913,6 +934,38 @@ def edit_finding(request, fid):
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+def remediation_date(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    user = get_object_or_404(Dojo_User, id=request.user.id)
+
+    if request.method == 'POST':
+        form = EditPlannedRemediationDateFindingForm(request.POST)
+
+        if form.is_valid():
+            finding.planned_remediation_date = request.POST.get('planned_remediation_date', '')
+            finding.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Finding Planned Remediation Date saved.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(
+                reverse('view_finding', args=(finding.id,)))
+
+    else:
+        form = EditPlannedRemediationDateFindingForm(finding=finding)
+
+    product_tab = Product_Tab(finding.test.engagement.product, title="Planned Remediation Date", tab="findings")
+
+    return render(request, 'dojo/remediation_date.html', {
+        'finding': finding,
+        'product_tab': product_tab,
+        'user': user,
+        'form': form
+    })
+
+
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -951,7 +1004,7 @@ def risk_unaccept(request, fid):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+@user_is_authorized(Finding, Permissions.Finding_View, 'fid')
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -1886,6 +1939,11 @@ def finding_bulk_update_all(request, pid=None):
                     for prod in prods:
                         calculate_grade(prod)
 
+                if form.cleaned_data['planned_remediation_date']:
+                    for finding in finds:
+                        finding.planned_remediation_date = form.cleaned_data['planned_remediation_date']
+                        finding.save_no_options()
+
                 skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
                     for finding in finds:
@@ -2006,6 +2064,7 @@ def finding_bulk_update_all(request, pid=None):
                 success_count = 0
                 finding_groups = set([find.finding_group for find in finds if find.has_finding_group])
                 logger.debug('finding_groups: %s', finding_groups)
+                groups_pushed_to_jira = False
                 for group in finding_groups:
                     if form.cleaned_data.get('push_to_jira'):
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(group)
@@ -2022,6 +2081,7 @@ def finding_bulk_update_all(request, pid=None):
 
                 if success_count > 0:
                     add_success_message_to_response('%i finding groups pushed to JIRA successfully' % success_count)
+                    groups_pushed_to_jira = True
 
                 # refresh from db
                 finds = finds.all()
@@ -2042,7 +2102,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
                     # push_to_jira = jira_helper.is_push_to_jira(new_finding, form.cleaned_data.get('push_to_jira'))
-                    if jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira'):
+                    if not groups_pushed_to_jira and (jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira')):
 
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(finding)
                         if finding.has_jira_group_issue and not finding.has_jira_issue:

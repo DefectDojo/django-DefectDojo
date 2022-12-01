@@ -21,7 +21,8 @@ from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
-from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
+from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, SLA_Configuration, \
+    Test, Test_Import, Test_Type, Finding, \
     User, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
@@ -518,7 +519,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                                                     'finding_group_set',
                                                     'files',
                                                     'burprawrequestresponse_set',
-                                                    'endpoint_status',
+                                                    'status_finding',
                                                     'finding_meta',
                                                     'test__test_type',
                                                     'test__engagement',
@@ -533,6 +534,51 @@ class FindingViewSet(prefetch.PrefetchListMixin,
             return serializers.FindingCreateSerializer
         else:
             return serializers.FindingSerializer
+
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.FindingCloseSerializer,
+        responses={status.HTTP_200_OK: serializers.FindingCloseSerializer}
+    )
+    @swagger_auto_schema(
+        method='post',
+        request_body=serializers.FindingCloseSerializer,
+        responses={status.HTTP_200_OK: serializers.FindingCloseSerializer}
+    )
+    @action(detail=True, methods=["post"])
+    def close(self, request, pk=None):
+        finding = self.get_object()
+
+        if request.method == 'POST':
+            finding_close = serializers.FindingCloseSerializer(data=request.data)
+            if finding_close.is_valid():
+                finding.is_mitigated = finding_close.validated_data['is_mitigated']
+                if settings.EDITABLE_MITIGATED_DATA:
+                    finding.mitigated = finding_close.validated_data['mitigated'] or timezone.now()
+                else:
+                    finding.mitigated = timezone.now()
+                finding.mitigated_by = request.user
+                finding.active = False
+                finding.false_p = finding_close.validated_data.get('false_p', False)
+                finding.duplicate = finding_close.validated_data.get('duplicate', False)
+                finding.out_of_scope = finding_close.validated_data.get('out_of_scope', False)
+
+                endpoints_status = finding.endpoint_status.all()
+                for e_status in endpoints_status:
+                    e_status.mitigated_by = request.user
+                    if settings.EDITABLE_MITIGATED_DATA:
+                        e_status.mitigated_time = finding_close.validated_data["mitigated"] or timezone.now()
+                    else:
+                        e_status.mitigated_time = timezone.now()
+                    e_status.mitigated = True
+                    e_status.last_modified = timezone.now()
+                    e_status.save()
+                finding.save()
+            else:
+                return Response(finding_close.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+        serialized_finding = serializers.FindingCloseSerializer(finding)
+        return Response(serialized_finding.data)
 
     @extend_schema(
         methods=['GET'],
@@ -1785,7 +1831,7 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
                                         'test_import_finding_action_set',
                                         'findings_affected',
                                         'findings_affected__endpoints',
-                                        'findings_affected__endpoint_status',
+                                        'findings_affected__status_finding',
                                         'findings_affected__finding_meta',
                                         'findings_affected__jira_issue',
                                         'findings_affected__burprawrequestresponse_set',
@@ -1992,7 +2038,7 @@ class ImportScanView(mixins.CreateModelMixin,
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement, do_not_reactivate = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
@@ -2136,7 +2182,7 @@ class ReImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement, do_not_reactivate = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
@@ -2561,3 +2607,15 @@ class ConfigurationPermissionViewSet(mixins.RetrieveModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'codename')
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+
+class SLAConfigurationViewset(mixins.ListModelMixin,
+                              mixins.RetrieveModelMixin,
+                              mixins.UpdateModelMixin,
+                              mixins.DestroyModelMixin,
+                              mixins.CreateModelMixin,
+                              viewsets.GenericViewSet):
+    serializer_class = serializers.SLAConfigurationSerializer
+    queryset = SLA_Configuration.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)

@@ -556,6 +556,9 @@
                             <option value="High">High</option>
                             <option value="Critical">Critical</option>
                         </select><br/><br/>
+                        <label><b>Planned Remediation Date</b></label><br/>
+                        <input id="id_bulk_planned_remediation_date" class="datepicker form-control hasDatepicker" name="planned_remediation_date" type="date"
+                               alt="Select the date the Finding will be remediated"/><br/>
                         <label><b>Status</b> <input id="id_bulk_status" name="status" type="checkbox" alt="Select to enable" title="status_checkbox"/></label><br/>
                         <label style="font-size: 80%; font-weight: normal; display: block">
                             <input id="id_bulk_active" name="active" type="checkbox" disabled/> <span>Active</span>
@@ -683,6 +686,7 @@
                             {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                                 <th>Group</th>
                             {% endif %}
+                            <th>Planned Remediation</th>
                         </tr>
                     </thead>
                 <tbody>
@@ -837,7 +841,7 @@
                             {% else %}
                               {% if finding.endpoints.all %}
                                 <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
-                                    {% for endpoint_status in finding.endpoint_status.all %}
+                                    {% for endpoint_status in finding.status_finding.all %}
                                         {% if endpoint_status.mitigated %}
                                             &#10003;
                                         {% else %}
@@ -926,6 +930,11 @@
                                 {% endif %}
                             </td>
                         {% endif %}
+                        <td class="nowrap">
+                            {% if finding.planned_remediation_date %}
+                            {{ finding.planned_remediation_date }}
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -1205,6 +1214,7 @@
                   {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                     { "data": "grouped" },
                   {% endif %}
+                  { "data": "planned_remediation_date"}
               ];
 
             // Filter the list of items to display based on what is shown.

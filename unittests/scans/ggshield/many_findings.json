@@ -1,0 +1,108 @@
+{
+    "id": "54c2793a-89f2-4480-8468-ad042349357b",
+    "type": "commit-range",
+    "scans": [
+        {
+            "id": "03a2bf6cba491559f8b760a2c9bf8dd9f53916a0",
+            "type": "commit",
+            "entities_with_incidents": [
+                {
+                    "mode": "NEW",
+                    "filename": "wapf/settings.py",
+                    "incidents": [
+                        {
+                            "policy": "Secrets detection",
+                            "occurrences": [
+                                {
+                                    "match": "&dtzi36g3***************-*****+**********ljel3*ji5",
+                                    "type": "apikey",
+                                    "line_start": 23,
+                                    "line_end": 23,
+                                    "index_start": 14,
+                                    "index_end": 64,
+                                    "post_line_start": 23,
+                                    "post_line_end": 23
+                                }
+                            ],
+                            "type": "Django Secret Key",
+                            "validity": "no_checker",
+                            "ignore_sha": "06b15f1d8c0095386c7bbc4f423f5ec30b41b22b1565a836e55b978202ba569b",
+                            "total_occurrences": 1
+                        }
+                    ],
+                    "total_incidents": 1,
+                    "total_occurrences": 1
+                }
+            ],
+            "extra_info": {
+                "author": "iamnihal",
+                "email": "nihalcyberdude@gmail.com",
+                "date": "Sat Mar 13 17:42:00 2021 +0530"
+            },
+            "total_incidents": 1,
+            "total_occurrences": 1
+        },
+        {
+            "id": "8f388be3452f8d9f20ed788c94ebc11faa8ae7b6",
+            "type": "commit",
+            "entities_with_incidents": [
+                {
+                    "mode": "MODIFY",
+                    "filename": "wapf/settings.py",
+                    "incidents": [
+                        {
+                            "policy": "Secrets detection",
+                            "occurrences": [
+                                {
+                                    "match": "&dtzi36g3***************-*****+**********ljel3*ji5",
+                                    "type": "apikey",
+                                    "line_start": null,
+                                    "line_end": null,
+                                    "index_start": 31,
+                                    "index_end": 81
+                                }
+                            ],
+                            "type": "Django Secret Key",
+                            "validity": "no_checker",
+                            "ignore_sha": "06b15f1d8c0095386c7bbc4f423f5ec30b41b22b1565a836e55b978202ba569b",
+                            "total_occurrences": 1
+                        }
+                    ],
+                    "total_incidents": 1,
+                    "total_occurrences": 1
+                }
+            ],
+            "extra_info": {
+                "author": "iamnihal",
+                "email": "nihalcyberdude@gmail.com",
+                "date": "Mon Jul 5 12:54:43 2021 +0530"
+            },
+            "total_incidents": 1,
+            "total_occurrences": 1
+        },
+        {
+            "id": "4e98ab3bef98720f1e3b8516fe26e9ed364aae6c",
+            "type": "commit",
+            "extra_info": {
+                "author": "iamnihal",
+                "email": "nihalcyberdude@gmail.com",
+                "date": "Sun May 16 21:54:07 2021 +0530"
+            },
+            "total_incidents": 0,
+            "total_occurrences": 0
+        },
+        {
+            "id": "890170cbbfd8331c406e288136036fe8d85b57fa",
+            "type": "commit",
+            "extra_info": {
+                "author": "iamnihal",
+                "email": "nihalcyberdude@gmail.com",
+                "date": "Thu Apr 1 23:16:15 2021 +0530"
+            },
+            "total_incidents": 0,
+            "total_occurrences": 0
+        }
+    ],
+    "total_incidents": 2,
+    "total_occurrences": 2
+}
