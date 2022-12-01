@@ -13,14 +13,7 @@ class TestHorusecParser(DojoTestCase):
             parser = HorusecParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(267, len(findings))
-
-    def test_get_findings_date(self):
-        """"""
-        with open(path.join(path.dirname(__file__), "../scans/horusec/issue_6258.json")) as testfile:
-            parser = HorusecParser()
-            findings = parser.get_findings(testfile, Test())
-            self.assertEqual(14, len(findings))
-            self.assertEqual('2022-05-06', findings[0].date.strftime("%Y-%m-%d"))
+            self.assertEqual('2021-10-19', findings[0].date.strftime("%Y-%m-%d"))
 
     def test_get_tests(self):
         """Version 2.6.3 with big project in Python"""
