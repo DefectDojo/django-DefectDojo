@@ -133,7 +133,7 @@ class TestDuplicationLoops(DojoTestCase):
         set_duplicate(self.finding_c, self.finding_b)
         self.assertEqual(self.finding_b.original_finding.first().id, self.finding_a.id)
         logger.debug('going to delete finding B')
-        b_active = self.finding_b.id
+        b_active = self.finding_b.active
         b_id = self.finding_b.id
         self.finding_b.delete()
         logger.debug('deleted finding B')
