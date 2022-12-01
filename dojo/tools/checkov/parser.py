@@ -77,7 +77,7 @@ def get_item(vuln, test, check_type):
         resource = vuln['resource']
 
     severity = 'Medium'
-    if 'severity' in vuln:
+    if 'severity' in vuln and vuln['severity'] is not None:
         severity = vuln['severity'].capitalize()
 
     mitigation = ''
