@@ -1513,6 +1513,9 @@ class ImportScanSerializer(serializers.Serializer):
     close_old_findings = serializers.BooleanField(required=False, default=False,
         help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
                   "If service has been set, only the findings for this service will be closed.")
+    close_old_findings_product_scope = serializers.BooleanField(required=False, default=False,
+        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
+                  "By default, it is false meaning that only old findings of the same type in the engagement are in scope.")
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
     version = serializers.CharField(required=False, help_text="Version that was scanned.")
@@ -1542,6 +1545,7 @@ class ImportScanSerializer(serializers.Serializer):
     def save(self, push_to_jira=False):
         data = self.validated_data
         close_old_findings = data.get('close_old_findings')
+        close_old_findings_product_scope = data.get('close_old_findings_product_scope')
         active = data.get('active')
         verified = data.get('verified')
         minimum_severity = data.get('minimum_severity')
@@ -1584,6 +1588,7 @@ class ImportScanSerializer(serializers.Serializer):
                                                                                             commit_hash=commit_hash,
                                                                                             push_to_jira=push_to_jira,
                                                                                             close_old_findings=close_old_findings,
+                                                                                            close_old_findings_product_scope=close_old_findings_product_scope,
                                                                                             group_by=group_by,
                                                                                             api_scan_configuration=api_scan_configuration,
                                                                                             service=service,
@@ -1659,6 +1664,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     # also for ReImport.
     close_old_findings = serializers.BooleanField(required=False, default=True,
                                                   help_text="Select if old findings no longer present in the report get closed as mitigated when importing.")
+    close_old_findings_product_scope = serializers.BooleanField(required=False, default=False,
+        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
+                  "By default, it is false meaning that only old findings of the same type in the engagement are in scope. "
+                  "Note that this only applies on the first call to reimport-scan.")
     version = serializers.CharField(required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")
     build_id = serializers.CharField(required=False, help_text="ID of the build that was scanned.")
     branch_tag = serializers.CharField(required=False, help_text="Branch or Tag that was scanned.")
@@ -1696,6 +1705,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         minimum_severity = data.get('minimum_severity')
         scan_date = data.get('scan_date', None)
         close_old_findings = data.get('close_old_findings')
+        close_old_findings_product_scope = data.get('close_old_findings_product_scope')
         verified = data.get('verified')
         active = data.get('active')
         do_not_reactivate = data.get('do_not_reactivate', False)
@@ -1758,6 +1768,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                                                                                 commit_hash=commit_hash,
                                                                                                 push_to_jira=push_to_jira,
                                                                                                 close_old_findings=close_old_findings,
+                                                                                                close_old_findings_product_scope=close_old_findings_product_scope,
                                                                                                 group_by=group_by,
                                                                                                 api_scan_configuration=api_scan_configuration,
                                                                                                 service=service,
