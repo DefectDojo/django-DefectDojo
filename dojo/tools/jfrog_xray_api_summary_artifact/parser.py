@@ -32,7 +32,7 @@ class JFrogXrayApiSummaryArtifactParser(object):
             for artifactNode in artifact_tree:
                 artifact_general = artifactNode['general']
                 artifact_issues = artifactNode['issues']
-                artifact_sha256 = artifactNode['sha256']
+                artifact_sha256 = artifact_general['sha256']
                 for node in artifact_issues:
                     service = decode_service(artifact_general['name'])
                     item = get_item(node, str(service), test, artifact_sha256)
