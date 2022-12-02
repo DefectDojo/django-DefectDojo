@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger workflow in Documentation Repo
+      - name: Trigger workflow in Documentation Repo (master)
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.DOCUMENTATION_TOKEN }}
@@ -24,5 +24,17 @@ jobs:
               repo: 'Documentation',
               workflow_id: 'deploy-gh-pages-branch.yml',
               ref: 'master'
+            })
+            console.log(result)
+      - name: Trigger workflow in Documentation Repo (dev)
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.DOCUMENTATION_TOKEN }}
+          script: |
+            const result = await github.rest.actions.createWorkflowDispatch({
+              owner: 'DefectDojo-Inc',
+              repo: 'Documentation',
+              workflow_id: 'deploy-gh-pages-branch.yml',
+              ref: 'dev'
             })
             console.log(result)
