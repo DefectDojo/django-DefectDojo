@@ -62,6 +62,9 @@ repositoryPrefix: defectdojo
 # imagePullSecrets: defectdojoregistrykey
 tag: latest
 
+# Change this to 'alpine' for using alpine instead of debian as django image distro
+djangoImageDistro: debian
+
 # Additional labels to add to the pods:
 # podLabels:
 #   key: value
