@@ -1,5 +1,6 @@
 import json
 import re
+import hashlib
 
 from cvss import CVSS3
 
@@ -69,14 +70,17 @@ def get_item(vulnerability, service, test, artifact_sha256):
     if len(impact_paths) > 0:
         impact_path = decode_impact_path(impact_paths[0])
 
+    result = hashlib.md5()
     if 'issue_id' in vulnerability:
-        unique_id_from_tool = str(hash(artifact_sha256 + impact_path.name + impact_path.version + vulnerability['issue_id']))
+        unique_id = str(artifact_sha256 + impact_path.name + impact_path.version + vulnerability['issue_id'])
         vuln_id_from_tool = vulnerability['issue_id']
     elif cve:
-        unique_id_from_tool = str(hash(artifact_sha256 + impact_path.name + impact_path.version + cve))
+        unique_id = str(artifact_sha256 + impact_path.name + impact_path.version + cve)
     else:
-        unique_id_from_tool = str(hash(artifact_sha256 + impact_path.name + impact_path.version + vulnerability['summary']))
+        unique_id = str(artifact_sha256 + impact_path.name + impact_path.version + vulnerability['summary'])
         vuln_id_from_tool = ""
+    result.update(unique_id.encode())
+    unique_id_from_tool = result.hexdigest()
 
     finding = Finding(
         vuln_id_from_tool=vuln_id_from_tool,

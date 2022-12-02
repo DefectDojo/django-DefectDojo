@@ -1,7 +1,7 @@
 from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.jfrog_xray_api_summary_artifact.parser import JFrogXrayApiSummaryArtifactParser
-
+import hashlib
 
 class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
 
@@ -35,7 +35,10 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
         self.assertIsNone(item.references)
         self.assertIsNone(item.impact)
         self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", item.cvssv3)
-        self.assertEqual(str(hash("eaab06c0a28618bfb65481bf31bce7d6dd3a15dac528297690111c202a1cd468" + "3.12:openssl" + "1.1.1k-r0" + "XRAY-124116"), item.unique_id_from_tool))
+        result = hashlib.md5()
+        unique_id = "eaab06c0a28618bfb65481bf31bce7d6dd3a15dac528297690111c202a1cd468" + "3.12:openssl" + "1.1.1k-r0" + "XRAY-124116"
+        result.update(unique_id.encode())
+        self.assertEqual(result.hexdigest(), item.unique_id_from_tool)
 
     def test_parse_file_with_many_vulns(self):
         testfile = open("unittests/scans/jfrog_xray_api_summary_artifact/many_vulns.json")
