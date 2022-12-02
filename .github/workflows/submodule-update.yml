@@ -11,9 +11,6 @@ jobs:
   build:
     name: Run Documentation Workflow
     runs-on: ubuntu-latest
-    env:
-      PARENT_REPOSITORY: 'Documentation'
-      OWNER: 'DefectDojo-Inc'
 
     steps:
       - name: Trigger workflow in Documentation Repo
@@ -22,8 +19,8 @@ jobs:
           github-token: ${{ secrets.DOCUMENTATION_TOKEN }}
           script: |
             const result = await github.rest.actions.createWorkflowDispatch({
-              owner: ${{ env.OWNER }},
-              repo: ${{ env.PARENT_REPOSITORY }},
+              owner: 'DefectDojo-Inc',
+              repo: 'Documentation',
               workflow_id: 'deploy-gh-pages-branch.yml',
               ref: 'master'
             })
