@@ -30,7 +30,7 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
         self.assertIsNotNone(item.tags)
         print(item.tags)
         self.assertEqual("1.1.1k-r0", item.component_version)
-        self.assertEqual("default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9", item.file_path[:66])
+        self.assertEqual("artifact_path/artifact1/1.0/", item.file_path[:28])
         self.assertIsNone(item.severity_justification)
         self.assertIsNone(item.references)
         self.assertIsNone(item.impact)
