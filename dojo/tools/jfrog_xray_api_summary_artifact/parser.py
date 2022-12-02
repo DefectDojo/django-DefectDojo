@@ -32,15 +32,16 @@ class JFrogXrayApiSummaryArtifactParser(object):
             for artifactNode in artifact_tree:
                 artifact_general = artifactNode['general']
                 artifact_issues = artifactNode['issues']
+                artifact_sha256 = artifactNode['sha256']
                 for node in artifact_issues:
                     service = decode_service(artifact_general['name'])
-                    item = get_item(node, str(service), test)
+                    item = get_item(node, str(service), test, artifact_sha256)
                     items.append(item)
         return items
 
 
 # Retrieve the findings
-def get_item(vulnerability, service, test):
+def get_item(vulnerability, service, test, artifact_sha256):
     cve = None
     cwe = None
     cvssv3 = None
@@ -69,12 +70,12 @@ def get_item(vulnerability, service, test):
         impact_path = decode_impact_path(impact_paths[0])
 
     if 'issue_id' in vulnerability:
-        unique_id_from_tool = str(hash(impact_path.name + impact_path.version + vulnerability['issue_id']))
+        unique_id_from_tool = str(hash(artifact_sha256 + impact_path.name + impact_path.version + vulnerability['issue_id']))
         vuln_id_from_tool = vulnerability['issue_id']
     elif cve:
-        unique_id_from_tool = str(hash(impact_path.name + impact_path.version + cve))
+        unique_id_from_tool = str(hash(artifact_sha256 + impact_path.name + impact_path.version + cve))
     else:
-        unique_id_from_tool = str(hash(impact_path.name + impact_path.version + vulnerability['summary']))
+        unique_id_from_tool = str(hash(artifact_sha256 + impact_path.name + impact_path.version + vulnerability['summary']))
         vuln_id_from_tool = ""
 
     finding = Finding(
