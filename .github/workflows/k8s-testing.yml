@@ -128,13 +128,13 @@ jobs:
             k8s: 'v1.22.0'
           - databases: pgsql
             brokers: rabbit
-            k8s: 'v1.24.0'
+            k8s: 'v1.23.9'
           - databases: mysql
             brokers: redis
-            k8s: 'v1.24.0'
+            k8s: 'v1.23.9'
           - databases: pgsqlha
             brokers: rabbit
-            k8s: 'v1.24.0'
+            k8s: 'v1.23.9'
 
     steps:
 #      - name: Login to DockerHub
