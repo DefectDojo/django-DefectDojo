@@ -725,10 +725,10 @@ jszip@^3.10.1:
     readable-stream "~2.3.6"
     setimmediate "^1.0.5"
 
-justgage@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/justgage/-/justgage-1.6.0.tgz#6204579c0b1668cd966771f16082c001faef3d1b"
-  integrity sha512-83zOuiC++kuAjMdI/uAXDV0oadBLuvsZmRWt4FUHYQh1cTZIbSLgRfsijSBXXhytIwIAFSTHtAOAdVi2993uDw==
+justgage@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/justgage/-/justgage-1.6.1.tgz#e4827bf6220b086e896520cfc3167cfc6e1164a3"
+  integrity sha512-09GTQ0uiGlB/jJO3l+aUGeCrYmz5ZcHC0JVb4SB6ZKIXPeHL7wVt6rIZMkC+Gs6a9Yhgo4W8L4XMdeZJHOichg==
   dependencies:
     raphael "^2.3.0"
 
