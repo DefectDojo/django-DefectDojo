@@ -122,19 +122,19 @@ jobs:
           # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
           - databases: pgsql
             brokers: redis
-            k8s: 'v1.18.16'
+            k8s: 'v1.22.0'
           - databases: mysql
             brokers: rabbit
-            k8s: 'v1.18.16'
+            k8s: 'v1.22.0'
           - databases: pgsql
             brokers: rabbit
-            k8s: 'v1.22.0'
+            k8s: 'v1.24.0'
           - databases: mysql
             brokers: redis
-            k8s: 'v1.22.0'
+            k8s: 'v1.24.0'
           - databases: pgsqlha
             brokers: rabbit
-            k8s: 'v1.22.0'
+            k8s: 'v1.24.0'
 
     steps:
 #      - name: Login to DockerHub
