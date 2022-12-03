@@ -3,6 +3,7 @@ from dojo.models import Test
 from dojo.tools.jfrog_xray_api_summary_artifact.parser import JFrogXrayApiSummaryArtifactParser
 import hashlib
 
+
 class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln(self):
