@@ -244,6 +244,8 @@ env = environ.Env(
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
                                  '.html', '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
+    # Max file size for scan added via API in MB
+    DD_SCAN_FILE_MAX_SIZE=(int,100),
     # When disabled, existing user tokens will not be removed but it will not be
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
@@ -1505,7 +1507,7 @@ SILENCED_SYSTEM_CHECKS = ['mysql.E001']
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
-SCAN_FILE_MAX_SIZE = 100
+SCAN_FILE_MAX_SIZE = env("DD_SCAN_FILE_MAX_SIZE")
 
 # Apply a severity level to "Security Weaknesses" in Qualys WAS
 QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
