@@ -214,7 +214,7 @@ def get_or_create_engagement(engagement_id=None, engagement_name=None, product_n
             raise ValueError('no product, unable to create engagement')
 
         target_start = timezone.now().date()
-        if isinstance(target_end, type(None)) or (target_start > target_end):
+        if (target_end is None) or (target_start > target_end):
             target_end = (timezone.now() + timedelta(days=365)).date()
 
         engagement = Engagement.objects.create(engagement_type="CI/CD", name=engagement_name, product=product, lead=get_current_user(),
