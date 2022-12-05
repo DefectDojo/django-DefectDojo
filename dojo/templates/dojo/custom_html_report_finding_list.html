@@ -137,7 +137,6 @@
         {% endif %}
 
         {% if finding.steps_to_reproduce %}
-            <pre>{{ finding.impact|markdown_render }}</pre>
             <h6>Steps to Reproduce</h6>
             <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
         {% endif %}
