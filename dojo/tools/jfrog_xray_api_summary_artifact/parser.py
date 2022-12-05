@@ -89,7 +89,7 @@ def get_item(vulnerability, service, test, artifact_name, artifact_version, arti
         cwe=cwe,
         cvssv3=cvssv3,
         severity=severity,
-        description=impact_path.name + " " + impact_path.version + ": " + vulnerability['description'],
+        description=impact_path.name + ":" + impact_path.version + " -> " + vulnerability['description'],
         test=test,
         file_path=impact_paths[0],
         component_name=artifact_name,
@@ -129,10 +129,10 @@ def decode_cwe_number(value):
     return int(match[0].rsplit('-')[1])
 
 
-def decode_artifact(artifact_general)
+def decode_artifact(artifact_general):
     artifact = Artifact("","","")
     artifact.sha256 = artifact_general['sha256']
-    match = re.match(r".*:(.*)", artifact_general['name'], re.IGNORECASE)
+    match = re.match(r"(.*):(.*)", artifact_general['name'], re.IGNORECASE)
     if match:
         artifact.name = match[1]
         artifact.version = match[2]
