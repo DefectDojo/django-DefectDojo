@@ -1499,6 +1499,7 @@ class ImportScanSerializer(serializers.Serializer):
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
+    engagement_end_date = serializers.DateField(required=False, help_text="End Date for Engagement. Default is current time + 365 days. Required format year-month-day")
     source_code_management_uri = serializers.URLField(max_length=600, required=False, help_text="Resource link to source code")
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), required=False)
@@ -1567,9 +1568,10 @@ class ImportScanSerializer(serializers.Serializer):
         group_by = data.get('group_by', None)
         create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)
 
+        engagement_end_date = data.get('engagement_end_date', None)
         _, test_title, scan_type, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement, do_not_reactivate = get_import_meta_data_from_dict(data)
         engagement = get_or_create_engagement(engagement_id, engagement_name, product_name, product_type_name, auto_create_context,
-                                              deduplication_on_engagement, source_code_management_uri=source_code_management_uri)
+                                              deduplication_on_engagement, source_code_management_uri=source_code_management_uri, target_end=engagement_end_date)
 
         # have to make the scan_date_time timezone aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
         scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
@@ -1646,6 +1648,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
+    engagement_end_date = serializers.DateField(required=False, help_text="End Date for Engagement. Default is current time + 365 days. Required format year-month-day")
     source_code_management_uri = serializers.URLField(max_length=600, required=False, help_text="Resource link to source code")
     test = serializers.PrimaryKeyRelatedField(required=False,
         queryset=Test.objects.all())
@@ -1712,6 +1715,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
         source_code_management_uri = data.get('source_code_management_uri', None)
+        engagement_end_date = data.get('engagement_end_date', None)
 
         group_by = data.get('group_by', None)
         create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)
@@ -1747,7 +1751,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 # perform Import to create test
                 logger.debug('reimport for non-existing test, using import to create new test')
                 engagement = get_or_create_engagement(None, engagement_name, product_name, product_type_name, auto_create_context,
-                                                      deduplication_on_engagement, source_code_management_uri=source_code_management_uri)
+                                                      deduplication_on_engagement, source_code_management_uri=source_code_management_uri, target_end=engagement_end_date)
                 importer = Importer()
                 test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, lead, environment,
                                                                                                 active=active, verified=verified, tags=tags,
