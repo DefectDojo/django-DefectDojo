@@ -41,7 +41,7 @@ class JFrogXrayApiSummaryArtifactParser(object):
         return items
 
 
-# Retrieve the findings
+# Retrieve the findings of the affected 1st level component (Artifact)
 def get_item(vulnerability, service, test, artifact_name, artifact_version, artifact_sha256):
     cve = None
     cwe = None
