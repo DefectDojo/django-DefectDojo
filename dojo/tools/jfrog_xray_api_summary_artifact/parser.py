@@ -33,16 +33,16 @@ class JFrogXrayApiSummaryArtifactParser(object):
             for artifactNode in artifact_tree:
                 artifact_general = artifactNode['general']
                 artifact_issues = artifactNode['issues']
-                artifact_sha256 = artifact_general['sha256']
+                artifact = decode_artifact(artifact_general)
                 for node in artifact_issues:
                     service = decode_service(artifact_general['name'])
-                    item = get_item(node, str(service), test, artifact_sha256)
+                    item = get_item(node, str(service), test, artifact.name, artifact.version, artifact.sha256)
                     items.append(item)
         return items
 
 
 # Retrieve the findings
-def get_item(vulnerability, service, test, artifact_sha256):
+def get_item(vulnerability, service, test, artifact_name, artifact_version, artifact_sha256):
     cve = None
     cwe = None
     cvssv3 = None
@@ -89,11 +89,11 @@ def get_item(vulnerability, service, test, artifact_sha256):
         cwe=cwe,
         cvssv3=cvssv3,
         severity=severity,
-        description=vulnerability['description'],
+        description=impact_path.name + " " + impact_path.version + ": " + vulnerability['description'],
         test=test,
         file_path=impact_paths[0],
-        component_name=impact_path.name,
-        component_version=impact_path.version,
+        component_name=artifact_name,
+        component_version=artifact_version,
         static_finding=True,
         dynamic_finding=False,
         unique_id_from_tool=unique_id_from_tool
@@ -127,6 +127,16 @@ def decode_cwe_number(value):
     if match is None:
         return 0
     return int(match[0].rsplit('-')[1])
+
+
+def decode_artifact(artifact_general)
+    artifact = Artifact("","","")
+    artifact.sha256 = artifact_general['sha256']
+    match = re.match(r".*:(.*)", artifact_general['name'], re.IGNORECASE)
+    if match:
+        artifact.name = match[1]
+        artifact.version = match[2]
+    return artifact
 
 
 def decode_impact_path(path):
@@ -166,6 +176,13 @@ def decode_impact_path(path):
         impact_path.name = fullname
 
     return impact_path
+
+
+class Artifact:
+    def __init__(self, sha256, name, version):
+        self.sha256 = sha256
+        self.name = name
+        self.version = version
 
 
 class ImpactPath:
