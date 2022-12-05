@@ -130,7 +130,7 @@ def decode_cwe_number(value):
 
 
 def decode_artifact(artifact_general):
-    artifact = Artifact("","","")
+    artifact = Artifact("", "", "")
     artifact.sha256 = artifact_general['sha256']
     match = re.match(r"(.*):(.*)", artifact_general['name'], re.IGNORECASE)
     if match:
