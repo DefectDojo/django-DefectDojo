@@ -30,7 +30,15 @@
                     </h5>
                 </div>
             </div>
+            {% if finding.title %}
+                <h6>Title</h6>
+                <pre>{{ finding.title|markdown_render }}</pre>
+            {% endif %}
             <div class="table-responsive">
+                <table class="table-striped table table-condensed table-hover centered">
+                    <tr><th>Title</th></tr>
+                    <tr><td>{{ finding.title }}</td></tr>
+                </table>
                 <table id="heading" class="table-striped table table-condensed table-hover centered">
                     <tr>
                         <th>Severity</th>
@@ -48,8 +56,8 @@
                         {% if finding.cwe %}
                             <th>CWE</th>
                         {% endif %}
-                        {% if finding.cve %}
-                            <th>CVE</th>
+                        {% if finding.vulnerability_ids %}
+                            <th>Vulnerability IDs</th>
                         {% endif %}
                     </tr>
                     <tr>
@@ -90,13 +98,8 @@
                                 </a>
                             </td>
                         {% endif %}
-                        {% if finding.cve %}
-                            <td>
-                                <a target="_blank"
-                                    href="https://nvd.nist.gov/vuln/detail/{{ finding.cve }}">
-                                    <i class="fa fa-external-link"></i> {{ finding.cve }}
-                                </a>
-                            </td>
+                        {% if finding.vulnerability_ids %}
+                            <td>{{ finding.vulnerability_ids }}</td>
                         {% endif %}
                     </tr>
                 </table>
@@ -115,9 +118,12 @@
             <pre>{{ finding.description|markdown_render }}</pre>
         {% endif %}
 
-        {% if finding.get_report_requests %}
+        {% if finding.mitigation %}
             <h6>Mitigation</h6>
             <pre>{{ finding.mitigation|markdown_render }}</pre>
+        {% endif %}
+
+        {% if finding.get_report_requests %}
             <h6>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h6>
             {% for req in finding.get_report_requests %}
                 <b>Request {{forloop.counter}} </b>
@@ -129,8 +135,12 @@
             {% endfor %}
         {% endif %}
 
-        {% if finding.steps_to_reproduce %}
+        {% if finding.impact %}
             <h6>Impact</h6>
+            <pre>{{ finding.impact }}</pre>
+        {% endif %}
+
+        {% if finding.steps_to_reproduce %}
             <pre>{{ finding.impact|markdown_render }}</pre>
             <h6>Steps to Reproduce</h6>
             <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
