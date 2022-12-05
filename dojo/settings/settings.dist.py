@@ -248,6 +248,8 @@ env = environ.Env(
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
                                  '.html', '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
+    # Max file size for scan added via API in MB
+    DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
@@ -816,6 +818,7 @@ INSTALLED_APPS = (
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
+    'dojo.middleware.APITrailingSlashMiddleware',
     'dojo.middleware.DojoSytemSettingsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -1210,6 +1213,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'BlackDuck API': ['unique_id_from_tool'],
     'docker-bench-security Scan': ['unique_id_from_tool'],
     'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version', 'severity'],
+    'Vulners Scan': ['vuln_id_from_tool', 'component_name'],
     'Twistlock Image Scan': ['title', 'severity', 'component_name', 'component_version'],
     'NeuVector (REST)': ['title', 'severity', 'component_name', 'component_version'],
     'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
@@ -1254,6 +1258,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Edgescan Scan': True,
     'Bugcrowd API Import': True,
     'Veracode SourceClear Scan': True,
+    'Vulners Scan': True,
     'Twistlock Image Scan': True,
     'Wpscan': True,
     'Rusty Hog Scan': True,
@@ -1379,6 +1384,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
     'BlackDuck API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'docker-bench-security Scan': DEDUPE_ALGO_HASH_CODE,
+    'Vulners Scan': DEDUPE_ALGO_HASH_CODE,
     'Twistlock Image Scan': DEDUPE_ALGO_HASH_CODE,
     'NeuVector (REST)': DEDUPE_ALGO_HASH_CODE,
     'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
@@ -1514,7 +1520,7 @@ SILENCED_SYSTEM_CHECKS = ['mysql.E001']
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
-SCAN_FILE_MAX_SIZE = 100
+SCAN_FILE_MAX_SIZE = env("DD_SCAN_FILE_MAX_SIZE")
 
 # Apply a severity level to "Security Weaknesses" in Qualys WAS
 QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
@@ -1583,6 +1589,7 @@ VULNERABILITY_URLS = {
     'PYSEC': 'https://osv.dev/vulnerability/',
     'SNYK': 'https://snyk.io/vuln/',
     'RUSTSEC': 'https://rustsec.org/advisories/',
+    'VNS': 'https://vulners.com/',
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
