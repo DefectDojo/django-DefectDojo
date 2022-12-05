@@ -19,7 +19,7 @@
             <div class="panel-heading finding-title">
                 <div class="clearfix">
                     <h5>
-                        Finding {{ forloop.counter }}: {{ finding.title }}
+                        Finding {{ forloop.counter }} - DefectDojo ID {{ finding.id }}
                         {% if finding.tags %}
                             <sup>
                                 {% for tag in finding.tags.all %}
@@ -45,20 +45,25 @@
                             <th>Date Mitigated</th>
                             <th>Mitigated By</th>
                         {% endif %}
-                        {% if finding.cwe > 0 %}
+                        {% if finding.cwe %}
                             <th>CWE</th>
                         {% endif %}
-                        <th>Dojo ID</th>
+                        {% if finding.cve %}
+                            <th>CVE</th>
+                        {% endif %}
                     </tr>
                     <tr>
                         <td>
-                        <span class="label severity severity-{{ finding.severity }}">
-                            {% if finding.severity %}
-                                {{ finding.severity }}
-                            {% else %}
-                                Unknown
-                            {% endif %}
-                        </span>
+                            <span class="label severity severity-{{ finding.severity }}">
+                                {% if finding.severity %}
+                                    {{ finding.severity }}
+                                    {% if finding.cvssv3_score %}
+                                        ({{ finding.cvssv3_score }})
+                                    {% endif %}
+                                {% else %}
+                                    Unknown
+                                {% endif %}
+                            </span>
                         </td>
                         <td>{{ finding.status }}</td>
                         {% if finding.risk_acceptance_set.all %}
@@ -77,7 +82,7 @@
                             <td>{{ finding.mitigated }}</td>
                             <td>{{ finding.mitigated_by }}</td>
                         {% endif %}
-                        {% if finding.cwe > 0 %}
+                        {% if finding.cwe %}
                             <td>
                                 <a target="_blank"
                                     href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
@@ -85,7 +90,14 @@
                                 </a>
                             </td>
                         {% endif %}
-                        <td>{{ finding.id }}</td>
+                        {% if finding.cve %}
+                            <td>
+                                <a target="_blank"
+                                    href="https://nvd.nist.gov/vuln/detail/{{ finding.cve }}">
+                                    <i class="fa fa-external-link"></i> {{ finding.cve }}
+                                </a>
+                            </td>
+                        {% endif %}
                     </tr>
                 </table>
             </div>
@@ -96,14 +108,16 @@
         {% if finding.cvssv3 %}
             <h6>CVSS v3</h6>
             <pre>{{ finding.cvssv3|markdown_render }}</pre>
-            {% endif %}
+        {% endif %}
 
-        <h6>Description</h6>
-        <pre>{{ finding.description|markdown_render }}</pre>
+        {% if finding.description %}
+            <h6>Description</h6>
+            <pre>{{ finding.description|markdown_render }}</pre>
+        {% endif %}
 
-        <h6>Mitigation</h6>
-        <pre>{{ finding.mitigation|markdown_render }}</pre>
         {% if finding.get_report_requests %}
+            <h6>Mitigation</h6>
+            <pre>{{ finding.mitigation|markdown_render }}</pre>
             <h6>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h6>
             {% for req in finding.get_report_requests %}
                 <b>Request {{forloop.counter}} </b>
@@ -113,22 +127,25 @@
                     <pre class="raw_request">{{ req.get_response|truncatechars_html:800 }}</pre>
                 {% endif %}
             {% endfor %}
-            {% endif %}
+        {% endif %}
 
-        <h6>Impact</h6>
-        <pre>{{ finding.impact|markdown_render }}</pre>
         {% if finding.steps_to_reproduce %}
-        <h6>Steps to Reproduce</h6>
-        <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
+            <h6>Impact</h6>
+            <pre>{{ finding.impact|markdown_render }}</pre>
+            <h6>Steps to Reproduce</h6>
+            <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
         {% endif %}
+
         {% if finding.severity_justification %}
-        <h6>Severity Justification</h6>
-        <pre>{{ finding.severity_justification|markdown_render }}</pre>
+            <h6>Severity Justification</h6>
+            <pre>{{ finding.severity_justification|markdown_render }}</pre>
         {% endif %}
+
         {% if finding.references %}
-        <h6>References</h6>
-        <pre>{{ finding.references|markdown_render }}</pre>
+            <h6>References</h6>
+            <pre>{{ finding.references|markdown_render }}</pre>
         {% endif %}
+
         {% if include_finding_images %}
             {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="HTML" %}
         {% endif %}
