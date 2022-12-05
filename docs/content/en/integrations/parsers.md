@@ -1296,22 +1296,6 @@ of the SonarQube project will be used.
 **Note:**: If `https` is used for the SonarQube, the certificate must be
 trusted by the DefectDojo instance.
 
-### Vulners
-
-Import Vulners [Audit](https://vulners.com/docs/API_wrapper/linux_audit/#linux-audit) results, no file required.
-
-In Tool Configuration, select Tool Type to "Vulners" and add the API Key
-
-In the Product settings select "Add API Scan Configuration" and select the previously added Vulners API Tool Configuration.
-
-After this is done, you can import the findings by selecting "Vulners" as the scan type.
-
-Detailed installation steps can be found in [vulners documentation](https://vulners.com/docs/plugins/defectdojo/).
-
-Use following [instructions](https://vulners.com/docs/apikey/) to generate Vulners API Key.
-
-More details about DefectDojo-plugin integration can be found at [vulners integrations page](https://vulners.com/plugins).
-
 #### Vulners
 
 Import Vulners [Audit](https://vulners.com/docs/API_wrapper/linux_audit/#linux-audit) results, no file required.
