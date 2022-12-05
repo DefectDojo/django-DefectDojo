@@ -1,7 +1,7 @@
 import logging
 from django.core.exceptions import ValidationError
 from dojo.models import Product_API_Scan_Configuration
-from .api_client import ApiVulners
+from .api_client import VulnersAPI
 
 logger = logging.getLogger(__name__)
 
@@ -42,4 +42,4 @@ class VulnersImporter(object):
                 )
 
         tool_config = config.tool_configuration
-        return ApiVulners(tool_config), config
+        return VulnersAPI(tool_config), config
