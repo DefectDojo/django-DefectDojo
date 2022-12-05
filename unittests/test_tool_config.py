@@ -37,9 +37,17 @@ class TestApiScanConfigEmpty(DojoTestCase):
             self.assertEqual(acsh[i]['tool_type_name'], 'SonarQube')
             self.assertEqual(acsh[i]['hint'], 'the field <b>Service key 1</b> has to be set with the SonarQube project key. <b>Service key 2</b> can be used for the Organization ID if using SonarCloud.')
 
+        i += 1
+        with self.subTest('Vulners'):
+            self.assertEqual(acsh[i]['name'], 'Vulners')
+            self.assertEqual(acsh[i]['tool_type_name'], 'Vulners')
+            self.assertEqual(acsh[i]['hint'], 'the field <b>Service key 1</b> has to be set with the Vulners API key.')
+
     def test_counts(self):
         acsh = get_api_scan_configuration_hints()
         self.assertEqual(acsh[0]['tool_types'].count(), 0)
         self.assertEqual(acsh[0]['tool_configurations'].count(), 0)
         self.assertEqual(acsh[3]['tool_types'].count(), 1)
         self.assertEqual(acsh[3]['tool_configurations'].count(), 1)
+
+# TODO test missing test

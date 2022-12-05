@@ -3,7 +3,7 @@ import logging
 from cvss.cvss3 import CVSS3
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.vulners.importer import VulnersImporter
+from .importer import VulnersImporter
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ vulners_severity_mapping = {
 }
 
 
-class VulnersParser(object):
+class ApiVulnersParser(object):
     """Parser that can load data from Vulners Scanner API"""
 
     def get_scan_types(self):
@@ -31,6 +31,9 @@ class VulnersParser(object):
 
     def requires_tool_type(self, scan_type):
         return "Vulners"
+
+    def api_scan_configuration_hint(self):
+        return 'the field <b>Service key 1</b> has to be set with the Vulners API key.'
 
     def requires_file(self, scan_type):
         return False

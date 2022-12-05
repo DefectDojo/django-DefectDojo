@@ -1,7 +1,7 @@
 import vulners
 
 
-class VulnersAPI:
+class ApiVulners:
     """
     A simple client for the Vulners API
     """

@@ -1,13 +1,13 @@
 from ..dojo_test_case import DojoTestCase
-from dojo.tools.vulners.parser import VulnersParser
+from dojo.tools.api_vulners.parser import ApiVulnersParser
 from dojo.models import Test
 
 
-class TestVulnersParser(DojoTestCase):
+class TestApiVulnersParser(DojoTestCase):
 
     def test_parse_many_findings(self):
-        testfile = open("unittests/scans/vulners/report_many_vulns.json")
-        parser = VulnersParser()
+        testfile = open("unittests/scans/api_vulners/report_many_vulns.json")
+        parser = ApiVulnersParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
         finding = findings[2]
@@ -19,8 +19,8 @@ class TestVulnersParser(DojoTestCase):
         self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", finding.cvssv3)
 
     def test_parse_one_finding(self):
-        testfile = open("unittests/scans/vulners/report_one_vuln.json")
-        parser = VulnersParser()
+        testfile = open("unittests/scans/api_vulners/report_one_vuln.json")
+        parser = ApiVulnersParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         finding = findings[0]
@@ -31,14 +31,14 @@ class TestVulnersParser(DojoTestCase):
         self.assertEqual("CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
 
     def test_parse_no_finding(self):
-        testfile = open("unittests/scans/vulners/report_no_vulns.json")
-        parser = VulnersParser()
+        testfile = open("unittests/scans/api_vulners/report_no_vulns.json")
+        parser = ApiVulnersParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_no_description(self):
-        testfile = open("unittests/scans/vulners/report_no_description.json")
-        parser = VulnersParser()
+        testfile = open("unittests/scans/api_vulners/report_no_description.json")
+        parser = ApiVulnersParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         finding = findings[0]
