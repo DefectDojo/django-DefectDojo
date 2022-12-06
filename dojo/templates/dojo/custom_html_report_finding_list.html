@@ -19,7 +19,7 @@
             <div class="panel-heading finding-title">
                 <div class="clearfix">
                     <h5>
-                        Finding {{ forloop.counter }} - DefectDojo ID {{ finding.id }}
+                        Finding {{ forloop.counter }} - {{ finding.title }}
                         {% if finding.tags %}
                             <sup>
                                 {% for tag in finding.tags.all %}
@@ -31,11 +31,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table-striped table table-condensed table-hover centered">
-                    <tr><th>Title</th></tr>
-                    <tr><td>{{ finding.title }}</td></tr>
-                </table>
-                <table id="heading" class="table-striped table table-condensed table-hover centered">
+                 <table id="heading" class="table-striped table table-condensed table-hover centered">
                     <tr>
                         <th>Severity</th>
                         <th>Status</th>
@@ -55,6 +51,7 @@
                         {% if finding.vulnerability_ids %}
                             <th>Vulnerability IDs</th>
                         {% endif %}
+                        <th>Dojo ID</th>
                     </tr>
                     <tr>
                         <td>
@@ -97,6 +94,7 @@
                         {% if finding.vulnerability_ids %}
                             <td>{{ finding.vulnerability_ids }}</td>
                         {% endif %}
+                        <td>{{ finding.id }}</td>
                     </tr>
                 </table>
             </div>
