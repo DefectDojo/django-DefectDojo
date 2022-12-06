@@ -1485,8 +1485,8 @@ class ImportScanSerializer(serializers.Serializer):
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
         default='Info', help_text='Minimum severity level to be imported')
-    active = serializers.BooleanField(default=True, help_text="Select if these findings are currently active.")
-    verified = serializers.BooleanField(default=True, help_text="Select if these findings have been verified.")
+    active = serializers.BooleanField(help_text="Override the active setting from the tool.")
+    verified = serializers.BooleanField(help_text="Override the verified setting from the tool.")
     scan_type = serializers.ChoiceField(
         choices=get_choices_sorted())
     # TODO why do we allow only existing endpoints?
@@ -1639,8 +1639,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
         default='Info', help_text='Minimum severity level to be imported')
-    active = serializers.BooleanField(default=True, help_text="Select if these findings are currently active.")
-    verified = serializers.BooleanField(default=True, help_text="Select if these findings have been verified.")
+    active = serializers.BooleanField(help_text="Override the active setting from the tool.")
+    verified = serializers.BooleanField(help_text="Override the verified setting from the tool.")
     help_do_not_reactivate = 'Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs.'
     do_not_reactivate = serializers.BooleanField(default=False, required=False, help_text=help_do_not_reactivate)
     scan_type = serializers.ChoiceField(
@@ -1739,6 +1739,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         # have to make the scan_date_time timezone aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
         scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
         statistics_before, statistics_delta = None, None
+
         try:
             if test:
                 # reimport into provided / latest test
