@@ -48,11 +48,7 @@ def get_item(vulnerability, test):
         # Others go to references.
         main_finding = vulnerability['securityData']['securityIssues'][0]
 
-        if main_finding.get("source") == "cve":
-            vulnerability_id = main_finding.get("reference")
-        else:
-            # if sonatype of else, will not match Finding model today
-            vulnerability_id = None
+        vulnerability_id = main_finding.get("reference")
 
         if main_finding['severity'] <= 3.9:
             severity = "Low"
