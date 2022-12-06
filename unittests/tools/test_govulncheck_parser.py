@@ -46,6 +46,3 @@ class TestGovulncheckParser(DojoTestCase):
             self.assertIsNotNone(finding.impact)
             self.assertIsNotNone(finding.description)
             self.assertEqual("https://groups.google.com/g/golang-announce/c/x49AQzIVX-s", finding.references)
-
-
-
