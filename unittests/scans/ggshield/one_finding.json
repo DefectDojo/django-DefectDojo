@@ -1,0 +1,46 @@
+{
+    "id": "54c2793a-89f2-4480-8468-ad042349357b",
+    "type": "commit-range",
+    "scans": [
+        {
+            "id": "8f388be3452f8d9f20ed788c94ebc11faa8ae7b6",
+            "type": "commit",
+            "entities_with_incidents": [
+                {
+                    "mode": "MODIFY",
+                    "filename": "wapf/settings.py",
+                    "incidents": [
+                        {
+                            "policy": "Secrets detection",
+                            "occurrences": [
+                                {
+                                    "match": "&dtzi36g3***************-*****+**********ljel3*ji5",
+                                    "type": "apikey",
+                                    "line_start": null,
+                                    "line_end": null,
+                                    "index_start": 31,
+                                    "index_end": 81
+                                }
+                            ],
+                            "type": "Django Secret Key",
+                            "validity": "no_checker",
+                            "ignore_sha": "06b15f1d8c0095386c7bbc4f423f5ec30b41b22b1565a836e55b978202ba569b",
+                            "total_occurrences": 1
+                        }
+                    ],
+                    "total_incidents": 1,
+                    "total_occurrences": 1
+                }
+            ],
+            "extra_info": {
+                "author": "iamnihal",
+                "email": "infosec.nihal@gmail.com",
+                "date": "Mon Jul 5 12:54:43 2021 +0530"
+            },
+            "total_incidents": 1,
+            "total_occurrences": 1
+        }
+    ],
+    "total_incidents": 1,
+    "total_occurrences": 1
+}

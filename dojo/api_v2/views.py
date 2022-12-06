@@ -559,6 +559,9 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                     finding.mitigated = timezone.now()
                 finding.mitigated_by = request.user
                 finding.active = False
+                finding.false_p = finding_close.validated_data.get('false_p', False)
+                finding.duplicate = finding_close.validated_data.get('duplicate', False)
+                finding.out_of_scope = finding_close.validated_data.get('out_of_scope', False)
 
                 endpoints_status = finding.endpoint_status.all()
                 for e_status in endpoints_status:
@@ -2035,7 +2038,7 @@ class ImportScanView(mixins.CreateModelMixin,
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        _, _, _, engagement_id, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement, do_not_reactivate = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
@@ -2179,7 +2182,7 @@ class ReImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement = serializers.get_import_meta_data_from_dict(serializer.validated_data)
+        test_id, test_title, scan_type, _, engagement_name, product_name, product_type_name, auto_create_context, deduplication_on_engagement, do_not_reactivate = serializers.get_import_meta_data_from_dict(serializer.validated_data)
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)

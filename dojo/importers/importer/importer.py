@@ -189,12 +189,20 @@ class DojoDefaultImporter(object):
             return [serializers.serialize('json', [finding, ]) for finding in new_findings]
         return new_findings
 
-    def close_old_findings(self, test, scan_date_time, user, push_to_jira=None, service=None):
+    def close_old_findings(self, test, scan_date_time, user, push_to_jira=None, service=None, close_old_findings_product_scope=False):
         # Close old active findings that are not reported by this scan.
         new_hash_codes = test.finding_set.values('hash_code')
 
-        # Close old findings of the same test type in the same engagement
-        old_findings = Finding.objects.exclude(test=test) \
+        if close_old_findings_product_scope:
+            # Close old findings of the same test type in the same product
+            old_findings = Finding.objects.exclude(test=test) \
+                .exclude(hash_code__in=new_hash_codes) \
+                .filter(test__engagement__product=test.engagement.product,
+                        test__test_type=test.test_type,
+                        active=True)
+        else:
+            # Close old findings of the same test type in the same engagement
+            old_findings = Finding.objects.exclude(test=test) \
                                         .exclude(hash_code__in=new_hash_codes) \
                                         .filter(test__engagement=test.engagement,
                                                 test__test_type=test.test_type,
@@ -237,8 +245,8 @@ class DojoDefaultImporter(object):
 
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None,
-                    service=None, title=None, create_finding_groups_for_all_findings=True):
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, close_old_findings_product_scope=False,
+                    group_by=None, api_scan_configuration=None, service=None, title=None, create_finding_groups_for_all_findings=True):
 
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
@@ -337,7 +345,8 @@ class DojoDefaultImporter(object):
         closed_findings = []
         if close_old_findings:
             logger.debug('IMPORT_SCAN: Closing findings no longer present in scan report')
-            closed_findings = self.close_old_findings(test, scan_date, user=user, push_to_jira=push_to_jira, service=service)
+            closed_findings = self.close_old_findings(test, scan_date, user=user, push_to_jira=push_to_jira, service=service,
+                                                      close_old_findings_product_scope=close_old_findings_product_scope)
 
         logger.debug('IMPORT_SCAN: Updating test/engagement timestamps')
         importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
