@@ -13,6 +13,7 @@ class TestHorusecParser(DojoTestCase):
             parser = HorusecParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(267, len(findings))
+            self.assertEqual('2021-10-19', findings[0].date.strftime("%Y-%m-%d"))
 
     def test_get_tests(self):
         """Version 2.6.3 with big project in Python"""

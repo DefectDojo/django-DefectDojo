@@ -196,7 +196,8 @@ def get_or_create_product(product_name=None, product_type_name=None, auto_create
         return product
 
 
-def get_or_create_engagement(engagement_id=None, engagement_name=None, product_name=None, product_type_name=None, auto_create_context=None, deduplication_on_engagement=False):
+def get_or_create_engagement(engagement_id=None, engagement_name=None, product_name=None, product_type_name=None, auto_create_context=None,
+                             deduplication_on_engagement=False, source_code_management_uri=None, target_end=None):
     # try to find the engagement (and product)
     product = get_target_product_if_exists(product_name, product_type_name)
     engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
@@ -212,6 +213,13 @@ def get_or_create_engagement(engagement_id=None, engagement_name=None, product_n
         if not product:
             raise ValueError('no product, unable to create engagement')
 
-        engagement = Engagement.objects.create(engagement_type="CI/CD", name=engagement_name, product=product, lead=get_current_user(), target_start=timezone.now().date(), target_end=(timezone.now() + timedelta(days=365)).date(), deduplication_on_engagement=deduplication_on_engagement)
+        target_start = timezone.now().date()
+        if (target_end is None) or (target_start > target_end):
+            target_end = (timezone.now() + timedelta(days=365)).date()
+
+        engagement = Engagement.objects.create(engagement_type="CI/CD", name=engagement_name, product=product, lead=get_current_user(),
+                                               target_start=target_start, target_end=target_end,
+                                               deduplication_on_engagement=deduplication_on_engagement,
+                                               source_code_management_uri=source_code_management_uri)
 
         return engagement

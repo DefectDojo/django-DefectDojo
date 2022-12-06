@@ -127,7 +127,7 @@ class TestBugcrowdApiImporter(TestCase):
         mock_foo.return_value = self.findings
 
         bugrcrowd_api_importer = BugcrowdApiImporter()
-        my_findings = bugrcrowd_api_importer.get_findings(self.test_2)
+        my_findings, api_scan_config = bugrcrowd_api_importer.get_findings(self.test_2)
 
         mock_foo.assert_called_with("SERVICE_KEY_1", "SERVICE_KEY_2")
         self.assertListEqual(my_findings, self.findings)

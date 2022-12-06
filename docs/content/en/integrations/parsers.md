@@ -533,6 +533,10 @@ Example:
 }
 ```
 
+### Ggshield
+
+Import [Ggshield](https://github.com/GitGuardian/ggshield) findings in JSON format.
+
 ### Gosec Scanner
 
 Import Gosec Scanner findings in JSON format.
@@ -1247,6 +1251,22 @@ Detailed XML Report
 ### Veracode SourceClear
 
 Import Project CSV or JSON report
+
+### Vulners
+
+Import Vulners [Audit](https://vulners.com/docs/API_wrapper/linux_audit/#linux-audit) results, no file required.
+
+Follow these steps to set up importing:
+1. Configure the Vulners API Key details by navigating to Configuration / Tool Configuration, selecting the Tool Type to "Vulners", and adding the API Key
+2. In the Product settings select "Add API Scan Configuration" and select the previously added Vulners API Tool Configuration.
+3. After this is done, you can import the findings by selecting "Vulners" as the scan type.
+
+Detailed installation steps can be found in [vulners documentation](https://vulners.com/docs/plugins/defectdojo/).
+
+Use following [instructions](https://vulners.com/docs/apikey/) to generate Vulners API Key.
+
+More details about DefectDojo-plugin integration can be found at [vulners integrations page](https://vulners.com/plugins).
+
 
 ### Wapiti Scan
 

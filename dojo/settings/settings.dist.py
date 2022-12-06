@@ -5,6 +5,7 @@ from celery.schedules import crontab
 from dojo import __version__
 import environ
 from netaddr import IPNetwork, IPSet
+import json
 
 # See https://documentation.defectdojo.com/getting_started/configuration/ for options
 # how to tune the configuration to your needs.
@@ -60,6 +61,7 @@ env = environ.Env(
     DD_CELERY_BROKER_PORT=(int, -1),
     DD_CELERY_BROKER_PATH=(str, '/dojo.celerydb.sqlite'),
     DD_CELERY_BROKER_PARAMS=(str, ''),
+    DD_CELERY_BROKER_TRANSPORT_OPTIONS=(str, ''),
     DD_CELERY_TASK_IGNORE_RESULT=(bool, True),
     DD_CELERY_RESULT_BACKEND=(str, 'django-db'),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
@@ -174,11 +176,13 @@ env = environ.Env(
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
     # SLA Notifications via alerts and JIRA comments
-    # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature
+    # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature.
+    # If desired you can enable to only notify for Findings that are linked to JIRA issues.
+    # All three flags are moved to system_settings, will be removed from settings file
     DD_SLA_NOTIFY_ACTIVE=(bool, False),
     DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, False),
-    # finetuning settings for when enabled
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
+    # finetuning settings for when enabled
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
     # Use business day's to calculate SLA's and age instead of calendar days
@@ -244,6 +248,8 @@ env = environ.Env(
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
                                  '.html', '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
+    # Max file size for scan added via API in MB
+    DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
@@ -555,6 +561,7 @@ DOCUMENTATION_URL = env('DD_DOCUMENTATION_URL')
 # If you import thousands of Active findings through your pipeline everyday,
 # and make the choice of enabling SLA notifications for non-verified findings,
 # be mindful of performance.
+# 'SLA_NOTIFY_ACTIVE', 'SLA_NOTIFY_ACTIVE_VERIFIED_ONLY' and 'SLA_NOTIFY_WITH_JIRA_ONLY' are moved to system settings, will be removed here
 SLA_NOTIFY_ACTIVE = env('DD_SLA_NOTIFY_ACTIVE')  # this will include 'verified' findings as well as non-verified.
 SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env('DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY')
 SLA_NOTIFY_WITH_JIRA_ONLY = env('DD_SLA_NOTIFY_WITH_JIRA_ONLY')  # Based on the 2 above, but only with a JIRA link
@@ -584,13 +591,13 @@ LOGIN_EXEMPT_URLS = (
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 9,
-        }
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'dojo.user.validators.MinLengthValidator'
+    },
+    {
+        'NAME': 'dojo.user.validators.MaxLengthValidator'
     },
     {
         'NAME': 'dojo.user.validators.NumberValidator'
@@ -811,6 +818,7 @@ INSTALLED_APPS = (
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
+    'dojo.middleware.APITrailingSlashMiddleware',
     'dojo.middleware.DojoSytemSettingsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -1061,6 +1069,9 @@ CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 CELERY_TASK_SERIALIZER = env('DD_CELERY_TASK_SERIALIZER')
 CELERY_PASS_MODEL_BY_ID = env('DD_CELERY_PASS_MODEL_BY_ID')
 
+if len(env('DD_CELERY_BROKER_TRANSPORT_OPTIONS')) > 0:
+    CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env('DD_CELERY_BROKER_TRANSPORT_OPTIONS'))
+
 CELERY_IMPORTS = ('dojo.tools.tool_issue_updater', )
 
 # Celery beat scheduled tasks
@@ -1192,7 +1203,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'CycloneDX Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'SSLyze Scan (JSON)': ['title', 'description'],
     'Harbor Vulnerability Scan': ['title'],
-    'Rusty Hog Scan': ['title', 'description'],
+    'Rusty Hog Scan': ['file_path', 'payload'],
     'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'Hydra Scan': ['title', 'description'],
     'DrHeader JSON Importer': ['title', 'description'],
@@ -1201,7 +1212,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
     'BlackDuck API': ['unique_id_from_tool'],
     'docker-bench-security Scan': ['unique_id_from_tool'],
-    'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
+    'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version', 'severity'],
+    'Vulners Scan': ['vuln_id_from_tool', 'component_name'],
     'Twistlock Image Scan': ['title', 'severity', 'component_name', 'component_version'],
     'NeuVector (REST)': ['title', 'severity', 'component_name', 'component_version'],
     'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
@@ -1246,14 +1258,16 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Edgescan Scan': True,
     'Bugcrowd API Import': True,
     'Veracode SourceClear Scan': True,
+    'Vulners Scan': True,
     'Twistlock Image Scan': True,
     'Wpscan': True,
+    'Rusty Hog Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'vulnerability_ids', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'vulnerability_ids', 'line', 'file_path', 'payload', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
 
 # Adding fields to the hash_code calculation regardless of the previous settings
 HASH_CODE_FIELDS_ALWAYS = ['service']
@@ -1370,6 +1384,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
     'BlackDuck API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'docker-bench-security Scan': DEDUPE_ALGO_HASH_CODE,
+    'Vulners Scan': DEDUPE_ALGO_HASH_CODE,
     'Twistlock Image Scan': DEDUPE_ALGO_HASH_CODE,
     'NeuVector (REST)': DEDUPE_ALGO_HASH_CODE,
     'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
@@ -1505,7 +1520,7 @@ SILENCED_SYSTEM_CHECKS = ['mysql.E001']
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
-SCAN_FILE_MAX_SIZE = 100
+SCAN_FILE_MAX_SIZE = env("DD_SCAN_FILE_MAX_SIZE")
 
 # Apply a severity level to "Security Weaknesses" in Qualys WAS
 QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
@@ -1574,6 +1589,7 @@ VULNERABILITY_URLS = {
     'PYSEC': 'https://osv.dev/vulnerability/',
     'SNYK': 'https://snyk.io/vuln/',
     'RUSTSEC': 'https://rustsec.org/advisories/',
+    'VNS': 'https://vulners.com/',
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")

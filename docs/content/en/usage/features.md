@@ -232,13 +232,17 @@ details about the deduplication process : switch
 
 ### Deduplication - APIv2 parameters
 
--   `skip_duplicates`: if true, duplicates are not
+- `skip_duplicates`: if true, duplicates are not
     inserted at all
--   `close_old_findings` : if true, findings that are not
+- `close_old_findings` : if true, findings that are not
     duplicates and that were in the previous scan of the same type
-    (example ZAP) for the same product (or engagement in case of
-    \"Deduplication on engagement\") and that are not present in the new
-    scan are closed (Inactive, Verified, Mitigated)
+    (example ZAP) for the same engagement (or product in case of
+    \"close_old_findings_product_scope\") and that are not present in the new
+    scan are closed (Inactive, Verified, Mitigated). 
+- `close_old_findings_product_scope` : if true, close_old_findings applies
+    to all findings of the same type in the product. Note that
+    \"Deduplication on engagement\" is no longer used to determine the
+    scope of close_old_findings.
 
 ### Deduplication / Similar findings
 
@@ -284,24 +288,19 @@ days teams have to remediate a finding.
 
 ### SLA notification configuration
 
-There are 5 variables in the settings.py file that you can configure, to
-act on the global behavior. By default, any findings across the instance
-that are in `Active, Verified` state will be considered for
-notifications.
+There are 3 variables in the system settings that can be set for notifcations of SLA breaches.
+By default notifications are disabled.
+You can either choose to notify about breaches for findings that are only in 'Active' or
+for any findings across the instance that are in `Active, Verified`.
+Furthermore, it is possible choose to only consider findings that have a JIRA issue linked to them.
+
+There are 2 variables in the settings.py file that you can configure, to
+act on the global behavior.
 
 {{< highlight python >}}
-SLA_NOTIFY_ACTIVE = False
-SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = True
-SLA_NOTIFY_WITH_JIRA_ONLY = False
 SLA_NOTIFY_PRE_BREACH = 3
 SLA_NOTIFY_POST_BREACH = 7
 {{< / highlight >}}
-
-Setting both `SLA_NOTIFY_ACTIVE` and `SLA_NOTIFY_ACTIVE_VERIFIED_ONLY`
-to `False` will effectively disable SLA notifications.
-
-You can choose to only consider findings that have a JIRA issue linked
-to them. If so, please set `SLA_NOTIFY_WITH_JIRA_ONLY` to `True`.
 
 The `SLA_NOTIFY_PRE_BREACH` is expressed in days. Whenever a finding\'s
 \"SLA countdown\" (time to remediate) drops to this number, a
