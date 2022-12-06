@@ -232,13 +232,17 @@ details about the deduplication process : switch
 
 ### Deduplication - APIv2 parameters
 
--   `skip_duplicates`: if true, duplicates are not
+- `skip_duplicates`: if true, duplicates are not
     inserted at all
--   `close_old_findings` : if true, findings that are not
+- `close_old_findings` : if true, findings that are not
     duplicates and that were in the previous scan of the same type
-    (example ZAP) for the same product (or engagement in case of
-    \"Deduplication on engagement\") and that are not present in the new
-    scan are closed (Inactive, Verified, Mitigated)
+    (example ZAP) for the same engagement (or product in case of
+    \"close_old_findings_product_scope\") and that are not present in the new
+    scan are closed (Inactive, Verified, Mitigated). 
+- `close_old_findings_product_scope` : if true, close_old_findings applies
+    to all findings of the same type in the product. Note that
+    \"Deduplication on engagement\" is no longer used to determine the
+    scope of close_old_findings.
 
 ### Deduplication / Similar findings
 
