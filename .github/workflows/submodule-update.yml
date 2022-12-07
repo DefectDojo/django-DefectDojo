@@ -4,55 +4,25 @@ name: Update DefectDojo Inc. Documentation
 on:
   push:
     branches: [master, dev]
+    paths:
+      - docs/**
+  workflow_dispatch:
 
 jobs:
   build:
-    name: Submodule update
+    name: Run Documentation Workflow
     runs-on: ubuntu-latest
-    env:
-      PARENT_REPOSITORY: 'DefectDojo-Inc/Documentation'
-      OWNER: 'DefectDojo-Inc'
 
     steps:
-      - name: Determine target branch
-        id: branch-target
-        run: |
-          if [ ! -z ${GITHUB_BASE_REF} ]; then
-            echo "branch=${GITHUB_BASE_REF}" >> $GITHUB_ENV
-          else
-            echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-          fi
-    
-      - name: Checkout DefectDojo from dev 
-        uses: actions/checkout@v3
-        if: env.branch == 'dev'
+      - name: Trigger workflow in Documentation Repo
+        uses: actions/github-script@v6
         with:
-          ref: dev
-
-      - name: Create PR to Documentation repo on dev branch
-        id: create_dev_pr
-        uses: releasehub-com/github-action-create-pr-parent-submodule@v1
-        if: env.branch == 'dev'
-        with:
-          github_token: ${{ secrets.DOCUMENTATION_TOKEN }}
-          parent_repository: ${{ env.PARENT_REPOSITORY }}
-          checkout_branch: dev
-          pr_against_branch: dev
-          owner: ${{ env.OWNER }}
-          
-      - name: Checkout DefectDojo from master 
-        uses: actions/checkout@v3
-        if: env.branch == 'master'
-        with:
-          ref: master
-
-      - name: Create PR to Documentation repo on master branch
-        id: create_master_pr
-        uses: releasehub-com/github-action-create-pr-parent-submodule@v1
-        if: env.branch == 'master'
-        with:
-          github_token: ${{ secrets.DOCUMENTATION_TOKEN }}
-          parent_repository: ${{ env.PARENT_REPOSITORY }}
-          checkout_branch: master
-          pr_against_branch: master
-          owner: ${{ env.OWNER }}
+          github-token: ${{ secrets.DOCUMENTATION_TOKEN }}
+          script: |
+            const result = await github.rest.actions.createWorkflowDispatch({
+              owner: 'DefectDojo-Inc',
+              repo: 'Documentation',
+              workflow_id: 'deploy-gh-pages-branch.yml',
+              ref: 'master'
+            })
+            console.log(result)

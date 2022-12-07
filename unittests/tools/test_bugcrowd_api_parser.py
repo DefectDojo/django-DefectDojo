@@ -42,7 +42,10 @@ class TestBugcrowdApiParser(TestCase):
             self.assertEqual(
                 finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a"
             )
-            self.assertTrue("https://tracker.bugcrowd.com/example/submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a" in finding.references)
+            self.assertTrue(
+                "/submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a"
+                in finding.references
+            )
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
 
@@ -112,7 +115,9 @@ class TestBugcrowdApiParser(TestCase):
             )
 
     def test_parse_file_with_not_reproducible_finding(self):
-        with open("unittests/scans/bugcrowd_api/bugcrowd_not_reproducible.json") as testfile:
+        with open(
+            "unittests/scans/bugcrowd_api/bugcrowd_not_reproducible.json"
+        ) as testfile:
 
             #             description = """
             # Vulnerability Name: JWT alg none

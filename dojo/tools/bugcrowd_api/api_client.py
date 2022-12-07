@@ -44,7 +44,7 @@ class BugcrowdAPI:
             "filter[program]": program,
             "page[limit]": 100,
             "page[offset]": 0,
-            "include": "monetary_rewards,target",
+            "include": "monetary_rewards,target,program,external_issues",
             "sort": "submitted-desc",
         }
 

@@ -54,16 +54,16 @@ jobs:
             echo "changed=true" >> $GITHUB_ENV
           fi
 
-      # run all checks but version increment always when something changed
-      - name: Run chart-testing (lint)
-        run: ct lint --config ct.yaml --target-branch ${{ env.ct-branch }} --check-version-increment=false
-        if: env.changed == 'true'
-
       # run version check only if not dev as in dev we have a `x.y.z-dev` version
       # x.y.z gets bumped automatically when doing a release
       - name: Run chart-testing (lint)
         run: ct lint --config ct.yaml --target-branch ${{ env.ct-branch }} --check-version-increment=true
         if: ${{ env.changed == 'true' && env.ct-branch != 'dev' }}  
+
+      # run all checks but version increment always when something changed
+      - name: Run chart-testing (lint)
+        run: ct lint --config ct.yaml --target-branch ${{ env.ct-branch }} --check-version-increment=false
+        if: env.changed == 'true'
 
       # - name: Create kind cluster
       #  uses: helm/kind-action@v1.1.0
