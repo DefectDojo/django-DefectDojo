@@ -135,6 +135,8 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ''),
     DD_SAML2_ENABLED=(bool, False),
+    # Allows to override default SAML authentication backend. Check https://djangosaml2.readthedocs.io/contents/setup.html#custom-user-attributes-processing
+    DD_SAML2_AUTHENTICATION_BACKENDS=(str, 'djangosaml2.backends.Saml2Backend'),
     # Force Authentication to make SSO possible with SAML2
     DD_SAML2_FORCE_AUTH=(bool, True),
     DD_SAML2_LOGIN_BUTTON_TEXT=(str, 'Login with SAML'),
@@ -883,7 +885,7 @@ if SAML2_ENABLED:
         SAML_METADATA['local'] = [env('DD_SAML2_METADATA_LOCAL_FILE_PATH')]
     INSTALLED_APPS += ('djangosaml2',)
     MIDDLEWARE.append('djangosaml2.middleware.SamlSessionMiddleware')
-    AUTHENTICATION_BACKENDS += ('djangosaml2.backends.Saml2Backend',)
+    AUTHENTICATION_BACKENDS += env('DD_SAML2_AUTHENTICATION_BACKENDS',)
     LOGIN_EXEMPT_URLS += (r'^%ssaml2/' % URL_PREFIX,)
     SAML_LOGOUT_REQUEST_PREFERRED_BINDING = saml2.BINDING_HTTP_POST
     SAML_IGNORE_LOGOUT_ERRORS = True
