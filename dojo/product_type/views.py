@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
+from django.utils.translation import gettext as _
 from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Type_MemberForm, \
     Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm, Add_Product_Type_GroupForm, \
@@ -41,9 +42,11 @@ def product_type(request):
 
     pts.object_list = prefetch_for_product_type(pts.object_list)
 
-    add_breadcrumb(title="Product Type List", top_level=True, request=request)
+    page_name = _("Product Type List")
+    add_breadcrumb(title=page_name, top_level=True, request=request)
+
     return render(request, 'dojo/product_type.html', {
-        'name': 'Product Type List',
+        'name': page_name,
         'pts': pts,
         'ptl': ptl,
         'name_words': name_words})
@@ -69,6 +72,7 @@ def prefetch_for_product_type(prod_types):
 
 @user_has_global_permission(Permissions.Product_Type_Add)
 def add_product_type(request):
+    page_name = _("Add Product Type")
     form = Product_TypeForm()
     if request.method == 'POST':
         form = Product_TypeForm(request.POST)
@@ -81,29 +85,31 @@ def add_product_type(request):
             member.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Product type added successfully.',
+                                 _('Product type added successfully.'),
                                  extra_tags='alert-success')
             create_notification(event='product_type_added', title=product_type.name,
                                 product_type=product_type,
                                 url=reverse('view_product_type', args=(product_type.id,)))
             return HttpResponseRedirect(reverse('product_type'))
-    add_breadcrumb(title="Add Product Type", top_level=False, request=request)
+    add_breadcrumb(title=page_name, top_level=False, request=request)
+
     return render(request, 'dojo/new_product_type.html', {
-        'name': 'Add Product Type',
+        'name': page_name,
         'form': form,
     })
 
 
 @user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid')
 def view_product_type(request, ptid):
+    page_name = _("View Product Type")
     pt = get_object_or_404(Product_Type, pk=ptid)
     members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_View)
     groups = get_authorized_groups_for_product_type(pt, Permissions.Product_Type_View)
     products = get_authorized_products(Permissions.Product_View).filter(prod_type=pt)
     products = get_page_items(request, products, 25)
-    add_breadcrumb(title="View Product Type", top_level=False, request=request)
+    add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, 'dojo/view_product_type.html', {
-        'name': 'View Product Type',
+        'name': page_name,
         'pt': pt,
         'products': products,
         'groups': groups,
