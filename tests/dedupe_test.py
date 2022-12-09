@@ -145,9 +145,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 1").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        # active and verified:
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_1.json")
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
@@ -162,8 +159,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 2").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_2.json")
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
@@ -222,9 +217,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoint Test 1").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        # active and verified
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
@@ -236,9 +228,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoint Test 2").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        # active and verified
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_2.xml")
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
@@ -292,8 +281,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Same Eng Test 1").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
@@ -305,8 +292,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Same Eng Test 2").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
@@ -364,8 +349,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 1").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         # os.path.realpath makes the path canonical
         driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
@@ -378,8 +361,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 2").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings_line_changed.xml"))
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
@@ -443,8 +424,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Immuniweb Test").click()
         driver.find_element(By.CSS_SELECTOR, "b.fa.fa-ellipsis-v").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan Results").click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
@@ -456,8 +435,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Generic Test").click()
         driver.find_element(By.CSS_SELECTOR, "b.fa.fa-ellipsis-v").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan Results").click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
@@ -480,8 +457,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 1").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
@@ -493,8 +468,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 2").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
@@ -515,8 +488,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 1").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_service').send_keys("service_1")
         driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
@@ -529,8 +500,6 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Path Test 2").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[3]/div/div').click()
-        driver.find_element(By.XPATH, '//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element(By.ID, 'id_service').send_keys("service_2")
         driver.find_element(By.ID, 'id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()

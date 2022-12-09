@@ -27,7 +27,7 @@ class HorusecParser(object):
 
     def get_findings(self, filename, test):
         data = json.load(filename)
-        report_date = datetime.strptime(data.get("createdAt")[0:9], "%Y-%m-%d")
+        report_date = datetime.strptime(data.get("createdAt")[0:10], "%Y-%m-%d")
         return [self._get_finding(node, report_date) for node in data.get("analysisVulnerabilities")]
 
     def get_tests(self, scan_type, scan):
