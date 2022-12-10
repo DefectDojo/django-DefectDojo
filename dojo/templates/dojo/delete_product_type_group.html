@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block content %}
-<h3> Delete a Product Type Group </h3>
+<h3>{{ name }}</h3>
 <form class="form-horizontal" action="{%  url 'delete_product_type_group' groupid %}" method="post">{% csrf_token %}
   {% include "dojo/form_fields.html" with form=form %}
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-      <input class="btn btn-danger" type="submit" value="Delete"/>
+      <input class="btn btn-danger" type="submit" value="{% trans "Delete" %}"/>
     </div>
   </div>
 </form>
