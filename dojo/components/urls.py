@@ -1,7 +1,7 @@
-from django.conf.urls import url
+from django.urls import re_path
 from dojo.components import views
 
 urlpatterns = [
-        url(r'^components$', views.components,
+        re_path(r'^components$', views.components,
      name='components'),
 ]
