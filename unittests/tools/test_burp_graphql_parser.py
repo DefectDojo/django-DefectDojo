@@ -22,7 +22,7 @@ class TestBurpGraphQLParser(DojoTestCase):
             self.assertIn("remediation 1", findings[0].mitigation)
             self.assertIn("issue description 1", findings[0].impact)
             self.assertIn("issue remediation 1", findings[0].mitigation)
-            self.assertEquals('High', findings[0].severity)
+            self.assertEqual('High', findings[0].severity)
             self.assertEqual(1, len(findings[0].unsaved_endpoints))
             self.assertEqual('www.test.com', findings[0].unsaved_endpoints[0].host)
             self.assertEqual('path', findings[0].unsaved_endpoints[0].path)

@@ -1057,7 +1057,7 @@ class TestDuplicationLogic(DojoTestCase):
         # should we do the same for out_of_scope? risk accepted?
         # should this be part of the dedupe process? or seperate as in false_p history?
         self.assert_finding(finding_new, not_pk=22, duplicate=True, duplicate_finding_id=finding_22.id, hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, True)
+        self.assertEqual(finding_new.false_p, True)
 
     def test_false_positive_history_with_dedupe_no_endpoints_title_matches_but_not_hash_code(self):
         self.enable_false_positive_history()
@@ -1073,7 +1073,7 @@ class TestDuplicationLogic(DojoTestCase):
 
         # dedupe is enabled, hash_code doesn't matches, so new finding not marked as duplicate and also not recognized by false positive history
         self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, False)
+        self.assertEqual(finding_new.false_p, False)
 
     def test_false_positive_history_with_dedupe_no_endpoints_cwe_matches_but_not_hash_code(self):
         self.enable_false_positive_history()
@@ -1089,7 +1089,7 @@ class TestDuplicationLogic(DojoTestCase):
 
         # dedupe is enabled, hash_code doesn't matches, so new finding not marked as duplicate and also not recognized by false positive history
         self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, False)
+        self.assertEqual(finding_new.false_p, False)
 
     def test_false_positive_history_without_dedupe_no_endpoints_identical(self):
         self.enable_dedupe(enable=False)
@@ -1105,7 +1105,7 @@ class TestDuplicationLogic(DojoTestCase):
 
         # dedupe is disabled, hash_code matches, so marked as false positive
         self.assert_finding(finding_new, not_pk=22, duplicate=False, hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, True)
+        self.assertEqual(finding_new.false_p, True)
 
     def test_false_positive_history_without_dedupe_no_endpoints_title_matches_but_not_hash_code(self):
         self.enable_dedupe(enable=False)
@@ -1121,7 +1121,7 @@ class TestDuplicationLogic(DojoTestCase):
 
         # dedupe is disabled, hash_code doesn't matches, so not marked as false positive
         self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, False)
+        self.assertEqual(finding_new.false_p, False)
 
     def test_false_positive_history_without_dedupe_no_endpoints_cwe_matches_but_not_hash_code(self):
         self.enable_dedupe(enable=False)
@@ -1137,7 +1137,7 @@ class TestDuplicationLogic(DojoTestCase):
 
         # dedupe is enabled, hash_code doesn't matches, so new finding not marked as duplicate and also not recognized by false positive history
         self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, False)
+        self.assertEqual(finding_new.false_p, False)
 
     #  false positive history with endpoints
 
@@ -1161,7 +1161,7 @@ class TestDuplicationLogic(DojoTestCase):
         # dedupe is enabled, hash_code mismatche due to endpoints, so new finding not marked as duplicate AND copies false positive True from original even with mismatching endpoints
         # feature or BUG? false positive status is copied when dedupe says it's not a dupe and endpoints are mismatching
         self.assert_finding(finding_new, not_pk=22, duplicate=False, hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, True)
+        self.assertEqual(finding_new.false_p, True)
 
     def test_false_positive_history_with_dedupe_with_endpoints_title_matches_but_not_hash_code(self):
         self.enable_false_positive_history()
@@ -1185,7 +1185,7 @@ class TestDuplicationLogic(DojoTestCase):
         # dedupe is enabled, hash_code doesn't matches, so new finding not marked as duplicate but it IS recognized by false positive history because of the title matching
         # feature or BUG? false positive status is copied when dedupe says it's not a dupe and endpoints are mismatching
         self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, True)
+        self.assertEqual(finding_new.false_p, True)
 
     def test_false_positive_history_with_dedupe_with_endpoints_cwe_matches_but_not_hash_code(self):
         self.enable_false_positive_history()
@@ -1210,7 +1210,7 @@ class TestDuplicationLogic(DojoTestCase):
         # dedupe is enabled, hash_code doesn't matches, so new finding not marked as duplicate but it IS recognized by false positive history because of the cwe matching
         # feature or BUG? false positive status is copied when dedupe says it's not a dupe and endpoints are mismatching
         self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, True)
+        self.assertEqual(finding_new.false_p, True)
 
     def test_false_positive_history_without_dedupe_with_endpoints_identical(self):
         self.enable_dedupe(enable=False)
@@ -1233,7 +1233,7 @@ class TestDuplicationLogic(DojoTestCase):
 
         # dedupe is disabled, hash_code matches, so marked as false positive
         self.assert_finding(finding_new, not_pk=22, duplicate=False, hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, True)
+        self.assertEqual(finding_new.false_p, True)
 
     def test_false_positive_history_without_dedupe_with_endpoints_title_matches_but_not_hash_code(self):
         self.enable_dedupe(enable=False)
@@ -1258,7 +1258,7 @@ class TestDuplicationLogic(DojoTestCase):
         # dedupe is disabled, hash_code doesn't matches, but it IS recognized by false positive history because of the title matching
         # feature or BUG? false positive status is copied when dedupe says it's not a dupe and endpoints are mismatching
         self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, True)
+        self.assertEqual(finding_new.false_p, True)
 
     def test_false_positive_history_without_dedupe_with_endpoints_cwe_matches_but_not_hash_code(self):
         self.enable_dedupe(enable=False)
@@ -1284,7 +1284,7 @@ class TestDuplicationLogic(DojoTestCase):
         # dedupe is disabled, hash_code doesn't matches, so new finding not marked as duplicate but it IS recognized by false positive history because of the cwe matching
         # feature or BUG? false positive status is copied when dedupe says it's not a dupe and endpoints are mismatching
         self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
-        self.assertEquals(finding_new.false_p, True)
+        self.assertEqual(finding_new.false_p, True)
 
     # # some extra tests
 
