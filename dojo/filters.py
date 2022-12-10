@@ -2135,7 +2135,7 @@ class LogEntryFilter(DojoFilter):
                    'changes', 'additional_data', 'remote_addr']
         filter_overrides = {
             JSONField: {
-                'filterset_class': CharFilter,
+                'filter_class': CharFilter,
                 'extra': lambda f: {
                     'lookup_expr': 'icontains',
                 }
