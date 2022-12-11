@@ -3,9 +3,9 @@ from dojo.models import Finding, Dojo_User
 from django.db import models
 from django.conf import settings
 
-from ratelimit.exceptions import Ratelimited
-from ratelimit.core import is_ratelimited
-from ratelimit import ALL
+from django_ratelimit.exceptions import Ratelimited
+from django_ratelimit.core import is_ratelimited
+from django_ratelimit import ALL
 
 import logging
 
