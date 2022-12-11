@@ -32,7 +32,7 @@ from django.contrib.auth.models import Permission
 from django.utils import timezone
 from django.db.utils import IntegrityError
 import six
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 import json
 import dojo.jira_link.helper as jira_helper
 import logging
