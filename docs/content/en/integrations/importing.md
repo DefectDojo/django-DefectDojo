@@ -59,7 +59,7 @@ An import can be performed by specifying the names of these entities in the API 
 {
     "minimum_severity": 'Info',
     "active": True,
-    "verified": Trued,
+    "verified": True,
     "scan_type": 'ZAP Scan',
     "test_title": 'Manual ZAP Scan by John',
     "product_type_name": 'Good Products',
@@ -77,7 +77,7 @@ A classic way of importing a scan is by specifying the ID of the engagement inst
 {
     "minimum_severity": 'Info',
     "active": True,
-    "verified": Trued,
+    "verified": True,
     "scan_type": 'ZAP Scan',
     "test_title": 'Manual ZAP Scan by John',
     "engagement": 123,
@@ -95,7 +95,7 @@ An reimport can be performed by specifying the names of these entities in the AP
 {
     "minimum_severity": 'Info',
     "active": True,
-    "verified": Trued,
+    "verified": True,
     "scan_type": 'ZAP Scan',
     "test_title": 'Manual ZAP Scan by John',
     "product_type_name": 'Good Products',
@@ -120,7 +120,7 @@ A classic way of reimporting a scan is by specifying the ID of the test instead:
 {
     "minimum_severity": 'Info',
     "active": True,
-    "verified": Trued,
+    "verified": True,
     "scan_type": 'ZAP Scan',
     "test": 123,
 }
