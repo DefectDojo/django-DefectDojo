@@ -7,7 +7,6 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 SEVERITY = 'Info'
-NO_IMPACT = "In your code no call of these vulnerable function, but they in call stack of other function"
 
 
 class GovulncheckParser:
@@ -23,41 +22,47 @@ class GovulncheckParser:
 
     @staticmethod
     def get_location(data, node):
+        while data['Calls']['Functions'][str(node)]['CallSites'][0]['Parent'] != 1:
+            node = data['Calls']['Functions'][str(node)]['CallSites'][0]['Parent']
         return [f"{x['Pos']['Filename']}:{x['Pos']['Line']}:{x['Pos']['Column']}" for x in
-                data['Calls']['Functions'][str(node)]['CallSites'] if x['Parent'] == 1]
+                data['Calls']['Functions'][str(node)]['CallSites']]
+
+    @staticmethod
+    def get_version(data, node):
+        return data['Requires']['Modules'][str(node)]['Version']
 
     def get_findings(self, scan_file, test):
         findings = []
-        scan_data = scan_file.read()
-        # remove intro from developer
-        scan_data = scan_data[scan_data.find(b'{'):]
         try:
-            data = json.loads(scan_data)
-        except Exception:
+            data = json.load(scan_file)
+        except Exception as e:
+            logger.warning("Invalid JSON format. %r", e)
             return findings
         else:
-            list_vulns = data['Vulns']
-
-            for cve, elems in groupby(list_vulns, key=lambda vuln: vuln['OSV']['aliases'][0]):
-                try:
-                    d = dict()
-                    first_elem = list(islice(elems, 1))
-                    d['cve'] = cve
-                    d['severity'] = SEVERITY
-                    d['title'] = first_elem[0]['OSV']['id']
-                    d['component_name'] = first_elem[0]['OSV']['affected'][0]['package']['name']
-                    d['references'] = first_elem[0]['OSV']['references'][0]['url']
-                    d['url'] = first_elem[0]['OSV']['affected'][0]['database_specific']['url']
-                    vuln_methods = set(
-                        first_elem[0]['OSV']['affected'][0]['ecosystem_specific']['imports'][0]['symbols'])
-                    impact = set(self.get_location(data, first_elem[0]['CallSink']))
-                    for elem in elems:
-                        impact.update(self.get_location(data, elem['CallSink']))
-                        vuln_methods.update(elem['OSV']['affected'][0]['ecosystem_specific']['imports'][0]['symbols'])
-                except Exception as e:
-                    logger.warning('Skip vulnerability due %r', e)
-                    continue
-                d['impact'] = '; '.join(impact) if impact else NO_IMPACT
-                d['description'] = f"Vulnerable functions: {'; '.join(vuln_methods)}"
-                findings.append(Finding(**d))
+            if data['Vulns']:
+                list_vulns = data['Vulns']
+                for cve, elems in groupby(list_vulns, key=lambda vuln: vuln['OSV']['aliases'][0]):
+                    try:
+                        d = dict()
+                        first_elem = list(islice(elems, 1))
+                        d['cve'] = cve
+                        d['severity'] = SEVERITY
+                        d['title'] = first_elem[0]['OSV']['id']
+                        d['component_name'] = first_elem[0]['OSV']['affected'][0]['package']['name']
+                        d['component_version'] = self.get_version(data, first_elem[0]['RequireSink'])
+                        d['references'] = first_elem[0]['OSV']['references'][0]['url']
+                        d['url'] = first_elem[0]['OSV']['affected'][0]['database_specific']['url']
+                        vuln_methods = set(
+                            first_elem[0]['OSV']['affected'][0]['ecosystem_specific']['imports'][0]['symbols'])
+                        impact = set(self.get_location(data, first_elem[0]['CallSink']))
+                        for elem in elems:
+                            impact.update(self.get_location(data, elem['CallSink']))
+                            vuln_methods.update(
+                                elem['OSV']['affected'][0]['ecosystem_specific']['imports'][0]['symbols'])
+                    except Exception as e:
+                        logger.warning('Skip vulnerability due %r', e)
+                        continue
+                    d['impact'] = '; '.join(impact) if impact else None
+                    d['description'] = f"Vulnerable functions: {'; '.join(vuln_methods)}"
+                    findings.append(Finding(**d))
             return findings
