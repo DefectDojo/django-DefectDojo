@@ -1662,7 +1662,8 @@ class Endpoint(models.Model):
                           Q(finding__out_of_scope=True) |
                           Q(finding__mitigated__isnull=False) |
                           Q(finding__false_p=True) |
-                          Q(finding__duplicate=True))
+                          Q(finding__duplicate=True) |
+                          Q(finding__active=False))
         return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
     @property
