@@ -161,7 +161,7 @@ services:
     volumes:
        - defectdojo_rabbitmq:/var/lib/rabbitmq
   redis:
-    image: redis:7.0.5-alpine@sha256:518c024ec78b3074917bad2d40863e882e5297d65587e6d7c6e0b7281d9b8270
+    image: redis:7.0.6-alpine@sha256:5bafd88139e6063c1e8114b06f1474e93db2c40bd3709ade8efbb5046f7aa5dc
     profiles: 
       - mysql-redis
       - postgres-redis
