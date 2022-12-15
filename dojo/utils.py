@@ -1538,10 +1538,10 @@ class Product_Tab():
                                                           out_of_scope=False,
                                                           active=True,
                                                           mitigated__isnull=True).count()
-        self.endpoints_count = Endpoint.objects.filter(
-            product=self.product).count()
-        self.endpoint_hosts_count = Endpoint.objects.filter(
-            product=self.product).values('host').distinct().count()
+        active_endpoints = Endpoint.objects.filter(
+            product=self.product, finding__active=True, finding__mitigated__isnull=True)
+        self.endpoints_count = active_endpoints.distinct().count()
+        self.endpoint_hosts_count = active_endpoints.values('host').distinct().count()
         self.benchmark_type = Benchmark_Type.objects.filter(
             enabled=True).order_by('name')
         self.engagement = None
