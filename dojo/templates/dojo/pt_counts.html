@@ -18,7 +18,8 @@
     </form>
     <br/>
     {% if pt %}
-        <h2>{% blocktrans %}Finding Information For Period of {{ start_date.date }} - {{ end_date.date }}{% endblocktrans %}</h2>
+        <h2>{% blocktrans with start_date=start_date.date end_date=end_date.date%}Finding Information For Period of {{ start_date }} - {{ end_date }}
+            {% endblocktrans %}</h2>
         <h3 class="inline-block">{{ pt.name }}</h3> [
         <a href="{% url 'product_type_metrics' pt.id %}" class="inline-block">{% trans "View Details" %}</a>]
         <div class="panel panel-default table-responsive">
