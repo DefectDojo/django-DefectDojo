@@ -32,7 +32,7 @@ from django.contrib.auth.models import Permission
 from django.utils import timezone
 from django.db.utils import IntegrityError
 import six
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 import json
 import dojo.jira_link.helper as jira_helper
 import logging
@@ -1485,8 +1485,8 @@ class ImportScanSerializer(serializers.Serializer):
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
         default='Info', help_text='Minimum severity level to be imported')
-    active = serializers.BooleanField(default=True, help_text="Select if these findings are currently active.")
-    verified = serializers.BooleanField(default=True, help_text="Select if these findings have been verified.")
+    active = serializers.BooleanField(help_text="Override the active setting from the tool.")
+    verified = serializers.BooleanField(help_text="Override the verified setting from the tool.")
     scan_type = serializers.ChoiceField(
         choices=get_choices_sorted())
     # TODO why do we allow only existing endpoints?
@@ -1547,8 +1547,6 @@ class ImportScanSerializer(serializers.Serializer):
         data = self.validated_data
         close_old_findings = data.get('close_old_findings')
         close_old_findings_product_scope = data.get('close_old_findings_product_scope')
-        active = data.get('active')
-        verified = data.get('verified')
         minimum_severity = data.get('minimum_severity')
         endpoint_to_add = data.get('endpoint_to_add')
         scan_date = data.get('scan_date', None)
@@ -1560,6 +1558,15 @@ class ImportScanSerializer(serializers.Serializer):
         api_scan_configuration = data.get('api_scan_configuration', None)
         service = data.get('service', None)
         source_code_management_uri = data.get('source_code_management_uri', None)
+
+        if 'active' in self.initial_data:
+            active = data.get('active')
+        else:
+            active = None
+        if 'verified' in self.initial_data:
+            verified = data.get('verified')
+        else:
+            verified = None
 
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
@@ -1639,8 +1646,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
         default='Info', help_text='Minimum severity level to be imported')
-    active = serializers.BooleanField(default=True, help_text="Select if these findings are currently active.")
-    verified = serializers.BooleanField(default=True, help_text="Select if these findings have been verified.")
+    active = serializers.BooleanField(help_text="Override the active setting from the tool.")
+    verified = serializers.BooleanField(help_text="Override the verified setting from the tool.")
     help_do_not_reactivate = 'Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs.'
     do_not_reactivate = serializers.BooleanField(default=False, required=False, help_text=help_do_not_reactivate)
     scan_type = serializers.ChoiceField(
@@ -1709,8 +1716,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan_date = data.get('scan_date', None)
         close_old_findings = data.get('close_old_findings')
         close_old_findings_product_scope = data.get('close_old_findings_product_scope')
-        verified = data.get('verified')
-        active = data.get('active')
         do_not_reactivate = data.get('do_not_reactivate', False)
         version = data.get('version', None)
         build_id = data.get('build_id', None)
@@ -1727,6 +1732,15 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         source_code_management_uri = data.get('source_code_management_uri', None)
         engagement_end_date = data.get('engagement_end_date', None)
 
+        if 'active' in self.initial_data:
+            active = data.get('active')
+        else:
+            active = None
+        if 'verified' in self.initial_data:
+            verified = data.get('verified')
+        else:
+            verified = None
+
         group_by = data.get('group_by', None)
         create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)
 
@@ -1739,6 +1753,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         # have to make the scan_date_time timezone aware otherwise uploads via the API would fail (but unit tests for api upload would pass...)
         scan_date_time = timezone.make_aware(datetime.combine(scan_date, datetime.min.time())) if scan_date else None
         statistics_before, statistics_delta = None, None
+
         try:
             if test:
                 # reimport into provided / latest test

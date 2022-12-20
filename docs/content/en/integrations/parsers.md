@@ -415,17 +415,17 @@ Import Edgescan vulnerabilities by JSON file or API - no file required.
 
 Follow these steps to setup API importing:
 
-1.  Configure the Edgescan Authentication details by navigating to
-    Configuration / Tool Configuration, selecting the Tool Type to "Edgescan",
-    and Authentication Type "API Key". Paste your Edgescan API key in the
-    "API Key" field.
-2.  In the Product settings select "Add API Scan Configuration" and select the
-    previously added Edgescan Tool Configuration. Provide the ID
-    of the asset from which to import findings in the field *Service key 1*.
-3.  After this is done, you can import the findings by selecting 
-    "Edgescan Scan" as the scan type. If you have more than one asset 
-    configured, you must also select which Edgescan API Scan Configuration to 
-    use.
+1.  Configure the Edgescan authentication details by navigating to
+    `Configuration -> Tool Configuration -> Add Tool Configuration`. Enter a `Name`,
+    select the `Tool Type` "Edgescan", `Authentication Type` "API Key", paste 
+    your Edgescan API key in the `API Key` field, and click `Submit`.
+2.  In the `Product` settings select `Add API Scan Configuration` and select the
+    previously added Edgescan tool configuration. Provide the edgescan asset ID(s)
+    that you wish to import the findings for in the field `Service key 1`. 
+    *Multiple asset IDs should be comma separated with no spacing.*
+3.  After this is done, you can import the findings on the `Product` page through
+    `Findings -> Import Scan Results`. Select "Edgescan Scan" as the `Scan type`,
+    the API scan configuration from the last step, and click `Import`.
 
 ### ESLint
 

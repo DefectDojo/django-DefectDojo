@@ -12,11 +12,11 @@ class TestJfrogJFrogXrayParser(DojoTestCase):
         testfile.close()
         self.assertEqual(1, len(findings))
         item = findings[0]
-        self.assertEquals("debian:stretch:libx11", item.component_name)
-        self.assertEquals("2:1.6.4-3", item.component_version)
+        self.assertEqual("debian:stretch:libx11", item.component_name)
+        self.assertEqual("2:1.6.4-3", item.component_version)
         self.assertEqual(1, len(item.unsaved_vulnerability_ids))
-        self.assertEquals("CVE-2018-14600", item.unsaved_vulnerability_ids[0])
-        self.assertEquals(787, item.cwe)
+        self.assertEqual("CVE-2018-14600", item.unsaved_vulnerability_ids[0])
+        self.assertEqual(787, item.cwe)
 
     def test_parse_file_with_many_vulns(self):
         testfile = open("unittests/scans/jfrogxray/many_vulns.json")
@@ -61,8 +61,8 @@ class TestJfrogJFrogXrayParser(DojoTestCase):
 
     def test_decode_cwe_number(self):
         with self.subTest(val="CWE-1234"):
-            self.assertEquals(1234, decode_cwe_number("CWE-1234"))
+            self.assertEqual(1234, decode_cwe_number("CWE-1234"))
         with self.subTest(val=""):
-            self.assertEquals(0, decode_cwe_number(""))
+            self.assertEqual(0, decode_cwe_number(""))
         with self.subTest(val="cwe-1"):
-            self.assertEquals(1, decode_cwe_number("cwe-1"))
+            self.assertEqual(1, decode_cwe_number("cwe-1"))

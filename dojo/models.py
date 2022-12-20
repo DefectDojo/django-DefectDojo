@@ -1404,9 +1404,9 @@ class Endpoint_Status(models.Model):
     def age(self):
 
         if self.mitigated:
-            diff = self.mitigated_time.date() - self.date.date()
+            diff = self.mitigated_time.date() - self.date
         else:
-            diff = get_current_date() - self.date.date()
+            diff = get_current_date() - self.date
         days = diff.days
         return days if days > 0 else 0
 
@@ -1662,7 +1662,8 @@ class Endpoint(models.Model):
                           Q(finding__out_of_scope=True) |
                           Q(finding__mitigated__isnull=False) |
                           Q(finding__false_p=True) |
-                          Q(finding__duplicate=True))
+                          Q(finding__duplicate=True) |
+                          Q(finding__active=False))
         return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
     @property

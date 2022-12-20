@@ -94,7 +94,7 @@ class TagTests(DojoAPITestCase):
         response = self.put_finding_remove_tags_api(finding_id, tags_remove)
 
         # for some reason this method returns just a message, not the remaining tags
-        self.assertEquals(response['success'], 'Tag(s) Removed')
+        self.assertEqual(response['success'], 'Tag(s) Removed')
 
         # retrieve finding and check
         tags_merged = list(set(tags) - set(tags_remove))
@@ -114,7 +114,7 @@ class TagTests(DojoAPITestCase):
         response = self.put_finding_remove_tags_api(finding_id, tags_remove)
 
         # for some reason this method returns just a message, not the remaining tags
-        self.assertEquals(response['success'], 'Tag(s) Removed')
+        self.assertEqual(response['success'], 'Tag(s) Removed')
 
         # retrieve finding and check
         tags_merged = list(set(tags) - set(tags_remove))
@@ -134,7 +134,7 @@ class TagTests(DojoAPITestCase):
         response = self.put_finding_remove_tags_api(finding_id, tags_remove, expected_response_status_code=400)
 
         # for some reason this method returns just a message, not the remaining tags
-        self.assertEquals(response['error'], '\'tag5\' is not a valid tag in list')
+        self.assertEqual(response['error'], '\'tag5\' is not a valid tag in list')
 
         # retrieve finding and check
         tags_merged = list(set(tags) - set(tags_remove))

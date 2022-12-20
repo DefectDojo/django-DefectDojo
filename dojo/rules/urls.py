@@ -1,12 +1,12 @@
-from django.conf.urls import url
+from django.urls import re_path
 from dojo.rules import views
 
 urlpatterns = [
-    url(r'^rules', views.rules, name='rules'),
-    url(r'^rule/add', views.new_rule, name='Add Rule'),
-    url(r'^rule/(?P<pid>\d+)/edit$', views.edit_rule,
+    re_path(r'^rules', views.rules, name='rules'),
+    re_path(r'^rule/add', views.new_rule, name='Add Rule'),
+    re_path(r'^rule/(?P<pid>\d+)/edit$', views.edit_rule,
         name='Edit Rule'),
-    url(r'^rule/(?P<pid>\d+)/add_child', views.add_child,
+    re_path(r'^rule/(?P<pid>\d+)/add_child', views.add_child,
         name='Add Child'),
-    url(r'^rule/(?P<tid>\d+)/delete$', views.delete_rule,
+    re_path(r'^rule/(?P<tid>\d+)/delete$', views.delete_rule,
         name='Delete Rule'), ]
