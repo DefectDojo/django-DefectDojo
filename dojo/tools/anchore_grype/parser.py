@@ -57,6 +57,7 @@ class AnchoreGrypeParser(object):
             artifact_version = artifact.get('version')
             artifact_purl = artifact.get('purl')
             artifact_location = artifact.get('locations')
+            file_path = None
             if artifact_location and len(artifact_location) > 0 and artifact_location[0].get('path'):
                 file_path = artifact_location[0].get('path')
 
