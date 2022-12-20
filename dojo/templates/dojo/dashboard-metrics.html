@@ -27,7 +27,7 @@
     {{ block.super }}
     <div class="row navbar-fixed-top">
         <div class="col-md-12">
-            <h2>{% blocktrans %}{{ name }} for {{ start_date.date }} - {{ end_date.date }}{% endblocktrans %}
+            <h2>{% blocktrans with start_date=start_date.date end_date=end_date.date%}{{ name }} for {{ start_date }} - {{ end_date }}{% endblocktrans %}
                 <a class="btn close pull-right" href="{% url 'metrics' %}" aria-hidden="true">&times;</a>
                 <div class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -101,7 +101,7 @@
         {% if top_ten_products %}
             <div class="col-md-12 section-start">
                 <div class="panel panel-default">
-                    <div class="panel-heading">{% blocktrans %}Top {{ top_ten_products|length }} Products By Bug Severity{% endblocktrans %}</div>
+                    <div class="panel-heading">{% blocktrans with length=top_ten_products|length %}Top {{ length }} Products By Bug Severity{% endblocktrans %}</div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
                         <div id="top-ten" class="graph"></div>
