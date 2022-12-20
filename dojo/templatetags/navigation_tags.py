@@ -38,7 +38,7 @@ def url_replace(request, field='page', value=1):
 @register.simple_tag
 def dojo_sort(request, display='Name', value='title', default=None):
     field = 'o'
-    icon = '<i class="fa fa-sort'
+    icon = '<i class="fa-solid fa-sort'
     title = 'Click to sort '
     if field in request.GET:
         if value in request.GET[field]:

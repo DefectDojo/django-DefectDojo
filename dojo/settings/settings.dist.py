@@ -810,7 +810,8 @@ INSTALLED_APPS = (
     'social_django',
     'drf_yasg',
     'drf_spectacular',
-    'tagulous'
+    'tagulous',
+    'fontawesomefree'
 )
 
 # ------------------------------------------------------------------------------

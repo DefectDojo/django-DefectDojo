@@ -13,19 +13,19 @@
                             {% if "dojo.add_jira_instance"|has_configuration_permission %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                 <li role="presentation">
                                     <a href="{% url 'express_jira' %}">
-                                        <i class="fa fa-plus"></i> Add Jira Instance (Express)
+                                        <i class="fa-solid fa-plus"></i> Add Jira Instance (Express)
                                     </a>
                                 </li>
                                 <li role="presentation">
                                     <a href="{% url 'add_jira' %}">
-                                        <i class="fa fa-plus"></i> Add Jira Instance
+                                        <i class="fa-solid fa-plus"></i> Add Jira Instance
                                     </a>
                                 </li>
                             </ul>
@@ -63,7 +63,7 @@
                                 </td>
                                 <td>
                                     <a href="{{ jira_instance.url }}">{{ jira_instance.url }}
-                                    <i class="fa fa-external-link" aria-hidden="true"></i>
+                                    <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
                                     </a>
                                 </td>
                                 <td>
@@ -72,13 +72,13 @@
                                 <td>
                                     {% if "dojo.change_jira_instance"|has_configuration_permission %}
                                     <a href="{% url 'edit_jira' jira_instance.id %}" class="btn btn-sm btn-warning">
-                                        <i class="fa fa-pencil"></i>
+                                        <i class="fa-solid fa-file"></i>
                                         Edit
                                     </a>
                                     {% endif %}
                                     {% if "dojo.delete_jira_instance"|has_configuration_permission %}
                                     <a href="{% url 'delete_jira' jira_instance.id %}" class="btn btn-sm btn-danger">
-                                        <i class="fa fa-trash" style="color:white"></i>
+                                        <i class="fa-solid fa-trash" style="color:white"></i>
                                         Delete
                                     </a>
                                     {% endif %}
