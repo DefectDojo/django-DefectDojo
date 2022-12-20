@@ -168,7 +168,7 @@
                                  start="{{ c_prod.calc_health }}"></div>
                             <div>
                                 {% if c_prod.critical_present and c_prod.high_present %}
-                                    <p>{% blocktranslate %}{{ c_prod.name }} is affected by <b>both</b> critical and
+                                    <p>{% blocktranslate with name=c_prod.name%}{{ name }} is affected by <b>both</b> critical and
                                         high severity vulnerabilities.{% endblocktranslate %} </p>
                                     <p>
                                         <a href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
@@ -177,15 +177,15 @@
                                         <a href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
                                             {% trans "High Severity Vulnerabilities" %}</a></p>
                                 {% elif c_prod.critical_present %}
-                                    <p>{% blocktranslate %}
-                                        {{ c_prod.name }} is affected by critical vulnerabilities.{% endblocktranslate %}
+                                    <p>{% blocktranslate with name=c_prod.name%}
+                                        {{ name }} is affected by critical vulnerabilities.{% endblocktranslate %}
                                     </p>
                                     <p>
                                         <a href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
                                             {% trans "Critical Severity Vulnerabilities" %}</a></p>
                                 {% elif c_prod.high_present %}
-                                    <p>{% blocktranslate %}
-                                        {{ c_prod.name }} is affected by high severity vulnerabilities.{% endblocktranslate %}
+                                    <p>{% blocktranslate with name=c_prod.name%}
+                                        {{ name }} is affected by high severity vulnerabilities.{% endblocktranslate %}
                                     </p>
                                     <p>
                                         <a href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
