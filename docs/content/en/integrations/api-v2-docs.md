@@ -12,7 +12,7 @@ DefectDojo\'s API is created using [Django Rest
 Framework](http://www.django-rest-framework.org/). The documentation of
 each endpoint is available within each DefectDojo installation at
 [`/api/v2/doc/`](https://demo.defectdojo.org/api/v2/) and can be accessed by choosing the API v2
-Docs link on the user drop down menu in the header.
+Docs link on the user drop down menu in the header. 
 
 ![image](../../images/api_v2_1.png)
 
@@ -20,7 +20,7 @@ The documentation is generated using [Django Rest Framework
 Yet Another Swagger Generator](https://github.com/axnsan12/drf-yasg/), and is
 interactive. On the top of API v2 docs is a link that generates an OpenAPI v2 spec.
 
-As a preparation to move to OpenAPIv3, we have added an compatible spec and documentation at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/?docExpansion=none)
+As a preparation to move to OpenAPIv3, we have added an compatible spec and documentation at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/)
 
 To interact with the documentation, a valid Authorization header value
 is needed. Visit the `/api/v2/key/` view to generate your
@@ -35,8 +35,7 @@ URL, Response Body, Response Code and Response Headers.
 
 If you're logged in to the Defect Dojo web UI, you do not need to provide the authorization token.
 
-Authentication
---------------
+## Authentication
 
 The API uses header authentication with API key. The format of the
 header should be: :
@@ -47,8 +46,12 @@ For example: :
 
     Authorization: Token c8572a5adf107a693aa6c72584da31f4d1f1dcff
 
-Sample Code
------------
+### Alternative authentication method
+
+If you use [an alternative authentication method](../social-authentication/) for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \
+Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
+
+## Sample Code
 
 Here are some simple python examples and their results produced against
 the `/users` endpoint: :
@@ -61,10 +64,9 @@ headers = {'content-type': 'application/json',
             'Authorization': 'Token c8572a5adf107a693aa6c72584da31f4d1f1dcff'}
 r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
 
-for key, value in r.__dict__.iteritems():
-    print key
-    print value
-    print '------------------'
+for key, value in r.__dict__.items():
+  print(f"'{key}': '{value}'")
+  print('------------------')
 {{< /highlight >}}
 
 This code will return the list of all the users defined in DefectDojo.
@@ -101,10 +103,9 @@ headers = {'content-type': 'application/json',
             'Authorization': 'Token c8572a5adf107a693aa6c72584da31f4d1f1dcff'}
 r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
 
-for key, value in r.__dict__.iteritems():
-    print key
-    print value
-    print '------------------'
+for key, value in r.__dict__.items():
+  print(f"'{key}': '{value}'")
+  print('------------------')
 {{< /highlight >}}
 
 The json object result is: :
@@ -132,8 +133,7 @@ See [Django Rest Framework\'s documentation on interacting with an
 API](http://www.django-rest-framework.org/topics/api-clients/) for
 additional examples and tips.
 
-Manually calling the API
-------------------------
+## Manually calling the API
 
 Tools like Postman can be used for testing the API.
 
@@ -172,8 +172,7 @@ Example for importing a scan result:
 
 -   Click send
 
-Clients / API Wrappers
-----------------------
+## Clients / API Wrappers
 
 | Wrapper                      | Status                   | Notes |
 | -----------------------------| ------------------------| ------------------------|

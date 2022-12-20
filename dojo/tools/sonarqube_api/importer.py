@@ -23,7 +23,10 @@ class SonarQubeApiImporter(object):
     def get_findings(self, filename, test):
         items = self.import_issues(test)
         if settings.SONARQUBE_API_PARSER_HOTSPOTS:
-            items.extend(self.import_hotspots(test))
+            if items:
+                items.extend(self.import_hotspots(test))
+            else:
+                items = self.import_hotspots(test)
         return items
 
     @staticmethod
@@ -74,19 +77,20 @@ class SonarQubeApiImporter(object):
 
     def import_issues(self, test):
 
-        items = list()
+        items = []
 
         try:
-
             client, config = self.prepare_client(test)
-
-            if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-                component = client.get_project(config.service_key_1)
-            else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
-                component = client.find_project(test.engagement.product.name)
-
-            issues = client.find_issues(component['key'])
-            logging.info('Found {} issues for component {}'.format(len(issues), component["key"]))
+            # Get the value in the service key 2 box
+            organization = config.service_key_2 if (config and config.service_key_2) else None
+            # Get the value in the service key 1 box
+            if config and config.service_key_1:
+                component = client.get_project(config.service_key_1, organization=organization, branch=test.branch_tag)
+            else:
+                component = client.find_project(test.engagement.product.name, organization=organization, branch=test.branch_tag)
+            # Get the resource from SonarQube
+            issues = client.find_issues(component['key'], organization=organization, branch=test.branch_tag)
+            logging.info(f'Found {len(issues)} issues for component {component["key"]}')
 
             for issue in issues:
                 status = issue['status']
@@ -95,7 +99,7 @@ class SonarQubeApiImporter(object):
                 if self.is_closed(status) or from_hotspot:
                     continue
 
-                type = issue['type']
+                issue_type = issue['type']
                 if len(issue['message']) > 511:
                     title = issue['message'][0:507] + "..."
                 else:
@@ -119,7 +123,7 @@ class SonarQubeApiImporter(object):
                     key=issue['key'],
                     defaults={
                         'status': status,
-                        'type': type,
+                        'type': issue_type,
                     }
                 )
 
@@ -164,16 +168,18 @@ class SonarQubeApiImporter(object):
 
     def import_hotspots(self, test):
         try:
-            items = list()
+            items = []
             client, config = self.prepare_client(test)
+            # Get the value in the service key 2 box
+            organization = config.service_key_2 if (config and config.service_key_2) else None
+            # Get the value in the service key 1 box
+            if config and config.service_key_1:
+                component = client.get_project(config.service_key_1, organization=organization, branch=test.branch_tag)
+            else:
+                component = client.find_project(test.engagement.product.name, organization=organization, branch=test.branch_tag)
 
-            if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-                component = client.get_project(config.service_key_1)
-            else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
-                component = client.find_project(test.engagement.product.name)
-
-            hotspots = client.find_hotspots(component['key'])
-            logging.info('Found {} hotspots for project {}'.format(len(hotspots), component["key"]))
+            hotspots = client.find_hotspots(component['key'], organization=organization, branch=test.branch_tag)
+            logging.info(f'Found {len(hotspots)} hotspots for project {component["key"]}')
 
             for hotspot in hotspots:
                 status = hotspot['status']
@@ -181,7 +187,7 @@ class SonarQubeApiImporter(object):
                 if self.is_reviewed(status):
                     continue
 
-                type = 'SECURITY_HOTSPOT'
+                issue_type = 'SECURITY_HOTSPOT'
                 severity = 'Info'
                 title = textwrap.shorten(text=hotspot.get('message', ''), width=500)
                 component_key = hotspot.get('component')
@@ -197,7 +203,7 @@ class SonarQubeApiImporter(object):
                     key=hotspot['key'],
                     defaults={
                         'status': status,
-                        'type': type
+                        'type': issue_type
                     }
                 )
 
@@ -284,7 +290,9 @@ class SonarQubeApiImporter(object):
     def get_references(vuln_details):
         parser = etree.HTMLParser()
         details = etree.fromstring(vuln_details, parser)
+
         rule_references = ""
-        for a in details.iter("a"):
-            rule_references += "[{}]({})\n".format(a.text, a.get('href'))
+        if details is not None:
+            for a in details.iter("a"):
+                rule_references += f"[{a.text}]({a.get('href')})\n"
         return rule_references

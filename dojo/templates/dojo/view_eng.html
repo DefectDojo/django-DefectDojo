@@ -31,6 +31,11 @@
                                         <i class="fa fa-pencil-square-o"></i> Edit Engagement
                                         </a>
                                     </li>
+                                    <li>
+                                        <a class="" href="{% url 'copy_engagement' eng.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                        <i class="fa fa-copy"></i> Copy Engagement
+                                        </a>
+                                    </li>
                                     <li role="presentation">
                                         {% if eng.active %}
                                             <a class="" href="{% url 'close_engagement' eng.id %}">
@@ -268,6 +273,10 @@
                                                                     <a class="" href="{% url 'edit_test' test.id %}">
                                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                                 </li>
+                                                                <li>
+                                                                    <a class="" href="{% url 'copy_test' test.id %}">
+                                                                    <i class="fa fa-copy"></i> Copy</a>
+                                                                </li>
                                                             {% endif %}
                                                             {% if test|has_object_permission:"Finding_Add" %}
                                                                 <li class="divider"></li>
@@ -405,7 +414,7 @@
                                                     </ul>
                                                 </td>
                                                 <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.created|date }}</a></td>
-                                                <td>{{ risk_acceptance.accepted_by.get_full_name }}</td>
+                                                <td>{{ risk_acceptance.accepted_by }}</td>
                                                 <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.name }}</a></td>
                                                 <td>
                                                     {{ risk_acceptance.get_decision_display|default_if_none:"" }}
@@ -677,12 +686,13 @@
                             {% for file in files %}
                                 <div class="col-md-2" style="text-align: center">
                                     <div class="row">
-                                        <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
-                                        {% if file.file.url|get_thumbnail %}
-                                            <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
-                                        {% else %}
-                                            <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
-                                        {% endif %}
+                                        {% url 'access_file' fid=file.id oid=eng.id obj_type='Engagement' as image_url %}
+                                        <a href="{{ image_url }}" target="_blank">
+                                            {% if file|get_thumbnail %}
+                                                <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
+                                            {% else %}
+                                                <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
+                                            {% endif %}
                                         </a>
                                     </div>
                                     <div class="row">

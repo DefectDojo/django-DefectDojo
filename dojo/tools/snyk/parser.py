@@ -19,7 +19,7 @@ class SnykParser(object):
 
         reportTree = self.parse_json(json_output)
 
-        if type(reportTree) is list:
+        if isinstance(reportTree, list):
             temp = []
             for moduleTree in reportTree:
                 temp += self.process_tree(moduleTree, test)
@@ -28,10 +28,7 @@ class SnykParser(object):
             return self.process_tree(reportTree, test)
 
     def process_tree(self, tree, test):
-        if tree:
-            return [data for data in self.get_items(tree, test)]
-        else:
-            return []
+        return list(self.get_items(tree, test)) if tree else []
 
     def parse_json(self, json_output):
         try:
@@ -47,19 +44,20 @@ class SnykParser(object):
 
     def get_items(self, tree, test):
         items = {}
+        target_file = tree.get('displayTargetFile', None)
+        upgrades = tree.get('remediation', {}).get('upgrade', None)
         if 'vulnerabilities' in tree:
             vulnerabilityTree = tree['vulnerabilities']
 
             for node in vulnerabilityTree:
-
-                item = self.get_item(node, test)
+                item = self.get_item(node, test, target_file=target_file, upgrades=upgrades)
                 unique_key = node['title'] + str(node['packageName'] + str(
                     node['version']) + str(node['from']) + str(node['id']))
                 items[unique_key] = item
 
         return list(items.values())
 
-    def get_item(self, vulnerability, test):
+    def get_item(self, vulnerability, test, target_file=None, upgrades=None):
 
         # vulnerable and unaffected versions can be in string format for a single vulnerable version,
         # or an array for multiple versions depending on the language.
@@ -117,6 +115,7 @@ class SnykParser(object):
             file_path=vulnPath,
             vuln_id_from_tool=vulnerability['id'],
         )
+        finding.unsaved_tags = []
 
         # CVSSv3 vector
         if vulnerability.get('CVSSv3'):
@@ -162,5 +161,20 @@ class SnykParser(object):
         # Add the remediation substring to mitigation section
         if (remediation_index != -1) and (references_index != -1):
             finding.mitigation = finding.description[remediation_index:references_index]
+
+        # Add Target file if supplied
+        if target_file:
+            finding.unsaved_tags.append('target_file:{}'.format(target_file))
+            finding.mitigation += '\nUpgrade Location: {}'.format(target_file)
+
+        # Add the upgrade libs list to the mitigation section
+        if upgrades:
+            for current_pack_version, meta_dict in upgrades.items():
+                upgraded_pack = meta_dict['upgradeTo']
+                tertiary_upgrade_list = meta_dict['upgrades']
+                if any(lib.split('@')[0] in finding.mitigation for lib in tertiary_upgrade_list):
+                    finding.unsaved_tags.append('upgrade_to:{}'.format(upgraded_pack))
+                    finding.mitigation += '\nUpgrade from {} to {} to fix this issue, as well as updating the following:\n - '.format(current_pack_version, upgraded_pack)
+                    finding.mitigation += '\n - '.join(tertiary_upgrade_list)
 
         return finding

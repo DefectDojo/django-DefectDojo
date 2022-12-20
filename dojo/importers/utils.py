@@ -18,11 +18,9 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
     if not scan_date:
         scan_date = now
 
-    test.engagement.updated = now
     if test.engagement.engagement_type == 'CI/CD':
         test.engagement.target_end = max_safe([scan_date.date(), test.engagement.target_end])
 
-    test.updated = now
     test.target_end = max_safe([scan_date, test.target_end])
 
     if version:
@@ -149,15 +147,9 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
 
         eps, created = Endpoint_Status.objects.get_or_create(
             finding=finding,
-            endpoint=ep)
-        if created:
-            eps.date = finding.date
-            eps.save()
+            endpoint=ep,
+            defaults={'date': finding.date})
 
-        if ep and eps:
-            ep.endpoint_status.add(eps)
-            finding.endpoint_status.add(eps)
-            finding.endpoints.add(ep)
     logger.debug('IMPORT_SCAN: ' + str(len(endpoints)) + ' imported')
 
 

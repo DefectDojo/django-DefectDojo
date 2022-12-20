@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.urls import reverse
+from django.urls import reverse, Resolver404
 from django.db.models import Q, Count
 from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse, QueryDict
 from django.shortcuts import render, get_object_or_404
@@ -36,7 +36,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
-    get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url
+    get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url, calculate_grade
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
@@ -63,6 +63,10 @@ logger = logging.getLogger(__name__)
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def engagement_calendar(request):
+
+    if not get_system_setting('enable_calendar'):
+        raise Resolver404()
+
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         engagements = get_authorized_engagements(Permissions.Engagement_View)
     else:
@@ -217,6 +221,7 @@ def edit_engagement(request, eid):
         if form.is_valid():
             # first save engagement details
             new_status = form.cleaned_data.get('status')
+            engagement.product = form.cleaned_data.get('product')
             engagement = form.save(commit=False)
             if (new_status == "Cancelled" or new_status == "Completed"):
                 engagement.active = False
@@ -326,6 +331,47 @@ def delete_engagement(request, eid):
         'engagement': engagement,
         'form': form,
         'rels': rels,
+    })
+
+
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
+def copy_engagement(request, eid):
+    engagement = get_object_or_404(Engagement, id=eid)
+    product = engagement.product
+    form = DoneForm()
+
+    if request.method == 'POST':
+        form = DoneForm(request.POST)
+        if form.is_valid():
+            engagement_copy = engagement.copy()
+            calculate_grade(product)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Engagement Copied successfully.',
+                extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Copying of %s' % engagement.name,
+                                description='The engagement "%s" was copied by %s' % (engagement.name, request.user),
+                                product=product,
+                                url=request.build_absolute_uri(reverse('view_engagement', args=(engagement_copy.id, ))),
+                                recipients=[engagement.lead],
+                                icon="exclamation-triangle")
+            return redirect_to_return_url_or_else(request, reverse("view_engagements", args=(product.id, )))
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Unable to copy engagement, please try again.',
+                extra_tags='alert-danger')
+
+    product_tab = Product_Tab(product, title="Copy Engagement", tab="engagements")
+    return render(request, 'dojo/copy_object.html', {
+        'source': engagement,
+        'source_label': 'Engagement',
+        'destination_label': 'Product',
+        'product_tab': product_tab,
+        'form': form,
     })
 
 
@@ -565,8 +611,8 @@ def import_scan_results(request, eid=None, pid=None):
             scan = request.FILES.get('file', None)
             scan_date = form.cleaned_data['scan_date']
             minimum_severity = form.cleaned_data['minimum_severity']
-            active = form.cleaned_data['active']
-            verified = form.cleaned_data['verified']
+            activeChoice = form.cleaned_data.get('active', None)
+            verifiedChoice = form.cleaned_data.get('verified', None)
             scan_type = request.POST['scan_type']
             tags = form.cleaned_data['tags']
             version = form.cleaned_data['version']
@@ -581,6 +627,7 @@ def import_scan_results(request, eid=None, pid=None):
             environment = Development_Environment.objects.get(id=environment_id)
 
             group_by = form.cleaned_data.get('group_by', None)
+            create_finding_groups_for_all_findings = form.cleaned_data['create_finding_groups_for_all_findings']
 
             # TODO move to form validation?
             if scan and is_scan_file_too_large(scan):
@@ -617,12 +664,26 @@ def import_scan_results(request, eid=None, pid=None):
             # Save newly added endpoints
             added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, engagement.product)
 
+            active = None
+            if activeChoice:
+                if activeChoice == 'force_to_true':
+                    active = True
+                elif activeChoice == 'force_to_false':
+                    active = False
+            verified = None
+            if verifiedChoice:
+                if verifiedChoice == 'force_to_true':
+                    verified = True
+                elif verifiedChoice == 'force_to_false':
+                    verified = False
+
             try:
                 importer = Importer()
                 test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
                             minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service)
+                            close_old_findings=close_old_findings, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service,
+                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
 

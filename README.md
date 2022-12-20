@@ -6,7 +6,7 @@
 
 ![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/screenshot1.png)
 
-[DefectDojo](https://www.defectdojo.org/) is a security orchestration and
+[DefectDojo](https://www.defectdojo.com/) is a security orchestration and
 vulnerability management platform.
 DefectDojo allows you to manage your application security program, maintain
 product and application information, triage vulnerabilities and
@@ -16,9 +16,9 @@ improve with the more you use the platform.
 
 ## Demo
 
-Try out the demo sever at [demo.defectdojo.org](https://demo.defectdojo.org)
+Try out the demo server at [demo.defectdojo.org](https://demo.defectdojo.org)
 
-Log in with `admin / 1Defectdojo@demo#appsec`. Please note that the demo is publicly accessable and regularly reset. Do not put sensitive data in the demo.
+Log in with `admin / 1Defectdojo@demo#appsec`. Please note that the demo is publicly accessible and regularly reset. Do not put sensitive data in the demo.
 
 ## Quick Start
 
@@ -39,14 +39,16 @@ Navigate to <http://localhost:8080>.
 
 ## Documentation
 
-- [Official Docs](https://defectdojo.github.io/django-DefectDojo/) ([latest](https://defectdojo.github.io/django-DefectDojo/) | [dev](https://defectdojo.github.io/django-DefectDojo/dev))
-- [REST APIs](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/)
-- [Client APIs and Wrappers](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/#clients--api-wrappers)
+- [Official Docs](https://documentation.defectdojo.com/) ([latest](https://documentation.defectdojo.com/) | [dev](https://documentation.defectdojo.com/dev))
+- [REST APIs](https://documentation.defectdojo.com/integrations/api-v2-docs/)
+- [Client APIs and Wrappers](https://documentation.defectdojo.com/integrations/api-v2-docs/#clients--api-wrappers)
 - [Authentication Options](readme-docs/AVAILABLE-PLUGINS.md)
+- [Parsers](https://documentation.defectdojo.com/integrations/parsers/)
 
 ## Supported Installation Options
 
 * [Docker / Docker Compose](readme-docs/DOCKER.md)
+* [SaaS](https://www.defectdojo.com/pricing) - Includes Support & Supports the Project
 * [AWS AMI ](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk) - Supports the Project
 * [godojo](https://github.com/DefectDojo/godojo)
 

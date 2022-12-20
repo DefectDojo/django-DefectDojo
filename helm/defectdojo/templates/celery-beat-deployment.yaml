@@ -22,6 +22,9 @@ spec:
         defectdojo.org/component: celery
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- if .Values.podLabels }}
+        {{- toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}         
       annotations:
       {{- with .Values.celery.beat.annotations }}
         {{- toYaml . | nindent 8 }}
@@ -63,9 +66,9 @@ spec:
         args:
         - "-verbose={{ .Values.cloudsql.verbose }}"
         {{- if eq .Values.database "postgresql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
         {{- else if eq .Values.database "mysql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.master.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.primary.service.ports.mysql }}"
         {{- end }}
         {{- if .Values.cloudsql.enable_iam_login }}
         - "-enable_iam_login"
@@ -103,31 +106,24 @@ spec:
           valueFrom:
             secretKeyRef:
             {{- if eq .Values.celery.broker "rabbitmq" }}
-            {{- if .Values.rabbitmq.enabled }}
-              name: defectdojo-{{ .Values.celery.broker }}-specific
-              key: {{ .Values.celery.broker }}-password
-            {{- else }}
-              name: {{ .Values.rabbitmq.existingPasswordSecret }}
-              key: {{ .Values.rabbitmq.secretPasswordKey }}  
-            {{- end }}            
+              name: {{ .Values.rabbitmq.auth.existingPasswordSecret | default "defectdojo-rabbitmq-specific" }}
+              key: {{ .Values.rabbitmq.auth.secretPasswordKey | default "rabbitmq-password" }}  
             {{- else if eq .Values.celery.broker "redis" }}
-            {{- if .Values.redis.enabled }}
-              name: defectdojo-{{ .Values.celery.broker }}-specific
-              key: {{ .Values.celery.broker }}-password
-            {{- else }}
-              name: {{ .Values.redis.auth.existingSecret }}
-              key: {{ .Values.redis.auth.existingSecretPasswordKey }}
-            {{- end }}  
+              name: {{ .Values.redis.auth.existingSecret | default "defectdojo-redis-specific" }}
+              key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
             {{- end }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
-              name: {{ .Values.postgresql.existingSecret }}
-              key: {{ .Values.postgresql.secretKey }}
+                name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
+                key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
+              {{- else if eq .Values.database "postgresqlha" }}
+                name: {{ .Values.postgresqlha.postgresql.existingSecret | default "defectdojo-postgresql-ha-specific" }}
+                key: postgresql-postgres-password
               {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.auth.existingSecret }}
-              key: {{ .Values.mysql.auth.secretKey }}
+                name: {{ .Values.mysql.auth.existingSecret | default "defectdojo-mysql-specific" }}
+                key: {{ .Values.mysql.auth.secretKey | default "mysql-password" }}
               {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:

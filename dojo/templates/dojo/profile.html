@@ -35,7 +35,9 @@
                 {% if user.has_usable_password %}
                     <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">Change Password</a>
                 {% endif %}
-                <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">API Key</a>
+                {% if API_TOKENS_ENABLED %}
+                    <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">API Key</a>
+                {% endif %}
                 </div>
             </div>
             <div class="panel panel-default">
@@ -43,7 +45,7 @@
                     <div class="clearfix">
                         <h4 class="pull-left">Groups</h4>
                         &nbsp;
-                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                        <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                             <i class="fa fa-question-circle"></i></a>
                         {% if request.user.is_superuser %}
                         <div class="dropdown pull-right">

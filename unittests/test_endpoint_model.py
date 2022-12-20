@@ -245,3 +245,85 @@ class TestEndpointStatusBrokenModel(DojoTestCase):
             self.assertEqual(e.count(), 1)
             e = e.first()
             self.assertEqual(e.endpoint_status.count(), 0)
+
+
+class TestEndpointStatusModel(DojoTestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def test_str(self):
+        eps = Endpoint_Status.objects.get(id=1)
+        self.assertEqual(str(eps), "'High Impact Test Finding' on 'ftp://localhost'")
+
+    # def test_dummy(self):
+    #     fs = Finding.objects.all()
+    #     for f in fs:
+    #         print(f.id, f.test.engagement.product.id, str(f))
+
+    #     es = Endpoint.objects.all()
+    #     for e in es:
+    #         print(e.id, e.product.id, str(e))
+
+    #     epss = Endpoint_Status.objects.all()
+    #     for eps in epss:
+    #         print(eps.id, eps.finding.id, eps.endpoint.id, str(eps))
+
+    def test_status_evaluation(self):
+        ep1 = Endpoint.objects.get(id=4)
+        ep2 = Endpoint.objects.get(id=5)
+        ep3 = Endpoint.objects.get(id=6)
+        ep4 = Endpoint.objects.get(id=7)
+        ep5 = Endpoint.objects.get(id=8)
+
+        with self.subTest('Endpoint without statuses'):
+            self.assertEqual(ep1.findings_count, 0, ep1.findings.all())
+            self.assertEqual(ep1.active_findings_count, 0, ep1.active_findings)
+            self.assertFalse(ep1.vulnerable, ep1.active_findings_count)
+            self.assertTrue(ep1.mitigated, ep1.active_findings_count)
+
+        with self.subTest('Endpoint with vulnerabilities but all of them are mitigated because of different reasons'):
+            self.assertEqual(ep2.findings_count, 4, ep2.findings.all())
+            self.assertEqual(ep2.active_findings_count, 0, ep2.active_findings)
+            self.assertFalse(ep2.vulnerable, ep2.active_findings_count)
+            self.assertTrue(ep2.mitigated, ep2.active_findings_count)
+
+        with self.subTest('Host without vulnerabilities'):
+            self.assertEqual(ep1.host_endpoints_count, 2, ep1.host_endpoints)
+            self.assertEqual(ep2.host_endpoints_count, 2, ep2.host_endpoints)
+            self.assertEqual(ep1.host_findings_count, 4, ep1.host_findings)
+            self.assertEqual(ep2.host_findings_count, 4, ep2.host_findings)
+            self.assertEqual(ep1.host_active_findings_count, 0, ep1.host_active_findings)
+            self.assertEqual(ep2.host_active_findings_count, 0, ep2.host_active_findings)
+            self.assertEqual(ep1.host_mitigated_endpoints_count, 1, ep1.host_mitigated_endpoints)
+            self.assertEqual(ep2.host_mitigated_endpoints_count, 1, ep2.host_mitigated_endpoints)
+
+        with self.subTest('Endpoint with one vulnerabilitiy but EPS is mitigated'):
+            self.assertEqual(ep3.findings_count, 1, ep3.findings.all())
+            self.assertEqual(ep3.active_findings_count, 0, ep3.active_findings)
+            self.assertFalse(ep3.vulnerable, ep3.active_findings_count)
+            self.assertTrue(ep3.mitigated, ep3.active_findings_count)
+
+        with self.subTest('Endpoint with one vulnerability'):
+            self.assertEqual(ep4.findings_count, 1, ep4.findings.all())
+            self.assertEqual(ep4.active_findings_count, 1, ep4.active_findings)
+            self.assertTrue(ep4.vulnerable, ep4.active_findings_count)
+            self.assertFalse(ep4.mitigated, ep4.active_findings_count)
+
+        with self.subTest('Endpoint with one vulnerability but finding is mitigated'):
+            self.assertEqual(ep5.findings_count, 1, ep5.findings.all())
+            self.assertEqual(ep5.active_findings_count, 0, ep5.active_findings)
+            self.assertFalse(ep5.vulnerable, ep5.active_findings_count)
+            self.assertTrue(ep5.mitigated, ep5.active_findings_count)
+
+        with self.subTest('Host with vulnerabilities'):
+            self.assertEqual(ep3.host_endpoints_count, 3, ep3.host_endpoints)
+            self.assertEqual(ep4.host_endpoints_count, 3, ep4.host_endpoints)
+            self.assertEqual(ep5.host_endpoints_count, 3, ep5.host_endpoints)
+            self.assertEqual(ep3.host_findings_count, 2, ep3.host_findings)
+            self.assertEqual(ep4.host_findings_count, 2, ep4.host_findings)
+            self.assertEqual(ep5.host_findings_count, 2, ep5.host_findings)
+            self.assertEqual(ep3.host_active_findings_count, 1, ep3.host_active_findings)
+            self.assertEqual(ep4.host_active_findings_count, 1, ep4.host_active_findings)
+            self.assertEqual(ep5.host_active_findings_count, 1, ep5.host_active_findings)
+            self.assertEqual(ep3.host_mitigated_endpoints_count, 2, ep3.host_mitigated_endpoints)
+            self.assertEqual(ep4.host_mitigated_endpoints_count, 2, ep4.host_mitigated_endpoints)
+            self.assertEqual(ep5.host_mitigated_endpoints_count, 2, ep5.host_mitigated_endpoints)
