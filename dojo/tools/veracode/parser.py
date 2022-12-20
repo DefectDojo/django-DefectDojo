@@ -136,11 +136,15 @@ class VeracodeParser(object):
         _mitigated_date = None
         if ('mitigation_status' in xml_node.attrib and
                 xml_node.attrib["mitigation_status"].lower() == "accepted"):
-            # This happens if any mitigation (including 'Potential false positive')
-            # was accepted in VC.
-            for mitigation in xml_node.findall("x:mitigations/x:mitigation", namespaces=XML_NAMESPACE):
+            if ('remediation_status' in xml_node.attrib and
+                    xml_node.attrib["remediation_status"].lower() == "fixed"):
                 _is_mitigated = True
-                _mitigated_date = datetime.strptime(mitigation.attrib['date'], '%Y-%m-%d %H:%M:%S %Z')
+            else:
+                # This happens if any mitigation (including 'Potential false positive')
+                # was accepted in VC.
+                for mitigation in xml_node.findall("x:mitigations/x:mitigation", namespaces=XML_NAMESPACE):
+                    _is_mitigated = True
+                    _mitigated_date = datetime.strptime(mitigation.attrib['date'], '%Y-%m-%d %H:%M:%S %Z')
         finding.is_mitigated = _is_mitigated
         finding.mitigated = _mitigated_date
         finding.active = not _is_mitigated
