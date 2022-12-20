@@ -19,10 +19,10 @@ class TestFile(object):
 
 class TestDependencyCheckParser(DojoTestCase):
     def test_parse_empty_file(self):
-        with open(path.join(path.dirname(__file__), "../scans/dependency_check/dc_empty.xml")) as test_file:
-            parser = DependencyCheckParser()
-            findings = parser.get_findings(test_file, Test())
-            self.assertEqual(0, len(findings))
+        testfile = open("unittests/scans/dependency_check/single_dependency_with_related_no_vulnerability.xml")
+        parser = DependencyCheckParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(0, len(findings))
 
     def test_parse_file_with_single_vulnerability_has_single_finding(self):
         testfile = open("unittests/scans/dependency_check/single_vuln.xml")
