@@ -111,6 +111,16 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual(datetime.datetime(2020, 6, 1, 10, 2, 1), finding.mitigated)
         self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
 
+    def test_parse_file_with_mitigated_fixed_finding(self):
+        testfile = open("unittests/scans/veracode/mitigated_fixed_finding.xml")
+        parser = VeracodeParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("Medium", finding.severity)
+        self.assertTrue(finding.is_mitigated)
+        self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
+
     def test_parse_file_with_mitigated_sca_finding(self):
         testfile = open("unittests/scans/veracode/veracode_scan_sca_mitigated.xml")
         parser = VeracodeParser()
