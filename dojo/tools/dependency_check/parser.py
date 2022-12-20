@@ -33,15 +33,14 @@ class DependencyCheckParser(object):
             dupes[key] = finding
 
     def get_filename_and_path_from_dependency(self, dependency, related_dependency, namespace):
-        if related_dependency:
-            if related_dependency.findtext(namespace + 'fileName'):
-                return related_dependency.findtext(namespace + 'fileName'), related_dependency.findtext(namespace + 'filePath')
-            else:
-                # without filename, it would be just a duplicate finding so we have to skip it. filename is only present for relateddependencies since v6.0.0
-                # logger.debug('related_dependency: %s', ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
-                return None, None
+        if not related_dependency:
+            return dependency.findtext(f'{namespace}fileName'), dependency.findtext(f'{namespace}filePath')
+        if related_dependency.findtext(f'{namespace}fileName'):
+            return related_dependency.findtext(f'{namespace}fileName'), related_dependency.findtext(f'{namespace}filePath')
         else:
-            return dependency.findtext(namespace + 'fileName'), dependency.findtext(namespace + 'filePath')
+            # without filename, it would be just a duplicate finding so we have to skip it. filename is only present for relateddependencies since v6.0.0
+            # logger.debug('related_dependency: %s', ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
+            return None, None
 
     def get_component_name_and_version_from_dependency(self, dependency, related_dependency, namespace):
         identifiers_node = dependency.find(namespace + 'identifiers')
