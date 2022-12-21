@@ -126,21 +126,21 @@
                             {% endif %} {% endcomment %}
                             {% if not critical_prods %}
                                 <div class="dropdown pull-right">
-                                    <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                                    <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                             data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
-                                        <span class="fa fa-bars"></span>
+                                        <span class="fa-solid fa-bars"></span>
                                         <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                         <li role="presentation">
                                             <a href="{% url 'metrics_product_type' %}?type=Finding">
-                                                <i class="fa fa-file-text-o"></i> {% trans "Measures Findings" %}
+                                                <i class="fa-solid fa-file-lines"></i> {% trans "Measures Findings" %}
                                             </a>
                                         </li>
                                         <li role="presentation">
                                             <a href="{% url 'metrics_product_type' %}?type=Endpoint">
-                                                <i class="fa fa-file-text-o"></i> {% trans "Measure Affected Endpoints" %}
+                                                <i class="fa-solid fa-file-lines"></i> {% trans "Measure Affected Endpoints" %}
                                             </a>
                                         </li>
                                     </ul>
