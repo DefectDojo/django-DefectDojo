@@ -13,18 +13,18 @@
                     <h3 class="has-filters">
                         Rules Framework
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if "dojo.add_rule"|has_configuration_permission %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a href="{% url 'Add Rule' %}">
-                                            <i class="fa fa-plus"></i> Add Rule
+                                            <i class="fa-solid fa-plus"></i> Add Rule
                                         </a>
                                     </li>
                             </ul>
@@ -66,13 +66,13 @@
                                             {% if "dojo.change_rule"|has_configuration_permission %}
                                             <a class="btn btn-sm btn-warning"
                                                 href="{% url 'Edit Rule' rule.id %}">
-                                                <i class="fa fa-pencil"></i> Edit
+                                                <i class="fa-solid fa-file"></i> Edit
                                             </a>
                                             {% endif %}
                                             {% if "dojo.delete_rule"|has_configuration_permission %}
                                             <a class="btn btn-sm btn-danger"
                                                 href="{% url 'Delete Rule' rule.id %}">
-                                                <i class="fa fa-pencil"></i> Delete
+                                                <i class="fa-solid fa-file"></i> Delete
                                             </a>
                                             {% endif %}
                                         </div>

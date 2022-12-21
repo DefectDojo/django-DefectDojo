@@ -46,18 +46,18 @@
                         <h4 class="pull-left">Groups</h4>
                         &nbsp;
                         <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
-                            <i class="fa fa-question-circle"></i></a>
+                            <i class="fa-solid fa-circle-question"></i></a>
                         {% if request.user.is_superuser %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-bars"></span>
+                                <span class="fa-solid fa-bars"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu4">
                                 <li role="presentation">
                                     <a id="addGroupMember" href="{% url 'add_group_member_user' user.id %}">
-                                        <i class="fa fa-plus"></i> Add Groups
+                                        <i class="fa-solid fa-plus"></i> Add Groups
                                     </a>
                                 </li>
                             </ul>

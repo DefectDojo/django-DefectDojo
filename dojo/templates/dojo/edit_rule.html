@@ -34,18 +34,18 @@
         }
 
         function get_alerts() {
-            $('.dropdown-alerts').html('<div class="text-center"><i class="fa fa-spin fa-spinner"></i></div>');
+            $('.dropdown-alerts').html('<div class="text-center"><i class="fa-solid fa-spin fa-spinner"></i></div>');
             $.get("/alerts/json?limit=12", function (data) {
                 $('.dropdown-alerts').empty();
                 $.each(data, function(i, elem) {
                     var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;
                     var desc = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';
-                    $('.dropdown-alerts').append('<li><a href="' + elem.fields.url + '"><div><i class="fa fa-' + elem.fields.icon + ' fa-fw"></i> ' +
+                    $('.dropdown-alerts').append('<li><a href="' + elem.fields.url + '"><div><i class="fa-solid fa-' + elem.fields.icon + ' fa-fw"></i> ' +
                                                   desc + '<span class="pull-right text-muted small">' +
                                                  elem.fields.source + '</span></div></a></li><li class="divider"></li>');
                 });
                 $('.dropdown-alerts').append('<li><a class="text-center" href="/alerts"><strong>See All Alerts </strong>' +
-                                             '<i class="fa fa-angle-right"></i></a></li>');
+                                             '<i class="fa-solid fa-angle-right"></i></a></li>');
             });
         }
     });
