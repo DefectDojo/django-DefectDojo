@@ -1013,7 +1013,6 @@ class ApiProductFilter(DojoFilter):
     internet_accessible = BooleanFilter(field_name='internet_accessible')
     # CharFilter
     name = CharFilter(lookup_expr='icontains')
-    name_exact = CharFilter(field_name='name', lookup_expr='exact')
     description = CharFilter(lookup_expr='icontains')
     business_criticality = CharFilter(method=custom_filter, field_name='business_criticality')
     platform = CharFilter(method=custom_filter, field_name='platform')
