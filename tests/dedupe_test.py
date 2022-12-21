@@ -78,7 +78,7 @@ class DedupeTest(BaseTestCase):
                 return
 
         driver.find_element(By.ID, "select_all").click()
-        driver.find_element(By.CSS_SELECTOR, "i.fa.fa-trash").click()
+        driver.find_element(By.CSS_SELECTOR, "i.fa-solid.fa-trash").click()
         try:
             WebDriverWait(driver, 1).until(EC.alert_is_present(),
                                         'Timed out waiting for finding delete ' +
@@ -422,7 +422,7 @@ class DedupeTest(BaseTestCase):
         self.goto_active_engagements_overview(driver)
         driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Immuniweb Test").click()
         driver.find_element(By.PARTIAL_LINK_TEXT, "Immuniweb Test").click()
-        driver.find_element(By.CSS_SELECTOR, "b.fa.fa-ellipsis-v").click()
+        driver.find_element(By.CSS_SELECTOR, "b.fa-solid.fa-ellipsis-vertical").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan Results").click()
         driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
@@ -433,7 +433,7 @@ class DedupeTest(BaseTestCase):
         self.goto_active_engagements_overview(driver)
         driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Generic Test").click()
         driver.find_element(By.PARTIAL_LINK_TEXT, "Generic Test").click()
-        driver.find_element(By.CSS_SELECTOR, "b.fa.fa-ellipsis-v").click()
+        driver.find_element(By.CSS_SELECTOR, "b.fa-solid.fa-ellipsis-vertical").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan Results").click()
         driver.find_element(By.ID, 'id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
