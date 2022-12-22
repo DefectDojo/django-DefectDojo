@@ -18,6 +18,7 @@ The following notification methods currently exist:
  - Email
  - Slack
  - Microsoft Teams
+ - Webhooks
  - Alerts within DefectDojo (default)
 
 You can set these notifications on a global scope (if you have
@@ -115,3 +116,7 @@ To activate notifications to Microsoft Teams, you have to:
 - Configure an Incoming Webhook in a Teams channel and copy the URL of the webhook to the clipboard
 - Activate `Enable Microsoft Teams notifications` in the System Settings
 - Paste the URL of the Incoming Webhook into the field `Msteams url`
+
+### Webhooks
+
+# TODO
