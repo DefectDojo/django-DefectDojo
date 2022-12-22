@@ -658,6 +658,9 @@
               {% if "mail" in enabled_notifications %}
               <td class="centered">{% trans "Mail" %}</td>
               {% endif %}
+              {% if "webhooks" in enabled_notifications %}
+              <td class="centered">{% trans "Webhooks" %}</td>
+              {% endif %}
               <td class="centered">{% trans "Alert" %}</td>
           </tr>
           {% for field in personal_notifications_form.visible_fields %}

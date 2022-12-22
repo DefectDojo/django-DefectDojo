@@ -353,6 +353,15 @@ class System_Settings(models.Model):
     mail_notifications_to = models.CharField(max_length=200, default="",
                                              blank=True)
 
+    enable_webhooks_notifications = \
+        models.BooleanField(default=False,
+                            verbose_name=_('Enable Webhook notifications'),
+                            blank=False)
+    webhooks_url = models.CharField(max_length=400, default='', blank=True,
+                                    help_text=_('The full URL of the incoming webhook'))
+    webhooks_token = models.CharField(max_length=100, default='', blank=True,
+                                   help_text=_('Token required for interacting with Webhook endpoint'))
+
     false_positive_history = models.BooleanField(
         default=False, help_text=_(
             "(EXPERIMENTAL) DefectDojo will automatically mark the finding as a "
@@ -4015,12 +4024,14 @@ class JIRA_Issue(models.Model):
 NOTIFICATION_CHOICE_SLACK = ("slack", "slack")
 NOTIFICATION_CHOICE_MSTEAMS = ("msteams", "msteams")
 NOTIFICATION_CHOICE_MAIL = ("mail", "mail")
+NOTIFICATION_CHOICE_WEBHOOKS = ("webhooks", "webhooks")
 NOTIFICATION_CHOICE_ALERT = ("alert", "alert")
 
 NOTIFICATION_CHOICES = (
     NOTIFICATION_CHOICE_SLACK,
     NOTIFICATION_CHOICE_MSTEAMS,
     NOTIFICATION_CHOICE_MAIL,
+    NOTIFICATION_CHOICE_WEBHOOKS,
     NOTIFICATION_CHOICE_ALERT,
 )
 
