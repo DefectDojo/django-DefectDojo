@@ -4,12 +4,14 @@ import requests
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from django.core.mail import EmailMessage
+from django.conf import settings
 from django.db.models import Count, Prefetch, Q
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
@@ -170,6 +172,7 @@ def process_notifications(event, notifications=None, **kwargs):
     slack_enabled = get_system_setting("enable_slack_notifications")
     msteams_enabled = get_system_setting("enable_msteams_notifications")
     mail_enabled = get_system_setting("enable_mail_notifications")
+    webhooks_enabled = get_system_setting("enable_webhooks_notifications")
 
     if slack_enabled and "slack" in getattr(notifications, event, getattr(notifications, "other")):
         logger.debug("Sending Slack Notification")
@@ -182,6 +185,10 @@ def process_notifications(event, notifications=None, **kwargs):
     if mail_enabled and "mail" in getattr(notifications, event, getattr(notifications, "other")):
         logger.debug("Sending Mail Notification")
         send_mail_notification(event, notifications.user, **kwargs)
+
+    if webhooks_enabled and 'webhooks' in getattr(notifications, event, getattr(notifications, 'other')):
+        logger.debug('Sending Webhooks Notification')
+        send_webhooks_notification(event, notifications.user, **kwargs)
 
     if "alert" in getattr(notifications, event, getattr(notifications, "other")):
         logger.debug(f"Sending Alert to {notifications.user}")
@@ -307,6 +314,76 @@ def send_mail_notification(event, user=None, *args, **kwargs):
     except Exception as e:
         logger.exception(e)
         log_alert(e, "Email Notification", title=kwargs["title"], description=str(e), url=kwargs["url"])
+
+
+@dojo_async_task
+@app.task
+def send_webhooks_notification(event, user=None, *args, **kwargs):
+    from dojo.utils import get_system_setting
+
+    try:
+        if get_system_setting('webhooks_url') is not None:
+            logger.debug('sending webhook message')
+            headers={
+                "User-Agent": f"DefectDojo-{dd_version}",
+                "X-DefectDojo-Event": event,
+                "X-DefectDojo-Instance": settings.SITE_URL,
+            }
+            if get_system_setting('webhooks_token') is not None:
+                headers["X-DefectDojo-Token"] = get_system_setting('webhooks_token')
+            if user:
+                headers["X-DefectDojo-User"] = user
+            res = requests.request(
+                method='POST',
+                url=get_system_setting('webhooks_url'),
+                headers=headers,
+                data=create_notification_message(event, user, 'webhooks', *args, **kwargs))
+            if res.status_code != 200:
+                logger.error("Error when sending message to Webhooks")
+                logger.error(res.status_code)
+                logger.error(res.text)
+                raise RuntimeError('Error posting message to Webhooks: ' + res.text)
+        else:
+            logger.info('URL for Webhooks not configured: skipping system notification')
+    except Exception as e:
+        logger.exception(e)
+        log_alert(e, "Webhooks Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
+        pass
+
+
+@dojo_async_task
+@app.task
+def send_webhooks_notification(event, user=None, *args, **kwargs):
+    from dojo.utils import get_system_setting
+
+    try:
+        if get_system_setting('webhooks_url') is not None:
+            logger.debug('sending webhook message')
+            headers={
+                "User-Agent": f"DefectDojo-{dd_version}",
+                "X-DefectDojo-Event": event,
+                "X-DefectDojo-Instance": settings.SITE_URL,
+            }
+            if get_system_setting('webhooks_token') is not None:
+                headers["X-DefectDojo-Token"] = get_system_setting('webhooks_token')
+            if user:
+                headers["X-DefectDojo-User"] = user
+            res = requests.request(
+                method='POST',
+                url=get_system_setting('webhooks_url'),
+                headers=headers,
+                data=create_notification_message(event, user, 'webhooks', *args, **kwargs))
+            if res.status_code != 200:
+                logger.error("Error when sending message to Webhooks")
+                logger.error(res.status_code)
+                logger.error(res.text)
+                raise RuntimeError('Error posting message to Webhooks: ' + res.text)
+        else:
+            logger.info('URL for Webhooks not configured: skipping system notification')
+    except Exception as e:
+        logger.exception(e)
+        log_alert(e, "Webhooks Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
+        pass
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
