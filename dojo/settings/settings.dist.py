@@ -1596,3 +1596,6 @@ VULNERABILITY_URLS = {
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
+# Fixes error
+# AttributeError: Problem installing fixture '/app/dojo/fixtures/defect_dojo_sample_data.json': 'Settings' object has no attribute 'AUDITLOG_DISABLE_ON_RAW_SAVE'
+AUDITLOG_DISABLE_ON_RAW_SAVE = False
