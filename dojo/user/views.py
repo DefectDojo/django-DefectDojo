@@ -1,6 +1,5 @@
 import contextlib
 import logging
-from datetime import datetime
 from crum import get_current_user
 
 from django.conf import settings
