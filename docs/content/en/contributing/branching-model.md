@@ -9,8 +9,8 @@ weight: 3
 
 The DefectDojo team aims to meet the following cadence: 
 
-- Minor releases at leasts once a month on the first Tuesday of the month
-- Patch/Bugfix releases every Friday
+- Minor releases at least once a month on the first Monday of the month
+- Patch/Bugfix releases every Monday
 - Security releases can come at any time.
 
 In doubt, GitHub Actions are the source of truth. The releases are semi-automated right now, with a DefectDojo maintainer proceeding with each major step in the release. The steps for a regular release are:
