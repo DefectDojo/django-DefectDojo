@@ -279,12 +279,11 @@ def user(request):
     users = UserFilter(request.GET, queryset=users)
     paged_users = get_page_items(request, users.qs, 25)
     add_breadcrumb(title=_("All Users"), top_level=True, request=request)
-    return render(request,
-                  'dojo/users.html',
-                  {"users": paged_users,
-                   "filtered": users,
-                   "name": "All Users",
-                   })
+    return render(request, 'dojo/users.html', {
+        "users": paged_users,
+        "filtered": users,
+        "name": "All Users",
+    })
 
 
 @user_is_configuration_authorized('auth.add_user')
