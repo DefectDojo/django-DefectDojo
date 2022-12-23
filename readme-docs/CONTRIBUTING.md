@@ -33,7 +33,7 @@ For changes that require additional settings, you can now use local_settings.py 
 ## Python3 version
 For compatibility reasons, the code in dev branch should be python3.8 compliant.
 
-## Submisison Approval
+## Submisison Pre-Approval
 With the exception of new parsers and parser improvements, it is recomended that you get in touch with us to discuss changes prior to dedicating time and resources. We are working on defining clear guidelines on direction and acceptable PRs, but in the meantime, please get in touch with a core mod or a maintainer on Slack.  
 
 ## Submitting Pull Requests
