@@ -1,5 +1,6 @@
 import contextlib
 import logging
+from datetime import datetime
 from crum import get_current_user
 
 from django.conf import settings
@@ -58,7 +59,7 @@ class DojoLoginView(LoginView):
         messages.add_message(
             self.request,
             messages.SUCCESS,
-            _(f'Hello {name}! Your last login was on {last_login}'),
+            _(f'Hello {name}! Your last login was on {last_login} ({datetime.strftime(last_login, "%Y-%m-%d %I:%M:%S %p")})'),
             extra_tags='alert-success')
         return response
 
