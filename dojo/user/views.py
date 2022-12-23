@@ -55,11 +55,11 @@ class DojoLoginView(LoginView):
             last_login = user.last_login
         response = super().form_valid(form)
         name = self.request.user.first_name or self.request.user.username
-        last_login = naturaltime(last_login or self.request.user.last_login)
+        last_login = last_login or self.request.user.last_login
         messages.add_message(
             self.request,
             messages.SUCCESS,
-            _(f'Hello {name}! Your last login was on {last_login} ({datetime.strftime(last_login, "%Y-%m-%d %I:%M:%S %p")})'),
+            _(f'Hello {name}! Your last login was on {naturaltime(last_login)} ({last_login.strftime("%Y-%m-%d %I:%M:%S %p")})'),
             extra_tags='alert-success')
         return response
 
