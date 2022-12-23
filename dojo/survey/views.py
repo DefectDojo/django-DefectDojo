@@ -262,7 +262,7 @@ def edit_questionnaire(request, sid):
                     messages.SUCCESS,
                     'Questionnaire successfully updated, you may now add/edit questions.',
                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('questionnaire', args=(survey.id,)))
+                return HttpResponseRedirect(reverse('edit_questionnaire', args=(survey.id,)))
             else:
                 messages.add_message(
                     request,
