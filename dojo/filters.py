@@ -2,7 +2,7 @@ import collections
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
-from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY, UNDER_REVIEW_QUERY
+from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, NOT_ACCEPTED_FINDINGS_QUERY, WAS_ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY, UNDER_REVIEW_QUERY
 import logging
 from datetime import timedelta, datetime
 from django import forms
@@ -10,12 +10,13 @@ from django.apps import apps
 from auditlog.models import LogEntry
 from django.conf import settings
 import six
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter, NumberFilter, DateFilter
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
+from django.db.models import JSONField
 import pytz
 from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
@@ -206,7 +207,7 @@ def get_tags_label_from_model(model):
         return 'Tags (Unknown)'
 
 
-def get_finding_filter_fields(metrics=False, similar=False):
+def get_finding_filterset_fields(metrics=False, similar=False):
     fields = []
 
     if similar:
@@ -407,6 +408,68 @@ class DateRangeFilter(ChoiceFilter):
         return self.options[value][1](qs, self.field_name)
 
 
+class DateRangeOmniFilter(ChoiceFilter):
+    options = {
+        '': (_('Any date'), lambda qs, name: qs.all()),
+        1: (_('Today'), lambda qs, name: qs.filter(**{
+            '%s__year' % name: now().year,
+            '%s__month' % name: now().month,
+            '%s__day' % name: now().day
+        })),
+        2: (_('Next 7 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=7)),
+        })),
+        3: (_('Next 30 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=30)),
+        })),
+        4: (_('Next 90 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=90)),
+        })),
+        5: (_('Past 7 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=7)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        6: (_('Past 30 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=30)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        7: (_('Past 90 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=90)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        8: (_('Current month'), lambda qs, name: qs.filter(**{
+            '%s__year' % name: now().year,
+            '%s__month' % name: now().month
+        })),
+        9: (_('Past year'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=365)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        10: (_('Current year'), lambda qs, name: qs.filter(**{
+            '%s__year' % name: now().year,
+        })),
+        11: (_('Next year'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=365)),
+        })),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(DateRangeOmniFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = ''
+        return self.options[value][1](qs, self.field_name)
+
+
 class ReportBooleanFilter(ChoiceFilter):
     options = {
         '': (_('Either'), lambda qs, name: qs.all()),
@@ -438,15 +501,12 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
 
     def accepted(self, qs, name):
         # return qs.filter(risk_acceptance__isnull=False)
-        from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
         return qs.filter(ACCEPTED_FINDINGS_QUERY)
 
     def not_accepted(self, qs, name):
-        from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
         return qs.filter(NOT_ACCEPTED_FINDINGS_QUERY)
 
     def was_accepted(self, qs, name):
-        from dojo.finding.views import WAS_ACCEPTED_FINDINGS_QUERY
         return qs.filter(WAS_ACCEPTED_FINDINGS_QUERY)
 
     options = {
@@ -1027,6 +1087,7 @@ class ApiFindingFilter(DojoFilter):
     under_defect_review = BooleanFilter(field_name='under_defect_review')
     under_review = BooleanFilter(field_name='under_review')
     verified = BooleanFilter(field_name='verified')
+    has_jira = BooleanFilter(field_name='jira_issue', lookup_expr='isnull', exclude=True)
     # CharFilter
     component_version = CharFilter(lookup_expr='icontains')
     component_name = CharFilter(lookup_expr='icontains')
@@ -1042,7 +1103,7 @@ class ApiFindingFilter(DojoFilter):
     references = CharFilter(lookup_expr='icontains')
     severity = CharFilter(method=custom_filter, field_name='severity')
     severity_justification = CharFilter(lookup_expr='icontains')
-    step_to_reproduce = CharFilter(lookup_expr='icontains')
+    steps_to_reproduce = CharFilter(lookup_expr='icontains')
     unique_id_from_tool = CharFilter(lookup_expr='icontains')
     title = CharFilter(lookup_expr='icontains')
     # DateRangeFilter
@@ -1133,7 +1194,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'thread_id', 'notes', 'files',
-                   'line', 'endpoint_status', 'cve']
+                   'line', 'cve']
 
 
 class FindingFilter(FindingFilterWithTags):
@@ -1152,6 +1213,8 @@ class FindingFilter(FindingFilterWithTags):
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(label="Mitigated Date")
+
+    planned_remediation_date = DateRangeOmniFilter()
 
     file_path = CharFilter(lookup_expr='icontains')
     param = CharFilter(lookup_expr='icontains')
@@ -1290,13 +1353,13 @@ class FindingFilter(FindingFilterWithTags):
 
     class Meta:
         model = Finding
-        fields = get_finding_filter_fields()
+        fields = get_finding_filterset_fields()
 
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoints', 'references',
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
-                   'hash_code', 'endpoint_status',
+                   'hash_code',
                    'reviewers',
                    'created', 'files', 'sla_start_date', 'cvssv3',
                    'severity_justification', 'steps_to_reproduce']
@@ -1357,7 +1420,7 @@ class SimilarFindingFilter(FindingFilter):
     class Meta(FindingFilter.Meta):
         model = Finding
         # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
-        fields = get_finding_filter_fields(similar=True)
+        fields = get_finding_filterset_fields(similar=True)
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -1531,7 +1594,7 @@ class MetricsFindingFilter(FindingFilter):
 
     class Meta(FindingFilter.Meta):
         model = Finding
-        fields = get_finding_filter_fields(metrics=True)
+        fields = get_finding_filterset_fields(metrics=True)
 
 
 class MetricsEndpointFilter(FilterSet):
@@ -1720,7 +1783,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['endpoint_status']
+        exclude = ['findings']
 
 
 class ApiEndpointFilter(DojoFilter):
@@ -1903,7 +1966,7 @@ class EndpointReportFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['product', 'endpoint_status']
+        exclude = ['product']
 
 
 class ReportFindingFilter(FindingFilterWithTags):
@@ -1932,8 +1995,8 @@ class ReportFindingFilter(FindingFilterWithTags):
         model = Finding
         # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references', 'test', 'sonarqube_issue',
-                   'thread_id', 'notes', 'endpoints', 'endpoint_status',
+                   'references', 'test', 'sonarqube_issue',
+                   'thread_id', 'notes', 'endpoints',
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 
@@ -1996,51 +2059,27 @@ class UserFilter(DojoFilter):
     username = CharFilter(lookup_expr='icontains')
     email = CharFilter(lookup_expr='icontains')
 
-    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-        o = OrderingFilter(
-            # tuple-mapping retains order
-            fields=(
-                ('username', 'username'),
-                ('last_name', 'last_name'),
-                ('first_name', 'first_name'),
-                ('email', 'email'),
-                ('is_active', 'is_active'),
-                ('is_superuser', 'is_superuser'),
-                ('last_login', 'last_login'),
-            ),
-            field_labels={
-                'username': 'User Name',
-                'is_active': 'Active',
-                'is_superuser': 'Superuser',
-            }
-        )
-    else:
-        o = OrderingFilter(
-            # tuple-mapping retains order
-            fields=(
-                ('username', 'username'),
-                ('last_name', 'last_name'),
-                ('first_name', 'first_name'),
-                ('email', 'email'),
-                ('is_active', 'is_active'),
-                ('is_staff', 'is_staff'),
-                ('is_superuser', 'is_superuser'),
-                ('last_login', 'last_login'),
-            ),
-            field_labels={
-                'username': 'User Name',
-                'is_active': 'Active',
-                'is_staff': 'Staff',
-                'is_superuser': 'Superuser',
-            }
-        )
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('username', 'username'),
+            ('last_name', 'last_name'),
+            ('first_name', 'first_name'),
+            ('email', 'email'),
+            ('is_active', 'is_active'),
+            ('is_superuser', 'is_superuser'),
+            ('last_login', 'last_login'),
+        ),
+        field_labels={
+            'username': 'User Name',
+            'is_active': 'Active',
+            'is_superuser': 'Superuser',
+        }
+    )
 
     class Meta:
         model = Dojo_User
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            fields = ['is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
-        else:
-            fields = ['is_staff', 'is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
+        fields = ['is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
 
 
 class GroupFilter(DojoFilter):
@@ -2094,6 +2133,14 @@ class LogEntryFilter(DojoFilter):
         model = LogEntry
         exclude = ['content_type', 'object_pk', 'object_id', 'object_repr',
                    'changes', 'additional_data', 'remote_addr']
+        filter_overrides = {
+            JSONField: {
+                'filter_class': CharFilter,
+                'extra': lambda f: {
+                    'lookup_expr': 'icontains',
+                }
+            }
+        }
 
 
 class ProductTypeFilter(DojoFilter):

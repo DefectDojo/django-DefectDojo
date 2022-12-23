@@ -134,7 +134,7 @@
                                         <td>
                                             <a target="_blank"
                                                href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                                <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
                                             </a>
                                         </td>
                                     {% endif %}
@@ -300,7 +300,8 @@
             var toc = "";
             var level = 3;
 
-            document.getElementById("contents").innerHTML =
+            if (document.getElementById("contents") != null) {
+                document.getElementById("contents").innerHTML =
                 document.getElementById("contents").innerHTML.replace(
                     /<h([\d])([^<]*)>([^<]+)<\/h([\d])>|<h([\d])([^>]*)>([^<]+)<sup>([^<]*)<\/sup>([^<]*)<\/h([\d])>/gi,
                     function (str, openLevel, id, titleText, closeLevel, openLevel_t, id_t, titleText_t, tags, junk, closeLevel_t) {
@@ -359,12 +360,15 @@
                             + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                     }
                 );
-
+            }
+			
             if (level) {
                 toc += (new Array(level + 1)).join("</ul>");
             }
 
-            document.getElementById("toc").innerHTML += toc;
+            if (document.getElementById("toc") != null) {
+                document.getElementById("toc").innerHTML += toc;
+            }
         };
 
     </script>

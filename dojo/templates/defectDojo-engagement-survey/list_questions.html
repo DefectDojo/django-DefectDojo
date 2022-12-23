@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load display_tags %}
 {% load authorization_tags %}
+{% load event_tags %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -27,7 +28,7 @@
                         {% for question in questions %}
                             <tr>
                                 <td>
-                                    {% if "dojo.change_question"|has_configuration_permission:"staff" %}
+                                    {% if "dojo.change_question"|has_configuration_permission %}
                                     <a title="{{ question.text }}" href="{% url 'edit_question' question.id %}">{{ question.text }}</a>
                                     {% else %}
                                     {{ question.text }}
@@ -50,7 +51,7 @@
         <div class="col-md-2">
             <div class="panel panel-default filters">
                 {% if filtered.form %}
-                    {% if "dojo.add_question"|has_configuration_permission:"staff" %}
+                    {% if "dojo.add_question"|has_configuration_permission %}
                         <div class="panel-heading">Actions</div>
                         <div class="panel-body centered">
                             <a class="btn btn-sm btn-secondary" href="{% url 'create_question' %}">
@@ -60,7 +61,15 @@
                     {% endif %}
                     <div class="panel-heading">Filters</div>
                     <form method="get" class="panel-body">
-                        {{ filtered.form.as_p }}
+                        {% for field in filtered.form.visible_fields %}
+                            <div class="form-group">
+                                {{ field.errors }}
+                                <label for="{{ field.auto_id }}" style="display: block;">{{ field.label }}</label>
+                                {% with placeholder="placeholder:"|add:field.label %}
+                                    {{ field|addcss:"class:form-control input-sm"|addcss:placeholder }}
+                                {% endwith %}
+                            </div>
+                        {% endfor %}
                         <div class="centered">
                             <input type="submit" class="btn btn-secondary inline top" label="submit" value="Apply"/><br/><br/>
                             <a href="{% url 'questions' %}"> [Clear Filters] </a>

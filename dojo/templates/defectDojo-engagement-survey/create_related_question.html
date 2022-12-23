@@ -41,7 +41,7 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <form method="post" class="form-horizontal">
+                <form id="id_question_form" method="post" class="form-horizontal">
                     <legend>{{ name }}</legend>
                     {% csrf_token %}
                     {% include "dojo/form_fields.html" with form=form %}
@@ -59,59 +59,30 @@
             </div>
         </div>
     </div>
-{% endblock %}
-<!-- /.container -->
+{% endblock content %}
 
-<!-- /#wrapper -->
-
-<!-- jQuery -->
-<script src="{{ STATIC_URL }}jquery/dist/jquery.min.js"></script>
-<!--  jQuery UI -->
-<script src="{{ STATIC_URL }}jquery-ui/jquery-ui.min.js"></script>
-<!-- Bootstrap Core JavaScript -->
-<script src="{{ STATIC_URL }}bootstrap/dist/js/bootstrap.min.js"></script>
-
-<!-- Metis Menu Plugin JavaScript -->
-<script src="{{ STATIC_URL }}metisMenu/dist/metisMenu.min.js"></script>
-
-<!-- Custom Theme JavaScript -->
-<script src="{{ STATIC_URL }}startbootstrap-sb-admin-2/dist/js/sb-admin-2.js"></script>
-<!-- Calendar JavaScript -->
-<script src="{{ STATIC_URL }}moment/min/moment.min.js"></script>
-<script src="{{ STATIC_URL }}fullcalendar/dist/fullcalendar.min.js"></script>
-<!-- Table sorter JavaScript -->
-<script src="{{ STATIC_URL }}jquery.tablesorter/dist/js/jquery.tablesorter.min.js"></script>
-<!-- our JS -->
-<script src="{{ STATIC_URL }}dojo/js/index.js"></script>
-<script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
-<script type="application/javascript">
-    $(function () {
-        $("*[data-type='choice']").parents('.form-group').hide();
-        $("*[data-type='text']").parents('.form-group').hide();
-
-        if ($('#id_type').val() == 'choice'){
-            $("*[data-type='text']").parents('.form-group').hide();
-            $("*[data-type='choice']").parents('.form-group').show();
-        }
-        if ($('#id_type').val() == 'text'){
+{% block postscript %}
+    {{ block.super }}
+    <script type="application/javascript">
+        $(function () {
             $("*[data-type='choice']").parents('.form-group').hide();
-            $("*[data-type='text']").parents('.form-group').show();
-        }
-
-        $('#id_type').change(function(){
-            $("*[data-type='choice']").parents('.form-group').hide();
-            $("*[data-type='text']").parents('.form-group').hide();
-            if (this.value == 'choice'){
-                $("*[data-type='text']").parents('.form-group').hide();
+    
+            if ($('#id_type').val() == 'choice'){
                 $("*[data-type='choice']").parents('.form-group').show();
             }
-            if (this.value == 'text'){
+            if ($('#id_type').val() == 'text'){
                 $("*[data-type='choice']").parents('.form-group').hide();
-                $("*[data-type='text']").parents('.form-group').show();
             }
+    
+            $('#id_type').change(function(){
+                $("*[data-type='choice']").parents('.form-group').hide();
+                if (this.value == 'choice'){
+                    $("*[data-type='choice']").parents('.form-group').show();
+                }
+                if (this.value == 'text'){
+                    $("*[data-type='text']").parents('.form-group').show();
+                }
+            });
         });
-    });
-</script>
-</body>
-
-</html>
+    </script>
+{% endblock postscript %}

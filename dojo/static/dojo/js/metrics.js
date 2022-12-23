@@ -1980,7 +1980,8 @@ function languages_pie(data) {
             }
         },
         legend: {
-            show: true
+            show: true,
+            container: "#donut-lang-container",
         },
         grid: {
             hoverable: true,

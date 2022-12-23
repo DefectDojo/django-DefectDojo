@@ -14,21 +14,21 @@
               <h3 class="has-filters">
                   Metrics Overview
                 <div class="dropdown pull-right ">
-                    <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                    <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
-                        <span class="fa fa-bars"></span>
+                        <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a href="{% url 'view_product_metrics' prod.id %}?type=Finding">
-                                <i class="fa fa-file-text-o"></i> Measure Findings
+                                <i class="fa-solid fa-file-lines"></i> Measure Findings
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="{% url 'view_product_metrics' prod.id %}?type=Endpoint">
-                                <i class="fa fa-file-text-o"></i> Measure Affected Endpoints
+                                <i class="fa-solid fa-file-lines"></i> Measure Affected Endpoints
                             </a>
                         </li>
                     </ul>
@@ -48,7 +48,7 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-crosshairs fa-2x"></i>
+                                <i class="fa-solid fa-crosshairs fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ verified_objs|length }}</span>
@@ -56,7 +56,7 @@
                                             href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are open/active and verified">Verified
                                         {{ view }}{{ verified_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -67,7 +67,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Verified since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -77,14 +77,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bug fa-2x"></i>
+                                <i class="fa-solid fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ open_objs|length }}</span>
                                     <span><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                         title="Findings that are open/active, but not (yet) verified">Open
                                         {{ view }}{{ open_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -95,7 +95,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Opened since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Opened since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -105,14 +105,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-check fa-2x"></i>
+                                <i class="fa-solid fa-check fa-2x"></i>
 
                                 <div class="pull-right text-right">
                                     <span class="fa-2x">{{ accepted_objs|length }}</span>
                                     <span><a
                                             href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that have been accepted in a risk acceptance.">Risk Accepted
-                                    {{ view }}s <i class="fa fa-arrow-circle-right"></i></a>
+                                    {{ view }}s <i class="fa-solid fa-circle-right"></i></a>
                                 </span>
                                 </div>
                             </div>
@@ -123,7 +123,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Accepted since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Risk Accepted since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -133,14 +133,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ closed_objs|length }}</span>
                                     <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are closed and mitigated.">Closed
                                         {{ view }}{{ closed_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -151,7 +151,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Closed since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Closed since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -161,14 +161,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ false_positive_objs|length }}</span>
                                     <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are marked as false postive.">False-postive
                                         {{ view }}{{ false_positive_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -179,7 +179,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Flagged since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Flagged since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -189,7 +189,7 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ out_of_scope_objs|length }}</span>
@@ -197,7 +197,7 @@
                                             href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are marked as out of scope.">Out Of Scope
                                         {{ view }}{{ out_of_scope_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -208,7 +208,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Since {{ start_date|date:"D., M. d, Y" }}.</small>
                     </div>
                 </div>
@@ -218,14 +218,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bullseye fa-2x"></i>
+                                <i class="fa-solid fa-bullseye fa-2x"></i>
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ all_objs|length }}</span>
                                     <span><a href="{% url 'product_all_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="All findings.">Total
                                         {{ view }}{{ all_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -236,7 +236,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -246,14 +246,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bug fa-2x"></i>
+                                <i class="fa-solid fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ inactive_objs|length }}</span>
                                     <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are not active but not mitigated for some reason">Inactive
                                         {{ view }}{{ inactive_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -264,7 +264,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Ingested since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Ingested since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -283,7 +283,7 @@
                     <div class="btn-group">
                       <!--
                         <button class="btn btn-primary clickable panel-collapsed">
-                            <span><i class="fa fa-bar-chart"></i></span>
+                            <span><i class="fa-solid fa-chart-column"></i></span>
                         </button>
                       -->
                     </div>
@@ -296,14 +296,14 @@
                     <div class="panel-heading">
                         Open, Closed, and Accepted Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="open_close_weekly" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -313,14 +313,14 @@
                     <div class="panel-heading">
                         Week to Week by Severity
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_weekly" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -330,14 +330,14 @@
                     <div class="panel-heading">
                         Critical Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_critical" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -347,14 +347,14 @@
                     <div class="panel-heading">
                         High Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_high" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -364,14 +364,14 @@
                     <div class="panel-heading">
                         Medium Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_medium" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -386,7 +386,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Finding age of {{ open_objs|length|apnumber }} open
                             finding{{ open_objs|length|pluralize }}</small>
                     </div>
@@ -397,14 +397,14 @@
                     <div class="panel-heading">
                         Weekly activity of findings reported
                             <i title="Weeks are only displayed if findings are available."
-                            class="text-info fa fa-info-circle"></i>
+                            class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div class="graph" id="punchcard"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -414,14 +414,14 @@
                     <div class="panel-heading">
                         Findings by Test Type
                         <i title="Test Types shown only if available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div class="graph" id="test_type"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Test Types shown only if available.</small>
                     </div>
                 </div>
@@ -436,7 +436,7 @@
                         <div id="open_vulnerabilities" class="graph"></div>
                     </div>
                     <div class="panel-footer">
-                        <i class="text-info fa fa-info-circle"></i>
+                        <i class="text-info fa-solid fa-circle-info"></i>
                         <small>Showing {{ open_vulnerabilities|length|apnumber }}
                             vulnerabilit{{ open_vulnerabilities|length|pluralize:"y,ies"}} from Open findings</small>
                     </div>
@@ -451,7 +451,7 @@
                         <div id="all_vulnerabilities" class="graph"></div>
                     </div>
                     <div class="panel-footer">
-                        <i class="text-info fa fa-info-circle"></i>
+                        <i class="text-info fa-solid fa-circle-info"></i>
                         <small>Showing {{ all_vulnerabilities|length|apnumber }}
                             vulnerabilit{{ all_vulnerabilities|length|pluralize:"y,ies"}} from all findings</small>
                     </div>

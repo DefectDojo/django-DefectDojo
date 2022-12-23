@@ -5,7 +5,7 @@
 # Dockerfile.django to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.8.13-slim-bullseye@sha256:0e07cc072353e6b10de910d8acffa020a42467112ae6610aa90d6a3c56a74911 as base
+FROM python:3.11.1-slim-bullseye@sha256:555dcc94587b4101de48664b45b19f17e099a3ab236dec629791f366e2f2e83c as base
 FROM base as build
 WORKDIR /app
 RUN \
@@ -16,10 +16,13 @@ RUN \
     dnsutils \
     default-mysql-client \
     libmariadb-dev-compat \
+    libpq-dev \
     postgresql-client \
     xmlsec1 \
     git \
     uuid-runtime \
+    # libcurl4-openssl-dev is required for installing pycurl python package
+    libcurl4-openssl-dev \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -72,7 +75,7 @@ COPY dojo/ ./dojo/
 
 RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
 
-FROM nginx:1.23.0-alpine@sha256:8e38930f0390cbd79b2d1528405fb17edcda5f4a30875ecf338ebaa598dc994e
+FROM nginx:1.23.3-alpine@sha256:dd8a054d7ef030e94a6449783605d6c306c1f69c10c2fa06b66a030e0d1db793
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/

@@ -33,7 +33,7 @@ jobs:
         with:
           args: -v -tpng ${{ steps.getfile.outputs.files }}
       - name: Push Local Changes
-        uses: stefanzweifel/git-auto-commit-action@v4.14.1
+        uses: stefanzweifel/git-auto-commit-action@v4.16.0
         with:
           commit_user_name: "PlantUML_bot"
           commit_user_email: "noreply@defectdojo.org"

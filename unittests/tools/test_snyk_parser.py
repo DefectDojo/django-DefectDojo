@@ -70,7 +70,9 @@ class TestSnykParser(DojoTestCase):
         self.assertEqual(611, finding.cwe)
         self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L", finding.cvssv3)
         self.assertEqual(
-            "## Remediation\nUpgrade `org.apache.santuario:xmlsec` to version 2.1.4 or higher.\n",
+            "## Remediation\nUpgrade `org.apache.santuario:xmlsec` to version 2.1.4 or higher.\n\n" +
+            "Upgrade Location: pom.xml\n" +
+            "Upgrade from org.apache.santuario:xmlsec@2.1.1 to org.apache.santuario:xmlsec@2.1.4 to fix this issue, as well as updating the following:\n - org.apache.santuario:xmlsec@2.1.1",
             finding.mitigation,
         )
         self.assertEqual(
@@ -146,3 +148,28 @@ class TestSnykParser(DojoTestCase):
             self.assertEqual(
                 "SNYK-SLES153-PERMISSIONS-2648113", finding.vuln_id_from_tool
             )
+
+    def test_snykParser_target_file(self):
+        with open("unittests/scans/snyk/all_containers_target_output.json") as testfile:
+            parser = SnykParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(40, len(findings))
+            # Mobile-Security-Framework-MobSF@0.0.0: SQL Injection
+            finding = findings[0]
+            self.assertEqual("Critical", finding.severity)
+            self.assertIn('target_file:Mobile-Security-Framework-MobSF/requirements.txt', finding.unsaved_tags)
+
+    def test_snykParser_update_libs_tag(self):
+        with open("unittests/scans/snyk/single_project_upgrade_libs.json") as testfile:
+            parser = SnykParser()
+            findings = parser.get_findings(testfile, Test())
+            for index in range(len(findings)):
+                print(index, findings[index], findings[index].unsaved_tags)
+            self.assertEqual(254, len(findings))
+            # acme-review@1.0.0: Remote Code Execution (RCE)
+            finding = findings[227]
+            print(finding, finding.severity, finding.unsaved_tags)
+            self.assertEqual("High", finding.severity)
+            self.assertIn('target_file:package-lock.json', finding.unsaved_tags)
+            self.assertIn('upgrade_to:react-scripts@5.0.0', finding.unsaved_tags)
+            self.assertIn('shell-quote@1.7.2', finding.mitigation)

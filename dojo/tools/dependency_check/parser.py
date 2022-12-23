@@ -17,6 +17,7 @@ class DependencyCheckParser(object):
         'info': 'Info',
         'low': 'Low',
         'moderate': 'Medium',
+        'medium': 'Medium',
         'high': 'High',
         'critical': 'Critical'
     }
@@ -32,15 +33,14 @@ class DependencyCheckParser(object):
             dupes[key] = finding
 
     def get_filename_and_path_from_dependency(self, dependency, related_dependency, namespace):
-        if related_dependency:
-            if related_dependency.findtext(namespace + 'fileName'):
-                return related_dependency.findtext(namespace + 'fileName'), related_dependency.findtext(namespace + 'filePath')
-            else:
-                # without filename, it would be just a duplicate finding so we have to skip it. filename is only present for relateddependencies since v6.0.0
-                # logger.debug('related_dependency: %s', ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
-                return None, None
+        if not related_dependency:
+            return dependency.findtext(f'{namespace}fileName'), dependency.findtext(f'{namespace}filePath')
+        if related_dependency.findtext(f'{namespace}fileName'):
+            return related_dependency.findtext(f'{namespace}fileName'), related_dependency.findtext(f'{namespace}filePath')
         else:
-            return dependency.findtext(namespace + 'fileName'), dependency.findtext(namespace + 'filePath')
+            # without filename, it would be just a duplicate finding so we have to skip it. filename is only present for relateddependencies since v6.0.0
+            # logger.debug('related_dependency: %s', ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
+            return None, None
 
     def get_component_name_and_version_from_dependency(self, dependency, related_dependency, namespace):
         identifiers_node = dependency.find(namespace + 'identifiers')
@@ -178,11 +178,14 @@ class DependencyCheckParser(object):
 
         # handle if the severity have something not in the mapping
         # default to 'Medium' and produce warnings in logs
-        if severity.strip().lower() not in self.SEVERITY_MAPPING:
-            logger.warn(f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value")
-            severity = "Medium"
+        if severity:
+            if severity.strip().lower() not in self.SEVERITY_MAPPING:
+                logger.warn(f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value")
+                severity = "Medium"
+            else:
+                severity = self.SEVERITY_MAPPING[severity.strip().lower()]
         else:
-            severity = self.SEVERITY_MAPPING[severity.strip().lower()]
+            severity = "Medium"
 
         reference_detail = None
         references_node = vulnerability.find(namespace + 'references')
@@ -281,20 +284,20 @@ class DependencyCheckParser(object):
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
 
+                            relatedDependencies = dependency.find(namespace + 'relatedDependencies')
+                            if relatedDependencies:
+                                for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
+                                    finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
+                                    if finding:  # could be None
+                                        if scan_date:
+                                            finding.date = scan_date
+                                        self.add_finding(finding, dupes)
+
                     for suppressedVulnerability in vulnerabilities.findall(namespace + 'suppressedVulnerability'):
                         if suppressedVulnerability:
                             finding = self.get_finding_from_vulnerability(dependency, None, suppressedVulnerability, test, namespace)
                             if scan_date:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
-
-                    relatedDependencies = dependency.find(namespace + 'relatedDependencies')
-                    if relatedDependencies:
-                        for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
-                            finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
-                            if finding:  # could be None
-                                if scan_date:
-                                    finding.date = scan_date
-                                self.add_finding(finding, dupes)
 
         return list(dupes.values())

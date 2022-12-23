@@ -51,9 +51,21 @@ def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwar
 
 
 # also get signal when id is set/changed so we can process new findings
-pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['id', 'active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope', 'risk_accepted'])
-# pre_save_changed.connect(pre_save_finding_status_change, sender=Finding)
-# post_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope'])
+pre_save_changed.connect(
+    pre_save_finding_status_change,
+    sender=Finding,
+    fields=[
+        "id",
+        "active",
+        "verified",
+        "false_p",
+        "is_mitigated",
+        "mitigated",
+        "mitigated_by",
+        "out_of_scope",
+        "risk_accepted",
+    ],
+)
 
 
 def update_finding_status(new_state_finding, user, changed_fields=None):
@@ -403,7 +415,8 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 
             new_original.duplicate = False
             new_original.duplicate_finding = None
-            new_original.active = True
+            new_original.active = original.active
+            new_original.is_mitigated = original.is_mitigated
             new_original.save_no_options()
             new_original.found_by.set(original.found_by.all())
 
@@ -565,9 +578,7 @@ def add_endpoints(new_finding, form):
     for endpoint in new_finding.endpoints.all():
         eps, created = Endpoint_Status.objects.get_or_create(
             finding=new_finding,
-            endpoint=endpoint, defaults={'date': form.cleaned_data['date'] or now})
-        endpoint.endpoint_status.add(eps)
-        new_finding.endpoint_status.add(eps)
+            endpoint=endpoint, defaults={'date': form.cleaned_data['date'] or timezone.now()})
 
 
 def save_vulnerability_ids(finding, vulnerability_ids):

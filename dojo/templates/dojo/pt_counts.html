@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load display_tags %}
 {% block add_styles %}
     {{ block.super }}
@@ -13,27 +14,26 @@
 
     <form class="biweekly-metrics" action="{% url 'product_type_counts' %}" method="get">
         {{ form.as_p }}
-        <input class="btn btn-sm btn-primary" type="submit" value="Generate Metrics For Selected Period"/>
+        <input class="btn btn-sm btn-primary" type="submit" value="{% trans "Generate Metrics For Selected Period" %}"/>
     </form>
     <br/>
     {% if pt %}
-        <h2>Finding Information For Period of {{ start_date.date }} - {{ end_date.date }}</h2>
+        <h2>{% blocktrans with start_date=start_date.date end_date=end_date.date%}Finding Information For Period of {{ start_date }} - {{ end_date }}
+            {% endblocktrans %}</h2>
         <h3 class="inline-block">{{ pt.name }}</h3> [
-        <a href="{% url 'product_type_metrics' pt.id %}" class="inline-block">View Details</a>]
+        <a href="{% url 'product_type_metrics' pt.id %}" class="inline-block">{% trans "View Details" %}</a>]
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
-                <h4>Total Security Bug Count In Period</h4>
+                <h4>{% trans "Total Security Bug Count In Period" %}</h4>
             </div>
             <table class="table table-bordered table-condensed table-striped">
                 <thead>
                 <tr>
-                    <th>Critical</th>
-                    <th>High</th>
-                    <th>Medium</th>
-                    <th>Low</th>
-                    <th>
-                        Total
-                    </th>
+                    <th>{% trans "Critical" %}</th>
+                    <th>{% trans "High" %}</th>
+                    <th>{% trans "Medium" %}</th>
+                    <th>{% trans "Low" %}</th>
+                    <th>{% trans "Total" %}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -61,18 +61,16 @@
         <br/>
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
-                <h4>Total Security Bugs Opened In Period</h4>
+                <h4>{% trans "Total Security Bugs Opened In Period" %}</h4>
             </div>
             <table class="table table-bordered table-condensed table-striped">
                 <thead>
                 <tr>
-                    <th>Critical</th>
-                    <th>High</th>
-                    <th>Medium</th>
-                    <th>Low</th>
-                    <th>
-                        Total
-                    </th>
+                    <th>{% trans "Critical" %}</th>
+                    <th>{% trans "High" %}</th>
+                    <th>{% trans "Medium" %}</th>
+                    <th>{% trans "Low" %}</th>
+                    <th>{% trans "Total" %}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -99,18 +97,16 @@
         <br/>
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
-                <h4>Total Security Bugs Closed In Period</h4>
+                <h4>{% trans "Total Security Bugs Closed In Period" %}</h4>
             </div>
             <table class="table table-bordered table-condensed table-striped">
                 <thead>
                 <tr>
-                    <th>Critical</th>
-                    <th>High</th>
-                    <th>Medium</th>
-                    <th>Low</th>
-                    <th>
-                        Total
-                    </th>
+                    <th>{% trans "Critical" %}</th>
+                    <th>{% trans "High" %}</th>
+                    <th>{% trans "Medium" %}</th>
+                    <th>{% trans "Low" %}</th>
+                    <th>{% trans "Total" %}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -138,32 +134,24 @@
         <br/>
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
-                <h4>Trending Total Bug Count By Month</h4>
+                <h4>{% trans "Trending Total Bug Count By Month" %}</h4>
             </div>
             <table class="table table-bordered table-condensed table-striped">
                 <thead>
                 <tr>
-                    <th>
-                        Month
-                    </th>
-                    <th>Critical</th>
-                    <th>High</th>
-                    <th>Medium</th>
-                    <th>Low</th>
-                    <th>
-                        Opened in Month
-                    </th>
-                    <th>
-                        Open to Date
-                    </th>
-                    <th>
-                        Total Closed<sup>*</sup>
-                    </th>
+                    <th>{% trans "Month" %}</th>
+                    <th>{% trans "Critical" %}</th>
+                    <th>{% trans "High" %}</th>
+                    <th>{% trans "Medium" %}</th>
+                    <th>{% trans "Low" %}</th>
+                    <th>{% trans "Opened in Month" %}</th>
+                    <th>{% trans "Open to Date" %}</th>
+                    <th>{% trans "Total Closed" %}<sup>*</sup></th>
                 </tr>
                 </thead>
                 <tfoot style="font-size: 12px;" class="text-info">
                 <tr>
-                    <td colspan="8"><sup>*</sup>Closed findings may have been opened outside of requested period.</td>
+                    <td colspan="8"><sup>*</sup>{% trans "Closed findings may have been opened outside of requested period." %}</td>
                 </tr>
                 </tfoot>
                 <tbody>
@@ -200,21 +188,17 @@
         <br/>
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
-                <h4>Top 10 By Bug Severity</h4>
+                <h4>{% trans "Top 10 By Bug Severity" %}</h4>
             </div>
             <table class="table table-bordered table-condensed table-striped">
                 <thead>
                 <tr>
-                    <th>
-                        Product
-                    </th>
-                    <th>Critical</th>
-                    <th>High</th>
-                    <th>Medium</th>
-                    <th>Low</th>
-                    <th>
-                        Total
-                    </th>
+                    <th>{% trans "Product" %}</th>
+                    <th>{% trans "Critical" %}</th>
+                    <th>{% trans "High" %}</th>
+                    <th>{% trans "Medium" %}</th>
+                    <th>{% trans "Low" %}</th>
+                    <th>{% trans "Total" %}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -246,18 +230,18 @@
         <br/>
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
-                <h4>{{ pt }} Open Findings </h4>
+                <h4>{% blocktrans %}{{ pt }} Open Findings{% endblocktrans %}</h4>
             </div>
             <table id="open_findings"
                    class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                 <thead>
                 <tr>
-                    <th>No.</th>
-                    <th>Name</th>
-                    <th> Date</th>
-                    <th>Severity</th>
-                    <th>Age</th>
-                    <th>Product</th>
+                    <th>{% trans "No." %}</th>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "Severity" %}</th>
+                    <th>{% trans "Age" %}</th>
+                    <th>{% trans "Product" %}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -284,6 +268,3 @@
     {% endif %}
 
 {% endblock %}
-
-
-

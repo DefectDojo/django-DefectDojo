@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load event_tags %}
 {% load static %}
+{% load i18n %}
 {% block add_styles %}
     {{ block.super }}
     body{
@@ -26,23 +27,23 @@
     {{ block.super }}
     <div class="row navbar-fixed-top">
         <div class="col-md-12">
-            <h2>{{ name }} For {{ start_date.date }} - {{ end_date.date }}
+            <h2>{% blocktrans with start_date=start_date.date end_date=end_date.date%}{{ name }} for {{ start_date }} - {{ end_date }}{% endblocktrans %}
                 <a class="btn close pull-right" href="{% url 'metrics' %}" aria-hidden="true">&times;</a>
                 <div class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
-                        <span class="fa fa-bars"></span>
+                        <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a href="{% url 'metrics' %}?view=dashboard&type=Finding">
-                                <i class="fa fa-file-text-o"></i> Measures Findings
+                                <i class="fa-solid fa-file-lines"></i> {% trans "Measures Findings" %}
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="{% url 'metrics' %}?view=dashboard&type=Endpoint">
-                                <i class="fa fa-file-text-o"></i> Measure Affected Endpoints
+                                <i class="fa-solid fa-file-lines"></i> {% trans "Measure Affected Endpoints" %}
                             </a>
                         </li>
                     </ul>
@@ -53,9 +54,7 @@
     <div class="row metric-data">
         <div class="col-md-6 section-start">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    Open Bug Count by Month
-                </div>
+                <div class="panel-heading">{% trans "Open Bug Count by Month" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div id="opened_per_month" class="graph"></div>
@@ -66,9 +65,7 @@
         </div>
         <div class="col-md-6">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    Risk Accepted Bug Count by Month
-                </div>
+                <div class="panel-heading">{% trans "Risk Accepted Bug Count by Month" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div id="accepted_per_month" class="graph"></div>
@@ -79,9 +76,7 @@
         </div>
         <div class="col-md-12 section-start">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    Open Bug Count by Week
-                </div>
+                <div class="panel-heading">{% trans "Open Bug Count by Week" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div id="opened_per_week" class="graph"></div>
@@ -92,9 +87,7 @@
         </div>
         <div class="col-md-12 section-start">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    Risk Accepted Bug Count by Week
-                </div>
+                <div class="panel-heading">{% trans "Risk Accepted Bug Count by Week" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div id="accepted_per_week" class="graph"></div>
@@ -108,9 +101,7 @@
         {% if top_ten_products %}
             <div class="col-md-12 section-start">
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Top {{ top_ten_products|length }} Products By Bug Severity
-                    </div>
+                    <div class="panel-heading">{% blocktrans with length=top_ten_products|length %}Top {{ length }} Products By Bug Severity{% endblocktrans %}</div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
                         <div id="top-ten" class="graph"></div>
@@ -122,9 +113,7 @@
         {% endif %}
         <div class="col-md-4 section-start">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    Total Findings In Period By Severity
-                </div>
+                <div class="panel-heading">{% trans "Total Findings In Period By Severity" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div id="opened_in_period" class="graph"></div>
@@ -135,9 +124,7 @@
         </div>
         <div class="col-md-4">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    Total Findings Risk Accepted In Period By Severity
-                </div>
+                <div class="panel-heading">{% trans "Total Findings Risk Accepted In Period By Severity" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div id="total_accepted_in_period" class="graph"></div>
@@ -148,9 +135,7 @@
         </div>
         <div class="col-md-4">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    Total Findings Closed In Period By Severity
-                </div>
+                <div class="panel-heading">{% trans "Total Findings Closed In Period By Severity" %}</div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div id="total_closed_in_period" class="graph"></div>
@@ -163,15 +148,15 @@
             <div class="col-lg-12 section-start">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        Weekly activity, displayed by day, of findings reported.*
+                        {% trans "Weekly activity, displayed by day, of findings reported.*" %}
                     </div>
                     <div class="panel-body">
                         <div class="graph-500" id="punchcard"></div>
-                        <p class="text-center text-muted small"><br/>Week begins on date displayed.</p>
+                        <p class="text-center text-muted small"><br/>{% trans "Week begins on date displayed." %}</p>
 
                         <p>
                             <br/>
-                            <span class="text-muted small">* Weeks are only displayed if findings are available.</span>
+                            <span class="text-muted small">{% trans "* Weeks are only displayed if findings are available." %}</span>
                         </p>
                     </div>
                 </div>
@@ -307,7 +292,7 @@
                 punchcard("#punchcard", {{ punchcard|safe }}, {{ ticks|safe }});
 
             {%  endif %}
-            
+
         })
     </script>
 {% endblock %}

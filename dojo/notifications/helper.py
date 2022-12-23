@@ -26,7 +26,9 @@ def create_notification(event=None, **kwargs):
         logger.debug('creating notifications for recipients: %s', kwargs['recipients'])
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
             # kwargs.update({'user': recipient_notifications.user})
+            logger.debug('Sent notification to %s', recipient_notifications.user)
             process_notifications(event, recipient_notifications, **kwargs)
+
     else:
         logger.debug('creating system notifications for event: %s', event)
         # send system notifications to all admin users
@@ -61,7 +63,7 @@ def create_notification(event=None, **kwargs):
 
         # System notifications
         try:
-            system_notifications = Notifications.objects.get(user=None)
+            system_notifications = Notifications.objects.get(user=None, template=False)
         except Exception:
             system_notifications = Notifications()
 
@@ -133,6 +135,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     notification_message = None
     try:
         notification_message = render_to_string(template, kwargs)
+        logger.debug("Rendering from the template %s", template)
     except TemplateDoesNotExist:
         logger.debug('template not found or not implemented yet: %s', template)
     except Exception as e:
@@ -377,7 +380,14 @@ def notify_test_created(test):
                         url=reverse('view_test', args=(test.id,)))
 
 
-def notify_scan_added(test, updated_count, new_findings, findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
+def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
+    logger.debug("Scan added notifications")
+
+    new_findings = sorted(list(new_findings), key=lambda x: x.numerical_severity)
+    findings_mitigated = sorted(list(findings_mitigated), key=lambda x: x.numerical_severity)
+    findings_reactivated = sorted(list(findings_reactivated), key=lambda x: x.numerical_severity)
+    findings_untouched = sorted(list(findings_untouched), key=lambda x: x.numerical_severity)
+
     title = 'Created/Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
     create_notification(event='scan_added', title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
                         finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=findings_untouched,

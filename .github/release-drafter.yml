@@ -45,7 +45,7 @@ exclude-labels:
   - 'skip-changelog'      
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
-  Please consult the [Upgrade notes in the documentation ](https://defectdojo.github.io/django-DefectDojo/getting_started/upgrading/) for specific instructions for this release, and general upgrade instructions. Below is an automatically generated list of all PRs merged since the previous release.
+  Please consult the [Upgrade notes in the documentation ](https://documentation.defectdojo.com/getting_started/upgrading/) for specific instructions for this release, and general upgrade instructions. Below is an automatically generated list of all PRs merged since the previous release.
   
   ## Changes since $PREVIOUS_TAG
   $CHANGES

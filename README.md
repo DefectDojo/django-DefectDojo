@@ -39,10 +39,11 @@ Navigate to <http://localhost:8080>.
 
 ## Documentation
 
-- [Official Docs](https://defectdojo.github.io/django-DefectDojo/) ([latest](https://defectdojo.github.io/django-DefectDojo/) | [dev](https://defectdojo.github.io/django-DefectDojo/dev))
-- [REST APIs](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/)
-- [Client APIs and Wrappers](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/#clients--api-wrappers)
+- [Official Docs](https://documentation.defectdojo.com/) ([latest](https://documentation.defectdojo.com/) | [dev](https://documentation.defectdojo.com/dev))
+- [REST APIs](https://documentation.defectdojo.com/integrations/api-v2-docs/)
+- [Client APIs and Wrappers](https://documentation.defectdojo.com/integrations/api-v2-docs/#clients--api-wrappers)
 - [Authentication Options](readme-docs/AVAILABLE-PLUGINS.md)
+- [Parsers](https://documentation.defectdojo.com/integrations/parsers/)
 
 ## Supported Installation Options
 

@@ -259,6 +259,23 @@ class CycloneDXParser(object):
             if len(cwes) > 0:
                 finding.cwe = cwes[0]
 
+            # Check for mitigation
+            analysis = vulnerability.findall("b:analysis", namespaces=ns)
+            if analysis and len(analysis) == 1:
+                state = analysis[0].findtext("b:state", namespaces=ns)
+                if state:
+                    if "resolved" == state or "resolved_with_pedigree" == state or "not_affected" == state:
+                        finding.is_mitigated = True
+                        finding.active = False
+                    elif "false_positive" == state:
+                        finding.false_p = True
+                        finding.active = False
+                    if not finding.active:
+                        detail = analysis[0].findtext("b:detail", namespaces=ns)
+                        if detail:
+                            finding.mitigation = \
+                                finding.mitigation + '\n**This vulnerability is mitigated and/or suppressed:** {}\n'.format(detail)
+
             findings.append(finding)
 
         return findings
@@ -277,6 +294,12 @@ class CycloneDXParser(object):
     def _get_findings_json(self, file, test):
         """Load a CycloneDX file in JSON format"""
         data = json.load(file)
+
+        # Parse timestamp to get the report date
+        report_date = None
+        if data.get("metadata") and data.get("metadata").get("timestamp"):
+            report_date = dateutil.parser.parse(data.get("metadata").get("timestamp"))
+
         # for each component we keep data
         components = {}
         for component in data.get("components", []):
@@ -332,6 +355,9 @@ class CycloneDXParser(object):
                     vuln_id_from_tool=vulnerability.get("id"),
                 )
 
+                if report_date:
+                    finding.date = report_date
+
                 ratings = vulnerability.get("ratings", [])
                 for rating in ratings:
                     if rating.get("method") == "CVSSv3" or rating.get("method") == "CVSSv31":
@@ -365,6 +391,23 @@ class CycloneDXParser(object):
                 if cwes and len(cwes) > 0:
                     finding.cwe = cwes[0]
 
+                # Check for mitigation
+                analysis = vulnerability.get('analysis')
+                if analysis:
+                    state = analysis.get('state')
+                    if state:
+                        if "resolved" == state or "resolved_with_pedigree" == state or "not_affected" == state:
+                            finding.is_mitigated = True
+                            finding.active = False
+                        elif "false_positive" == state:
+                            finding.false_p = True
+                            finding.active = False
+                        if not finding.active:
+                            detail = analysis.get("detail")
+                            if detail:
+                                finding.mitigation = \
+                                    finding.mitigation + '\n**This vulnerability is mitigated and/or suppressed:** {}\n'.format(detail)
+
                 findings.append(finding)
         return findings
 
@@ -372,6 +415,8 @@ class CycloneDXParser(object):
         if reference not in components:
             LOGGER.warning(f"reference:{reference} not found in the BOM")
             return (None, None)
+        if "version" not in components[reference]:
+            return (components[reference]["name"], None)
         return (components[reference]["name"], components[reference]["version"])
 
     def fix_severity(self, severity):

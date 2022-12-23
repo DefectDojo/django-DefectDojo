@@ -11,7 +11,7 @@
                     <h3 class="has-filters">
                         Engineers
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                         </div>
                     </h3>
                 </div>
@@ -33,9 +33,6 @@
                             <th class="nowrap">{% dojo_sort request 'Email' 'email' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Last Login' 'last_login'%}</th>
                             <th class="nowrap, text-center">{% dojo_sort request 'Active' 'is_active' %}</th>
-                            {% if not 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
-                            <th class="nowrap, text-center">{% dojo_sort request 'Staff' 'is_staff' %}</th>
-                            {% endif %}
                             <th class="nowrap, text-center">{% dojo_sort request 'Superuser' 'is_superuser' %}</th>
                         </tr>
                         {% for u in users %}
@@ -46,16 +43,11 @@
                                 <td>{{ u.email }}</td>
                                 <td>{{ u.last_login }}</td>
                                 <td class="text-center">{% if u.is_active %}
-                                    <i class="text-success fa fa-check"></i>{% else %}
-                                    <i class="text-danger fa fa-times"></i>{% endif %}</td>
-                                {% if not 'FEATURE_CONFIGURATION_AUTHORIZATION'|setting_enabled %}
-                                <td class="text-center">{% if u.is_staff %}
-                                    <i class="text-success fa fa-check"></i>{% else %}
-                                    <i class="text-danger fa fa-times"></i>{% endif %}</td>
-                                {% endif %}
+                                    <i class="text-success fa-solid fa-check"></i>{% else %}
+                                    <i class="text-danger fa-solid fa-xmark"></i>{% endif %}</td>
                                 <td class="text-center">{% if u.is_superuser %}
-                                    <i class="text-success fa fa-check"></i>{% else %}
-                                    <i class="text-danger fa fa-times"></i>{% endif %}</td>
+                                    <i class="text-success fa-solid fa-check"></i>{% else %}
+                                    <i class="text-danger fa-solid fa-xmark"></i>{% endif %}</td>
                                 </tr>
                         {% endfor %}
                     </table>
