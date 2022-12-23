@@ -33,6 +33,9 @@ For changes that require additional settings, you can now use local_settings.py 
 ## Python3 version
 For compatibility reasons, the code in dev branch should be python3.8 compliant.
 
+## Submisison Approval
+With the exception of new parsers and parser improvements, it is recomended that you get in touch with us to discuss changes prior to dedicating time and resources. We are working on defining clear guidelines on direction and acceptable PRs, but in the meantime, please get in touch with a core mod or a maintainer on Slack.  
+
 ## Submitting Pull Requests
 
 The following are things to consider before submitting a pull request to
@@ -50,7 +53,7 @@ DefectDojo.
 
 0. Pull requests should be submitted to the 'dev' branch.
 
-0. In dev branch, the code should be python 3.8 compliant.
+0. In dev branch, the code should be python 3.11 compliant.
 
 [dojo_settings]: /dojo/settings/settings.dist.py "DefectDojo settings file"
 [pep8]: https://www.python.org/dev/peps/pep-0008/ "PEP8"
