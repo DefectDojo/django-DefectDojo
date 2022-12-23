@@ -152,6 +152,7 @@ jobs:
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress --cni calico'
+          github token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Status of minikube
         run: |-
