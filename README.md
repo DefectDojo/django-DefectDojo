@@ -103,4 +103,4 @@ Please report Security issues via our [disclosure policy](readme-docs/SECURITY.m
 
 ## License
 
-DefectDojo is licensed under the [BSD Simplified license](LICENSE.md)
+DefectDojo is licensed under the [BSD-3-Clause License](LICENSE.md)
