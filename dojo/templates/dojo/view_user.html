@@ -365,6 +365,10 @@
                             <td style="width: 200px;"><strong>Global role</strong></td>
                             <td>{% if user.global_role.role %} {{ user.global_role.role }} {% endif %}</td>
                         </tr>
+                        <tr>
+                            <td style="width: 200px;"><strong>Last Login</strong></td>
+                            <td>{% if user.last_login %} {{ user.last_login }} {% else %} Never {% endif %}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

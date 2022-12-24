@@ -52,6 +52,7 @@
                             <th class="nowrap, text-center">{% dojo_sort request 'Active' 'is_active' %}</th>
                             <th class="nowrap, text-center">{% dojo_sort request 'Superuser' 'is_superuser' %}</th>
                             <th class="nowrap">Global Role</th>
+                            <th class="nowrap">Last Login</th>
                         </tr>
                         {% for u in users %}
                             <tr>
@@ -104,6 +105,7 @@
                                     <i class="text-success fa-solid fa-check"></i>{% else %}
                                     <i class="text-danger fa-solid fa-xmark"></i>{% endif %}</td>
                                 <td>{% if u.global_role.role %} {{ u.global_role.role }} {% endif %}</td>
+                                <td>{% if u.last_login %}{{ u.last_login }}{% else %}Never{% endif %}</td>
                                 </tr>
                         {% endfor %}
                     </table>
