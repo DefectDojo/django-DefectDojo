@@ -10,7 +10,7 @@ metadata:
     helm.sh/chart: {{ include "defectdojo.chart" . }}
 data:
   {{- range $i, $fixture := .Values.extraFixtures }}
-  {{- (printf "extra_%03d.json" $i) | nindent 2 }}: |
+  {{- printf "extra_%03d.json" $i | nindent 2 }}: |
     {{- $models := dict }}
     {{- $output := list }}
     {{- range $j, $data := $fixture.data }}
