@@ -62,14 +62,13 @@ spec:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
         {{- end }}          
         command:
-        - /bin/bash
-        - -euc
-        - |
-          cp /extra-fixtures/extra_*.json /app/dojo/fixtures/ && /entrypoint-initializer.sh
+        - /entrypoint-initializer.sh
         volumeMounts:
+        {{- range $i, $_ := .Values.extraFixtures }}
         - name: extra-fixtures
-          mountPath: /extra-fixtures
-          readOnly: true
+          mountPath: /app/dojo/fixtures/{{ printf "extra_%03d.json" $i }}
+          subPath: {{ printf "extra_%03d.json" $i }}
+        {{- end }}
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
@@ -111,5 +110,10 @@ spec:
       - name: extra-fixtures
         configMap:
           name: {{ $fullName }}-extra-fixtures
+          items:
+          {{- range $i, $_ := .Values.extraFixtures }}
+          - key: {{ printf "extra_%03d.json" $i }}
+            path: {{ printf "extra_%03d.json" $i }}
+          {{- end }}
   backoffLimit: 1
 {{- end }}
