@@ -106,6 +106,7 @@ spec:
       {{- end }}
       volumes:
       - name: extra-fixtures
-        configMap: {{ $fullName }}-extra-fixtures
+        configMap:
+          name: {{ $fullName }}-extra-fixtures
   backoffLimit: 1
 {{- end }}
