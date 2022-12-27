@@ -62,7 +62,11 @@ spec:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
         {{- end }}          
         command:
-          - /entrypoint-initializer.sh
+          - cp /extra-fixtures/extra_*.json /dojo/fixtures/ && /entrypoint-initializer.sh
+        volumeMounts:
+        - name: extra-fixtures
+          mountPath: /extra-fixtures
+          readOnly: true
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
@@ -100,5 +104,8 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+      - name: extra-fixtures
+        configMap: {{ $fullName }}-extra-fixtures
   backoffLimit: 1
 {{- end }}

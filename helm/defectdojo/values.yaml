@@ -495,6 +495,15 @@ redis:
 #   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
 extraConfigs: {}
 
+# Extra fixtures can be mounted to the initializer job by adding an item to the extraFixtures list:
+# NOTE  Each fixture must have a 'data' section, which must include a 'model' string and a 'fields' dictionary
+# extraFixtures:
+# - data:
+#   - model: dojo.system_settings
+#     fields:
+#       enable_deduplication: true
+extraFixtures: []
+
 # To add (or override) extra variables which need to be pulled from another configMap, you can
 # use extraEnv. For example:
 # extraEnv:
