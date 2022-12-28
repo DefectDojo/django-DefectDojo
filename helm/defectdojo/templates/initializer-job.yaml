@@ -64,10 +64,12 @@ spec:
         command:
         - /entrypoint-initializer.sh
         volumeMounts:
+        {{- if .Values.extraFixtures }}
         {{- range $i, $_ := .Values.extraFixtures }}
         - name: extra-fixtures
           mountPath: /app/dojo/fixtures/{{ printf "extra_%03d.json" $i }}
           subPath: {{ printf "extra_%03d.json" $i }}
+        {{- end }}
         {{- end }}
         envFrom:
         - configMapRef:
@@ -107,13 +109,15 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
+      {{- if .Values.extraFixtures }}
       - name: extra-fixtures
-        configMap:
-          name: {{ $fullName }}-extra-fixtures
+        secret:
+          secretName: {{ $fullName }}-extra-fixtures
           items:
           {{- range $i, $_ := .Values.extraFixtures }}
           - key: {{ printf "extra_%03d.json" $i }}
             path: {{ printf "extra_%03d.json" $i }}
           {{- end }}
+      {{- end }}
   backoffLimit: 1
 {{- end }}

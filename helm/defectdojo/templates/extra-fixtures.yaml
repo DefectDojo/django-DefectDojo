@@ -1,6 +1,7 @@
+{{- if .Values.extraFixtures }}
 {{- $fullName := include "defectdojo.fullname" . -}}
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
   name: {{ $fullName }}-extra-fixtures
   labels:
@@ -8,21 +9,26 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
+type: Opaque
 data:
   {{- range $i, $fixture := .Values.extraFixtures }}
-  {{- printf "extra_%03d.json" $i | nindent 2 }}: |
-    {{- $models := dict }}
-    {{- $output := list }}
-    {{- range $j, $data := $fixture.data }}
+  {{- $models := dict }}
+  {{- $output := list }}
+  {{- range $j, $data := $fixture.data }}
     {{- if empty $data.model }}
     {{- printf "'model' key missing from extraFixture %d, data item %d" $i $j | fail }}
     {{- end }}
     {{- if empty $data.fields }}
     {{- printf "'fields' key missing from extraFixture %d, data item %d" $i $j | fail }}
     {{- end }}
+    {{- if $data.pk }}
+    {{- $_ := set $models $data.model $data.pk }}
+    {{- else }}
     {{- $_ := set $models $data.model (get $models $data.model | add1) }}
+    {{- end }}
     {{- $_ := set $data "pk" (get $models $data.model) }}
     {{- $output = append $output $data }}
-    {{- end }}
-    {{- $output | toPrettyJson | nindent 4 }}
   {{- end }}
+  {{- printf "extra_%03d.json" $i | nindent 2 }}: {{ $output | toPrettyJson | b64enc }}
+  {{- end }}
+{{- end }}
