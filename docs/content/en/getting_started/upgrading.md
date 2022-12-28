@@ -61,6 +61,25 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.18.x
+
+**Upgrade instructions for helm chart with rabbitMQ enabled**: The rabbitMQ uses a statefulset by default. Before upgrading the helm chart we have to ensure that all queues are empty:
+
+```bash
+kubectl exec -i <name_of_the_rabbitmq_pod>  -- rabbitmqctl list_queues
+```
+
+Next step is to delete rabbitMQ pvc:
+
+```bash
+kubectl delete  pvc -l app.kubernetes.io/name=rabbitmq
+```
+
+Last step is to perform the upgrade.
+
+For more information: https://artifacthub.io/packages/helm/bitnami/rabbitmq/11.2.0
+
+
 
 ## Upgrading to DefectDojo Version 2.17.x.
 
@@ -145,7 +164,7 @@ There is another breaking change regarding the import of SSLyze scans. The parse
 
 Release 2.7.0 contains a beta functionality to make permissions for the configuration of DefectDojo more flexible. When the settings parameter `FEATURE_CONFIGURATION_AUTHORIZATION` is set to `True`, many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their **Superuser** or **Staff** status, see [Configuration Permissions]({{< ref "../usage/permissions/#configuration-permissions" >}}).
 
-The functionality using the flag `AUTHORIZATION_STAFF_OVERRIDE` has been removed. The same result can be achieved with giving the staff users a global Owner role. 
+The functionality using the flag `AUTHORIZATION_STAFF_OVERRIDE` has been removed. The same result can be achieved with giving the staff users a global Owner role.
 
 To support the transition for these 2 changes, you can run a migration script with ``./manage.py migrate_staff_users``. This script:
 
