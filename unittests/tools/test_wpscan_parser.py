@@ -152,7 +152,7 @@ class TestWpscanParser(DojoTestCase):
 
     def test_confidence(self):
         parser = WpscanParser()
-        self.assertEquals(0, parser._get_scanner_confidence(100))
-        self.assertEquals(5, parser._get_scanner_confidence(50))
-        self.assertEquals(7, parser._get_scanner_confidence(30))
-        self.assertEquals(10, parser._get_scanner_confidence(0))
+        self.assertEqual(0, parser._get_scanner_confidence(100))
+        self.assertEqual(5, parser._get_scanner_confidence(50))
+        self.assertEqual(7, parser._get_scanner_confidence(30))
+        self.assertEqual(10, parser._get_scanner_confidence(0))

@@ -108,7 +108,8 @@ class DojoDefaultReImporter(object):
                             finding.is_mitigated = False
                             finding.mitigated_by = None
                             finding.active = True
-                            finding.verified = verified
+                            if verified is not None:
+                                finding.verified = verified
                         if do_not_reactivate:
                             logger.debug('%i: skipping reactivating by user\'s choice do_not_reactivate: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                             note = Notes(
@@ -163,7 +164,8 @@ class DojoDefaultReImporter(object):
                             finding.is_mitigated = True
                             finding.mitigated_by = item.mitigated_by
                             finding.active = False
-                            finding.verified = verified
+                            if verified is not None:
+                                finding.verified = verified
                     if not finding.component_name or not finding.component_version:
                         finding.component_name = finding.component_name if finding.component_name else component_name
                         finding.component_version = finding.component_version if finding.component_version else component_version

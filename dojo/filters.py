@@ -10,7 +10,7 @@ from django.apps import apps
 from auditlog.models import LogEntry
 from django.conf import settings
 import six
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter, NumberFilter, DateFilter
@@ -207,7 +207,7 @@ def get_tags_label_from_model(model):
         return 'Tags (Unknown)'
 
 
-def get_finding_filter_fields(metrics=False, similar=False):
+def get_finding_filterset_fields(metrics=False, similar=False):
     fields = []
 
     if similar:
@@ -1353,7 +1353,7 @@ class FindingFilter(FindingFilterWithTags):
 
     class Meta:
         model = Finding
-        fields = get_finding_filter_fields()
+        fields = get_finding_filterset_fields()
 
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoints', 'references',
@@ -1420,7 +1420,7 @@ class SimilarFindingFilter(FindingFilter):
     class Meta(FindingFilter.Meta):
         model = Finding
         # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
-        fields = get_finding_filter_fields(similar=True)
+        fields = get_finding_filterset_fields(similar=True)
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -1594,7 +1594,7 @@ class MetricsFindingFilter(FindingFilter):
 
     class Meta(FindingFilter.Meta):
         model = Finding
-        fields = get_finding_filter_fields(metrics=True)
+        fields = get_finding_filterset_fields(metrics=True)
 
 
 class MetricsEndpointFilter(FilterSet):

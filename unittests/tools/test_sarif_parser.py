@@ -69,7 +69,7 @@ class TestSarifParser(DojoTestCase):
         self.assertEqual(15, item.line)
         description = """**Result message:** Variable "count" was used without being initialized.
 **Rule full description:** A variable was used without being initialized. This can result in runtime errors such as null reference exceptions."""
-        self.assertEquals(description, item.description)
+        self.assertEqual(description, item.description)
         for finding in findings:
             self.common_checks(finding)
 
@@ -535,14 +535,14 @@ class TestSarifParser(DojoTestCase):
     def test_get_fingerprints_hashes(self):
         # example from 3.27.16 of the spec
         data = {"fingerprints": {"stableResultHash/v2": "234567900abcd", "stableResultHash/v3": "34567900abcde"}}
-        self.assertEquals(
+        self.assertEqual(
             {"stableResultHash": {"version": 3, "value": "34567900abcde"}},
             get_fingerprints_hashes(data["fingerprints"]),
         )
 
         # example than reverse the order
         data2 = {"fingerprints": {"stableResultHash/v2": "234567900abcd", "stableResultHash/v1": "34567900abcde"}}
-        self.assertEquals(
+        self.assertEqual(
             {"stableResultHash": {"version": 2, "value": "234567900abcd"}},
             get_fingerprints_hashes(data2["fingerprints"]),
         )

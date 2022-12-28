@@ -5,7 +5,7 @@
 
 {% block content %}
     {{ block.super }}
-    <h2> {{ name }} <i class="fa fa-question-circle has-popover" data-trigger="hover"
+    <h2> {{ name }} <i class="fa-solid fa-circle-question has-popover" data-trigger="hover"
                        data-content="{% blocktrans %}This simple search function will return results whose findings or finding templates
                                      title, URL, description, endpoints, tags, references, languages or technologies contain the search query and products whose
                                      name, tags or description contain the search query.</br> Advanced search operators: (Restrict results to a certain type) product:,
@@ -24,7 +24,7 @@
                         placeholder="{% trans "Search" %}..." value="{{clean_query}}">
                 <span class="input-group-btn">
                     <button class="btn btn-primary" type="submit" aria-label="Search">
-                        <i class="fa fa-search"></i>
+                        <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </span>
             </div>

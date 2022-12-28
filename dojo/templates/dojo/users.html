@@ -11,18 +11,18 @@
                     <h3 class="has-filters">
                         {{ name }}
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if "auth.add_user"|has_configuration_permission %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a href="{% url 'add_user' %}">
-                                            <i class="fa fa-plus"></i> New User
+                                            <i class="fa-solid fa-plus"></i> New User
                                         </a>
                                     </li>
                             </ul>
@@ -52,35 +52,36 @@
                             <th class="nowrap, text-center">{% dojo_sort request 'Active' 'is_active' %}</th>
                             <th class="nowrap, text-center">{% dojo_sort request 'Superuser' 'is_superuser' %}</th>
                             <th class="nowrap">Global Role</th>
+                            <th class="nowrap">Last Login</th>
                         </tr>
                         {% for u in users %}
                             <tr>
                                 <td>
                                     <ul>
                                         <li class="dropdown" style="list-style:none;position:absolute">
-                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuUser">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuUser">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuUsers">
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'view_user' u.id %}" id="viewUser">
-                                                    <i class="fa fa-list-alt"></i> View</a>
+                                                    <i class="fa-solid fa-rectangle-list"></i> View</a>
                                                 </li>
                                                 {% if "auth.change_user"|has_configuration_permission %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'edit_user' u.id %}"  id="editUser">
-                                                    <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                                    <i class="fa-solid fa-pen-to-square"></i> Edit</a>
                                                 </li>
                                                 {% endif %}
                                                 <li role="separator" class="divider"></li>
                                                 <li role="presentation">
                                                   <a href="{% url 'action_history' u|content_type u.id %}">
-                                                      <i class="fa fa-history"></i> View History
+                                                      <i class="fa-solid fa-clock-rotate-left"></i> View History
                                                   </a>
                                                 </li>
                                                 {% if "auth.delete_user"|has_configuration_permission and u.id != request.user.id %}
                                                 <li role="separator" class="divider"></li>
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'delete_user' u.id %}">
-                                                    <i class="fa fa-trash"></i> Delete</a>
+                                                    <i class="fa-solid fa-trash"></i> Delete</a>
                                                 </li>
                                                 {% endif %}
                                             </ul>
@@ -98,12 +99,13 @@
                                     {% if u.usercontactinfo.cell_number %} Cell: {{ u.usercontactinfo.cell_number }}  {% endif %}
                                 </td>
                                 <td class="text-center">{% if u.is_active %}
-                                    <i class="text-success fa fa-check"></i>{% else %}
-                                    <i class="text-danger fa fa-times"></i>{% endif %}</td>
+                                    <i class="text-success fa-solid fa-check"></i>{% else %}
+                                    <i class="text-danger fa-solid fa-xmark"></i>{% endif %}</td>
                                 <td class="text-center">{% if u.is_superuser %}
-                                    <i class="text-success fa fa-check"></i>{% else %}
-                                    <i class="text-danger fa fa-times"></i>{% endif %}</td>
+                                    <i class="text-success fa-solid fa-check"></i>{% else %}
+                                    <i class="text-danger fa-solid fa-xmark"></i>{% endif %}</td>
                                 <td>{% if u.global_role.role %} {{ u.global_role.role }} {% endif %}</td>
+                                <td>{% if u.last_login %}{{ u.last_login }}{% else %}Never{% endif %}</td>
                                 </tr>
                         {% endfor %}
                     </table>

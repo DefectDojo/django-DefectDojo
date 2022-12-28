@@ -24,7 +24,7 @@
                         <tbody>
                         {% for alert in alerts %}
                             <tr>
-                                <td class="text-center"><i class="fa fa-{{ alert.icon }} fa-fw"></i></td>
+                                <td class="text-center"><i class="fa-solid fa-{{ alert.icon }} fa-fw"></i></td>
                                 <td class="text-center">{{ alert.source }}</td>
                                 <td>{%if alert.url %}<a href="{{ alert.url }}">{% endif %}{{ alert.title }}{% if alert.url %}</a>{% endif %}</td>
                                 <td>{{ alert.description|linebreaks }}</td>
