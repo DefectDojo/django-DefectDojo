@@ -109,7 +109,7 @@ annotations: {}
 # Components
 celery:
   broker: rabbitmq
-  # To use an external celery broker, set the hostname here 
+  # To use an external celery broker, set the hostname here
   brokerHost: ""
   logLevel: INFO
   beat:
