@@ -871,6 +871,7 @@ class ApiEngagementFilter(DojoFilter):
 
 class ProductFilter(DojoFilter):
     name = CharFilter(lookup_expr='icontains', label="Product Name")
+    name_exact = CharFilter(field_name='name', lookup_expr='iexact', label="Exact Product Name")
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
@@ -969,6 +970,7 @@ class ProductFilter(DojoFilter):
         # tuple-mapping retains order
         fields=(
             ('name', 'name'),
+            ('name_exact', 'name_exact'),
             ('prod_type__name', 'prod_type__name'),
             ('business_criticality', 'business_criticality'),
             ('platform', 'platform'),
@@ -979,6 +981,7 @@ class ProductFilter(DojoFilter):
         ),
         field_labels={
             'name': 'Product Name',
+            'name_exact': 'Exact Product Name',
             'prod_type__name': 'Product Type',
             'business_criticality': 'Business Criticality',
             'platform': 'Platform ',
@@ -1003,7 +1006,7 @@ class ProductFilter(DojoFilter):
 
     class Meta:
         model = Product
-        fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
+        fields = ['name', 'name_exact', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
                   'internet_accessible', 'tags']
 
 
@@ -1013,6 +1016,7 @@ class ApiProductFilter(DojoFilter):
     internet_accessible = BooleanFilter(field_name='internet_accessible')
     # CharFilter
     name = CharFilter(lookup_expr='icontains')
+    name_exact = CharFilter(field_name='name', lookup_expr='iexact')
     description = CharFilter(lookup_expr='icontains')
     business_criticality = CharFilter(method=custom_filter, field_name='business_criticality')
     platform = CharFilter(method=custom_filter, field_name='platform')
