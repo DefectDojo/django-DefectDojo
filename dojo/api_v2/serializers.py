@@ -32,7 +32,7 @@ from django.contrib.auth.models import Permission
 from django.utils import timezone
 from django.db.utils import IntegrityError
 import six
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 import json
 import dojo.jira_link.helper as jira_helper
 import logging
@@ -1547,8 +1547,6 @@ class ImportScanSerializer(serializers.Serializer):
         data = self.validated_data
         close_old_findings = data.get('close_old_findings')
         close_old_findings_product_scope = data.get('close_old_findings_product_scope')
-        active = data.get('active')
-        verified = data.get('verified')
         minimum_severity = data.get('minimum_severity')
         endpoint_to_add = data.get('endpoint_to_add')
         scan_date = data.get('scan_date', None)
@@ -1560,6 +1558,15 @@ class ImportScanSerializer(serializers.Serializer):
         api_scan_configuration = data.get('api_scan_configuration', None)
         service = data.get('service', None)
         source_code_management_uri = data.get('source_code_management_uri', None)
+
+        if 'active' in self.initial_data:
+            active = data.get('active')
+        else:
+            active = None
+        if 'verified' in self.initial_data:
+            verified = data.get('verified')
+        else:
+            verified = None
 
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
@@ -1709,8 +1716,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan_date = data.get('scan_date', None)
         close_old_findings = data.get('close_old_findings')
         close_old_findings_product_scope = data.get('close_old_findings_product_scope')
-        verified = data.get('verified')
-        active = data.get('active')
         do_not_reactivate = data.get('do_not_reactivate', False)
         version = data.get('version', None)
         build_id = data.get('build_id', None)
@@ -1726,6 +1731,15 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
         source_code_management_uri = data.get('source_code_management_uri', None)
         engagement_end_date = data.get('engagement_end_date', None)
+
+        if 'active' in self.initial_data:
+            active = data.get('active')
+        else:
+            active = None
+        if 'verified' in self.initial_data:
+            verified = data.get('verified')
+        else:
+            verified = None
 
         group_by = data.get('group_by', None)
         create_finding_groups_for_all_findings = data.get('create_finding_groups_for_all_findings', True)

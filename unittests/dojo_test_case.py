@@ -349,7 +349,7 @@ class DojoTestUtilsMixin(object):
         findings = Test.objects.get(id=test_id).finding_set.all()
         for finding in findings:
             logger.debug('finding!')
-            self.assertEquals(jira_helper.get_jira_updated(finding), updated_map[finding.id])
+            self.assertEqual(jira_helper.get_jira_updated(finding), updated_map[finding.id])
 
     def assert_jira_updated_map_changed(self, test_id, updated_map):
         findings = Test.objects.get(id=test_id).finding_set.all()
