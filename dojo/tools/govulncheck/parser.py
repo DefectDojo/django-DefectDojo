@@ -36,8 +36,7 @@ class GovulncheckParser:
         try:
             data = json.load(scan_file)
         except Exception as e:
-            logger.warning("Invalid JSON format. %r", e)
-            return findings
+            raise ValueError("Invalid JSON format")
         else:
             if data['Vulns']:
                 list_vulns = data['Vulns']
