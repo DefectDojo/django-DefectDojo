@@ -1741,6 +1741,10 @@ small {
     min-width:200px;
 }
 
+.EasyMDEContainer .table {
+    width: unset!important;
+}
+
 /* remove spinners (up & down arrow) for integer / number fields
 /* For Firefox */
 
