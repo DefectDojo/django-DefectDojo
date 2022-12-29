@@ -444,7 +444,8 @@ def endpoint_querys(request, prod):
                                                   mitigated=True,
                                                   out_of_scope=False).order_by("date")
     filters['open'] = endpoints_qs.filter(date__range=[start_date, end_date],
-                                          mitigated=False)
+                                          mitigated=False,
+                                          finding__active=True)
     filters['inactive'] = endpoints_qs.filter(date__range=[start_date, end_date],
                                               mitigated=True)
     filters['closed'] = endpoints_qs.filter(date__range=[start_date, end_date],

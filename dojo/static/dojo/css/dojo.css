@@ -41,6 +41,12 @@ textarea,
     margin-left: 6px;
 }
 
+.min,
+.max {
+    overscroll-behavior: none!important;
+    overflow-x: clip!important;
+}
+
 a {
   color: #546474;
 }
@@ -1733,6 +1739,10 @@ small {
 
 .select2-container {
     min-width:200px;
+}
+
+.EasyMDEContainer .table {
+    width: unset!important;
 }
 
 /* remove spinners (up & down arrow) for integer / number fields

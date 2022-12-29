@@ -349,7 +349,7 @@ class DojoTestUtilsMixin(object):
         findings = Test.objects.get(id=test_id).finding_set.all()
         for finding in findings:
             logger.debug('finding!')
-            self.assertEquals(jira_helper.get_jira_updated(finding), updated_map[finding.id])
+            self.assertEqual(jira_helper.get_jira_updated(finding), updated_map[finding.id])
 
     def assert_jira_updated_map_changed(self, test_id, updated_map):
         findings = Test.objects.get(id=test_id).finding_set.all()
@@ -443,7 +443,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
                                 product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
-                                scan_date=None, service=None):
+                                scan_date=None, service=None, forceActive=True, forceVerified=True):
         payload = {
                 "minimum_severity": minimum_severity,
                 "active": active,

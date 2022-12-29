@@ -611,8 +611,8 @@ def import_scan_results(request, eid=None, pid=None):
             scan = request.FILES.get('file', None)
             scan_date = form.cleaned_data['scan_date']
             minimum_severity = form.cleaned_data['minimum_severity']
-            active = form.cleaned_data['active']
-            verified = form.cleaned_data['verified']
+            activeChoice = form.cleaned_data.get('active', None)
+            verifiedChoice = form.cleaned_data.get('verified', None)
             scan_type = request.POST['scan_type']
             tags = form.cleaned_data['tags']
             version = form.cleaned_data['version']
@@ -663,6 +663,19 @@ def import_scan_results(request, eid=None, pid=None):
 
             # Save newly added endpoints
             added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, engagement.product)
+
+            active = None
+            if activeChoice:
+                if activeChoice == 'force_to_true':
+                    active = True
+                elif activeChoice == 'force_to_false':
+                    active = False
+            verified = None
+            if verifiedChoice:
+                if verifiedChoice == 'force_to_true':
+                    verified = True
+                elif verifiedChoice == 'force_to_false':
+                    verified = False
 
             try:
                 importer = Importer()

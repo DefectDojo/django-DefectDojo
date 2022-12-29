@@ -3,10 +3,10 @@ asteval==0.9.28
 bleach==5.0.1
 bleach[css]
 celery==5.2.7
-coverage==6.5.0
+coverage==7.0.1
 defusedxml==0.7.1
 django_celery_results==2.4.0
-django-auditlog==2.2.0
+django-auditlog==2.2.1
 django-dbbackup==4.0.2
 django-environ==0.9.0
 django-filter==21.1
@@ -26,7 +26,7 @@ html2text==2020.1.16
 humanize==4.4.0
 jira==3.4.1
 PyGithub==1.57
-lxml==4.9.1
+lxml==4.9.2
 Markdown==3.4.1
 mysqlclient==2.1.1
 openpyxl==3.0.10
@@ -35,11 +35,11 @@ Pillow==9.3.0  # required by django-imagekit
 psycopg2-binary==2.9.5
 cryptography==38.0.4
 python-dateutil==2.8.2
-pytz==2022.6
-redis==4.3.5
+pytz==2022.7
+redis==4.4.0
 requests==2.28.1
-sqlalchemy==1.4.44  # Required by Celery broker transport
-supervisor==4.2.4
+sqlalchemy==1.4.45  # Required by Celery broker transport
+supervisor==4.2.5
 urllib3==1.26.11
 uWSGI==2.0.21
 vobject==0.9.6.1
@@ -49,18 +49,18 @@ social-auth-app-django==5.0.0
 social-auth-core==4.3.0
 Python-jose==3.3.0
 gitpython==3.1.29
-debugpy==1.6.3
+debugpy==1.6.4
 python-gitlab==3.12.0
-google-api-python-client==2.66.0
-google-auth==2.14.1
-google-auth-oauthlib==0.7.1
+google-api-python-client==2.70.0
+google-auth==2.15.0
+google-auth-oauthlib==0.8.0
 drf_yasg==1.21.4
 cpe==1.2.1
 packageurl-python==0.10.4
 django-crum==0.7.9
 JSON-log-formatter==0.5.1
 django-split-settings==1.2.0
-django-debug-toolbar==3.7.0
+django-debug-toolbar==3.8.1
 django-debug-toolbar-request-history==0.1.4
 vcrpy==4.2.1
 vcrpy-unittest==0.1.7
@@ -69,13 +69,15 @@ PyJWT==2.6.0
 cvss==2.5
 django-fieldsignals==0.7.0
 hyperlink==21.0.0
-numpy==1.23.3
+numpy==1.24.0
 django-test-migrations==1.2.0
-djangosaml2==1.5.3
-drf-spectacular==0.24.2
-django-ratelimit==3.0.1
+djangosaml2==1.5.5
+drf-spectacular==0.25.1
+django-ratelimit==4.0.0
 argon2-cffi==21.3.0
 blackduck==1.0.7
-pycurl==7.45.1  # Required for Celery Broker AWS (SQS) support
-boto3==1.26.17  # Required for Celery Broker AWS (SQS) support
+pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
+boto3==1.26.37  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
+vulners==2.0.4
+fontawesomefree==6.2.1

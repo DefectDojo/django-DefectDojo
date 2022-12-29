@@ -415,7 +415,8 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 
             new_original.duplicate = False
             new_original.duplicate_finding = None
-            new_original.active = True
+            new_original.active = original.active
+            new_original.is_mitigated = original.is_mitigated
             new_original.save_no_options()
             new_original.found_by.set(original.found_by.all())
 
