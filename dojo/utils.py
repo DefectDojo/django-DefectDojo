@@ -2293,8 +2293,10 @@ def get_password_requirements_string():
 
     return password_requirements_string + '.'
 
+
 def get_zero_severity_level():
     return {'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0}
+
 
 def sum_by_severity_level(metrics):
     values = get_zero_severity_level()

@@ -587,7 +587,6 @@ def view_product_metrics(request, pid):
         if open_objs_by_severity.get(v.severity) is not None:
             open_objs_by_severity[v.severity] += 1
 
-
     for a in filters.get('accepted', None):
         if view == 'Finding':
             finding = a
