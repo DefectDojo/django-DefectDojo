@@ -646,18 +646,14 @@ def add_breadcrumb(parent=None,
             obj_crumbs = parent.get_breadcrumbs()
             if title is not None:
                 obj_crumbs += [{
-                    'title':
-                    title,
-                    'url':
-                    request.get_full_path() if url is None else url
+                    'title': title,
+                    'url': request.get_full_path() if url is None else url
                 }]
         else:
             title_done = True
             obj_crumbs = [{
-                'title':
-                title,
-                'url':
-                request.get_full_path() if url is None else url
+                'title': title,
+                'url': request.get_full_path() if url is None else url
             }]
 
         for crumb in crumbs:
@@ -2296,3 +2292,15 @@ def get_password_requirements_string():
         password_requirements_string = s.rsplit(', ', 1)[0] + ', and ' + s.rsplit(', ', 1)[1]
 
     return password_requirements_string + '.'
+
+def get_zero_severity_level():
+    return {'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0}
+
+def sum_by_severity_level(metrics):
+    values = get_zero_severity_level()
+
+    for m in metrics:
+        if values.get(m.severity) is not None:
+            values[m.severity] += 1
+
+    return values

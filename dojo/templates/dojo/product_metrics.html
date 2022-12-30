@@ -510,332 +510,83 @@
                 }
             });
 
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
+
             var ticks = [
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
-            {% for f in accepted_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
 
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-            accepted_objs(d1, d2, d3, d4, d5, ticks);
+            accepted_objs(
+                [[0, {{ accepted_objs_by_severity.Critical }}]],
+                [[1, {{ accepted_objs_by_severity.High }}]],
+                [[2, {{ accepted_objs_by_severity.Medium }}]],
+                [[3, {{ accepted_objs_by_severity.Low }}]],
+                [[4, {{ accepted_objs_by_severity.Info }}]],
+                ticks);
 
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in inactive_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            inactive_objs(
+                [[0, {{ inactive_objs_by_severity.Critical }}]],
+                [[1, {{ inactive_objs_by_severity.High }}]],
+                [[2, {{ inactive_objs_by_severity.Medium }}]],
+                [[3, {{ inactive_objs_by_severity.Low }}]],
+                [[4, {{ inactive_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            inactive_objs(d1, d2, d3, d4, d5, ticks);
+            open_objs(
+                [[0, {{ open_objs_by_severity.Critical }}]],
+                [[1, {{ open_objs_by_severity.High }}]],
+                [[2, {{ open_objs_by_severity.Medium }}]],
+                [[3, {{ open_objs_by_severity.Low }}]],
+                [[4, {{ open_objs_by_severity.Info }}]],
+                ticks);
 
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in open_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            false_positive_objs(
+                [[0, {{ false_positive_objs_by_severity.Critical }}]],
+                [[1, {{ false_positive_objs_by_severity.High }}]],
+                [[2, {{ false_positive_objs_by_severity.Medium }}]],
+                [[3, {{ false_positive_objs_by_severity.Low }}]],
+                [[4, {{ false_positive_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            open_objs(d1, d2, d3, d4, d5, ticks);
+            verified_objs(
+                [[0, {{ verified_objs_by_severity.Critical }}]],
+                [[1, {{ verified_objs_by_severity.High }}]],
+                [[2, {{ verified_objs_by_severity.Medium }}]],
+                [[3, {{ verified_objs_by_severity.Low }}]],
+                [[4, {{ verified_objs_by_severity.Info }}]],
+                ticks);
 
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in false_positive_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            out_of_scope_objs(
+                [[0, {{ out_of_scope_objs_by_severity.Critical }}]],
+                [[1, {{ out_of_scope_objs_by_severity.High }}]],
+                [[2, {{ out_of_scope_objs_by_severity.Medium }}]],
+                [[3, {{ out_of_scope_objs_by_severity.Low }}]],
+                [[4, {{ out_of_scope_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            false_positive_objs(d1, d2, d3, d4, d5, ticks);
-            
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in verified_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            all_objs(
+                [[0, {{ all_objs_by_severity.Critical }}]],
+                [[1, {{ all_objs_by_severity.High }}]],
+                [[2, {{ all_objs_by_severity.Medium }}]],
+                [[3, {{ all_objs_by_severity.Low }}]],
+                [[4, {{ all_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            verified_objs(d1, d2, d3, d4, d5, ticks);
-            
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in out_of_scope_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            closed_objs(
+                [[0, {{ closed_objs_by_severity.Critical }}]],
+                [[1, {{ closed_objs_by_severity.High }}]],
+                [[2, {{ closed_objs_by_severity.Medium }}]],
+                [[3, {{ closed_objs_by_severity.Low }}]],
+                [[4, {{ closed_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            out_of_scope_objs(d1, d2, d3, d4, d5, ticks);
-            
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in all_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            new_objs(
+                [[0, {{ new_objs_by_severity.Critical }}]],
+                [[1, {{ new_objs_by_severity.High }}]],
+                [[2, {{ new_objs_by_severity.Medium }}]],
+                [[3, {{ new_objs_by_severity.Low }}]],
+                [[4, {{ new_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            all_objs(d1, d2, d3, d4, d5, ticks);
-
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in closed_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            closed_objs(d1, d2, d3, d4, d5, ticks);
-            
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in new_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            new_objs(d1, d2, d3, d4, d5, ticks);
             
             var opened = [];
             var closed = [];
@@ -849,11 +600,11 @@
             {% endfor %}
             open_close_weekly(opened, closed, accepted, ticks);
             
-            critical = [];
-            high = [];
-            medium = [];
-            low = [];
-            info = [];
+            let critical = [];
+            let high = [];
+            let medium = [];
+            let low = [];
+            let info = [];
             ticks = [];
             {% for week, values in severity_weekly.items %}
                 ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
@@ -891,19 +642,11 @@
             {% endfor %}
             test_type(data);
             
-            var data_1 = {};
             var data_2 = []
             var ticks = []
-            {% for f in open_objs %}
-                if (data_1[{{ f.age }}]) {
-                    data_1[{{ f.age }}] += 1
-                }
-                else {
-                    data_1[{{ f.age }}] = 1
-                }
-            {% endfor %}
+
             var i = 0;
-            $.each(data_1, function (index, value) {
+            $.each({{ open_objs_by_age }}, function (index, value) {
                 if (value > 0) {
                     data_2.push([i, value]);
                     ticks.push([i, index])
