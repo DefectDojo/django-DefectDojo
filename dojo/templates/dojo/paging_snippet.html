@@ -5,7 +5,9 @@
 {% with page_param=prefix|add:'page' %}
 {% with page_size_param=prefix|add:'page_size' %}
 <div class="pull-left pagination  pagination-sm">
-    {% blocktrans %}Showing entries {{ page.start_index }} to {{ page.end_index }} of {{ page.paginator.count }}{% endblocktrans %}
+    {% blocktrans with start_index=page.start_index end_index=page.end_index count=page.paginator.count %}
+    Showing entries {{ start_index }} to {{ end_index }} of {{ count }}
+    {% endblocktrans %}
 </div>
 
 <nav class="pull-right">

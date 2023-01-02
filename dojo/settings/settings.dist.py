@@ -812,7 +812,8 @@ INSTALLED_APPS = (
     'social_django',
     'drf_yasg',
     'drf_spectacular',
-    'tagulous'
+    'tagulous',
+    'fontawesomefree'
 )
 
 # ------------------------------------------------------------------------------
@@ -1174,7 +1175,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # possible improvement: in the scanner put the library name into file_path, then dedup on vulnerability_ids + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['title', 'cwe', 'severity'],
-    'Qualys Scan': ['title', 'severity'],
+    'Qualys Scan': ['title', 'severity', 'endpoints'],
     # 'Qualys Webapp Scan': ['title', 'unique_id_from_tool'],
     'PHP Symfony Security Check': ['title', 'vulnerability_ids'],
     'Clair Scan': ['title', 'vulnerability_ids', 'description', 'severity'],
@@ -1595,3 +1596,6 @@ VULNERABILITY_URLS = {
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
+# Fixes error
+# AttributeError: Problem installing fixture '/app/dojo/fixtures/defect_dojo_sample_data.json': 'Settings' object has no attribute 'AUDITLOG_DISABLE_ON_RAW_SAVE'
+AUDITLOG_DISABLE_ON_RAW_SAVE = False
