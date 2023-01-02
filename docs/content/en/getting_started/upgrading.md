@@ -164,7 +164,7 @@ There is another breaking change regarding the import of SSLyze scans. The parse
 
 Release 2.7.0 contains a beta functionality to make permissions for the configuration of DefectDojo more flexible. When the settings parameter `FEATURE_CONFIGURATION_AUTHORIZATION` is set to `True`, many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their **Superuser** or **Staff** status, see [Configuration Permissions]({{< ref "../usage/permissions/#configuration-permissions" >}}).
 
-The functionality using the flag `AUTHORIZATION_STAFF_OVERRIDE` has been removed. The same result can be achieved with giving the staff users a global Owner role.
+The functionality using the flag `AUTHORIZATION_STAFF_OVERRIDE` has been removed. The same result can be achieved with giving the staff users a global Owner role. 
 
 To support the transition for these 2 changes, you can run a migration script with ``./manage.py migrate_staff_users``. This script:
 
