@@ -67,16 +67,12 @@ Follow DefectDojo on [Twitter](https://twitter.com/defectdojo), [Linkedin](https
 See our [Contributing guidelines](readme-docs/CONTRIBUTING.md)
 
 ## Commercial Support and Training
-Commercial support and training is availaible through [10Security](https://10security.com).
-
-10Security was founded by the creators of DefectDojo.
-For information please email info@10security.com or visit our [site](https://10security.com).
+[Commercial support and training is availaible.](https://www.defectdojo.com/) For information please email info@defectdojo.com.
 
 ## About Us
 
 DefectDojo is maintained by:
 * Greg Anderson ([@devGregA](https://github.com/devgrega) | [linkedin](https://www.linkedin.com/in/g-anderson/))
-* Aaron Weaver ([@aaronweaver](https://github.com/aaronweaver)| [linkedin](https://www.linkedin.com/in/aweaver/) | [@weavera](https://twitter.com/weavera))
 * Matt Tesauro ([@mtesauro](https://github.com/mtesauro) | [linkedin](https://www.linkedin.com/in/matttesauro/) | [@matt_tesauro](https://twitter.com/matt_tesauro))
 
 Core Moderators can help you with pull requests or feedback on dev ideas:
@@ -84,7 +80,6 @@ Core Moderators can help you with pull requests or feedback on dev ideas:
 
 Moderators can help you with pull requests or feedback on dev ideas:
 * Damien Carol ([@damnielcarol](https://github.com/damiencarol) | [linkedin](https://www.linkedin.com/in/damien-carol/))
-* Stefan Fleckenstein ([@StefanFl](https://github.com/stefanfl) | ([linkedin](https://www.linkedin.com/in/stefan-fleckenstein-6a456a30/))
 * Jannik Jürgens ([@alles-klar](https://github.com/alles-klar))
 
 
@@ -103,4 +98,4 @@ Please report Security issues via our [disclosure policy](readme-docs/SECURITY.m
 
 ## License
 
-DefectDojo is licensed under the [BSD Simplified license](LICENSE.md)
+DefectDojo is licensed under the [BSD-3-Clause License](LICENSE.md)
