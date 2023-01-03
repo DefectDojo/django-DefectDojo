@@ -16,12 +16,12 @@ Please update any documentation when needed in the [documentation folder](https:
 
 This checklist is for your information.
 
-- [ ] Features/Changes/Bugfixes should be submitted against the `dev` branch by default.
 - [ ] Make sure to rebase your PR against the very latest `dev`.
-- [ ] Hotfixes should be submitted against master (urgent bugfixes requiring a hotfix release).
+- [ ] Features/Changes should be submitted against the `dev`.
+- [ ] Bugfixes should be submitted against the `bugfix` branch.
 - [ ] Give a meaningful name to your PR, as it may end up being used in the release notes.
 - [ ] Your code is flake8 compliant.
-- [ ] Your code is python 3.6 compliant (specific python >3.6 syntax is currently not accepted).
+- [ ] Your code is python 3.11 compliant.
 - [ ] If this is a new feature and not a bug fix, you've included the proper documentation in the docs at https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs as part of this PR.
 - [ ] Model changes must include the necessary migrations in the dojo/db_migrations folder.
 - [ ] Add applicable tests to the unit tests.

@@ -74,7 +74,9 @@
         <link href="{% static "startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" %}" rel="stylesheet">
 
         <!-- Custom Fonts -->
-        <link href="{% static "font-awesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
 
         {% block add_css %}
         {% endblock %}
@@ -126,7 +128,7 @@
                                                 placeholder="{% trans "Search" %}..." value="{{clean_query}}">
                                             <span class="input-group-btn">
                                                 <button id="simple_search_submit" class="btn btn-primary" type="submit" aria-label="Search">
-                                                    <i class="fa fa-search"></i>
+                                                    <i class="fa-solid fa-magnifying-glass"></i>
                                                 </button>
                                             </span>
                                         </div>
@@ -136,9 +138,9 @@
                             </li>
                             <li class="dropdown">
                                 <a class="dropdown-toggle dropdown-toggle-alerts dropdown-toggle-h{{ alert_count }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ alert_count }} Alerts">
-                                    <i class="fa fa-bell fa-fw"></i>
+                                    <i class="fa-solid fa-bell fa-fw"></i>
                                     <span id="alert_count" class="badge badge-count badge-count{{ alert_count }}">{{ alert_count }}</span>
-                                    <i class="fa fa-caret-down"></i>
+                                    <i class="fa-solid fa-caret-down"></i>
                                 </a>
                                 <ul class="dropdown-menu dropdown-alerts">
                                 </ul>
@@ -147,22 +149,22 @@
                         {% endif %}
                         <li class="dropdown">
                             <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="User Menu">
-                                <i class="fa fa-user fa-fw"></i>
-                                <i class="fa fa-caret-down"></i>
+                                <i class="fa-solid fa-user fa-fw"></i>
+                                <i class="fa-solid fa-caret-down"></i>
                             </a>
                             <ul class="dropdown-menu dropdown-user">
                                 {% block settings-dropdown-items %}
                                     {% if request.user.is_authenticated %}
                                         <li>
                                             <a href="{% url 'view_profile' %}">
-                                                <i class="fa fa-user fa-fw"></i> 
+                                                <i class="fa-solid fa-user fa-fw"></i> 
                                                 {{ request.user.username }}
                                             </a>
                                         </li>
                                         {% if API_TOKENS_ENABLED %}
                                           <li>
                                               <a href="{% url 'api_v2_key' %}">
-                                                  <i class="fa fa-fw fa-key"></i>
+                                                <i class="fa-solid fa-key fa-fw"></i>
                                                   {% trans "API v2 Key" %}
                                               </a>
                                           </li>
@@ -170,19 +172,19 @@
                                     {% endif %}
                                     <li>
                                         <a href="{% url 'api_v2_schema' %}" target="_blank">
-                                            <i class="fa fa-book fa-fw" title="OpenAPI v2 Docs"></i>
+                                            <i class="fa-solid fa-book fa-fw" title="OpenAPI v2 Docs"></i>
                                             {% trans "API v2 OpenAPI2 Docs" %}
                                         </a>
                                     </li>
                                     <li>
                                         <a href="{% url 'swagger-ui_oa3' %}" target="_blank">
-                                            <i class="fa fa-book fa-fw" title="OpenAPI v3 Docs"></i>
+                                            <i class="fa-solid fa-book fa-fw" title="OpenAPI v3 Docs"></i>
                                             {% trans "API v2 OpenAPI3 Docs" %}
                                         </a>
                                     </li>
                                     <li>
                                         <a href="{{ DOCUMENTATION_URL }}" target="_blank">
-                                            <i class="fa fa-question-circle fa-fw"></i>
+                                            <i class="fa-solid fa-circle-question fa-fw"></i>
                                             {% trans "Documentation" %}
                                         </a>
                                     </li>
@@ -191,14 +193,14 @@
                                     {% if SAML2_LOGOUT_URL != '' %}
                                         <li>
                                             <a href="{{ SAML2_LOGOUT_URL }}">
-                                                <i class="fa fa-sign-out fa-fw"></i>
+                                                <i class="fa-solid fa-right-from-bracket fa-fw"></i>
                                                 {% trans "SAML Logout" %}
                                             </a>
                                         </li>
                                     {% endif %}
                                     <li>
                                         <a href="{% url 'logout' %}">
-                                            <i class="fa fa-sign-out fa-fw"></i>
+                                            <i class="fa-solid fa-right-from-bracket fa-fw"></i>
                                             {% trans "Logout" %}
                                         </a>
                                     </li>
@@ -217,13 +219,13 @@
                                     {% block sidebar-items %}
                                         <li>
                                             <a href="{% url 'dashboard' %}" aria-disabled="true" aria-expanded="false" aria-label="Dashboard">
-                                                <i class="fa fa-dashboard fa-fw"></i>
+                                                <i class="fa-solid fa-gauge fa-fw"></i>
                                                 <span>{% trans "Dashboard" %}</span>
                                             </a>
                                         </li>
                                         <li>
                                             <a id="product-side-menu" href="{% url 'product' %}" aria-expanded="false" aria-label="Products">
-                                                <i class="fa fa-list fa-fw"></i>
+                                                <i class="fa-solid fa-list-ul fa-fw"></i>
                                                 <span>{% trans "Products" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
@@ -257,7 +259,7 @@
                                         </li>
                                         <li>
                                             <a href="{% url 'engagement' %}" aria-expanded="false" aria-label="Engagements">
-                                                <i class="fa fa-inbox fa-fw"></i>
+                                                <i class="fa-solid fa-inbox fa-fw"></i>
                                                 <span>{% trans "Engagements" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
@@ -292,7 +294,7 @@
                                         </li>
                                         <li>
                                             <a href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
-                                                <i class="fa fa-bug fa-fw"></i>
+                                                <i class="fa-solid fa-bug fa-fw"></i>
                                                 <span>{% trans "Findings" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
@@ -329,7 +331,7 @@
                                         </li>
                                         <li>
                                             <a href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
-                                                <i class="fa fa-th-large fa-fw"></i>
+                                                <i class="fa-solid fa-table-cells-large fa-fw"></i>
                                                 <span>{% trans "Components" %}</span>
                                             </a>
                                             <ul class="nav nav-second-level">
@@ -342,7 +344,7 @@
                                         </li>
                                         <li>
                                             <a href="{% url 'endpoint' %}" aria-expanded="false" aria-label="Endpoints">
-                                                <i class="fa fa-sitemap fa-fw"></i>
+                                                <i class="fa-solid fa-sitemap fa-fw"></i>
                                                 <span>{% trans "Endpoints" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
@@ -378,7 +380,7 @@
                                         </li>
                                         <li>
                                             <a href="{% url 'report_builder' %}" aria-expanded="false" aria-label="Reports">
-                                                <i class="fa fa-file-text-o fa-fw"></i>
+                                                <i class="fa-solid fa-file-lines fa-fw"></i>
                                                 <span>{% trans "Reports" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
@@ -386,7 +388,7 @@
                                         </li>
                                         <li>
                                             <a href="{% url 'metrics' %}?date=5&view=dashboard" aria-expanded="false" aria-label="Metrics">
-                                                <i class="fa fa-bar-chart fa-fw"></i>
+                                                <i class="fa-solid fa-chart-column fa-fw"></i>
                                                 <span>{% trans "Metrics" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
@@ -427,7 +429,7 @@
                                         {% if "auth.view_user"|has_configuration_permission or "auth.view_group"|has_configuration_permission %}
                                             <li>
                                                 <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users" id="id_user_menu">
-                                                    <i class="fa fa-user fa-fw"></i>
+                                                    <i class="fa-solid fa-user fa-fw"></i>
                                                     <span>{% trans "Users" %}</span>
                                                     <span class="glyphicon arrow"></span>
                                                 </a>
@@ -452,7 +454,7 @@
                                         {% if system_settings.enable_calendar %}
                                         <li>
                                             <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
-                                                <i class="fa fa-calendar fa-fw"></i>
+                                                <i class="fa-solid fa-calendar-days fa-fw"></i>
                                                 <span>{% trans "Calendar" %}</span>
                                             </a>
                                         </li>
@@ -461,7 +463,7 @@
                                             {% if "dojo.view_engagement_survey"|has_configuration_permission or "dojo.view_question"|has_configuration_permission %}
                                                 <li>
                                                     <a href="#">
-                                                        <i class="fa fa-hospital-o fa-fw"></i>
+                                                        <i class="fa-solid fa-house-medical-flag fa-fw"></i>
                                                         <span>{% trans "Questionnaires" %}</span>
                                                         <span class="glyphicon arrow"></span>
                                                     </a>
@@ -487,7 +489,7 @@
                                         {% endif %}
                                         <li id="menu_configuration">
                                             <a href="#" aria-expanded="false" aria-label="Configuration">
-                                                <i class="fa fa-cog fa-fw"></i>
+                                                <i class="fa-solid fa-gear fa-fw"></i>
                                                 <span>{% trans "Configuration" %}</span>
                                             </a>
                                             <ul class="nav nav-second-level">
@@ -584,7 +586,7 @@
 
                                     <li id="min-menu">
                                         <a href="#" id="minimize-menu" title="Expand/Collapse Menu" aria-label="Expand/Collapse Menu">
-                                            <i id="nav-minimize-menu-li" class="fa fa-arrow-circle-right fa-fw"></i>
+                                            <i id="nav-minimize-menu-li" class="fa-solid fa-circle-right fa-fw"></i>
                                             <span>{% trans "Collapse Menu" %}</span>
                                         </a>
                                     </li>
@@ -608,7 +610,7 @@
                                         {{ product_tab.product }}
                                         {% if system_settings.enable_benchmark == 9 %}
                                             {% for benchmark in tab_benchmarks%}
-                                                <sup><span class="fa fa-bookmark has-popover" data-trigger="hover" data-content="{{ benchmark|asvs_level }}"></span>
+                                                <sup><span class="fa-solid fa-bookmark has-popover" data-trigger="hover" data-content="{{ benchmark|asvs_level }}"></span>
                                                 {{ benchmark.desired_level }}</sup>
                                             {% endfor %}
                                         {% endif %}
@@ -622,26 +624,26 @@
                                     <ul class="nav nav-tabs horizontal-bar in">
                                         <li role="presentation"{% if product_tab.tab == 'overview' %} class="active"{% endif %}>
                                             <a href="{% url 'view_product' product_tab.product.id %}">
-                                                <span class="fa fa-globe" aria-hidden="true"></span>
+                                                <span class="fa-solid fa-earth-americas" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Overview" %}</span>
                                             </a>
                                         </li>
                                         <li role="presentation"{% if product_tab.tab == 'components' %} class="active"{% endif %}>
                                             <a href="{% url 'view_product_components' product_tab.product.id %}">
-                                                <span class="fa fa-th-large" aria-hidden="true"></span>
+                                                <span class="fa-solid fa-table-cells-large" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Components" %}</span>
                                             </a>
                                         </li>
                                         <li role="presentation"{% if product_tab.tab == 'metrics' %} class="active"{% endif %}>
                                             <a href="{% url 'view_product_metrics' product_tab.product.id %}">
-                                                <span class="fa fa-bar-chart" aria-hidden="true"></span>
+                                                <span class="fa-solid fa-chart-column" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Metrics" %}</span>
                                             </a>
                                         </li>
                                         <!-- Engagements Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.tab == 'engagements' %} active active-color{% endif %}">
                                             <a class="dropdown-toggle" data-toggle="dropdown" href="">
-                                                <span class="fa fa-calendar" aria-hidden="true"></span>
+                                                <span class="fa-solid fa-calendar-days" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Engagements" %}
                                                     {% if product_tab.engagements > 0 %} 
                                                         <span class="badge">{{ product_tab.engagements }}</span>
@@ -652,7 +654,7 @@
                                             <ul class="dropdown-menu">
                                                 <li>
                                                     <a href="{% url 'view_engagements' product_tab.product.id %}">
-                                                        <i class="fa fa-calendar"></i>
+                                                        <i class="fa-solid fa-calendar-days"></i>
                                                         {% trans "View Engagements" %}
                                                     </a>
                                                 </li>
@@ -660,13 +662,13 @@
                                                     <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="{% url 'new_eng_for_prod' product_tab.product.id %}">
-                                                            <i class="fa fa-plus"></i>
+                                                            <i class="fa-solid fa-plus"></i>
                                                             {% trans "Add New Interactive Engagement" %}
                                                         </a>
                                                     </li>
                                                     <li>
                                                         <a href="{% url 'new_eng_for_prod_cicd' product_tab.product.id %}">
-                                                            <i class="fa fa-plus"></i>
+                                                            <i class="fa-solid fa-plus"></i>
                                                             {% trans "Add New CI/CD Engagement" %}
                                                         </a>
                                                     </li>
@@ -676,7 +678,7 @@
                                         <!-- Findings Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.tab == 'findings' %} active active-color{% endif %}">
                                             <a class="dropdown-toggle" data-toggle="dropdown" href="">
-                                                <span class="fa fa-bug" aria-hidden="true"></span>
+                                                <span class="fa-solid fa-bug" aria-hidden="true"></span>
                                                 <span class="hidden-xs">
                                                     {% trans "Findings" %}
                                                     {% if product_tab.findings > 0 %}
@@ -688,44 +690,44 @@
                                             <ul class="dropdown-menu">
                                                 <li>
                                                     <a href="{% url 'product_open_findings' product_tab.product.id %}">
-                                                        <i class="fa fa-list-alt"></i>
+                                                        <i class="fa-solid fa-rectangle-list"></i>
                                                         {% trans "View Active Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="{% url 'product_open_findings' product_tab.product.id %}?verified=true">
-                                                        <i class="fa fa-list-alt"></i>
+                                                        <i class="fa-solid fa-rectangle-list"></i>
                                                         {% trans "View Active Verified Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="{% url 'product_open_findings' product_tab.product.id %}?severity=Critical">
-                                                        <i class="fa fa-exclamation-triangle"></i>
+                                                        <i class="fa-solid fa-triangle-exclamation"></i>
                                                         {% trans "View Critical Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="{% url 'product_open_findings' product_tab.product.id %}?date=2">
-                                                        <i class="fa fa-calendar"></i>
+                                                        <i class="fa-solid fa-calendar-days"></i>
                                                         {% trans "View Findings from Last 7 Days" %}
                                                     </a>
                                                 </li>
                                                 <li role="separator" class="divider"></li>
                                                 <li>
                                                     <a href="{% url 'product_accepted_findings' product_tab.product.id %}">
-                                                        <i class="fa fa-check"></i>
+                                                        <i class="fa-solid fa-check"></i>
                                                         {% trans "View Risk Accepted Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="{% url 'product_all_findings' product_tab.product.id %}">
-                                                        <i class="fa fa-search"></i>
+                                                        <i class="fa-solid fa-magnifying-glass"></i>
                                                         {% trans "View All Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="{% url 'product_closed_findings' product_tab.product.id %}">
-                                                        <i class="fa fa-fire-extinguisher"></i>
+                                                        <i class="fa-solid fa-fire-extinguisher"></i>
                                                         &nbsp;&nbsp;{% trans "View Closed Findings" %}
                                                     </a>
                                                 </li>
@@ -733,7 +735,7 @@
                                                     <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="{% url 'ad_hoc_finding' product_tab.product.id %}">
-                                                            <i class="fa fa-plus"></i>
+                                                            <i class="fa-solid fa-plus"></i>
                                                             {% trans "Add New Finding" %}
                                                         </a>
                                                     </li>
@@ -741,7 +743,7 @@
                                                 {% if product_tab.product|has_object_permission:"Import_Scan_Result" %}
                                                     <li>
                                                         <a href="{% url 'import_scan_results_prod' product_tab.product.id %}">
-                                                            <i class="fa fa-upload"></i>
+                                                            <i class="fa-solid fa-upload"></i>
                                                             {% trans "Import Scan Results" %}
                                                         </a>
                                                     </li>
@@ -751,7 +753,7 @@
                                         <!-- Endpoints Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.tab == 'endpoints' %} active active-color{% endif %}">
                                             <a class="dropdown-toggle" data-toggle="dropdown" href="">
-                                                <span class="fa fa-sitemap" aria-hidden="true"></span>
+                                                <span class="fa-solid fa-sitemap" aria-hidden="true"></span>
                                                 <span class="hidden-xs">
                                                     {% trans "Endpoints" %}
                                                     {% if product_tab.endpoints > 0 %}
@@ -763,32 +765,32 @@
                                             <ul class="dropdown-menu">
                                                 <li>
                                                     <a href="{% url 'endpoint' %}?product={{ product_tab.product.id }}">
-                                                        <i class="fa fa-list-alt"></i>
+                                                        <i class="fa-solid fa-rectangle-list"></i>
                                                         {% trans "View Endpoints" %}
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="{% url 'endpoint_host' %}?product={{ product_tab.product.id }}">
-                                                        <i class="fa fa-list-alt"></i>
+                                                        <i class="fa-solid fa-rectangle-list"></i>
                                                         {% trans "View Hosts" %}
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="{% url 'vulnerable_endpoints' %}?product={{ product_tab.product.id }}">
-                                                        <i class="fa fa-sitemap"></i>
+                                                        <i class="fa-solid fa-sitemap"></i>
                                                         {% trans "View Vulnerable Endpoints" %}
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ product_tab.product.id }}">
-                                                        <i class="fa fa-sitemap"></i>
+                                                        <i class="fa-solid fa-sitemap"></i>
                                                         {% trans "View Vulnerable Hosts" %}
                                                     </a>
                                                 </li>
                                                 <li role="separator" class="divider"></li>
                                                 <li>
                                                     <a href="{% url 'product_endpoint_report' product_tab.product.id %}">
-                                                        <i class="fa fa-file-text-o"></i>
+                                                        <i class="fa-solid fa-file-lines"></i>
                                                         {% trans "Endpoint Report" %}
                                                     </a>
                                                 </li>
@@ -796,7 +798,7 @@
                                                     <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="{% url 'add_endpoint' product_tab.product.id %}">
-                                                            <i class="fa fa-plus"></i>
+                                                            <i class="fa-solid fa-plus"></i>
                                                             {% trans "Add New Endpoint" %}
                                                         </a>
                                                     </li>
@@ -804,7 +806,7 @@
                                                 {% if product_tab.product|has_object_permission:"Endpoint_Edit" and system_settings.enable_endpoint_metadata_import %}
                                                     <li>
                                                         <a href="{% url 'import_endpoint_meta' product_tab.product.id %}">
-                                                            <i class="fa fa-upload"></i>
+                                                            <i class="fa-solid fa-upload"></i>
                                                             {% trans "Import Endpoint Meta" %}
                                                         </a>
                                                     </li>
@@ -816,7 +818,7 @@
                                             {% if product_tab.product|has_object_permission:"Benchmark_Edit" %}
                                                 <li role="presentation" class="dropdown{% if product_tab.tab == 'benchmarks' %} active{% endif %}">
                                                     <a class="dropdown-toggle" data-toggle="dropdown" href="">
-                                                        <span class="fa fa-balance-scale" aria-hidden="true"></span>
+                                                        <span class="fa-solid fa-scale-balanced" aria-hidden="true"></span>
                                                         <span class="hidden-xs">{% trans "Benchmarks" %}</span>
                                                         <span class="caret"></span>
                                                     </a>
@@ -824,7 +826,7 @@
                                                         {% for bt in product_tab.benchmark_type %}
                                                             <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' product_tab.product.id bt.id %}">
                                                                 <li>
-                                                                    <span class="fa fa-list"></span>
+                                                                    <span class="fa-solid fa-list-ul"></span>
                                                                     {{ bt.name }} {{ bt.version }}
                                                                 </a>
                                                                 <!-- the order is swithced here for some reason, but it looks bad the "correct" way -->
@@ -838,40 +840,40 @@
                                         {% if product_tab.product|has_object_permission:"Product_Edit" or product_tab.product|has_object_permission:"Product_Delete" %}
                                             <li role="presentation" class="dropdown{% if product_tab.tab == 'settings' %} active{% endif %}">
                                                 <a class="dropdown-toggle" data-toggle="dropdown" href="">
-                                                    <span class="fa fa-cogs" aria-hidden="true"></span>
+                                                    <span class="fa-solid fa-gears" aria-hidden="true"></span>
                                                     <span class="hidden-xs">{% trans "Settings" %}</span>
                                                     <span class="caret"></span></a>
                                                 <ul class="dropdown-menu">
                                                     {% if product_tab.product|has_object_permission:"Product_Edit" %}
                                                         <li role="presentation">
                                                             <a class="" href="{% url 'edit_product' product_tab.product.id %}">
-                                                                <i class="fa fa-pencil-square-o"></i>
+                                                                <i class="fa-solid fa-pen-to-square"></i>
                                                                 {% trans "Edit" %}
                                                             </a>
                                                         </li>
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
                                                             <a class="" href="{% url 'add_meta_data' product_tab.product.id %}">
-                                                                <i class="fa fa-plus"></i>
+                                                                <i class="fa-solid fa-plus"></i>
                                                                 {% trans "Add Custom Fields" %}
                                                             </a>
                                                         </li>
                                                         <li role="presentation">
                                                             <a title="Edit Custom Fields" href="{% url 'edit_meta_data' product_tab.product.id %}">
-                                                                <i class="fa fa-pencil-square-o"></i>
+                                                                <i class="fa-solid fa-pen-to-square"></i>
                                                                 {% trans "Edit Custom Fields" %}
                                                             </a>
                                                         </li>
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
                                                             <a class="" href="{% url 'add_api_scan_configuration' product_tab.product.id %}">
-                                                                <i class="fa fa-plus"></i>
+                                                                <i class="fa-solid fa-plus"></i>
                                                                 {% trans "Add API Scan Configuration" %}
                                                             </a>
                                                         </li>
                                                         <li role="presentation">
                                                             <a title="View API Scan Configurations" href="{% url 'view_api_scan_configurations' product_tab.product.id %}">
-                                                                <i class="fa fa-list-alt"></i>
+                                                                <i class="fa-solid fa-rectangle-list"></i>
                                                                 {% trans "View API Scan Configurations" %}
                                                             </a>
                                                         </li>
@@ -879,13 +881,13 @@
                                                             <li role="separator" class="divider"></li>
                                                             <li role="presentation">
                                                                 <a class="" href="{% url 'new_object' product_tab.product.id %}">
-                                                                    <i class="fa fa-plus"></i>
+                                                                    <i class="fa-solid fa-plus"></i>
                                                                     {% trans "Add Product Tracking Files" %}
                                                                 </a>
                                                             </li>
                                                             <li role="presentation">
                                                                 <a href="{% url 'view_objects' product_tab.product.id %}">
-                                                                    <i class="fa fa-list-alt"></i>
+                                                                    <i class="fa-solid fa-rectangle-list"></i>
                                                                     {% trans "View Product Tracking Files" %}
                                                                 </a>
                                                             </li>
@@ -894,13 +896,13 @@
                                                             <li role="separator" class="divider"></li>
                                                             <li role="presentation">
                                                                 <a href="{% url 'new_cred_product' product_tab.product.id %}">
-                                                                    <i class="fa fa-plus"></i>
+                                                                    <i class="fa-solid fa-plus"></i>
                                                                     {% trans "Add Credentials" %}
                                                                 </a>
                                                             </li>
                                                             <li role="presentation">
                                                                 <a href="{% url 'all_cred_product' product_tab.product.id %}">
-                                                                    <i class="fa fa-list-alt"></i>
+                                                                    <i class="fa-solid fa-rectangle-list"></i>
                                                                     {% trans "View Credentials" %}
                                                                 </a>
                                                             </li>
@@ -908,33 +910,33 @@
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
                                                             <a href="{% url 'new_tool_product' product_tab.product.id %}">
-                                                                <i class="fa fa-plus"></i>
+                                                                <i class="fa-solid fa-plus"></i>
                                                                 {% trans "Add Tools" %}
                                                             </a>
                                                         </li>
                                                         <li role="presentation">
                                                             <a href="{% url 'all_tool_product' product_tab.product.id %}">
-                                                                <i class="fa fa-list-alt"></i>
+                                                                <i class="fa-solid fa-rectangle-list"></i>
                                                                 {% trans "View Tools" %}
                                                             </a>
                                                         </li>
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
                                                             <a href="{% url 'add_engagement_presets' product_tab.product.id %}">
-                                                                <i class="fa fa-plus"></i>
+                                                                <i class="fa-solid fa-plus"></i>
                                                                 {% trans "Add Engagement Presets" %}
                                                             </a>
                                                         </li>
                                                         <li role="presentation">
                                                             <a href="{% url 'engagement_presets' product_tab.product.id %}">
-                                                                <i class="fa fa-list-alt"></i>
+                                                                <i class="fa-solid fa-rectangle-list"></i>
                                                                 {% trans "View Engagement Presets" %}
                                                             </a>
                                                         </li>
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
                                                             <a href="{% url 'action_history' product_tab.product|content_type product_tab.product.id %}">
-                                                                <i class="fa fa-history"></i>
+                                                                <i class="fa-solid fa-clock-rotate-left"></i>
                                                                 {% trans "View History" %}
                                                             </a>
                                                         </li>
@@ -943,7 +945,7 @@
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
                                                             <a class="text-danger" href="{% url 'delete_product' product_tab.product.id %}">
-                                                                <i class="fa fa-trash"></i>
+                                                                <i class="fa-solid fa-trash"></i>
                                                                 {% trans "Delete" %}
                                                             </a>
                                                         </li>
@@ -1036,7 +1038,7 @@
                             License</a>. | <a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/NOTICE"> Dependencies Notice.</a>
                                 </p>
                                 <p>
-                                    &copy; {% now "Y" %} DefectDojo Maintainers. All rights reserved.
+                                    &copy; 2015-{% now "Y" %} DefectDojo, Inc. All rights reserved.
                                 </p>
                             </div>
                         </div>
@@ -1100,7 +1102,7 @@
                 }
 
                 function get_alerts() {
-                    $('.dropdown-alerts').html('<div class="text-center"><i class="fa fa-spin fa-spinner"></i></div>');
+                    $('.dropdown-alerts').html('<div class="text-center"><i class="fa-solid fa-spin fa-spinner"></i></div>');
                     $.get("{% url 'alerts_json' %}?limit=12", function (data) {
                         $('.dropdown-alerts').empty();
                         $.each(data, function(i, elem) {
@@ -1109,7 +1111,7 @@
                         var description = elem.fields.description
                         var display_description = description ? description.length < 100 ? description : description.trim().substring(0,100).trim(this) + '...': ''
                         var dropdown_alert = "alert-list" + i;
-                        $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa fa-' + htmlEscape(elem.fields.icon) +
+                        $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa-solid fa-' + htmlEscape(elem.fields.icon) +
                                                         ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert +
                                                         ' title="' + htmlEscape(display_description) + '"></a><span class="pull-right text-muted small">' +
                                                     htmlEscape(elem.fields.source) + '</span></div></li><li class="divider"></li>');
@@ -1118,9 +1120,9 @@
 
                         if (data.length > 0) {
                             $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "alerts" %}"><strong>{% trans "See All Alerts" %}</strong>' +
-                                                        '<i class="fa fa-angle-right"></i></a></li>');
+                                                        '<i class="fa-solid fa-angle-right"></i></a></li>');
                             $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>{% trans "Clear All Alerts" %}</strong>' +
-                                                    '<i class="fa fa-angle-right"></i></a></li>');
+                                                    '<i class="fa-solid fa-angle-right"></i></a></li>');
                         }
                         else {
                             $('.dropdown-alerts').append('<li class="text-center"><strong>{% trans "No alerts found" %}</strong></li>');

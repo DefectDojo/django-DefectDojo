@@ -35,12 +35,14 @@ categories:
       - 'bug'
   - title: 📝 Documentation updates
     label: 'documentation'
+  - title: '🖌 Updates in UI'
+    label: 'ui'
+  - title: '🗣 Updates in localization'
+    label: 'localization'
   - title: '🧰 Maintenance'
     labels:
       - 'dependencies'
       - 'maintenance'
-  - title: '🖌 Updates in UI'
-    label: 'ui'
 exclude-labels:
   - 'skip-changelog'      
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'

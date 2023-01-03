@@ -68,7 +68,7 @@ Django forms are very rigid so without crispy-forms we're forced to use javascri
             $(jira_url).parent().height('34px')            
             $('#id_jira_webhook_secret').before(jira_url);
 
-            var generate_secret = $('<i id="id_generate_secret" class="fa fa-refresh has-popover" data-trigger="hover" data-content="Click to generate a new secret" data-placement="right" data-container="body" data-original-title="" title=""></i>')
+            var generate_secret = $('<i id="id_generate_secret" class="fa-solid fa-arrows-rotate has-popover" data-trigger="hover" data-content="Click to generate a new secret" data-placement="right" data-container="body" data-original-title="" title=""></i>')
             $('#id_jira_webhook_secret').css('display', 'inline-block');
             $('#id_jira_webhook_secret').width('25%')            
             $('#id_jira_webhook_secret').after(generate_secret);

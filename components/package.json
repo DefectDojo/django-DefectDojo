@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "2.17.0",
+  "version": "2.18.0",
   "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
@@ -27,7 +27,7 @@
     "font-awesome": "^4.0.0",
     "fullcalendar": "^3.10.2",
     "google-code-prettify": "^1.0.0",
-    "jquery": "^3.6.1",
+    "jquery": "^3.6.3",
     "jquery-highlight": "3.5.0",
     "jquery.cookie": "1.4.1",
     "jquery.flot.tooltip": "^0.9.0",
@@ -37,7 +37,7 @@
     "metismenu": "~3.0.7",
     "moment": "^2.29.4",
     "morris.js": "morrisjs/morris.js",
-    "pdfmake": "^0.2.6",
+    "pdfmake": "^0.2.7",
     "startbootstrap-sb-admin-2": "1.0.7"
   },
   "engines": {
