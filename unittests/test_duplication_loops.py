@@ -133,6 +133,7 @@ class TestDuplicationLoops(DojoTestCase):
         set_duplicate(self.finding_c, self.finding_b)
         self.assertEqual(self.finding_b.original_finding.first().id, self.finding_a.id)
         logger.debug('going to delete finding B')
+        b_active = self.finding_b.active
         b_id = self.finding_b.id
         self.finding_b.delete()
         logger.debug('deleted finding B')
@@ -141,7 +142,7 @@ class TestDuplicationLoops(DojoTestCase):
         self.assertEqual(self.finding_a.original_finding.first(), self.finding_c)
         self.assertEqual(self.finding_a.duplicate_finding, None)
         self.assertEqual(self.finding_a.duplicate, False)
-        self.assertEqual(self.finding_a.active, True)
+        self.assertEqual(self.finding_a.active, b_active)
 
         self.assertEqual(self.finding_c.original_finding.first(), None)
         self.assertEqual(self.finding_c.duplicate_finding, self.finding_a)
@@ -157,6 +158,7 @@ class TestDuplicationLoops(DojoTestCase):
         set_duplicate(self.finding_a, self.finding_b)
         self.assertEqual(self.finding_b.original_finding.first().id, self.finding_a.id)
         logger.debug('going to delete finding B')
+        b_active = self.finding_b.active
         b_id = self.finding_b.id
         self.finding_b.delete()
         logger.debug('deleted finding B')
@@ -164,7 +166,7 @@ class TestDuplicationLoops(DojoTestCase):
         self.assertEqual(self.finding_a.original_finding.first(), None)
         self.assertEqual(self.finding_a.duplicate_finding, None)
         self.assertEqual(self.finding_a.duplicate, False)
-        self.assertEqual(self.finding_a.active, True)
+        self.assertEqual(self.finding_a.active, b_active)
         with self.assertRaises(Finding.DoesNotExist):
             self.finding_b = Finding.objects.get(id=b_id)
 

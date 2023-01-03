@@ -16,28 +16,28 @@
                             Finding Templates
                         {% endif %}
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if "dojo.add_finding_template"|has_configuration_permission and not add_from_template and not apply_template %}
                                 <a href="{% url 'add_template' %}" class="btn btn-primary"
                                    title="Add Finding Template">
-                                    <i class="fa fa-plus"></i>
+                                    <i class="fa-solid fa-plus"></i>
                                 </a>
                             {% endif %}
                             {% if add_from_template %}
                                 <a href="{% url 'view_test' tid %}" class="btn btn-danger"
                                    title="Cancel add from template">
-                                    <i class="fa fa-ban"></i> Cancel
+                                    <i class="fa-solid fa-ban"></i> Cancel
                                 </a>
                             {% endif %}
                             {% if apply_template %}
                                 <a href="{% url 'view_finding' fid %}" class="btn btn-danger"
                                    title="Cancel apply template">
-                                    <i class="fa fa-ban"></i> Cancel
+                                    <i class="fa-solid fa-ban"></i> Cancel
                                 </a>
                             {% endif %}
                             <button class="btn btn-primary download_templates" type="submit"
                                    title="Export to file">
-                                    <i class="fa fa-archive"></i>
+                                    <i class="fa-solid fa-box-archive"></i>
                             </button>
                         </div>
                     </h3>
@@ -69,7 +69,7 @@
                                     {% if finding.cwe > 0 %}
                                         <a target="_blank"
                                            href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                            <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                            <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
                                         </a>
                                     {% endif %}
                                 </td>

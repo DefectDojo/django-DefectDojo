@@ -19,38 +19,38 @@
           <div class="dropdown pull-right">
             <div class="btn-group">
               <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-                <span class="fa fa-bars"></span>
+                <span class="fa-solid fa-bars"></span>
                 <span class="caret"></span>
               </button>
               <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                 {% if prod|has_object_permission:"Product_Edit" %}
                   <li role="presentation">
                     <a class="" href="{% url 'edit_product' prod.id %}">
-                                          <i class="fa fa-pencil-square-o"></i> {% trans "Edit" %}
+                                          <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}
                                       </a>
                   </li>
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a class="" href="{% url 'add_meta_data' prod.id %}">
-                        <i class="fa fa-plus"></i>{% trans "Add Custom Fields" %}
+                        <i class="fa-solid fa-plus"></i>{% trans "Add Custom Fields" %}
                     </a>
                   </li>
                   <li role="presentation">
                     <a title="Edit Custom Fields"
                       href="{% url 'edit_meta_data' prod.id %}">
-                        <i class="fa fa-pencil-square-o"></i>{% trans "Edit Custom Fields" %}
+                        <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit Custom Fields" %}
                     </a>
                   </li>
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                       <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
-                          <i class="fa fa-plus"></i>{% trans "Add API Scan Configuration" %}
+                          <i class="fa-solid fa-plus"></i>{% trans "Add API Scan Configuration" %}
                       </a>
                   </li>
                   <li role="presentation">
                       <a title="View API Scan Configurations"
                          href="{% url 'view_api_scan_configurations' prod.id %}">
-                          <i class="fa fa-list-alt"></i>{% trans "View API Scan Configurations" %}
+                          <i class="fa-solid fa-rectangle-list"></i>{% trans "View API Scan Configurations" %}
                       </a>
                   </li>
                 {% endif %}
@@ -59,14 +59,14 @@
                   {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
                   <li role="presentation">
                     <a class="" href="{% url 'new_object' prod.id %}">
-                        <i class="fa fa-plus"></i>{% trans "Add Product Tracking Files" %}
+                        <i class="fa-solid fa-plus"></i>{% trans "Add Product Tracking Files" %}
                     </a>
                   </li>
                   {% endif %}
                   {% if prod|has_object_permission:"Product_Tracking_Files_View" %}
                   <li role="presentation">
                     <a href="{% url 'view_objects' prod.id %}">
-                        <i class="fa fa-list-alt"></i>{% trans "View Product Tracking Files" %}
+                        <i class="fa-solid fa-rectangle-list"></i>{% trans "View Product Tracking Files" %}
                     </a>
                   </li>
                   {% endif %}
@@ -74,7 +74,7 @@
                 <li role="separator" class="divider"></li>
                 <li role="presentation">
                   <a href="{% url 'product_report' prod.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
-                      <i class="fa fa-file-text-o"></i>{% trans "Product Report" %}
+                      <i class="fa-solid fa-file-lines"></i>{% trans "Product Report" %}
                   </a>
                 </li>
                 {% if prod|has_object_permission:"Benchmark_Edit" %}
@@ -83,7 +83,7 @@
                     {% for bt in benchmark_type %}
                     <li role="presentation">
                       <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
-                                        <span class="fa fa-list"></span> {{ bt.name }} {{ bt.version }}
+                                        <span class="fa-solid fa-list-ul"></span> {{ bt.name }} {{ bt.version }}
                                     </a>
                     </li>
                     {% endfor %}
@@ -93,7 +93,7 @@
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a href="{% url 'action_history' prod|content_type prod.id %}">
-                        <i class="fa fa-history"></i>{% trans "View History" %}
+                        <i class="fa-solid fa-clock-rotate-left"></i>{% trans "View History" %}
                     </a>
                   </li>
                 {% endif %}
@@ -101,7 +101,7 @@
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a class="text-danger" href="{% url 'delete_product' prod.id %}">
-                        <i class="fa fa-trash"></i>{% trans "Delete" %}
+                        <i class="fa-solid fa-trash"></i>{% trans "Delete" %}
                     </a>
                   </li>
                 {% endif %}
@@ -120,7 +120,7 @@
 <div class="col-md-12">
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-pie-chart" aria-hidden="true"></span>{% trans "Metrics" %}</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-chart-pie" aria-hidden="true"></span>{% trans "Metrics" %}</h3>
     </div>
     <table class="table table-condensed">
       <tbody>
@@ -142,9 +142,9 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span>{% trans "Technologies" %} {% if app_analysis %}({{ app_analysis.count }}){% endif %}
+        <h3 class="panel-title"><span class="fa-solid fa-bolt" aria-hidden="true"></span>{% trans "Technologies" %} {% if app_analysis %}({{ app_analysis.count }}){% endif %}
             {% if prod|has_object_permission:"Technology_Add" %}
-            <a title="{% trans "Add new Technology" %}" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology" id="addTechnology"><span class="fa fa-plus"></span> </a>
+            <a title="{% trans "Add new Technology" %}" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology" id="addTechnology"><span class="fa-solid fa-plus"></span> </a>
             {% endif %}
         </h3>
       </div>
@@ -156,18 +156,18 @@
                 <td>
                     <ul>
                     <li class="dropdown" style="list-style:none;position:absolute">
-                        <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageTechnologies"><b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                        <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageTechnologies"><b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                         <ul class="dropdown-menu">
                             {% if prod|has_object_permission:"Technology_Edit" %}
                             <li>
                                 <a name="editTechnology" href="{% url 'edit_technology' app.id %}">
-                                <i class="fa fa-pencil-square-o"></i>{% trans "Edit" %}</a>
+                                <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit" %}</a>
                             </li>
                             {% endif %}
                             {% if prod|has_object_permission:"Technology_Delete" %}
                             <li>
                                 <a name="deleteTechnology" href="{% url 'delete_technology' app.id %}">
-                                <i class="fa fa-trash"></i>{% trans "Delete" %}</a>
+                                <i class="fa-solid fa-trash"></i>{% trans "Delete" %}</a>
                             </li>
                             {% endif %}
                         </ul>
@@ -190,7 +190,7 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa fa-gavel" aria-hidden="true"></span>{% trans "Regulations" %} {% if prod.regulations.count > 0%}({{ prod.regulations.count }}){%endif%}</h3>
+        <h3 class="panel-title"><span class="fa-solid fa-gavel" aria-hidden="true"></span>{% trans "Regulations" %} {% if prod.regulations.count > 0%}({{ prod.regulations.count }}){%endif%}</h3>
       </div>
       <ul class="list-group">
       {% for regulation in prod.regulations.all %}
@@ -210,7 +210,7 @@
   <div class="col-md-12">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class ="fa fa-balance-scale" aria-hidden="true"></span>{% trans "Benchmark Progress" %}</h3>
+        <h3 class="panel-title"><span class ="fa-solid fa-scale-balanced" aria-hidden="true"></span>{% trans "Benchmark Progress" %}</h3>
       </div>
         <ul class="list-group">
           {% for Abenchpercent in benchmarks_percents %}
@@ -245,18 +245,18 @@
                 <h4 class="pull-left">{% trans "Members" %}</h4>
                 &nbsp;
                 <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
-                    <i class="fa fa-question-circle"></i></a>
+                    <i class="fa-solid fa-circle-question"></i></a>
                 {% if prod|has_object_permission:"Product_Manage_Members" %}
                 <div class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductMember"
                             data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Member">
-                        <span class="fa fa-bars"></span>
+                        <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a id="addProductMember" href="{% url 'add_product_member' prod.id %}">
-                                <i class="fa fa-plus"></i>{% trans "Add Users" %}
+                                <i class="fa-solid fa-plus"></i>{% trans "Add Users" %}
                             </a>
                         </li>
                     </ul>
@@ -281,18 +281,18 @@
                             <td>
                                 <ul>
                                 <li class="dropdown" style="list-style:none;position:absolute">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductMember">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                     <ul class="dropdown-menu">
                                         {% if prod|has_object_permission:"Product_Manage_Members" %}
                                         <li>
                                             <a name="editProductMember" href="{% url 'edit_product_member' member.id %}">
-                                            <i class="fa fa-pencil-square-o"></i>{% trans "Edit" %}</a>
+                                            <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit" %}</a>
                                         </li>
                                         {% endif %}
                                         {% if member|has_object_permission:"Product_Member_Delete" %}
                                         <li>
                                             <a name="deleteProductMember" href="{% url 'delete_product_member' member.id %}">
-                                            <i class="fa fa-trash"></i>{% trans "Delete" %}</a>
+                                            <i class="fa-solid fa-trash"></i>{% trans "Delete" %}</a>
                                         </li>
                                         {% endif %}
                                     </ul>
@@ -333,18 +333,18 @@
                   <h4 class="pull-left">{% trans "Groups" %}</h4>
                   &nbsp;
                   <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
-                      <i class="fa fa-question-circle"></i></a>
+                      <i class="fa-solid fa-circle-question"></i></a>
                   {% if prod|has_object_permission:"Product_Group_Add" %}
                   <div class="dropdown pull-right">
                       <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductGroup"
                               data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Group">
-                          <span class="fa fa-bars"></span>
+                          <span class="fa-solid fa-bars"></span>
                           <span class="caret"></span>
                       </button>
                       <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                           <li role="presentation">
                               <a id="addProductGroup" href="{% url 'add_product_group' prod.id %}">
-                                  <i class="fa fa-plus"></i>{% trans "Add Groups" %}
+                                  <i class="fa-solid fa-plus"></i>{% trans "Add Groups" %}
                               </a>
                           </li>
                       </ul>
@@ -369,18 +369,18 @@
                       <td>
                           <ul>
                               <li class="dropdown" style="list-style:none;position:absolute">
-                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductGroup">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductGroup">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                   <ul class="dropdown-menu">
                                       {% if prod|has_object_permission:"Product_Group_Edit" %}
                                       <li>
                                           <a name="editProductGroup" href="{% url 'edit_product_group' group.id %}">
-                                              <i class="fa fa-pencil-square-o"></i>{% trans "Edit" %}</a>
+                                              <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit" %}</a>
                                       </li>
                                       {% endif %}
                                       {% if group|has_object_permission:"Product_Group_Delete" %}
                                       <li>
                                           <a name="deleteProductGroup" href="{% url 'delete_product_group' group.id %}">
-                                              <i class="fa fa-trash"></i>{% trans "Delete" %}</a>
+                                              <i class="fa-solid fa-trash"></i>{% trans "Delete" %}</a>
                                       </li>
                                       {% endif %}
                                   </ul>
@@ -419,7 +419,7 @@
 <div class="col-md-4">
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-info-circle fa-fw" aria-hidden="true"></span>{% trans "Metadata" %}</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw" aria-hidden="true"></span>{% trans "Metadata" %}</h3>
     </div>
     <div class="table-responsive">
       <table class="table table-striped" id="set-width">
@@ -468,7 +468,7 @@
             {% if jira_project %}
             <tr>
               <td><strong>{% trans "JIRA" %}</strong></td>
-              <td><a href="{{ prod | jira_project_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ prod | jira_key }}</a></td>
+              <td><a href="{{ prod | jira_project_url }}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> {{ prod | jira_key }}</a></td>
             </tr>
             {% endif %}
           {% endwith %}
@@ -482,7 +482,7 @@
     {% if system_settings.enable_finding_sla %}
     <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-calendar-check-o fa-fw" aria-hidden="true"></span>&nbsp;Service Level Agreement</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-calendar-check fa-fw" aria-hidden="true"></span>&nbsp;Service Level Agreement</h3>
     </div><div class="panel-body">
         <p>{{ sla.name }}</p>
         <p>{{ sla.description }}</p>
@@ -516,7 +516,7 @@
 {% if languages %}
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-language" aria-hidden="true"></span>{% trans "Languages" %} ({{ languages.count }})</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-language" aria-hidden="true"></span>{% trans "Languages" %} ({{ languages.count }})</h3>
     </div>
     <div class="panel-body" style="text-align: center;">
       <div style="display: inline-block; padding: 0px 15px 0px 15px; vertical-align: top;">
@@ -541,7 +541,7 @@
 {% if product_metadata %}
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-magic fa-fw" aria-hidden="true"></span>{% trans "Custom Fields" %}</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-wand-magic-sparkles fa-fw" aria-hidden="true"></span>{% trans "Custom Fields" %}</h3>
     </div>
     <div class="table-responsive">
       <table class="table table-striped">
@@ -561,7 +561,7 @@
 <!-- Contacts -->
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-users fa-fw" aria-hidden="true"></span>{% trans "Contacts" %}</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-users fa-fw" aria-hidden="true"></span>{% trans "Contacts" %}</h3>
     </div>
     <div class="table-responsive">
       <table class="table table-striped">
@@ -587,8 +587,8 @@
 <div class="panel panel-default panel-default-secondary" id="edit_notifications">
   <div class="panel-heading">
     {% url 'notifications' as notifications_url %}
-    <h3 class="panel-title"><span class="fa fa-users fa-fw" aria-hidden="true"></span>{% trans "Notifications" %}
-      <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{% trans "These are your personal settings for this product." %}" data-placement="right" data-container="body"></i>
+    <h3 class="panel-title"><span class="fa-solid fa-users fa-fw" aria-hidden="true"></span>{% trans "Notifications" %}
+      <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="{% trans "These are your personal settings for this product." %}" data-placement="right" data-container="body"></i>
     </h3>
   </div>
   <form id="edit_notifications_form" class="form-horizontal" method="post" action="{% url 'edit_notifications' prod.id %}">{% csrf_token %}
@@ -609,7 +609,7 @@
           <tr>
             <td><strong>{{ field.label }}&nbsp;</strong>
               {% if field.help_text %}
-              <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body"></i>
+              <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body"></i>
               {% endif %}
             </td>
             {% for pk,c in field.field.widget.choices %}

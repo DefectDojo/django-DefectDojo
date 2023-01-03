@@ -19,7 +19,7 @@ jobs:
   update_release_draft:
     runs-on: ubuntu-latest
     steps:
-      - uses: release-drafter/release-drafter@v5.21.1
+      - uses: release-drafter/release-drafter@v5.22.0
         with:
           version: ${{github.event.inputs.version}}  
         env:

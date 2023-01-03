@@ -74,35 +74,35 @@ class TestBulkRiskAcceptanceApi(APITestCase):
                            'accepted_by': 'King of the Internet'} for i in range(100, 150)]
         result = self.client.post(reverse('test-accept-risks', kwargs={'pk': self.test_a.id}), data=accepted_risks,
                                   format='json')
-        self.assertEquals(len(result.json()), 17)
-        self.assertEquals(self.test_a.unaccepted_open_findings.count(), 17)
-        self.assertEquals(self.test_b.unaccepted_open_findings.count(), 33)
-        self.assertEquals(self.test_c.unaccepted_open_findings.count(), 33)
+        self.assertEqual(len(result.json()), 17)
+        self.assertEqual(self.test_a.unaccepted_open_findings.count(), 17)
+        self.assertEqual(self.test_b.unaccepted_open_findings.count(), 33)
+        self.assertEqual(self.test_c.unaccepted_open_findings.count(), 33)
 
-        self.assertEquals(self.test_d.unaccepted_open_findings.count(), 34)
-        self.assertEquals(self.engagement_2a.risk_acceptance.count(), 0)
+        self.assertEqual(self.test_d.unaccepted_open_findings.count(), 34)
+        self.assertEqual(self.engagement_2a.risk_acceptance.count(), 0)
 
     def test_engagement_accept_risks(self):
         accepted_risks = [{'vulnerability_id': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
                            'accepted_by': 'King of the Internet'} for i in range(100, 150)]
         result = self.client.post(reverse('engagement-accept-risks', kwargs={'pk': self.engagement.id}),
                                   data=accepted_risks, format='json')
-        self.assertEquals(len(result.json()), 50)
-        self.assertEquals(self.engagement.unaccepted_open_findings.count(), 50)
+        self.assertEqual(len(result.json()), 50)
+        self.assertEqual(self.engagement.unaccepted_open_findings.count(), 50)
 
-        self.assertEquals(self.engagement_2a.risk_acceptance.count(), 0)
-        self.assertEquals(self.engagement_2a.unaccepted_open_findings.count(), 34)
+        self.assertEqual(self.engagement_2a.risk_acceptance.count(), 0)
+        self.assertEqual(self.engagement_2a.unaccepted_open_findings.count(), 34)
 
     def test_finding_accept_risks(self):
         accepted_risks = [{'vulnerability_id': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
                            'accepted_by': 'King of the Internet'} for i in range(60, 140)]
         result = self.client.post(reverse('finding-accept-risks'), data=accepted_risks, format='json')
-        self.assertEquals(len(result.json()), 106)
-        self.assertEquals(Finding.unaccepted_open_findings().count(), 62)
+        self.assertEqual(len(result.json()), 106)
+        self.assertEqual(Finding.unaccepted_open_findings().count(), 62)
 
-        self.assertEquals(self.engagement_2a.risk_acceptance.count(), 0)
-        self.assertEquals(self.engagement_2a.unaccepted_open_findings.count(), 34)
+        self.assertEqual(self.engagement_2a.risk_acceptance.count(), 0)
+        self.assertEqual(self.engagement_2a.unaccepted_open_findings.count(), 34)
 
         for ra in self.engagement_2b.risk_acceptance.all():
             for finding in ra.accepted_findings.all():
-                self.assertEquals(self.engagement_2a.product, finding.test.engagement.product)
+                self.assertEqual(self.engagement_2a.product, finding.test.engagement.product)

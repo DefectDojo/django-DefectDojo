@@ -1,29 +1,8 @@
 # DefectDojo
 
-<table>
-  <tr styl="margin: 0; position: absolute; top: 50%; -ms-transform: translateY(-50%); transform: translateY(-50%);">
-    <th><a href="https://opensourcesecurityindex.io/" target="_blank" rel="noopener">
-        <img style="width: 282px; height: 56px" src="https://opensourcesecurityindex.io/badge.svg"
-          alt="Open Source Security Index - Fastest Growing Open Source Security Projects" width="282" height="56" />
-      </a></th>
-    <th>
-      <p><a href="https://www.owasp.org/index.php/OWASP_DefectDojo_Project"><img
-            src="https://img.shields.io/badge/owasp-flagship%20project-orange.svg" alt="OWASP Flagship"></a> <a
-          href="https://github.com/DefectDojo/django-DefectDojo"><img
-            src="https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg" alt="GitHub release"></a> <a
-          href="https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ"><img
-            src="https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg" alt="YouTube Subscribe"></a> <img
-          src="https://img.shields.io/twitter/follow/defectdojo.svg?style=social&amp;label=Follow" alt="Twitter Follow">
-      </p>
-      <p><a href="https://github.com/DefectDojo/django-DefectDojo/actions"><img
-            src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/unit-tests.yml/badge.svg?branch=master"
-            alt="Unit Tests"></a><a href="https://github.com/DefectDojo/django-DefectDojo/actions"><img
-            src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/integration-tests.yml/badge.svg?branch=master"
-            alt="Integration Tests"></a> <a href="https://bestpractices.coreinfrastructure.org/projects/2098"><img
-            src="https://bestpractices.coreinfrastructure.org/projects/2098/badge" alt="CII Best Practices"></a></p>
-    </th>
-  </tr>
-</table>
+[![OWASP Flagship](https://img.shields.io/badge/owasp-flagship%20project-orange.svg)](https://www.owasp.org/index.php/OWASP_DefectDojo_Project) [![GitHub release](https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg)](https://github.com/DefectDojo/django-DefectDojo) [![YouTube Subscribe](https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg)](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) ![Twitter Follow](https://img.shields.io/twitter/follow/defectdojo.svg?style=social&label=Follow)
+
+[![Unit Tests](https://github.com/DefectDojo/django-DefectDojo/actions/workflows/unit-tests.yml/badge.svg?branch=master)](https://github.com/DefectDojo/django-DefectDojo/actions)[![Integration Tests](https://github.com/DefectDojo/django-DefectDojo/actions/workflows/integration-tests.yml/badge.svg?branch=master)](https://github.com/DefectDojo/django-DefectDojo/actions) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2098/badge)](https://bestpractices.coreinfrastructure.org/projects/2098)
 
 ![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/screenshot1.png)
 
@@ -88,16 +67,12 @@ Follow DefectDojo on [Twitter](https://twitter.com/defectdojo), [Linkedin](https
 See our [Contributing guidelines](readme-docs/CONTRIBUTING.md)
 
 ## Commercial Support and Training
-Commercial support and training is availaible through [10Security](https://10security.com).
-
-10Security was founded by the creators of DefectDojo.
-For information please email info@10security.com or visit our [site](https://10security.com).
+[Commercial support and training is availaible.](https://www.defectdojo.com/) For information please email info@defectdojo.com.
 
 ## About Us
 
 DefectDojo is maintained by:
 * Greg Anderson ([@devGregA](https://github.com/devgrega) | [linkedin](https://www.linkedin.com/in/g-anderson/))
-* Aaron Weaver ([@aaronweaver](https://github.com/aaronweaver)| [linkedin](https://www.linkedin.com/in/aweaver/) | [@weavera](https://twitter.com/weavera))
 * Matt Tesauro ([@mtesauro](https://github.com/mtesauro) | [linkedin](https://www.linkedin.com/in/matttesauro/) | [@matt_tesauro](https://twitter.com/matt_tesauro))
 
 Core Moderators can help you with pull requests or feedback on dev ideas:
@@ -105,7 +80,6 @@ Core Moderators can help you with pull requests or feedback on dev ideas:
 
 Moderators can help you with pull requests or feedback on dev ideas:
 * Damien Carol ([@damnielcarol](https://github.com/damiencarol) | [linkedin](https://www.linkedin.com/in/damien-carol/))
-* Stefan Fleckenstein ([@StefanFl](https://github.com/stefanfl) | ([linkedin](https://www.linkedin.com/in/stefan-fleckenstein-6a456a30/))
 * Jannik Jürgens ([@alles-klar](https://github.com/alles-klar))
 
 
@@ -124,4 +98,4 @@ Please report Security issues via our [disclosure policy](readme-docs/SECURITY.m
 
 ## License
 
-DefectDojo is licensed under the [BSD Simplified license](LICENSE.md)
+DefectDojo is licensed under the [BSD-3-Clause License](LICENSE.md)

@@ -11,7 +11,7 @@ class TestOutpost24Parser(DojoTestCase):
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
-            self.assertEquals(item_count, len(findings))
+            self.assertEqual(item_count, len(findings))
             if item_count > 0:
                 for item in findings:
                     endpoint_count = len(item.unsaved_endpoints)
