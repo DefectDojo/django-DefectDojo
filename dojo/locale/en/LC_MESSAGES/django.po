@@ -67,6 +67,10 @@ msgstr ""
 msgid "Closed"
 msgstr ""
 
+#: dojo/filters.py:122 dojo/models.py:2091
+msgid "Under Review"
+msgstr ""
+
 #: dojo/filters.py:367 dojo/filters.py:413 dojo/filters.py:591
 msgid "Any date"
 msgstr ""
@@ -99,6 +103,22 @@ msgstr ""
 msgid "Past year"
 msgstr ""
 
+#: dojo/filters.py:419
+msgid "Next 7 days"
+msgstr ""
+
+#: dojo/filters.py:423
+msgid "Next 30 days"
+msgstr ""
+
+#: dojo/filters.py:427
+msgid "Next 90 days"
+msgstr ""
+
+#: dojo/filters.py:454
+msgid "Next year"
+msgstr ""
+
 #: dojo/filters.py:475 dojo/filters.py:513
 msgid "Either"
 msgstr ""
@@ -127,8 +147,54 @@ msgstr ""
 msgid "Choice Question"
 msgstr ""
 
-#: dojo/models.py:133
-msgid "Privacy"
+#: dojo/metrics/views.py:50 dojo/templates/base.html:404
+msgid "Critical Product Metrics"
+msgstr ""
+
+#: dojo/metrics/views.py:153 dojo/metrics/views.py:243
+#: dojo/product/views.py:419
+msgid "All objects have been filtered away. Displaying all objects"
+msgstr ""
+
+#: dojo/metrics/views.py:386 dojo/templates/base.html:393
+#: dojo/templates/base.html:641 dojo/templates/dojo/product_type.html:85
+#: dojo/templates/dojo/view_product_details.html:123
+#: dojo/templates/dojo/view_product_type.html:31
+msgid "Metrics"
+msgstr ""
+
+#: dojo/metrics/views.py:395
+#, python-format
+msgid "%(product_type)s Metrics"
+msgstr ""
+
+#: dojo/metrics/views.py:406
+msgid "Product Type Metrics by Findings"
+msgstr ""
+
+#: dojo/metrics/views.py:409
+msgid "Product Type Metrics by Affected Endpoints"
+msgstr ""
+
+#: dojo/metrics/views.py:432
+#, python-format
+msgid "%(team_name)s Metrics"
+msgstr ""
+
+#: dojo/metrics/views.py:471 dojo/templates/base.html:419
+msgid "Simple Metrics"
+msgstr ""
+
+#: dojo/metrics/views.py:681
+msgid "Please choose month and year and the Product Type."
+msgstr ""
+
+#: dojo/metrics/views.py:684
+msgid "Bi-Weekly Metrics"
+msgstr ""
+
+#: dojo/metrics/views.py:711 dojo/templates/base.html:424
+msgid "Engineer Metrics"
 msgstr ""
 
 #: dojo/models.py:134
@@ -203,7 +269,11 @@ msgstr ""
 msgid "Forces this user to reset their password on next login."
 msgstr ""
 
-#: dojo/models.py:247
+#: dojo/models.py:226
+msgid "AzureAD"
+msgstr ""
+
+#: dojo/models.py:253
 msgid "Enable audit logging"
 msgstr ""
 
@@ -276,6 +346,10 @@ msgstr ""
 
 #: dojo/models.py:306 dojo/models.py:3453
 msgid "JIRA issue labels space seperated"
+msgstr ""
+
+#: dojo/models.py:309 dojo/models.py:3455
+msgid "Add vulnerability Id as a JIRA label"
 msgstr ""
 
 #: dojo/models.py:313
@@ -556,6 +630,24 @@ msgid ""
 "the user interface."
 msgstr ""
 
+#: dojo/models.py:475
+msgid "Enable Finding Groups"
+msgstr ""
+
+#: dojo/models.py:476
+msgid "With this setting turned off, the Finding Groups will be disabled."
+msgstr ""
+
+#: dojo/models.py:480
+msgid "Enable Calendar"
+msgstr ""
+
+#: dojo/models.py:481
+msgid ""
+"With this setting turned off, the Calendar will be disabled in the user "
+"interface."
+msgstr ""
+
 #: dojo/models.py:486
 msgid "New users will be assigned to this group."
 msgstr ""
@@ -596,7 +688,46 @@ msgstr ""
 msgid "Global role"
 msgstr ""
 
-#: dojo/models.py:729
+#: dojo/models.py:822
+msgid "Custom SLA Name"
+msgstr ""
+
+#: dojo/models.py:823
+msgid "A unique name for the set of SLAs."
+msgstr ""
+
+#: dojo/models.py:827
+msgid "Critical Finding SLA Days"
+msgstr ""
+
+#: dojo/models.py:828
+msgid "number of days to remediate a critical finding."
+msgstr ""
+
+#: dojo/models.py:829
+msgid "High Finding SLA Days"
+msgstr ""
+
+#: dojo/models.py:830
+msgid "number of days to remediate a high finding."
+msgstr ""
+
+#: dojo/models.py:831
+msgid "Medium Finding SLA Days"
+msgstr ""
+
+#: dojo/models.py:832
+msgid "number of days to remediate a medium finding."
+msgstr ""
+
+#: dojo/models.py:833
+msgid "Low Finding SLA Days"
+msgstr ""
+
+#: dojo/models.py:834
+msgid "number of days to remediate a low finding."
+msgstr ""
+
 #: dojo/models.py:869
 msgid "API"
 msgstr ""
@@ -889,6 +1020,10 @@ msgid ""
 "omitted. For example 'section-13', 'paragraph-2'."
 msgstr ""
 
+#: dojo/models.py:1461 dojo/templates/base.html:299
+#: dojo/templates/base.html:684 dojo/templates/dojo/simple_search.html:44
+msgid "Findings"
+msgstr ""
 
 #: dojo/models.py:1464
 msgid ""
@@ -1448,6 +1583,13 @@ msgid ""
 "is an optional field which is used in deduplication of findings when set."
 msgstr ""
 
+#: dojo/models.py:2283
+msgid "Planned Remediation Date"
+msgstr ""
+
+#: dojo/models.py:2284
+msgid "The date the flaw is expected to be remediated."
+msgstr ""
 
 #: dojo/models.py:2286
 msgid ""
@@ -1702,6 +1844,17 @@ msgstr ""
 msgid "JIRA Instance"
 msgstr ""
 
+#: dojo/models.py:3449
+msgid ""
+"JIRA custom field JSON mapping of Id to value, e.g. {\"customfield_10122\": "
+"[{\"name\": \"8.0.1\"}]}"
+msgstr ""
+
+#: dojo/models.py:3451
+msgid ""
+"JIRA default assignee (name). If left blank then it defaults to whatever is "
+"configured in JIRA."
+msgstr ""
 
 #: dojo/models.py:3458
 msgid ""
@@ -1931,6 +2084,416 @@ msgstr ""
 msgid "The selected choices as the answer"
 msgstr ""
 
+#: dojo/notes/views.py:50
+msgid "Note deleted."
+msgstr ""
+
+#: dojo/notes/views.py:55
+msgid "Note was not succesfully deleted."
+msgstr ""
+
+#: dojo/notes/views.py:117
+msgid "Note edited."
+msgstr ""
+
+#: dojo/notes/views.py:123
+msgid "Note was not succesfully edited."
+msgstr ""
+
+#: dojo/notifications/helper.py:121
+#, python-format
+msgid "Product %(title)s has been created successfully."
+msgstr ""
+
+#: dojo/notifications/helper.py:123
+#, python-format
+msgid "Product Type %(title)s has been created successfully."
+msgstr ""
+
+#: dojo/notifications/helper.py:125
+#, python-format
+msgid "Event %(event)s  has occurred."
+msgstr ""
+
+#: dojo/notifications/views.py:40 dojo/notifications/views.py:62
+#: dojo/notifications/views.py:84
+msgid "Settings saved."
+msgstr ""
+
+#: dojo/notifications/views.py:43
+msgid "Personal notification settings"
+msgstr ""
+
+#: dojo/notifications/views.py:65
+msgid "System notification settings"
+msgstr ""
+
+#: dojo/notifications/views.py:87
+msgid "Template notification settings"
+msgstr ""
+
+#: dojo/product/views.py:85
+msgid "Product List"
+msgstr ""
+
+#: dojo/product/views.py:197 dojo/product/views.py:227
+#: dojo/product/views.py:607 dojo/product/views.py:939
+#: dojo/templates/dojo/metrics.html:312 dojo/templates/dojo/metrics.html:337
+#: dojo/templates/dojo/metrics.html:389 dojo/templates/dojo/metrics.html:436
+#: dojo/templates/dojo/metrics.html:485 dojo/templates/dojo/pt_counts.html:196
+#: dojo/templates/dojo/pt_counts.html:244
+#: dojo/templates/dojo/simple_search.html:116
+#: dojo/templates/dojo/simple_search.html:190
+#: dojo/templates/dojo/simple_search.html:224
+#: dojo/templates/dojo/simple_search.html:263
+#: dojo/templates/dojo/simple_search.html:326
+#: dojo/templates/dojo/simple_search.html:351
+#: dojo/templates/dojo/simple_search.html:410
+#: dojo/templates/dojo/simple_search.html:447
+msgid "Product"
+msgstr ""
+
+#: dojo/product/views.py:669 dojo/templates/base.html:275
+msgid "All Engagements"
+msgstr ""
+
+#: dojo/product/views.py:753
+msgid "Product added successfully."
+msgstr ""
+
+#: dojo/product/views.py:766
+msgid "GitHub information added successfully."
+msgstr ""
+
+#: dojo/product/views.py:771
+msgid "This label is automatically applied to all issues created by DefectDojo"
+msgstr ""
+
+#: dojo/product/views.py:808
+msgid "New Product"
+msgstr ""
+
+#: dojo/product/views.py:841
+msgid "Product updated successfully."
+msgstr ""
+
+#: dojo/product/views.py:862
+msgid "GITHUB information updated successfully."
+msgstr ""
+
+#: dojo/product/views.py:884
+msgid "Edit Product"
+msgstr ""
+
+#: dojo/product/views.py:909
+msgid "Product and relationships will be removed in the background."
+msgstr ""
+
+#: dojo/product/views.py:911
+msgid "Product and relationships removed."
+msgstr ""
+
+#: dojo/product/views.py:918
+#, python-format
+msgid "Deletion of %(name)s"
+msgstr ""
+
+#: dojo/product/views.py:920
+#, python-format
+msgid "The product \"%(name)s\" was deleted by %(user)s"
+msgstr ""
+
+#: dojo/product/views.py:998
+msgid "Engagement added successfully."
+msgstr ""
+
+#: dojo/product/views.py:1027
+msgid "New CI/CD Engagement"
+msgstr ""
+
+#: dojo/product/views.py:1029
+msgid "New Interactive Engagement"
+msgstr ""
+
+#: dojo/product/views.py:1050
+msgid "Technology added successfully."
+msgstr ""
+
+#: dojo/product/views.py:1055
+msgid "Add Technology"
+msgstr ""
+
+#: dojo/product/views.py:1072
+msgid "Technology changed successfully."
+msgstr ""
+
+#: dojo/product/views.py:1076
+msgid "Edit Technology"
+msgstr ""
+
+#: dojo/product/views.py:1093
+msgid "Technology deleted successfully."
+msgstr ""
+
+#: dojo/product/views.py:1097
+msgid "Delete Technology"
+msgstr ""
+
+#: dojo/product/views.py:1120
+msgid "Metadata added successfully."
+msgstr ""
+
+#: dojo/product/views.py:1129
+msgid "Add Metadata"
+msgstr ""
+
+#: dojo/product/views.py:1157
+msgid "Metadata edited successfully."
+msgstr ""
+
+#: dojo/product/views.py:1161
+msgid "Edit Metadata"
+msgstr ""
+
+#: dojo/product/views.py:1171
+msgid "Pen Test"
+msgstr ""
+
+#: dojo/product/views.py:1174 dojo/product/views.py:1184
+msgid "Ad Hoc Engagement"
+msgstr ""
+
+#: dojo/product/views.py:1202 dojo/test/views.py:426 dojo/test/views.py:556
+msgid "Can not set a finding as inactive without adding all mandatory notes"
+msgstr ""
+
+#: dojo/product/views.py:1205 dojo/test/views.py:428 dojo/test/views.py:558
+msgid ""
+"Can not set a finding as false positive without adding all mandatory notes"
+msgstr ""
+
+#: dojo/product/views.py:1213 dojo/test/views.py:436 dojo/test/views.py:566
+msgid ""
+"Can not set a finding as inactive or false positive without adding all "
+"mandatory notes"
+msgstr ""
+
+#: dojo/product/views.py:1286
+msgid "Finding added successfully."
+msgstr ""
+
+#: dojo/product/views.py:1295 dojo/test/views.py:517 dojo/test/views.py:605
+msgid "The form has errors, please correct them below."
+msgstr ""
+
+#: dojo/product/views.py:1310 dojo/test/views.py:525 dojo/test/views.py:633
+msgid "Add Finding"
+msgstr ""
+
+#: dojo/product/views.py:1329
+msgid "Engagement Presets"
+msgstr ""
+
+#: dojo/product/views.py:1342
+msgid "Edit Engagement Preset"
+msgstr ""
+
+#: dojo/product/views.py:1351
+msgid "Engagement Preset Successfully Updated."
+msgstr ""
+
+#: dojo/product/views.py:1376
+msgid "Engagement Preset Successfully Created."
+msgstr ""
+
+#: dojo/product/views.py:1382
+msgid "New Engagement Preset"
+msgstr ""
+
+#: dojo/product/views.py:1399
+msgid "Engagement presets and engagement relationships removed."
+msgstr ""
+
+#: dojo/product/views.py:1407
+msgid "Delete Engagement Preset"
+msgstr ""
+
+#: dojo/product/views.py:1434
+msgid "Notification settings updated."
+msgstr ""
+
+#: dojo/product/views.py:1451 dojo/product_type/views.py:198
+msgid "You are not permitted to add users as owners."
+msgstr ""
+
+#: dojo/product/views.py:1465 dojo/user/views.py:549
+msgid "Product members added successfully."
+msgstr ""
+
+#: dojo/product/views.py:1468 dojo/user/views.py:552
+msgid "Add Product Member"
+msgstr ""
+
+#: dojo/product/views.py:1487
+msgid "You are not permitted to make users to owners."
+msgstr ""
+
+#: dojo/product/views.py:1493
+msgid "Product member updated successfully."
+msgstr ""
+
+#: dojo/product/views.py:1499
+msgid "Edit Product Member"
+msgstr ""
+
+#: dojo/product/views.py:1518
+msgid "Product member deleted successfully."
+msgstr ""
+
+#: dojo/product/views.py:1527
+msgid "Delete Product Member"
+msgstr ""
+
+#: dojo/product/views.py:1549 dojo/product/views.py:1611
+#, python-format
+msgid "API connection successful with message: %(result)s."
+msgstr ""
+
+#: dojo/product/views.py:1554
+msgid "API Scan Configuration added successfully."
+msgstr ""
+
+#: dojo/product/views.py:1569 dojo/templates/base.html:872
+#: dojo/templates/dojo/view_product_details.html:47
+msgid "Add API Scan Configuration"
+msgstr ""
+
+#: dojo/product/views.py:1583
+msgid "API Scan Configurations"
+msgstr ""
+
+#: dojo/product/views.py:1617
+msgid "API Scan Configuration successfully updated."
+msgstr ""
+
+#: dojo/product/views.py:1629
+msgid "Edit API Scan Configuration"
+msgstr ""
+
+#: dojo/product/views.py:1651
+msgid "API Scan Configuration deleted."
+msgstr ""
+
+#: dojo/product/views.py:1657
+msgid "Delete Tool Configuration"
+msgstr ""
+
+#: dojo/product/views.py:1679 dojo/product_type/views.py:351
+msgid "You are not permitted to make groups owners."
+msgstr ""
+
+#: dojo/product/views.py:1685
+msgid "Product group updated successfully."
+msgstr ""
+
+#: dojo/product/views.py:1692 dojo/product/views.py:1757
+msgid "Edit Product Group"
+msgstr ""
+
+#: dojo/product/views.py:1711
+msgid "Product group deleted successfully."
+msgstr ""
+
+#: dojo/product/views.py:1720
+msgid "Delete Product Group"
+msgstr ""
+
+#: dojo/product/views.py:1740 dojo/product_type/views.py:313
+msgid "You are not permitted to add groups as owners."
+msgstr ""
+
+#: dojo/product/views.py:1754
+msgid "Product groups added successfully."
+msgstr ""
+
+#: dojo/product_type/views.py:45 dojo/templates/dojo/product_type.html:14
+msgid "Product Type List"
+msgstr ""
+
+#: dojo/product_type/views.py:75 dojo/templates/base.html:254
+#: dojo/templates/dojo/product_type.html:27
+msgid "Add Product Type"
+msgstr ""
+
+#: dojo/product_type/views.py:88
+msgid "Product type added successfully."
+msgstr ""
+
+#: dojo/product_type/views.py:104
+msgid "View Product Type"
+msgstr ""
+
+#: dojo/product_type/views.py:147
+msgid "Previewing the relationships has been disabled."
+msgstr ""
+
+#: dojo/product_type/views.py:154
+#: dojo/templates/dojo/delete_product_type.html:24
+msgid "Delete Product Type"
+msgstr ""
+
+#: dojo/product_type/views.py:175
+msgid "Product type updated successfully."
+msgstr ""
+
+#: dojo/product_type/views.py:212 dojo/user/views.py:521
+msgid "Product type members added successfully."
+msgstr ""
+
+#: dojo/product_type/views.py:215
+#: dojo/templates/dojo/view_product_type.html:139 dojo/user/views.py:524
+msgid "Add Product Type Member"
+msgstr ""
+
+#: dojo/product_type/views.py:224
+msgid "Edit Product Type Member"
+msgstr ""
+
+#: dojo/product_type/views.py:234
+#, python-format
+msgid ""
+"There must be at least one owner for Product Type %(product_type_name)s."
+msgstr ""
+
+#: dojo/product_type/views.py:249
+msgid "Product type member updated successfully."
+msgstr ""
+
+#: dojo/product_type/views.py:276
+msgid "There must be at least one owner."
+msgstr ""
+
+#: dojo/product_type/views.py:284
+msgid "Product type member deleted successfully."
+msgstr ""
+
+#: dojo/product_type/views.py:327
+msgid "Product type groups added successfully."
+msgstr ""
+
+#: dojo/product_type/views.py:357
+msgid "Product type group updated successfully."
+msgstr ""
+
+#: dojo/product_type/views.py:384
+msgid "Product type group deleted successfully."
+msgstr ""
+
+#: dojo/search/views.py:318 dojo/search/views.py:349
+#, fuzzy
+#| msgid "Search"
+msgid "Simple Search"
+msgstr "Поиск"
 
 #: dojo/templates/base.html:129 dojo/templates/dojo/simple_search.html:24
 msgid "Search"
@@ -2163,6 +2726,10 @@ msgstr ""
 msgid "Rules Framework"
 msgstr ""
 
+#: dojo/templates/base.html:559
+msgid "SLA Configuration"
+msgstr ""
+
 #: dojo/templates/base.html:566
 msgid "System Settings"
 msgstr ""
@@ -2359,6 +2926,415 @@ msgstr ""
 
 #: dojo/templates/base.html:1125
 msgid "Clear All Alerts"
+msgstr ""
+
+#: dojo/templates/base.html:1129
+msgid "No alerts found"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:30
+#, python-format
+msgid "%(name)s for %(start_date)s - %(end_date)s"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:41
+#: dojo/templates/dojo/metrics.html:139
+msgid "Measures Findings"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:46
+#: dojo/templates/dojo/metrics.html:144
+msgid "Measure Affected Endpoints"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:57
+#: dojo/templates/dojo/metrics.html:214
+msgid "Open Bug Count by Month"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:68
+#: dojo/templates/dojo/metrics.html:241
+msgid "Risk Accepted Bug Count by Month"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:79
+#: dojo/templates/dojo/metrics.html:256
+msgid "Open Bug Count by Week"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:90
+#: dojo/templates/dojo/metrics.html:269
+msgid "Risk Accepted Bug Count by Week"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:104
+#, python-format
+msgid "Top %(length)s Products By Bug Severity"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:116
+msgid "Total Findings In Period By Severity"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:127
+msgid "Total Findings Risk Accepted In Period By Severity"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:138
+msgid "Total Findings Closed In Period By Severity"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:151
+msgid "Weekly activity, displayed by day, of findings reported.*"
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:155
+msgid "Week begins on date displayed."
+msgstr ""
+
+#: dojo/templates/dojo/dashboard-metrics.html:159
+msgid "* Weeks are only displayed if findings are available."
+msgstr ""
+
+#: dojo/templates/dojo/delete_product_type.html:5
+#, python-format
+msgid "Delete Product Type %(product_type)s"
+msgstr ""
+
+#: dojo/templates/dojo/delete_product_type.html:7
+msgid ""
+"Deleting this Product Type will remove any related objects associated\n"
+"        with it. These relationships are listed below:"
+msgstr ""
+
+#: dojo/templates/dojo/delete_product_type.html:12
+msgid "Danger Zone"
+msgstr ""
+
+#: dojo/templates/dojo/delete_product_type.html:17
+msgid "No relationships found."
+msgstr ""
+
+#: dojo/templates/dojo/edit_note.html:5
+msgid "Edit Note"
+msgstr ""
+
+#: dojo/templates/dojo/edit_note.html:10
+msgid "Save"
+msgstr ""
+
+#: dojo/templates/dojo/edit_product_type.html:19
+#, python-format
+msgid "Edit Product Type %(name)s"
+msgstr ""
+
+#: dojo/templates/dojo/edit_product_type.html:25
+msgid "Edit product type"
+msgstr ""
+
+#: dojo/templates/dojo/edit_product_type.html:25
+#: dojo/templates/dojo/edit_product_type_group.html:9
+#: dojo/templates/dojo/edit_product_type_member.html:10
+#: dojo/templates/dojo/edit_tool_type.html:12
+#: dojo/templates/dojo/new_product_type.html:24
+#: dojo/templates/dojo/new_product_type_group.html:14
+#: dojo/templates/dojo/new_product_type_member.html:15
+#: dojo/templates/dojo/new_tool_type.html:11
+#: dojo/templates/dojo/notifications.html:97
+msgid "Submit"
+msgstr ""
+
+#: dojo/templates/dojo/edit_tool_type.html:7
+msgid "Edit Tool Type Configuration"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:172
+#, python-format
+msgid ""
+"%(name)s is affected by <b>both</b> critical and\n"
+"                                        high severity vulnerabilities."
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:176 dojo/templates/dojo/metrics.html:186
+msgid "Critical Severity Vulnerabilities"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:179 dojo/templates/dojo/metrics.html:193
+msgid "High Severity Vulnerabilities"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:181
+#, python-format
+msgid ""
+"\n"
+"                                        %(name)s is affected by critical "
+"vulnerabilities."
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:188
+#, python-format
+msgid ""
+"\n"
+"                                        %(name)s is affected by high "
+"severity vulnerabilities."
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:197
+msgid "Full Metrics"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:205
+msgid "No Critical Products registered"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:227
+msgid "Active Bug Count by Month"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:284
+msgid "Metric Counts"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:292
+msgid "Top 10 Products <br/> by bug severity"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:296
+msgid "Detail Breakdown"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:297
+msgid "Opened Findings"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:298
+msgid "Accepted Findings"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:300
+msgid "Trending Open<br/>Bug Count"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:302
+msgid "Trending Accepted <br/> Bug Count"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:304
+msgid "Age of Issues"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:313 dojo/templates/dojo/metrics.html:370
+#: dojo/templates/dojo/metrics.html:390 dojo/templates/dojo/metrics.html:417
+#: dojo/templates/dojo/metrics.html:437 dojo/templates/dojo/metrics.html:466
+#: dojo/templates/dojo/metrics.html:486 dojo/templates/dojo/metrics.html:513
+#: dojo/templates/dojo/metrics.html:537 dojo/templates/dojo/metrics.html:564
+#: dojo/templates/dojo/metrics.html:586 dojo/templates/dojo/pt_counts.html:32
+#: dojo/templates/dojo/pt_counts.html:69 dojo/templates/dojo/pt_counts.html:105
+#: dojo/templates/dojo/pt_counts.html:143
+#: dojo/templates/dojo/pt_counts.html:197
+#: dojo/templates/dojo/simple_metrics.html:24
+msgid "Critical"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:317 dojo/templates/dojo/metrics.html:375
+#: dojo/templates/dojo/metrics.html:395 dojo/templates/dojo/metrics.html:422
+#: dojo/templates/dojo/metrics.html:442 dojo/templates/dojo/metrics.html:471
+#: dojo/templates/dojo/metrics.html:491 dojo/templates/dojo/metrics.html:517
+#: dojo/templates/dojo/metrics.html:541 dojo/templates/dojo/metrics.html:568
+#: dojo/templates/dojo/metrics.html:590 dojo/templates/dojo/pt_counts.html:36
+#: dojo/templates/dojo/pt_counts.html:73 dojo/templates/dojo/pt_counts.html:109
+#: dojo/templates/dojo/pt_counts.html:201
+#: dojo/templates/dojo/simple_metrics.html:23
+msgid "Total"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:336
+msgid "Team"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:340
+msgid "Days<br/>Open"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:341
+#: dojo/templates/dojo/simple_search.html:192
+#: dojo/templates/dojo/simple_search.html:227
+msgid "Status"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:366
+msgid "Opened During Period"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:374 dojo/templates/dojo/metrics.html:394
+#: dojo/templates/dojo/metrics.html:421 dojo/templates/dojo/metrics.html:441
+#: dojo/templates/dojo/metrics.html:470 dojo/templates/dojo/metrics.html:490
+#: dojo/templates/dojo/simple_metrics.html:28
+msgid "Info"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:413
+msgid "Accepted in Period"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:462
+msgid "Closed in Period"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:512
+msgid "Weekly"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:518 dojo/templates/dojo/metrics.html:542
+msgid "Closed*"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:536
+msgid "Monthly"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:556
+msgid "*Closed findings may have been opened outside of requested period."
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:563
+msgid "By Week"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:585
+msgid "By Month"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:609
+msgid "Days"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:610
+msgid "Bug Count"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:613
+msgid "0 - 30 Days"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:617
+msgid "31 - 60 Days"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:621
+msgid "61 - 90 Days"
+msgstr ""
+
+#: dojo/templates/dojo/metrics.html:625
+msgid "91+ Days"
+msgstr ""
+
+#: dojo/templates/dojo/new_product_type.html:19
+msgid "Register a new Product Type"
+msgstr ""
+
+#: dojo/templates/dojo/new_product_type_member.html:10
+msgid "Register new Product Type Members"
+msgstr ""
+
+#: dojo/templates/dojo/new_tool_type.html:6
+msgid "Add a Tool Type Configuration"
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:10
+#: dojo/templates/dojo/notifications.html:14
+#: dojo/templates/dojo/notifications.html:23
+msgid "System"
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:12
+#: dojo/templates/dojo/notifications.html:24
+msgid "Personal"
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:16
+msgid "Notification Settings"
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:21
+msgid "Scope"
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:21
+msgid ""
+"Destinations for system notifications are configured in System Settings. "
+"Destinations for personal notifications are taken from your personal contact "
+"details (personal Slack notifications will be sent to you as a direct "
+"message)."
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:25
+msgid "Template"
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:33
+msgid ""
+"These notification settings apply <u>globally</u> to all products and will "
+"be sent to all superusers."
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:35
+msgid ""
+"These notification settings apply <u>globally</u> to all products that you "
+"have read access to and will be sent to you only."
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:36
+msgid ""
+"If you want only notifications for certain products you should disable "
+"everything here and enable notifications on those products."
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:38
+msgid "These template <u>template</u>"
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:50
+msgid "Event"
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:52
+#: dojo/templates/dojo/view_product_details.html:601
+msgid "Slack"
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:55
+msgid "Microsoft Teams"
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:58
+#: dojo/templates/dojo/view_product_details.html:604
+msgid "Mail"
+msgstr ""
+
+#: dojo/templates/dojo/notifications.html:60
+#: dojo/templates/dojo/view_product_details.html:606
+msgid "Alert"
+msgstr ""
+
+#: dojo/templates/dojo/paging_snippet.html:8
+#, python-format
+msgid ""
+"\n"
+"    Showing entries %(start_index)s to %(end_index)s of %(count)s\n"
+"    "
+msgstr ""
+
+#: dojo/templates/dojo/paging_snippet.html:32
+msgid "Page Size"
+msgstr ""
+
+#: dojo/templates/dojo/paging_snippet.html:34
+msgid "Toggle Dropdown"
+msgstr ""
+
+#: dojo/templates/dojo/paging_snippet.html:45
+msgid "All"
 msgstr ""
 
 #: dojo/templates/dojo/password_reset.html:5
