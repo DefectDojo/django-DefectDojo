@@ -41,6 +41,8 @@ categories:
       - 'maintenance'
   - title: '🖌 Updates in UI'
     label: 'ui'
+  - title: '🏳️ Updates in localization'
+    label: 'localization'
 exclude-labels:
   - 'skip-changelog'      
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
