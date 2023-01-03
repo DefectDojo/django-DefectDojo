@@ -1,31 +1,32 @@
+{% load i18n %}
 {
     "@context": "https://schema.org/extensions",
     "@type": "MessageCard",
-    "title": "User Mentioned",
-    "summary": "User Mentioned",
+    "title": "{% trans "User Mentioned" %}",
+    "summary": "{% trans "User Mentioned" %}",
     "sections": [
         {
             "activityTitle": "DefectDojo",
             "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
-            "text": "A user has been mentioned.",
+            "text": "{% trans "A user has been mentioned" %}.",
             "facts": [
                 {
-                    "name": "User:",
+                    "name": "{% trans "User" %}:",
                     "value": "{{ user }}"
                 },
                 {
-                    "name": "Section:",
+                    "name": "{% trans "Section" %}:",
                     "value": "{{ section }}"
                 },
                 {
-                    "name": "note:",
+                    "name": "{% trans "note" %}:",
                     "value": "{{ note }}"
                 }
             ]
         }
         {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
             ,{
-                "activityTitle": "Disclaimer",
+                "activityTitle": "{% trans "Disclaimer" %}",
                 "text": "{{ system_settings.disclaimer }}"
             }
         {% endif %}
@@ -33,7 +34,7 @@
     "potentialAction": [
         {
             "@type": "OpenUri",
-            "name": "View",
+            "name": "{% trans "View" %}",
             "targets": [
                 {
                     "os": "default",

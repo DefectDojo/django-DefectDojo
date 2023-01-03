@@ -1,32 +1,33 @@
+{% load i18n %}
 {% url 'view_test' test.id as test_url %}
 {
     "@context": "https://schema.org/extensions",
     "@type": "MessageCard",
-    "title": "Test added",
-    "summary": "Test added",
+    "title": "{% trans "Test added" %}",
+    "summary": "{% trans "Test added" %}",
     "sections": [
         {
             "activityTitle": "DefectDojo",
             "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
-            "text": "A new test has been added.",
+            "text": "{% trans "A new test has been added" %}.",
             "facts": [
                 {
-                    "name": "Product:",
+                    "name": "{% trans "Product" %}:",
                     "value": "{{ engagement.product.name }}"
                 },
                 {
-                    "name": "Engagement:",
+                    "name": "{% trans "Engagement" %}:",
                     "value": "{{ engagement.name }}"
                 },
                 {
-                    "name": "Test:",
+                    "name": "{% trans "Test" %}:",
                     "value": "{{ test }}"
                 }
             ]
         }
         {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
             ,{
-                "activityTitle": "Disclaimer",
+                "activityTitle": "{% trans "Disclaimer" %}",
                 "text": "{{ system_settings.disclaimer }}"
             }
         {% endif %}
@@ -34,7 +35,7 @@
     "potentialAction": [
         {
             "@type": "OpenUri",
-            "name": "View Test",
+            "name": "{% trans "View Test" %}",
             "targets": [
                 {
                     "os": "default",

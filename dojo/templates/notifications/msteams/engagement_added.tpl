@@ -1,27 +1,28 @@
+{% load i18n %}
 {
     "@context": "https://schema.org/extensions",
     "@type": "MessageCard",
-    "title": "Engagement added",
-    "summary": "Engagement added",
+    "title": "{% trans "Engagement added" %}",
+    "summary": "{% trans "Engagement added" %}",
     "sections": [
         {
             "activityTitle": "DefectDojo",
             "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
-            "text": "A new engagement has been added.",
+            "text": "{% trans "A new engagement has been added" %}.",
             "facts": [
                 {
-                    "name": "Product:",
+                    "name": "{% trans "Product" %}:",
                     "value": "{{ engagement.product.name }}"
                 },
                 {
-                    "name": "Engagement:",
+                    "name": "{% trans "Engagement" %}:",
                     "value": "{{ engagement.name }}"
                 }
             ]
         }
         {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
             ,{
-                "activityTitle": "Disclaimer",
+                "activityTitle": "{% trans "Disclaimer" %}",
                 "text": "{{ system_settings.disclaimer }}"
             }
         {% endif %}
@@ -30,7 +31,7 @@
     "potentialAction": [
         {
             "@type": "OpenUri",
-            "name": "View Engagement",
+            "name": "{% trans "View Engagement" %}",
             "targets": [
                 {
                     "os": "default",

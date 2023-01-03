@@ -1,36 +1,37 @@
+{% load i18n %}
 {% url 'view_engagement' engagement.id as engagement_url %}
 {
     "@context": "https://schema.org/extensions",
     "@type": "MessageCard",
-    "title": "Engagement is starting",
-    "summary": "Engagement is starting",
+    "title": "{% trans "Engagement is starting" %}",
+    "summary": "{% trans "Engagement is starting" %}",
     "sections": [
         {
             "activityTitle": "DefectDojo",
             "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
-            "text": "An Engagement is starting.",
+            "text": "{% trans "An Engagement is starting" %}.",
             "facts": [
                 {
-                    "name": "Product:",
+                    "name": "{% trans "Product" %}:",
                     "value": "{{ engagement.product.name }}"
                 },
                 {
-                    "name": "Engagement:",
+                    "name": "{% trans "Engagement" %}:",
                     "value": "{{ engagement.name }}"
                 },
                 {
-                    "name": "Start date:",
+                    "name": "{% trans "Start date" %}:",
                     "value": "{{ engagement.target_start }}"
                 },
                 {
-                    "name": "End date:",
+                    "name": "{% trans "End date" %}:",
                     "value": "{{ engagement.target_end }}"
                 }
             ]
         }
         {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
             ,{
-                "activityTitle": "Disclaimer",
+                "activityTitle": "{% trans "Disclaimer" %}",
                 "text": "{{ system_settings.disclaimer }}"
             }
         {% endif %}
@@ -38,7 +39,7 @@
     "potentialAction": [
         {
             "@type": "OpenUri",
-            "name": "View Engagement",
+            "name": "{% trans "View Engagement" %}",
             "targets": [
                 {
                     "os": "default",

@@ -1,8 +1,9 @@
+{% load i18n %}
 {
     "@context": "https://schema.org/extensions",
     "@type": "MessageCard",
-    "title": "Event",
-    "summary": "Event",
+    "title": "{% trans "Event" %}",
+    "summary": "{% trans "Event" %}",
     "sections": [
         {
             "activityTitle": "DefectDojo",
@@ -11,7 +12,7 @@
         }
         {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
             ,{
-                "activityTitle": "Disclaimer",
+                "activityTitle": "{% trans "Disclaimer" %}",
                 "text": "{{ system_settings.disclaimer }}"
             }
         {% endif %}
@@ -19,7 +20,7 @@
     "potentialAction": [
         {
             "@type": "OpenUri",
-            "name": "View",
+            "name": "{% trans "View" %}",
             "targets": [
                 {
                     "os": "default",

@@ -1,14 +1,17 @@
+{% load i18n %}
 {{ description }}
 
 {% if risk_acceptance.is_expired %}
-    Risk Acceptance Expired
+    {% trans "Risk Acceptance Expired" %}
 {% else %}
-    Risk Acceptance Will Expire Soon
+    {% trans "Risk Acceptance Will Expire Soon" %}
 {% endif %}
 
+{% blocktranslate trimmed %}
 Risk Acceptance can be viewed here: {{ risk_acceptance_url|full_url }}
+{% endblocktranslate %}
 {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
     
-    Disclaimer:
+    {% trans "Disclaimer" %}:
     {{ system_settings.disclaimer }}
 {% endif %}
