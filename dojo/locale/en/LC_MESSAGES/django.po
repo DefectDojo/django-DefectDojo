@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-12 15:11+0000\n"
+"POT-Creation-Date: 2023-01-03 15:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -491,39 +491,37 @@ msgstr ""
 msgid "Enables Finding SLA's for time to remediate."
 msgstr ""
 
-#: dojo/models.py:389
-msgid "Critical Finding SLA Days"
-msgstr ""
-
-#: dojo/models.py:390
-msgid "# of days to remediate a critical finding."
-msgstr ""
-
-#: dojo/models.py:393
-msgid "High Finding SLA Days"
-msgstr ""
-
-#: dojo/models.py:394
-msgid "# of days to remediate a high finding."
-msgstr ""
-
-#: dojo/models.py:396
-msgid "Medium Finding SLA Days"
-msgstr ""
-
-#: dojo/models.py:397
-msgid "# of days to remediate a medium finding."
-msgstr ""
-
-#: dojo/models.py:400
-msgid "Low Finding SLA Days"
-msgstr ""
-
 #: dojo/models.py:401
-msgid "# of days to remediate a low finding."
+msgid "Enable Notifiy SLA's Breach for active Findings"
 msgstr ""
 
-#: dojo/models.py:405
+#: dojo/models.py:402
+msgid ""
+"Enables Notify when time to remediate according to Finding SLA's is breached "
+"for active Findings."
+msgstr ""
+
+#: dojo/models.py:407
+msgid "Enable Notifiy SLA's Breach for active, verified Findings"
+msgstr ""
+
+#: dojo/models.py:408
+msgid ""
+"Enables Notify when time to remediate according to Finding SLA's is breached "
+"for active, verified Findings."
+msgstr ""
+
+#: dojo/models.py:413
+msgid "Enable Notifiy SLA's Breach for Findings linked to JIRA"
+msgstr ""
+
+#: dojo/models.py:414
+msgid ""
+"Enables Notify when time to remediate according to Finding SLA's is breached "
+"for Findings that are linked to JIRA issues."
+msgstr ""
+
+#: dojo/models.py:419
 msgid "Allow Anonymous Survey Responses"
 msgstr ""
 
@@ -662,17 +660,57 @@ msgid ""
 "address matches this regex pattern. This is optional condition."
 msgstr ""
 
-#: dojo/models.py:479
-msgid "Email pattern for staff users"
+#: dojo/models.py:501
+msgid "Minimum password length"
 msgstr ""
 
-#: dojo/models.py:480
-msgid ""
-"When the email address of a new user created by OAuth2 matches this regex "
-"pattern, their is_staff flag will be set to True."
+#: dojo/models.py:502
+msgid "Requires user to set passwords greater than minimum length."
+msgstr ""
+
+#: dojo/models.py:505
+msgid "Maximum password length"
+msgstr ""
+
+#: dojo/models.py:506
+msgid "Requires user to set passwords less than maximum length."
 msgstr ""
 
 #: dojo/models.py:510
+msgid "Password must contain one digit"
+msgstr ""
+
+#: dojo/models.py:511
+msgid "Requires user passwords to contain at least one digit (0-9)."
+msgstr ""
+
+#: dojo/models.py:515
+msgid "Password must contain one special character"
+msgstr ""
+
+#: dojo/models.py:516
+msgid ""
+"Requires user passwords to contain at least one special character (()[]{}|"
+"\\`~!@#$%^&*_-+=;:'\",<>./?)."
+msgstr ""
+
+#: dojo/models.py:520
+msgid "Password must contain one lowercase letter"
+msgstr ""
+
+#: dojo/models.py:521
+msgid "Requires user passwords to contain at least one lowercase letter (a-z)."
+msgstr ""
+
+#: dojo/models.py:525
+msgid "Password must contain one uppercase letter"
+msgstr ""
+
+#: dojo/models.py:526
+msgid "Requires user passwords to contain at least one uppercase letter (A-Z)."
+msgstr ""
+
+#: dojo/models.py:556
 msgid "This role determines the permissions of the user to manage the group."
 msgstr ""
 
@@ -1109,7 +1147,9 @@ msgstr ""
 
 #: dojo/models.py:2010
 msgid ""
-"The Common Vulnerabilities and Exposures (CVE) associated with this flaw."
+"An id of a vulnerability in a security advisory associated with this "
+"finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other "
+"sources."
 msgstr ""
 
 #: dojo/models.py:2015
@@ -1205,15 +1245,13 @@ msgstr ""
 msgid "Endpoints"
 msgstr ""
 
-#: dojo/models.py:1744
-msgid "The hosts within the product that are susceptible to this flaw. + The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...)."
+#: dojo/models.py:2051
+msgid ""
+"The hosts within the product that are susceptible to this flaw. + The status "
+"of the endpoint associated with this flaw (Vulnerable, Mitigated, ...)."
 msgstr ""
 
-#: dojo/models.py:1748
-msgid "Endpoint Status"
-msgstr ""
-
-#: dojo/models.py:1753
+#: dojo/models.py:2056
 msgid "References"
 msgstr ""
 
@@ -1271,11 +1309,7 @@ msgstr ""
 msgid "Denotes if this finding has been marked as an accepted risk."
 msgstr ""
 
-#: dojo/models.py:1788
-msgid "Under Review"
-msgstr ""
-
-#: dojo/models.py:1789
+#: dojo/models.py:2092
 msgid "Denotes is this flaw is currently being reviewed."
 msgstr ""
 
@@ -2545,11 +2579,8 @@ msgstr ""
 msgid "All Product Types"
 msgstr ""
 
-#: dojo/templates/base.html:211
-msgid "Add Product Type"
-msgstr ""
-
-#: dojo/templates/base.html:219 dojo/templates/base.html:445
+#: dojo/templates/base.html:264 dojo/templates/base.html:648
+#: dojo/templates/dojo/simple_search.html:59
 msgid "Engagements"
 msgstr ""
 
@@ -2557,11 +2588,7 @@ msgstr ""
 msgid "Active Engagements"
 msgstr ""
 
-#: dojo/templates/base.html:224
-msgid "All Engagements"
-msgstr ""
-
-#: dojo/templates/base.html:225
+#: dojo/templates/base.html:280
 msgid "Engagements by Product"
 msgstr ""
 
@@ -2573,11 +2600,7 @@ msgstr ""
 msgid "Environments"
 msgstr ""
 
-#: dojo/templates/base.html:234 dojo/templates/base.html:459
-msgid "Findings"
-msgstr ""
-
-#: dojo/templates/base.html:239
+#: dojo/templates/base.html:305 dojo/templates/dojo/simple_search.html:264
 msgid "Open Findings"
 msgstr ""
 
@@ -2629,19 +2652,11 @@ msgstr ""
 msgid "Reports"
 msgstr ""
 
-#: dojo/templates/base.html:306 dojo/templates/base.html:441
-msgid "Metrics"
-msgstr ""
-
-#: dojo/templates/base.html:310
+#: dojo/templates/base.html:399
 msgid "Metrics Dashboard"
 msgstr ""
 
-#: dojo/templates/base.html:311
-msgid "Critical Product Metrics"
-msgstr ""
-
-#: dojo/templates/base.html:312
+#: dojo/templates/base.html:409
 msgid "Product Type Metrics"
 msgstr ""
 
@@ -2649,15 +2664,7 @@ msgstr ""
 msgid "Product Type Counts"
 msgstr ""
 
-#: dojo/templates/base.html:314
-msgid "Simple Metrics"
-msgstr ""
-
-#: dojo/templates/base.html:315
-msgid "Engineer Metrics"
-msgstr ""
-
-#: dojo/templates/base.html:323 dojo/templates/base.html:328
+#: dojo/templates/base.html:434 dojo/templates/base.html:441
 msgid "Users"
 msgstr ""
 
@@ -2855,11 +2862,8 @@ msgstr ""
 msgid "Edit Custom Fields"
 msgstr ""
 
-#: dojo/templates/base.html:543
-msgid "Add API Scan Configuration"
-msgstr ""
-
-#: dojo/templates/base.html:549
+#: dojo/templates/base.html:878
+#: dojo/templates/dojo/view_product_details.html:53
 msgid "View API Scan Configurations"
 msgstr ""
 
@@ -3393,38 +3397,733 @@ msgid ""
 "you registered with, and check your spam folder."
 msgstr ""
 
-#: dojo/user/validators.py:11
-msgid "The password must contain at least 1 digit, 0-9."
+#: dojo/templates/dojo/product_type.html:52
+msgid "Product count"
 msgstr ""
 
-#: dojo/user/validators.py:17
-msgid "Your password must contain at least 1 digit, 0-9."
+#: dojo/templates/dojo/product_type.html:53
+msgid "Active (Verified) findings"
 msgstr ""
 
-#: dojo/user/validators.py:25
-msgid "The password must contain at least 1 uppercase letter, A-Z."
+#: dojo/templates/dojo/product_type.html:54
+#: dojo/templates/dojo/view_product_type.html:286
+msgid "Critical product"
 msgstr ""
 
-#: dojo/user/validators.py:31
-msgid "Your password must contain at least 1 uppercase letter, A-Z."
+#: dojo/templates/dojo/product_type.html:55
+#: dojo/templates/dojo/view_product_type.html:296
+msgid "Key product"
 msgstr ""
 
-#: dojo/user/validators.py:39
-msgid "The password must contain at least 1 lowercase letter, a-z."
+#: dojo/templates/dojo/product_type.html:68
+msgid "View"
 msgstr ""
 
-#: dojo/user/validators.py:45
-msgid "Your password must contain at least 1 lowercase letter, a-z."
+#: dojo/templates/dojo/product_type.html:89
+#: dojo/templates/dojo/view_product_type.html:35
+msgid "Product Type Report"
 msgstr ""
 
-#: dojo/user/validators.py:53
+#: dojo/templates/dojo/product_type.html:131
+msgid "No product types found."
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:17
+msgid "Generate Metrics For Selected Period"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:21
+#, python-format
 msgid ""
-"The password must contain at least 1 symbol: ()[]{}|\\`~!@#$%^&*_-+=;:'\","
-"<>./?"
+"Finding Information For Period of %(start_date)s - %(end_date)s\n"
+"            "
 msgstr ""
 
-#: dojo/user/validators.py:60
+#: dojo/templates/dojo/pt_counts.html:24
+#: dojo/templates/dojo/simple_metrics.html:18
+msgid "View Details"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:27
+msgid "Total Security Bug Count In Period"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:64
+msgid "Total Security Bugs Opened In Period"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:100
+msgid "Total Security Bugs Closed In Period"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:137
+msgid "Trending Total Bug Count By Month"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:142
+msgid "Month"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:147
+msgid "Opened in Month"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:148
+msgid "Open to Date"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:149
+msgid "Total Closed"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:154
+msgid "Closed findings may have been opened outside of requested period."
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:191
+msgid "Top 10 By Bug Severity"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:233
+#, python-format
+msgid "%(pt)s Open Findings"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:239
+msgid "No."
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:240
+#: dojo/templates/dojo/simple_search.html:162
+msgid "Name"
+msgstr ""
+
+#: dojo/templates/dojo/pt_counts.html:243
+msgid "Age"
+msgstr ""
+
+#: dojo/templates/dojo/simple_metrics.html:11
+msgid "Generate Metrics For Selected Month/Year"
+msgstr ""
+
+#: dojo/templates/dojo/simple_metrics.html:29
+msgid "Opened This Month"
+msgstr ""
+
+#: dojo/templates/dojo/simple_metrics.html:30
+msgid "Closed This Month"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:9
 msgid ""
-"Your password must contain at least 1 symbol: ()[]{}|\\`~!@#$%^&*_-+=;:'\","
-"<>./?"
+"This simple search function will return results whose findings or finding "
+"templates\n"
+"                                     title, URL, description, endpoints, "
+"tags, references, languages or technologies contain the search query and "
+"products whose\n"
+"                                     name, tags or description contain the "
+"search query.</br> Advanced search operators: (Restrict results to a certain "
+"type) product:,\n"
+"                                     engagement:, finding:, endpoint:, tag:, "
+"language:, technology: or vulnerability_id:.\n"
+"                                     test-tags shows findings in tests that "
+"are tagged with provided tag, similar for engagement-tags and product-tags.\n"
+"                                     After submitting the search query, "
+"tabbed results will be displayed. The findings tab will have the possibility "
+"to\n"
+"                                     to perform more finegrained filtering "
+"on status fields, test type, etc."
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:49
+msgid "Vulnerability Ids"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:64
+msgid "Tests"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:79
+#: dojo/templates/dojo/view_product_details.html:519
+msgid "Languages"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:84
+msgid "Application Technolgies"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:117
+#: dojo/templates/dojo/simple_search.html:225
+#: dojo/templates/dojo/simple_search.html:428
+msgid "Engagement"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:119
+#: dojo/templates/dojo/simple_search.html:393
+msgid "Finding"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:189
+#: dojo/templates/dojo/simple_search.html:375
+#: dojo/templates/dojo/simple_search.html:446
+msgid "Type"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:262
+#: dojo/templates/dojo/simple_search.html:419
+msgid "Endpoint"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:271
+msgid "Endpoint is broken. Check documentation for look for fix process"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:286
+msgid "No Open, Active Findings"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:325
+msgid "Language"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:350
+msgid "Technology"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:376
+msgid "Item"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:401
+msgid "Finding Template"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:445
+msgid "ID"
+msgstr ""
+
+#: dojo/templates/dojo/simple_search.html:452
+msgid "Rank"
+msgstr ""
+
+#: dojo/templates/dojo/tool_type.html:13
+msgid "Tool Types"
+msgstr ""
+
+#: dojo/templates/dojo/tool_type.html:25
+msgid "Add Tool Type"
+msgstr ""
+
+#: dojo/templates/dojo/tool_type.html:70
+msgid "No tool types found"
+msgstr ""
+
+#: dojo/templates/dojo/view_note_history.html:5
+msgid "Note History"
+msgstr ""
+
+#: dojo/templates/dojo/view_note_history.html:14
+#, python-format
+msgid "commented %(time)s"
+msgstr ""
+
+#: dojo/templates/dojo/view_note_history.html:16
+#, python-format
+msgid "made changes on %(time)s"
+msgstr ""
+
+#: dojo/templates/dojo/view_note_history.html:22
+msgid "Note type:"
+msgstr ""
+
+#: dojo/templates/dojo/view_note_history.html:31
+msgid "Return"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:77
+msgid "Product Report"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:128
+msgid "CRITICAL"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:129
+msgid "HIGH"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:130
+msgid "MEDIUM"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:131
+msgid "LOW"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:132
+msgid "INFORMATIONAL"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:133
+msgid "TOTAL"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:145
+msgid "Technologies"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:147
+msgid "Add new Technology"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:185
+msgid "There are no technologies."
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:199
+msgid "There are no regulations."
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:213
+msgid "Benchmark Progress"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:223
+#: dojo/templates/dojo/view_product_details.html:229
+msgid "Complete"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:234
+msgid "There are no benchmarks"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:245
+#: dojo/templates/dojo/view_product_type.html:132
+msgid "Members"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:259
+#: dojo/templates/dojo/view_product_type.html:146
+msgid "Add Users"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:273
+#: dojo/templates/dojo/view_product_type.html:160
+msgid "User"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:274
+#: dojo/templates/dojo/view_product_details.html:362
+msgid "Source"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:275
+#: dojo/templates/dojo/view_product_details.html:363
+#: dojo/templates/dojo/view_product_type.html:161
+#: dojo/templates/dojo/view_product_type.html:234
+msgid "Role"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:303
+msgid "Product member"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:325
+#: dojo/templates/dojo/view_product_type.html:197
+msgid "No members found."
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:347
+#: dojo/templates/dojo/view_product_type.html:219
+msgid "Add Groups"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:361
+#: dojo/templates/dojo/view_product_type.html:233
+msgid "Group"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:391
+msgid "Product Group"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:412
+#: dojo/templates/dojo/view_product_type.html:270
+msgid "No groups found."
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:422
+#: dojo/templates/dojo/view_product_type.html:86
+msgid "Metadata"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:428
+msgid "Business Criticality"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:432
+msgid "Product Type"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:436
+msgid "Platform"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:440
+msgid "Lifecycle"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:444
+msgid "Origin"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:448
+msgid "User Records"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:458
+msgid "Revenue"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:526
+msgid "files"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:526
+msgid "and"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:529
+msgid "lines of code"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:544
+msgid "Custom Fields"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:564
+msgid "Contacts"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:570
+msgid "Team Manager"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:574
+msgid "Product Manager"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:578
+msgid "Technical Contact"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:591
+msgid "These are your personal settings for this product."
+msgstr ""
+
+#: dojo/templates/dojo/view_product_details.html:679
+msgid "saving..."
+msgstr ""
+
+#: dojo/templates/dojo/view_product_type.html:84
+msgid "Tags"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_type.html:85
+msgid "Criticality"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_type.html:87
+msgid "Active (Verified) Findings"
+msgstr ""
+
+#: dojo/templates/dojo/view_product_type.html:125
+msgid "No products found."
+msgstr ""
+
+#: dojo/templates/dojo/view_product_type.html:212
+msgid "Add Product Type Group"
+msgstr ""
+
+#: dojo/test/views.py:103
+msgid "Note added successfully."
+msgstr ""
+
+#: dojo/test/views.py:153
+msgid ""
+"There is a problem with the Google Sheets Sync Configuration. Contact your "
+"system admin to solve the issue. Until fixed, the Google Sheets Sync feature "
+"cannot be used."
+msgstr ""
+
+#: dojo/test/views.py:161
+msgid "Unable to reach the Google Sheet API."
+msgstr ""
+
+#: dojo/test/views.py:249
+msgid "Test saved."
+msgstr ""
+
+#: dojo/test/views.py:257
+msgid "Edit Test"
+msgstr ""
+
+#: dojo/test/views.py:280
+msgid "Test and relationships will be removed in the background."
+msgstr ""
+
+#: dojo/test/views.py:282
+msgid "Test and relationships removed."
+msgstr ""
+
+#: dojo/test/views.py:289
+#, python-format
+msgid "Deletion of %(title)s"
+msgstr ""
+
+#: dojo/test/views.py:291
+#, python-format
+msgid "The test \"%(title)s\" was deleted by %(user)s"
+msgstr ""
+
+#: dojo/test/views.py:304
+msgid "Delete Test"
+msgstr ""
+
+#: dojo/test/views.py:379
+msgid "Test Calendar"
+msgstr ""
+
+#: dojo/test/views.py:395
+#, python-format
+msgid "Test: %(test_type_name)s (%(product_name)s)"
+msgstr ""
+
+#: dojo/test/views.py:399
+#, python-format
+msgid ""
+"Set aside for test %(test_type_name)s, on product %(product_name)s. "
+"Additional detail can be found at %(detail_url)s"
+msgstr ""
+
+#: dojo/test/views.py:494
+#, python-format
+msgid "Addition of %(title)s"
+msgstr ""
+
+#: dojo/test/views.py:496
+#, python-format
+msgid "Finding \"%(title)s\" was added by %(user)s"
+msgstr ""
+
+#: dojo/test/views.py:598
+msgid "Finding from template added successfully."
+msgstr ""
+
+#: dojo/test/views.py:656
+msgid "Add From Template"
+msgstr ""
+
+#: dojo/test/views.py:668
+msgid ""
+"When re-uploading a scan, any findings not found in original scan will be "
+"updated as mitigated.  The process attempts to identify the differences, "
+"however manual verification is highly recommended."
+msgstr ""
+
+#: dojo/test/views.py:735
+#, python-format
+msgid "Report file is too large. Maximum supported size is %(size)d MB"
+msgstr ""
+
+#: dojo/test/views.py:767
+#, python-format
+msgid "Re-upload a %(scan_type)s"
+msgstr ""
+
+#: dojo/tool_product/views.py:33
+msgid "Product Tool Configuration Successfully Created."
+msgstr ""
+
+#: dojo/tool_product/views.py:39 dojo/tool_product/views.py:51
+msgid "Tool Configurations"
+msgstr ""
+
+#: dojo/tool_product/views.py:73
+msgid "Tool Product Configuration Successfully Updated."
+msgstr ""
+
+#: dojo/tool_product/views.py:79
+msgid "Edit Product Tool Configuration"
+msgstr ""
+
+#: dojo/tool_product/views.py:99
+msgid "Tool Product Successfully Deleted."
+msgstr ""
+
+#: dojo/tool_product/views.py:105
+msgid "Delete Product Tool Configuration"
+msgstr ""
+
+#: dojo/tool_type/views.py:26
+msgid "Tool Type Configuration Successfully Created."
+msgstr ""
+
+#: dojo/tool_type/views.py:31
+msgid "New Tool Type Configuration"
+msgstr ""
+
+#: dojo/tool_type/views.py:45
+msgid "Tool Type successfully updated."
+msgstr ""
+
+#: dojo/tool_type/views.py:51
+msgid "Edit Tool Type"
+msgstr ""
+
+#: dojo/tool_type/views.py:59
+msgid "Tool Type List"
+msgstr ""
+
+#: dojo/user/validators.py:14 dojo/user/validators.py:21
+#, python-brace-format
+msgid "Password must be at least {minimum_length} characters long."
+msgstr ""
+
+#: dojo/user/validators.py:31 dojo/user/validators.py:38
+#, python-brace-format
+msgid "Password must be less than {maximum_length} characters long."
+msgstr ""
+
+#: dojo/user/validators.py:48 dojo/user/validators.py:54
+msgid "Password must contain at least 1 digit, 0-9."
+msgstr ""
+
+#: dojo/user/validators.py:63 dojo/user/validators.py:69
+msgid "Password must contain at least 1 uppercase letter, A-Z."
+msgstr ""
+
+#: dojo/user/validators.py:78 dojo/user/validators.py:84
+msgid "Password must contain at least 1 lowercase letter, a-z."
+msgstr ""
+
+#: dojo/user/validators.py:94 dojo/user/validators.py:101
+msgid ""
+"The password must contain at least 1 special character, ()[]{}|\\`~!@#$%^&*_-"
+"+=;:'\",<>./?."
+msgstr ""
+
+#: dojo/user/views.py:61
+msgid ""
+"Hello {name}! Your last login was {naturaltime(last_login)} ({last_login."
+"strftime(\"%Y-%m-%d %I:%M:%S %p\")})"
+msgstr ""
+
+#: dojo/user/views.py:85
+msgid "API Key generated successfully."
+msgstr ""
+
+#: dojo/user/views.py:156
+msgid "You have logged out successfully."
+msgstr ""
+
+#: dojo/user/views.py:190
+msgid "Alerts removed."
+msgstr ""
+
+#: dojo/user/views.py:250
+msgid "Only superusers are allowed to change their global role."
+msgstr ""
+
+#: dojo/user/views.py:257
+msgid "Profile updated successfully."
+msgstr ""
+
+#: dojo/user/views.py:259
+#, python-format
+msgid "User Profile - %(user_full_name)s"
+msgstr ""
+
+#: dojo/user/views.py:287
+msgid "Your password has been changed."
+msgstr ""
+
+#: dojo/user/views.py:291
+msgid "Change Password"
+msgstr ""
+
+#: dojo/user/views.py:304
+msgid "All Users"
+msgstr ""
+
+#: dojo/user/views.py:351
+msgid "User added successfully."
+msgstr ""
+
+#: dojo/user/views.py:357
+msgid "User was not added successfully."
+msgstr ""
+
+#: dojo/user/views.py:359
+msgid "Add User"
+msgstr ""
+
+#: dojo/user/views.py:376
+msgid "View User"
+msgstr ""
+
+#: dojo/user/views.py:418
+msgid "Only superusers are allowed to edit superusers. User was not saved."
+msgstr ""
+
+#: dojo/user/views.py:423
+msgid ""
+"Only superusers are allowed to edit users with a global role. User was not "
+"saved."
+msgstr ""
+
+#: dojo/user/views.py:435
+msgid "User saved successfully."
+msgstr ""
+
+#: dojo/user/views.py:440
+msgid "User was not saved successfully."
+msgstr ""
+
+#: dojo/user/views.py:442
+msgid "Edit User"
+msgstr ""
+
+#: dojo/user/views.py:459
+msgid "You may not delete yourself."
+msgstr ""
+
+#: dojo/user/views.py:470
+msgid "Only superusers are allowed to delete superusers. User was not removed."
+msgstr ""
+
+#: dojo/user/views.py:475
+msgid ""
+"Only superusers are allowed to delete users with a global role. User was not "
+"removed."
+msgstr ""
+
+#: dojo/user/views.py:482
+msgid "User and relationships removed."
+msgstr ""
+
+#: dojo/user/views.py:495
+msgid "Delete User"
+msgstr ""
+
+#: dojo/user/views.py:578
+msgid "Groups added successfully."
+msgstr ""
+
+#: dojo/user/views.py:582
+msgid "Add Group Member"
+msgstr ""
+
+#: dojo/user/views.py:598
+msgid "Permissions updated."
 msgstr ""
