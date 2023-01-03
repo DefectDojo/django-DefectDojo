@@ -81,6 +81,7 @@ Core Moderators can help you with pull requests or feedback on dev ideas:
 Moderators can help you with pull requests or feedback on dev ideas:
 * Damien Carol ([@damnielcarol](https://github.com/damiencarol) | [linkedin](https://www.linkedin.com/in/damien-carol/))
 * Jannik Jürgens ([@alles-klar](https://github.com/alles-klar))
+* Dubravko Sever ([@dsever](https://github.com/dsever))
 
 
 ## Hall of Fame
