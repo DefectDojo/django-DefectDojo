@@ -61,6 +61,29 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.18.x
+
+**Upgrade instructions for helm chart with rabbitMQ enabled**: The rabbitMQ uses a statefulset by default. Before upgrading the helm chart we have to ensure that all queues are empty:
+
+```bash
+kubectl exec -i <name_of_the_rabbitmq_pod>  -- rabbitmqctl list_queues
+```
+
+Next step is to delete rabbitMQ pvc:
+
+```bash
+kubectl delete  pvc -l app.kubernetes.io/name=rabbitmq
+```
+
+Last step is to perform the upgrade.
+
+For more information: https://artifacthub.io/packages/helm/bitnami/rabbitmq/11.2.0
+
+
+
+## Upgrading to DefectDojo Version 2.17.x.
+
+There are no special instruction for upgrading to 2.17.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.17.0) for the contents of the release.
 
 ## Upgrading to DefectDojo Version 2.16.x.
 

@@ -7874,7 +7874,7 @@
       "test_name": "blacklist"
     },
     {
-      "code": "144     def get_option_form(self):\n145         return mark_safe(\n146             \"<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click \"\n147             \"and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>\" +\n148             self.get_html() + \"</h5><span class='fa fa-arrows pull-right icon'></span></div></div>\"\n149                               \"<form id='page-break'><input type='hidden' name='page-break'/></form></div>\")\n",
+      "code": "144     def get_option_form(self):\n145         return mark_safe(\n146             \"<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click \"\n147             \"and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>\" +\n148             self.get_html() + \"</h5><span class='fa-solid fa-up-down-left-right pull-right icon'></span></div></div>\"\n149                               \"<form id='page-break'><input type='hidden' name='page-break'/></form></div>\")\n",
       "filename": "dojo/reports/widgets.py",
       "issue_confidence": "HIGH",
       "issue_severity": "MEDIUM",
@@ -7891,7 +7891,7 @@
       "test_name": "django_mark_safe"
     },
     {
-      "code": "144     def get_option_form(self):\n145         return mark_safe(\n146             \"<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click \"\n147             \"and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>\" +\n148             self.get_html() + \"</h5><span class='fa fa-arrows pull-right icon'></span></div></div>\"\n149                               \"<form id='page-break'><input type='hidden' name='page-break'/></form></div>\")\n",
+      "code": "144     def get_option_form(self):\n145         return mark_safe(\n146             \"<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click \"\n147             \"and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>\" +\n148             self.get_html() + \"</h5><span class='fa-solid fa-up-down-left-right pull-right icon'></span></div></div>\"\n149                               \"<form id='page-break'><input type='hidden' name='page-break'/></form></div>\")\n",
       "filename": "dojo/reports/widgets.py",
       "issue_confidence": "HIGH",
       "issue_severity": "MEDIUM",

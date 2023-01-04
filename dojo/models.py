@@ -395,6 +395,24 @@ class System_Settings(models.Model):
         verbose_name=_("Enable Finding SLA's"),
         help_text=_("Enables Finding SLA's for time to remediate."))
 
+    enable_notify_sla_active = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Notifiy SLA's Breach for active Findings"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for active Findings."))
+
+    enable_notify_sla_active_verified = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Notifiy SLA's Breach for active, verified Findings"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for active, verified Findings."))
+
+    enable_notify_sla_jira_only = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Notifiy SLA's Breach for Findings linked to JIRA"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for Findings that are linked to JIRA issues."))
+
     allow_anonymous_survey_repsonse = models.BooleanField(
         default=False,
         blank=False,
@@ -478,6 +496,34 @@ class System_Settings(models.Model):
         default='',
         blank=True,
         help_text=_("New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition."))
+    minimum_password_length = models.IntegerField(
+        default=9,
+        verbose_name=_('Minimum password length'),
+        help_text=_("Requires user to set passwords greater than minimum length."))
+    maximum_password_length = models.IntegerField(
+        default=48,
+        verbose_name=_('Maximum password length'),
+        help_text=_("Requires user to set passwords less than maximum length."))
+    number_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one digit"),
+        help_text=_("Requires user passwords to contain at least one digit (0-9)."))
+    special_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one special character"),
+        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)."))  # noqa W605
+    lowercase_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one lowercase letter"),
+        help_text=_("Requires user passwords to contain at least one lowercase letter (a-z)."))
+    uppercase_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one uppercase letter"),
+        help_text=_("Requires user passwords to contain at least one uppercase letter (A-Z)."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -1358,9 +1404,9 @@ class Endpoint_Status(models.Model):
     def age(self):
 
         if self.mitigated:
-            diff = self.mitigated_time.date() - self.date.date()
+            diff = self.mitigated_time.date() - self.date
         else:
-            diff = get_current_date() - self.date.date()
+            diff = get_current_date() - self.date
         days = diff.days
         return days if days > 0 else 0
 
@@ -1616,7 +1662,8 @@ class Endpoint(models.Model):
                           Q(finding__out_of_scope=True) |
                           Q(finding__mitigated__isnull=False) |
                           Q(finding__false_p=True) |
-                          Q(finding__duplicate=True))
+                          Q(finding__duplicate=True) |
+                          Q(finding__active=False))
         return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
     @property
@@ -2815,14 +2862,16 @@ class Finding(models.Model):
             return escape(self.file_path)
         link = self.test.engagement.source_code_management_uri
         if "https://github.com/" in self.test.engagement.source_code_management_uri:
-            if self.test.commit_hash is not None:
+            if self.test.commit_hash:
                 link += '/blob/' + self.test.commit_hash + '/' + self.file_path
-            elif self.test.engagement.commit_hash is not None:
+            elif self.test.engagement.commit_hash:
                 link += '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
-            elif self.test.branch_tag is not None:
+            elif self.test.branch_tag:
                 link += '/blob/' + self.test.branch_tag + '/' + self.file_path
-            elif self.test.engagement.branch_tag is not None:
+            elif self.test.engagement.branch_tag:
                 link += '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
+            else:
+                link += '/' + self.file_path
         else:
             link += '/' + self.file_path
         if self.line:
@@ -3420,6 +3469,8 @@ class JIRA_Project(models.Model):
     component = models.CharField(max_length=200, blank=True)
     custom_fields = models.JSONField(max_length=200, blank=True, null=True,
                                    help_text=_("JIRA custom field JSON mapping of Id to value, e.g. {\"customfield_10122\": [{\"name\": \"8.0.1\"}]}"))
+    default_assignee = models.CharField(max_length=200, blank=True, null=True,
+                                     help_text=_("JIRA default assignee (name). If left blank then it defaults to whatever is configured in JIRA."))
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
                                    help_text=_('JIRA issue labels space seperated'))
     add_vulnerability_id_to_jira_label = models.BooleanField(default=False,

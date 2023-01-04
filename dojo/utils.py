@@ -1538,10 +1538,10 @@ class Product_Tab():
                                                           out_of_scope=False,
                                                           active=True,
                                                           mitigated__isnull=True).count()
-        self.endpoints_count = Endpoint.objects.filter(
-            product=self.product).count()
-        self.endpoint_hosts_count = Endpoint.objects.filter(
-            product=self.product).values('host').distinct().count()
+        active_endpoints = Endpoint.objects.filter(
+            product=self.product, finding__active=True, finding__mitigated__isnull=True)
+        self.endpoints_count = active_endpoints.distinct().count()
+        self.endpoint_hosts_count = active_endpoints.values('host').distinct().count()
         self.benchmark_type = Benchmark_Type.objects.filter(
             enabled=True).order_by('name')
         self.engagement = None
@@ -1806,33 +1806,33 @@ def sla_compute_and_notify(*args, **kwargs):
             jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
 
     # exit early on flags
-    if not settings.SLA_NOTIFY_ACTIVE and not settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
+    system_settings = System_Settings.objects.get()
+    if not system_settings.enable_notify_sla_active and not system_settings.enable_notify_sla_active_verified:
         logger.info("Will not notify on SLA breach per user configured settings")
         return
 
     jira_issue = None
     jira_instance = None
     try:
-        system_settings = System_Settings.objects.get()
         if system_settings.enable_finding_sla:
             logger.info("About to process findings for SLA notifications.")
             logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}, post-breach {}".format(
-                settings.SLA_NOTIFY_ACTIVE,
-                settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY,
-                settings.SLA_NOTIFY_WITH_JIRA_ONLY,
+                system_settings.enable_notify_sla_active,
+                system_settings.enable_notify_sla_active_verified,
+                system_settings.enable_notify_sla_jira_only,
                 settings.SLA_NOTIFY_PRE_BREACH,
                 settings.SLA_NOTIFY_POST_BREACH,
             ))
 
             query = None
-            if settings.SLA_NOTIFY_ACTIVE:
+            if system_settings.enable_notify_sla_active:
                 query = Q(active=True, is_mitigated=False, duplicate=False)
-            if settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
+            if system_settings.enable_notify_sla_active_verified:
                 query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
             logger.debug("My query: {}".format(query))
 
             no_jira_findings = {}
-            if settings.SLA_NOTIFY_WITH_JIRA_ONLY:
+            if system_settings.enable_notify_sla_jira_only:
                 logger.debug("Ignoring findings that are not linked to a JIRA issue")
                 no_jira_findings = Finding.objects.exclude(jira_issue__isnull=False)
 
@@ -2274,3 +2274,25 @@ def log_user_login_failed(sender, credentials, request, **kwargs):
         logger.error('login failed because of missing username via ip: {ip}'.format(
             ip=request.META['REMOTE_ADDR']
         ))
+
+
+def get_password_requirements_string():
+    s = 'Password must contain {minimum_length} to {maximum_length} characters'.format(
+        minimum_length=int(get_system_setting('minimum_password_length')),
+        maximum_length=int(get_system_setting('maximum_password_length')))
+
+    if bool(get_system_setting('lowercase_character_required')):
+        s += ', one lowercase letter (a-z)'
+    if bool(get_system_setting('uppercase_character_required')):
+        s += ', one uppercase letter (A-Z)'
+    if bool(get_system_setting('number_character_required')):
+        s += ', one number (0-9)'
+    if bool(get_system_setting('special_character_required')):
+        s += ', one special chacter (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)'  # noqa W605
+
+    if s.count(', ') == 1:
+        password_requirements_string = s.rsplit(', ', 1)[0] + ' and ' + s.rsplit(', ', 1)[1]
+    elif s.count(', ') > 1:
+        password_requirements_string = s.rsplit(', ', 1)[0] + ', and ' + s.rsplit(', ', 1)[1]
+
+    return password_requirements_string + '.'

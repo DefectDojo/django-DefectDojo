@@ -19,7 +19,7 @@
             "remediation_advice": "Properly do JWT",
             "severity": 5,
             "source": "external_form",
-            "state": "informational",
+            "state": "unresolved",
             "submitted_at": "2002-04-01T21:59:56.546Z",
             "title": "JWT Alg none",
             "vrt_id": "broken_authentication_and_session_management.authentication_bypass",
