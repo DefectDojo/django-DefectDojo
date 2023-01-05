@@ -1246,12 +1246,13 @@ In Tool Configuration, select Tool Type to "Edgescan" and Authentication Type "A
 Paste your Edgescan API key in the "API Key" field.
 
 In "Add API Scan Configuration" and select the
-    previously added Edgescan Tool Configuration. Provide the ID
-    of the asset from which to import findings in the field *Service key 1*.
-3.  After this is done, you can import the findings by selecting 
-    "Edgescan Scan" as the scan type. If you have more than one asset 
-    configured, you must also select which Edgescan API Scan Configuration to 
-    use.
+previously added Edgescan Tool Configuration. Provide the ID
+of the asset from which to import findings in the field *Service key 1*.
+
+After this is done, you can import the findings by selecting
+"Edgescan Scan" as the scan type. If you have more than one asset
+configured, you must also select which Edgescan API Scan Configuration to
+use.
 
 #### SonarQube API Import
 
@@ -1275,7 +1276,7 @@ In "Add API Scan Configuration"
     use the name of the Product as the project key in SonarQube. If you would like to
     import findings from multiple projects, you can specify multiple keys as
     separated API Scan Configuration in the Product settings.
--   If using SonarCloud, the orginization ID can be used from step 1, but it 
+-   If using SonarCloud, the orginization ID can be used from step 1, but it
     can be ovverirdden by supplying a different orginization ID in the *Service key 2* input field.
 
 ###### Multiple SonarQube API Configurations
@@ -1285,13 +1286,13 @@ Configuration shall be used. If you do not choose
 any, DefectDojo will use the API Scan Configuration of the Product if there is
 only one defined or the SonarQube Tool Configuration if there is only one.
 
-###### Multi Branch Scanning 
+###### Multi Branch Scanning
 
-If using a version of SonarQube with multi branch scanning, the branch tha be scanned can 
+If using a version of SonarQube with multi branch scanning, the branch tha be scanned can
 be supplied in the `branch tag` fieild at import/re-import time. If the branch does not exist,
-a notification will be generated in the alerts table indicating that branch to be imported 
-does not exist. If a branch name is not supplied during import/re-import, the default branch 
-of the SonarQube project will be used. 
+a notification will be generated in the alerts table indicating that branch to be imported
+does not exist. If a branch name is not supplied during import/re-import, the default branch
+of the SonarQube project will be used.
 
 **Note:**: If `https` is used for the SonarQube, the certificate must be
 trusted by the DefectDojo instance.
@@ -1311,4 +1312,3 @@ Detailed installation steps can be found in [vulners documentation](https://vuln
 Use following [instructions](https://vulners.com/docs/apikey/) to generate Vulners API Key.
 
 More details about DefectDojo-plugin integration can be found at [vulners integrations page](https://vulners.com/plugins).
-
