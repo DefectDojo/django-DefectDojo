@@ -873,6 +873,11 @@ msgid "Very Low"
 msgstr ""
 
 #: dojo/models.py:912 dojo/templates/dojo/simple_search.html:280
+#: dojo/templates/notifications/mail/risk_acceptance_expiration.tpl:38
+#: dojo/templates/notifications/mail/scan_added.tpl:24
+#: dojo/templates/notifications/mail/scan_added.tpl:33
+#: dojo/templates/notifications/mail/scan_added.tpl:42
+#: dojo/templates/notifications/mail/scan_added.tpl:51
 msgid "None"
 msgstr ""
 
@@ -1060,6 +1065,7 @@ msgstr ""
 
 #: dojo/models.py:1461 dojo/templates/base.html:299
 #: dojo/templates/base.html:684 dojo/templates/dojo/simple_search.html:44
+#: dojo/templates/notifications/mail/risk_acceptance_expiration.tpl:32
 msgid "Findings"
 msgstr ""
 
@@ -1106,6 +1112,7 @@ msgstr ""
 #: dojo/models.py:1991 dojo/templates/dojo/simple_search.html:223
 #: dojo/templates/dojo/simple_search.html:300
 #: dojo/templates/dojo/simple_search.html:449
+#: dojo/templates/notifications/mail/sla_breach.tpl:29
 msgid "Title"
 msgstr ""
 
@@ -1183,6 +1190,8 @@ msgstr ""
 #: dojo/models.py:2028 dojo/templates/dojo/metrics.html:338
 #: dojo/templates/dojo/pt_counts.html:242
 #: dojo/templates/dojo/simple_search.html:448
+#: dojo/templates/notifications/mail/sla_breach.tpl:31
+#: dojo/templates/notifications/msteams/sla_breach.tpl:27
 msgid "Severity"
 msgstr ""
 
@@ -1260,7 +1269,9 @@ msgid "The external documentation available for this flaw."
 msgstr ""
 
 #: dojo/models.py:2061 dojo/templates/dojo/simple_search.html:118
-#: dojo/templates/dojo/simple_search.html:383 dojo/test/views.py:125
+#: dojo/templates/dojo/simple_search.html:383
+#: dojo/templates/notifications/msteams/test_added.tpl:23
+#: dojo/test/views.py:125
 msgid "Test"
 msgstr ""
 
@@ -2184,6 +2195,13 @@ msgstr ""
 #: dojo/templates/dojo/simple_search.html:351
 #: dojo/templates/dojo/simple_search.html:410
 #: dojo/templates/dojo/simple_search.html:447
+#: dojo/templates/notifications/msteams/engagement_added.tpl:14
+#: dojo/templates/notifications/msteams/product_added.tpl:14
+#: dojo/templates/notifications/msteams/risk_acceptance_expiration.tpl:24
+#: dojo/templates/notifications/msteams/scan_added.tpl:15
+#: dojo/templates/notifications/msteams/sla_breach.tpl:15
+#: dojo/templates/notifications/msteams/test_added.tpl:15
+#: dojo/templates/notifications/msteams/upcoming_engagement.tpl:15
 msgid "Product"
 msgstr ""
 
@@ -2464,6 +2482,7 @@ msgid "Product type added successfully."
 msgstr ""
 
 #: dojo/product_type/views.py:104
+#: dojo/templates/notifications/msteams/product_type_added.tpl:29
 msgid "View Product Type"
 msgstr ""
 
@@ -3299,6 +3318,8 @@ msgid "These template <u>template</u>"
 msgstr ""
 
 #: dojo/templates/dojo/notifications.html:50
+#: dojo/templates/notifications/msteams/other.tpl:5
+#: dojo/templates/notifications/msteams/other.tpl:6
 msgid "Event"
 msgstr ""
 
@@ -3416,6 +3437,9 @@ msgid "Key product"
 msgstr ""
 
 #: dojo/templates/dojo/product_type.html:68
+#: dojo/templates/notifications/msteams/other.tpl:23
+#: dojo/templates/notifications/msteams/sla_breach.tpl:46
+#: dojo/templates/notifications/msteams/user_mentioned.tpl:37
 msgid "View"
 msgstr ""
 
@@ -3555,11 +3579,18 @@ msgstr ""
 #: dojo/templates/dojo/simple_search.html:117
 #: dojo/templates/dojo/simple_search.html:225
 #: dojo/templates/dojo/simple_search.html:428
+#: dojo/templates/notifications/msteams/engagement_added.tpl:18
+#: dojo/templates/notifications/msteams/risk_acceptance_expiration.tpl:28
+#: dojo/templates/notifications/msteams/scan_added.tpl:19
+#: dojo/templates/notifications/msteams/sla_breach.tpl:19
+#: dojo/templates/notifications/msteams/test_added.tpl:19
+#: dojo/templates/notifications/msteams/upcoming_engagement.tpl:19
 msgid "Engagement"
 msgstr ""
 
 #: dojo/templates/dojo/simple_search.html:119
 #: dojo/templates/dojo/simple_search.html:393
+#: dojo/templates/notifications/msteams/sla_breach.tpl:23
 msgid "Finding"
 msgstr ""
 
@@ -3709,6 +3740,7 @@ msgstr ""
 
 #: dojo/templates/dojo/view_product_details.html:273
 #: dojo/templates/dojo/view_product_type.html:160
+#: dojo/templates/notifications/msteams/user_mentioned.tpl:14
 msgid "User"
 msgstr ""
 
@@ -3762,6 +3794,7 @@ msgid "Business Criticality"
 msgstr ""
 
 #: dojo/templates/dojo/view_product_details.html:432
+#: dojo/templates/notifications/msteams/product_type_added.tpl:14
 msgid "Product Type"
 msgstr ""
 
@@ -3843,6 +3876,480 @@ msgstr ""
 
 #: dojo/templates/dojo/view_product_type.html:212
 msgid "Add Product Type Group"
+msgstr ""
+
+#: dojo/templates/notifications/alert/engagement_added.tpl:1
+#, python-format
+msgid ""
+"The engagement \"%(engagement.name)s\" has been created in the product "
+"\"%(engagement.product)s\"."
+msgstr ""
+
+#: dojo/templates/notifications/alert/product_added.tpl:1
+#, python-format
+msgid "The new product \"%(title)s\" has been added"
+msgstr ""
+
+#: dojo/templates/notifications/alert/product_type_added.tpl:1
+#, python-format
+msgid "The new product type \"%(title)s\" has been added"
+msgstr ""
+
+#: dojo/templates/notifications/alert/report_created.tpl:1
+#, python-format
+msgid "Your report \"%(report.name)s\" is ready."
+msgstr ""
+
+#: dojo/templates/notifications/alert/sla_breach.tpl:1
+#, python-format
+msgid ""
+"SLA breach alert for finding %(finding.id)s. Relative days count to SLA due "
+"date: %(sla_age)s."
+msgstr ""
+
+#: dojo/templates/notifications/alert/test_added.tpl:1
+#, python-format
+msgid ""
+"New test added for engagement %(engagement.product)s: %(test.test_type)s."
+msgstr ""
+
+#: dojo/templates/notifications/alert/upcoming_engagement.tpl:1
+#: dojo/templates/notifications/slack/upcoming_engagement.tpl:1
+#, python-format
+msgid ""
+"The engagement \"%(engagement.product)s\" is starting on "
+"%(engagement.target_start)s."
+msgstr ""
+
+#: dojo/templates/notifications/alert/user_mentioned.tpl:1
+#, python-format
+msgid "User %(user)s jotted a note on %(section)s"
+msgstr ""
+
+#: dojo/templates/notifications/mail/engagement_added.tpl:10
+#: dojo/templates/notifications/mail/other.tpl:8
+#: dojo/templates/notifications/mail/product_added.tpl:8
+#: dojo/templates/notifications/mail/product_type_added.tpl:8
+#: dojo/templates/notifications/mail/risk_acceptance_expiration.tpl:11
+#: dojo/templates/notifications/mail/scan_added.tpl:11
+#: dojo/templates/notifications/mail/sla_breach.tpl:9
+#: dojo/templates/notifications/mail/test_added.tpl:11
+#: dojo/templates/notifications/mail/upcoming_engagement.tpl:8
+#: dojo/templates/notifications/mail/user_mentioned.tpl:8
+msgid "Hello"
+msgstr ""
+
+#: dojo/templates/notifications/mail/engagement_added.tpl:13
+#, python-format
+msgid ""
+"The engagement \"%(engagement.name)s\" has been created in the product "
+"\"%(engagement.product)s\". It can be viewed here: <a href="
+"\"%(product_url|full_url)s\">%(product)s</a> / <a href="
+"\"%(engagement_url|full_url)s\">%(engagement.name)s</a>"
+msgstr ""
+
+#: dojo/templates/notifications/mail/engagement_added.tpl:19
+#: dojo/templates/notifications/mail/other.tpl:22
+#: dojo/templates/notifications/mail/product_added.tpl:17
+#: dojo/templates/notifications/mail/product_type_added.tpl:17
+#: dojo/templates/notifications/mail/report_created.tpl:15
+#: dojo/templates/notifications/mail/risk_acceptance_expiration.tpl:42
+#: dojo/templates/notifications/mail/scan_added.tpl:55
+#: dojo/templates/notifications/mail/sla_breach.tpl:36
+#: dojo/templates/notifications/mail/test_added.tpl:20
+#: dojo/templates/notifications/mail/upcoming_engagement.tpl:19
+#: dojo/templates/notifications/mail/user_mentioned.tpl:22
+msgid "Kind regards"
+msgstr ""
+
+#: dojo/templates/notifications/mail/engagement_added.tpl:30
+#: dojo/templates/notifications/mail/other.tpl:32
+#: dojo/templates/notifications/mail/product_added.tpl:29
+#: dojo/templates/notifications/mail/product_type_added.tpl:29
+#: dojo/templates/notifications/mail/report_created.tpl:25
+#: dojo/templates/notifications/mail/risk_acceptance_expiration.tpl:53
+#: dojo/templates/notifications/mail/scan_added.tpl:65
+#: dojo/templates/notifications/mail/sla_breach.tpl:46
+#: dojo/templates/notifications/mail/test_added.tpl:31
+#: dojo/templates/notifications/mail/upcoming_engagement.tpl:29
+#: dojo/templates/notifications/mail/user_mentioned.tpl:32
+msgid "You can manage your notification settings here"
+msgstr ""
+
+#: dojo/templates/notifications/mail/engagement_added.tpl:35
+#: dojo/templates/notifications/mail/other.tpl:37
+#: dojo/templates/notifications/mail/product_added.tpl:34
+#: dojo/templates/notifications/mail/product_type_added.tpl:34
+#: dojo/templates/notifications/mail/report_created.tpl:31
+#: dojo/templates/notifications/mail/risk_acceptance_expiration.tpl:58
+#: dojo/templates/notifications/mail/scan_added.tpl:70
+#: dojo/templates/notifications/mail/sla_breach.tpl:51
+#: dojo/templates/notifications/mail/test_added.tpl:36
+#: dojo/templates/notifications/mail/upcoming_engagement.tpl:34
+#: dojo/templates/notifications/mail/user_mentioned.tpl:37
+#: dojo/templates/notifications/msteams/engagement_added.tpl:25
+#: dojo/templates/notifications/msteams/other.tpl:15
+#: dojo/templates/notifications/msteams/product_added.tpl:21
+#: dojo/templates/notifications/msteams/product_type_added.tpl:21
+#: dojo/templates/notifications/msteams/report_created.tpl:21
+#: dojo/templates/notifications/msteams/risk_acceptance_expiration.tpl:39
+#: dojo/templates/notifications/msteams/scan_added.tpl:30
+#: dojo/templates/notifications/msteams/sla_breach.tpl:38
+#: dojo/templates/notifications/msteams/test_added.tpl:30
+#: dojo/templates/notifications/msteams/upcoming_engagement.tpl:34
+#: dojo/templates/notifications/msteams/user_mentioned.tpl:29
+#: dojo/templates/notifications/slack/engagement_added.tpl:6
+#: dojo/templates/notifications/slack/other.tpl:10
+#: dojo/templates/notifications/slack/product_added.tpl:6
+#: dojo/templates/notifications/slack/product_type_added.tpl:6
+#: dojo/templates/notifications/slack/report_created.tpl:6
+#: dojo/templates/notifications/slack/risk_acceptance_expiration.tpl:15
+#: dojo/templates/notifications/slack/scan_added.tpl:12
+#: dojo/templates/notifications/slack/sla_breach.tpl:9
+#: dojo/templates/notifications/slack/test_added.tpl:9
+#: dojo/templates/notifications/slack/upcoming_engagement.tpl:6
+#: dojo/templates/notifications/slack/user_mentioned.tpl:10
+msgid "Disclaimer"
+msgstr ""
+
+#: dojo/templates/notifications/mail/other.tpl:16
+#: dojo/templates/notifications/slack/other.tpl:4
+#, python-format
+msgid "More information on this event can be found here: %(url|full_url)s"
+msgstr ""
+
+#: dojo/templates/notifications/mail/product_added.tpl:11
+#, python-format
+msgid ""
+"The new product \"%(title)s\" has been added. It can be viewed here: <a href="
+"\"%(url|full_url)s\">%(title)s</a>"
+msgstr ""
+
+#: dojo/templates/notifications/mail/product_type_added.tpl:11
+#, python-format
+msgid ""
+"The new product type \"%(title)s\" has been added. It can be viewed here: <a "
+"href=\"%(url|full_url)s\">%(title)s</a>"
+msgstr ""
+
+#: dojo/templates/notifications/mail/report_created.tpl:8
+msgid "Greetings"
+msgstr ""
+
+#: dojo/templates/notifications/mail/report_created.tpl:11
+#: dojo/templates/notifications/slack/report_created.tpl:1
+#, python-format
+msgid ""
+"Your report \"%(report.name)s\" is ready. It can be downloaded here: "
+"%(url|full_url)s"
+msgstr ""
+
+#: dojo/templates/notifications/mail/risk_acceptance_expiration.tpl:18
+#, python-format
+msgid ""
+"<a href=\"%(risk_acceptance_url|full_url)s\">Risk acceptance "
+"%(risk_acceptance)s</a> with "
+"%(risk_acceptance.accepted_findings.all| length)s has expired "
+"%(risk_acceptance.expiration_date_handled|date)s"
+msgstr ""
+
+#: dojo/templates/notifications/mail/risk_acceptance_expiration.tpl:20
+#, python-format
+msgid ""
+"<a href=\"%(risk_acceptance_url|full_url)s\">Risk acceptance "
+"%(risk_acceptance)s</a> with "
+"%(risk_acceptance.accepted_findings.all| length)s will expire "
+"%(risk_acceptance.expiration_date|date)s"
+msgstr ""
+
+#: dojo/templates/notifications/mail/risk_acceptance_expiration.tpl:24
+msgid "Findings have been reactivated</p>"
+msgstr ""
+
+#: dojo/templates/notifications/mail/risk_acceptance_expiration.tpl:28
+msgid "Findings SLA start date have been reset</p>"
+msgstr ""
+
+#: dojo/templates/notifications/mail/scan_added.tpl:16
+#, python-format
+msgid ""
+"%(finding_count)s findings have been updated for while a scan was uploaded"
+msgstr ""
+
+#: dojo/templates/notifications/mail/scan_added.tpl:19
+msgid "New findings"
+msgstr ""
+
+#: dojo/templates/notifications/mail/scan_added.tpl:28
+msgid "Reactivated findings"
+msgstr ""
+
+#: dojo/templates/notifications/mail/scan_added.tpl:37
+msgid "Closed findings"
+msgstr ""
+
+#: dojo/templates/notifications/mail/scan_added.tpl:46
+msgid "Untouched findings"
+msgstr ""
+
+#: dojo/templates/notifications/mail/sla_breach.tpl:15
+#, python-format
+msgid "This security finding has breached its SLA. - Day(s) overdue: %(sla)s"
+msgstr ""
+
+#: dojo/templates/notifications/mail/sla_breach.tpl:21
+#, python-format
+msgid ""
+"A security finding is about to breach its SLA. - Day(s) remaining: %(sla)s"
+msgstr ""
+
+#: dojo/templates/notifications/mail/sla_breach.tpl:33
+msgid "Please refer to your SLA documentation for further guidance"
+msgstr ""
+
+#: dojo/templates/notifications/mail/test_added.tpl:14
+#, python-format
+msgid ""
+"A new test has been added: <a href=\"%(product_url|full_url)s\">%(product)s</"
+"a> / <a href=\"%(engagement_url|full_url)s\">%(engagement.name)s</a> / <a "
+"href=\"%(test_url|full_url)s\">%(test)s</a><br/> Finding details in the "
+"'scan_added' email, which is a separate notification (for now)."
+msgstr ""
+
+#: dojo/templates/notifications/mail/upcoming_engagement.tpl:11
+#, python-format
+msgid ""
+"this is a reminder that the engagement \"%(engagement.product)s\" is about "
+"to start shortly."
+msgstr ""
+
+#: dojo/templates/notifications/mail/upcoming_engagement.tpl:15
+msgid "Project start"
+msgstr ""
+
+#: dojo/templates/notifications/mail/upcoming_engagement.tpl:16
+msgid "Project end"
+msgstr ""
+
+#: dojo/templates/notifications/mail/user_mentioned.tpl:11
+#, python-format
+msgid ""
+"User %(user)s jotted a note on %(section)s:<br/> <br/> %(note)s<br/> <br/> "
+"It can be reviewed at %(url)s"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/engagement_added.tpl:5
+#: dojo/templates/notifications/msteams/engagement_added.tpl:6
+msgid "Engagement added"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/engagement_added.tpl:11
+msgid "A new engagement has been added"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/engagement_added.tpl:34
+#: dojo/templates/notifications/msteams/upcoming_engagement.tpl:42
+msgid "View Engagement"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/product_added.tpl:5
+#: dojo/templates/notifications/msteams/product_added.tpl:6
+msgid "Product Added"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/product_added.tpl:11
+msgid "A new product has been added"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/product_added.tpl:29
+msgid "View Product"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/product_type_added.tpl:5
+#: dojo/templates/notifications/msteams/product_type_added.tpl:6
+msgid "Product Type Added"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/product_type_added.tpl:11
+msgid "A new product type has been added"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/report_created.tpl:5
+#: dojo/templates/notifications/msteams/report_created.tpl:6
+msgid "Report created"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/report_created.tpl:11
+msgid "Report is ready for download"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/report_created.tpl:14
+msgid "Report"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/report_created.tpl:29
+msgid "Download"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/risk_acceptance_expiration.tpl:7
+#: dojo/templates/notifications/msteams/risk_acceptance_expiration.tpl:8
+#: dojo/templates/notifications/slack/risk_acceptance_expiration.tpl:5
+msgid "Risk Acceptance Expired"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/risk_acceptance_expiration.tpl:10
+#: dojo/templates/notifications/msteams/risk_acceptance_expiration.tpl:11
+#: dojo/templates/notifications/slack/risk_acceptance_expiration.tpl:7
+msgid "Risk Acceptance Will Expire Soon"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/risk_acceptance_expiration.tpl:18
+#, python-format
+msgid ""
+"Risk acceptance %(risk_acceptance)s with "
+"%(risk_acceptance.accepted_findings.all| length)s has expired "
+"%(risk_acceptance.expiration_date_handled|date)s"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/risk_acceptance_expiration.tpl:20
+#, python-format
+msgid ""
+"Risk acceptance %(risk_acceptance)s with "
+"%(risk_acceptance.accepted_findings.all| length)s will expire "
+"%(risk_acceptance.expiration_date|date)s"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/risk_acceptance_expiration.tpl:32
+msgid "Risk Acceptance"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/risk_acceptance_expiration.tpl:47
+msgid "View Risk Acceptance"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/scan_added.tpl:12
+msgid "A new scan has been added"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/scan_added.tpl:23
+msgid "Scan"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/scan_added.tpl:38
+#: dojo/templates/notifications/msteams/test_added.tpl:38
+msgid "View Test"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/sla_breach.tpl:6
+#: dojo/templates/notifications/msteams/sla_breach.tpl:7
+msgid "SLA breached"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/sla_breach.tpl:12
+msgid "A SLA for a finding has been breached"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/sla_breach.tpl:31
+msgid "SLA age"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/test_added.tpl:6
+#: dojo/templates/notifications/msteams/test_added.tpl:7
+msgid "Test added"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/test_added.tpl:12
+msgid "A new test has been added"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/upcoming_engagement.tpl:6
+#: dojo/templates/notifications/msteams/upcoming_engagement.tpl:7
+msgid "Engagement is starting"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/upcoming_engagement.tpl:12
+msgid "An Engagement is starting"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/upcoming_engagement.tpl:23
+msgid "Start date"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/upcoming_engagement.tpl:27
+msgid "End date"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/user_mentioned.tpl:5
+#: dojo/templates/notifications/msteams/user_mentioned.tpl:6
+msgid "User Mentioned"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/user_mentioned.tpl:11
+msgid "A user has been mentioned"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/user_mentioned.tpl:18
+msgid "Section"
+msgstr ""
+
+#: dojo/templates/notifications/msteams/user_mentioned.tpl:22
+msgid "note"
+msgstr ""
+
+#: dojo/templates/notifications/slack/engagement_added.tpl:1
+#, python-format
+msgid ""
+"The engagement \"%(engagement.name)s\" has been created in the product "
+"\"%(engagement.product)s\". It can be viewed here: %(url|full_url)s"
+msgstr ""
+
+#: dojo/templates/notifications/slack/product_added.tpl:1
+#, python-format
+msgid ""
+"The new product \"%(title)s\" has been added. It can be viewed here: "
+"%(url|full_url)s"
+msgstr ""
+
+#: dojo/templates/notifications/slack/product_type_added.tpl:1
+#, python-format
+msgid ""
+"The new product type \"%(title)s\" has been added. It can be viewed here: "
+"%(url|full_url)s"
+msgstr ""
+
+#: dojo/templates/notifications/slack/risk_acceptance_expiration.tpl:10
+#, python-format
+msgid "Risk Acceptance can be viewed here: %(risk_acceptance_url|full_url)s"
+msgstr ""
+
+#: dojo/templates/notifications/slack/scan_added.tpl:5
+#, python-format
+msgid ""
+"%(test)s results have been uploaded. They can be viewed here: "
+"%(url|full_url)s"
+msgstr ""
+
+#: dojo/templates/notifications/slack/sla_breach.tpl:1
+#, python-format
+msgid ""
+"SLA breach alert for finding %(finding.id)s. Relative days count to SLA due "
+"date: %(sla_age)s. Title: %(finding.title)s Severity: %(finding.severity)s "
+"You can find details here: %(url|full_url)s"
+msgstr ""
+
+#: dojo/templates/notifications/slack/test_added.tpl:1
+#, python-format
+msgid ""
+"New test added for engagement %(engagement.name)s in product "
+"%(engagement.product)s. Title: %(test.title)s Type: %(test.test_type)s You "
+"can find details here: %(url|full_url)s"
+msgstr ""
+
+#: dojo/templates/notifications/slack/user_mentioned.tpl:1
+#, python-format
+msgid ""
+"User %(user)s jotted a note on %(section)s: %(note)s Full details of the "
+"note can be reviewed at %(url)s"
 msgstr ""
 
 #: dojo/test/views.py:103
