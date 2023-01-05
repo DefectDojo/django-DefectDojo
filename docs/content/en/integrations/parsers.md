@@ -1194,47 +1194,48 @@ All parsers which using API have common basic configuration step but with differ
 
 Follow these steps to setup API importing:
 
-1.  Configure the API Authentication details by navigating to
-    Configuration / Tool Configuration, selecting related Tool Type
-    and Authentication Type "API Key". Paste your credentials to field
+1.  Configure the API authentication details by navigating to
+    `Configuration -> Tool Configuration -> Add Tool Configuration`. Enter a `Name`,
+    selecting related `Tool Type` and `Authentication Type` "API Key". Paste your credentials to field
     and other fields based on definitions below.
 
-2.  In the Product settings select "Add API Scan Configuration" and select the
-    previously added Tool Configuration. Proved values based on definitions below
+2.  In the `Product` settings select `Add API Scan Configuration` and select the
+    previously added `Tool Configuration`. Proved values based on definitions below
 
-3.  After all these steps will be done, you can import the findings by selecting related scaner type as the scan type in test.
-
+3.  After this is done, you can import the findings on the `Product` page through
+    `Findings -> Import Scan Results`. Select "Edgescan Scan" as the `Scan type`,
+    the API scan configuration from the last step, and click `Import`.
 
 #### Blackduck API
 
-In Tool Configuration, select Tool Type to "BlackDuck API" and Authentication Type "API Key".
-Paste your BlackDuck API token in the "API Key" field.
+In `Tool Configuration`, select `Tool Type` to "BlackDuck API" and `Authentication Type` "API Key".
+Paste your BlackDuck API token in the `API Key` field.
 
-In "Add API Scan Configuration" provide the ID
-of the project from which to import findings in the field *Service key 1*.
-Provide the version of the project from which to import findings in the field *Service key 2*.
+In `Add API Scan Configuration` provide the ID
+of the project from which to import findings in the field `Service key 1`.
+Provide the version of the project from which to import findings in the field `Service key 2`.
 
 #### Bugcrowd API
 
-In Tool Configuration, select Tool Type to "Bugcrowd API" and Authentication Type "API Key".
-Paste your BlackDuck API token in the "API Key" field.
+In `Tool Configuration`, select `Tool Type` to "Bugcrowd API" and `Authentication Type` "API Key".
+Paste your BlackDuck API token in the `API Key` field.
 Set your API key directly in the format `username:password` in the API Token input, it will be added to the header `'Authorization': 'Token {}'.format(self.api_token),`
 
 For each product, you can configure 2 things:
-- *Service key 1*: the bugcrowd program code (it's the slug name in the url for the program, url safe)
-- *Service key 2*: the bugcrowd target name (the full name, it will be url-encoded, you can find it in https://tracker.bugcrowd.com/<YOURPROGRAM>/settings/scope/target_groups)
+- `Service key 1`: the bugcrowd program code (it's the slug name in the url for the program, url safe)
+- `Service key 2`: the bugcrowd target name (the full name, it will be url-encoded, you can find it in https://tracker.bugcrowd.com/<YOURPROGRAM>/settings/scope/target_groups)
     - It can be left empty so that all program submissions are imported
 
 That way, per product, you can use the same program but separate by target, which is a fairly common way of filtering/grouping Bugcrowd.
-Adding support for a 3rd filtering would be possible with Service Key 3, feel free to make a PR.
+Adding support for a 3rd filtering would be possible with `Service Key 3`, feel free to make a PR.
 
 #### Cobalt.io API Import
 
-In Tool Configuration, select Tool Type to "Cobalt.io API" and Authentication Type "API Key".
-Paste your Cobalt.io API token in the "API Key" field and the desired org token in the "Extras" field.
+In `Tool Configuration`, select `Tool Type` to "Cobalt.io API" and `Authentication Type` "API Key".
+Paste your Cobalt.io API token in the `API Key` field and the desired org token in the `Extras` field.
 
-In "Add API Scan Configuration" provide the ID
-of the asset from which to import findings in the field *Service key 1*.
+In `Add API Scan Configuration` provide the ID
+of the asset from which to import findings in the field `Service key 1`.
 The ID can be found at the end of the URL when viewing the asset in your browser.
 
 If you have more than one asset configured, you
@@ -1242,12 +1243,13 @@ must also select which Cobalt.io API Scan Configuratio to use.
 
 #### Edgescan
 
-In Tool Configuration, select Tool Type to "Edgescan" and Authentication Type "API Key".
-Paste your Edgescan API key in the "API Key" field.
+In `Tool Configuration`, select `Tool Type` to "Edgescan" and `Authentication Type` "API Key".
+Paste your Edgescan API key in the `API Key` field.
 
-In "Add API Scan Configuration" and select the
-previously added Edgescan Tool Configuration. Provide the ID
-of the asset from which to import findings in the field *Service key 1*.
+In `Add API Scan Configuration` and select the
+previously added Edgescan `Tool Configuration`. Provide the edgescan asset ID(s)
+that you wish to import the findings for in the field `Service key 1`. 
+*Multiple asset IDs should be comma separated with no spacing.*
 
 After this is done, you can import the findings by selecting
 "Edgescan Scan" as the scan type. If you have more than one asset
@@ -1256,35 +1258,35 @@ use.
 
 #### SonarQube API Import
 
-In Tool Configuration, select Tool Type to "SonarQube API" and Authentication Type "API Key".
+In `Tool Configuration`, select `Tool Type` to "SonarQube API" and `Authentication Type` "API Key".
 Note the url must be in the format of `https://<sonarqube_host>/api`
 Paste your SonarQube API token in the "API Key" field.
 By default the tool will import vulnerabilities issues
 and security hotspots only, but additional filters can be setup using the 
-Extras field separated by commas (e.g. BUG,VULNERABILITY,CODE_SMELL). When using
+Extras field separated by commas (e.g. `BUG,VULNERABILITY,CODE_SMELL`). When using
 SonarCloud, you must also specify the Organization ID in the Extras field as follows
 `OrgID=sonarcloud-organzation-ID`. If also specifying issue type filters, please 
 seperate the items in the Extras field by a vertical bar as follows
 `BUG,VULNERABILITY,CODE_SMEL|OrgID=sonarcloud-organzation-ID`
 
 In "Add API Scan Configuration"
--   *Service key 1* must
+-   `Service key 1` must
     be the SonarQube project key, which can be found by navigating to a specific project and
     selecting the value from the url
     `https://<sonarqube_host>/dashboard?id=key`.
     When you do not provide a SonarQube project key, DefectDojo will
     use the name of the Product as the project key in SonarQube. If you would like to
     import findings from multiple projects, you can specify multiple keys as
-    separated API Scan Configuration in the Product settings.
+    separated `API Scan Configuration` in the `Product` settings.
 -   If using SonarCloud, the orginization ID can be used from step 1, but it
-    can be ovverirdden by supplying a different orginization ID in the *Service key 2* input field.
+    can be overiden by supplying a different orginization ID in the `Service key 2` input field.
 
 ###### Multiple SonarQube API Configurations
 
-In the import or re-import dialog you can select which API Scan
-Configuration shall be used. If you do not choose
-any, DefectDojo will use the API Scan Configuration of the Product if there is
-only one defined or the SonarQube Tool Configuration if there is only one.
+In the import or re-import dialog you can select which `API Scan
+Configuration` shall be used. If you do not choose
+any, DefectDojo will use the `API Scan Configuration` of the Product if there is
+only one defined or the SonarQube `Tool Configuration` if there is only one.
 
 ###### Multi Branch Scanning
 
@@ -1301,9 +1303,9 @@ trusted by the DefectDojo instance.
 
 Import Vulners [Audit](https://vulners.com/docs/API_wrapper/linux_audit/#linux-audit) results, no file required.
 
-In Tool Configuration, select Tool Type to "Vulners" and add the API Key
+In `Tool Configuration`, select `Tool Type` to "Vulners" and add the API Key
 
-In the Product settings select "Add API Scan Configuration" and select the previously added Vulners API Tool Configuration.
+In the `Product` settings select `Add API Scan Configuration` and select the previously added Vulners `API Tool Configuration`.
 
 After this is done, you can import the findings by selecting "Vulners" as the scan type.
 

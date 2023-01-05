@@ -26,7 +26,7 @@ class DojoDefaultReImporter(object):
 
     @dojo_async_task
     @app.task(ignore_result=False)
-    def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
+    def process_parsed_findings(self, test, parsed_findings, scan_type, user, active=None, verified=None, minimum_severity=None,
                                 endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None,
                                 do_not_reactivate=False, create_finding_groups_for_all_findings=True, **kwargs):
 
@@ -108,7 +108,8 @@ class DojoDefaultReImporter(object):
                             finding.is_mitigated = False
                             finding.mitigated_by = None
                             finding.active = True
-                            finding.verified = verified
+                            if verified is not None:
+                                finding.verified = verified
                         if do_not_reactivate:
                             logger.debug('%i: skipping reactivating by user\'s choice do_not_reactivate: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                             note = Notes(
@@ -163,7 +164,8 @@ class DojoDefaultReImporter(object):
                             finding.is_mitigated = True
                             finding.mitigated_by = item.mitigated_by
                             finding.active = False
-                            finding.verified = verified
+                            if verified is not None:
+                                finding.verified = verified
                     if not finding.component_name or not finding.component_version:
                         finding.component_name = finding.component_name if finding.component_name else component_name
                         finding.component_version = finding.component_version if finding.component_version else component_version
@@ -180,8 +182,14 @@ class DojoDefaultReImporter(object):
                 item.reporter = user
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = user
-                item.verified = verified
-                item.active = active
+
+                if active is not None:
+                    # indicates an override. Otherwise, do not change the value of item.active
+                    item.active = active
+
+                if verified is not None:
+                    # indicates an override. Otherwise, do not change the value of verified
+                    item.verified = verified
 
                 # if scan_date was provided, override value from parser
                 if scan_date:
@@ -336,7 +344,7 @@ class DojoDefaultReImporter(object):
 
         return mitigated_findings
 
-    def reimport_scan(self, scan, scan_type, test, active=True, verified=True, tags=None, minimum_severity=None,
+    def reimport_scan(self, scan, scan_type, test, active=None, verified=None, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None,
                     service=None, do_not_reactivate=False, create_finding_groups_for_all_findings=True):
@@ -379,7 +387,7 @@ class DojoDefaultReImporter(object):
             results_list = []
             # First kick off all the workers
             for findings_list in chunk_list:
-                result = self.process_parsed_findings(test, findings_list, scan_type, user, active, verified,
+                result = self.process_parsed_findings(test, findings_list, scan_type, user, active=active, verified=verified,
                                                       minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
                                                       push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False,
                                                       do_not_reactivate=do_not_reactivate, create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
@@ -402,7 +410,7 @@ class DojoDefaultReImporter(object):
             importer_utils.update_test_progress(test)
         else:
             new_findings, reactivated_findings, findings_to_mitigate, untouched_findings = \
-                self.process_parsed_findings(test, parsed_findings, scan_type, user, active, verified,
+                self.process_parsed_findings(test, parsed_findings, scan_type, user, active=active, verified=verified,
                                              minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
                                              push_to_jira=push_to_jira, group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True,
                                              do_not_reactivate=do_not_reactivate, create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)

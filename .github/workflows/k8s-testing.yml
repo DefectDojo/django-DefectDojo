@@ -146,12 +146,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@v2.7.1
+        uses: manusa/actions-setup-minikube@v2.7.2
         with:
           minikube version: 'v1.24.0'
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress --cni calico'
+          github token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Status of minikube
         run: |-

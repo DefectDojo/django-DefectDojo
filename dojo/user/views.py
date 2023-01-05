@@ -1,3 +1,4 @@
+import contextlib
 import logging
 from crum import get_current_user
 
@@ -8,6 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.views import LoginView, PasswordResetView
+from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.core.mail import get_connection
 from django.core.mail.backends.smtp import EmailBackend
 from django.core import serializers
@@ -38,6 +40,27 @@ from dojo.authorization.authorization_decorators import user_is_configuration_au
 import hyperlink
 
 logger = logging.getLogger(__name__)
+
+
+class DojoLoginView(LoginView):
+    template_name = 'dojo/login.html'
+    authentication_form = AuthenticationForm
+
+    def form_valid(self, form):
+        last_login = None
+        with contextlib.suppress(Exception):
+            username = form.cleaned_data.get('username')
+            user = Dojo_User.objects.get(username=username)
+            last_login = user.last_login
+        response = super().form_valid(form)
+        name = self.request.user.first_name or self.request.user.username
+        last_login = last_login or self.request.user.last_login
+        messages.add_message(
+            self.request,
+            messages.SUCCESS,
+            _(f'Hello {name}! Your last login was {naturaltime(last_login)} ({last_login.strftime("%Y-%m-%d %I:%M:%S %p")})'),
+            extra_tags='alert-success')
+        return response
 
 
 # #  Django Rest Framework API v2
@@ -119,7 +142,7 @@ def login_view(request):
         except:
             return HttpResponseRedirect(reverse('social:begin', args=[social_auth]))
     else:
-        return LoginView.as_view(template_name='dojo/login.html', authentication_form=AuthenticationForm)(request)
+        return DojoLoginView.as_view(template_name='dojo/login.html', authentication_form=AuthenticationForm)(request)
 
 
 def logout_view(request):
@@ -279,12 +302,11 @@ def user(request):
     users = UserFilter(request.GET, queryset=users)
     paged_users = get_page_items(request, users.qs, 25)
     add_breadcrumb(title=_("All Users"), top_level=True, request=request)
-    return render(request,
-                  'dojo/users.html',
-                  {"users": paged_users,
-                   "filtered": users,
-                   "name": "All Users",
-                   })
+    return render(request, 'dojo/users.html', {
+        "users": paged_users,
+        "filtered": users,
+        "name": "All Users",
+    })
 
 
 @user_is_configuration_authorized('auth.add_user')

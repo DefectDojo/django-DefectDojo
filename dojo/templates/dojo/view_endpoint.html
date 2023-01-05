@@ -39,11 +39,11 @@
                 <div class="dropdown pull-right">
                     <div class="btn-group">
                         <button class="btn btn-primary clickable panel-collapsed">
-                            <span><i class="fa fa-bar-chart"></i></span>
+                            <span><i class="fa-solid fa-chart-column"></i></span>
                         </button>
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-bars"></span>
+                                <span class="fa-solid fa-bars"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
@@ -51,38 +51,38 @@
                                 {% if endpoint|has_object_permission:"Endpoint_Edit" %}
                                     <li role="presentation">
                                         <a href="{% url 'edit_endpoint' endpoint.id %}">
-                                            <i class="fa fa-pencil-square-o"></i> Edit Endpoint
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit Endpoint
                                         </a>
                                     </li>
                                     <li role="presentation">
                                         <a href="{% url 'add_endpoint_meta_data' endpoint.id %}">
-                                            <i class="fa fa-list-alt"></i> Add Metadata
+                                            <i class="fa-solid fa-rectangle-list"></i> Add Metadata
                                         </a>
                                     </li>
                                 {% endif %}
                                     <li role="presentation">
                                         <a href="{% url 'action_history' endpoint|content_type endpoint.id %}">
-                                            <i class="fa fa-history"></i> View History
+                                            <i class="fa-solid fa-clock-rotate-left"></i> View History
                                         </a>
                                     </li>
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation">
                                         <a href="{% url 'endpoint_report' endpoint.id %}?active=1">
-                                            <i class="fa fa-file-text-o"></i> Report
+                                            <i class="fa-solid fa-file-lines"></i> Report
                                         </a>
                                     </li>
                                 {% if endpoint|has_object_permission:"Endpoint_Delete" %}
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation" class="text-danger">
                                         <a class="text-danger" href="{% url 'delete_endpoint' endpoint.id %}">
-                                            <i class="fa fa-trash-o"></i> Delete Endpoint
+                                            <i class="fa-solid fa-trash"></i> Delete Endpoint
                                         </a>
                                     </li>
                                 {% endif %}
                               {% else %}
                                 <li role="presentation">
                                     <a href="{% url 'endpoint_host_report' endpoint.id %}?&active=1">
-                                        <i class="fa fa-file-text-o"></i> Report
+                                        <i class="fa-solid fa-file-lines"></i> Report
                                     </a>
                                 </li>
                               {% endif %}
@@ -97,7 +97,7 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-calendar fa-2x"></i>
+                                <i class="fa-solid fa-calendar-days fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">&nbsp;</span>
@@ -119,7 +119,7 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bug fa-2x"></i>
+                                <i class="fa-solid fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ all_findings|length }}</span>
@@ -130,7 +130,7 @@
                                         <a href="{% url 'endpoint_host_report' endpoint.id %}">
                                       {% endif %}
                                             endpoint finding{{ all_findings|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -146,7 +146,7 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bug fa-2x"></i>
+                                <i class="fa-solid fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span>Opened findings count by month</span>
@@ -177,9 +177,9 @@
                                 <td>{% if item %}
                                       <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
                                       {% if item.vulnerable %}
-                                        <span style="color:OrangeRed" class="fa fa-thumbs-down"></span>
+                                        <span style="color:OrangeRed" class="fa-solid fa-thumbs-down"></span>
                                       {% else %}
-                                        <span class="fa fa-thumbs-up"></span>
+                                        <span class="fa-solid fa-thumbs-up"></span>
                                       {% endif %}
                                       &nbsp;{{ item|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
                                     {% endif %}
@@ -221,11 +221,11 @@
                             <div class="btn-group pull-right">
                                 <a title="Edit Information" class="btn btn-sm btn-primary"
                                    href="{% url 'edit_endpoint_meta_data' endpoint.id %}">
-                                    <span class="fa fa-pencil-square-o"></span>
+                                    <span class="fa-solid fa-pen-to-square"></span>
                                 </a>
                                 <a title="Add Information" class="btn btn-sm btn-primary"
                                    href="{% url 'add_endpoint_meta_data' endpoint.id %}">
-                                    <span class="fa fa-plus"></span>
+                                    <span class="fa-solid fa-plus"></span>
                                 </a>
                             </div>
                         </h4>

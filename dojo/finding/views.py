@@ -1939,6 +1939,11 @@ def finding_bulk_update_all(request, pid=None):
                     for prod in prods:
                         calculate_grade(prod)
 
+                if form.cleaned_data['date']:
+                    for finding in finds:
+                        finding.date = form.cleaned_data['date']
+                        finding.save_no_options()
+
                 if form.cleaned_data['planned_remediation_date']:
                     for finding in finds:
                         finding.planned_remediation_date = form.cleaned_data['planned_remediation_date']

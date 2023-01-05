@@ -14,27 +14,27 @@
                       {{ benchmark_summary_form.management_form }}
                       {{ benchmark_summary_form.benchmark_type.as_hidden }}
                       {{ benchmark_summary_form.product.as_hidden }}
-                      <label for="target">Target Level <span class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Target ASVS Level for this application."></label>
+                      <label for="target">Target Level <span class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Target ASVS Level for this application."></label>
                       {{ benchmark_summary_form.desired_level }}
                       {{ benchmark_summary_form.score.as_hidden }}
-                      <label for="publish">Publish <span class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Publish will display the ASVS Level on the product and other areas in DefectDojo. Check this once you have completed the assessment."></label>
+                      <label for="publish">Publish <span class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Publish will display the ASVS Level on the product and other areas in DefectDojo. Check this once you have completed the assessment."></label>
                       {{ benchmark_summary_form.publish }}
                       <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                               data-toggle="dropdown" aria-expanded="true">
-                              <i class="fa fa-filter">
+                              <i class="fa-solid fa-filter">
                               </i>
                           <span class="caret"></span>
                       </button>
                       <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a title="{{ bc.name }}" href="{% url 'view_product_benchmark' product.id benchmark_type.id %}">
-                                <span class="fa fa-angle-right"></span> View All
+                                <span class="fa-solid fa-angle-right"></span> View All
                               </a>
                           </li>
                           {% for bc in benchmark_category %}
                           <li role="presentation">
                               <a title="{{ bc.name }}" href="{% url 'view_product_benchmark' product.id benchmark_type.id bc.id %}">
-                                  <span class="fa fa-list"></span> {{ bc.name }}
+                                  <span class="fa-solid fa-list-ul"></span> {{ bc.name }}
                               </a>
                           </li>
                           {% endfor %}

@@ -83,7 +83,7 @@ jobs:
           commit_message: "Update versions in application files"
           branch: ${{ env.NEW_BRANCH }}
       - id: set-repo-org
-        run: echo "repoorg::${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
+        run: echo "repoorg=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
      
       - name: Create Pull Request
         env:

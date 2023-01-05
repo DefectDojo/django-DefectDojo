@@ -385,6 +385,9 @@ class DojoMetaDataForm(forms.ModelForm):
 
 
 class ImportScanForm(forms.Form):
+    active_verified_choices = [("not_specified", "Not specified (default)"),
+                               ("force_to_true", "Force to True"),
+                               ("force_to_false", "Force to False")]
     scan_date = forms.DateTimeField(
         required=False,
         label="Scan Completion Date",
@@ -393,8 +396,11 @@ class ImportScanForm(forms.Form):
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
                                          choices=SEVERITY_CHOICES)
-    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
-    verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
+    active = forms.ChoiceField(required=True, choices=active_verified_choices,
+                               help_text='Force findings to be active/inactive, or default to the original tool')
+    verified = forms.ChoiceField(required=True, choices=active_verified_choices,
+                               help_text='Force findings to be verified/not verified, or default to the original tool')
+
     # help_do_not_reactivate = 'Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs.'
     # do_not_reactivate = forms.BooleanField(help_text=help_do_not_reactivate, required=False)
     scan_type = forms.ChoiceField(required=True, choices=get_choices_sorted)
@@ -433,6 +439,8 @@ class ImportScanForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(ImportScanForm, self).__init__(*args, **kwargs)
+        self.fields['active'].initial = self.active_verified_choices[0]
+        self.fields['verified'].initial = self.active_verified_choices[0]
 
         # couldn't find a cleaner way to add empty default
         if 'group_by' in self.fields:
@@ -475,6 +483,9 @@ class ImportScanForm(forms.Form):
 
 
 class ReImportScanForm(forms.Form):
+    active_verified_choices = [("not_specified", "Not specified (default)"),
+                               ("force_to_true", "Force to True"),
+                               ("force_to_false", "Force to False")]
     scan_date = forms.DateTimeField(
         required=False,
         label="Scan Completion Date",
@@ -483,8 +494,11 @@ class ReImportScanForm(forms.Form):
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
                                          choices=SEVERITY_CHOICES[0:4])
-    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
-    verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
+    active = forms.ChoiceField(required=True, choices=active_verified_choices,
+                               help_text='Force findings to be active/inactive, or default to the original tool')
+    verified = forms.ChoiceField(required=True, choices=active_verified_choices,
+                             help_text='Force findings to be verified/not verified, or default to the original tool')
+
     help_do_not_reactivate = 'Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs.'
     do_not_reactivate = forms.BooleanField(help_text=help_do_not_reactivate, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints')
@@ -511,6 +525,8 @@ class ReImportScanForm(forms.Form):
 
     def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
+        self.fields['active'].initial = self.active_verified_choices[0]
+        self.fields['verified'].initial = self.active_verified_choices[0]
         self.scan_type = None
         if test:
             self.scan_type = test.test_type.name
@@ -1322,6 +1338,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     risk_accept = forms.BooleanField(required=False)
     risk_unaccept = forms.BooleanField(required=False)
 
+    date = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'datepicker'}))
     planned_remediation_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'datepicker'}))
     finding_group = forms.BooleanField(required=False)
     finding_group_create = forms.BooleanField(required=False)
@@ -1357,7 +1374,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = ('severity', 'planned_remediation_date', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+        fields = ('severity', 'date', 'planned_remediation_date', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
                   'is_mitigated')
 
 

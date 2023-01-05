@@ -695,9 +695,9 @@ def re_import_scan_results(request, tid):
 
             minimum_severity = form.cleaned_data['minimum_severity']
             scan = request.FILES.get('file', None)
-            active = form.cleaned_data['active']
+            activeChoice = form.cleaned_data.get('active', None)
+            verifiedChoice = form.cleaned_data.get('verified', None)
             do_not_reactivate = form.cleaned_data['do_not_reactivate']
-            verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
             version = form.cleaned_data.get('version', None)
             branch_tag = form.cleaned_data.get('branch_tag', None)
@@ -712,6 +712,19 @@ def re_import_scan_results(request, tid):
 
             group_by = form.cleaned_data.get('group_by', None)
             create_finding_groups_for_all_findings = form.cleaned_data.get('create_finding_groups_for_all_findings')
+
+            active = None
+            if activeChoice:
+                if activeChoice == 'force_to_true':
+                    active = True
+                elif activeChoice == 'force_to_false':
+                    active = False
+            verified = None
+            if verifiedChoice:
+                if verifiedChoice == 'force_to_true':
+                    verified = True
+                elif verifiedChoice == 'force_to_false':
+                    verified = False
 
             # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags

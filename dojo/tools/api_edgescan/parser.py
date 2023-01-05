@@ -1,5 +1,6 @@
 import json
 
+from cvss import parser as cvss_parser
 from dojo.models import Endpoint, Finding
 from .importer import EdgescanImporter
 
@@ -20,6 +21,9 @@ class ApiEdgescanParser(object):
 
     def get_description_for_scan_types(self, scan_type):
         return "Edgescan findings can be imported by API or JSON file."
+
+    def requires_file(self, scan_type):
+        return False
 
     def requires_tool_type(self, scan_type):
         return "Edgescan"
@@ -53,7 +57,9 @@ class ApiEdgescanParser(object):
             finding.unsaved_vulnerability_ids = vulnerability["cves"]
         if vulnerability["cvss_version"] == 3:
             if vulnerability["cvss_vector"]:
-                finding.cvssv3 = vulnerability["cvss_vector"]
+                cvss_objects = cvss_parser.parse_cvss_from_text(vulnerability["cvss_vector"])
+                if len(cvss_objects) > 0:
+                    finding.cvssv3 = cvss_objects[0].clean_vector()
         finding.url = vulnerability["location"]
         finding.severity = ES_SEVERITIES[vulnerability["severity"]]
         finding.description = vulnerability["description"]
@@ -63,6 +69,8 @@ class ApiEdgescanParser(object):
             finding.tags = vulnerability["asset_tags"].split(",")
         finding.unique_id_from_tool = vulnerability["id"]
 
-        finding.unsaved_endpoints = [Endpoint.from_uri(vulnerability["location"])]
+        finding.unsaved_endpoints = [Endpoint.from_uri(vulnerability["location"])
+                                    if '://' in vulnerability["location"] else
+                                    Endpoint.from_uri("//" + vulnerability["location"])]
 
         return finding

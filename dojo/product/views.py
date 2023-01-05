@@ -154,7 +154,7 @@ def view_product(request, pid):
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
-    languages = Languages.objects.filter(product=prod).order_by('-code')
+    languages = Languages.objects.filter(product=prod).order_by('-code').select_related('language')
     app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
     benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
     benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True,
@@ -445,7 +445,8 @@ def endpoint_querys(request, prod):
                                                   mitigated=True,
                                                   out_of_scope=False).order_by("date")
     filters['open'] = endpoints_qs.filter(date__range=[start_date, end_date],
-                                          mitigated=False)
+                                          mitigated=False,
+                                          finding__active=True)
     filters['inactive'] = endpoints_qs.filter(date__range=[start_date, end_date],
                                               mitigated=True)
     filters['closed'] = endpoints_qs.filter(date__range=[start_date, end_date],
