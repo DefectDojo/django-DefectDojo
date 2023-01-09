@@ -1,6 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from django.utils.http import urlquote
+from  urllib.parse import quote
 from re import compile
 import logging
 from threading import local
@@ -41,9 +41,9 @@ class LoginRequiredMiddleware:
             path = request.path_info.lstrip('/')
             if not any(m.match(path) for m in EXEMPT_URLS):
                 if path == 'logout':
-                    fullURL = "%s?next=%s" % (settings.LOGIN_URL, '/')
+                    fullURL = f"{settings.LOGIN_URL}?next=/"
                 else:
-                    fullURL = "%s?next=%s" % (settings.LOGIN_URL, urlquote(request.get_full_path()))
+                    fullURL = f"{settings.LOGIN_URL}?next={quote(request.get_full_path())}"
                 return HttpResponseRedirect(fullURL)
 
         if request.user.is_authenticated:
@@ -60,8 +60,7 @@ class LoginRequiredMiddleware:
             if Dojo_User.force_password_reset(request.user) and path != 'change_password':
                 return HttpResponseRedirect(reverse('change_password'))
 
-        response = self.get_response(request)
-        return response
+        return self.get_response(request)
 
 
 class DojoSytemSettingsMiddleware(object):
