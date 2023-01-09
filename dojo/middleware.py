@@ -1,6 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from  urllib.parse import quote
+from urllib.parse import quote
 from re import compile
 import logging
 from threading import local
