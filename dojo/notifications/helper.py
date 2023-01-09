@@ -359,7 +359,7 @@ def send_webhooks_notification(event, *args, **kwargs):
             try:
                 if endpoint.url is not None:
                     logger.debug(f"sending webhook message to endpoint {endpoint.name}")
-                    headers={
+                    headers = {
                         "User-Agent": f"DefectDojo-{dd_version}",
                         "X-DefectDojo-Event": event,
                         "X-DefectDojo-Instance": settings.SITE_URL,
@@ -381,7 +381,7 @@ def send_webhooks_notification(event, *args, **kwargs):
 
                         # 5xx is also not OK
                         elif 500 <= res.status_code < 600:
-                            # If there is only temporary outage (we detected 5xx first time or it was before more then one hour), we can keep endpoint active (but marked) 
+                            # If there is only temporary outage (we detected 5xx first time or it was before more then one hour), we can keep endpoint active (but marked)
 
                             # First detection
                             if endpoint.last_error is None or (now - endpoint.last_error).minutes > 60:
