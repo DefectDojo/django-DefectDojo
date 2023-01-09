@@ -2306,3 +2306,11 @@ def sum_by_severity_level(metrics):
             values[m.severity] += 1
 
     return values
+
+
+def get_current_date():
+    return timezone.now().date()
+
+
+def get_current_datetime():
+    return timezone.now()

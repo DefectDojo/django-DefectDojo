@@ -32,6 +32,7 @@ from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
 from dojo.settings.settings import SLA_BUSINESS_DAYS
+from dojo.utils import get_current_date, get_current_datetime
 from numpy import busday_count
 
 
@@ -150,14 +151,6 @@ class Regulation(models.Model):
 
 from .user_managment import Dojo_User, UserContactInfo, Dojo_Group, Role, Dojo_Group_Member, Global_Role, Contact  # noqa: F401
 from .system_settings import System_Settings, System_SettingsAdmin, SystemSettingsFormAdmin  # noqa: F401
-
-
-def get_current_date():
-    return timezone.now().date()
-
-
-def get_current_datetime():
-    return timezone.now()
 
 
 class Note_Type(models.Model):
