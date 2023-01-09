@@ -61,11 +61,14 @@ def update_endpoint_status(existing_finding, new_finding, user):
     # using `.all()` will mark as mitigated also `endpoint_status` with flags `false_positive`, `out_of_scope` and `risk_accepted`. This is a known issue. This is not a bug. This is a future.
     existing_finding_endpoint_status_list = existing_finding.status_finding.all()
     new_finding_endpoints_list = new_finding.unsaved_endpoints
-    endpoint_status_to_mitigate = list(
-        filter(
-            lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint not in new_finding_endpoints_list,
-            existing_finding_endpoint_status_list)
-    )
+    if new_finding.is_mitigated:
+        endpoint_status_to_mitigate = existing_finding_endpoint_status_list
+    else:
+        endpoint_status_to_mitigate = list(
+            filter(
+                lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint not in new_finding_endpoints_list,
+                existing_finding_endpoint_status_list)
+        )
     # Determine if this can be run async
     if settings.ASYNC_FINDING_IMPORT:
         chunk_list = importer_utils.chunk_list(endpoint_status_to_mitigate)
