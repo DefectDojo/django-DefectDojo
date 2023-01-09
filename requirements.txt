@@ -20,7 +20,7 @@ django_extensions==3.2.1
 django-slack==5.18.0
 # This library is very outdated and not directly. It is used solely for migration
 # purposes to django-tagulous, so it must stay
-# ango-tagging==0.5.0
+# django-tagging==0.5.0
 git+https://github.com/DefectDojo/django-tagging@develop#egg=django-tagging
 django-watson==1.6.2
 django-prometheus==2.2.0
