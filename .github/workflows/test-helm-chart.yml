@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - dev
+      - bugfix
       - release/**
       - hotfix/**
 
@@ -58,7 +59,7 @@ jobs:
       # x.y.z gets bumped automatically when doing a release
       - name: Run chart-testing (lint)
         run: ct lint --config ct.yaml --target-branch ${{ env.ct-branch }} --check-version-increment=true
-        if: ${{ env.changed == 'true' && env.ct-branch != 'dev' }}  
+        if: ${{ env.changed == 'true' && env.ct-branch != 'dev' && env.ct-branch != 'bugfix' }}  
 
       # run all checks but version increment always when something changed
       - name: Run chart-testing (lint)
