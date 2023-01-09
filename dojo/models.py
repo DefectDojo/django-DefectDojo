@@ -4120,6 +4120,28 @@ class NotificationsAdmin(admin.ModelAdmin):
         return list_fields
 
 
+class Webhook_Endpoints(models.Model):
+    STATUS_CHOICES = (
+        ("active", "Active"),
+        ("inactive_400", "Inactive because of 4xx error"), 
+        ("active_500", "Active but 5xx error detected"), 
+        ("inactive_500", "Inactive because of 5xx error"), 
+        ("inactive_others", "Inactive because of status code unsupported"), 
+        ("inactive_manual", "Inactive because of manual deactivation"), 
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active", blank=False)
+    name = models.CharField(max_length=100, default='', blank=False, unique=True,
+                                    help_text=_('Name of the incoming webhook'))
+    url = models.URLField(max_length=200, default='', blank=False,
+                                    help_text=_('The full URL of the incoming webhook'))
+    header_name = models.CharField(max_length=100, default='', blank=True, null=True,
+                                   help_text=_('Name of the header required for interacting with Webhook endpoint'))
+    header_value = models.CharField(max_length=100, default='', blank=True, null=True,
+                                   help_text=_('Content of the header required for interacting with Webhook endpoint'))
+    first_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened first time'))
+    last_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened last time'))
+
+
 class Tool_Product_Settings(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
@@ -4653,6 +4675,7 @@ admin.site.register(GITHUB_Clone)
 admin.site.register(GITHUB_Details_Cache)
 admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
+admin.site.register(Webhook_Endpoints)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)

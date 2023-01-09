@@ -15,7 +15,7 @@ from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Alerts, Dojo_User, Notifications, System_Settings, UserContactInfo
+from dojo.models import Alerts, Dojo_User, Notifications, System_Settings, UserContactInfo, Webhook_Endpoints, get_current_datetime
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
@@ -353,37 +353,75 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
 
 @dojo_async_task
 @app.task
-def send_webhooks_notification(event, user=None, *args, **kwargs):
-    from dojo.utils import get_system_setting
+def send_webhooks_notification(event, *args, **kwargs):
+    for endpoint in Webhook_Endpoints.objects.all():
+        if endpoint.status.startswith('active'):
+            try:
+                if endpoint.url is not None:
+                    logger.debug(f"sending webhook message to endpoint {endpoint.name}")
+                    headers={
+                        "User-Agent": f"DefectDojo-{dd_version}",
+                        "X-DefectDojo-Event": event,
+                        "X-DefectDojo-Instance": settings.SITE_URL,
+                    }
+                    if endpoint.header_name is not None:
+                        headers[endpoint.header_name] = endpoint.header_value
+                    res = requests.request(
+                        method='POST',
+                        url=endpoint.url,
+                        headers=headers,
+                        data=create_notification_message(event, None, 'webhooks', *args, **kwargs))
+                    if res.status_code not in [200, 201]:
+                        now = get_current_datetime()
 
-    try:
-        if get_system_setting('webhooks_url') is not None:
-            logger.debug('sending webhook message')
-            headers={
-                "User-Agent": f"DefectDojo-{dd_version}",
-                "X-DefectDojo-Event": event,
-                "X-DefectDojo-Instance": settings.SITE_URL,
-            }
-            if get_system_setting('webhooks_token') is not None:
-                headers["X-DefectDojo-Token"] = get_system_setting('webhooks_token')
-            if user:
-                headers["X-DefectDojo-User"] = user
-            res = requests.request(
-                method='POST',
-                url=get_system_setting('webhooks_url'),
-                headers=headers,
-                data=create_notification_message(event, user, 'webhooks', *args, **kwargs))
-            if res.status_code != 200:
-                logger.error("Error when sending message to Webhooks")
-                logger.error(res.status_code)
-                logger.error(res.text)
-                raise RuntimeError('Error posting message to Webhooks: ' + res.text)
+                        # There is no reason to keep endpoint active if it is returning 4xx errors
+                        if 400 <= res.status_code < 500:
+                            endpoint.status = "inactive_400"
+                            endpoint.first_error = now
+
+                        # 5xx is also not OK
+                        elif 500 <= res.status_code < 600:
+                            # If there is only temporary outage (we detected 5xx first time or it was before more then one hour), we can keep endpoint active (but marked) 
+
+                            # First detection
+                            if endpoint.last_error is None or (now - endpoint.last_error).minutes > 60:
+                                endpoint.status = "active_500"
+                                endpoint.first_error = now  # Yes, if last fail happen before more then hour, we are considering it as a new error
+
+                            # Repleated detection
+                            else:
+
+                                # Error is repeating over more then hour
+                                if (now - endpoint.first_error).minutes > 60:
+                                    endpoint.status = "inactive_500"
+
+                                # This situation shouldn't happen - only if somebody was cleaning status and didn't clean first/last_error
+                                # But we should handle it
+                                else:
+                                    endpoint.status = "active_500"
+                                    endpoint.first_error = now
+
+                        # Well, we really accepts only 200 and 201
+                        else:
+                            endpoint.status = "inactive_others"
+                            endpoint.first_error = now
+
+                        endpoint.last_error = now
+                        endpoint.save()
+
+                        logger.error("Error when sending message to Webhooks")
+                        logger.error(res.status_code)
+                        logger.error(res.text)
+                        raise RuntimeError('Error posting message to Webhooks: ' + res.text)
+                else:
+                    logger.info(f"URL for Webhook {endpoint.name} not configured: skipping system notification")
+            except Exception as e:
+                logger.exception(e)
+                log_alert(e, "Webhooks Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
         else:
-            logger.info('URL for Webhooks not configured: skipping system notification')
-    except Exception as e:
-        logger.exception(e)
-        log_alert(e, "Webhooks Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
-        pass
+            logger.info(f"URL for Webhook '{endpoint.name}' is not active: {endpoint.get_status_display()} ({endpoint.status})")
+    else:
+        logger.info('URLs for Webhooks not configured: skipping system notification')
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
