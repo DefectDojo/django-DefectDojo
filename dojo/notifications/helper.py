@@ -355,7 +355,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
 @app.task
 def send_webhooks_notification(event, *args, **kwargs):
     for endpoint in Webhook_Endpoints.objects.all():
-        if endpoint.status.startswith('active'):
+        if endpoint.status.startswith(Webhook_Endpoints._STATUS_ACTIVE):
             try:
                 if endpoint.url is not None:
                     logger.debug(f"sending webhook message to endpoint {endpoint.name}")
@@ -376,7 +376,7 @@ def send_webhooks_notification(event, *args, **kwargs):
 
                         # There is no reason to keep endpoint active if it is returning 4xx errors
                         if 400 <= res.status_code < 500:
-                            endpoint.status = "inactive_400"
+                            endpoint.status = Webhook_Endpoints.STATUS_INACTIVE_400
                             endpoint.first_error = now
 
                         # 5xx is also not OK
@@ -385,7 +385,7 @@ def send_webhooks_notification(event, *args, **kwargs):
 
                             # First detection
                             if endpoint.last_error is None or (now - endpoint.last_error).minutes > 60:
-                                endpoint.status = "active_500"
+                                endpoint.status = Webhook_Endpoints.STATUS_ACTIVE_500
                                 endpoint.first_error = now  # Yes, if last fail happen before more then hour, we are considering it as a new error
 
                             # Repleated detection
@@ -393,17 +393,17 @@ def send_webhooks_notification(event, *args, **kwargs):
 
                                 # Error is repeating over more then hour
                                 if (now - endpoint.first_error).minutes > 60:
-                                    endpoint.status = "inactive_500"
+                                    endpoint.status = Webhook_Endpoints.STATUS_INACTIVE_500
 
                                 # This situation shouldn't happen - only if somebody was cleaning status and didn't clean first/last_error
                                 # But we should handle it
                                 else:
-                                    endpoint.status = "active_500"
+                                    endpoint.status = Webhook_Endpoints.STATUS_ACTIVE_500
                                     endpoint.first_error = now
 
                         # Well, we really accepts only 200 and 201
                         else:
-                            endpoint.status = "inactive_others"
+                            endpoint.status = Webhook_Endpoints.STATUS_INACTIVE_OTHERS
                             endpoint.first_error = now
 
                         endpoint.last_error = now
