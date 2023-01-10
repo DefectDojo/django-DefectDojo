@@ -4121,13 +4121,21 @@ class NotificationsAdmin(admin.ModelAdmin):
 
 
 class Webhook_Endpoints(models.Model):
+    _STATUS_ACTIVE = "active"
+    _STATUS_INACTIVE = "inactive"
+    STATUS_ACTIVE = f"{_STATUS_ACTIVE}"
+    STATUS_INACTIVE_400 = f"{_STATUS_INACTIVE}_400"
+    STATUS_ACTIVE_500 = f"{_STATUS_ACTIVE}_500"
+    STATUS_INACTIVE_500 = f"{_STATUS_INACTIVE}_500"
+    STATUS_INACTIVE_OTHERS = f"{_STATUS_INACTIVE}_others"
+    STATUS_INACTIVE_MANUAL = f"{_STATUS_INACTIVE}_manual"
     STATUS_CHOICES = (
-        ("active", "Active"),
-        ("inactive_400", "Inactive because of 4xx error"),
-        ("active_500", "Active but 5xx error detected"),
-        ("inactive_500", "Inactive because of 5xx error"),
-        ("inactive_others", "Inactive because of status code unsupported"),
-        ("inactive_manual", "Inactive because of manual deactivation"),
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_INACTIVE_400, "Inactive because of 4xx error"),
+        (STATUS_ACTIVE_500, "Active but 5xx error detected"),
+        (STATUS_INACTIVE_500, "Inactive because of 5xx error"),
+        (STATUS_INACTIVE_OTHERS, "Inactive because of status code unsupported"),
+        (STATUS_INACTIVE_MANUAL, "Inactive because of manual deactivation"),
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active", blank=False)
     name = models.CharField(max_length=100, default='', blank=False, unique=True,
