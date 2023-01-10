@@ -1,4 +1,5 @@
 import requests
+from requests.exceptions import JSONDecodeError as RequestsJSONDecodeError
 
 from dojo.models import Tool_Configuration, Tool_Type
 from dojo.utils import prepare_for_view
@@ -369,7 +370,14 @@ class SonarQubeAPI:
         if not response.ok:
             raise Exception(f'Unable to connect and search in SonarQube due to {response.status_code} - {response.content.decode("utf-8")}')
 
-        num_projects = response.json()['paging']['total']
+        try:
+            num_projects = response.json()['paging']['total']
+        except RequestsJSONDecodeError:
+            raise Exception(f"""
+                Test request was successful (there was no HTTP-4xx or HTTP-5xx) but response doesn't contain expected JSON response.
+                SonarQube responded with HTTP-{response.status_code} ({response.reason}).
+                This is full response: {response.text}
+                """)
         return f'You have access to {num_projects} projects'
 
     def test_product_connection(self, api_scan_configuration):
