@@ -821,7 +821,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         logger.debug(response)
         logger.debug(response.data)
         self.assertEqual(201, response.status_code, response.content[:1000])
-       
+
     def test_update_patch_unsuccessful(self):
         anoher_finding_payload = self.payload.copy()
         anoher_finding_payload['finding'] = 3
