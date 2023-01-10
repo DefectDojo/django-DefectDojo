@@ -651,8 +651,6 @@ CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 
 # A list of trusted origins for unsafe requests (e.g. POST).
 # Use comma-separated list of domains, they will be split to list automatically
-# DefectDojo is running on Django version 3.2. Format of DD_CSRF_TRUSTED_ORIGINS may change in future when it will be upgraded to Django version 4.0
-# Please see: https://docs.djangoproject.com/en/4.0/ref/settings/#std-setting-CSRF_TRUSTED_ORIGINS
 CSRF_TRUSTED_ORIGINS = env('DD_CSRF_TRUSTED_ORIGINS')
 
 # Unless set to None, the SecurityMiddleware sets the Cross-Origin Opener Policy
