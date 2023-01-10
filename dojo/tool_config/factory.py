@@ -10,7 +10,7 @@ SCAN_APIS = {
                 'Bugcrowd API': BugcrowdAPI,
                 'BlackDuck API': BlackduckAPI,
                 'Cobalt.io': CobaltAPI,
-                'Edgescan API': EdgescanAPI,
+                'Edgescan': EdgescanAPI,
                 'SonarQube': SonarQubeAPI,
                 'Vulners': VulnersAPI,
              }

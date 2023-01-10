@@ -1,9 +1,10 @@
 from .dojo_test_case import DojoTestCase
-from dojo.tools.factory import get_api_scan_configuration_hints
+from dojo.tools.factory import get_api_scan_configuration_hints, PARSERS
+from dojo.tool_config.factory import SCAN_APIS
 from dojo.models import Tool_Configuration, Tool_Type
 
 
-class TestApiScanConfigEmpty(DojoTestCase):
+class TestApiScanConfigEntry(DojoTestCase):
 
     def setUp(self):
         tool_type, _ = Tool_Type.objects.get_or_create(name='SonarQube')
@@ -11,9 +12,15 @@ class TestApiScanConfigEmpty(DojoTestCase):
 
     def test_base(self):
         acsh = get_api_scan_configuration_hints()
-        self.assertEqual(len(acsh), 5, acsh)
+        self.assertEqual(len(acsh), 6, acsh)
 
         i = 0
+        with self.subTest('BlackDuck API'):
+            self.assertEqual(acsh[i]['name'], 'BlackDuck API')
+            self.assertEqual(acsh[i]['tool_type_name'], 'BlackDuck API')
+            self.assertEqual(acsh[i]['hint'], 'the field <b>Service key 1</b> has to be set to ID of the project from which to import findings. <b>Service key 2</b> has to be set to the version of the project')
+
+        i += 1
         with self.subTest('Bugcrowd'):
             self.assertEqual(acsh[i]['name'], 'Bugcrowd API Import')
             self.assertEqual(acsh[i]['tool_type_name'], 'Bugcrowd API')
@@ -45,9 +52,20 @@ class TestApiScanConfigEmpty(DojoTestCase):
 
     def test_counts(self):
         acsh = get_api_scan_configuration_hints()
-        self.assertEqual(acsh[0]['tool_types'].count(), 0)
-        self.assertEqual(acsh[0]['tool_configurations'].count(), 0)
-        self.assertEqual(acsh[3]['tool_types'].count(), 1)
-        self.assertEqual(acsh[3]['tool_configurations'].count(), 1)
+        self.assertEqual(acsh[1]['tool_types'].count(), 0)
+        self.assertEqual(acsh[1]['tool_configurations'].count(), 0)
+        self.assertEqual(acsh[4]['tool_types'].count(), 1)
+        self.assertEqual(acsh[4]['tool_configurations'].count(), 1)
 
-# TODO test missing test
+    def test_has_functions(self):
+        for parser_name, parser in PARSERS.items():
+            if parser.__module__.startswith('dojo.tools.api_'):
+                with self.subTest(parser_name):
+                    self.assertTrue(hasattr(parser, "requires_tool_type"), "All API parsers should have function 'requires_tool_type'")
+
+                    scan_type = parser.get_scan_types()[0]
+                    tool_type = parser.requires_tool_type(scan_type)
+
+                    self.assertIn(tool_type, SCAN_APIS, "All API parsers should be defined in dojo.tool_config.factory.SCAN_APIS")
+
+                    self.assertTrue(hasattr(parser, "api_scan_configuration_hint"), "All API parsers should have function 'api_scan_configuration_hint'")

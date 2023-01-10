@@ -27,6 +27,9 @@ class ApiBlackduckParser(object):
     def requires_tool_type(self, scan_type):
         return SCAN_TYPE_ID
 
+    def api_scan_configuration_hint(self):
+        return 'the field <b>Service key 1</b> has to be set to ID of the project from which to import findings. <b>Service key 2</b> has to be set to the version of the project'
+
     def get_findings(self, file, test):
         if file is None:
             data = BlackduckApiImporter().get_findings(test)
