@@ -268,11 +268,11 @@ def view_finding(request, fid):
     logger.debug(findings)
     try:
         prev_finding_id = findings[(list(findings).index(finding.id)) - 1]
-    except AssertionError:
+    except (AssertionError, ValueError):
         prev_finding_id = finding.id
     try:
         next_finding_id = findings[(list(findings).index(finding.id)) + 1]
-    except IndexError:
+    except (IndexError, ValueError):
         next_finding_id = finding.id
 
     cred_finding = Cred_Mapping.objects.filter(
