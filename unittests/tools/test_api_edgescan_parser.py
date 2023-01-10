@@ -7,28 +7,28 @@ from dojo.models import Test
 class TestApiEdgescanParser(TestCase):
 
     def test_get_scan_types(self):
-        parser = EdgescanParser()
+        parser = ApiEdgescanParser()
         self.assertEqual(parser.get_scan_types(), ["Edgescan Scan"])
 
     def test_get_label_for_scan_types(self):
         scan_type = "Edgescan Scan"
-        parser = EdgescanParser()
+        parser = ApiEdgescanParser()
         self.assertEqual(parser.get_label_for_scan_types(scan_type), "Edgescan Scan")
 
     def get_description_for_scan_types(self):
         scan_type = "Edgescan Scan"
-        parser = EdgescanParser()
+        parser = ApiEdgescanParser()
         self.assertEqual(
             parser.get_description_for_scan_types(scan_type),
             "Edgescan findings can be imported by API or JSON file."
         )
 
     def test_requires_file(self):
-        parser = EdgescanParser()
+        parser = ApiEdgescanParser()
         self.assertEqual(parser.requires_file("scan_type"), False)
 
     def test_requires_tool_type(self):
-        parser = EdgescanParser()
+        parser = ApiEdgescanParser()
         self.assertEqual(parser.requires_tool_type("scan_type"), "Edgescan")
 
     def test_parse_file_with_no_vuln_has_no_findings(self):

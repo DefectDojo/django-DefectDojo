@@ -11,7 +11,7 @@ class TestApiScanConfigEmpty(DojoTestCase):
 
     def test_base(self):
         acsh = get_api_scan_configuration_hints()
-        self.assertEqual(len(acsh), 4, acsh)
+        self.assertEqual(len(acsh), 5, acsh)
 
         i = 0
         with self.subTest('Bugcrowd'):
