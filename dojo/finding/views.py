@@ -1291,7 +1291,7 @@ def add_stub_finding(request, tid):
                 messages.SUCCESS,
                 'Stub Finding created successfully.',
                 extra_tags='alert-success')
-            if request.is_ajax():
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 data = {
                     'message': 'Stub Finding created successfully.',
                     'id': stub_finding.id,
@@ -1301,7 +1301,7 @@ def add_stub_finding(request, tid):
                 }
                 return HttpResponse(json.dumps(data))
         else:
-            if request.is_ajax():
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 data = {
                     'message':
                     'Stub Finding form has error, please revise and try again.',
