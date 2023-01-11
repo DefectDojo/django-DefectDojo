@@ -119,6 +119,7 @@ In that case, an "API parser" is needed. Core code is the same as a regular pars
    - ex: `return 'the field <b>Service key 1</b> has to be set to ID of the project. <b>Service key 2</b> has to be set to the version of the project'`
 4. Parser *MUST* implemets function `def requires_tool_type(self, scan_type)` which returns name of the required `Tool_Type`. 
 5. Parser *MUST NOT* create related `Tool_Type`. It will be created automatically based on the function `requires_tool_type`.
+6. API client *SHOULD* implemets `def test_connection(self):` and `def test_product_connection(self, api_scan_configuration):` to be able to test connectivity and test permissions. It should return string with a sucessfull status (like _you have access to 125 projects_) or raise an exception.
 
 ## Template Generator
 
