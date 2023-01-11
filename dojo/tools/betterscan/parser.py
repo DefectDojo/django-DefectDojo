@@ -21,7 +21,7 @@ class BetterscanParser(object):
         return ["Betterscan.io"]
 
     def get_label_for_scan_types(self, scan_type):
-        return ["Betterscan Scan"] 
+        return ["Betterscan Scan"]
 
     def get_description_for_scan_types(self, scan_type):
         return "Import Betterscan.io scan results"
