@@ -166,7 +166,8 @@ class DojoDefaultReImporter(object):
                             finding.active = False
                             if verified is not None:
                                 finding.verified = verified
-                    if not finding.component_name or not finding.component_version:
+
+                    if (component_name is not None and not finding.component_name) or (component_version is not None and not finding.component_version):
                         finding.component_name = finding.component_name if finding.component_name else component_name
                         finding.component_version = finding.component_version if finding.component_version else component_version
                         finding.save(dedupe_option=False)
