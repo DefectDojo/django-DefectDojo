@@ -24,7 +24,6 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from django.utils.timezone import now
-from django.contrib.humanize.templatetags.humanize import naturaltime
 
 from rest_framework.authtoken.models import Token
 
