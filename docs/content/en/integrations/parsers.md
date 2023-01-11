@@ -85,6 +85,9 @@ Azure Security Center recommendations can be exported from the user interface in
 
 JSON report format
 
+## Betterscan
+
+SARIF report format
 
 ### Blackduck API
 
