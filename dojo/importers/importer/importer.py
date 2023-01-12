@@ -68,6 +68,7 @@ class DojoDefaultImporter(object):
         logger.debug('starting import of %i items.', len(items) if items else 0)
         i = 0
         group_names_to_findings_dict = {}
+
         for item in items:
             # FIXME hack to remove when all parsers have unit tests for this attribute
             if item.severity.lower().startswith('info') and item.severity != 'Info':
@@ -179,7 +180,6 @@ class DojoDefaultImporter(object):
         sync = kwargs.get('sync', False)
         if not sync:
             return [serializers.serialize('json', [finding, ]) for finding in new_findings]
-
         return new_findings
 
     def close_old_findings(self, test, scan_date_time, user, push_to_jira=None, service=None, close_old_findings_product_scope=False):
