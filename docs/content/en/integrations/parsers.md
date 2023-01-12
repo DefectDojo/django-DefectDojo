@@ -578,6 +578,7 @@ vulnerabilityAlerts (RepositoryVulnerabilityAlert object)
                 + description
                 + identifiers
                     + value
+                    + cve (optional)
                 + references (optional)
                     + url (optional)
                 + cvss (optional)
