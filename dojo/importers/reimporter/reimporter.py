@@ -17,6 +17,7 @@ from dojo.models import (BurpRawRequestResponse, FileUpload, Finding,
 from dojo.tools.factory import get_parser
 from dojo.utils import get_current_user, is_finding_groups_enabled
 from django.db.models import Q
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -26,6 +27,7 @@ class DojoDefaultReImporter(object):
 
     @dojo_async_task
     @app.task(ignore_result=False)
+    @transaction.atomic(durable=True)
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active=None, verified=None, minimum_severity=None,
                                 endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None,
                                 do_not_reactivate=False, create_finding_groups_for_all_findings=True, **kwargs):

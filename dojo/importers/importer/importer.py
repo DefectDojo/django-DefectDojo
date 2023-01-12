@@ -17,6 +17,7 @@ from dojo.models import (BurpRawRequestResponse, FileUpload,
                          Finding, Test, Test_Import, Test_Type)
 from dojo.tools.factory import get_parser
 import logging
+from django.db import transaction
 
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,7 @@ class DojoDefaultImporter(object):
 
     @dojo_async_task
     @app.task(ignore_result=False)
+    @transaction.atomic(durable=True)
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active=None, verified=None, minimum_severity=None,
                                 endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None,
                                 create_finding_groups_for_all_findings=True, **kwargs):
