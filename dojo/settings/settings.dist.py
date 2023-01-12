@@ -26,6 +26,7 @@ env = environ.Env(
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
     DD_SECURE_SSL_REDIRECT=(bool, False),
+    DD_SECURE_CROSS_ORIGIN_OPENER_POLICY=(str, 'same-origin'),
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
@@ -652,9 +653,11 @@ CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 
 # A list of trusted origins for unsafe requests (e.g. POST).
 # Use comma-separated list of domains, they will be split to list automatically
-# DefectDojo is running on Django version 3.2. Format of DD_CSRF_TRUSTED_ORIGINS may change in future when it will be upgraded to Django version 4.0
-# Please see: https://docs.djangoproject.com/en/4.0/ref/settings/#std-setting-CSRF_TRUSTED_ORIGINS
 CSRF_TRUSTED_ORIGINS = env('DD_CSRF_TRUSTED_ORIGINS')
+
+# Unless set to None, the SecurityMiddleware sets the Cross-Origin Opener Policy
+# header on all responses that do not already have it to the value provided.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = env('DD_SECURE_CROSS_ORIGIN_OPENER_POLICY') if env('DD_SECURE_CROSS_ORIGIN_OPENER_POLICY') != 'None' else None
 
 if env('DD_SECURE_PROXY_SSL_HEADER'):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
