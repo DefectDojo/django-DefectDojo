@@ -144,7 +144,6 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
         except (MultipleObjectsReturned):
             raise Exception("Endpoints in your database are broken. Please access {} and migrate them to new format or "
                             "remove them.".format(reverse('endpoint_migrate')))
-
         eps, created = Endpoint_Status.objects.get_or_create(
             finding=finding,
             endpoint=ep,

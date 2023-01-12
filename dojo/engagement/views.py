@@ -56,6 +56,8 @@ from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 import dojo.notifications.helper as notifications_helper
 from dojo.endpoint.utils import save_endpoints_to_add
 
+from django.db import transaction
+
 
 logger = logging.getLogger(__name__)
 
@@ -574,6 +576,7 @@ def add_tests(request, eid):
 
 
 # Cant use the easy decorator because of the potential for either eid/pid being used
+@transaction.atomic(durable=True)
 def import_scan_results(request, eid=None, pid=None):
     engagement = None
     form = ImportScanForm()

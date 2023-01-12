@@ -72,7 +72,6 @@ def endpoint_filter(**kwargs):
 
     return qs
 
-
 def endpoint_get_or_create(**kwargs):
 
     qs = endpoint_filter(**kwargs)
