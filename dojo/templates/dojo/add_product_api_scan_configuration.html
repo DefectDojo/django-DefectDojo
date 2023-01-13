@@ -15,16 +15,20 @@
         </div>
     </form>
     <div class="alert alert-info">
-        API Scan Configurations are supported for the test types SonarQube API, Cobalt.io API and Edgescan API.
-    <ul>
-        <li>For <b>SonarQube API</b> the field <b>Service key 1</b> has to be set with the SonarQube project key.
-            <b>Service key 2</b> can be used for the Organization ID if using SonarCloud.</li>   
-        <li>For <b>Bugcrowd API</b> the field <b>Service key 1</b> has to be set with the Bugcrowd program code.
-            <b>Service key 2</b> can be set with the target in the Bugcrowd program (will be url encoded for the api call), if not supplied, will fetch all submissions in the program</li> 
-        <li>For <b>Cobalt.io API</b> the field <b>Service key 1</b> has to be set with the Cobalt.io asset id. 
-            <b>Service key 2</b> will be populated with the asset name while saving the configuration.</li>   
-        <li>For <b>Edgescan API</b> the field <b>Service key 1</b> has to be set with the Edgescan asset id.</li>
-    </ul>
+        API Scan Configurations are supported for these test types.
+        <ul>
+        {% for hint in api_scan_configuration_hints %}
+            <li>
+                {% if hint.tool_types.count == 0 %}
+                    <a id="link_tt_{{ hint.id }}" href="{% url 'add_tool_type' %}?name={{ hint.tool_type_name }}">Parser <b>{{ hint.name }}</b> requires created tool type <b>{{ hint.tool_type_name }}</b>.</a>
+                {% elif hint.tool_configurations.count == 0 %}
+                    <a id="link_tc_{{ hint.id }}" href="{% url 'add_tool_config' %}?tool_type={{ hint.tool_types.first.id }}">Tool type <b>{{ hint.tool_type_name }}</b> exists however parser <b>{{ hint.name }}</b> requires at least one tool configuration.</a>
+                {% else %}
+                    <b>{{ hint.name }}</b>: {{ hint.hint | safe }}
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
     </div>
 {% endblock %}
 {% block postscript %}
