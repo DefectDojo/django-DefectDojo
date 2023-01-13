@@ -151,3 +151,17 @@ class APITrailingSlashMiddleware:
             response._is_rendered = False
             response.render()
         return response
+
+
+class AdditionalHeaderMiddleware:
+    """
+    Middleware that will add an arbitray amount of HTTP Request headers toall requests.
+    """
+
+    def __init__(self, get_response):
+
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request.META.update(settings.ADDITIONAL_HEADERS)
+        return self.get_response(request)
