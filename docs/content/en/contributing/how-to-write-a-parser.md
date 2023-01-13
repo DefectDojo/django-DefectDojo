@@ -39,6 +39,7 @@ $ docker-compose build --build-arg uid=1000
 |`unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
 |`unittests/tools/test_<parser_name>_parser.py` | Unit tests of the parser.
 |`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
+|`doc/content/en/integrations/parsers`          | Documentation, what kind of file format is required and how it should be obtained 
 
 ## Factory contract
 
@@ -90,6 +91,35 @@ class MyToolParser(object):
         <...>
 
 ```
+
+## API Parsers
+
+Some reports are not reachable as a file that the user or pipeline can upload but the results of the scans have to be downloaded via API (or we just want to add support for multiple methods).
+In that case, an "API parser" is needed. Core code is the same as a regular parser but there are some additional requirements.
+
+### Which files do you need to modify? (API Parsers only)
+
+| File                                              | Purpose
+|-------                                            |--------
+|`dojo/tools/api_<parser_dir>/api_client.py`        | API client should perform all HTTP API calls and JSON with data from the API
+|`dojo/tools/api_<parser_dir>/importer.py`          | Importer should prepare the API client and process its results
+|`dojo/tools/api_<parser_dir>/parser.py`            | Parser should fetch processed data from the importer
+|`unittests/tools/test_api_<parser_name>_parser.py` | Unit tests of the parser.
+|`unittests/tools/test_api_<parser_name>_importer.py` | Unit tests of the importer.
+|`dojo/tool_config/factory.py`                      | Parser must be listed in `SCAN_APIS`
+|`unittests/test_tool_config.py`                    | Unit tests for content of hints and other metadata
+
+### Factory contract (API Parsers only)
+
+1. Parser directory *MUST* starts with `api_`
+   - ex: `dojo/tools/api_mytool`
+2. class-name of parser *MUST* starts with `Api`
+   - ex: `ApiMytoolParser`
+3. Parser *MUST* implements function `def api_scan_configuration_hint(self)` which returns a string with a hint, on how to configure service keys in Product ...TODO. Using of HTML tag `<b>` is required. Help will be rendered on the website.
+   - ex: `return 'the field <b>Service key 1</b> has to be set to ID of the project. <b>Service key 2</b> has to be set to the version of the project'`
+4. Parser *MUST* implemets function `def requires_tool_type(self, scan_type)` which returns name of the required `Tool_Type`. 
+5. Parser *MUST NOT* create related `Tool_Type`. It will be created automatically based on the function `requires_tool_type`.
+6. API client *SHOULD* implemets `def test_connection(self):` and `def test_product_connection(self, api_scan_configuration):` to be able to test connectivity and test permissions. It should return string with a sucessfull status (like _you have access to 125 projects_) or raise an exception.
 
 ## Template Generator
 
@@ -283,6 +313,12 @@ for finding in findings:
     for endpoint in finding.unsaved_endpoints:
         endpoint.clean()
 ```
+
+### Tests API Parsers
+
+Not only parser but also importer should be tested.
+`patch` method from `unittest.mock` is usualy usefull for simulating API responses.
+It is highly recommeded to use it.
 
 ## Other files that could be involved
 
