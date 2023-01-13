@@ -3361,10 +3361,13 @@ class JIRA_Instance(models.Model):
                                         ('Bug', 'Bug'),
                                         ('Security', 'Security')
                                     )
-    default_issue_type = models.CharField(max_length=15,
-                                          choices=default_issue_type_choices,
-                                          default='Bug',
-                                          help_text=_('You can define extra issue types in settings.py'))
+    if hasattr(settings, 'JIRA_DEFAULT_ISSUE_TYPE'):
+        default_issue_type = settings.JIRA_DEFAULT_ISSUE_TYPE
+    else:
+        default_issue_type = models.CharField(max_length=15,
+                                            choices=default_issue_type_choices,
+                                            default='Bug',
+                                            help_text=_('You can define extra issue types in settings.py'))
     issue_template_dir = models.CharField(max_length=255,
                                       null=True,
                                       blank=True,
