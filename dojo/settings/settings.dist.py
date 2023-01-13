@@ -85,6 +85,8 @@ env = environ.Env(
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
+    DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
+    DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
     DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
     DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
     DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
@@ -495,6 +497,8 @@ SOCIAL_AUTH_PIPELINE = (
 
 CLASSIC_AUTH_ENABLED = True
 FORGOT_PASSWORD = env('DD_FORGOT_PASSWORD')
+FORGOT_USERNAME = env('DD_FORGOT_USERNAME')
+PASSWORD_RESET_TIMEOUT = env('DD_PASSWORD_RESET_TIMEOUT')
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
 SHOW_LOGIN_FORM = env('DD_SOCIAL_AUTH_SHOW_LOGIN_FORM')
 SOCIAL_LOGIN_AUTO_REDIRECT = env('DD_SOCIAL_LOGIN_AUTO_REDIRECT')
@@ -593,6 +597,7 @@ LOGIN_EXEMPT_URLS = (
     r'complete/',
     r'empty_questionnaire/([\d]+)/answer',
     r'^%spassword_reset/' % URL_PREFIX,
+    r'^%sforgot_username' % URL_PREFIX,
     r'^%sreset/' % URL_PREFIX,
 )
 
