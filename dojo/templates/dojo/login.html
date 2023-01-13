@@ -29,9 +29,16 @@
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success">Login</button>
                     </div>
-                    {% if FORGOT_PASSWORD %}
-                        <div class="col-sm-3">
-                            <a id="reset-password" href="{% url 'password_reset' %}">I forgot my password</a>
+                    {% if FORGOT_PASSWORD or FORGOT_USERNAME %}
+                        <div class="col-sm-4">
+                            <ul style="list-style-type: none">
+                                {% if FORGOT_PASSWORD %}
+                                    <li><a id="reset-password" href="{% url 'password_reset' %}">I forgot my password</a></li>
+                                {% endif %}
+                                {% if FORGOT_USERNAME %}
+                                    <li><a id="forgot-username" href="{% url 'forgot_username' %}">I forgot my username</a></li>
+                                {% endif %}
+                            </ul>
                         </div>
                     {% endif %}
                 {% endif %}
