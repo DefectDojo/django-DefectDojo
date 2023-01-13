@@ -653,7 +653,9 @@ CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 
 # A list of trusted origins for unsafe requests (e.g. POST).
 # Use comma-separated list of domains, they will be split to list automatically
-CSRF_TRUSTED_ORIGINS = env('DD_CSRF_TRUSTED_ORIGINS')
+# Only specify this settings if the contents is not an empty list (the default)
+if env('DD_CSRF_TRUSTED_ORIGINS') != ['[]']:
+    CSRF_TRUSTED_ORIGINS = env('DD_CSRF_TRUSTED_ORIGINS')
 
 # Unless set to None, the SecurityMiddleware sets the Cross-Origin Opener Policy
 # header on all responses that do not already have it to the value provided.
