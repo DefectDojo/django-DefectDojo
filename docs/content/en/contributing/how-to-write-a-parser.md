@@ -39,7 +39,7 @@ $ docker-compose build --build-arg uid=1000
 |`unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
 |`unittests/tools/test_<parser_name>_parser.py` | Unit tests of the parser.
 |`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
-|`doc/content/en/integrations/parsers`          | Documentation, what kind of file format is required and how it should be obtained 
+|`doc/content/en/integrations/parsers/<file/api_pull>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained 
 
 ## Factory contract
 
