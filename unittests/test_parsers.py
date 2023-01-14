@@ -3,6 +3,7 @@ import os
 
 basedir = os.path.join(get_unit_tests_path(), '..')
 
+
 class TestParsers(DojoTestCase):
     def test_file_existence(self):
         for parser_dir in os.scandir(os.path.join(basedir, 'dojo', 'tools')):
