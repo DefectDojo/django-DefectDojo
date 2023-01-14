@@ -2,6 +2,8 @@
 title: "Bugcrowd API"
 toc_hide: true
 ---
+All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
+
 In `Tool Configuration`, select `Tool Type` to "Bugcrowd API" and `Authentication Type` "API Key".
 Paste your BlackDuck API token in the `API Key` field.
 Set your API key directly in the format `username:password` in the API Token input, it will be added to the header `'Authorization': 'Token {}'.format(self.api_token),`

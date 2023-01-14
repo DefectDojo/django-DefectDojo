@@ -2,6 +2,10 @@
 title: "Edgescan"
 toc_hide: true
 ---
+Import Edgescan vulnerabilities by API or [JSON file](../../file/edgescan.md)
+
+All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
+
 In `Tool Configuration`, select `Tool Type` to "Edgescan" and `Authentication Type` "API Key".
 Paste your Edgescan API key in the `API Key` field.
 

@@ -2,6 +2,8 @@
 title: "Blackduck API"
 toc_hide: true
 ---
+All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
+
 In `Tool Configuration`, select `Tool Type` to "BlackDuck API" and `Authentication Type` "API Key".
 Paste your BlackDuck API token in the `API Key` field.
 

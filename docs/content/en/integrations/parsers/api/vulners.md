@@ -2,6 +2,8 @@
 title: "Vulners"
 toc_hide: true
 ---
+All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
+
 Import Vulners [Audit](https://vulners.com/docs/API_wrapper/linux_audit/#linux-audit) results, no file required.
 
 In `Tool Configuration`, select `Tool Type` to "Vulners" and add the API Key
