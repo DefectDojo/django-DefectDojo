@@ -73,6 +73,10 @@ class DojoDefaultReImporter(object):
             if service:
                 item.service = service
 
+            if item.dynamic_finding:
+                for e in item.unsaved_endpoints:
+                    e.clean()
+
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
 
