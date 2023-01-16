@@ -1,6 +1,7 @@
 import contextlib
 import logging
 from crum import get_current_user
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
@@ -22,6 +23,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
+from django.utils.timezone import now
 
 from rest_framework.authtoken.models import Token
 
@@ -600,13 +602,15 @@ def edit_permissions(request, uid):
     return HttpResponseRedirect(reverse('view_user', args=(uid,)))
 
 
-class DojoPasswordResetForm(PasswordResetForm):
+class DojoForgotUsernameForm(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
 
         from_email = get_system_setting('email_from')
 
         url = hyperlink.parse(settings.SITE_URL)
+        subject_template_name = 'dojo/forgot_username_subject.html'
+        email_template_name = 'notifications/mail/forgot_username.tpl'
         context['site_name'] = url.host
         context['protocol'] = url.scheme
         context['domain'] = settings.SITE_URL[len(f'{url.scheme}://'):]
@@ -623,5 +627,34 @@ class DojoPasswordResetForm(PasswordResetForm):
             raise ValidationError("SMTP server is not configured correctly...")
 
 
+class DojoPasswordResetForm(PasswordResetForm):
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+
+        from_email = get_system_setting('email_from')
+
+        url = hyperlink.parse(settings.SITE_URL)
+        email_template_name = 'notifications/mail/forgot_password.tpl'
+        context['site_name'] = url.host
+        context['protocol'] = url.scheme
+        context['domain'] = settings.SITE_URL[len(f'{url.scheme}://'):]
+        context['link_expiration_date'] = naturaltime(now() + timedelta(seconds=settings.PASSWORD_RESET_TIMEOUT))
+
+        super().send_mail(subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name)
+
+    def clean(self):
+        try:
+            connection = get_connection()
+            if isinstance(connection, EmailBackend):
+                connection.open()
+                connection.close()
+        except Exception:
+            raise ValidationError("SMTP server is not configured correctly...")
+
+
 class DojoPasswordResetView(PasswordResetView):
     form_class = DojoPasswordResetForm
+
+
+class DojoForgotUsernameView(PasswordResetView):
+    form_class = DojoForgotUsernameForm

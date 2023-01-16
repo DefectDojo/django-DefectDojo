@@ -238,5 +238,14 @@ else
     # else
     #     echo "Error: Zap integration test failed"; exit 1
     # fi
+
+    test="Tool Config integration tests"
+    echo "Running: $test"
+    if python3 tests/tool_config.py ; then
+        success $test
+    else
+        fail $test
+    fi
+
     exec echo "Done Running all configured integration tests."
 fi
