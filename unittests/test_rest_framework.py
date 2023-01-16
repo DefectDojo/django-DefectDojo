@@ -810,6 +810,18 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         self.assertEqual(400, response.status_code, response.content[:1000])
         self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
 
+    def test_create_minimal(self):
+        # This call should not fail even if there is not date defined
+        minimal_payload = {
+            'endpoint': 1,
+            'finding': 3,
+        }
+        response = self.client.post(self.url, minimal_payload)
+        logger.debug('test_create_response:')
+        logger.debug(response)
+        logger.debug(response.data)
+        self.assertEqual(201, response.status_code, response.content[:1000])
+
     def test_update_patch_unsuccessful(self):
         anoher_finding_payload = self.payload.copy()
         anoher_finding_payload['finding'] = 3
