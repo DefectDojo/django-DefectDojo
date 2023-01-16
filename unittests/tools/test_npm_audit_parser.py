@@ -6,14 +6,14 @@ from dojo.models import Test
 
 class TestNpmAuditParser(DojoTestCase):
     def test_npm_audit_parser_with_no_vuln_has_no_findings(self):
-        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/no_vuln.json"))
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/no_vuln.json"))
         parser = NpmAuditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_npm_audit_parser_with_one_criticle_vuln_has_one_findings(self):
-        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/one_vuln.json"))
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/one_vuln.json"))
         parser = NpmAuditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -23,7 +23,7 @@ class TestNpmAuditParser(DojoTestCase):
         self.assertEqual("1.9.2", findings[0].component_version)
 
     def test_npm_audit_parser_with_many_vuln_has_many_findings(self):
-        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/many_vuln.json"))
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/many_vuln.json"))
         parser = NpmAuditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -43,7 +43,7 @@ class TestNpmAuditParser(DojoTestCase):
 
     def test_npm_audit_parser_multiple_cwes_per_finding(self):
         # cwes formatted as escaped list: "cwe": "[\"CWE-346\",\"CWE-453\"]",
-        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/multiple_cwes.json"))
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/multiple_cwes.json"))
         parser = NpmAuditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -53,7 +53,7 @@ class TestNpmAuditParser(DojoTestCase):
 
     def test_npm_audit_parser_multiple_cwes_per_finding_list(self):
         # cwes formatted as proper list: "cwe": ["CWE-918","CWE-1333"],
-        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/multiple_cwes2.json"))
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/multiple_cwes2.json"))
         parser = NpmAuditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -61,7 +61,7 @@ class TestNpmAuditParser(DojoTestCase):
         self.assertEqual(918, findings[0].cwe)
 
     def test_npm_audit_parser_with_one_criticle_vuln_has_null_as_cwe(self):
-        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/cwe_null.json"))
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/cwe_null.json"))
         parser = NpmAuditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -72,7 +72,7 @@ class TestNpmAuditParser(DojoTestCase):
 
     def test_npm_audit_parser_empty_with_error(self):
         with self.assertRaises(ValueError) as context:
-            testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/empty_with_error.json"))
+            testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/empty_with_error.json"))
             parser = NpmAuditParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
@@ -81,7 +81,7 @@ class TestNpmAuditParser(DojoTestCase):
 
     def test_npm_audit_parser_many_vuln_npm7(self):
         with self.assertRaises(ValueError) as context:
-            testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/many_vuln_npm7.json"))
+            testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/many_vuln_npm7.json"))
             parser = NpmAuditParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()

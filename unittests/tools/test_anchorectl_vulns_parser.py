@@ -5,13 +5,13 @@ from dojo.models import Test
 
 class TestAnchoreCTLVulnsParser(DojoTestCase):
     def test_anchore_engine_parser_has_no_finding(self):
-        testfile = open("unittests/scans/anchoreCTL_vulns/no_vuln.json")
+        testfile = open("unittests/scans/anchorectl_vulns/no_vuln.json")
         parser = AnchoreCTLVulnsParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_anchore_engine_parser_has_one_finding_and_it_is_correctly_parsed(self):
-        testfile = open("unittests/scans/anchoreCTL_vulns/one_vuln.json")
+        testfile = open("unittests/scans/anchorectl_vulns/one_vuln.json")
         parser = AnchoreCTLVulnsParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -22,7 +22,7 @@ class TestAnchoreCTLVulnsParser(DojoTestCase):
         self.assertEqual(singleFinding.description, '**Image hash**: None\n\n**Package**: libgnutls30-3.5.8-5+deb9u4\n\n**Package path**: None\n\n**Package type**: dpkg\n\n**Feed**: vulnerabilities/debian:9\n\n**CPE**: None\n\n**Description**: That test description\n\n')
 
     def test_anchore_engine_parser_has_many_findings(self):
-        testfile = open("unittests/scans/anchoreCTL_vulns/many_vulns.json")
+        testfile = open("unittests/scans/anchorectl_vulns/many_vulns.json")
         parser = AnchoreCTLVulnsParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
