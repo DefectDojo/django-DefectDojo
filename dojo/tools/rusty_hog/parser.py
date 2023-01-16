@@ -105,7 +105,7 @@ class RustyhogParser(object):
                 if vulnerability.get('location') is not None:
                     description += "\n**JIRA location:** {}".format(vulnerability.get('location'))
                 if vulnerability.get('url') is not None:
-                    description += "\n**JIRA url:** [{}](())".format(vulnerability.get('url'), vulnerability.get('url'))
+                    description += "\n**JIRA url:** [{}]({})".format(vulnerability.get('url'), vulnerability.get('url'))
             elif scanner == "Essex Hog":
                 found_secret_string = vulnerability.get('stringsFound')
                 description = "**This string was found:** {}".format(found_secret_string)
