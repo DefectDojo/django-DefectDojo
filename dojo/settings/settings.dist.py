@@ -260,6 +260,8 @@ env = environ.Env(
     # When disabled, existing user tokens will not be removed but it will not be
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
+    # You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
+    DD_ADDITIONAL_HEADERS=(dict, {}),
 )
 
 
@@ -842,6 +844,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dojo.middleware.LoginRequiredMiddleware',
+    'dojo.middleware.AdditionalHeaderMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
@@ -1618,3 +1621,5 @@ FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
 # Fixes error
 # AttributeError: Problem installing fixture '/app/dojo/fixtures/defect_dojo_sample_data.json': 'Settings' object has no attribute 'AUDITLOG_DISABLE_ON_RAW_SAVE'
 AUDITLOG_DISABLE_ON_RAW_SAVE = False
+#  You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
+ADDITIONAL_HEADERS = env('DD_ADDITIONAL_HEADERS')

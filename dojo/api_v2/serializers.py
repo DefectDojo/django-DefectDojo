@@ -20,7 +20,7 @@ from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIE
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
     Network_Locations, UserContactInfo, Product_API_Scan_Configuration, DEFAULT_NOTIFICATION, \
-    Vulnerability_Id, Vulnerability_Id_Template
+    Vulnerability_Id, Vulnerability_Id_Template, get_current_date
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from dojo.utils import is_scan_file_too_large
@@ -840,7 +840,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         status.false_positive = validated_data.get('false_positive', False)
         status.out_of_scope = validated_data.get('out_of_scope', False)
         status.risk_accepted = validated_data.get('risk_accepted', False)
-        status.date = validated_data.get('date', timezone.now())
+        status.date = validated_data.get('date', get_current_date())
         status.save()
         return status
 
