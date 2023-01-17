@@ -260,8 +260,6 @@ def view_profile(request):
                                  extra_tags='alert-success')
     add_breadcrumb(title=_("User Profile - %(user_full_name)s") % {'user_full_name': user.get_full_name()}, top_level=True, request=request)
     return render(request, 'dojo/profile.html', {
-        'name': 'Engineer Profile',
-        'metric': False,
         'user': user,
         'form': form,
         'contact_form': contact_form,
@@ -291,28 +289,28 @@ def change_password(request):
             return HttpResponseRedirect(reverse('view_profile'))
 
     add_breadcrumb(title=_("Change Password"), top_level=False, request=request)
-    return render(request, 'dojo/change_pwd.html', {
-        'name': 'ChangePassword',
-        'form': form})
+    return render(request, 'dojo/change_pwd.html', { 'form': form })
 
 
 @user_is_configuration_authorized('auth.view_user')
 def user(request):
+    page_name = _("All Users")
     users = Dojo_User.objects.all() \
         .select_related('usercontactinfo', 'global_role') \
         .order_by('username', 'last_name', 'first_name')
     users = UserFilter(request.GET, queryset=users)
     paged_users = get_page_items(request, users.qs, 25)
-    add_breadcrumb(title=_("All Users"), top_level=True, request=request)
+    add_breadcrumb(title=page_name, top_level=True, request=request)
     return render(request, 'dojo/users.html', {
         "users": paged_users,
         "filtered": users,
-        "name": "All Users",
+        "name": page_name,
     })
 
 
 @user_is_configuration_authorized('auth.add_user')
 def add_user(request):
+    page_name = _("Add User")
     form = AddDojoUserForm()
     contact_form = UserContactInfoForm()
     global_role_form = GlobalRoleForm()
@@ -326,12 +324,12 @@ def add_user(request):
             if not request.user.is_superuser and form.cleaned_data['is_superuser']:
                 messages.add_message(request,
                                     messages.ERROR,
-                                    'Only superusers are allowed to add superusers. User was not saved.',
+                                    _('Only superusers are allowed to add superusers. User was not saved.'),
                                     extra_tags='alert-danger')
             elif not request.user.is_superuser and global_role_form.cleaned_data['role']:
                 messages.add_message(request,
                                     messages.ERROR,
-                                    'Only superusers are allowed to add users with a global role. User was not saved.',
+                                    _('Only superusers are allowed to add users with a global role. User was not saved.'),
                                     extra_tags='alert-danger')
             else:
                 user = form.save(commit=False)
@@ -358,9 +356,9 @@ def add_user(request):
                                  messages.ERROR,
                                  _('User was not added successfully.'),
                                  extra_tags='alert-danger')
-    add_breadcrumb(title=_("Add User"), top_level=False, request=request)
+    add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/add_user.html", {
-        'name': 'Add User',
+        'name': page_name,
         'form': form,
         'contact_form': contact_form,
         'global_role_form': global_role_form,
@@ -386,6 +384,7 @@ def view_user(request, uid):
 
 @user_is_configuration_authorized('auth.change_user')
 def edit_user(request, uid):
+    page_name = _("Edit User")
     user = get_object_or_404(Dojo_User, id=uid)
     form = EditDojoUserForm(instance=user)
 
@@ -441,9 +440,9 @@ def edit_user(request, uid):
                                 messages.ERROR,
                                 _('User was not saved successfully.'),
                                 extra_tags='alert-danger')
-    add_breadcrumb(title=_("Edit User"), top_level=False, request=request)
+    add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/add_user.html", {
-        'name': 'Edit User',
+        'name': page_name,
         'form': form,
         'contact_form': contact_form,
         'global_role_form': global_role_form,
@@ -486,7 +485,7 @@ def delete_user(request, uid):
                     except RestrictedError as err:
                         messages.add_message(request,
                                             messages.WARNING,
-                                            'User cannot be deleted: {}'.format(err),
+                                            _('User cannot be deleted: %(error)s') % {'error': err},
                                             extra_tags='alert-warning')
                     return HttpResponseRedirect(reverse('users'))
 
