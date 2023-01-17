@@ -289,7 +289,7 @@ def change_password(request):
             return HttpResponseRedirect(reverse('view_profile'))
 
     add_breadcrumb(title=_("Change Password"), top_level=False, request=request)
-    return render(request, 'dojo/change_pwd.html', { 'form': form })
+    return render(request, 'dojo/change_pwd.html', {'form': form})
 
 
 @user_is_configuration_authorized('auth.view_user')
