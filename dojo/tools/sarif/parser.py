@@ -18,12 +18,14 @@ class SarifParser(object):
     """
 
     def get_scan_types(self):
-        return ["SARIF"]
+        return ["SARIF", "Betterscan.io"]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
+        if scan_type == "Betterscan.io":
+            return "Import Betterscan.io report. Currently only SARIF Format is supported."
         return "SARIF report file can be imported in SARIF format."
 
     def get_findings(self, filehandle, test):
