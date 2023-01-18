@@ -39,6 +39,11 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
     test.save()
     test.engagement.save()
 
+def update_tags(test, tags):
+    if tags:
+        test.tags = tags
+
+    test.save()
 
 def update_import_history(type, active, verified, tags, minimum_severity, endpoints_to_add, version, branch_tag,
                             build_id, commit_hash, push_to_jira, close_old_findings, test,
@@ -53,7 +58,6 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
     import_settings['push_to_jira'] = push_to_jira
     import_settings['tags'] = tags
 
-    # tags=tags TODO no tags field in api for reimport it seems
     if endpoints_to_add:
         import_settings['endpoints'] = [str(endpoint) for endpoint in endpoints_to_add]
 
