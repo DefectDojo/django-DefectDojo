@@ -12,6 +12,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db.models.expressions import Case, When
+from django.db import transaction
 from django.urls import reverse
 from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.files.base import ContentFile
@@ -2790,8 +2791,8 @@ class Finding(models.Model):
 
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
         if dedupe_option or false_history or issue_updater_option or product_grading_option or push_to_jira:
-            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
-                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
+            transaction.on_commit(lambda: finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
+                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs))
         else:
             logger.debug('no options selected that require finding post processing')
 
