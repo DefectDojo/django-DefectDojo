@@ -39,11 +39,13 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
     test.save()
     test.engagement.save()
 
+
 def update_tags(test, tags):
     if tags:
         test.tags = tags
 
     test.save()
+
 
 def update_import_history(type, active, verified, tags, minimum_severity, endpoints_to_add, version, branch_tag,
                             build_id, commit_hash, push_to_jira, close_old_findings, test,
