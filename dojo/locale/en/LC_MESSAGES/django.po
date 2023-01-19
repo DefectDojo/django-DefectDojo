@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-19 16:41+0000\n"
+"POT-Creation-Date: 2023-01-19 16:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2879,10 +2879,6 @@ msgstr ""
 
 #: dojo/templates/base.html
 msgid "No alerts found"
-msgstr ""
-
-#: dojo/templates/base.html
-msgid "TEST LOCALIZATION STRING"
 msgstr ""
 
 #: dojo/templates/dojo/dashboard-metrics.html
