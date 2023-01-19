@@ -433,6 +433,9 @@ class DojoDefaultReImporter(object):
         logger.debug('REIMPORT_SCAN: Updating test/engagement timestamps')
         importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
 
+        logger.debug('REIMPORT_SCAN: Updating test tags')
+        importer_utils.update_tags(test, tags)
+
         test_import = None
         if settings.TRACK_IMPORT_HISTORY:
             logger.debug('REIMPORT_SCAN: Updating Import History')
