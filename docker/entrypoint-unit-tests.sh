@@ -47,7 +47,7 @@ EOF
     exit 1
 }
 
-python3 manage.py makemessages -l en --no-obsolete --extension html,txt,py,tpl
+python3 manage.py makemessages -l en --no-obsolete --extension html,txt,py,tpl --add-location file
 git diff --exit-code dojo/locale/ || {
     cat <<-EOF
 
