@@ -56,6 +56,10 @@ git diff --exit-code dojo/locale/ || {
 You made changes which affected localization. However, you have not committed or
 staged them.
 
+Run the following command in your enviroment (or start unit-tests, it will run
+command in stead of you) and commit changes:
+python3 manage.py makemessages -l en --no-obsolete --extension html,txt,py,tpl --add-location file --ignore=docs/*
+
 ********************************************************************************
 
 EOF
