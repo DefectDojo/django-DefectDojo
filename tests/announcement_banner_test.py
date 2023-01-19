@@ -17,14 +17,14 @@ class AnnouncementBannerTest(BaseTestCase):
     def test_setup(self):
         driver = self.driver
         driver.get(self.base_url + 'configure_announcement')
-        if(self.is_element_by_css_selector_present('input.btn.btn-danger')):
+        if self.is_element_by_css_selector_present('input.btn.btn-danger'):
             driver.find_element(By.CSS_SELECTOR, 'input.btn.btn-danger').click()
 
     def enable_announcement(self, message, dismissable, style):
         driver = self.driver
         driver.get(self.base_url + 'configure_announcement')
         driver.find_element(By.ID, 'id_message').send_keys(message)
-        
+
         Select(driver.find_element(By.ID, 'id_style')).select_by_visible_text(style)
 
         dismissable_control = driver.find_element(By.ID, 'id_dismissable')
@@ -46,13 +46,13 @@ class AnnouncementBannerTest(BaseTestCase):
         text = 'Big important announcement, definitely pay attention!'
         self.enable_announcement(text, False, self.type)
         self.assertTrue(self.is_success_message_present('Announcement updated successfully.'))
-        
+
         self.assertTrue(self.is_element_by_css_selector_present(f'.announcement-banner.alert-{self.type.lower()}', text=text))
         driver.get(self.base_url)
         self.assertTrue(self.is_element_by_css_selector_present(f'.announcement-banner.alert-{self.type.lower()}', text=text))
         self.disable_announcement()
         self.assertTrue(self.is_success_message_present('Announcement removed for everyone.'))
-    
+
     def test_create_dismissable_announcement(self):
         driver = self.driver
         driver.get(self.base_url)
@@ -61,7 +61,7 @@ class AnnouncementBannerTest(BaseTestCase):
         text = 'Big important announcement, definitely pay don\'t dismiss this one.'
         self.enable_announcement(text, True, self.type)
         self.assertTrue(self.is_success_message_present('Announcement updated successfully.'))
-        
+
         self.assertTrue(self.is_element_by_css_selector_present(f'.announcement-banner.alert-{self.type.lower()}', text=text))
         driver.get(self.base_url)
         self.assertTrue(self.is_element_by_css_selector_present(f'.announcement-banner.alert-{self.type.lower()}', text=text))
@@ -82,7 +82,7 @@ class AnnouncementBannerTest(BaseTestCase):
         text = 'Everyone sees this, right?'
         self.enable_announcement(text, True, self.type)
         self.assertTrue(self.is_success_message_present('Announcement updated successfully.'))
-        
+
         self.assertTrue(self.is_element_by_css_selector_present(f'.announcement-banner.alert-{self.type.lower()}', text=text))
         close_button = driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a/span[contains(text(), '×')]")
         close_button.click()
@@ -99,7 +99,7 @@ class AnnouncementBannerTest(BaseTestCase):
         self.assertFalse(self.is_element_by_css_selector_present(f'.announcement-banner.alert-{self.type.lower()}', text=text))
         self.disable_announcement()
         self.assertTrue(self.is_success_message_present('Announcement removed for everyone.'))
-    
+
     def test_announcement_ui_disabled_when_set(self):
         driver = self.driver
         driver.get(self.base_url)
@@ -108,7 +108,7 @@ class AnnouncementBannerTest(BaseTestCase):
         text = 'The most important announcement of the year.'
         self.enable_announcement(text, False, self.type)
         self.assertTrue(self.is_success_message_present('Announcement updated successfully.'))
-        
+
         self.assertTrue(self.is_element_by_css_selector_present(f'.announcement-banner.alert-{self.type.lower()}', text=text))
         driver.get(self.base_url + 'configure_announcement')
         driver.find_element(By.XPATH, "//input[contains(@id, 'id_message') and @disabled]")
@@ -117,7 +117,7 @@ class AnnouncementBannerTest(BaseTestCase):
 
         self.disable_announcement()
         self.assertTrue(self.is_success_message_present('Announcement removed for everyone.'))
-    
+
     def test_announcement_empty_after_removal(self):
         driver = self.driver
         driver.get(self.base_url)
@@ -126,11 +126,11 @@ class AnnouncementBannerTest(BaseTestCase):
         text = 'Surely no-one would delete this announcement quickly'
         self.enable_announcement(text, False, self.type)
         self.assertTrue(self.is_success_message_present('Announcement updated successfully.'))
-        
+
         self.assertTrue(self.is_element_by_css_selector_present(f'.announcement-banner.alert-{self.type.lower()}', text=text))
         self.disable_announcement()
         self.assertTrue(self.is_success_message_present('Announcement removed for everyone.'))
-        
+
         driver.get(self.base_url + 'configure_announcement')
         driver.find_element(By.XPATH, "//input[contains(@id, 'id_message') and contains(@value,'')]")
         driver.find_element(By.XPATH, "//select[contains(@id, 'id_style')]/option[@selected and contains(text(), 'Info')]")
@@ -144,10 +144,11 @@ class AnnouncementBannerTest(BaseTestCase):
         text = "Links in announcements? <a href='https://github.com/DefectDojo/django-DefectDojo' style='color: #224477;' target='_blank'>you bet!</a>"
         self.enable_announcement(text, False, self.type)
         self.assertTrue(self.is_success_message_present('Announcement updated successfully.'))
-        
+
         driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a[@href='https://github.com/DefectDojo/django-DefectDojo' and @style='color: #224477;' and @target='_blank']")
         self.disable_announcement()
         self.assertTrue(self.is_success_message_present('Announcement removed for everyone.'))
+
 
 def suite():
     suite = unittest.TestSuite()
