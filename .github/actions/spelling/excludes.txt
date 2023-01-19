@@ -56,3 +56,5 @@ ignore$
 \.zip$
 ^\.github/actions/spelling/
 ^\Q.github/workflows/spelling.yml\E$
+(?:^|/)unittests/scans
+(?:^|/)dojo/db_migrations
