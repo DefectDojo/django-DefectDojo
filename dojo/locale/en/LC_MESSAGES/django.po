@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-12 15:11+0000\n"
+"POT-Creation-Date: 2023-01-19 14:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -152,7 +152,7 @@ msgid "Critical Product Metrics"
 msgstr ""
 
 #: dojo/metrics/views.py:153 dojo/metrics/views.py:243
-#: dojo/product/views.py:419
+#: dojo/product/views.py:420
 msgid "All objects have been filtered away. Displaying all objects"
 msgstr ""
 
@@ -921,7 +921,7 @@ msgstr ""
 msgid "Title for SSH/API Key"
 msgstr ""
 
-#: dojo/models.py:1135 dojo/user/views.py:94
+#: dojo/models.py:1135 dojo/user/views.py:96
 msgid "API Key"
 msgstr ""
 
@@ -2177,12 +2177,12 @@ msgstr ""
 msgid "Template notification settings"
 msgstr ""
 
-#: dojo/product/views.py:85
+#: dojo/product/views.py:86
 msgid "Product List"
 msgstr ""
 
-#: dojo/product/views.py:197 dojo/product/views.py:227
-#: dojo/product/views.py:607 dojo/product/views.py:939
+#: dojo/product/views.py:198 dojo/product/views.py:228
+#: dojo/product/views.py:618 dojo/product/views.py:962
 #: dojo/templates/dojo/metrics.html:312 dojo/templates/dojo/metrics.html:337
 #: dojo/templates/dojo/metrics.html:389 dojo/templates/dojo/metrics.html:436
 #: dojo/templates/dojo/metrics.html:485 dojo/templates/dojo/pt_counts.html:196
@@ -2205,266 +2205,266 @@ msgstr ""
 msgid "Product"
 msgstr ""
 
-#: dojo/product/views.py:669 dojo/templates/base.html:275
+#: dojo/product/views.py:692 dojo/templates/base.html:275
 msgid "All Engagements"
 msgstr ""
 
-#: dojo/product/views.py:753
+#: dojo/product/views.py:776
 msgid "Product added successfully."
 msgstr ""
 
-#: dojo/product/views.py:766
+#: dojo/product/views.py:789
 msgid "GitHub information added successfully."
 msgstr ""
 
-#: dojo/product/views.py:771
+#: dojo/product/views.py:794
 msgid "This label is automatically applied to all issues created by DefectDojo"
 msgstr ""
 
-#: dojo/product/views.py:808
+#: dojo/product/views.py:831
 msgid "New Product"
 msgstr ""
 
-#: dojo/product/views.py:841
+#: dojo/product/views.py:864
 msgid "Product updated successfully."
 msgstr ""
 
-#: dojo/product/views.py:862
+#: dojo/product/views.py:885
 msgid "GITHUB information updated successfully."
 msgstr ""
 
-#: dojo/product/views.py:884
+#: dojo/product/views.py:907
 msgid "Edit Product"
 msgstr ""
 
-#: dojo/product/views.py:909
+#: dojo/product/views.py:932
 msgid "Product and relationships will be removed in the background."
 msgstr ""
 
-#: dojo/product/views.py:911
+#: dojo/product/views.py:934
 msgid "Product and relationships removed."
 msgstr ""
 
-#: dojo/product/views.py:918
+#: dojo/product/views.py:941
 #, python-format
 msgid "Deletion of %(name)s"
 msgstr ""
 
-#: dojo/product/views.py:920
+#: dojo/product/views.py:943
 #, python-format
 msgid "The product \"%(name)s\" was deleted by %(user)s"
 msgstr ""
 
-#: dojo/product/views.py:998
+#: dojo/product/views.py:1021
 msgid "Engagement added successfully."
 msgstr ""
 
-#: dojo/product/views.py:1027
+#: dojo/product/views.py:1050
 msgid "New CI/CD Engagement"
 msgstr ""
 
-#: dojo/product/views.py:1029
+#: dojo/product/views.py:1052
 msgid "New Interactive Engagement"
 msgstr ""
 
-#: dojo/product/views.py:1050
+#: dojo/product/views.py:1073
 msgid "Technology added successfully."
 msgstr ""
 
-#: dojo/product/views.py:1055
+#: dojo/product/views.py:1078
 msgid "Add Technology"
 msgstr ""
 
-#: dojo/product/views.py:1072
+#: dojo/product/views.py:1095
 msgid "Technology changed successfully."
 msgstr ""
 
-#: dojo/product/views.py:1076
+#: dojo/product/views.py:1099
 msgid "Edit Technology"
 msgstr ""
 
-#: dojo/product/views.py:1093
+#: dojo/product/views.py:1116
 msgid "Technology deleted successfully."
 msgstr ""
 
-#: dojo/product/views.py:1097
+#: dojo/product/views.py:1120
 msgid "Delete Technology"
 msgstr ""
 
-#: dojo/product/views.py:1120
+#: dojo/product/views.py:1143
 msgid "Metadata added successfully."
 msgstr ""
 
-#: dojo/product/views.py:1129
+#: dojo/product/views.py:1152
 msgid "Add Metadata"
 msgstr ""
 
-#: dojo/product/views.py:1157
+#: dojo/product/views.py:1180
 msgid "Metadata edited successfully."
 msgstr ""
 
-#: dojo/product/views.py:1161
+#: dojo/product/views.py:1184
 msgid "Edit Metadata"
 msgstr ""
 
-#: dojo/product/views.py:1171
+#: dojo/product/views.py:1194
 msgid "Pen Test"
 msgstr ""
 
-#: dojo/product/views.py:1174 dojo/product/views.py:1184
+#: dojo/product/views.py:1197 dojo/product/views.py:1207
 msgid "Ad Hoc Engagement"
 msgstr ""
 
-#: dojo/product/views.py:1202 dojo/test/views.py:426 dojo/test/views.py:556
+#: dojo/product/views.py:1225 dojo/test/views.py:426 dojo/test/views.py:556
 msgid "Can not set a finding as inactive without adding all mandatory notes"
 msgstr ""
 
-#: dojo/product/views.py:1205 dojo/test/views.py:428 dojo/test/views.py:558
+#: dojo/product/views.py:1228 dojo/test/views.py:428 dojo/test/views.py:558
 msgid ""
 "Can not set a finding as false positive without adding all mandatory notes"
 msgstr ""
 
-#: dojo/product/views.py:1213 dojo/test/views.py:436 dojo/test/views.py:566
+#: dojo/product/views.py:1236 dojo/test/views.py:436 dojo/test/views.py:566
 msgid ""
 "Can not set a finding as inactive or false positive without adding all "
 "mandatory notes"
 msgstr ""
 
-#: dojo/product/views.py:1286
+#: dojo/product/views.py:1309
 msgid "Finding added successfully."
 msgstr ""
 
-#: dojo/product/views.py:1295 dojo/test/views.py:517 dojo/test/views.py:605
+#: dojo/product/views.py:1318 dojo/test/views.py:517 dojo/test/views.py:605
 msgid "The form has errors, please correct them below."
 msgstr ""
 
-#: dojo/product/views.py:1310 dojo/test/views.py:525 dojo/test/views.py:633
+#: dojo/product/views.py:1333 dojo/test/views.py:525 dojo/test/views.py:633
 msgid "Add Finding"
 msgstr ""
 
-#: dojo/product/views.py:1329
+#: dojo/product/views.py:1352
 msgid "Engagement Presets"
 msgstr ""
 
-#: dojo/product/views.py:1342
+#: dojo/product/views.py:1365
 msgid "Edit Engagement Preset"
 msgstr ""
 
-#: dojo/product/views.py:1351
+#: dojo/product/views.py:1374
 msgid "Engagement Preset Successfully Updated."
 msgstr ""
 
-#: dojo/product/views.py:1376
+#: dojo/product/views.py:1399
 msgid "Engagement Preset Successfully Created."
 msgstr ""
 
-#: dojo/product/views.py:1382
+#: dojo/product/views.py:1405
 msgid "New Engagement Preset"
 msgstr ""
 
-#: dojo/product/views.py:1399
+#: dojo/product/views.py:1422
 msgid "Engagement presets and engagement relationships removed."
 msgstr ""
 
-#: dojo/product/views.py:1407
+#: dojo/product/views.py:1430
 msgid "Delete Engagement Preset"
 msgstr ""
 
-#: dojo/product/views.py:1434
+#: dojo/product/views.py:1457
 msgid "Notification settings updated."
 msgstr ""
 
-#: dojo/product/views.py:1451 dojo/product_type/views.py:198
+#: dojo/product/views.py:1474 dojo/product_type/views.py:198
 msgid "You are not permitted to add users as owners."
 msgstr ""
 
-#: dojo/product/views.py:1465 dojo/user/views.py:549
+#: dojo/product/views.py:1488 dojo/user/views.py:551
 msgid "Product members added successfully."
 msgstr ""
 
-#: dojo/product/views.py:1468 dojo/user/views.py:552
+#: dojo/product/views.py:1491 dojo/user/views.py:554
 msgid "Add Product Member"
 msgstr ""
 
-#: dojo/product/views.py:1487
+#: dojo/product/views.py:1510
 msgid "You are not permitted to make users to owners."
 msgstr ""
 
-#: dojo/product/views.py:1493
+#: dojo/product/views.py:1516
 msgid "Product member updated successfully."
 msgstr ""
 
-#: dojo/product/views.py:1499
+#: dojo/product/views.py:1522
 msgid "Edit Product Member"
 msgstr ""
 
-#: dojo/product/views.py:1518
+#: dojo/product/views.py:1541
 msgid "Product member deleted successfully."
 msgstr ""
 
-#: dojo/product/views.py:1527
+#: dojo/product/views.py:1550
 msgid "Delete Product Member"
 msgstr ""
 
-#: dojo/product/views.py:1549 dojo/product/views.py:1611
+#: dojo/product/views.py:1572 dojo/product/views.py:1635
 #, python-format
 msgid "API connection successful with message: %(result)s."
 msgstr ""
 
-#: dojo/product/views.py:1554
+#: dojo/product/views.py:1577
 msgid "API Scan Configuration added successfully."
 msgstr ""
 
-#: dojo/product/views.py:1569 dojo/templates/base.html:872
+#: dojo/product/views.py:1592 dojo/templates/base.html:872
 #: dojo/templates/dojo/view_product_details.html:47
 msgid "Add API Scan Configuration"
 msgstr ""
 
-#: dojo/product/views.py:1583
+#: dojo/product/views.py:1607
 msgid "API Scan Configurations"
 msgstr ""
 
-#: dojo/product/views.py:1617
+#: dojo/product/views.py:1641
 msgid "API Scan Configuration successfully updated."
 msgstr ""
 
-#: dojo/product/views.py:1629
+#: dojo/product/views.py:1653
 msgid "Edit API Scan Configuration"
 msgstr ""
 
-#: dojo/product/views.py:1651
+#: dojo/product/views.py:1676
 msgid "API Scan Configuration deleted."
 msgstr ""
 
-#: dojo/product/views.py:1657
+#: dojo/product/views.py:1682
 msgid "Delete Tool Configuration"
 msgstr ""
 
-#: dojo/product/views.py:1679 dojo/product_type/views.py:351
+#: dojo/product/views.py:1704 dojo/product_type/views.py:351
 msgid "You are not permitted to make groups owners."
 msgstr ""
 
-#: dojo/product/views.py:1685
+#: dojo/product/views.py:1710
 msgid "Product group updated successfully."
 msgstr ""
 
-#: dojo/product/views.py:1692 dojo/product/views.py:1757
+#: dojo/product/views.py:1717 dojo/product/views.py:1782
 msgid "Edit Product Group"
 msgstr ""
 
-#: dojo/product/views.py:1711
+#: dojo/product/views.py:1736
 msgid "Product group deleted successfully."
 msgstr ""
 
-#: dojo/product/views.py:1720
+#: dojo/product/views.py:1745
 msgid "Delete Product Group"
 msgstr ""
 
-#: dojo/product/views.py:1740 dojo/product_type/views.py:313
+#: dojo/product/views.py:1765 dojo/product_type/views.py:313
 msgid "You are not permitted to add groups as owners."
 msgstr ""
 
-#: dojo/product/views.py:1754
+#: dojo/product/views.py:1779
 msgid "Product groups added successfully."
 msgstr ""
 
@@ -2499,12 +2499,12 @@ msgstr ""
 msgid "Product type updated successfully."
 msgstr ""
 
-#: dojo/product_type/views.py:212 dojo/user/views.py:521
+#: dojo/product_type/views.py:212 dojo/user/views.py:523
 msgid "Product type members added successfully."
 msgstr ""
 
 #: dojo/product_type/views.py:215
-#: dojo/templates/dojo/view_product_type.html:139 dojo/user/views.py:524
+#: dojo/templates/dojo/view_product_type.html:139 dojo/user/views.py:526
 msgid "Add Product Type Member"
 msgstr ""
 
@@ -2552,7 +2552,7 @@ msgstr "Поиск"
 msgid "Search"
 msgstr "Поиск"
 
-#: dojo/templates/base.html:169 dojo/user/views.py:97
+#: dojo/templates/base.html:169 dojo/user/views.py:99
 msgid "API v2 Key"
 msgstr ""
 
@@ -3071,6 +3071,40 @@ msgstr ""
 msgid "Edit Tool Type Configuration"
 msgstr ""
 
+#: dojo/templates/dojo/forgot_username.html:5
+#: dojo/templates/dojo/forgot_username_done.html:5
+msgid "Retrieve Username"
+msgstr ""
+
+#: dojo/templates/dojo/forgot_username.html:6
+msgid ""
+"Forgotten your username? Enter your email address below, and we’ll email it "
+"to you."
+msgstr ""
+
+#: dojo/templates/dojo/forgot_username.html:12
+msgid "Retreive my username"
+msgstr ""
+
+#: dojo/templates/dojo/forgot_username_done.html:7
+msgid ""
+"We’ve emailed you information about your user account, if an account exists "
+"with the email you entered. You should receive the requested information "
+"shortly."
+msgstr ""
+
+#: dojo/templates/dojo/forgot_username_done.html:8
+#: dojo/templates/dojo/password_reset_done.html:8
+msgid ""
+"If you don’t receive an email, please make sure you’ve entered the address "
+"you registered with, and check your spam folder."
+msgstr ""
+
+#: dojo/templates/dojo/forgot_username_subject.html:2
+#, python-format
+msgid "Retrieve username on %(site_name)s"
+msgstr ""
+
 #: dojo/templates/dojo/metrics.html:172
 #, python-format
 msgid ""
@@ -3410,12 +3444,6 @@ msgstr ""
 msgid ""
 "We’ve emailed you instructions for setting your password, if an account "
 "exists with the email you entered. You should receive them shortly."
-msgstr ""
-
-#: dojo/templates/dojo/password_reset_done.html:8
-msgid ""
-"If you don’t receive an email, please make sure you’ve entered the address "
-"you registered with, and check your spam folder."
 msgstr ""
 
 #: dojo/templates/dojo/product_type.html:52
@@ -4012,6 +4040,44 @@ msgstr ""
 msgid "Disclaimer"
 msgstr ""
 
+#: dojo/templates/notifications/mail/forgot_password.tpl:3
+#, python-format
+msgid ""
+"You're receiving this email because you requested a password reset for your "
+"user account at %(site_name)s."
+msgstr ""
+
+#: dojo/templates/notifications/mail/forgot_password.tpl:5
+msgid "Please go to the following page and choose a new password:"
+msgstr ""
+
+#: dojo/templates/notifications/mail/forgot_password.tpl:7
+#, python-format
+msgid "The link above expires on: %(link_expiration_date)s"
+msgstr ""
+
+#: dojo/templates/notifications/mail/forgot_password.tpl:10
+#: dojo/templates/notifications/mail/forgot_username.tpl:8
+msgid "Thanks for using our site!"
+msgstr ""
+
+#: dojo/templates/notifications/mail/forgot_password.tpl:11
+#: dojo/templates/notifications/mail/forgot_username.tpl:9
+#, python-format
+msgid "The %(site_name)s team"
+msgstr ""
+
+#: dojo/templates/notifications/mail/forgot_username.tpl:3
+#, python-format
+msgid ""
+"You're receiving this email because you requested your username for your "
+"user account at %(site_name)s."
+msgstr ""
+
+#: dojo/templates/notifications/mail/forgot_username.tpl:5
+msgid "Here is your username:"
+msgstr ""
+
 #: dojo/templates/notifications/mail/other.tpl:16
 #: dojo/templates/notifications/slack/other.tpl:4
 #, python-format
@@ -4476,19 +4542,19 @@ msgstr ""
 msgid "Tool Type Configuration Successfully Created."
 msgstr ""
 
-#: dojo/tool_type/views.py:31
+#: dojo/tool_type/views.py:33
 msgid "New Tool Type Configuration"
 msgstr ""
 
-#: dojo/tool_type/views.py:45
+#: dojo/tool_type/views.py:47
 msgid "Tool Type successfully updated."
 msgstr ""
 
-#: dojo/tool_type/views.py:51
+#: dojo/tool_type/views.py:53
 msgid "Edit Tool Type"
 msgstr ""
 
-#: dojo/tool_type/views.py:59
+#: dojo/tool_type/views.py:61
 msgid "Tool Type List"
 msgstr ""
 
@@ -4520,117 +4586,117 @@ msgid ""
 "+=;:'\",<>./?."
 msgstr ""
 
-#: dojo/user/views.py:61
+#: dojo/user/views.py:63
 msgid ""
 "Hello {name}! Your last login was {naturaltime(last_login)} ({last_login."
 "strftime(\"%Y-%m-%d %I:%M:%S %p\")})"
 msgstr ""
 
-#: dojo/user/views.py:85
+#: dojo/user/views.py:87
 msgid "API Key generated successfully."
 msgstr ""
 
-#: dojo/user/views.py:156
+#: dojo/user/views.py:158
 msgid "You have logged out successfully."
 msgstr ""
 
-#: dojo/user/views.py:190
+#: dojo/user/views.py:192
 msgid "Alerts removed."
 msgstr ""
 
-#: dojo/user/views.py:250
+#: dojo/user/views.py:252
 msgid "Only superusers are allowed to change their global role."
 msgstr ""
 
-#: dojo/user/views.py:257
+#: dojo/user/views.py:259
 msgid "Profile updated successfully."
 msgstr ""
 
-#: dojo/user/views.py:259
+#: dojo/user/views.py:261
 #, python-format
 msgid "User Profile - %(user_full_name)s"
 msgstr ""
 
-#: dojo/user/views.py:287
+#: dojo/user/views.py:289
 msgid "Your password has been changed."
 msgstr ""
 
-#: dojo/user/views.py:291
+#: dojo/user/views.py:293
 msgid "Change Password"
 msgstr ""
 
-#: dojo/user/views.py:304
+#: dojo/user/views.py:306
 msgid "All Users"
 msgstr ""
 
-#: dojo/user/views.py:351
+#: dojo/user/views.py:353
 msgid "User added successfully."
 msgstr ""
 
-#: dojo/user/views.py:357
+#: dojo/user/views.py:359
 msgid "User was not added successfully."
 msgstr ""
 
-#: dojo/user/views.py:359
+#: dojo/user/views.py:361
 msgid "Add User"
 msgstr ""
 
-#: dojo/user/views.py:376
+#: dojo/user/views.py:378
 msgid "View User"
 msgstr ""
 
-#: dojo/user/views.py:418
+#: dojo/user/views.py:420
 msgid "Only superusers are allowed to edit superusers. User was not saved."
 msgstr ""
 
-#: dojo/user/views.py:423
+#: dojo/user/views.py:425
 msgid ""
 "Only superusers are allowed to edit users with a global role. User was not "
 "saved."
 msgstr ""
 
-#: dojo/user/views.py:435
+#: dojo/user/views.py:437
 msgid "User saved successfully."
 msgstr ""
 
-#: dojo/user/views.py:440
+#: dojo/user/views.py:442
 msgid "User was not saved successfully."
 msgstr ""
 
-#: dojo/user/views.py:442
+#: dojo/user/views.py:444
 msgid "Edit User"
 msgstr ""
 
-#: dojo/user/views.py:459
+#: dojo/user/views.py:461
 msgid "You may not delete yourself."
 msgstr ""
 
-#: dojo/user/views.py:470
+#: dojo/user/views.py:472
 msgid "Only superusers are allowed to delete superusers. User was not removed."
 msgstr ""
 
-#: dojo/user/views.py:475
+#: dojo/user/views.py:477
 msgid ""
 "Only superusers are allowed to delete users with a global role. User was not "
 "removed."
 msgstr ""
 
-#: dojo/user/views.py:482
+#: dojo/user/views.py:484
 msgid "User and relationships removed."
 msgstr ""
 
-#: dojo/user/views.py:495
+#: dojo/user/views.py:497
 msgid "Delete User"
 msgstr ""
 
-#: dojo/user/views.py:578
+#: dojo/user/views.py:580
 msgid "Groups added successfully."
 msgstr ""
 
-#: dojo/user/views.py:582
+#: dojo/user/views.py:584
 msgid "Add Group Member"
 msgstr ""
 
-#: dojo/user/views.py:598
+#: dojo/user/views.py:600
 msgid "Permissions updated."
 msgstr ""
