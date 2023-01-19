@@ -37,7 +37,7 @@ def configure_announcement(request):
             return HttpResponseRedirect('dashboard')
         form = AnnouncementCreateForm(request.POST)
         announcement, created = Announcement.objects.get_or_create(id=1)
-        if form.is_valid():
+        if form.is_valid() and created:
             announcement.message = form.cleaned_data['message']
             announcement.style = form.cleaned_data['style']
             announcement.dismissable = form.cleaned_data['dismissable']
