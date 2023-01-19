@@ -26,6 +26,7 @@ env = environ.Env(
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
     DD_SECURE_SSL_REDIRECT=(bool, False),
+    DD_SECURE_CROSS_ORIGIN_OPENER_POLICY=(str, 'same-origin'),
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
@@ -84,6 +85,8 @@ env = environ.Env(
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
+    DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
+    DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
     DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
     DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
     DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
@@ -194,6 +197,8 @@ env = environ.Env(
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
+    # You can set extra Jira issue types via a simple env var that supports a csv format, like "Work Item,Vulnerability"
+    DD_JIRA_EXTRA_ISSUE_TYPES=(str, ''),
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
     DD_LOGGING_HANDLER=(str, 'console'),
     DD_ALERT_REFRESH=(bool, True),
@@ -255,6 +260,8 @@ env = environ.Env(
     # When disabled, existing user tokens will not be removed but it will not be
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
+    # You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
+    DD_ADDITIONAL_HEADERS=(dict, {}),
 )
 
 
@@ -490,6 +497,8 @@ SOCIAL_AUTH_PIPELINE = (
 
 CLASSIC_AUTH_ENABLED = True
 FORGOT_PASSWORD = env('DD_FORGOT_PASSWORD')
+FORGOT_USERNAME = env('DD_FORGOT_USERNAME')
+PASSWORD_RESET_TIMEOUT = env('DD_PASSWORD_RESET_TIMEOUT')
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
 SHOW_LOGIN_FORM = env('DD_SOCIAL_AUTH_SHOW_LOGIN_FORM')
 SOCIAL_LOGIN_AUTO_REDIRECT = env('DD_SOCIAL_LOGIN_AUTO_REDIRECT')
@@ -588,6 +597,7 @@ LOGIN_EXEMPT_URLS = (
     r'complete/',
     r'empty_questionnaire/([\d]+)/answer',
     r'^%spassword_reset/' % URL_PREFIX,
+    r'^%sforgot_username' % URL_PREFIX,
     r'^%sreset/' % URL_PREFIX,
 )
 
@@ -650,9 +660,13 @@ CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 
 # A list of trusted origins for unsafe requests (e.g. POST).
 # Use comma-separated list of domains, they will be split to list automatically
-# DefectDojo is running on Django version 3.2. Format of DD_CSRF_TRUSTED_ORIGINS may change in future when it will be upgraded to Django version 4.0
-# Please see: https://docs.djangoproject.com/en/4.0/ref/settings/#std-setting-CSRF_TRUSTED_ORIGINS
-CSRF_TRUSTED_ORIGINS = env('DD_CSRF_TRUSTED_ORIGINS')
+# Only specify this settings if the contents is not an empty list (the default)
+if env('DD_CSRF_TRUSTED_ORIGINS') != ['[]']:
+    CSRF_TRUSTED_ORIGINS = env('DD_CSRF_TRUSTED_ORIGINS')
+
+# Unless set to None, the SecurityMiddleware sets the Cross-Origin Opener Policy
+# header on all responses that do not already have it to the value provided.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = env('DD_SECURE_CROSS_ORIGIN_OPENER_POLICY') if env('DD_SECURE_CROSS_ORIGIN_OPENER_POLICY') != 'None' else None
 
 if env('DD_SECURE_PROXY_SSL_HEADER'):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -831,6 +845,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dojo.middleware.LoginRequiredMiddleware',
+    'dojo.middleware.AdditionalHeaderMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
@@ -1414,6 +1429,13 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ('Security', 'Security')
 )
 
+if env('DD_JIRA_EXTRA_ISSUE_TYPES') != '':
+    if env('DD_JIRA_EXTRA_ISSUE_TYPES').count(',') > 0:
+        for extra_type in env('DD_JIRA_EXTRA_ISSUE_TYPES').split(','):
+            JIRA_ISSUE_TYPE_CHOICES_CONFIG += (extra_type, extra_type)
+    else:
+        JIRA_ISSUE_TYPE_CHOICES_CONFIG += (env('DD_JIRA_EXTRA_ISSUE_TYPES'), env('DD_JIRA_EXTRA_ISSUE_TYPES'))
+
 JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 
 # ------------------------------------------------------------------------------
@@ -1600,3 +1622,5 @@ FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
 # Fixes error
 # AttributeError: Problem installing fixture '/app/dojo/fixtures/defect_dojo_sample_data.json': 'Settings' object has no attribute 'AUDITLOG_DISABLE_ON_RAW_SAVE'
 AUDITLOG_DISABLE_ON_RAW_SAVE = False
+#  You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
+ADDITIONAL_HEADERS = env('DD_ADDITIONAL_HEADERS')

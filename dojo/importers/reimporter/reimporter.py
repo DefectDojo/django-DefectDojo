@@ -73,6 +73,10 @@ class DojoDefaultReImporter(object):
             if service:
                 item.service = service
 
+            if item.dynamic_finding:
+                for e in item.unsaved_endpoints:
+                    e.clean()
+
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
 
@@ -166,7 +170,8 @@ class DojoDefaultReImporter(object):
                             finding.active = False
                             if verified is not None:
                                 finding.verified = verified
-                    if not finding.component_name or not finding.component_version:
+
+                    if (component_name is not None and not finding.component_name) or (component_version is not None and not finding.component_version):
                         finding.component_name = finding.component_name if finding.component_name else component_name
                         finding.component_version = finding.component_version if finding.component_version else component_version
                         finding.save(dedupe_option=False)
@@ -422,6 +427,9 @@ class DojoDefaultReImporter(object):
 
         logger.debug('REIMPORT_SCAN: Updating test/engagement timestamps')
         importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
+
+        logger.debug('REIMPORT_SCAN: Updating test tags')
+        importer_utils.update_tags(test, tags)
 
         test_import = None
         if settings.TRACK_IMPORT_HISTORY:

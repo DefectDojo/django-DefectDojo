@@ -20,7 +20,7 @@ from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIE
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
     Network_Locations, UserContactInfo, Product_API_Scan_Configuration, DEFAULT_NOTIFICATION, \
-    Vulnerability_Id, Vulnerability_Id_Template
+    Vulnerability_Id, Vulnerability_Id_Template, get_current_date
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from dojo.utils import is_scan_file_too_large
@@ -840,7 +840,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         status.false_positive = validated_data.get('false_positive', False)
         status.out_of_scope = validated_data.get('out_of_scope', False)
         status.risk_accepted = validated_data.get('risk_accepted', False)
-        status.date = validated_data.get('date', timezone.now())
+        status.date = validated_data.get('date', get_current_date())
         status.save()
         return status
 
@@ -1693,7 +1693,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         allow_null=True,
         default=None,
         queryset=User.objects.all())
-    tags = TagListSerializerField(required=False, help_text="Modify existing tags that help describe this scan.")
+    tags = TagListSerializerField(required=False, help_text="Modify existing tags that help describe this scan. (Existing test tags will be overwritten)")
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
     create_finding_groups_for_all_findings = serializers.BooleanField(help_text="If set to false, finding groups will only be created when there is more than one grouped finding", required=False, default=True)
@@ -1761,7 +1761,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 reimporter = ReImporter()
                 test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, test_import = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
-                                                tags=None, minimum_severity=minimum_severity,
+                                                tags=tags, minimum_severity=minimum_severity,
                                                 endpoints_to_add=endpoints_to_add, scan_date=scan_date_time,
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,

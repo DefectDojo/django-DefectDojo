@@ -130,7 +130,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   mysql:
-    image: mysql:5.7.40@sha256:6306f106a056e24b3a2582a59a4c84cd199907f826eff27df36406f227cd9a7d
+    image: mysql:5.7.41@sha256:f04fc2e2f01e65d6e2828b4cce2c4761d9258aee71d989e273b2ae309f44a945
     profiles: 
       - mysql-rabbitmq
       - mysql-redis
@@ -154,14 +154,14 @@ services:
     volumes:
       - defectdojo_postgres:/var/lib/postgresql/data
   rabbitmq:
-    image: rabbitmq:3.11.5-alpine@sha256:e9dd024b254c714e726d4e40b59bd7cf7b9b1c734ace132803d00f596b1afb85
+    image: rabbitmq:3.11.7-alpine@sha256:8fd27c17748376cccdff3301ec06695ab99dcf92dcab61acd1545ccf31011549
     profiles: 
       - mysql-rabbitmq
       - postgres-rabbitmq
     volumes:
        - defectdojo_rabbitmq:/var/lib/rabbitmq
   redis:
-    image: redis:7.0.7-alpine@sha256:9dc2499d6c21f869a6e22b170003483d3fca8c03992f4a11f6493c0b392da40f
+    image: redis:7.0.8-alpine@sha256:5ae5799117d680a13dd35184f26db66549605e220f1af52f4b7557f77830aa17
     profiles: 
       - mysql-redis
       - postgres-redis

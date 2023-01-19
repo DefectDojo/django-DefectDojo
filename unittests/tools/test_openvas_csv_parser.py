@@ -6,7 +6,7 @@ from dojo.models import Test, Engagement, Product
 class TestOpenVASUploadCsvParser(DojoTestCase):
 
     def test_openvas_csv_one_vuln(self):
-        with open("unittests/scans/openvas/one_vuln.csv") as f:
+        with open("unittests/scans/openvas_csv/one_vuln.csv") as f:
             test = Test()
             test.engagement = Engagement()
             test.engagement.product = Product()
@@ -27,7 +27,7 @@ class TestOpenVASUploadCsvParser(DojoTestCase):
             self.assertEqual(22, findings[0].unsaved_endpoints[0].port)
 
     def test_openvas_csv_many_vuln(self):
-        with open("unittests/scans/openvas/many_vuln.csv") as f:
+        with open("unittests/scans/openvas_csv/many_vuln.csv") as f:
             test = Test()
             test.engagement = Engagement()
             test.engagement.product = Product()
