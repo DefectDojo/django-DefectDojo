@@ -13,7 +13,7 @@ unset DD_DATABASE_URL
 # Unset the celery broker URL so that we can force the other DD_CELERY_BROKER settings
 unset DD_CELERY_BROKER_URL
 
-python3 manage.py makemessages -l en --no-obsolete --extension html,txt,py,tpl --add-location file
+python3 manage.py makemessages -l en --no-obsolete --extension html,txt,py,tpl --add-location file --ignore=docs/*
 python3 manage.py makemigrations dojo
 python3 manage.py migrate
 
