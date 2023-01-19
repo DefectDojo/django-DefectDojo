@@ -53,7 +53,7 @@ git diff --exit-code dojo/locale/ || {
 
 ********************************************************************************
 
-You made changes which affected localization but you have not committed or
+You made changes which affected localization. However, you have not committed or
 staged them.
 
 ********************************************************************************
