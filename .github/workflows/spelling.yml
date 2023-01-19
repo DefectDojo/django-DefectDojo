@@ -34,11 +34,11 @@ name: Check Spelling
 #   For background, see: https://github.com/check-spelling/check-spelling/wiki/Feature:-Update-with-deploy-key
 
 on:
-  push:
-    branches:
-    - "**"
-    tags-ignore:
-    - "**"
+  # push:
+  #   branches:
+  #   - "**"
+  #   tags-ignore:
+  #   - "**"
   pull_request_target:
     branches:
     - "**"
@@ -71,7 +71,7 @@ jobs:
     steps:
     - name: check-spelling
       id: spelling
-      uses: check-spelling/check-spelling@main
+      uses: check-spelling/check-spelling@v0.0.21
       with:
         suppress_push_for_open_pull_request: 1
         checkout: true
@@ -84,21 +84,21 @@ jobs:
         extra_dictionary_limit: 10
         check_commit_messages: commits title description
 
-  comment-push:
-    name: Report (Push)
-    # If your workflow isn't running on push, you can remove this job
-    runs-on: ubuntu-latest
-    needs: spelling
-    permissions:
-      contents: write
-    if: (success() || failure()) && needs.spelling.outputs.followup && github.event_name == 'push'
-    steps:
-    - name: comment
-      uses: check-spelling/check-spelling@prerelease
-      with:
-        checkout: true
-        spell_check_this: check-spelling/spell-check-this@prerelease
-        task: ${{ needs.spelling.outputs.followup }}
+  # comment-push:
+  #   name: Report (Push)
+  #   # If your workflow isn't running on push, you can remove this job
+  #   runs-on: ubuntu-latest
+  #   needs: spelling
+  #   permissions:
+  #     contents: write
+  #   if: (success() || failure()) && needs.spelling.outputs.followup && github.event_name == 'push'
+  #   steps:
+  #   - name: comment
+  #     uses: check-spelling/check-spelling@v0.0.21
+  #     with:
+  #       checkout: true
+  #       spell_check_this: check-spelling/spell-check-this@prerelease
+  #       task: ${{ needs.spelling.outputs.followup }}
 
   comment-pr:
     name: Report (PR)
@@ -110,7 +110,7 @@ jobs:
     if: (success() || failure()) && needs.spelling.outputs.followup && contains(github.event_name, 'pull_request')
     steps:
     - name: comment
-      uses: check-spelling/check-spelling@main
+      uses: check-spelling/check-spelling@v0.0.21
       with:
         checkout: true
         spell_check_this: check-spelling/spell-check-this@prerelease
@@ -134,7 +134,7 @@ jobs:
       cancel-in-progress: false
     steps:
     - name: apply spelling updates
-      uses: check-spelling/check-spelling@main
+      uses: check-spelling/check-spelling@v0.0.21
       with:
         experimental_apply_changes_via_bot: 1
         checkout: true
