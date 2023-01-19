@@ -47,6 +47,21 @@ EOF
     exit 1
 }
 
+python3 manage.py makemessages -l en --no-obsolete --extension html,txt,py,tpl
+git diff --exit-code dojo/locale/ || {
+    cat <<-EOF
+
+********************************************************************************
+
+You made changes which affected localization but you have not committed or
+staged them.
+
+********************************************************************************
+
+EOF
+    exit 1
+}
+
 python3 manage.py makemigrations --no-input --check --dry-run --verbosity 3 || {
     cat <<-EOF
 
