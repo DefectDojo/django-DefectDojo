@@ -75,7 +75,11 @@ class DojoDefaultReImporter(object):
 
             if item.dynamic_finding:
                 for e in item.unsaved_endpoints:
-                    e.clean()
+                    try:
+                        e.clean()
+                    except ValidationError as err:
+                        logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
+                                       "{}".format(err))
 
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
