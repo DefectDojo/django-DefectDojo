@@ -477,7 +477,6 @@ class DojoGroupSerializer(serializers.ModelSerializer):
                 auth_group.user_set.add(member)
             instance.save()
         ret = super().to_representation(instance)
-
         # This will show only "configuration_permissions" even if user has also other permissions
         all_permissions = set(ret['configuration_permissions'])
         allowed_configuration_permissions = set(self.fields['configuration_permissions'].child_relation.queryset.values_list('id', flat=True))
