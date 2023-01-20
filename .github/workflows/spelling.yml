@@ -35,10 +35,10 @@ name: Check Spelling
 
 on:
   push:
-    # branches:
-    # - "**"
-    # tags-ignore:
-    # - "**"
+    branches:
+    - "**"
+    tags-ignore:
+    - "**"
   pull_request_target:
     branches:
     - "**"
@@ -83,11 +83,11 @@ jobs:
         use_sarif: 1
         extra_dictionary_limit: 10
         check_commit_messages: commits title description
-        extra_dictionaries:
-          cspell:python/src/python/python-lib.txt
-          cspell:python/src/python/python.txt
-          cspell:python/src/common/extra.txt
-          cspell:django/django.txt
+        # extra_dictionaries:
+        #   cspell:python/src/python/python-lib.txt
+        #   cspell:python/src/python/python.txt
+        #   cspell:python/src/common/extra.txt
+        #   cspell:django/django.txt
 #          cspell:software-terms/src/software-terms.txt
   comment-push:
     name: Report (Push)
