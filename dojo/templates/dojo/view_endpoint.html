@@ -22,7 +22,7 @@
                       Host: {{ endpoint.host }} -
                       {{ endpoint.host_mitigated_endpoints_count }} / {{ endpoint.host_endpoints_count }} mitigated endpoints
                     {% else %}
-                      Endpoint: {{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %} -
+                      Endpoint: {{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %} -
                       {% if endpoint.mitigated %}
                         Mitigated
                       {% else %}
@@ -181,7 +181,7 @@
                                       {% else %}
                                         <span class="fa-solid fa-thumbs-up"></span>
                                       {% endif %}
-                                      &nbsp;{{ item|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                      &nbsp;{{ item|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                     {% endif %}
                                 </td>
                             {% endfor %}
