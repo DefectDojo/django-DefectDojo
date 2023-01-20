@@ -220,7 +220,7 @@ env = environ.Env(
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
-    DD_JIRA_DEFAULT_ISSUE_TYPE=(str,'Bug'),
+    DD_JIRA_DEFAULT_ISSUE_TYPE=(str, 'Bug'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
 
     # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
