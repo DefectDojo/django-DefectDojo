@@ -1503,7 +1503,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         test_id = import0['test']
         reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
 
-        self.assertEqual(reimport1['statistics'],  {
+        self.assertEqual(reimport1['statistics'], {
             'after': {
                 'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
                 'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
@@ -1542,7 +1542,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                     'total': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 3, 'verified': 0}},
                 'reactivated': {
                     'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'high': {'active': 0, 'duplicate': 0,'false_p': 0,'is_mitigated': 0,'out_of_scope': 0,'risk_accepted': 0,'total': 0,'verified': 0},
+                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
                     'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
                     'low': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
                     'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
