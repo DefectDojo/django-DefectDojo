@@ -71,7 +71,7 @@ jobs:
     steps:
     - name: check-spelling
       id: spelling
-      uses: check-spelling/check-spelling@v0.0.21
+      uses: check-spelling/check-spelling@main
       with:
         suppress_push_for_open_pull_request: 1
         checkout: true
@@ -83,12 +83,7 @@ jobs:
         use_sarif: 1
         extra_dictionary_limit: 10
         check_commit_messages: commits title description
-        # extra_dictionaries:
-        #   cspell:python/src/python/python-lib.txt
-        #   cspell:python/src/python/python.txt
-        #   cspell:python/src/common/extra.txt
-        #   cspell:django/django.txt
-#          cspell:software-terms/src/software-terms.txt
+
   comment-push:
     name: Report (Push)
     # If your workflow isn't running on push, you can remove this job
@@ -99,7 +94,7 @@ jobs:
     if: (success() || failure()) && needs.spelling.outputs.followup && github.event_name == 'push'
     steps:
     - name: comment
-      uses: check-spelling/check-spelling@v0.0.21
+      uses: check-spelling/check-spelling@prerelease
       with:
         checkout: true
         spell_check_this: check-spelling/spell-check-this@prerelease
@@ -115,7 +110,7 @@ jobs:
     if: (success() || failure()) && needs.spelling.outputs.followup && contains(github.event_name, 'pull_request')
     steps:
     - name: comment
-      uses: check-spelling/check-spelling@v0.0.21
+      uses: check-spelling/check-spelling@main
       with:
         checkout: true
         spell_check_this: check-spelling/spell-check-this@prerelease
@@ -139,7 +134,7 @@ jobs:
       cancel-in-progress: false
     steps:
     - name: apply spelling updates
-      uses: check-spelling/check-spelling@v0.0.21
+      uses: check-spelling/check-spelling@main
       with:
         experimental_apply_changes_via_bot: 1
         checkout: true
