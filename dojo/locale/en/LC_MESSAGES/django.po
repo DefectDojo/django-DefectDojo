@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-12 15:11+0000\n"
+"POT-Creation-Date: 2023-01-19 18:43-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,6 +12,26 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: dojo/announcement/views.py:37
+msgid "Announcement removed for everyone."
+msgstr ""
+
+#: dojo/announcement/views.py:54
+msgid "Announcement updated successfully."
+msgstr ""
+
+#: dojo/announcement/views.py:59
+msgid "Announcement Configuration"
+msgstr ""
+
+#: dojo/announcement/views.py:72
+msgid "Announcement removed."
+msgstr ""
+
+#: dojo/announcement/views.py:78
+msgid "Failed to remove announcement."
+msgstr ""
 
 #: dojo/api_v2/serializers.py:128 dojo/api_v2/serializers.py:257
 #, python-brace-format
@@ -145,6 +165,14 @@ msgstr ""
 
 #: dojo/filters.py:2246
 msgid "Choice Question"
+msgstr ""
+
+#: dojo/forms.py:2909
+msgid "Dismissable?"
+msgstr ""
+
+#: dojo/forms.py:2912
+msgid "Ticking this box allows users to dismiss the current announcement"
 msgstr ""
 
 #: dojo/metrics/views.py:50 dojo/templates/base.html:404
@@ -1752,7 +1780,18 @@ msgid ""
 "expires."
 msgstr ""
 
-#: dojo/models.py:3303
+#: dojo/models.py:3311
+msgid ""
+"This dismissable message will be displayed on all pages for authenticated "
+"users. It can contain basic html tags, for example <a href='https://www.fred."
+"com' style='color: #337ab7;' target='_blank'>https://example.com</a>"
+msgstr ""
+
+#: dojo/models.py:3315
+msgid "The style of banner to display. (info, success, warning, danger)"
+msgstr ""
+
+#: dojo/models.py:3325
 msgid ""
 "This message will be displayed on the login page. It can contain basic html "
 "tags, for example <a href='https://www.fred.com' style='color: #337ab7;' "
@@ -2714,6 +2753,10 @@ msgid "Configuration"
 msgstr ""
 
 #: dojo/templates/base.html:500
+msgid "Announcement"
+msgstr ""
+
+#: dojo/templates/base.html:506
 msgid "Credential Manager"
 msgstr ""
 
@@ -3031,11 +3074,23 @@ msgid ""
 msgstr ""
 
 #: dojo/templates/dojo/delete_product_type.html:12
+#: dojo/templates/dojo/dismiss_announcement.html:10
 msgid "Danger Zone"
 msgstr ""
 
 #: dojo/templates/dojo/delete_product_type.html:17
 msgid "No relationships found."
+msgstr ""
+
+#: dojo/templates/dojo/dismiss_announcement.html:4
+#: dojo/templates/dojo/dismiss_announcement.html:17
+msgid "Dismiss Announcement"
+msgstr ""
+
+#: dojo/templates/dojo/dismiss_announcement.html:6
+msgid ""
+"Dismissing the announcement will remove the current announcement from your "
+"view"
 msgstr ""
 
 #: dojo/templates/dojo/edit_note.html:5

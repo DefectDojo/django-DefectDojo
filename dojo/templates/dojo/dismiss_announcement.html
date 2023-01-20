@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
     {{ block.super }}
-    <h3> Dismiss Announcement {{ product }}</h3>
+    <h3> {% trans "Dismiss Announcement" %} {{ product }}</h3>
     <p>
-        Dismissing the announcement will remove the current announcement from your view
+        {% trans "Dismissing the announcement will remove the current announcement from your view" %}
     </p>
     <div class="danger-zone panel panel-danger">
         <div class="panel-heading">
-            <h3>Danger Zone</h3>
+            <h3>{% trans "Danger Zone" %}</h3>
         </div>
         <form class="form-horizontal" method="post">
             {% csrf_token %}
             {{ form }}
 
             <div class="form-group">
-                <button class="btn btn-danger" type="submit" name="dismiss_announcement_name" value="dismiss_announcement">Dismiss Announcement</button>
+                <button class="btn btn-danger" type="submit" name="dismiss_announcement_name" value="dismiss_announcement">{% trans "Dismiss Announcement" %}</button>
             </div>
         </form>
     </div>

@@ -3,6 +3,7 @@ import logging
 from django.shortcuts import render
 from django.contrib import messages
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponseRedirect
 from dojo.utils import add_breadcrumb
 
@@ -32,7 +33,7 @@ def configure_announcement(request):
             Announcement.objects.all().delete()
             messages.add_message(request,
                                 messages.SUCCESS,
-                                'Announcement removed for everyone.',
+                                _('Announcement removed for everyone.'),
                                 extra_tags='alert-success')
             return HttpResponseRedirect('dashboard')
         form = AnnouncementCreateForm(request.POST)
@@ -49,12 +50,12 @@ def configure_announcement(request):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Announcement updated successfully.',
+                _('Announcement updated successfully.'),
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("configure_announcement"))
 
-    add_breadcrumb(title="Announcement Configuration", top_level=True, request=request)
+    add_breadcrumb(title=_("Announcement Configuration"), top_level=True, request=request)
     return render(request, 'dojo/announcement.html', {
         'form': form,
         'remove': remove
@@ -67,13 +68,13 @@ def dismiss_announcement(request):
         if deleted_count > 0:
             messages.add_message(request,
                                 messages.SUCCESS,
-                                'Announcement removed.',
+                                _('Announcement removed.'),
                                 extra_tags='alert-success')
             return HttpResponseRedirect('dashboard')
         else:
             messages.add_message(request,
                                 messages.ERROR,
-                                'Failed to remove announcement.',
+                                _('Failed to remove announcement.'),
                                 extra_tags='alert-danger')
             return render(request, 'dojo/dismiss_announcement.html')
     return render(request, 'dojo/dismiss_announcement.html')

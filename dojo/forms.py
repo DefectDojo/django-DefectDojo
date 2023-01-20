@@ -17,6 +17,7 @@ from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 import tagulous
 
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
@@ -2905,10 +2906,10 @@ class LoginBanner(forms.Form):
 
 class AnnouncementCreateForm(forms.ModelForm):
     dismissable = forms.BooleanField(
-        label="Dismissable?",
+        label=_('Dismissable?'),
         initial=False,
         required=False,
-        help_text='Ticking this box allows users to dismiss the current announcement'
+        help_text=_('Ticking this box allows users to dismiss the current announcement')
     )
 
     class Meta:
