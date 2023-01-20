@@ -5,7 +5,7 @@
 
 {% block content %}
     {{ block.super }}
-<h3 id="id_heading">{% blocktrans with full_name = user.get_full_name %}User {{ full_name }}{% endblocktrans %}</h3>
+<h3 id="id_heading">{% blocktrans with full_name=user.get_full_name %}User {{ full_name }}{% endblocktrans %}</h3>
 <div class="row">
     <div id="tests" class="col-md-8">
         <div class="panel panel-default">
