@@ -35,23 +35,8 @@ name: Check Spelling
 
 on:
   push:
-    branches:
-    - "**"
-    tags-ignore:
-    - "**"
+  workflow_dispatch:
   pull_request_target:
-    branches:
-    - "**"
-    tags-ignore:
-    - "**"
-    # types:
-    # - 'opened'
-    # - 'reopened'
-    # - 'synchronize'
-  issue_comment:
-    types:
-    - 'created'
-
 jobs:
   spelling:
     name: Check Spelling
