@@ -20,6 +20,7 @@ from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
@@ -628,7 +629,7 @@ def add_breadcrumb(parent=None,
     if top_level or crumbs is None:
         crumbs = [
             {
-                'title': 'Home',
+                'title': _('Home'),
                 'url': reverse('home')
             },
         ]
