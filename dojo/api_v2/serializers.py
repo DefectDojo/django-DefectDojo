@@ -1,3 +1,5 @@
+from dojo.group.utils import get_auth_group_name
+from django.contrib.auth.models import Group
 from typing import List
 from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
@@ -466,6 +468,14 @@ class DojoGroupSerializer(serializers.ModelSerializer):
         exclude = ['auth_group']
 
     def to_representation(self, instance):
+        if not instance.auth_group:
+            auth_group = Group(name=get_auth_group_name(instance))
+            auth_group.save()
+            instance.auth_group = auth_group
+            members = instance.users.all()
+            for member in members:
+                auth_group.user_set.add(member)
+            instance.save()
         ret = super().to_representation(instance)
 
         # This will show only "configuration_permissions" even if user has also other permissions
