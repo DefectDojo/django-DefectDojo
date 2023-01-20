@@ -44,10 +44,10 @@ on:
     - "**"
     tags-ignore:
     - "**"
-    types:
-    - 'opened'
-    - 'reopened'
-    - 'synchronize'
+    # types:
+    # - 'opened'
+    # - 'reopened'
+    # - 'synchronize'
   issue_comment:
     types:
     - 'created'
