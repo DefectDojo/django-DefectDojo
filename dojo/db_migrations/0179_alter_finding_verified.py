@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0177_alter_system_settings_time_zone'),
+        ('dojo', '0178_alter_answer_polymorphic_ctype_and_more'),
     ]
 
     operations = [
