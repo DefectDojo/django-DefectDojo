@@ -39,7 +39,7 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, T
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, \
     add_breadcrumb, async_delete, \
     get_system_setting, get_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, \
-    get_enabled_notifications_list
+    get_enabled_notifications_list, get_zero_severity_level, sum_by_severity_level
 
 from dojo.notifications.helper import create_notification
 from dojo.components.sql_group_concat import Sql_GroupConcat
@@ -51,6 +51,7 @@ from dojo.product.queries import get_authorized_products, get_authorized_members
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type, \
     get_authorized_product_types
 from dojo.tool_config.factory import create_API
+from dojo.tools.factory import get_api_scan_configuration_hints
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
@@ -526,6 +527,9 @@ def view_product_metrics(request, pid):
     high_weekly = OrderedDict()
     medium_weekly = OrderedDict()
 
+    open_objs_by_severity = get_zero_severity_level()
+    accepted_objs_by_severity = get_zero_severity_level()
+
     for v in filters.get('open', None):
         iso_cal = v.date.isocalendar()
         x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
@@ -561,8 +565,7 @@ def view_product_metrics(request, pid):
             else:
                 severity_weekly[x][severity] = 1
         else:
-            severity_weekly[x] = {'Critical': 0, 'High': 0,
-                                  'Medium': 0, 'Low': 0, 'Info': 0}
+            severity_weekly[x] = get_zero_severity_level()
             severity_weekly[x][severity] = 1
             severity_weekly[x]['week'] = y
 
@@ -582,6 +585,10 @@ def view_product_metrics(request, pid):
             else:
                 medium_weekly[x] = {'count': 1, 'week': y}
 
+        # Optimization: count severity level on server side
+        if open_objs_by_severity.get(v.severity) is not None:
+            open_objs_by_severity[v.severity] += 1
+
     for a in filters.get('accepted', None):
         if view == 'Finding':
             finding = a
@@ -598,13 +605,19 @@ def view_product_metrics(request, pid):
             open_close_weekly[x] = {'closed': 0, 'open': 0, 'accepted': 1}
             open_close_weekly[x]['week'] = y
 
+        if accepted_objs_by_severity.get(a.severity) is not None:
+            accepted_objs_by_severity[a.severity] += 1
+
     test_data = {}
     for t in tests:
         if t.test_type.name in test_data:
             test_data[t.test_type.name] += t.verified_finding_count
         else:
             test_data[t.test_type.name] = t.verified_finding_count
+
     product_tab = Product_Tab(prod, title=_("Product"), tab="metrics")
+
+    open_objs_by_age = {x: len([_ for _ in filters.get('open') if _.age == x]) for x in set([_.age for _ in filters.get('open')])}
 
     return render(request, 'dojo/product_metrics.html', {
         'prod': prod,
@@ -613,14 +626,24 @@ def view_product_metrics(request, pid):
         'inactive_engs': inactive_engs_page,
         'view': view,
         'verified_objs': filters.get('verified', None),
+        'verified_objs_by_severity': sum_by_severity_level(filters.get('verified')),
         'open_objs': filters.get('open', None),
+        'open_objs_by_severity': open_objs_by_severity,
+        'open_objs_by_age': open_objs_by_age,
         'inactive_objs': filters.get('inactive', None),
+        'inactive_objs_by_severity': sum_by_severity_level(filters.get('inactive')),
         'closed_objs': filters.get('closed', None),
+        'closed_objs_by_severity': sum_by_severity_level(filters.get('closed')),
         'false_positive_objs': filters.get('false_positive', None),
+        'false_positive_objs_by_severity': sum_by_severity_level(filters.get('false_positive')),
         'out_of_scope_objs': filters.get('out_of_scope', None),
+        'out_of_scope_objs_by_severity': sum_by_severity_level(filters.get('out_of_scope')),
         'accepted_objs': filters.get('accepted', None),
+        'accepted_objs_by_severity': accepted_objs_by_severity,
         'new_objs': filters.get('new_verified', None),
+        'new_objs_by_severity': sum_by_severity_level(filters.get('new_verified')),
         'all_objs': filters.get('all', None),
+        'all_objs_by_severity': sum_by_severity_level(filters.get('all')),
         'form': filters.get('form', None),
         'reset_link': reverse('view_product_metrics', args=(prod.id,)) + '?type=' + view,
         'open_vulnerabilities': open_vulnerabilities,
@@ -1573,6 +1596,7 @@ def add_api_scan_configuration(request, pid):
                   {'form': form,
                    'product_tab': product_tab,
                    'product': product,
+                   'api_scan_configuration_hints': get_api_scan_configuration_hints(),
                    })
 
 
@@ -1631,7 +1655,8 @@ def edit_api_scan_configuration(request, pid, pascid):
                   'dojo/edit_product_api_scan_configuration.html',
                   {
                       'form': form,
-                      'product_tab': product_tab
+                      'product_tab': product_tab,
+                      'api_scan_configuration_hints': get_api_scan_configuration_hints(),
                   })
 
 

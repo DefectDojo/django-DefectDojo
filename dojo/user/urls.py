@@ -1,5 +1,5 @@
 from django.conf.urls import include
-from django.urls import re_path
+from django.urls import re_path, reverse_lazy
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 
@@ -41,6 +41,17 @@ if settings.FORGOT_PASSWORD:
         re_path(r'^reset/done/$', auth_views.PasswordResetCompleteView.as_view(
             template_name='dojo/password_reset_complete.html',
         ), name='password_reset_complete'),
+    ])
+
+if settings.FORGOT_USERNAME:
+    urlpatterns.extend([
+        re_path(r'^forgot_username_done/$', auth_views.PasswordResetDoneView.as_view(
+            template_name='dojo/forgot_username_done.html',
+        ), name="forgot_username_done"),
+        re_path(r'^forgot_username/$', views.DojoForgotUsernameView.as_view(
+            template_name='dojo/forgot_username.html',
+            success_url=reverse_lazy("forgot_username_done")
+        ), name="forgot_username"),
     ])
 
 if settings.API_TOKENS_ENABLED:
