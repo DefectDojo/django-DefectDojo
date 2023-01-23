@@ -353,8 +353,8 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
 
 @dojo_async_task
 @app.task
-def send_webhooks_notification(event, *args, **kwargs):
-    for endpoint in Webhook_Endpoints.objects.all():
+def send_webhooks_notification(event, user=None, *args, **kwargs):
+    for endpoint in Webhook_Endpoints.objects.filter(owner=user):
         if endpoint.status.startswith(Webhook_Endpoints._STATUS_ACTIVE):
             try:
                 if endpoint.url is not None:
@@ -421,7 +421,10 @@ def send_webhooks_notification(event, *args, **kwargs):
         else:
             logger.info(f"URL for Webhook '{endpoint.name}' is not active: {endpoint.get_status_display()} ({endpoint.status})")
     else:
-        logger.info('URLs for Webhooks not configured: skipping system notification')
+        if user:
+            logger.info(f"URLs for Webhooks not configured for user '{user}': skipping user notification")
+        else:
+            logger.info(f"URLs for Webhooks not configured: skipping system notification")
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):

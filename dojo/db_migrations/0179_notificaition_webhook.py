@@ -2,12 +2,13 @@
 
 from django.db import migrations, models
 import multiselectfield.db.fields
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0177_alter_system_settings_time_zone'),
+        ('dojo', '0178_alter_answer_polymorphic_ctype_and_more'),
     ]
 
     operations = [
@@ -22,6 +23,7 @@ class Migration(migrations.Migration):
                 ('header_value', models.CharField(blank=True, default='', help_text='Content of the header required for interacting with Webhook endpoint', max_length=100, null=True)),
                 ('first_error', models.DateTimeField(help_text='If endpoint is active, when error happened first time')),
                 ('last_error', models.DateTimeField(help_text='If endpoint is active, when error happened last time')),
+                ('owner', models.ForeignKey(blank=True, help_text='Owner/receiver of notification, if empty processed as system notification', null=True, on_delete=django.db.models.deletion.CASCADE, to='dojo.dojo_user')),
             ],
         ),
         migrations.AddField(

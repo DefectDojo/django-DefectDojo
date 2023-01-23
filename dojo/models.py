@@ -4148,6 +4148,8 @@ class Webhook_Endpoints(models.Model):
                                    help_text=_('Content of the header required for interacting with Webhook endpoint'))
     first_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened first time'))
     last_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened last time'))
+    owner = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.CASCADE,
+                              help_text=_('Owner/receiver of notification, if empty processed as system notification'))
 
 
 class Tool_Product_Settings(models.Model):
