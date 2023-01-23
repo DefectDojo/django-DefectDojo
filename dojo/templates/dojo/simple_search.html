@@ -264,7 +264,7 @@
                         {% for e in endpoints %}
                             <tr>
                                 <td>
-                                    <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="{% trans "Endpoint is broken. Check documentation for look for fix process" %}" >&#128681;</span>{% endif %}</a>
+                                    <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="{% trans "Endpoint is broken. Check documentation to look for fix process" %}" >&#128681;</span>{% endif %}</a>
                                     {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
                                 {% if e.product %}
@@ -414,7 +414,7 @@
                             <tr>
                                 <td>{% trans "Endpoint" %}</td>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                    <a class="search-finding" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                     {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
                                 </td>
                             </tr>
