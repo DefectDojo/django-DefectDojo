@@ -563,7 +563,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                 finding.duplicate = finding_close.validated_data.get('duplicate', False)
                 finding.out_of_scope = finding_close.validated_data.get('out_of_scope', False)
 
-                endpoints_status = finding.endpoint_status.all()
+                endpoints_status = finding.status_finding.all()
                 for e_status in endpoints_status:
                     e_status.mitigated_by = request.user
                     if settings.EDITABLE_MITIGATED_DATA:
