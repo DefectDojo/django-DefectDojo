@@ -342,7 +342,7 @@ class DojoDefaultImporter(object):
                                                       close_old_findings_product_scope=close_old_findings_product_scope)
 
         logger.debug('IMPORT_SCAN: Updating test/engagement timestamps')
-        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
+        importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date, tags)
 
         test_import = None
         if settings.TRACK_IMPORT_HISTORY:

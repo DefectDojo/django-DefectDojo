@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date):
+def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date, tags):
     if not scan_date:
         scan_date = now
 
@@ -35,6 +35,9 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
 
     if branch_tag:
         test.commit_hash = commit_hash
+
+    if tags:
+        test.tags = tags
 
     test.save()
     test.engagement.save()
