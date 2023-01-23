@@ -78,6 +78,7 @@ from dojo.models import (
     General_Survey,
     Check_List,
     Announcement,
+    Webhook_Endpoints,
 )
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import (
@@ -3330,3 +3331,12 @@ class AnnouncementViewSet(
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = "__all__"
     permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
+
+
+class WebhookEndpointsViewset(
+    DojoModelViewSet
+):
+    serializer_class = serializers.WebhookEndpointsSerializer
+    queryset = Webhook_Endpoints.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)  # TODO
