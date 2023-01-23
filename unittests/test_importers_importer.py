@@ -19,7 +19,7 @@ from dojo.utils import get_object_or_none
 
 logger = logging.getLogger(__name__)
 
-NPM_AUDIT_NO_VULN_FILENAME = 'scans/npm_audit_sample/no_vuln.json'
+NPM_AUDIT_NO_VULN_FILENAME = 'scans/npm_audit/no_vuln.json'
 NPM_AUDIT_SCAN_TYPE = 'NPM Audit Scan'
 
 ACUNETIX_AUDIT_ONE_VULN_FILENAME = 'scans/acunetix/one_finding.xml'

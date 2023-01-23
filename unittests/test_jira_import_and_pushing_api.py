@@ -65,7 +65,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.scans_path = '/scans/'
         self.zap_sample5_filename = self.scans_path + 'zap/5_zap_sample_one.xml'
-        self.npm_groups_sample_filename = self.scans_path + 'npm_audit_sample/many_vuln_with_groups.json'
+        self.npm_groups_sample_filename = self.scans_path + 'npm_audit/many_vuln_with_groups.json'
 
     def test_import_no_push_to_jira(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename)

@@ -7,7 +7,7 @@ from django.forms import Widget as form_widget
 from django.forms.utils import flatatt
 from django.http import QueryDict
 from django.template.loader import render_to_string
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -96,7 +96,7 @@ class Div(form_widget):
             '<i class="fa-solid fa-rotate-left"></i></a><a class="btn btn-default" data-edit="redo" title="Redo (Ctrl/Cmd+Y)">'
             '<i class="fa-solid fa-rotate-right"></i></a></div><br/><br/></div><div{}>\r\n{}</div>',
             flatatt(final_attrs),
-            force_text(value))
+            force_str(value))
 
 
 class WYSIWYGContentForm(forms.Form):

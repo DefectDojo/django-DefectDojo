@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load get_banner %}
 {% block content %}
     {{ block.super }}
-    <h3>Login</h3>
+    <h3>{% trans "Login" %}</h3>
     <form class="form-horizontal" method="POST" autocomplete="off"> {% csrf_token %}
         <fieldset class="col-md-offset-3 col-md-6">
             {% if "banner_enable"|get_banner_conf %}
@@ -21,17 +22,24 @@
                 {% if SHOW_LOGIN_FORM or 'force_login_form' in request.GET %}
                     <div class="col-sm-offset-1 col-sm-2" id="toggleBox" onclick="togglePassVisibility()">
                         <i class="fa-solid fa-eye"></i>
-                        <span><b>Show Password</b></span>
+                        <span><b>{% trans "Show Password" %}</b></span>
                     </div>
                 {% endif %}
 
                 {% if CLASSIC_AUTH_ENABLED and SHOW_LOGIN_FORM or 'force_login_form' in request.GET %}
                     <div class="col-sm-offset-1 col-sm-2">
-                        <button class="btn btn-success">Login</button>
+                        <button class="btn btn-success">{% trans "Login" %}</button>
                     </div>
-                    {% if FORGOT_PASSWORD %}
-                        <div class="col-sm-3">
-                            <a id="reset-password" href="{% url 'password_reset' %}">I forgot my password</a>
+                    {% if FORGOT_PASSWORD or FORGOT_USERNAME %}
+                        <div class="col-sm-4">
+                            <ul style="list-style-type: none">
+                                {% if FORGOT_PASSWORD %}
+                                    <li><a id="reset-password" href="{% url 'password_reset' %}">{% trans "I forgot my password" %}</a></li>
+                                {% endif %}
+                                {% if FORGOT_USERNAME %}
+                                    <li><a id="forgot-username" href="{% url 'forgot_username' %}">{% trans "I forgot my username" %}</a></li>
+                                {% endif %}
+                            </ul>
                         </div>
                     {% endif %}
                 {% endif %}
@@ -40,7 +48,7 @@
                 {% if GOOGLE_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
-                            <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Google</a>
+                            <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">{% trans "Login with Google" %}</a>
                         </button>
                     </div>
                 {% endif %}
@@ -48,7 +56,7 @@
                 {% if OKTA_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
-                            <a href="{% url 'social:begin' 'okta-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with OKTA</a>
+                            <a href="{% url 'social:begin' 'okta-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">{% trans "Login with OKTA" %}</a>
                         </button>
                     </div>
                 {% endif %}
@@ -56,7 +64,7 @@
                 {% if AZUREAD_TENANT_OAUTH2_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
-                            <a href="{% url 'social:begin' 'azuread-tenant-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Azure AD</a>
+                            <a href="{% url 'social:begin' 'azuread-tenant-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">{% trans "Login with Azure AD" %}</a>
                         </button>
                     </div>
                 {% endif %}
@@ -64,7 +72,7 @@
                 {% if GITLAB_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
-                            <a href="{% url 'social:begin' 'gitlab' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Gitlab</a>
+                            <a href="{% url 'social:begin' 'gitlab' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">{% trans "Login with Gitlab" %}</a>
                         </button>
                     </div>
                 {% endif %}
@@ -72,7 +80,7 @@
                 {% if AUTH0_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
-                            <a href="{% url 'social:begin' 'auth0' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Auth0</a>
+                            <a href="{% url 'social:begin' 'auth0' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">{% trans "Login with Auth0" %}</a>
                         </button>
                     </div>
                 {% endif %}
@@ -88,7 +96,7 @@
                 {% if GITHUB_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
-                            <a href="{% url 'social:begin' 'github' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Github</a>
+                            <a href="{% url 'social:begin' 'github' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">{% trans "Login with Github" %}</a>
                         </button>
                     </div>
                 {% endif %}
@@ -96,7 +104,7 @@
                 {% if GITHUB_ENTERPRISE_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
-                            <a href="{% url 'social:begin' 'github-enterprise' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Github Enterprise</a>
+                            <a href="{% url 'social:begin' 'github-enterprise' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">{% trans "Login with Github Enterprise" %}</a>
                         </button>
                     </div>
                 {% endif %}

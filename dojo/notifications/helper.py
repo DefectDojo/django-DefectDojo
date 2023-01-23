@@ -128,8 +128,7 @@ def create_description(event, *args, **kwargs):
 
 
 def create_notification_message(event, user, notification_type, *args, **kwargs):
-    template = 'notifications/%s.tpl' % event.replace('/', '')
-    kwargs.update({'type': notification_type})
+    template = f"notifications/{notification_type}/{event.replace('/', '')}.tpl"
     kwargs.update({'user': user})
 
     notification_message = None
@@ -143,7 +142,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     finally:
         if not notification_message:
             kwargs["description"] = create_description(event, *args, **kwargs)
-            notification_message = render_to_string('notifications/other.tpl', kwargs)
+            notification_message = render_to_string(f"notifications/{notification_type}/other.tpl", kwargs)
 
     return notification_message if notification_message else ''
 
