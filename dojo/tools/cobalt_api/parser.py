@@ -139,12 +139,16 @@ class CobaltApiParser(object):
 
     def convert_severity(self, cobalt_severity):
         """Convert severity value"""
-        if cobalt_severity == "low":
+        if cobalt_severity == "informational":
+            return "Info"
+        elif cobalt_severity == "low":
             return "Low"
         elif cobalt_severity == "medium":
             return "Medium"
         elif cobalt_severity == "high":
             return "High"
+        elif cobalt_severity == "critical":
+            return "Critical"
         else:
             return "Info"
 

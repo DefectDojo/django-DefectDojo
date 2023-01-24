@@ -14,7 +14,10 @@
 <div class="alert alert-info">
     API Scan Configurations are supported for the test types SonarQube API, Cobalt.io API and Edgescan API.
 <ul>
-    <li>For <b>SonarQube API</b> the field <b>Service key 1</b> has to be set with the SonarQube project key.</li>   
+    <li>For <b>SonarQube API</b> the field <b>Service key 1</b> has to be set with the SonarQube project key.
+        <b>Service key 2</b> can be used for the Organization ID if using SonarCloud.</li>   
+    <li>For <b>Bugcrowd API</b> the field <b>Service key 1</b> has to be set with the Bugcrowd program code.
+        <b>Service key 2</b> can be set with the target in the Bugcrowd program (will be url encoded for the api call), if not supplied, will fetch all submissions in the program</li> 
     <li>For <b>Cobalt.io API</b> the field <b>Service key 1</b> has to be set with the Cobalt.io asset id. 
         <b>Service key 2</b> will be populated with the asset name while saving the configuration.</li>   
     <li>For <b>Edgescan API</b> the field <b>Service key 1</b> has to be set with the Edgescan asset id.</li>

@@ -60,6 +60,16 @@ class TestNpmAuditParser(DojoTestCase):
         self.assertEqual(6, len(findings))
         self.assertEqual(918, findings[0].cwe)
 
+    def test_npm_audit_parser_with_one_criticle_vuln_has_null_as_cwe(self):
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/cwe_null.json"))
+        parser = NpmAuditParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        self.assertEqual(1035, findings[0].cwe)
+        self.assertEqual("growl", findings[0].component_name)
+        self.assertEqual("1.9.2", findings[0].component_version)
+
     def test_npm_audit_parser_empty_with_error(self):
         with self.assertRaises(ValueError) as context:
             testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_sample/empty_with_error.json"))

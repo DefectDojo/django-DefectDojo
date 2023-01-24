@@ -14,7 +14,7 @@ from dojo.authorization.authorization_decorators import user_is_configuration_au
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('dojo.view_note_type', 'superuser')
+@user_is_configuration_authorized('dojo.view_note_type')
 def note_type(request):
     initial_queryset = Note_Type.objects.all().order_by('name')
     name_words = initial_queryset.values_list('name', flat=True)
@@ -30,7 +30,7 @@ def note_type(request):
         'name_words': name_words})
 
 
-@user_is_configuration_authorized('dojo.change_note_type', 'superuser')
+@user_is_configuration_authorized('dojo.change_note_type')
 def edit_note_type(request, ntid):
     nt = get_object_or_404(Note_Type, pk=ntid)
     is_single = nt.is_single
@@ -56,7 +56,7 @@ def edit_note_type(request, ntid):
         'nt': nt})
 
 
-@user_is_configuration_authorized('dojo.change_note_type', 'superuser')
+@user_is_configuration_authorized('dojo.change_note_type')
 def disable_note_type(request, ntid):
     nt = get_object_or_404(Note_Type, pk=ntid)
     nt_form = DisableOrEnableNoteTypeForm(instance=nt)
@@ -81,7 +81,7 @@ def disable_note_type(request, ntid):
         'nt': nt})
 
 
-@user_is_configuration_authorized('dojo.change_note_type', 'superuser')
+@user_is_configuration_authorized('dojo.change_note_type')
 def enable_note_type(request, ntid):
     nt = get_object_or_404(Note_Type, pk=ntid)
     nt_form = DisableOrEnableNoteTypeForm(instance=nt)
@@ -105,7 +105,7 @@ def enable_note_type(request, ntid):
         'nt': nt})
 
 
-@user_is_configuration_authorized('dojo.add_note_type', 'superuser')
+@user_is_configuration_authorized('dojo.add_note_type')
 def add_note_type(request):
     form = NoteTypeForm()
     if request.method == 'POST':

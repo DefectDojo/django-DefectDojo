@@ -1,0 +1,134 @@
+
+# code: language=Dockerfile
+
+# The code for the build image should be identical with the code in
+# Dockerfile.nginx to use the caching mechanism of Docker.
+
+# Ref: https://devguide.python.org/#branchstatus
+FROM python:3.8.15-alpine3.16@sha256:8f3997244336ad0f067ad693f85906263a21a7f571b6577a64134aba889bc95e as base
+FROM base as build
+WORKDIR /app
+RUN \
+  apk update && \
+  apk add --no-cache \
+    gcc \
+    build-base \
+    bind-tools \
+    mysql-client \
+    mariadb-dev \
+    postgresql14-client \
+    xmlsec \
+    git \
+    util-linux \
+    curl-dev \
+    openssl \
+    libffi-dev \
+    && \
+    rm -rf /var/cache/apk/* && \
+  true
+COPY requirements.txt ./
+# CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
+# https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
+RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+
+FROM base as django-alpine
+WORKDIR /app
+ARG uid=1001
+ARG gid=1337
+ARG appuser=defectdojo
+ENV appuser ${appuser}
+RUN \
+  apk update && \
+  apk add --no-cache \
+    openjpeg \
+    jpeg \
+    tiff \
+    bind-tools \
+    mysql-client \
+    mariadb-dev \
+    xmlsec \
+    git \
+    util-linux \
+    postgresql14-client \
+    curl-dev \
+    openssl \
+    # needed for integration-tests
+    bash \
+    && \
+    rm -rf /var/cache/apk/* && \
+  true
+COPY --from=build /tmp/wheels /tmp/wheels
+COPY requirements.txt ./
+RUN export PYCURL_SSL_LIBRARY=openssl && \
+    pip3 install \
+	--no-cache-dir \
+	--no-index \
+  --find-links=/tmp/wheels \
+  -r ./requirements.txt
+
+COPY \
+  docker/entrypoint-celery-beat.sh \
+  docker/entrypoint-celery-worker.sh \
+  docker/entrypoint-initializer.sh \
+  docker/entrypoint-uwsgi.sh \
+  docker/entrypoint-uwsgi-dev.sh \
+  docker/entrypoint-unit-tests.sh \
+  docker/entrypoint-unit-tests-devDocker.sh \
+  docker/wait-for-it.sh \
+  docker/certs/* \
+  /
+COPY wsgi.py manage.py docker/unit-tests.sh ./
+COPY dojo/ ./dojo/
+
+# Add extra fixtures to docker image which are loaded by the initializer
+COPY docker/extra_fixtures/* /app/dojo/fixtures/
+
+COPY tests/ ./tests/
+RUN \
+  # Remove placeholder copied from docker/certs
+  rm -f /readme.txt && \
+  # Remove placeholder copied from docker/extra_fixtures
+  rm -f dojo/fixtures/readme.txt && \
+  mkdir -p dojo/migrations && \
+  chmod g=u dojo/migrations && \
+  true
+USER root
+RUN \
+    addgroup --gid ${gid} ${appuser} && \
+    adduser --system --no-create-home --disabled-password --gecos '' \
+        --uid ${uid} --ingroup ${appuser} ${appuser} && \
+    chown -R root:root /app && \
+    chmod -R u+rwX,go+rX,go-w /app && \
+    # Allow for bind mounting local_settings.py and other setting overrides
+    chown -R root:${appuser} /app/dojo/settings && \
+    chmod -R 775 /app/dojo/settings && \
+    mkdir /var/run/${appuser} && \
+    chown ${appuser} /var/run/${appuser} && \
+	  chmod g=u /var/run/${appuser} && \
+    mkdir -p media/threat && chown -R ${uid} media
+USER ${uid}
+ENV \
+  # Only variables that are not defined in settings.dist.py
+  DD_ADMIN_USER=admin \
+  DD_ADMIN_MAIL=admin@defectdojo.local \
+  DD_ADMIN_PASSWORD='' \
+  DD_ADMIN_FIRST_NAME=Admin \
+  DD_ADMIN_LAST_NAME=User \
+  DD_CELERY_LOG_LEVEL="INFO" \
+  DD_CELERY_WORKER_POOL_TYPE="solo" \
+  # Enable prefork and options below to ramp-up celeryworker performance. Presets should work fine for a machine with 8GB of RAM, while still leaving room.
+  # See https://docs.celeryproject.org/en/stable/userguide/workers.html#id12 for more details
+  # DD_CELERY_WORKER_POOL_TYPE="prefork" \
+  # DD_CELERY_WORKER_AUTOSCALE_MIN="2" \
+  # DD_CELERY_WORKER_AUTOSCALE_MAX="8" \
+  # DD_CELERY_WORKER_CONCURRENCY="8" \
+  # DD_CELERY_WORKER_PREFETCH_MULTIPLIER="128" \
+  DD_INITIALIZE=true \
+  DD_UWSGI_MODE="socket" \
+  DD_UWSGI_ENDPOINT="0.0.0.0:3031" \
+  DD_UWSGI_NUM_OF_PROCESSES="2" \
+  DD_UWSGI_NUM_OF_THREADS="2"
+ENTRYPOINT ["/entrypoint-uwsgi.sh"]
+
+FROM django-alpine as django-unittests
+COPY unittests/ ./unittests/

@@ -21,52 +21,49 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: master
+
       - name: Configure git
         run: |
           git config --global user.name "${{ env.GIT_USERNAME }}"
           git config --global user.email "${{ env.GIT_EMAIL }}"
+
       - name: Create new tag ${{ github.event.inputs.release_number }}
         # at this point, the PR from the 1st workflow is merged into master.
         run: |
           git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
           git push origin ${{ github.event.inputs.release_number }}
+
       - name: Install Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
           version: v3.4.0
+
       - name: Configure Helm repos
         run: |
-          helm repo add bitnami https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami/
+          helm repo add bitnami https://charts.bitnami.com/bitnami
           helm dependency list ./helm/defectdojo
           helm dependency update ./helm/defectdojo
+
       - name: Package Helm chart
         id: package-helm-chart
         run: |
           mkdir build
           helm package helm/defectdojo/ --destination ./build
-          echo "::set-output name=chart_version::$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')"
+          echo "chart_version=$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')" >> $GITHUB_ENV
+
       - name: Create release ${{ github.event.inputs.release_number }}
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.event.inputs.release_number }}  # this does not create a tag
-          release_name: Release ${{ github.event.inputs.release_number }}
-          body: |
-            Run the release drafter to populate the release notes.
+          name: Release ${{ github.event.inputs.release_number }}
+          tag_name: ${{ github.event.inputs.release_number }}
+          body: Run the release drafter to populate the release notes.
           draft: true
           prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
+          files: ./build/defectdojo-${{ env.chart_version }}.tgz
+          token: ${{ secrets.GITHUB_TOKEN }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
-          asset_name: defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
-          asset_content_type: application/tar+gzip
+          GITHUB_REPOSITORY: DefectDojo/django-DefectDojo
+
       - name: Update Helm repository index
         id: update-helm-repository-index
         run: |
@@ -106,7 +103,7 @@ jobs:
           ref: ${{ github.event.inputs.release_number }}
 
       - id: set-repo-org
-        run: echo ::set-output name=repoorg::${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]'
+        run: echo "repoorg=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         id: buildx
@@ -127,7 +124,7 @@ jobs:
       - name: Build and push images
         uses: docker/build-push-action@v3
         env:
-          REPO_ORG: ${{ steps.set-repo-org.outputs.repoorg }}
+          REPO_ORG: ${{ env.repoorg }}
           docker-image: ${{ matrix.docker-image }}
         with:
           push: true

@@ -27,7 +27,7 @@ class HorusecParser(object):
 
     def get_findings(self, filename, test):
         data = json.load(filename)
-        report_date = datetime.strptime(data.get("createdAt")[0:9], "%Y-%m-%d")
+        report_date = datetime.strptime(data.get("createdAt")[0:10], "%Y-%m-%d")
         return [self._get_finding(node, report_date) for node in data.get("analysisVulnerabilities")]
 
     def get_tests(self, scan_type, scan):
@@ -62,7 +62,9 @@ class HorusecParser(object):
             severity=data["vulnerabilities"]["severity"].title(),
             description=description,
             file_path=data["vulnerabilities"]["file"],
-            line=int(data["vulnerabilities"]["line"]),
             scanner_confidence=self.CONDIFDENCE[data["vulnerabilities"]["confidence"]],
         )
+        # sometimes the attribute 'line' is empty
+        if data["vulnerabilities"].get("line") and data["vulnerabilities"]["line"].isdigit():
+            finding.line = int(data["vulnerabilities"]["line"])
         return finding

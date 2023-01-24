@@ -68,7 +68,7 @@ class TestConfigurationAuthorizationDecorators(DojoTestCase):
         self.request = RequestFactory().get('/dummy')
         self.user = User()
         self.request.user = self.user
-        self.decorated_func = user_is_configuration_authorized('test', 'testLegacy', Mock())
+        self.decorated_func = user_is_configuration_authorized('test', Mock())
 
     @patch('dojo.authorization.authorization_decorators.user_has_configuration_permission')
     def test_authorization_user_has_configuration_permission_ok(self, mock):
@@ -76,7 +76,7 @@ class TestConfigurationAuthorizationDecorators(DojoTestCase):
 
         self.decorated_func(self.request)
 
-        mock.assert_called_with(self.user, 'test', 'testLegacy')
+        mock.assert_called_with(self.user, 'test')
 
     @patch('dojo.authorization.authorization_decorators.user_has_configuration_permission')
     def test_authorization_user_has_configuration_permission_denied(self, mock):
@@ -85,4 +85,4 @@ class TestConfigurationAuthorizationDecorators(DojoTestCase):
         with self.assertRaises(PermissionDenied):
             self.decorated_func(self.request)
 
-        mock.assert_called_with(self.user, 'test', 'testLegacy')
+        mock.assert_called_with(self.user, 'test')

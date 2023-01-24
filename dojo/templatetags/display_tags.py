@@ -54,9 +54,9 @@ markdown_styles = [
 ]
 
 finding_related_action_classes_dict = {
-    'reset_finding_duplicate_status': 'fa fa-eraser',
-    'set_finding_as_original': 'fa fa-superpowers',
-    'mark_finding_duplicate': 'fa fa-copy'
+    'reset_finding_duplicate_status': 'fa-solid fa-eraser',
+    'set_finding_as_original': 'fa-brands fa-superpowers',
+    'mark_finding_duplicate': 'fa-solid fa-copy'
 }
 
 finding_related_action_title_dict = {
@@ -82,7 +82,7 @@ def markdown_render(value):
                                                       'markdown.extensions.fenced_code',
                                                       'markdown.extensions.toc',
                                                       'markdown.extensions.tables'])
-        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs, markdown_styles))
+        return mark_safe(bleach.clean(markdown_text, tags=markdown_tags, attributes=markdown_attrs, css_sanitizer=markdown_styles))
 
 
 @register.filter(name='url_shortner')
@@ -243,7 +243,9 @@ def group_sla(group):
         return ""
 
     # if there is at least 1 finding, there will be date, severity etc to calculate sla
-    return finding_sla(group)
+    # Get the first finding with the highests severity
+    finding = group.findings.all().order_by('severity').first()
+    return finding_sla(finding)
 
 
 @register.filter(name='finding_sla')
@@ -254,14 +256,14 @@ def finding_sla(finding):
     title = ""
     severity = finding.severity
     find_sla = finding.sla_days_remaining()
-    sla_age = get_system_setting('sla_' + severity.lower())
+    sla_age = getattr(finding.get_sla_periods(), severity.lower(), None)
     if finding.mitigated:
         status = "blue"
         status_text = 'Remediated within SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
         if find_sla and find_sla < 0:
             status = "orange"
             find_sla = abs(find_sla)
-            status_text = 'Out of SLA: Remediatied ' + str(
+            status_text = 'Out of SLA: Remediated ' + str(
                 find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
     else:
         status = "green"
@@ -456,20 +458,20 @@ def tracked_object_type(current_object):
 
 
 def icon(name, tooltip):
-    return '<i class="fa fa-' + name + ' has-popover" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+    return '<i class="fa-solid fa-' + name + ' has-popover" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
 
 
 def not_specified_icon(tooltip):
-    return '<i class="fa fa-question fa-fw text-danger has-popover" aria-hidden="true" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+    return '<i class="fa-solid fa-question fa-fw text-danger has-popover" aria-hidden="true" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
 
 
 def stars(filled, total, tooltip):
     code = '<i class="has-popover" data-placement="bottom" data-content="' + tooltip + '">'
     for i in range(0, total):
         if i < filled:
-            code += '<i class="fa fa-star has-popover" aria-hidden="true"></span>'
+            code += '<i class="fa-solid fa-star has-popover" aria-hidden="true"></span>'
         else:
-            code += '<i class="fa fa-star-o text-muted has-popover" aria-hidden="true"></span>'
+            code += '<i class="fa-regular fa-star text-muted has-popover" aria-hidden="true"></span>'
     code += '</i>'
     return code
 
@@ -838,9 +840,9 @@ def jira_change(obj):
 
 
 @register.filter
-def get_thumbnail(filename):
+def get_thumbnail(file):
     from pathlib import Path
-    file_format = Path(filename).suffix[1:]
+    file_format = Path(file.file.url).suffix[1:]
     return file_format in supported_file_formats
 
 
@@ -999,8 +1001,8 @@ def import_history(finding, autoescape=True):
 
     html = """
 
-    <i class="fa fa-history has-popover"
-        title="<i class='fa fa-history'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
+    <i class="fa-solid fa-clock-rotate-left has-popover"
+        title="<i class='fa-solid fa-clock-rotate-left'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
         data-content="%s<br/>Currently only showing status changes made by import/reimport."
     </i>
     """

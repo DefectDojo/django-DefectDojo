@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load static %}
 {% load humanize %}
 {% load display_tags %}
@@ -14,44 +15,42 @@
     <div class="panel panel-default">
       <div class="panel-heading tight">
         <div class="clearfix">
-          <h3 class="pull-left">
-                    Description
-                </h3>
+          <h3 class="pull-left">{% trans "Description" %}</h3>
           <div class="dropdown pull-right">
             <div class="btn-group">
               <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-                            <span class="fa fa-bars"></span>
-                            <span class="caret"></span>
-                        </button>
+                <span class="fa-solid fa-bars"></span>
+                <span class="caret"></span>
+              </button>
               <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                 {% if prod|has_object_permission:"Product_Edit" %}
                   <li role="presentation">
                     <a class="" href="{% url 'edit_product' prod.id %}">
-                                          <i class="fa fa-pencil-square-o"></i> Edit
+                                          <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}
                                       </a>
                   </li>
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a class="" href="{% url 'add_meta_data' prod.id %}">
-                        <i class="fa fa-plus"></i> Add Custom Fields
+                        <i class="fa-solid fa-plus"></i>{% trans "Add Custom Fields" %}
                     </a>
                   </li>
                   <li role="presentation">
                     <a title="Edit Custom Fields"
                       href="{% url 'edit_meta_data' prod.id %}">
-                        <i class="fa fa-pencil-square-o"></i> Edit Custom Fields
+                        <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit Custom Fields" %}
                     </a>
                   </li>
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                       <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
-                          <i class="fa fa-plus"></i> Add API Scan Configuration
+                          <i class="fa-solid fa-plus"></i>{% trans "Add API Scan Configuration" %}
                       </a>
                   </li>
                   <li role="presentation">
                       <a title="View API Scan Configurations"
                          href="{% url 'view_api_scan_configurations' prod.id %}">
-                          <i class="fa fa-list-alt"></i> View API Scan Configurations
+                          <i class="fa-solid fa-rectangle-list"></i>{% trans "View API Scan Configurations" %}
                       </a>
                   </li>
                 {% endif %}
@@ -60,14 +59,14 @@
                   {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
                   <li role="presentation">
                     <a class="" href="{% url 'new_object' prod.id %}">
-                        <i class="fa fa-plus"></i> Add Product Tracking Files
+                        <i class="fa-solid fa-plus"></i>{% trans "Add Product Tracking Files" %}
                     </a>
                   </li>
                   {% endif %}
                   {% if prod|has_object_permission:"Product_Tracking_Files_View" %}
                   <li role="presentation">
                     <a href="{% url 'view_objects' prod.id %}">
-                        <i class="fa fa-list-alt"></i> View Product Tracking Files
+                        <i class="fa-solid fa-rectangle-list"></i>{% trans "View Product Tracking Files" %}
                     </a>
                   </li>
                   {% endif %}
@@ -75,7 +74,7 @@
                 <li role="separator" class="divider"></li>
                 <li role="presentation">
                   <a href="{% url 'product_report' prod.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
-                      <i class="fa fa-file-text-o"></i> Product Report
+                      <i class="fa-solid fa-file-lines"></i>{% trans "Product Report" %}
                   </a>
                 </li>
                 {% if prod|has_object_permission:"Benchmark_Edit" %}
@@ -84,7 +83,7 @@
                     {% for bt in benchmark_type %}
                     <li role="presentation">
                       <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
-                                        <span class="fa fa-list"></span> {{ bt.name }} {{ bt.version }}
+                                        <span class="fa-solid fa-list-ul"></span> {{ bt.name }} {{ bt.version }}
                                     </a>
                     </li>
                     {% endfor %}
@@ -94,7 +93,7 @@
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a href="{% url 'action_history' prod|content_type prod.id %}">
-                        <i class="fa fa-history"></i> View History
+                        <i class="fa-solid fa-clock-rotate-left"></i>{% trans "View History" %}
                     </a>
                   </li>
                 {% endif %}
@@ -102,7 +101,7 @@
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a class="text-danger" href="{% url 'delete_product' prod.id %}">
-                        <i class="fa fa-trash"></i> Delete
+                        <i class="fa-solid fa-trash"></i>{% trans "Delete" %}
                     </a>
                   </li>
                 {% endif %}
@@ -121,17 +120,17 @@
 <div class="col-md-12">
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-pie-chart" aria-hidden="true"></span> Metrics</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-chart-pie" aria-hidden="true"></span>{% trans "Metrics" %}</h3>
     </div>
     <table class="table table-condensed">
       <tbody>
         <tr>
-          <td class="col-sm-2 bg-vuln-critical vuln-count text-center">{{ critical }}<span class="hidden-xs"><br><small>CRITICAL</small></span></td>
-          <td class="col-sm-2 bg-vuln-high vuln-count text-center">{{ high }}<span class="hidden-xs"><br><small>HIGH</small></span></td>
-          <td class="col-sm-2 bg-vuln-medium vuln-count text-center">{{ medium }}<span class="hidden-xs"><br><small>MEDIUM</small></span></td>
-          <td class="col-sm-2 bg-vuln-low vuln-count text-center">{{ low }}<span class="hidden-xs"><br><small>LOW</small></span></td>
-          <td class="col-sm-2 bg-vuln-info vuln-count text-center">{{ info }}<span class="hidden-xs"><br><small>INFORMATIONAL</small></span></td>
-          <td class="col-sm-2 bg-muted vuln-count text-center">{{ total }}<span class="hidden-xs"><br><small>TOTAL</small></span></td>
+          <td class="col-sm-2 bg-vuln-critical vuln-count text-center">{{ critical }}<span class="hidden-xs"><br><small>{% trans "CRITICAL" %}</small></span></td>
+          <td class="col-sm-2 bg-vuln-high vuln-count text-center">{{ high }}<span class="hidden-xs"><br><small>{% trans "HIGH" %}</small></span></td>
+          <td class="col-sm-2 bg-vuln-medium vuln-count text-center">{{ medium }}<span class="hidden-xs"><br><small>{% trans "MEDIUM" %}</small></span></td>
+          <td class="col-sm-2 bg-vuln-low vuln-count text-center">{{ low }}<span class="hidden-xs"><br><small>{% trans "LOW" %}</small></span></td>
+          <td class="col-sm-2 bg-vuln-info vuln-count text-center">{{ info }}<span class="hidden-xs"><br><small>{% trans "INFORMATIONAL" %}</small></span></td>
+          <td class="col-sm-2 bg-muted vuln-count text-center">{{ total }}<span class="hidden-xs"><br><small>{% trans "TOTAL" %}</small></span></td>
         </tr>
       </tbody>
     </table>
@@ -143,9 +142,9 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span> Technologies {%if app_analysis%}({{ app_analysis.count }}){%endif%}
+        <h3 class="panel-title"><span class="fa-solid fa-bolt" aria-hidden="true"></span>{% trans "Technologies" %} {% if app_analysis %}({{ app_analysis.count }}){% endif %}
             {% if prod|has_object_permission:"Technology_Add" %}
-            <a title="Add new Technology" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology" id="addTechnology"><span class="fa fa-plus"></span> </a>
+            <a title="{% trans "Add new Technology" %}" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology" id="addTechnology"><span class="fa-solid fa-plus"></span> </a>
             {% endif %}
         </h3>
       </div>
@@ -157,18 +156,18 @@
                 <td>
                     <ul>
                     <li class="dropdown" style="list-style:none;position:absolute">
-                        <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageTechnologies"><b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                        <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageTechnologies"><b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                         <ul class="dropdown-menu">
                             {% if prod|has_object_permission:"Technology_Edit" %}
                             <li>
                                 <a name="editTechnology" href="{% url 'edit_technology' app.id %}">
-                                <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit" %}</a>
                             </li>
                             {% endif %}
                             {% if prod|has_object_permission:"Technology_Delete" %}
                             <li>
                                 <a name="deleteTechnology" href="{% url 'delete_technology' app.id %}">
-                                <i class="fa fa-trash"></i> Delete</a>
+                                <i class="fa-solid fa-trash"></i>{% trans "Delete" %}</a>
                             </li>
                             {% endif %}
                         </ul>
@@ -183,21 +182,21 @@
     </table>
     {% else %}
         <ul class="list-group">
-            <li class="list-group-item"><small class="text-muted"><em>There are no technologies.</em></small></li>
+            <li class="list-group-item"><small class="text-muted"><em>{% trans "There are no technologies." %}</em></small></li>
         </ul>
-      {% endif %}
+    {% endif %}
 </div>
   </div>
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa fa-gavel" aria-hidden="true"></span> Regulations {% if prod.regulations.count > 0%}({{ prod.regulations.count }}){%endif%}</h3>
+        <h3 class="panel-title"><span class="fa-solid fa-gavel" aria-hidden="true"></span>{% trans "Regulations" %} {% if prod.regulations.count > 0%}({{ prod.regulations.count }}){%endif%}</h3>
       </div>
       <ul class="list-group">
       {% for regulation in prod.regulations.all %}
         <li class="list-group-item"><span class="badge">{{ regulation.get_category_display }}</span><span data-toggle="tooltip" data-placement="bottom" title="{{ product.regulation.name }}">{{ regulation.acronym }}</span> <small class="text-muted">{{ regulation.jurisdiction }}</small></li>
       {% empty %}
-        <li class="list-group-item"><small class="text-muted"><em>There are no regulations.</em></small></li>
+        <li class="list-group-item"><small class="text-muted"><em>{% trans "There are no regulations." %}</em></small></li>
       {% endfor %}
       </ul>
 
@@ -211,7 +210,7 @@
   <div class="col-md-12">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class ="fa fa-balance-scale" aria-hidden="true"></span> Benchmark Progress </h3>
+        <h3 class="panel-title"><span class ="fa-solid fa-scale-balanced" aria-hidden="true"></span>{% trans "Benchmark Progress" %}</h3>
       </div>
         <ul class="list-group">
           {% for Abenchpercent in benchmarks_percents %}
@@ -221,18 +220,18 @@
                 <span class="float-md-left"><strong>{{Abenchpercent.0}}</strong></span>
               </div>
               <div class="col-md-6 text-right">
-              <span class="float-md-right">{{Abenchpercent.1|default:"0&#37;"}} Complete</span>
+              <span class="float-md-right">{{Abenchpercent.1|default:"0&#37;"}} {% trans "Complete" %}</span>
               </div>
             </div>
             <div class="progress">
               <div class="progress-bar" role="progressbar" aria-valuenow="{{Abenchpercent.1}}"
               aria-valuemin="0%" aria-valuemax="100%" style="width:{{Abenchpercent.1}}">
-              <span class="sr-only">{{Abenchpercent.1|default:"0&#37;"}} Complete</span>
+              <span class="sr-only">{{Abenchpercent.1|default:"0&#37;"}} {% trans "Complete" %}</span>
               </div>
             </div>
           </li>
           {% empty %}
-            <li class="list-group-item"><small class = "text-muted"><em>There are no benchmarks</em></small></li>
+            <li class="list-group-item"><small class = "text-muted"><em>{% trans "There are no benchmarks" %}</em></small></li>
           {% endfor %}
         </ul>
     </div>
@@ -243,21 +242,21 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
-                <h4 class="pull-left">Members</h4>
+                <h4 class="pull-left">{% trans "Members" %}</h4>
                 &nbsp;
-                <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                    <i class="fa fa-question-circle"></i></a>
+                <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                    <i class="fa-solid fa-circle-question"></i></a>
                 {% if prod|has_object_permission:"Product_Manage_Members" %}
                 <div class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductMember"
                             data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Member">
-                        <span class="fa fa-bars"></span>
+                        <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a id="addProductMember" href="{% url 'add_product_member' prod.id %}">
-                                <i class="fa fa-plus"></i> Add Users
+                                <i class="fa-solid fa-plus"></i>{% trans "Add Users" %}
                             </a>
                         </li>
                     </ul>
@@ -271,9 +270,9 @@
                     <thead>
                     <tr>
                         <th label="Actions"></th>
-                        <th>User</th>
-                        <th>Source</th>
-                        <th>Role</th>
+                        <th>{% trans "User" %}</th>
+                        <th>{% trans "Source" %}</th>
+                        <th>{% trans "Role" %}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -282,18 +281,18 @@
                             <td>
                                 <ul>
                                 <li class="dropdown" style="list-style:none;position:absolute">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductMember">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                     <ul class="dropdown-menu">
                                         {% if prod|has_object_permission:"Product_Manage_Members" %}
                                         <li>
                                             <a name="editProductMember" href="{% url 'edit_product_member' member.id %}">
-                                            <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                            <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit" %}</a>
                                         </li>
                                         {% endif %}
                                         {% if member|has_object_permission:"Product_Member_Delete" %}
                                         <li>
                                             <a name="deleteProductMember" href="{% url 'delete_product_member' member.id %}">
-                                            <i class="fa fa-trash"></i> Delete</a>
+                                            <i class="fa-solid fa-trash"></i>{% trans "Delete" %}</a>
                                         </li>
                                         {% endif %}
                                     </ul>
@@ -301,7 +300,7 @@
                                 </ul>
                             </td>
                             <td name="member_user">{{ member.user.get_full_name }}</td>
-                            <td>Product member</td>
+                            <td>{% trans "Product member" %}</td>
                             <td name="member_role">{{ member.role }}</td>
                         </tr>
                     {% endfor %}
@@ -323,7 +322,7 @@
             </div>
         {% else %}
             <div class="panel-body">
-                <small class="text-muted"><em>No members found.</em></small>
+                <small class="text-muted"><em>{% trans "No members found." %}</em></small>
             </div>
         {% endif %}
     </div>
@@ -331,21 +330,21 @@
       <div class="panel panel-default">
           <div class="panel-heading">
               <div class="clearfix">
-                  <h4 class="pull-left">Groups</h4>
+                  <h4 class="pull-left">{% trans "Groups" %}</h4>
                   &nbsp;
-                  <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                      <i class="fa fa-question-circle"></i></a>
+                  <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                      <i class="fa-solid fa-circle-question"></i></a>
                   {% if prod|has_object_permission:"Product_Group_Add" %}
                   <div class="dropdown pull-right">
                       <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductGroup"
                               data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Group">
-                          <span class="fa fa-bars"></span>
+                          <span class="fa-solid fa-bars"></span>
                           <span class="caret"></span>
                       </button>
                       <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                           <li role="presentation">
                               <a id="addProductGroup" href="{% url 'add_product_group' prod.id %}">
-                                  <i class="fa fa-plus"></i> Add Groups
+                                  <i class="fa-solid fa-plus"></i>{% trans "Add Groups" %}
                               </a>
                           </li>
                       </ul>
@@ -359,9 +358,9 @@
                   <thead>
                   <tr>
                       <th label="Actions"></th>
-                      <th>Group</th>
-                      <th>Source</th>
-                      <th>Role</th>
+                      <th>{% trans "Group" %}</th>
+                      <th>{% trans "Source" %}</th>
+                      <th>{% trans "Role" %}</th>
                   </tr>
                   </thead>
                   <tbody>
@@ -370,18 +369,18 @@
                       <td>
                           <ul>
                               <li class="dropdown" style="list-style:none;position:absolute">
-                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductGroup">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductGroup">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                   <ul class="dropdown-menu">
                                       {% if prod|has_object_permission:"Product_Group_Edit" %}
                                       <li>
                                           <a name="editProductGroup" href="{% url 'edit_product_group' group.id %}">
-                                              <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                              <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit" %}</a>
                                       </li>
                                       {% endif %}
                                       {% if group|has_object_permission:"Product_Group_Delete" %}
                                       <li>
                                           <a name="deleteProductGroup" href="{% url 'delete_product_group' group.id %}">
-                                              <i class="fa fa-trash"></i> Delete</a>
+                                              <i class="fa-solid fa-trash"></i>{% trans "Delete" %}</a>
                                       </li>
                                       {% endif %}
                                   </ul>
@@ -389,7 +388,7 @@
                           </ul>
                       </td>
                       <td name="group_name">{{ group.group.name }}</td>
-                      <td name="group_source"> Product Group </td>
+                      <td name="group_source">{% trans "Product Group" %}</td>
                       <td name="group_role">{{ group.role }}</td>
                   </tr>
                   {% endfor %}
@@ -410,7 +409,7 @@
           </div>
           {% else %}
           <div class="panel-body">
-              <small class="text-muted"><em>No groups found.</em></small>
+              <small class="text-muted"><em>{% trans "No groups found." %}</em></small>
           </div>
           {% endif %}
       </div>
@@ -420,33 +419,33 @@
 <div class="col-md-4">
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-info-circle fa-fw" aria-hidden="true"></span> Metadata</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw" aria-hidden="true"></span>{% trans "Metadata" %}</h3>
     </div>
     <div class="table-responsive">
       <table class="table table-striped" id="set-width">
         <tbody>
           <tr>
-            <td style="width: 160px;"><strong>Business Criticality</strong></td>
+            <td style="width: 160px;"><strong>{% trans "Business Criticality" %}</strong></td>
             <td>{{ prod.get_business_criticality_display|notspecified }}</td>
           </tr>
           <tr>
-            <td><strong>Product Type</strong></td>
+            <td><strong>{% trans "Product Type" %}</strong></td>
             <td>{{ prod.prod_type|notspecified }}</td>
           </tr>
           <tr>
-            <td><strong>Platform</strong></td>
+            <td><strong>{% trans "Platform" %}</strong></td>
             <td>{{ prod.get_platform_display|notspecified }}</td>
           </tr>
           <tr>
-            <td><strong>Lifecycle</strong></td>
+            <td><strong>{% trans "Lifecycle" %}</strong></td>
             <td>{{ prod.get_lifecycle_display|notspecified }}</td>
           </tr>
           <tr>
-            <td><strong>Origin</strong></td>
+            <td><strong>{% trans "Origin" %}</strong></td>
             <td>{{ prod.get_origin_display|notspecified }}</td>
           </tr>
           <tr>
-            <td><strong>User Records</strong></td>
+            <td><strong>{% trans "User Records" %}</strong></td>
             <td>
               {%  if prod.user_records > 0 %}
               {{ prod.user_records|intcomma }}
@@ -456,7 +455,7 @@
             </td>
           </tr>
           <tr>
-            <td><strong>Revenue</strong></td>
+            <td><strong>{% trans "Revenue" %}</strong></td>
             <td>
               {%  if prod.revenue > 0 %}
                 {% if prod.revenue < 1000000 %}{{ prod.revenue|intcomma }}{% else %}{{ prod.revenue|intword }}{% endif %}
@@ -468,8 +467,8 @@
           {% with jira_project=prod|jira_project %}
             {% if jira_project %}
             <tr>
-              <td><strong>JIRA</strong></td>
-              <td><a href="{{ prod | jira_project_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ prod | jira_key }}</a></td>
+              <td><strong>{% trans "JIRA" %}</strong></td>
+              <td><a href="{{ prod | jira_project_url }}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> {{ prod | jira_key }}</a></td>
             </tr>
             {% endif %}
           {% endwith %}
@@ -479,22 +478,61 @@
   </div>
 
 <!-- End metadata -->
+<!-- SLA -->
+    {% if system_settings.enable_finding_sla %}
+    <div class="panel panel-default panel-default-secondary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="fa-solid fa-calendar-check fa-fw" aria-hidden="true"></span>&nbsp;Service Level Agreement</h3>
+    </div><div class="panel-body">
+        <p>{{ sla.name }}</p>
+        <p>{{ sla.description }}</p>
+      </div>
+    <div class="table-responsive">
+      <table class="table table-striped" >
+        <tbody>
+          <tr>
+            <td style="width: 160px;"><strong>Critical</strong></td>
+            <td>{{ sla.critical }} days to remediate</td>
+          </tr>
+          <tr>
+            <td style="width: 160px;"><strong>High</strong></td>
+            <td>{{ sla.high }} days to remediate</td>
+          </tr>
+          <tr>
+            <td style="width: 160px;"><strong>Medium</strong></td>
+            <td>{{ sla.medium }} days to remediate</td>
+          </tr>
+          <tr>
+            <td style="width: 160px;"><strong>Low</strong></td>
+            <td>{{ sla.low }} days to remediate</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+<!-- End SLA -->
 <!-- Lang -->
 {% if languages %}
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-language" aria-hidden="true"></span> Languages ({{ languages.count }})</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-language" aria-hidden="true"></span>{% trans "Languages" %} ({{ languages.count }})</h3>
     </div>
-    <div class="panel-body">
+    <div class="panel-body" style="text-align: center;">
+      <div style="display: inline-block; padding: 0px 15px 0px 15px; vertical-align: top;">
         <div class="chart" id="donut-lang"></div>
-        <div style="padding-top: 10px;">
+        <div style="padding: 10px 0px 10px 0px;">
             {%  if langSummary.files__sum > 0 %}
-            <strong>{{ langSummary.files__sum|intcomma }}</strong> files {%  if langSummary.code__sum %} and {%endif%}
+            <strong>{{ langSummary.files__sum|intcomma }}</strong> {% trans "files" %} {%  if langSummary.code__sum %} {% trans "and" %} {%endif%}
             {% endif %}
             {%  if langSummary.code__sum %}
-            <strong>{{ langSummary.code__sum|intcomma }}</strong> lines of code
+            <strong>{{ langSummary.code__sum|intcomma }}</strong> {% trans "lines of code" %}
             {% endif %}
         </div>
+      </div>
+      <div style="display: inline-block; padding: 0px 15px 0px 15px; white-space: nowrap; overflow-x: scroll; text-align: left;">
+        <div id="donut-lang-container"></div>
+      </div>
     </div>
   </div>
 {% endif %}
@@ -503,7 +541,7 @@
 {% if product_metadata %}
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-magic fa-fw" aria-hidden="true"></span> Custom Fields</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-wand-magic-sparkles fa-fw" aria-hidden="true"></span>{% trans "Custom Fields" %}</h3>
     </div>
     <div class="table-responsive">
       <table class="table table-striped">
@@ -523,21 +561,21 @@
 <!-- Contacts -->
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-users fa-fw" aria-hidden="true"></span> Contacts</h3>
+      <h3 class="panel-title"><span class="fa-solid fa-users fa-fw" aria-hidden="true"></span>{% trans "Contacts" %}</h3>
     </div>
     <div class="table-responsive">
       <table class="table table-striped">
         <tbody>
           <tr>
-            <td style="width: 160px;"><strong>Team Manager</strong></td>
+            <td style="width: 160px;"><strong>{% trans "Team Manager" %}</strong></td>
             <td>{% if prod.team_manager != "0" %}{{ prod.team_manager | default:"Unknown" }}{% endif %}</td>
           </tr>
           <tr>
-            <td><strong>Product Manager</strong></td>
+            <td><strong>{% trans "Product Manager" %}</strong></td>
             <td>{% if prod.product_manager != "0" %}{{ prod.product_manager | default:"Unknown" }}{% endif %}</td>
           </tr>
           <tr>
-            <td><strong>Technical Contact</strong></td>
+            <td><strong>{% trans "Technical Contact" %}</strong></td>
             <td>{% if prod.technical_contact != "0" %}{{ prod.technical_contact | default:"Unknown" }}{% endif %}</td>
           </tr>
         </tbody>
@@ -549,8 +587,8 @@
 <div class="panel panel-default panel-default-secondary" id="edit_notifications">
   <div class="panel-heading">
     {% url 'notifications' as notifications_url %}
-    <h3 class="panel-title"><span class="fa fa-users fa-fw" aria-hidden="true"></span> Notifications
-      <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="These are your personal settings for this product." data-placement="right" data-container="body"></i>
+    <h3 class="panel-title"><span class="fa-solid fa-users fa-fw" aria-hidden="true"></span>{% trans "Notifications" %}
+      <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="{% trans "These are your personal settings for this product." %}" data-placement="right" data-container="body"></i>
     </h3>
   </div>
   <form id="edit_notifications_form" class="form-horizontal" method="post" action="{% url 'edit_notifications' prod.id %}">{% csrf_token %}
@@ -560,18 +598,18 @@
           <tr>
               <td id="saving_notifications">&nbsp;</td>
               {% if "slack" in enabled_notifications %}
-              <td class="centered">Slack</td>
+              <td class="centered">{% trans "Slack" %}</td>
               {% endif %}
               {% if "mail" in enabled_notifications %}
-              <td class="centered">Mail</td>
+              <td class="centered">{% trans "Mail" %}</td>
               {% endif %}
-              <td class="centered">Alert</td>
+              <td class="centered">{% trans "Alert" %}</td>
           </tr>
           {% for field in personal_notifications_form.visible_fields %}
           <tr>
             <td><strong>{{ field.label }}&nbsp;</strong>
               {% if field.help_text %}
-              <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body"></i>
+              <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body"></i>
               {% endif %}
             </td>
             {% for pk,c in field.field.widget.choices %}
@@ -638,7 +676,7 @@
 
     $(function() {
       $('div#edit_notifications input[type=checkbox]').on('click', function() {
-        $('#saving_notifications').append(' <small>(saving...)</small>')
+        $('#saving_notifications').append(' <small>({% trans "saving..." %})</small>')
         $('#edit_notifications_form').submit()
       });
     });

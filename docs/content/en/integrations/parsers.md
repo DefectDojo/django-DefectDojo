@@ -34,7 +34,7 @@ grype defectdojo/defectdojo-django:1.13.1 -o json > many_vulns.json
 
 ### Arachni Scanner
 
-Arachni Web Scanner (http://arachni-scanner.com/wiki)
+Arachni Web Scanner (https://www.arachni-scanner.com)
 
 Reports are generated with `arachni_reporter` tool this way:
 
@@ -85,6 +85,23 @@ Azure Security Center recommendations can be exported from the user interface in
 
 JSON report format
 
+
+### Blackduck API
+
+Import findings from the BlackDuck API - no file required.
+
+Follow these steps to setup API importing:
+
+1.  Configure the BlackDuck API Authentication details by navigating to
+    Configuration / Tool Configuration, selecting the Tool Type to "BlackDuck API",
+    and Authentication Type "API Key". Paste your BlackDuck API token in the
+    "API Key" field.
+2.  In the Product settings select "Add API Scan Configuration" and select the
+    previously added BlackDuck API Tool Configuration. Provide the ID
+    of the project from which to import findings in the field *Service key 1*.
+    Provide the version of the project from which to import findings in the field *Service key 2*.
+3.  After this is done, you can import the findings by selecting "BlackDuck API" as the scan type.
+
 ### Blackduck Hub
 
 2 options:
@@ -102,6 +119,18 @@ Import Brakeman Scanner findings in JSON format.
 ### Bugcrowd
 
 Import Bugcrowd results in CSV format.
+
+### Bugcrowd API
+
+Import Bugcrowd submissions directly from the API using the API token.
+Set your API key directly in the format `username:password` in the API Token input, it will be added to the header `'Authorization': 'Token {}'.format(self.api_token),`
+For each product, you can configure 2 things:
+- Service key 1: the bugcrowd program code (it's the slug name in the url for the program, url safe)
+- Service key 2: the bugcrowd target name (the full name, it will be url-encoded, you can find it in https://tracker.bugcrowd.com/<YOURPROGRAM>/settings/scope/target_groups)
+    - It can be left empty so that all program submissions are imported
+
+That way, per product, you can use the same program but separate by target, which is a fairly common way of filtering/grouping Bugcrowd.
+Adding support for a 3rd filtering would be possible with Service Key 3, feel free to make a PR.
 
 ### Bundler-Audit
 
@@ -371,6 +400,11 @@ Import of JSON report from
 Import JSON container image linter reports
 <https://github.com/goodwithtech/dockle>
 
+### docker-bench-security Scanner
+
+Import JSON reports of OWASP [docker-bench-security](https://github.com/docker/docker-bench-security).
+docker-bench-security is a script that make tests based on [CIS Docker Benchmark](https://www.cisecurity.org/benchmark/docker/).
+
 ### Detect-secrets
 
 Import of JSON report from <https://github.com/Yelp/detect-secrets>
@@ -381,17 +415,17 @@ Import Edgescan vulnerabilities by JSON file or API - no file required.
 
 Follow these steps to setup API importing:
 
-1.  Configure the Edgescan Authentication details by navigating to
-    Configuration / Tool Configuration, selecting the Tool Type to "Edgescan",
-    and Authentication Type "API Key". Paste your Edgescan API key in the
-    "API Key" field.
-2.  In the Product settings select "Add API Scan Configuration" and select the
-    previously added Edgescan Tool Configuration. Provide the ID
-    of the asset from which to import findings in the field *Service key 1*.
-3.  After this is done, you can import the findings by selecting 
-    "Edgescan Scan" as the scan type. If you have more than one asset 
-    configured, you must also select which Edgescan API Scan Configuration to 
-    use.
+1.  Configure the Edgescan authentication details by navigating to
+    `Configuration -> Tool Configuration -> Add Tool Configuration`. Enter a `Name`,
+    select the `Tool Type` "Edgescan", `Authentication Type` "API Key", paste 
+    your Edgescan API key in the `API Key` field, and click `Submit`.
+2.  In the `Product` settings select `Add API Scan Configuration` and select the
+    previously added Edgescan tool configuration. Provide the edgescan asset ID(s)
+    that you wish to import the findings for in the field `Service key 1`. 
+    *Multiple asset IDs should be comma separated with no spacing.*
+3.  After this is done, you can import the findings on the `Product` page through
+    `Findings -> Import Scan Results`. Select "Edgescan Scan" as the `Scan type`,
+    the API scan configuration from the last step, and click `Import`.
 
 ### ESLint
 
@@ -499,6 +533,10 @@ Example:
 }
 ```
 
+### Ggshield
+
+Import [Ggshield](https://github.com/GitGuardian/ggshield) findings in JSON format.
+
 ### Gosec Scanner
 
 Import Gosec Scanner findings in JSON format.
@@ -517,7 +555,7 @@ Import Dependency Scanning Report vulnerabilities in JSON format: https://docs.g
 
 ### Github Vulnerability
 
-Import findings from Github vulnerability scan:
+Import findings from Github vulnerability scan (GraphQL Query):
 <https://help.github.com/en/github/managing-security-vulnerabilities>
 
 Currently the parser is able to manage only `RepositoryVulnerabilityAlert` object.
@@ -529,6 +567,7 @@ vulnerabilityAlerts (RepositoryVulnerabilityAlert object)
     + id
     + createdAt (optional)
     + vulnerableManifestPath (optional)
+    + state (optional)
     + securityVulnerability (SecurityVulnerability object)
         + severity (CRITICAL/HIGH/LOW/MODERATE)
         + package (optional)
@@ -542,7 +581,9 @@ vulnerabilityAlerts (RepositoryVulnerabilityAlert object)
                 + references (optional)
                     + url (optional)
                 + cvss (optional)
+                    + score (optional)
                     + vectorString (optional)
+                + cwes (optional)
 ```
 
 References:
@@ -902,7 +943,7 @@ Synchronize Probely Plus findings with DefectDojo.
 To setup this integration set the DefectDojo URL and API key on the
 Integrations page on Probely. Then, select which Product, Engagement,
 and, optionally, the Test you want to synchronize to. The API key needs
-to belong to a staff user.
+to belong to a user with write access to the product.
 
 Works with DefectDojo 1.5.x and 1.6.x. Probely also supports non-public
 DefectDojo instances.
@@ -910,6 +951,12 @@ DefectDojo instances.
 For detailed instructions on how to configure Probely and DefectDojo,
 see
 <https://help.probely.com/en/articles/3811515-how-to-integrate-probely-with-defectdojo>
+
+### PWN Security Automation Framework
+
+- (Main Page)\[<https://github.com/0dayinc/pwn>\]
+- pwn_sast: Import the JSON results generated by the pwn_sast Driver.  This driver scans source code repositories for security anti-patterns that may result in vulnerability identification.
+- More driver results coming soon...
 
 ### Qualys Scan
 
@@ -994,6 +1041,10 @@ report as follows
 -   Removing both fields will allow retrieval of all findings in the
     Risk Recon instance.
 
+### Rubocop Scan
+
+Import Rubocop JSON scan report (with option -f json).
+
 ### Rusty Hog parser
 
 From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
@@ -1019,6 +1070,20 @@ For example, a report with `Dockle` as a driver name will produce a Test with a 
 {{% alert title="Warning" color="warning" %}}
 Current implementation is limited and will aggregate all the findings in the SARIF file in one single report.
 {{% /alert %}}
+
+#### Support for de-duplication (fingerprinting)
+
+SARIF parser take into account data for fingerprinting. It's base on `fingerprints` and `partialFingerprints` properties.
+It's possible to activate de-duplication based on this data by customizing settings.
+
+```Python
+# in your settings.py file
+DEDUPLICATION_ALGORITHM_PER_PARSER["SARIF"] = DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
+```
+
+### Scantist Scan
+Scantist is an open source management platform. Scan and remediate open source security, licensing and compliance risks across your software development lifecycle.
+Here you can find more information: <https://scantist.com/>
 
 ### ScoutSuite
 
@@ -1070,9 +1135,12 @@ Follow these steps to setup the SonarQube API import:
     Configuration / Tool Configuration. Note the url must be in the
     format of `https://<sonarqube_host>/api`. Select the tool
     type to be SonarQube. By default the tool will import vulnerabilities issues
-    and security hotspots only,
-    but additional filters can be setup using the Extras field separated by
-    commas (e.g. BUG,VULNERABILITY,CODE_SMELL)
+    and security hotspots only, but additional filters can be setup using the 
+    Extras field separated by commas (e.g. BUG,VULNERABILITY,CODE_SMELL). When using
+    SonarCloud, you must also specify the Organization ID in the Extras field as follows
+    `OrgID=sonarcloud-organzation-ID`. If also specifying issue type filters, please 
+    seperate the items in the Extras field by a vertical bar as follows
+    `BUG,VULNERABILITY,CODE_SMEL|OrgID=sonarcloud-organzation-ID`
 2.  In the Product settings add an API Scan Configuration. *Service key 1* must
     be the SonarQube project key, which can be found by navigating to a specific project and
     selecting the value from the url
@@ -1081,12 +1149,26 @@ Follow these steps to setup the SonarQube API import:
     use the name of the Product as the project key in SonarQube. If you would like to
     import findings from multiple projects, you can specify multiple keys as
     separated API Scan Configuration in the Product settings.
-3.  Once all of the settings are made, the SonarQube API Import will be
+3.  If using SonarCloud, the orginization ID can be used from step 1, but it 
+    can be ovverirdden by supplying a different orginization ID in the *Service key 2* input field.
+4.  Once all of the settings are made, the SonarQube API Import will be
     able to import all vulnerability information from the SonarQube
-    instance. In the import or re-import dialog you can select which API Scan
-    Configuration shall be used. If you do not choose
-    any, DefectDojo will use the API Scan Configuration of the Product if there is
-    only one defined or the SonarQube Tool Configuration if there is only one.
+    instance. 
+
+##### Multiple SonarQube API Configurations
+
+In the import or re-import dialog you can select which API Scan
+Configuration shall be used. If you do not choose
+any, DefectDojo will use the API Scan Configuration of the Product if there is
+only one defined or the SonarQube Tool Configuration if there is only one.
+
+##### Multi Branch Scanning 
+
+If using a version of SonarQube with multi branch scanning, the branch tha be scanned can 
+be supplied in the `branch tag` fieild at import/re-import time. If the branch does not exist,
+a notification will be generated in the alerts table indicating that branch to be imported 
+does not exist. If a branch name is not supplied during import/re-import, the default branch 
+of the SonarQube project will be used. 
 
 **Note:**: If `https` is used for the SonarQube, the certificate must be
 trusted by the DefectDojo instance.
@@ -1135,7 +1217,11 @@ JSON report of [trivy scanner](https://github.com/aquasecurity/trivy).
 
 ### Trufflehog
 
-JSON Output of Trufflehog.
+JSON Output of Trufflehog. Supports version 2 and 3 of https://github.com/trufflesecurity/trufflehog
+
+### Trufflehog3
+
+JSON Output of Trufflehog3, a fork of TruffleHog located at https://github.com/feeltheajf/truffleHog3
 
 ### Trustwave
 
@@ -1161,6 +1247,26 @@ VCG output can be imported in CSV or Xml formats.
 ### Veracode
 
 Detailed XML Report
+
+### Veracode SourceClear
+
+Import Project CSV or JSON report
+
+### Vulners
+
+Import Vulners [Audit](https://vulners.com/docs/API_wrapper/linux_audit/#linux-audit) results, no file required.
+
+Follow these steps to set up importing:
+1. Configure the Vulners API Key details by navigating to Configuration / Tool Configuration, selecting the Tool Type to "Vulners", and adding the API Key
+2. In the Product settings select "Add API Scan Configuration" and select the previously added Vulners API Tool Configuration.
+3. After this is done, you can import the findings by selecting "Vulners" as the scan type.
+
+Detailed installation steps can be found in [vulners documentation](https://vulners.com/docs/plugins/defectdojo/).
+
+Use following [instructions](https://vulners.com/docs/apikey/) to generate Vulners API Key.
+
+More details about DefectDojo-plugin integration can be found at [vulners integrations page](https://vulners.com/plugins).
+
 
 ### Wapiti Scan
 
@@ -1188,6 +1294,12 @@ HTTP Return Code | Severity
 407              |  Medium
 500              |  Low
 
+### Whispers
+
+Import Whispers JSON results.
+
+https://github.com/adeptex/whispers
+
 ### Xanitizer
 
 Import XML findings list report, preferably with parameter
@@ -1199,4 +1311,4 @@ Import Yarn Audit scan report in JSON format. Use something like `yarn audit --j
 
 ### Zed Attack Proxy
 
-ZAP XML report format.
+ZAP XML report format (with or without requests and responses).

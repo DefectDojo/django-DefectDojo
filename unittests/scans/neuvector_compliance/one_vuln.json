@@ -1,0 +1,25 @@
+{
+    "run_timestamp": 1663583567,
+    "run_at": "2022-09-19T10:32:47Z",
+    "kubernetes_cis_version": "1.6.0",
+    "docker_cis_version": "1.2.0",
+    "items": [
+        {
+            "test_number": "D.1.1.11",
+            "category": "docker",
+            "type": "host",
+            "profile": "Level 1",
+            "scored": true,
+            "automated": true,
+            "description": "Ensure auditing is configured for Dockerfiles and directories - /etc/docker/daemon.json",
+            "remediation": "Install auditd. Add -w /etc/docker/daemon.json -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+            "tags": [
+                "GDPR",
+                "HIPAA",
+                "NIST"
+            ],
+            "level": "WARN",
+            "message": []
+        }
+    ]
+}

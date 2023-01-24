@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load event_tags %}
 {% load display_tags %}
+{% load i18n %}
 {% load static %}
 {% block add_styles %}
     {{ block.super }}
@@ -114,42 +115,43 @@
 {% block content %}
     {{ block.super }}
     <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading tight">
-                <div class="clearfix">
-                    <h3 {% if not critical_prods %}class="has-filters" {% endif %}>
-                        {{ name }}
-                        {% comment %} {% if not critical_prods %}
-                            <div class="dropdown pull-right"></div>
-                        {% endif %} {% endcomment %}
-                        {% if not critical_prods %}
-                            <div class="dropdown pull-right">
-                                <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
-                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                        data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
-                                    <span class="fa fa-bars"></span>
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                    <li role="presentation">
-                                        <a href="{% url 'metrics_product_type' %}?type=Finding">
-                                            <i class="fa fa-file-text-o"></i> Measures Findings
-                                        </a>
-                                    </li>
-                                    <li role="presentation">
-                                        <a href="{% url 'metrics_product_type' %}?type=Endpoint">
-                                            <i class="fa fa-file-text-o"></i> Measure Affected Endpoints
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        {% endif %}
-                    </h3>
-
+        <div class="row">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <div class="clearfix">
+                        <h3 {% if not critical_prods %}class="has-filters" {% endif %}>
+                            {{ name }}
+                            {% comment %} {% if not critical_prods %}
+                                <div class="dropdown pull-right"></div>
+                            {% endif %} {% endcomment %}
+                            {% if not critical_prods %}
+                                <div class="dropdown pull-right">
+                                    <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                            data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
+                                        <span class="fa-solid fa-bars"></span>
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                        <li role="presentation">
+                                            <a href="{% url 'metrics_product_type' %}?type=Finding">
+                                                <i class="fa-solid fa-file-lines"></i> {% trans "Measures Findings" %}
+                                            </a>
+                                        </li>
+                                        <li role="presentation">
+                                            <a href="{% url 'metrics_product_type' %}?type=Endpoint">
+                                                <i class="fa-solid fa-file-lines"></i> {% trans "Measure Affected Endpoints" %}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </h3>
+                    </div>
                 </div>
-            </div>
-            <div id="the-filters" class="is-filters panel-body collapse">
-                {% include "dojo/filter_snippet.html" with form=findings.form clear_link="/metrics/product/type" %}
+                <div id="the-filters" class="is-filters panel-body collapse">
+                    {% include "dojo/filter_snippet.html" with form=findings.form clear_link="/metrics/product/type" %}
+                </div>
             </div>
         </div>
     </div>
@@ -166,28 +168,32 @@
                                  start="{{ c_prod.calc_health }}"></div>
                             <div>
                                 {% if c_prod.critical_present and c_prod.high_present %}
-                                    <p> {{ c_prod.name }} is affected by <b>both</b> critical and high severity
-                                        vulnerabilities.</p>
+                                    <p>{% blocktranslate with name=c_prod.name%}{{ name }} is affected by <b>both</b> critical and
+                                        high severity vulnerabilities.{% endblocktranslate %} </p>
                                     <p>
-                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical
-                                            Severity Vulnerabilities</a></p>
+                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
+                                            {% trans "Critical Severity Vulnerabilities" %}</a></p>
                                     <p>
-                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High
-                                            Severity Vulnerabilities</a></p>
+                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
+                                            {% trans "High Severity Vulnerabilities" %}</a></p>
                                 {% elif c_prod.critical_present %}
-                                    <p> {{ c_prod.name }} is affected by critical vulnerabilities. </p>
+                                    <p>{% blocktranslate with name=c_prod.name%}
+                                        {{ name }} is affected by critical vulnerabilities.{% endblocktranslate %}
+                                    </p>
                                     <p>
-                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical
-                                            Severity Vulnerabilities</a></p>
+                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
+                                            {% trans "Critical Severity Vulnerabilities" %}</a></p>
                                 {% elif c_prod.high_present %}
-                                    <p> {{ c_prod.name }} is affected by high severity vulnerabilities.</p>
+                                    <p>{% blocktranslate with name=c_prod.name%}
+                                        {{ name }} is affected by high severity vulnerabilities.{% endblocktranslate %}
+                                    </p>
                                     <p>
-                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High
-                                            Severity Vulnerabilities</a></p>
+                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
+                                            {% trans "High Severity Vulnerabilities" %}</a></p>
                                 {% endif %}
                                 <p>
                                     <a href='{{ url_prefix }}/metrics/product/type?date=2&test__engagement__product__prod_type={{ c_prod.id }}&status='>
-                                        Full Metrics</a></p></div>
+                                        {% trans "Full Metrics" %}</a></p></div>
                             <br>
                         </div>
                     {% endfor %}
@@ -195,17 +201,16 @@
             {% elif name == "Critical Product Metrics" %}
                 <div class="row">
                     <div class="col-lg-6">
-                        <h3><b> No Critical Products registered</b></h3>
+                        <h3><b>{% trans "No Critical Products registered" %}</b></h3>
                     </div>
                 </div>
             {% endif %}
+
             <div class="row">
                 {% if opened_per_month %}
                     <div class="col-lg-6">
                         <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Open Bug Count by Month
-                            </div>
+                            <div class="panel-heading">{% trans "Open Bug Count by Month" %}</div>
                             <!-- /.panel-heading -->
                             <div class="panel-body">
                                 <div id="opened_per_month_2"></div>
@@ -218,9 +223,7 @@
                 {% if active_per_month %}
                     <div class="col-lg-6">
                         <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Active Bug Count by Month
-                            </div>
+                            <div class="panel-heading">{% trans "Active Bug Count by Month" %}</div>
                             <!-- /.panel-heading -->
                             <div class="panel-body">
                                 <div id="active_per_month"></div>
@@ -230,12 +233,11 @@
                         <!-- /.panel -->
                     </div>
                 {% endif %}
-
                 {% if accepted_per_month %}
                     <div class="col-lg-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                Risk Accepted Bug Count by Month
+                                {% trans "Risk Accepted Bug Count by Month" %}
                             </div>
                             <!-- /.panel-heading -->
                             <div class="panel-body">
@@ -246,11 +248,11 @@
                         <!-- /.panel -->
                     </div>
                 {% endif %}
-                {% if  not critical_prods %}
+                {% if not critical_prods %}
                     <div class="col-lg-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                Open Bug Count by Week
+                                {% trans "Open Bug Count by Week" %}
                             </div>
                             <!-- /.panel-heading -->
                             <div class="panel-body">
@@ -263,7 +265,7 @@
                     <div class="col-lg-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                Risk Accepted Bug Count by Week
+                                {% trans "Risk Accepted Bug Count by Week" %}
                             </div>
                             <!-- /.panel-heading -->
                             <div class="panel-body">
@@ -278,26 +280,27 @@
                     </div>
                     <div class="row" id="metric_counts">
                         <div class="col-md-12">
-                            <h3>Metric Counts</h3>
+                            <h3>{% trans "Metric Counts" %}</h3>
                         </div>
                         <div class="col-md-12">
                             <div class="tabbable tabs-left">
                                 <ul class="nav nav-tabs">
                                     {% if top_ten_products %}
-                                        <li class="active"><a data-toggle="tab" href="#tabs-1">Top
-                                            10 Products <br/> by bug severity
-                                        </a></li> {% endif %}
-                                    <li><a data-toggle="tab" href="#tabs-2">Detail Breakdown</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-3">Opened Findings</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-4">Accepted Findings</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-5">Closed Findings</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-6">Trending Open <br/>
-                                        Bug Count
+                                        <li class="active">
+                                            <a data-toggle="tab" href="#tabs-1">
+                                                {% trans "Top 10 Products <br/> by bug severity" %}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    <li><a data-toggle="tab" href="#tabs-2">{% trans "Detail Breakdown" %}</a></li>
+                                    <li><a data-toggle="tab" href="#tabs-3">{% trans "Opened Findings" %}</a></li>
+                                    <li><a data-toggle="tab" href="#tabs-4">{% trans "Accepted Findings" %}</a></li>
+                                    <li><a data-toggle="tab" href="#tabs-5">{% trans "Closed Findings" %}</a></li>
+                                    <li><a data-toggle="tab" href="#tabs-6">{% trans "Trending Open<br/>Bug Count" %}
                                     </a></li>
-                                    <li><a data-toggle="tab" href="#tabs-7">Trending Accepted <br/>
-                                        Bug Count
+                                    <li><a data-toggle="tab" href="#tabs-7">{% trans "Trending Accepted <br/> Bug Count" %}
                                     </a></li>
-                                    <li><a data-toggle="tab" href="#tabs-8">Age of Issues</a></li>
+                                    <li><a data-toggle="tab" href="#tabs-8">{% trans "Age of Issues" %}</a></li>
                                 </ul>
                                 <div class="tab-content">
                                     {% if top_ten_products %}
@@ -305,12 +308,12 @@
                                             <table
                                                     class="table table-bordered table-condensed table-striped table-400">
                                                 <tr>
-                                                    <th>Product</th>
-                                                    <th>Critical</th>
-                                                    <th>High</th>
-                                                    <th>Medium</th>
-                                                    <th>Low</th>
-                                                    <th>Total</th>
+                                                    <th>{% trans "Product" %}</th>
+                                                    <th>{% trans "Critical" %}</th>
+                                                    <th>{% trans "High" %}</th>
+                                                    <th>{% trans "Medium" %}</th>
+                                                    <th>{% trans "Low" %}</th>
+                                                    <th>{% trans "Total" %}</th>
                                                 </tr>
                                                 {% for t in top_ten_products %}
                                                     <tr>
@@ -329,13 +332,13 @@
                                     <div class="tab-pane table-responsive" id="tabs-2">
                                         <table class="table table-bordered table-condensed table-striped table-600">
                                             <tr>
-                                                <th class="nowrap">Team</th>
-                                                <th class="">Product</th>
-                                                <th>Severity</th>
-                                                <th>Description</th>
-                                                <th class="nowrap">Days<br/>Open</th>
-                                                <th class="nowrap">Status</th>
-                                                <th class="nowrap">Reporter</th>
+                                                <th class="nowrap">{% trans "Team" %}</th>
+                                                <th class="">{% trans "Product" %}</th>
+                                                <th>{% trans "Severity" %}</th>
+                                                <th>{% trans "Description" %}</th>
+                                                <th class="nowrap">{% trans "Days<br/>Open" %}</th>
+                                                <th class="nowrap">{% trans "Status" %}</th>
+                                                <th class="nowrap">{% trans "Reporter" %}</th>
 
                                             </tr>
                                             {% for finding in findings.qs %}
@@ -359,16 +362,16 @@
                                     </div>
                                     <div class="tab-pane" id="tabs-3">
                                         <div class="table-responsive">
-                                            <h4>Opened During Period</h4>
+                                            <h4>{% trans "Opened During Period" %}</h4>
                                             <table
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
-                                                    <th>Critical</th>
-                                                    <th>High</th>
-                                                    <th>Medium</th>
-                                                    <th>Low</th>
-                                                    <th>Info</th>
-                                                    <th>Total</th>
+                                                    <th>{% trans "Critical" %}</th>
+                                                    <th>{% trans "High" %}</th>
+                                                    <th>{% trans "Medium" %}</th>
+                                                    <th>{% trans "Low" %}</th>
+                                                    <th>{% trans "Info" %}</th>
+                                                    <th>{% trans "Total" %}</th>
                                                 </tr>
                                                 <tr>
                                                     <td>{{ in_period_counts.Critical }}</td>
@@ -382,14 +385,13 @@
                                             <table
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
-                                                    <th>Product</th>
-                                                    <th>Critical</th>
-                                                    <th>High</th>
-                                                    <th>Medium</th>
-                                                    <th>Low</th>
-                                                    <th>Info</th>
-                                                    <th>Total</th>
-
+                                                    <th>{% trans "Product" %}</th>
+                                                    <th>{% trans "Critical" %}</th>
+                                                    <th>{% trans "High" %}</th>
+                                                    <th>{% trans "Medium" %}</th>
+                                                    <th>{% trans "Low" %}</th>
+                                                    <th>{% trans "Info" %}</th>
+                                                    <th>{% trans "Total" %}</th>
                                                 </tr>
                                                 {% for key, value in in_period_details.items %}
                                                     <tr>
@@ -407,16 +409,16 @@
                                     </div>
                                     <div class="tab-pane" id="tabs-4">
                                         <div class="table-responsive">
-                                            <h4>Accepted in Period</h4>
+                                            <h4>{% trans "Accepted in Period" %}</h4>
                                             <table
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
-                                                    <th>Critical</th>
-                                                    <th>High</th>
-                                                    <th>Medium</th>
-                                                    <th>Low</th>
-                                                    <th>Info</th>
-                                                    <th>Total</th>
+                                                    <th>{% trans "Critical" %}</th>
+                                                    <th>{% trans "High" %}</th>
+                                                    <th>{% trans "Medium" %}</th>
+                                                    <th>{% trans "Low" %}</th>
+                                                    <th>{% trans "Info" %}</th>
+                                                    <th>{% trans "Total" %}</th>
                                                 </tr>
                                                 <tr>
                                                     <td>{{ accepted_in_period_counts.critical|default_if_none:0 }}</td>
@@ -430,14 +432,13 @@
                                             <table
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
-                                                    <th>Product</th>
-                                                    <th>Critical</th>
-                                                    <th>High</th>
-                                                    <th>Medium</th>
-                                                    <th>Low</th>
-                                                    <th>Info</th>
-                                                    <th>Total</th>
-
+                                                    <th>{% trans "Product" %}</th>
+                                                    <th>{% trans "Critical" %}</th>
+                                                    <th>{% trans "High" %}</th>
+                                                    <th>{% trans "Medium" %}</th>
+                                                    <th>{% trans "Low" %}</th>
+                                                    <th>{% trans "Info" %}</th>
+                                                    <th>{% trans "Total" %}</th>
                                                 </tr>
                                                 {% for key, value in accepted_in_period_details.items %}
                                                     <tr>
@@ -457,16 +458,16 @@
                                     </div>
                                     <div class="tab-pane" id="tabs-5">
                                         <div class="table-responsive">
-                                            <h4>Closed in Period</h4>
+                                            <h4>{% trans "Closed in Period" %}</h4>
                                             <table
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
-                                                    <th>Critical</th>
-                                                    <th>High</th>
-                                                    <th>Medium</th>
-                                                    <th>Low</th>
-                                                    <th>Info</th>
-                                                    <th>Total</th>
+                                                    <th>{% trans "Critical" %}</th>
+                                                    <th>{% trans "High" %}</th>
+                                                    <th>{% trans "Medium" %}</th>
+                                                    <th>{% trans "Low" %}</th>
+                                                    <th>{% trans "Info" %}</th>
+                                                    <th>{% trans "Total" %}</th>
                                                 </tr>
                                                 <tr>
                                                     <td>{{ closed_in_period_counts.Critical }}</td>
@@ -480,13 +481,13 @@
                                             <table
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
-                                                    <th>Product</th>
-                                                    <th>Critical</th>
-                                                    <th>High</th>
-                                                    <th>Medium</th>
-                                                    <th>Low</th>
-                                                    <th>Info</th>
-                                                    <th>Total</th>
+                                                    <th>{% trans "Product" %}</th>
+                                                    <th>{% trans "Critical" %}</th>
+                                                    <th>{% trans "High" %}</th>
+                                                    <th>{% trans "Medium" %}</th>
+                                                    <th>{% trans "Low" %}</th>
+                                                    <th>{% trans "Info" %}</th>
+                                                    <th>{% trans "Total" %}</th>
 
                                                 </tr>
                                                 {% for key, value in closed_in_period_details.items %}
@@ -507,13 +508,13 @@
                                         <div class="metric-half table-responsive">
                                             <table class="table table-bordered table-condensed table-striped">
                                                 <tr>
-                                                    <th>Weekly</th>
-                                                    <th>Critical</th>
-                                                    <th>High</th>
-                                                    <th>Medium</th>
-                                                    <th>Low</th>
-                                                    <th>Total</th>
-                                                    <th>Closed*</th>
+                                                    <th>{% trans "Weekly" %}</th>
+                                                    <th>{% trans "Critical" %}</th>
+                                                    <th>{% trans "High" %}</th>
+                                                    <th>{% trans "Medium" %}</th>
+                                                    <th>{% trans "Low" %}</th>
+                                                    <th>{% trans "Total" %}</th>
+                                                    <th>{% trans "Closed*" %}</th>
                                                 </tr>
                                                 {% for week in opened_per_week|slice:'1:' %}
                                                     <tr>
@@ -531,13 +532,13 @@
                                         <div class="metric-half table-responsive">
                                             <table class="table table-bordered table-condensed table-striped">
                                                 <tr>
-                                                    <th>Monthly</th>
-                                                    <th>Critical</th>
-                                                    <th>High</th>
-                                                    <th>Medium</th>
-                                                    <th>Low</th>
-                                                    <th>Total</th>
-                                                    <th>Closed*</th>
+                                                    <th>{% trans "Monthly" %}</th>
+                                                    <th>{% trans "Critical" %}</th>
+                                                    <th>{% trans "High" %}</th>
+                                                    <th>{% trans "Medium" %}</th>
+                                                    <th>{% trans "Low" %}</th>
+                                                    <th>{% trans "Total" %}</th>
+                                                    <th>{% trans "Closed*" %}</th>
                                                 </tr>
                                                 {% for month in opened_per_month|slice:'1:' %}
                                                     <tr>
@@ -551,19 +552,19 @@
                                                     </tr>
                                                 {% endfor %}
                                             </table>
-                                            <p>*Closed findings may have been opened outside of requested period.</p>
+                                            <p>{% trans "*Closed findings may have been opened outside of requested period." %}</p>
                                         </div>
                                     </div>
                                     <div class="tab-pane" id="tabs-7">
                                         <div class="metric-half table-responsive">
                                             <table class="table table-bordered table-condensed table-striped">
                                                 <tr>
-                                                    <th>By Week</th>
-                                                    <th>Critical</th>
-                                                    <th>High</th>
-                                                    <th>Medium</th>
-                                                    <th>Low</th>
-                                                    <th>Total</th>
+                                                    <th>{% trans "By Week" %}</th>
+                                                    <th>{% trans "Critical" %}</th>
+                                                    <th>{% trans "High" %}</th>
+                                                    <th>{% trans "Medium" %}</th>
+                                                    <th>{% trans "Low" %}</th>
+                                                    <th>{% trans "Total" %}</th>
                                                 </tr>
                                                 {% for week in accepted_per_week|slice:'1:' %}
                                                     <tr>
@@ -580,12 +581,12 @@
                                         <div class="metric-half table-responsive">
                                             <table class="table table-bordered table-condensed table-striped">
                                                 <tr>
-                                                    <th>By Month</th>
-                                                    <th>Critical</th>
-                                                    <th>High</th>
-                                                    <th>Medium</th>
-                                                    <th>Low</th>
-                                                    <th>Total</th>
+                                                    <th>{% trans "By Month" %}</th>
+                                                    <th>{% trans "Critical" %}</th>
+                                                    <th>{% trans "High" %}</th>
+                                                    <th>{% trans "Medium" %}</th>
+                                                    <th>{% trans "Low" %}</th>
+                                                    <th>{% trans "Total" %}</th>
                                                 </tr>
                                                 {% for month in accepted_per_month|slice:'1:' %}
                                                     <tr>
@@ -604,23 +605,23 @@
                                         <table
                                                 class="table table-bordered table-condensed table-striped table-400">
                                             <tr>
-                                                <th>Days</th>
-                                                <th>Bug Count</th>
+                                                <th>{% trans "Days" %}</th>
+                                                <th>{% trans "Bug Count" %}</th>
                                             </tr>
                                             <tr>
-                                                <td>0 - 30 Days</td>
+                                                <td>{% trans "0 - 30 Days" %}</td>
                                                 <td>{{ age_detail.0 }}</td>
                                             </tr>
                                             <tr>
-                                                <td>31 - 60 Days</td>
+                                                <td>{% trans "31 - 60 Days" %}</td>
                                                 <td>{{ age_detail.1 }}</td>
                                             </tr>
                                             <tr>
-                                                <td>61 - 90 Days</td>
+                                                <td>{% trans "61 - 90 Days" %}</td>
                                                 <td>{{ age_detail.2 }}</td>
                                             </tr>
                                             <tr>
-                                                <td>91+ Days</td>
+                                                <td>{% trans "91+ Days" %}</td>
                                                 <td>{{ age_detail.3 }}</td>
                                             </tr>
                                         </table>
@@ -630,9 +631,10 @@
                         </div>
                     </div>
                 {% endif %}
-    <br/>
-    <br/>
-    <br/>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
@@ -668,7 +670,7 @@
             {% if not show_pt_filter %}
                 $('#id_test__engagement__product__prod_type').parents('p').remove();
             {% endif %}
-            
+
             var critical = [];
             var high = [];
             var medium = [];
@@ -682,7 +684,7 @@
             {% if opened_per_month %}
                 opened_per_month_2(critical, high, medium, low);
             {% endif %}
-            
+
             critical = [];
             high = [];
             medium = [];
@@ -696,7 +698,7 @@
             {% if active_per_month %}
                 active_per_month(critical, high, medium, low);
             {% endif %}
-            
+
             critical = [];
             high = [];
             medium = [];

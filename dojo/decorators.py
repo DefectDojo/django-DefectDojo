@@ -3,9 +3,9 @@ from dojo.models import Finding, Dojo_User
 from django.db import models
 from django.conf import settings
 
-from ratelimit.exceptions import Ratelimited
-from ratelimit.core import is_ratelimited
-from ratelimit import ALL
+from django_ratelimit.exceptions import Ratelimited
+from django_ratelimit.core import is_ratelimited
+from django_ratelimit import ALL
 
 import logging
 
@@ -158,7 +158,7 @@ def on_exception_log_kwarg(func):
             f = open("/tmp/selenium_page_source.html", "w", encoding='utf-8')
             f.writelines(self.driver.page_source)
             # time.sleep(30)
-            raise(e)
+            raise e
 
     return wrapper
 

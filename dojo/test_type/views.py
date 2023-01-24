@@ -37,7 +37,7 @@ def test_type(request):
         'name_words': name_words})
 
 
-@user_is_configuration_authorized('dojo.add_test_type', 'staff')
+@user_is_configuration_authorized('dojo.add_test_type')
 def add_test_type(request):
     form = Test_TypeForm()
     if request.method == 'POST':
@@ -58,7 +58,7 @@ def add_test_type(request):
     })
 
 
-@user_is_configuration_authorized('dojo.change_test_type', 'staff')
+@user_is_configuration_authorized('dojo.change_test_type')
 def edit_test_type(request, ptid):
     tt = get_object_or_404(Test_Type, pk=ptid)
     form = Test_TypeForm(instance=tt)

@@ -33,3 +33,7 @@ ui:
 
 parser:
   - dojo/tools/**/*
+
+localization:
+  - dojo/locale/*
+  - dojo/locale/**/*

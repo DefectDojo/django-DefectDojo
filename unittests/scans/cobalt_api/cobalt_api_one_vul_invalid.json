@@ -10,7 +10,7 @@
         "labels": [],
         "impact": 1,
         "likelihood": 1,
-        "severity": "low",
+        "severity": "critical",
         "affected_targets": [
           "https://example.com"
         ],

@@ -73,7 +73,7 @@ Users can be assigned as members to Products and Product Types, giving them one 
 | Delete Note                 | (x) <sup>2)</sub> | (x) <sup>2)</sub> | x          | x     |              |
 
 
-<sup>1)</sup> Every staff user and administrator can add Product Types. Regular users are not allowed to add Product Types, unless they are Global Owner or Maintainer.
+<sup>1)</sup> Every superuser can add Product Types. Regular users are not allowed to add Product Types, unless they are Global Owner or Maintainer.
 
 <sup>2)</sup> Every user is allowed to edit and delete his own notes.
 
@@ -105,7 +105,7 @@ The membership of a group itself has a role that determines what permissions the
 | Add Group member as Owner   |        |            | x     |
 | Delete Group                |        |            | x     |
 
-<sup>1)</sup> Every staff user and administrator can add groups. Regular users are not allowed to add groups.
+<sup>1)</sup> Every superuser can add groups. Regular users are not allowed to add groups.
 
 The permissions to manage the roles of Products and Product types for a group is defined by the role of the user in the respective Product or Product Type.
 
@@ -113,7 +113,7 @@ Groups can have a global role too. This global role gives all members of the gro
 
 ## Configuration permissions
 
-Release 2.7.0 contains a beta functionality to make permissions for the configuration of DefectDojo more flexible. When the settings parameter `FEATURE_CONFIGURATION_AUTHORIZATION` is set to `True`, many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their **Superuser** or **Staff** status:
+Many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their **superuser** status:
 
 ![Configuration permissions](../../images/configuration_permissions.png)
 

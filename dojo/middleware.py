@@ -128,3 +128,40 @@ class System_Settings_Manager(models.Manager):
             return self.get_from_db(*args, **kwargs)
 
         return from_cache
+
+
+class APITrailingSlashMiddleware:
+    """
+    Middleware that will send a more informative error response to POST requests
+    made without the trailing slash. When this middleware is not active, POST requests
+    without the trailing slash will return a 301 status code, with no explanation as to why
+    """
+
+    def __init__(self, get_response):
+
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        path = request.path_info.lstrip('/')
+        if request.method == 'POST' and 'api/v2/' in path and path[-1] != '/' and response.status_code == 400:
+            response.data = {'message': 'Please add a trailing slash to your request.'}
+            # you need to change private attribute `_is_render`
+            # to call render second time
+            response._is_rendered = False
+            response.render()
+        return response
+
+
+class AdditionalHeaderMiddleware:
+    """
+    Middleware that will add an arbitray amount of HTTP Request headers toall requests.
+    """
+
+    def __init__(self, get_response):
+
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request.META.update(settings.ADDITIONAL_HEADERS)
+        return self.get_response(request)

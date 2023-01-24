@@ -192,6 +192,28 @@ def get_snippet(result):
     return snippet
 
 
+def get_codeFlowsDescription(codeFlows):
+    for codeFlow in codeFlows:
+        if 'threadFlows' not in codeFlow:
+            continue
+        for threadFlow in codeFlow['threadFlows']:
+            if 'locations' not in threadFlow:
+                continue
+
+            description = '**Code flow:**\n'
+            for location in threadFlow['locations']:
+                physicalLocation = location['location']['physicalLocation']
+                region = physicalLocation['region']
+                description += '\t' + physicalLocation['artifactLocation']['uri'] + ':' + str(region['startLine'])
+                if 'startColumn' in region:
+                    description += ':' + str(region['startColumn'])
+                if 'snippet' in region:
+                    description += '\t-\t' + region['snippet']['text']
+                description += '\n'
+
+    return description
+
+
 def get_description(result, rule):
     description = ''
     message = ''
@@ -213,6 +235,9 @@ def get_description(result, rule):
             if fullDescription != message and fullDescription != shortDescription:
                 description += '**Rule full description:** {}\n'.format(fullDescription)
 
+    if 'codeFlows' in result:
+        description += get_codeFlowsDescription(result['codeFlows'])
+
     if description.endswith('\n'):
         description = description[:-1]
 
@@ -232,6 +257,27 @@ def get_references(rule):
     return reference
 
 
+def cvss_to_severity(cvss):
+    severity_mapping = {
+        1: 'Info',
+        2: 'Low',
+        3: 'Medium',
+        4: 'High',
+        5: 'Critical'
+    }
+
+    if cvss >= 9:
+        return severity_mapping.get(5)
+    elif cvss >= 7:
+        return severity_mapping.get(4)
+    elif cvss >= 4:
+        return severity_mapping.get(3)
+    elif cvss > 0:
+        return severity_mapping.get(2)
+    else:
+        return severity_mapping.get(1)
+
+
 def get_severity(result, rule):
     severity = result.get('level')
     if severity is None and rule is not None:
@@ -244,7 +290,7 @@ def get_severity(result, rule):
     elif 'warning' == severity:
         return 'Medium'
     elif 'error' == severity:
-        return 'Critical'
+        return 'High'
     else:
         return 'Medium'
 
@@ -292,6 +338,13 @@ def get_item(result, rules, artifacts, run_date):
         if len(cwes_extracted) > 0:
             finding.cwe = cwes_extracted[-1]
 
+        # Some tools such as GitHub or Grype return the severity in properties instead
+        if 'properties' in rule and 'security-severity' in rule['properties']:
+            cvss = float(rule['properties']['security-severity'])
+            severity = cvss_to_severity(cvss)
+            finding.cvssv3_score = cvss
+            finding.severity = severity
+
     # manage the case that some tools produce CWE as properties of the result
     cwes_properties_extracted = get_result_cwes_properties(result)
     if len(cwes_properties_extracted) > 0:
@@ -304,4 +357,45 @@ def get_item(result, rules, artifacts, run_date):
     if run_date:
         finding.date = run_date
 
+    # manage fingerprints
+    # fingerprinting in SARIF is more complete than in current implementation
+    # SARIF standard make it possible to have multiple version in the same report
+    # for now we just take the first one and keep the format to be able to compare it
+    if result.get("fingerprints"):
+        hashes = get_fingerprints_hashes(result["fingerprints"])
+        first_item = next(iter(hashes.items()))
+        finding.unique_id_from_tool = first_item[1]['value']
+    elif result.get("partialFingerprints"):
+        # for this one we keep an order to have id that could be compared
+        hashes = get_fingerprints_hashes(result["partialFingerprints"])
+        sorted_hashes = sorted(hashes.keys())
+        finding.unique_id_from_tool = "|".join([f'{key}:{hashes[key]["value"]}' for key in sorted_hashes])
     return finding
+
+
+def get_fingerprints_hashes(values):
+    """
+    Method that generate a `unique_id_from_tool` data from the `fingerprints` attribute.
+     - for now, we take the value of the last version of the first hash method.
+    """
+    fingerprints = dict()
+    for key in values:
+        if "/" in key:
+            key_method = key.split("/")[-2]
+            key_method_version = int(key.split("/")[-1].replace("v", ""))
+        else:
+            key_method = key
+            key_method_version = 0
+        value = values[key]
+        if fingerprints.get(key_method):
+            if fingerprints[key_method]["version"] < key_method_version:
+                fingerprints[key_method] = {
+                    "version": key_method_version,
+                    "value": value,
+                }
+        else:
+            fingerprints[key_method] = {
+                "version": key_method_version,
+                "value": value,
+            }
+    return fingerprints

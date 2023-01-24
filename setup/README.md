@@ -27,13 +27,13 @@ All installs make these assumption:
 * DefectDojo will be run in a virtualenv
 * All installs support an interactive and non-interactive install methods
 * All installation configuration lives in ./dojo/settings/template-env
-* * Running setup.bash without editing template-env assumes a single-server install.
-* * Running setup.bash without editing template-env non-interactively assumes a single-server install with MySQL
+  * Running setup.bash without editing template-env assumes a single-server install.
+  * Running setup.bash without editing template-env non-interactively assumes a single-server install with MySQL
 * Any install configuration variable can be overridden by setting an environmental variable
 * One of the following Operating Systems is used as the base for the install
-* * Ubuntu Linux - officially supported versions: 16.04 LTS, 18.04 LTS
-* * CentOS - officially supported versions: ?
-* * Mac OS X - officially supported versions: ?
+  * Ubuntu Linux - officially supported versions: 16.04 LTS, 18.04 LTS
+  * CentOS - officially supported versions: ?
+  * Mac OS X - officially supported versions: ?
 
 ### Definitions
 

@@ -65,36 +65,36 @@ class Div(form_widget):
         final_attrs = self.build_attrs(attrs)
         return format_html(
             '<div class="btn-toolbar" data-role="editor-toolbar" data-target=""><div class="btn-group">'
-            '<a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a>'
-            '<a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a>'
+            '<a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa-solid fa-bold"></i></a>'
+            '<a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa-solid fa-italic"></i></a>'
             '<a class="btn btn-default" data-edit="strikethrough" title="Strikethrough">'
-            '<i class="fa fa-strikethrough"></i></a>'
+            '<i class="fa-solid fa-strikethrough"></i></a>'
             '<a class="btn btn-default" data-edit="underline" title="Underline (Ctrl/Cmd+U)">'
-            '<i class="fa fa-underline"></i></a></div><div class="btn-group">'
+            '<i class="fa-solid fa-underline"></i></a></div><div class="btn-group">'
             '<a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list">'
-            '<i class="fa fa-list-ul"></i></a>'
+            '<i class="fa-solid fa-list-ul"></i></a>'
             '<a class="btn btn-default" data-edit="insertorderedlist" title="Number list">'
-            '<i class="fa fa-list-ol"></i></a>'
-            '<a class="btn btn-default" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-outdent">'
-            '</i></a><a class="btn btn-default" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent"></i>'
+            '<i class="fa-solid fa-list-ol"></i></a>'
+            '<a class="btn btn-default" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa-solid fa-outdent">'
+            '</i></a><a class="btn btn-default" data-edit="indent" title="Indent (Tab)"><i class="fa-solid fa-indent"></i>'
             '</a></div><div class="btn-group">'
             '<a class="btn btn-default" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)">'
-            '<i class="fa fa-align-left"></i></a>'
+            '<i class="fa-solid fa-align-left"></i></a>'
             '<a class="btn btn-default" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)">'
-            '<i class="fa fa-align-center"></i></a>'
+            '<i class="fa-solid fa-align-center"></i></a>'
             '<a class="btn btn-default" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)">'
-            '<i class="fa fa-align-right"></i></a>'
+            '<i class="fa-solid fa-align-right"></i></a>'
             '<a class="btn btn-default" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)">'
-            '<i class="fa fa-align-justify"></i></a></div><div class="btn-group">'
+            '<i class="fa-solid fa-align-justify"></i></a></div><div class="btn-group">'
             '<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Hyperlink">'
-            '<i class="fa fa-link"></i></a><div class="dropdown-menu input-append">'
+            '<i class="fa-solid fa-link"></i></a><div class="dropdown-menu input-append">'
             '<input placeholder="URL" type="text" data-edit="createLink" />'
             '<button class="btn" type="button">Add</button></div></div><div class="btn-group">'
             '<a class="btn btn-default" data-edit="unlink" title="Remove Hyperlink">'
-            '<i class="fa fa-unlink"></i></a></div><div class="btn-group">'
+            '<i class="fa-solid fa-link-slash"></i></a></div><div class="btn-group">'
             '<a class="btn btn-default" data-edit="undo" title="Undo (Ctrl/Cmd+Z)">'
-            '<i class="fa fa-undo"></i></a><a class="btn btn-default" data-edit="redo" title="Redo (Ctrl/Cmd+Y)">'
-            '<i class="fa fa-repeat"></i></a></div><br/><br/></div><div{}>\r\n{}</div>',
+            '<i class="fa-solid fa-rotate-left"></i></a><a class="btn btn-default" data-edit="redo" title="Redo (Ctrl/Cmd+Y)">'
+            '<i class="fa-solid fa-rotate-right"></i></a></div><br/><br/></div><div{}>\r\n{}</div>',
             flatatt(final_attrs),
             force_text(value))
 
@@ -145,7 +145,7 @@ class PageBreak(Widget):
         return mark_safe(
             "<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click "
             "and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>" +
-            self.get_html() + "</h5><span class='fa fa-arrows pull-right icon'></span></div></div>"
+            self.get_html() + "</h5><span class='fa-solid fa-up-down-left-right pull-right icon'></span></div></div>"
                               "<form id='page-break'><input type='hidden' name='page-break'/></form></div>")
 
 
@@ -402,7 +402,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             d = QueryDict(mutable=True)
             for item in widget.get(list(widget.keys())[0]):
                 if item['name'] in d:
-                    d.getlist(item['name']).append(item['value'])
+                    d.appendlist(item['name'], item['value'])
                 else:
                     d[item['name']] = item['value']
             from dojo.endpoint.views import get_endpoint_ids
@@ -421,7 +421,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             d = QueryDict(mutable=True)
             for item in widget.get(list(widget.keys())[0]):
                 if item['name'] in d:
-                    d.getlist(item['name']).append(item['value'])
+                    d.appendlist(item['name'], item['value'])
                 else:
                     d[item['name']] = item['value']
 

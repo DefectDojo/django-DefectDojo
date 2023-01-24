@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load dict_key %}
 
 {% block content %}
@@ -15,22 +16,22 @@
                             &nbsp;
                             <button class="btn btn-primary dropdown-toggle" type="button" id="downloadMenu"
                                     data-toggle="dropdown" aria-expanded="true" aria-label="download">
-                                <span class="fa fa-download"></span>
+                                <span class="fa-solid fa-download"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="downloadMenu">
                             <li role="presentation">
                                 <a id="csv_export" href="{% url 'engagement_csv_export' %}?url={{ request.get_full_path }}">
-                                    <i class="fa fa-table"></i> CSV Export
+                                    <i class="fa-solid fa-table"></i> CSV Export
                                 </a>
                             </li>
                             <li role="presentation">
                                 <a id="excel_export" href="{% url 'engagement_excel_export' %}?url={{ request.get_full_path }}">
-                                    <i class="fa fa-file-excel-o"></i> Excel Export
+                                    <i class="fa-solid fa-file-excel"></i> Excel Export
                                 </a>
                             </li>
                             </ul>
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                         </div>
                     </h3>
                 </div>
@@ -48,6 +49,7 @@
                     <table id="engagements"
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
+                            <th></th>
                             <th>{% dojo_sort request 'Engagement' 'name' 'asc' %}</th>
                             <th>{% dojo_sort request 'Period' 'target_start' 'asc' %}</th>
                             <th>Status</th>
@@ -62,10 +64,85 @@
 
                         {% for e in engagements %}
                             <tr>
+                                <td class="nowrap">
+                                    <div class="align-top">
+                                        <div class="dropdown">
+                                            <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="" href="{% url 'view_engagement' e.id %}">
+                                                        <i class="fa-solid fa-rectangle-list"></i> View
+                                                </li>
+                                                {% if e|has_object_permission:"Engagement_Edit" %}
+                                                <li>
+                                                    <a class="" href="{% url 'edit_engagement' e.id %}">
+                                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                                    </a>
+                                                </li>
+                                                <li class="divider"></li>
+                                                {% endif %}
+                                                {% if e|has_object_permission:"Test_Add" %}
+                                                <li role="presentation">
+                                                    <a class="" href="{% url 'add_tests' e.id %}">
+                                                        <i class="fa-solid fa-plus"></i> Add Tests
+                                                    </a>
+                                                </li>
+                                                {% endif %}
+                                                {% if e|has_object_permission:"Import_Scan_Result" %}
+                                                <li role="presentation">
+                                                    <a class="" href="{% url 'import_scan_results' e.id %}">
+                                                        <i class="fa-solid fa-upload"></i> Import Scan Results
+                                                    </a>
+                                                </li>
+                                                {% endif %}
+                                                <li class="divider"></li>
+                                                <li role="presentation">
+                                                    <a href="{% url 'engagement_open_findings' e.id %}">
+                                                        <i class="fa-solid fa-file-lines"></i> View Active Findings
+                                                    </a>
+                                                </li>
+                                                <li role="presentation">
+                                                    <a href="{% url 'engagement_verified_findings' e.id %}">
+                                                        <i class="fa-solid fa-file-lines"></i> View Active and Verified Findings
+                                                    </a>
+                                                </li>
+                                                <li role="presentation">
+                                                    <a href="{% url 'engagement_closed_findings' e.id %}">
+                                                        <i class="fa-solid fa-file-lines"></i> View Mitigated Findings
+                                                    </a>
+                                                </li>
+                                                <li role="presentation">
+                                                    <a href="{% url 'engagement_accepted_findings' e.id %}">
+                                                        <i class="fa-solid fa-file-lines"></i> View Accepted Findings
+                                                    </a>
+                                                </li>
+                                                <li role="presentation">
+                                                    <a href="{% url 'engagement_all_findings' e.id %}">
+                                                        <i class="fa-solid fa-file-lines"></i> View All Findings
+                                                    </a>
+                                                </li>
+                                                <li class="divider"></li>
+                                                <li role="presentation">
+                                                    <a href="{% url 'engagement_report' e.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
+                                                        <i class="fa-solid fa-file-lines"></i> Engagement Report
+                                                    </a>
+                                                </li>
+                                                {% if e|has_object_permission:"Engagement_Delete" %}
+                                                <li class="divider"></li>
+                                                <li>
+                                                    <a class="text-danger" href="{% url 'delete_engagement' e.id %}">
+                                                        <i class="fa-solid fa-trash"></i> Delete Engagement
+                                                    </a>
+                                                </li>
+                                                {% endif %}
+                                            </ul>
+                                            </li>
+                                            </ul>
+                                </td>
                                 <td style="white-space: normal">
                                     <a class="eng_link" href="{%url 'view_engagement' e.id %}">{% if e.name %}{{ e.name }}{% endif %}</a>
                                     <div>
-                                        {% include "dojo/snippets/tags.html" with tags=e.tags.alll %}
+                                        {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                     </div>
                                 </td>
                                 <td> {{ e.target_start }} - {{ e.target_end }}
@@ -81,7 +158,7 @@
                                         {{ e.product.name }}
                                     </a>
                                     {{ e.product|jira_project_tag }}
-                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
                                 </td>
                                 <td class="prod_name">
                                     <a href="{% url 'product_type_metrics' e.product.prod_type.id %}">
@@ -117,6 +194,29 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
+    <script>
+        $(function() {
+            $('.table-responsive').on('shown.bs.dropdown', function(e) {
+                var t = $(this),
+                m = $(e.target).find('.dropdown-menu'),
+                tb = t.offset().top + t.height(),
+                mb = m.offset().top + m.outerHeight(true),
+                d = 20; // Space for shadow + scrollbar.   
+            if (t[0].scrollWidth > t.innerWidth()) {
+                if (mb + d > tb) {
+                    t.css('padding-bottom', ((mb + d) - tb));
+                }
+            } else {
+                t.css('overflow', 'visible');
+            }
+            }).on('hidden.bs.dropdown', function() {
+                $(this).css({
+                    'padding-bottom': '',
+                    'overflow': ''
+                });
+            });
+        });
+    </script>
     <script>
         $(function () {
             var prodWords = [

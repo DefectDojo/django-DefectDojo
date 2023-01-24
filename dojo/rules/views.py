@@ -37,7 +37,7 @@ field_dictionary['Product'] = product_fields
 field_dictionary['Product Type'] = product_type_fields
 
 
-@user_is_configuration_authorized('dojo.view_rule', 'superuser')
+@user_is_configuration_authorized('dojo.view_rule')
 def rules(request):
     initial_queryset = Rule.objects.all().order_by('name')
     add_breadcrumb(title="Rules", top_level=True, request=request)
@@ -48,7 +48,7 @@ def rules(request):
         'rules': initial_queryset})
 
 
-@user_is_configuration_authorized('dojo.add_rule', 'superuser')
+@user_is_configuration_authorized('dojo.add_rule')
 def new_rule(request):
     if request.method == 'POST':
         form = RuleForm(request.POST)
@@ -73,7 +73,7 @@ def new_rule(request):
                    'field_dictionary': json.dumps(field_dictionary)})
 
 
-@user_is_configuration_authorized('dojo.add_rule', 'superuser')
+@user_is_configuration_authorized('dojo.add_rule')
 def add_child(request, pid):
     rule = get_object_or_404(Rule, pk=pid)
     if request.method == 'POST':
@@ -101,7 +101,7 @@ def add_child(request, pid):
                    'field_dictionary': json.dumps(field_dictionary)})
 
 
-@user_is_configuration_authorized('dojo.change_rule', 'superuser')
+@user_is_configuration_authorized('dojo.change_rule')
 def edit_rule(request, pid):
     pt = get_object_or_404(Rule, pk=pid)
     children = Rule.objects.filter(parent_rule=pt)
@@ -128,7 +128,7 @@ def edit_rule(request, pid):
         'pt': pt, })
 
 
-@user_is_configuration_authorized('dojo.delete_rule', 'superuser')
+@user_is_configuration_authorized('dojo.delete_rule')
 def delete_rule(request, tid):
     rule = get_object_or_404(Rule, pk=tid)
     form = DeleteRuleForm(instance=rule)

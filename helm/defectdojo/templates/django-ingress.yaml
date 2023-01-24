@@ -1,6 +1,6 @@
 {{- if .Values.django.ingress.enabled -}}
 {{- $fullName := include "defectdojo.fullname" . -}}
-{{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 apiVersion: networking.k8s.io/v1
 {{- else -}}
 apiVersion: networking.k8s.io/v1beta1
@@ -28,7 +28,7 @@ metadata:
   {{- end }}
 {{- end }}
 spec:
-{{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
   {{- if .Values.django.ingress.ingressClassName }}
   ingressClassName: {{ .Values.django.ingress.ingressClassName }}
   {{- end }}
@@ -45,7 +45,7 @@ spec:
   - host: {{ .Values.host }}
     http:
       paths:
-        {{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
+        {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
         - pathType: Prefix
           {{- if .Values.django.ingress.path }}
           path: {{ .Values.django.ingress.path }}

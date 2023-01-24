@@ -1,6 +1,7 @@
 from ..dojo_test_case import DojoTestCase
 from dojo.tools.bugcrowd.parser import BugCrowdParser
 from dojo.models import Test
+from datetime import datetime, timezone
 
 
 class TestBugCrowdParser(DojoTestCase):
@@ -22,6 +23,7 @@ class TestBugCrowdParser(DojoTestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
         self.assertEqual(1, len(findings))
+        self.assertEqual(findings[0].date, datetime(2020, 3, 1, 6, 15, 6, tzinfo=timezone.utc))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         testfile = open("unittests/scans/bugcrowd/BugCrowd-many.csv")

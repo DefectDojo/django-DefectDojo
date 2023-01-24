@@ -80,7 +80,7 @@
                 <hr>
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                        <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
                         </i>
                     </label>
                     <div class="col-sm-10 form-control-static">
@@ -103,7 +103,7 @@
                 <hr>
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="id_github_issue">GitHub issue
-                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Github issue connected to this finding" data-placement="right" data-container="body" data-original-title="" title="">
+                        <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Github issue connected to this finding" data-placement="right" data-container="body" data-original-title="" title="">
                         </i>
                     </label>
                     <div class="col-sm-10 form-control-static">
@@ -135,17 +135,26 @@
         $ = django.jQuery;
         $.hotkeys.options.filterInputAcceptingElements = false;
         $.hotkeys.options.filterTextInputs = false;
-
+		
+        var tmp_val = null;
+		
+        if ($('#id_mitigated').val() != null) {
+            $('#id_mitigated').val($('#id_mitigated').val().slice(0,10));
+            var tmp_val = $('#id_mitigated').val();
+        }
+		
         function displayMitigated() {
-            var elMitigated = $('#id_mitigated_0').closest('.form-group'),
+            var elMitigated = $('#id_mitigated').closest('.form-group'),
                 elMitigatedBy = $('#id_mitigated_by').closest('.form-group'),
                 elActive = $('#id_active')[0];
 
             if (!elActive.checked) {
                 elMitigated.show('fast');
+				$('#id_mitigated').val(tmp_val);
                 elMitigatedBy.show('fast');
             } else {
                 elMitigated.hide('fast');
+				$('#id_mitigated').val('');
                 elMitigatedBy.hide('fast');
             }
         }
@@ -164,13 +173,12 @@
             });
 
             $("textarea").each(function (index, elem) {
-
                 if (elem.hasAttribute("required")) {
                     elem.removeAttribute("required");
                     elem.id = "req"
                 }
 
-                if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids') {
+                if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids' && !$(elem).hasClass('select2-search__field')) {
                     var mde = new EasyMDE({
                         spellChecker: false,
                         element: elem,

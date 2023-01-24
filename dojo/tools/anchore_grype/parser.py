@@ -56,6 +56,10 @@ class AnchoreGrypeParser(object):
             artifact_name = artifact.get('name')
             artifact_version = artifact.get('version')
             artifact_purl = artifact.get('purl')
+            artifact_location = artifact.get('locations')
+            file_path = None
+            if artifact_location and len(artifact_location) > 0 and artifact_location[0].get('path'):
+                file_path = artifact_location[0].get('path')
 
             finding_title = f'{vuln_id} in {artifact_name}:{artifact_version}'
 
@@ -146,6 +150,7 @@ class AnchoreGrypeParser(object):
                             static_finding=True,
                             dynamic_finding=False,
                             nb_occurences=1,
+                            file_path=file_path,
                         )
                 dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
 

@@ -9,7 +9,7 @@
                     <h3 class="has-filters">
                         Generate Product Endpoint Report
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                         </div>
                     </h3>
                 </div>
@@ -23,7 +23,7 @@
                     <br/>
 
                     <div class="alert alert-info" role="alert">
-                        <span class="fa fa-lightbulb-o" aria-hidden="true"></span>
+                        <span class="fa-solid fa-lightbulb" aria-hidden="true"></span>
                         <span class=""><b>Hint:</b></span>
                         To generate a report of all mitigated findings in endpoints select: Active: Either,
                         Verified: Either, Mitigated: Yes
@@ -51,7 +51,7 @@
                             <tr>
                                 <td>
                                     <a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=e.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
                                 <td>
                                     <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.findings_count }}</a>

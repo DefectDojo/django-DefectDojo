@@ -151,6 +151,12 @@ class TestNucleiParser(DojoTestCase):
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(22, finding.unsaved_endpoints[0].port)
             self.assertEqual("CVE-2018-15473", finding.vuln_id_from_tool)
+            vulnerability_ids = finding.unsaved_vulnerability_ids
+            self.assertEqual(1, len(vulnerability_ids))
+            self.assertIn('CVE-2018-15473', vulnerability_ids)
+            self.assertEqual(362, finding.cwe)
+            self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
+            self.assertEqual(5.3, finding.cvssv3_score)
 
         with self.subTest(i=1):
             finding = findings[1]

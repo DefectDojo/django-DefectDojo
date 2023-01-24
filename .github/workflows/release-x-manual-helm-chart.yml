@@ -14,45 +14,55 @@ jobs:
   release-chart:
     runs-on: ubuntu-latest
     steps:
+      
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      
       - name: Get upload URL
         id: get-upload-url
         uses: pdamianik/release-tag-to-upload-url-action@v1.0.1
         with:
           tag: ${{ github.event.inputs.release_number }}
           token: ${{ github.token }}
+      
       - name: Configure git
         run: |
           git config --global user.name "${{ env.GIT_USERNAME }}"
           git config --global user.email "${{ env.GIT_EMAIL }}"
+      
       - name: Install Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
           version: v3.4.0
+      
       - name: Configure HELM repos
         run: |-
-             helm repo add bitnami https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami/
+             helm repo add bitnami https://charts.bitnami.com/bitnami
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
+      
       - name: Package Helm chart
         id: package-helm-chart
         run: |
           mkdir build
           helm package helm/defectdojo/ --destination ./build
-          echo "::set-output name=chart_version::$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')"
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "chart_version=$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')" >> #GITHUB_ENV
+      
+      - name: Create release ${{ github.event.inputs.release_number }}
+        uses: softprops/action-gh-release@v1
         with:
-          upload_url: ${{ steps.get-upload-url.outputs.uploadUrl }}
-          asset_path: ./build/defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
-          asset_name: defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
-          asset_content_type: application/tar+gzip
+          name: Release ${{ github.event.inputs.release_number }}
+          tag_name: ${{ github.event.inputs.release_number }}
+          body: Run the release drafter to populate the release notes.
+          draft: true
+          prerelease: false
+          files: ./build/defectdojo-${{ env.chart_version }}.tgz
+          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_REPOSITORY: DefectDojo/django-DefectDojo
+      
       - name: Update Helm repository index
         id: update-helm-repository-index
         run: |

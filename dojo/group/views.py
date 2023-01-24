@@ -25,7 +25,7 @@ from dojo.group.utils import get_auth_group_name
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('auth.view_group', 'staff')
+@user_is_configuration_authorized('auth.view_group')
 def group(request):
     groups = get_authorized_groups(Permissions.Group_View)
     groups = GroupFilter(request.GET, queryset=groups)
@@ -40,7 +40,7 @@ def group(request):
 
 # Users need to be authorized to view groups in general and only the groups they are a member of
 # because with the group they can see user information that might be considered as confidential
-@user_is_configuration_authorized('auth.view_group', 'staff')
+@user_is_configuration_authorized('auth.view_group')
 @user_is_authorized(Dojo_Group, Permissions.Group_View, 'gid')
 def view_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
@@ -151,7 +151,7 @@ def delete_group(request, gid):
     })
 
 
-@user_is_configuration_authorized('auth.add_group', 'staff')
+@user_is_configuration_authorized('auth.add_group')
 def add_group(request):
     form = DojoGroupForm
     global_role_form = GlobalRoleForm()
@@ -367,7 +367,7 @@ def add_product_type_group(request, gid):
     })
 
 
-@user_is_configuration_authorized('auth.change_permission', 'superuser')
+@user_is_configuration_authorized('auth.change_permission')
 def edit_permissions(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     if request.method == 'POST':

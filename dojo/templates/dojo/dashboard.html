@@ -19,7 +19,7 @@
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
-                                    <i class="fa fa-bullseye fa-5x"></i>
+                                    <i class="fa-solid fa-bullseye fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
                                     <div class="huge">{{ engagement_count }}</div>
@@ -30,7 +30,7 @@
                         <a href="{% url 'engagement' %}">
                             <div class="panel-footer">
                                 <span class="pull-left">View Engagement Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -43,7 +43,7 @@
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
-                                    <i class="fa fa-bug fa-5x"></i>
+                                    <i class="fa-solid fa-bug fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
                                     <div class="huge">{{ finding_count }}</div>
@@ -54,7 +54,7 @@
                         <a href="{% url 'all_findings' %}?duplicate=2&date=2&o=-date">
                             <div class="panel-footer">
                                 <span class="pull-left">View Finding Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -67,7 +67,7 @@
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
-                                    <i class="fa fa-fire-extinguisher fa-5x"></i>
+                                    <i class="fa-solid fa-fire-extinguisher fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
                                     <div class="huge">{{ mitigated_count }}</div>
@@ -78,7 +78,7 @@
                         <a href="{% url 'closed_findings' %}?duplicate=2&mitigated=2">
                             <div class="panel-footer">
                                 <span class="pull-left">View Finding Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -91,7 +91,7 @@
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
-                                    <i class="fa fa-check fa-5x"></i>
+                                    <i class="fa-solid fa-check fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
                                     <div class="huge">{{ accepted_count }}</div>
@@ -102,7 +102,7 @@
                         <a href="{% url 'accepted_findings' %}?duplicate=2&risk_acceptance__created__date=2">
                             <div class="panel-footer">
                                 <span class="pull-left">View Finding Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
                                 <div class="clearfix"></div>
                             </div>
                         </a>
@@ -147,7 +147,7 @@
         </div>
     {% endblock %}
     {% block surveys %}
-        {% if system_settings.enable_questionnaires and "dojo.view_engagement_survey"|has_configuration_permission:"staff"  %}
+        {% if system_settings.enable_questionnaires and "dojo.view_engagement_survey"|has_configuration_permission  %}
             <div class="row">
                 <div class="col-lg-12">
                     <div class="panel panel-default">

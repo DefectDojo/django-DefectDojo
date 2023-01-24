@@ -10,18 +10,18 @@
                     <h3 class="has-filters">
                         Environment List
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
-                            {% if "dojo.add_development_environment"|has_configuration_permission:"staff" %}
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                            {% if "dojo.add_development_environment"|has_configuration_permission %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a href="{%  url 'add_dev_env' %}">
-                                            <i class="fa fa-plus"></i> New Environment </a>
+                                            <i class="fa-solid fa-plus"></i> New Environment </a>
                                     </li>
                             </ul>
                             {% endif %}
@@ -47,7 +47,7 @@
                         <tbody>
                         {% for de in devs %}
                             <tr>
-                                {% if "dojo.change_development_environment"|has_configuration_permission:"staff" %}
+                                {% if "dojo.change_development_environment"|has_configuration_permission %}
                                     <td><a href="{% url 'edit_dev_env' de.id %}"> {{ de.name }} </a></td>
                                 {% else %}
                                     <td> {{ de.name }} </a> </td>

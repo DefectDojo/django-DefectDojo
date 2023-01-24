@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
     {{ block.super }}
-    <h1>403</h1>
-    <hr/>
+    <h1>
+        Oops...
+    </h1>
     <h2>
-        You don't have permission to do that. Contact your administrator for additional access.
+        ...looks like you don't have permission to do that.
     </h2>
-    {% endblock %}
+    <hr/>
+    <p class="lightgrey">403 Forbidden</p>
+{% endblock %}

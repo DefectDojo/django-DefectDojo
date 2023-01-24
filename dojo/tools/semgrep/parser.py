@@ -35,7 +35,10 @@ class SemgrepParser(object):
 
             # manage CWE
             if 'cwe' in item["extra"]["metadata"]:
-                finding.cwe = int(item["extra"]["metadata"].get("cwe").partition(':')[0].partition('-')[2])
+                if isinstance(item["extra"]["metadata"].get("cwe"), list):
+                    finding.cwe = int(item["extra"]["metadata"].get("cwe")[0].partition(':')[0].partition('-')[2])
+                else:
+                    finding.cwe = int(item["extra"]["metadata"].get("cwe").partition(':')[0].partition('-')[2])
 
             # manage references from metadata
             if 'references' in item["extra"]["metadata"]:
@@ -64,7 +67,7 @@ class SemgrepParser(object):
 
     def convert_severity(self, val):
         if "WARNING" == val.upper():
-            return "Low"
+            return "Medium"
         elif "ERROR" == val.upper():
             return "High"
         elif "INFO" == val.upper():

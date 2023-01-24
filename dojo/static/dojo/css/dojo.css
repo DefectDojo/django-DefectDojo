@@ -41,6 +41,12 @@ textarea,
     margin-left: 6px;
 }
 
+.min,
+.max {
+    overscroll-behavior: none!important;
+    overflow-x: clip!important;
+}
+
 a {
   color: #546474;
 }
@@ -684,7 +690,20 @@ div.page_select {
 }
 
 input#simple_search {
+    width: 100%!important;
+}
+
+.dojo-modals-wrapper {
+    display: none;
+    flex-direction: column;
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
     width: 100%;
+    height: 100%;
+    overflow: auto;
 }
 
 .footer {
@@ -1020,16 +1039,28 @@ div.custom-search-form {
     #page-wrapper {
         margin: 75px 0 0 0;
     }
+
+    #footer-wrapper {
+        margin: 75px 0 0 0;
+    }
 }
 
 @media (min-width: 359px) {
     #page-wrapper {
         margin: 100px 0 0 0;
     }
+
+    #footer-wrapper {
+        margin: 100px 0 0 0;
+    }
 }
 
 @media (min-width: 600px) {
     #page-wrapper {
+        margin: 50px 0 0 0;
+    }
+
+    #footer-wrapper {
         margin: 50px 0 0 0;
     }
 }
@@ -1041,6 +1072,11 @@ div.custom-search-form {
 
     #page-wrapper {
         margin: 0 0 0 175px;
+    }
+
+    #footer-wrapper {
+        margin: 0 0 0 175px;
+        border-left: 1px solid #e7e7e7;
     }
 
     li#minimize-menu-li {
@@ -1085,6 +1121,11 @@ div.custom-search-form {
 
     body.min #page-wrapper {
         margin: 0 0 0 50px;
+        border-left: 1px solid #e7e7e7;
+    }
+
+    body.min #footer-wrapper {
+        margin: 0 0 0 50px;
     }
 
     body.min div.navbar-default.sidebar {
@@ -1128,6 +1169,31 @@ div.custom-search-form {
     margin-bottom: 10px;
     vertical-align: middle;
     margin-right: 25px;
+}
+
+.dojo-filter-set.form-inline .filter-form-group {
+    display: flex;
+    flex-wrap: wrap;
+    flex-basis: auto;
+    flex-grow: 4;
+    align-content: stretch;
+    margin-bottom: 10px;
+    vertical-align: middle;
+    margin-right: 25px;
+}
+
+.dojo-filter-set.form-inline .filter-form-input {
+    margin-right: 25px;
+    margin-bottom: 10px;
+}
+
+.dojo-filter-set.form-inline .filter-form-control {
+    width: auto!important;
+    vertical-align: middle;
+}
+
+.dojo-filter-set.form-inline .form-control {
+    height: auto!important;
 }
 
 .report-filter-set {
@@ -1673,6 +1739,10 @@ small {
 
 .select2-container {
     min-width:200px;
+}
+
+.EasyMDEContainer .table {
+    width: unset!important;
 }
 
 /* remove spinners (up & down arrow) for integer / number fields

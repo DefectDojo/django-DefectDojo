@@ -38,31 +38,22 @@
 {% block postscript %}
     {{ block.super }}
     <script>
-        var prior_select_val, prior_select_text;
 
         $( document ).ready(function() {
-          //Remove the finding to merge into from the merge into select dropdown-menu
           var selected = $('#id_finding_to_merge_into').val();
-          $("#id_findings_to_merge option[value='" + selected + "']").remove();
+
           //Select all value in findings to merge
           $('#id_findings_to_merge option').prop('selected', true);
-          prior_select_val = $('#id_finding_to_merge_into option:selected').val();
-          prior_select_text = $('#id_finding_to_merge_into option:selected').text();
+
+          // apart from the select finding we are merging into
+          $("#id_findings_to_merge option[value='" + selected + "']").prop('selected', false);
         });
 
         $(function () {
           $('#id_finding_to_merge_into').change(function(){
             var selected = $('#id_finding_to_merge_into').val();
 
-            $("#id_findings_to_merge option[value='" + selected + "']").remove();
-
-            $('#id_findings_to_merge').append($('<option>', {
-                value: prior_select_val,
-                text: prior_select_text
-            }));
-
-            prior_select_val = $('#id_finding_to_merge_into option:selected').val();
-            prior_select_text = $('#id_finding_to_merge_into option:selected').text();
+            $("#id_findings_to_merge option[value='" + selected + "']").prop('selected', false);
           });
         });
     </script>

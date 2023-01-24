@@ -323,7 +323,7 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
             return HttpResponseRedirect(reverse('import_endpoint_meta', args=(product.id, )))
         elif origin == 'API':
             from rest_framework.serializers import ValidationError
-            raise ValidationError('The column "hostname" must be present to map host to Endpoint.',)
+            raise ValidationError('The column "hostname" must be present to map host to Endpoint.')
 
     keys = [key for key in reader.fieldnames if key != 'hostname']
 

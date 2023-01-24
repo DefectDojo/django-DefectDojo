@@ -28,6 +28,7 @@ An example can be found in [`template_env`](https://github.com/DefectDojo/django
 `local_settings.py` can contain more complex customizations such as adding MIDDLEWARE or INSTALLED_APP entries.
 This file is processed *after* settings.dist.py is processed, so you can modify settings delivered by Defect Dojo out of the box.
  The file must be located in the `dojo/settings` directory. Environment variables in this file must have no `DD_` prefix.
+If the file is missing feel free to create it. Do not edit `settings.dist.py` directly.
 
 An example can be found in [`dojo/settings/template-local_settings`](https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/template-local_settings).
 

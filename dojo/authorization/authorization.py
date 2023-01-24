@@ -1,5 +1,4 @@
 from django.core.exceptions import PermissionDenied
-from django.conf import settings
 from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_global_roles_with_permissions, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
@@ -7,23 +6,20 @@ from dojo.models import Product_Type, Product_Type_Member, Product, Product_Memb
     Languages, App_Analysis, Stub_Finding, Product_API_Scan_Configuration
 
 
-def user_has_configuration_permission(user, permission, legacy=None):
+def user_has_configuration_permission(user, permission):
 
     if not user:
         return False
 
-    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-        return user.has_perm(permission)
-    else:
-        if legacy == 'staff':
-            return user.is_staff
-        elif legacy == 'superuser':
-            return user.is_superuser
-        else:
-            raise Exception(f'{legacy} is not allowed for parameter legacy')
+    if user.is_anonymous:
+        return False
+
+    return user.has_perm(permission)
 
 
 def user_has_permission(user, obj, permission):
+    if user.is_anonymous:
+        return False
 
     if user.is_superuser:
         return True
@@ -110,16 +106,15 @@ def user_has_global_permission(user, permission):
     if not user:
         return False
 
+    if user.is_anonymous:
+        return False
+
     if user.is_superuser:
         return True
 
     if permission == Permissions.Product_Type_Add:
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            if user_has_configuration_permission(user, 'dojo.add_product_type'):
-                return True
-        else:
-            if user.is_staff:
-                return True
+        if user_has_configuration_permission(user, 'dojo.add_product_type'):
+            return True
 
     if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_global_permission(user.global_role.role.id, permission):
         return True
@@ -131,8 +126,8 @@ def user_has_global_permission(user, permission):
     return False
 
 
-def user_has_configuration_permission_or_403(user, permission, legacy=None):
-    if not user_has_configuration_permission(user, permission, legacy):
+def user_has_configuration_permission_or_403(user, permission):
+    if not user_has_configuration_permission(user, permission):
         raise PermissionDenied()
 
 

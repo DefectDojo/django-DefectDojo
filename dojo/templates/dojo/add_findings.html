@@ -31,7 +31,7 @@
                     <h4>
                     <div class="form-group">
                         <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
                             </i>
                         </label>
                         <div class="col-sm-10 form-control-static">
@@ -62,7 +62,7 @@
                     <hr>
                     <div class="form-group">
                         <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
                             </i>
                         </label>
                         <div class="col-sm-10 form-control-static">
@@ -112,29 +112,28 @@
             {% endif %}
         });
 
-            $("textarea").each(function (index, elem) {
+        $("textarea").each(function (index, elem) {
+            if (elem.hasAttribute("required")) {
+                elem.removeAttribute("required");
+                elem.id = "req"
+            }
 
-                if (elem.hasAttribute("required")) {
-                    elem.removeAttribute("required");
-                    elem.id = "req"
-                }
-
-                if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids') {
-                    var mde = new EasyMDE({
-                        spellChecker: false,
-                        element: elem,
-                        autofocus: false,
-                        forceSync: true,
-                        toolbar: ["bold", "italic", "heading", "|",
-                            "quote", "unordered-list", "ordered-list", "|",
-                            "link", "image", "|",
-                            "table", "horizontal-rule", "code", "|",
-                            "guide"
-                        ]
-                    });
-                    mde.render();
-                }
-            });
+            if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids' && !$(elem).hasClass('select2-search__field')) {
+                var mde = new EasyMDE({
+                    spellChecker: false,
+                    element: elem,
+                    autofocus: false,
+                    forceSync: true,
+                    toolbar: ["bold", "italic", "heading", "|",
+                        "quote", "unordered-list", "ordered-list", "|",
+                        "link", "image", "|",
+                        "table", "horizontal-rule", "code", "|",
+                        "guide"
+                    ]
+                });
+                mde.render();
+            }
+        });
 
         $("#add_finding").submit(function () {
             var isFormValid = true;

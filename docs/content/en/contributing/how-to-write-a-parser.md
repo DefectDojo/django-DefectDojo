@@ -220,7 +220,7 @@ Bad example (DIY):
 
 ## Deduplication algorithm
 
-By default a new parser uses the 'legacy' deduplication algorithm documented at https://defectdojo.github.io/django-DefectDojo/usage/features/#deduplication-algorithms
+By default a new parser uses the 'legacy' deduplication algorithm documented at https://documentation.defectdojo.com/usage/features/#deduplication-algorithms
 
 ## Unit tests
 

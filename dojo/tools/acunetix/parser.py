@@ -4,6 +4,7 @@ import logging
 import dateutil
 import html2text
 import hyperlink
+from cvss import parser as cvss_parser
 from defusedxml.ElementTree import parse
 from dojo.models import Endpoint, Finding
 
@@ -68,7 +69,9 @@ class AcunetixParser(object):
                     finding.references = "\n".join(references)
 
                 if item.findtext("CVSS3/Descriptor"):
-                    finding.cvssv3 = item.findtext("CVSS3/Descriptor")
+                    cvss_objects = cvss_parser.parse_cvss_from_text(item.findtext("CVSS3/Descriptor"))
+                    if len(cvss_objects) > 0:
+                        finding.cvssv3 = cvss_objects[0].clean_vector()
 
                 # more description are in "Details"
                 if item.findtext("Details") and len(item.findtext("Details").strip()) > 0:

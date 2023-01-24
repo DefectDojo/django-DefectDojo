@@ -21,10 +21,12 @@ from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, En
     DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
     ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
-    NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet
+    NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet, \
+    ConfigurationPermissionViewSet
 from json import dumps
 from enum import Enum
 from django.urls import reverse
+from django.contrib.auth.models import Permission
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -787,7 +789,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
             'false_positive': False,
             'risk_accepted': False,
             'out_of_scope': False,
-            "date": "2017-01-12T00:00",
+            "date": "2017-01-12",
         }
         self.update_fields = {'mitigated': True}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -807,6 +809,18 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         logger.debug(response.data)
         self.assertEqual(400, response.status_code, response.content[:1000])
         self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
+
+    def test_create_minimal(self):
+        # This call should not fail even if there is not date defined
+        minimal_payload = {
+            'endpoint': 1,
+            'finding': 3,
+        }
+        response = self.client.post(self.url, minimal_payload)
+        logger.debug('test_create_response:')
+        logger.debug(response)
+        logger.debug(response.data)
+        self.assertEqual(201, response.status_code, response.content[:1000])
 
     def test_update_patch_unsuccessful(self):
         anoher_finding_payload = self.payload.copy()
@@ -874,7 +888,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Endpoint_Add
         self.permission_update = Permissions.Endpoint_Edit
         self.permission_delete = Permissions.Endpoint_Delete
-        self.deleted_objects = 3
+        self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -905,7 +919,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Engagement_Add
         self.permission_update = Permissions.Engagement_Edit
         self.permission_delete = Permissions.Engagement_Delete
-        self.deleted_objects = 24
+        self.deleted_objects = 23
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1047,6 +1061,37 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         result_json = new_result.json()
         assert not result_json["duplicate"]
         assert result_json["duplicate_finding"] is None
+
+    def test_filter_steps_to_reproduce(self):
+        # Confirm initial data
+        result = self.client.get(self.url + '?steps_to_reproduce=lorem')
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not filter on steps_to_reproduce")
+        result_json = result.json()
+        assert result_json["count"] == 0
+
+        # Set steps to reproduce
+        result = self.client.patch(self.url + "2/", data={"steps_to_reproduce": "Lorem ipsum dolor sit amet"})
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
+        assert result.json()["steps_to_reproduce"] == "Lorem ipsum dolor sit amet"
+        result = self.client.patch(self.url + "3/", data={"steps_to_reproduce": "Ut enim ad minim veniam"})
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
+        assert result.json()["steps_to_reproduce"] == "Ut enim ad minim veniam"
+
+        # Test
+        result = self.client.get(self.url + "?steps_to_reproduce=lorem")
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not filter on steps_to_reproduce")
+        result_json = result.json()
+        assert result_json["count"] == 1
+        assert result_json["results"][0]["id"] == 2
+        assert result_json["results"][0]["steps_to_reproduce"] == "Lorem ipsum dolor sit amet"
+
+        # Set steps to reproduce
+        result = self.client.patch(self.url + "2/", data={"steps_to_reproduce": ""})
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
+        assert result.json()["steps_to_reproduce"] == ""
+        result = self.client.patch(self.url + "3/", data={"steps_to_reproduce": ""})
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
+        assert result.json()["steps_to_reproduce"] == ""
 
 
 class FindingMetadataTest(BaseClass.RESTEndpointTest):
@@ -1298,7 +1343,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Product_Type_Add_Product
         self.permission_update = Permissions.Product_Edit
         self.permission_delete = Permissions.Product_Delete
-        self.deleted_objects = 17
+        self.deleted_objects = 25
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1358,7 +1403,7 @@ class TestsTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Test_Add
         self.permission_update = Permissions.Test_Edit
         self.permission_delete = Permissions.Test_Delete
-        self.deleted_objects = 19
+        self.deleted_objects = 18
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1486,11 +1531,35 @@ class UsersTest(BaseClass.RESTEndpointTest):
             "last_name": "user",
             "email": "example@email.com",
             "is_active": True,
+            "configuration_permissions": [217, 218]
         }
-        self.update_fields = {"first_name": "test changed"}
+        self.update_fields = {"first_name": "test changed", "configuration_permissions": [219, 220]}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 17
+        self.deleted_objects = 18
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create_user_with_non_configuration_permissions(self):
+        payload = self.payload.copy()
+        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        response = self.client.post(self.url, payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('object does not exist', response.data['message'])
+
+    def test_update_user_with_non_configuration_permissions(self):
+        payload = {}
+        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        response = self.client.patch(self.url + '3/', payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('object does not exist', response.data['message'])
+
+    def test_update_user_other_permissions_will_not_leak_and_stay_untouched(self):
+        payload = {}
+        payload['configuration_permissions'] = [217, 218, 219]
+        response = self.client.patch(self.url + '6/', payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['configuration_permissions'], payload['configuration_permissions'])
+        user_permissions = User.objects.get(username='user5').user_permissions.all().values_list('id', flat=True)
+        self.assertEqual(set(user_permissions), set(payload['configuration_permissions'] + [26, 28]))
 
 
 class UserContactInfoTest(BaseClass.RESTEndpointTest):
@@ -2162,7 +2231,7 @@ class ProductTypeTest(BaseClass.RESTEndpointTest):
         self.permission_check_class = Product_Type
         self.permission_update = Permissions.Product_Type_Edit
         self.permission_delete = Permissions.Product_Type_Delete
-        self.deleted_objects = 21
+        self.deleted_objects = 25
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create_object_not_authorized(self):
@@ -2195,8 +2264,9 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
         self.payload = {
             "name": "Test Group",
             "description": "Test",
+            "configuration_permissions": [217, 218],
         }
-        self.update_fields = {'description': "changed"}
+        self.update_fields = {'description': "changed", "configuration_permissions": [219, 220]}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Dojo_Group
         self.permission_update = Permissions.Group_Edit
@@ -2223,6 +2293,31 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
 
         response = self.client.post(self.url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_create_group_with_non_configuration_permissions(self):
+        payload = self.payload.copy()
+        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        response = self.client.post(self.url, payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('object does not exist', response.data['message'])
+
+    def test_update_group_with_non_configuration_permissions(self):
+        payload = {}
+        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        response = self.client.patch(self.url + '2/', payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('object does not exist', response.data['message'])
+
+    def test_update_group_other_permissions_will_not_leak_and_stay_untouched(self):
+        Dojo_Group.objects.get(name='Group 1 Testdata').auth_group.permissions.set([218, 220, 26, 28])  # I was trying to set this in 'dojo_testdata.json' but it hasn't sucessful
+        payload = {}
+        payload['configuration_permissions'] = [217, 218, 219]
+        response = self.client.patch(self.url + '1/', payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['configuration_permissions'], payload['configuration_permissions'])
+        permissions = Dojo_Group.objects.get(name='Group 1 Testdata').auth_group.permissions.all().values_list('id', flat=True)
+        self.assertEqual(set(permissions), set(payload['configuration_permissions'] + [26, 28]))
+        Dojo_Group.objects.get(name='Group 1 Testdata').auth_group.permissions.clear()
 
 
 class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
@@ -2541,4 +2636,16 @@ class TestTypeTest(BaseClass.AuthenticatedViewTest):
         self.update_fields = {'name': 'Test_2'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ConfigurationPermissionTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Permission
+        self.endpoint_path = 'configuration_permissions'
+        self.viewname = 'permission'
+        self.viewset = ConfigurationPermissionViewSet
+        self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

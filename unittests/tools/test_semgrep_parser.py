@@ -19,7 +19,7 @@ class TestSemgrepParser(DojoTestCase):
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Medium", finding.severity)
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02194.java", finding.file_path)
         self.assertEqual(64, finding.line)
         self.assertEqual(696, finding.cwe)
@@ -35,7 +35,7 @@ class TestSemgrepParser(DojoTestCase):
         testfile.close()
         self.assertEqual(3, len(findings))
         finding = findings[0]
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Medium", finding.severity)
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02194.java", finding.file_path)
         self.assertEqual(64, finding.line)
         self.assertEqual(696, finding.cwe)
@@ -56,7 +56,7 @@ class TestSemgrepParser(DojoTestCase):
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Medium", finding.severity)
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01150.java", finding.file_path)
         self.assertEqual(66, finding.line)
         self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
@@ -77,12 +77,12 @@ class TestSemgrepParser(DojoTestCase):
         self.assertIsNone(finding.mitigation)
         self.assertEqual("python.lang.correctness.tempfile.flush.tempfile-without-flush", finding.vuln_id_from_tool)
         finding = findings[2]
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Medium", finding.severity)
         self.assertEqual("utils.py", finding.file_path)
         self.assertEqual(503, finding.line)
         self.assertEqual("python.lang.maintainability.useless-ifelse.useless-if-conditional", finding.vuln_id_from_tool)
         finding = findings[4]
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Medium", finding.severity)
         self.assertEqual("tools/sslyze/parser_xml.py", finding.file_path)
         self.assertEqual(124, finding.line)
         self.assertEqual(327, finding.cwe)
@@ -93,3 +93,18 @@ class TestSemgrepParser(DojoTestCase):
         self.assertEqual(33, finding.line)
         self.assertEqual(1236, finding.cwe)
         self.assertEqual("python.lang.security.unquoted-csv-writer.unquoted-csv-writer", finding.vuln_id_from_tool)
+
+    def test_parse_cwe_list(self):
+        testfile = open("unittests/scans/semgrep/cwe_list.json")
+        parser = SemgrepParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("Info", finding.severity)
+        self.assertEqual("index.js", finding.file_path)
+        self.assertEqual(12, finding.line)
+        self.assertEqual(352, finding.cwe)
+        self.assertEqual("javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage", finding.vuln_id_from_tool)
+        self.assertIn("const app = express();", finding.description)
+        self.assertIn("A CSRF middleware was not detected in your express application. Ensure you are either using one  such as `csurf` or `csrf` (see rule references) and/or you are properly doing CSRF validation in your routes with a token or cookies.", finding.description)

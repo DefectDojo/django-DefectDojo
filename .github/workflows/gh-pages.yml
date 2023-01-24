@@ -11,7 +11,7 @@ on:
 # Both builds have to be one worflow as otherwise one publish will overwrite the other
 jobs:
   deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '12.x'
+          node-version: '16.x'
 
       - name: Cache dependencies
         uses: actions/cache@v3

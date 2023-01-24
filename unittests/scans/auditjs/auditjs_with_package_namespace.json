@@ -1,0 +1,65 @@
+[
+  {
+    "coordinates": "pkg:npm/loose-envify@1.4.0",
+    "description": "Fast (and loose) selective `process.env` replacer using js-tokens instead of an AST",
+    "reference": "https://ossindex.sonatype.org/component/pkg:npm/loose-envify@1.4.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.37",
+    "vulnerabilities": []
+  },
+  {
+    "coordinates": "pkg:npm/js-tokens@4.0.0",
+    "description": "Tiny JavaScript tokenizer.",
+    "reference": "https://ossindex.sonatype.org/component/pkg:npm/js-tokens@4.0.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.37",
+    "vulnerabilities": []
+  },
+  {
+    "coordinates": "pkg:npm/react-dom@18.2.0",
+    "description": "React package for working with the DOM.",
+    "reference": "https://ossindex.sonatype.org/component/pkg:npm/react-dom@18.2.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.37",
+    "vulnerabilities": []
+  },
+  {
+    "coordinates": "pkg:npm/scheduler@0.23.0",
+    "description": "Cooperative scheduler for the browser environment.",
+    "reference": "https://ossindex.sonatype.org/component/pkg:npm/scheduler@0.23.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.37",
+    "vulnerabilities": []
+  },
+  {
+    "coordinates": "pkg:npm/next@12.2.2",
+    "description": "The React Framework",
+    "reference": "https://ossindex.sonatype.org/component/pkg:npm/next@12.2.2?utm_source=auditjs&utm_medium=integration&utm_content=4.0.37",
+    "vulnerabilities": [
+      
+    ]
+  },
+  {
+    "coordinates": "pkg:npm/%40next/env@12.2.2",
+    "reference": "https://ossindex.sonatype.org/component/pkg:npm/%40next/env@12.2.2?utm_source=auditjs&utm_medium=integration&utm_content=4.0.37",
+    "vulnerabilities": [
+        {
+          "id": "da5a3b11-c75b-48e7-9c28-1123f0a492bf",
+          "title": "Unverified Certificate",
+          "description": "> When using SSL to connect to a MySQL server, the SSL procedure implemented does not actually check if the remote server has a trusted certificate or not.\n> \n> -- [github.com](https://github.com/mysqljs/mysql/issues/816)",
+          "cvssScore": 9.6,
+          "cvssVector": "CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+          "reference": "https://ossindex.sonatype.org/vulnerability/da5a3b11-c75b-48e7-9c28-1123f0a492bf?component-type=npm&component-name=mysql&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        }
+      ]
+  },
+  {
+    "coordinates": "pkg:npm/%40swc/helpers@0.4.2",
+    "reference": "https://ossindex.sonatype.org/component/pkg:npm/%40swc/helpers@0.4.2?utm_source=auditjs&utm_medium=integration&utm_content=4.0.37",
+    "vulnerabilities": [
+      
+    ]
+  },
+  {
+    "coordinates": "pkg:npm/%40next/swc-linux-x64-gnu@12.2.2",
+    "reference": "https://ossindex.sonatype.org/component/pkg:npm/%40next/swc-linux-x64-gnu@12.2.2?utm_source=auditjs&utm_medium=integration&utm_content=4.0.37",
+    "vulnerabilities": []
+  },
+  {
+    "coordinates": "pkg:npm/%40next/swc-linux-x64-musl@12.2.2",
+    "reference": "https://ossindex.sonatype.org/component/pkg:npm/%40next/swc-linux-x64-musl@12.2.2?utm_source=auditjs&utm_medium=integration&utm_content=4.0.37",
+    "vulnerabilities": []
+  }
+]

@@ -25,10 +25,11 @@ from imagekit.processors import ResizeToFill
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 from dojo.filters import TemplateFindingFilter, SimilarFindingFilter, FindingFilter, AcceptedFindingFilter
-from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
+from dojo.forms import EditPlannedRemediationDateFindingForm, NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, \
+    PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
-    FindingFormID, FindingBulkUpdateForm, MergeFindings
+    FindingFormID, FindingBulkUpdateForm, MergeFindings, CopyFindingForm
 from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, Endpoint_Status, \
     FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, Test_Import_Finding_Action, User, Engagement, Vulnerability_Id_Template
@@ -48,6 +49,7 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
+from dojo.test.queries import get_authorized_tests
 
 logger = logging.getLogger(__name__)
 
@@ -213,10 +215,9 @@ def prefetch_for_findings(findings, prefetch_type='all'):
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
-        prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
-        prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
-        prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
-        prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
+        prefetched_findings = prefetched_findings.prefetch_related('status_finding')
+        prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('status_finding__id', filter=Q(status_finding__mitigated=False)))
+        prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('status_finding__id', filter=Q(status_finding__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__members')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__members')
@@ -419,7 +420,7 @@ def close_finding(request, fid):
             now = timezone.now()
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = now
+            new_note.date = form.cleaned_data.get("mitigated") or now
             new_note.save()
             finding.notes.add(new_note)
 
@@ -429,24 +430,28 @@ def close_finding(request, fid):
                 'Note Saved.',
                 extra_tags='alert-success')
 
-            if len(missing_note_types) == 0:
+            if len(missing_note_types) <= 1:
                 finding.active = False
                 now = timezone.now()
-                finding.mitigated = now
-                finding.mitigated_by = request.user
+                finding.mitigated = form.cleaned_data.get("mitigated") or now
+                finding.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
                 finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
-                endpoint_status = finding.endpoint_status.all()
+                finding.false_p = form.cleaned_data.get("false_p", False)
+                finding.out_of_scope = form.cleaned_data.get("out_of_scope", False)
+                finding.duplicate = form.cleaned_data.get("duplicate", False)
+                endpoint_status = finding.status_finding.all()
                 for status in endpoint_status:
-                    status.mitigated_by = request.user
-                    status.mitigated_time = timezone.now()
+                    status.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
+                    status.mitigated_time = form.cleaned_data.get("mitigated") or now
                     status.mitigated = True
                     status.last_modified = timezone.now()
                     status.save()
 
                 # only push to JIRA if there is an issue, to prevent a new one from being created
                 if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
+                    jira_helper.add_comment(finding, new_note, force_push=True)
                     finding.save(push_to_jira=True)
                 else:
                     finding.save()
@@ -460,7 +465,7 @@ def close_finding(request, fid):
                                     title='Closing of %s' % finding.title,
                                     finding=finding,
                                     description='The finding "%s" was closed by %s' % (finding.title, request.user),
-                                    url=request.build_absolute_uri(reverse('view_test', args=(finding.test.id, ))),
+                                    url=reverse('view_finding', args=(finding.id, )),
                                     )
                 return HttpResponseRedirect(
                     reverse('view_test', args=(finding.test.id, )))
@@ -572,7 +577,7 @@ def reopen_finding(request, fid):
     finding.is_mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
-    endpoint_status = finding.endpoint_status.all()
+    endpoint_status = finding.status_finding.all()
     for status in endpoint_status:
         status.mitigated_by = None
         status.mitigated_time = None
@@ -664,6 +669,50 @@ def delete_finding(request, fid):
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+def copy_finding(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    product = finding.test.engagement.product
+    tests = get_authorized_tests(Permissions.Test_Edit).filter(engagement=finding.test.engagement)
+    form = CopyFindingForm(tests=tests)
+
+    if request.method == 'POST':
+        form = CopyFindingForm(request.POST, tests=tests)
+        if form.is_valid():
+            test = form.cleaned_data.get('test')
+            product = finding.test.engagement.product
+            finding_copy = finding.copy(test=test)
+            calculate_grade(product)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Finding Copied successfully.',
+                extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Copying of %s' % finding.title,
+                                description='The finding "%s" was copied by %s to %s' % (finding.title, request.user, test.title),
+                                product=product,
+                                url=request.build_absolute_uri(reverse('copy_finding', args=(finding_copy.id, ))),
+                                recipients=[finding.test.engagement.lead],
+                                icon="exclamation-triangle")
+            return redirect_to_return_url_or_else(request, reverse('view_test', args=(test.id,)))
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Unable to copy finding, please try again.',
+                extra_tags='alert-danger')
+
+    product_tab = Product_Tab(product, title="Copy Finding", tab="findings")
+    return render(request, 'dojo/copy_object.html', {
+        'source': finding,
+        'source_label': 'Finding',
+        'destination_label': 'Test',
+        'product_tab': product_tab,
+        'form': form,
+    })
+
+
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # finding = finding._detag_to_serializable()
@@ -695,7 +744,7 @@ def edit_finding(request, fid):
                            can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
 
         if finding.active:
-            if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+            if (form['active'].value() is False or form['false_p'].value() or form['out_of_scope'].value()) and form['duplicate'].value() is False:
                 note_type_activation = Note_Type.objects.filter(is_active=True).count()
                 closing_disabled = 0
                 if note_type_activation:
@@ -705,13 +754,17 @@ def edit_finding(request, fid):
                                                      code='inactive_without_mandatory_notes')
                     error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
                                                     code='false_p_without_mandatory_notes')
+                    error_out_of_scope = ValidationError('Can not set a finding as out of scope without adding all mandatory notes',
+                                                         code='out_of_scope_without_mandatory_notes')
                     if form['active'].value() is False:
                         form.add_error('active', error_inactive)
                     if form['false_p'].value():
                         form.add_error('false_p', error_false_p)
+                    if form['out_of_scope'].value():
+                        form.add_error('out_of_scope', error_out_of_scope)
                     messages.add_message(request,
                                          messages.ERROR,
-                                         'Can not set a finding as inactive or false positive without adding all mandatory notes',
+                                         'Can not set a finding as inactive, false positive or out of scope without adding all mandatory notes',
                                          extra_tags='alert-danger')
 
         if use_jira:
@@ -751,6 +804,19 @@ def edit_finding(request, fid):
             new_finding.last_reviewed_by = request.user
 
             new_finding.tags = form.cleaned_data['tags']
+
+            # If active is not checked and CAN_EDIT_MIIGATED_DATA, mitigate the finding and the associated endpoints status
+            if finding_helper.can_edit_mitigated_data(request.user):
+                if (form['active'].value() is False or form['false_p'].value() or form['out_of_scope'].value()) and form['duplicate'].value() is False:
+                    now = timezone.now()
+                    new_finding.is_mitigated = True
+                    endpoint_status = new_finding.status_finding.all()
+                    for status in endpoint_status:
+                        status.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
+                        status.mitigated_time = form.cleaned_data.get("mitigated") or now
+                        status.mitigated = True
+                        status.last_modified = timezone.now()
+                        status.save()
 
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
@@ -868,6 +934,38 @@ def edit_finding(request, fid):
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+def remediation_date(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    user = get_object_or_404(Dojo_User, id=request.user.id)
+
+    if request.method == 'POST':
+        form = EditPlannedRemediationDateFindingForm(request.POST)
+
+        if form.is_valid():
+            finding.planned_remediation_date = request.POST.get('planned_remediation_date', '')
+            finding.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Finding Planned Remediation Date saved.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(
+                reverse('view_finding', args=(finding.id,)))
+
+    else:
+        form = EditPlannedRemediationDateFindingForm(finding=finding)
+
+    product_tab = Product_Tab(finding.test.engagement.product, title="Planned Remediation Date", tab="findings")
+
+    return render(request, 'dojo/remediation_date.html', {
+        'finding': finding,
+        'product_tab': product_tab,
+        'user': user,
+        'form': form
+    })
+
+
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -906,7 +1004,7 @@ def risk_unaccept(request, fid):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+@user_is_authorized(Finding, Permissions.Finding_View, 'fid')
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -936,15 +1034,18 @@ def request_finding_review(request, fid):
             finding.reviewers.set(users)
             finding.save()
             reviewers = ""
+            reviewers_short = []
             for suser in form.cleaned_data['reviewers']:
                 full_user = Dojo_User.generate_full_name(Dojo_User.objects.get(id=suser))
                 logger.debug("Asking %s for review", full_user)
                 reviewers += str(full_user) + ", "
+                reviewers_short.append(Dojo_User.objects.get(id=suser).username)
             reviewers = reviewers[:-2]
 
             create_notification(event='review_requested',
                                 title='Finding review requested',
                                 finding=finding,
+                                recipients=reviewers_short,
                                 description='User %s has requested that user(s) %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
                                 icon='check',
                                 url=reverse("view_finding", args=(finding.id,)))
@@ -1025,7 +1126,7 @@ def clear_finding_review(request, fid):
     })
 
 
-@user_is_configuration_authorized('dojo.add_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.add_finding_template')
 def mktemplate(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     templates = Finding_Template.objects.filter(title=finding.title)
@@ -1067,7 +1168,7 @@ def mktemplate(request, fid):
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
-@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.view_finding_template')
 def find_template_to_apply(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
@@ -1369,7 +1470,7 @@ def promote_to_finding(request, fid):
         })
 
 
-@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.view_finding_template')
 def templates(request):
     templates = Finding_Template.objects.all().order_by('cwe')
     templates = TemplateFindingFilter(request.GET, queryset=templates)
@@ -1387,7 +1488,7 @@ def templates(request):
         })
 
 
-@user_is_configuration_authorized('dojo.view_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.view_finding_template')
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize('json', Finding_Template.objects.all())
     return HttpResponse(leads_as_json, content_type='json')
@@ -1438,7 +1539,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
     return count
 
 
-@user_is_configuration_authorized('dojo.add_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.add_finding_template')
 def add_template(request):
     form = FindingTemplateForm()
     if request.method == 'POST':
@@ -1473,7 +1574,7 @@ def add_template(request):
     })
 
 
-@user_is_configuration_authorized('dojo.change_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.change_finding_template')
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = FindingTemplateForm(
@@ -1519,7 +1620,7 @@ def edit_template(request, tid):
     })
 
 
-@user_is_configuration_authorized('dojo.delete_finding_template', 'staff')
+@user_is_configuration_authorized('dojo.delete_finding_template')
 def delete_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
 
@@ -1630,7 +1731,7 @@ def merge_finding_product(request, pid):
 
                 if finding_to_merge_into not in findings_to_merge:
                     for finding in findings_to_merge.exclude(pk=finding_to_merge_into.pk):
-                        notes_entry = "{} {} ({}),".format(notes_entry, finding.title, finding.id)
+                        notes_entry = "{}\n- {} ({}),".format(notes_entry, finding.title, finding.id)
                         if finding.static_finding:
                             static = finding.static_finding
 
@@ -1651,7 +1752,7 @@ def merge_finding_product(request, pid):
                                 finding_descriptions = "{}\n**File Path:** {}\n".format(finding_descriptions, finding.file_path)
 
                         # If checked merge the Reference
-                        if form.cleaned_data['append_reference']:
+                        if form.cleaned_data['append_reference'] and finding.references is not None:
                             finding_references = "{}\n{}".format(finding_references, finding.references)
 
                         # if checked merge the endpoints
@@ -1720,7 +1821,7 @@ def merge_finding_product(request, pid):
                         finding_action = "deleted"
                         findings_to_merge.delete()
 
-                    notes_entry = "Finding consists of merged findings from the following findings: {} which have been {}.".format(notes_entry[:-1], finding_action)
+                    notes_entry = "Finding consists of merged findings from the following findings which have been {}: {}".format(finding_action, notes_entry[:-1])
                     note = Notes(entry=notes_entry, author=request.user)
                     note.save()
                     finding_to_merge_into.notes.add(note)
@@ -1838,6 +1939,16 @@ def finding_bulk_update_all(request, pid=None):
                     for prod in prods:
                         calculate_grade(prod)
 
+                if form.cleaned_data['date']:
+                    for finding in finds:
+                        finding.date = form.cleaned_data['date']
+                        finding.save_no_options()
+
+                if form.cleaned_data['planned_remediation_date']:
+                    for finding in finds:
+                        finding.planned_remediation_date = form.cleaned_data['planned_remediation_date']
+                        finding.save_no_options()
+
                 skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
                     for finding in finds:
@@ -1877,7 +1988,7 @@ def finding_bulk_update_all(request, pid=None):
 
                 if form.cleaned_data['finding_group_add']:
                     logger.debug('finding_group_add checked!')
-                    fgid = form.cleaned_data['add_to_finding_group']
+                    fgid = form.cleaned_data['add_to_finding_group_id']
                     finding_group = Finding_Group.objects.get(id=fgid)
                     finding_group, added, skipped = finding_helper.add_to_finding_group(finding_group, finds)
 
@@ -1958,6 +2069,7 @@ def finding_bulk_update_all(request, pid=None):
                 success_count = 0
                 finding_groups = set([find.finding_group for find in finds if find.has_finding_group])
                 logger.debug('finding_groups: %s', finding_groups)
+                groups_pushed_to_jira = False
                 for group in finding_groups:
                     if form.cleaned_data.get('push_to_jira'):
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(group)
@@ -1969,13 +2081,12 @@ def finding_bulk_update_all(request, pid=None):
                             jira_helper.push_to_jira(group)
                             success_count += 1
 
-                        jira_helper.push_to_jira(group)
-
                 for error_message, error_count in error_counts.items():
                     add_error_message_to_response('%i finding groups could not be pushed to JIRA: %s' % (error_count, error_message))
 
                 if success_count > 0:
-                    add_success_message_to_response('%i finding groups pushed to JIRA succesfully' % success_count)
+                    add_success_message_to_response('%i finding groups pushed to JIRA successfully' % success_count)
+                    groups_pushed_to_jira = True
 
                 # refresh from db
                 finds = finds.all()
@@ -1996,7 +2107,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
                     # push_to_jira = jira_helper.is_push_to_jira(new_finding, form.cleaned_data.get('push_to_jira'))
-                    if jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira'):
+                    if not groups_pushed_to_jira and (jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira')):
 
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(finding)
                         if finding.has_jira_group_issue and not finding.has_jira_issue:
@@ -2015,7 +2126,7 @@ def finding_bulk_update_all(request, pid=None):
                     add_error_message_to_response('%i findings could not be pushed to JIRA: %s' % (error_count, error_message))
 
                 if success_count > 0:
-                    add_success_message_to_response('%i findings pushed to JIRA succesfully' % success_count)
+                    add_success_message_to_response('%i findings pushed to JIRA successfully' % success_count)
 
                 if updated_find_count > 0:
                     messages.add_message(request,

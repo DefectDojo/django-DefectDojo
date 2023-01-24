@@ -1,0 +1,853 @@
+{
+  "dockerbenchsecurity": "1.3.6",
+  "start": 1659371395,
+  
+  "tests": [
+    {
+      "id": "1",
+      "desc": "Host Configuration",
+      "results": [
+        {
+          "id": "1.1.1",
+          "desc": "Ensure a separate partition for containers has been created (Automated)",
+          "result": "WARN",
+          "remediation": "For new installations, you should create a separate partition for the /var/lib/docker mount point. For systems that have already been installed, you should use the Logical Volume Manager (LVM) within Linux to create a new partition.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "1.1.2",
+          "desc": "Ensure only trusted users are allowed to control Docker daemon (Automated)",
+          "result": "INFO",
+          "details": "doubtfulusers: jubjubbird",
+          "items": [
+            "jubjubbird"
+          ],
+          "remediation": "You should remove any untrusted users from the docker group using command sudo gpasswd -d <your-user> docker or add trusted users to the docker group using command sudo usermod -aG docker <your-user>. You should not create a mapping of sensitive directories from the host to container volumes.",
+          "remediation-impact": "Only trust user are allow to build and execute containers as normal user."
+        },
+        {
+          "id": "1.1.3",
+          "desc": "Ensure auditing is configured for the Docker daemon (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /usr/bin/dockerd -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.4",
+          "desc": "Ensure auditing is configured for Docker files and directories -/run/containerd (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -a exit,always -F path=/run/containerd -F perm=war -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.5",
+          "desc": "Ensure auditing is configured for Docker files and directories - /var/lib/docker (Automated)",
+          "result": "INFO",
+          "details": "Directory not found",
+          "remediation": "Install auditd. Add -w /var/lib/docker -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.6",
+          "desc": "Ensure auditing is configured for Docker files and directories - /etc/docker (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /etc/docker -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.7",
+          "desc": "Ensure auditing is configured for Docker files and directories - docker.service (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /lib/systemd/system/docker.service -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.8",
+          "desc": "Ensure auditing is configured for Docker files and directories - containerd.sock (Automated)",
+          "result": "INFO",
+          "details": "File not found",
+          "remediation": "Install auditd. Add -w  -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.9",
+          "desc": "Ensure auditing is configured for Docker files and directories - docker.socket (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /lib/systemd/system/docker.socket -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.10",
+          "desc": "Ensure auditing is configured for Docker files and directories - /etc/default/docker (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /etc/default/docker -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.11",
+          "desc": "Ensure auditing is configured for Dockerfiles and directories - /etc/docker/daemon.json (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /etc/docker/daemon.json -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.12",
+          "desc": "1.1.12 Ensure auditing is configured for Dockerfiles and directories - /etc/containerd/config.toml (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /etc/containerd/config.toml -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.13",
+          "desc": "Ensure auditing is configured for Docker files and directories - /etc/sysconfig/docker (Automated)",
+          "result": "INFO",
+          "details": "File not found",
+          "remediation": "Install auditd. Add -w /etc/sysconfig/docker -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.14",
+          "desc": "Ensure auditing is configured for Docker files and directories - /usr/bin/containerd (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /usr/bin/containerd -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.15",
+          "desc": "Ensure auditing is configured for Docker files and directories - /usr/bin/containerd-shim (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /usr/bin/containerd-shim -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.16",
+          "desc": "Ensure auditing is configured for Docker files and directories - /usr/bin/containerd-shim-runc-v1 (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /usr/bin/containerd-shim-runc-v1 -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.17",
+          "desc": "Ensure auditing is configured for Docker files and directories - /usr/bin/containerd-shim-runc-v2 (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /usr/bin/containerd-shim-runc-v2 -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.1.18",
+          "desc": "Ensure auditing is configured for Docker files and directories - /usr/bin/runc (Automated)",
+          "result": "WARN",
+          "remediation": "Install auditd. Add -w /usr/bin/runc -k docker to the /etc/audit/rules.d/audit.rules file. Then restart the audit daemon using command service auditd restart.",
+          "remediation-impact": "Audit can generate large log files. So you need to make sure that they are rotated and archived periodically. Create a separate partition for audit logs to avoid filling up other critical partitions."
+        },
+        {
+          "id": "1.2.1",
+          "desc": "Ensure the container host has been Hardened (Manual)",
+          "result": "INFO",
+          "remediation": "You may consider various Security Benchmarks for your container host.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "1.2.2",
+          "desc": "Ensure that the version of Docker is up to date (Manual)",
+          "result": "INFO",
+          "details": "Using 20.10.17",
+          "remediation": "You should monitor versions of Docker releases and make sure your software is updated as required.",
+          "remediation-impact": "You should perform a risk assessment regarding Docker version updates and review how they may impact your operations."
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "desc": "Docker daemon configuration",
+      "results": [
+        {
+          "id": "2.1",
+          "desc": "Run the Docker daemon as a non-root user, if possible (Manual)",
+          "result": "INFO",
+          "remediation": "Follow the current Dockerdocumentation on how to install the Docker daemon as a non-root user.",
+          "remediation-impact": "There are multiple prerequisites depending on which distribution that is in use, and also known limitations regarding networking and resource limitation. Running in rootless mode also changes the location of any configuration files in use, including all containers using the daemon."
+        },
+        {
+          "id": "2.2",
+          "desc": "Ensure network traffic is restricted between containers on the default bridge (Scored)",
+          "result": "WARN",
+          "remediation": "Edit the Docker daemon configuration file to ensure that inter-container communication is disabled: icc: false.",
+          "remediation-impact": "Inter-container communication is disabled on the default network bridge. If any communication between containers on the same host is desired, it needs to be explicitly defined using container linking or custom networks."
+        },
+        {
+          "id": "2.3",
+          "desc": "Ensure the logging level is set to 'info' (Scored)",
+          "result": "PASS"
+        },
+        {
+          "id": "2.4",
+          "desc": "Ensure Docker is allowed to make changes to iptables (Scored)",
+          "result": "PASS"
+        },
+        {
+          "id": "2.5",
+          "desc": "Ensure insecure registries are not used (Scored)",
+          "result": "WARN",
+          "remediation": "You should ensure that no insecure registries are in use.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "2.6",
+          "desc": "Ensure aufs storage driver is not used (Scored)",
+          "result": "PASS"
+        },
+        {
+          "id": "2.7",
+          "desc": "Ensure TLS authentication for Docker daemon is configured (Scored)",
+          "result": "INFO",
+          "details": "Docker daemon not listening on TCP",
+          "remediation": "Follow the steps mentioned in the Docker documentation or other references. By default, TLS authentication is not configured.",
+          "remediation-impact": "You would need to manage and guard certificates and keys for the Docker daemon and Docker clients."
+        },
+        {
+          "id": "2.8",
+          "desc": "Ensure the default ulimit is configured appropriately (Manual)",
+          "result": "INFO",
+          "details": "Default ulimit doesn't appear to be set",
+          "remediation": "Run Docker in daemon mode and pass --default-ulimit as option with respective ulimits as appropriate in your environment and in line with your security policy. Example: dockerd --default-ulimit nproc=1024:2048 --default-ulimit nofile=100:200",
+          "remediation-impact": "If ulimits are set incorrectly this could cause issues with system resources, possibly causing a denial of service condition."
+        },
+        {
+          "id": "2.9",
+          "desc": "Enable user namespace support (Scored)",
+          "result": "WARN",
+          "remediation": "Please consult the Docker documentation for various ways in which this can be configured depending upon your requirements. The high-level steps are: Ensure that the files /etc/subuid and /etc/subgid exist. Start the docker daemon with --userns-remap flag.",
+          "remediation-impact": "User namespace remapping is incompatible with a number of Docker features and also currently breaks some of its functionalities."
+        },
+        {
+          "id": "2.10",
+          "desc": "Ensure the default cgroup usage has been confirmed (Scored)",
+          "result": "PASS"
+        },
+        {
+          "id": "2.11",
+          "desc": "Ensure base device size is not changed until needed (Scored)",
+          "result": "PASS"
+        },
+        {
+          "id": "2.12",
+          "desc": "Ensure that authorization for Docker client commands is enabled (Scored)",
+          "result": "WARN",
+          "remediation": "Install/Create an authorization plugin. Configure the authorization policy as desired. Start the docker daemon using command dockerd --authorization-plugin=<PLUGIN_ID>",
+          "remediation-impact": "Each Docker command needs to pass through the authorization plugin mechanism. This may have a performance impact"
+        },
+        {
+          "id": "2.13",
+          "desc": "Ensure centralized and remote logging is configured (Scored)",
+          "result": "WARN",
+          "remediation": "Set up the desired log driver following its documentation. Start the docker daemon using that logging driver. Example: dockerd --log-driver=syslog --log-opt syslog-address=tcp://192.xxx.xxx.xxx",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "2.14",
+          "desc": "Ensure containers are restricted from acquiring new privileges (Scored)",
+          "result": "WARN",
+          "remediation": "You should run the Docker daemon using command: dockerd --no-new-privileges",
+          "remediation-impact": "no_new_priv prevents LSMs such as SELinux from escalating the privileges of individual containers."
+        },
+        {
+          "id": "2.15",
+          "desc": "Ensure live restore is enabled (Scored)",
+          "result": "WARN",
+          "remediation": "Run Docker in daemon mode and pass --live-restore option.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "2.16",
+          "desc": "Ensure Userland Proxy is Disabled (Scored)",
+          "result": "WARN",
+          "remediation": "You should run the Docker daemon using command: dockerd --userland-proxy=false",
+          "remediation-impact": "Some systems with older Linux kernels may not be able to support hairpin NAT and therefore require the userland proxy service. Also, some networking setups can be impacted by the removal of the userland proxy."
+        },
+        {
+          "id": "2.17",
+          "desc": "Ensure that a daemon-wide custom seccomp profile is applied if appropriate (Manual)",
+          "result": "PASS"
+        },
+        {
+          "id": "2.18",
+          "desc": "Ensure that experimental features are not implemented in production (Scored)",
+          "result": "INFO",
+          "remediation": "You should not pass --experimental as a runtime parameter to the Docker daemon on production systems.",
+          "remediation-impact": "None."
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "desc": "Docker daemon configuration files",
+      "results": [
+        {
+          "id": "3.1",
+          "desc": "Ensure that the docker.service file ownership is set to root:root (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.2",
+          "desc": "Ensure that docker.service file permissions are appropriately set (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.3",
+          "desc": "Ensure that docker.socket file ownership is set to root:root (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.4",
+          "desc": "Ensure that docker.socket file permissions are set to 644 or more restrictive (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.5",
+          "desc": "Ensure that the /etc/docker directory ownership is set to root:root (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.6",
+          "desc": "Ensure that /etc/docker directory permissions are set to 755 or more restrictively (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.7",
+          "desc": "Ensure that registry certificate file ownership is set to root:root (Automated)",
+          "result": "INFO",
+          "details": "Directory not found",
+          "remediation": "You should run the following command: chown root:root /etc/docker/certs.d/<registry-name>/*. This would set the individual ownership and group ownership for the registry certificate files to root.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "3.8",
+          "desc": "Ensure that registry certificate file permissions are set to 444 or more restrictively (Automated)",
+          "result": "INFO",
+          "details": "Directory not found",
+          "remediation": "You should run the following command: chmod 444 /etc/docker/certs.d/<registry-name>/*. This would set the permissions for the registry certificate files to 444.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "3.9",
+          "desc": "Ensure that TLS CA certificate file ownership is set to root:root (Automated)",
+          "result": "INFO",
+          "details": "No TLS CA certificate found",
+          "remediation": "You should run the following command: chown root:root <path to TLS CA certificate file>. This sets the individual ownership and group ownership for the TLS CA certificate file to root.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "3.10",
+          "desc": "Ensure that TLS CA certificate file permissions are set to 444 or more restrictively (Automated)",
+          "result": "INFO",
+          "details": "No TLS CA certificate found",
+          "remediation": "You should run the following command: chmod 444 <path to TLS CA certificate file>. This sets the file permissions on the TLS CA file to 444.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "3.11",
+          "desc": "Ensure that Docker server certificate file ownership is set to root:root (Automated)",
+          "result": "INFO",
+          "details": "No TLS Server certificate found",
+          "remediation": "You should run the following command: chown root:root <path to Docker server certificate file>. This sets the individual ownership and the group ownership for the Docker server certificate file to root.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "3.12",
+          "desc": "Ensure that the Docker server certificate file permissions are set to 444 or more restrictively (Automated)",
+          "result": "INFO",
+          "details": "No TLS Server certificate found",
+          "remediation": "You should run the following command: chmod 444 <path to Docker server certificate file>. This sets the file permissions of the Docker server certificate file to 444.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "3.13",
+          "desc": "Ensure that the Docker server certificate key file ownership is set to root:root (Automated)",
+          "result": "INFO",
+          "details": "No TLS Key found",
+          "remediation": "You should run the following command: chown root:root <path to Docker server certificate key file>. This sets the individual ownership and group ownership for the Docker server certificate key file to root.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "3.14",
+          "desc": "Ensure that the Docker server certificate key file permissions are set to 400 (Automated)",
+          "result": "INFO",
+          "details": "No TLS Key found",
+          "remediation": "You should run the following command: chmod 400 <path to Docker server certificate key file>. This sets the Docker server certificate key file permissions to 400.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "3.15",
+          "desc": "Ensure that the Docker socket file ownership is set to root:docker (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.16",
+          "desc": "Ensure that the Docker socket file permissions are set to 660 or more restrictively (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.17",
+          "desc": "Ensure that the daemon.json file ownership is set to root:root (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.18",
+          "desc": "Ensure that daemon.json file permissions are set to 644 or more restrictive (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.19",
+          "desc": "Ensure that the /etc/default/docker file ownership is set to root:root (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.20",
+          "desc": "Ensure that the /etc/sysconfig/docker file permissions are set to 644 or more restrictively (Automated)",
+          "result": "INFO",
+          "details": "File not found",
+          "remediation": "You should run the following command: chmod 644 /etc/sysconfig/docker. This sets the file permissions for this file to 644.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "3.21",
+          "desc": "Ensure that the /etc/sysconfig/docker file ownership is set to root:root (Automated)",
+          "result": "INFO",
+          "details": "File not found",
+          "remediation": "You should run the following command: chown root:root /etc/sysconfig/docker. This sets the ownership and group ownership for the file to root.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "3.22",
+          "desc": "Ensure that the /etc/default/docker file permissions are set to 644 or more restrictively (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.23",
+          "desc": "Ensure that the Containerd socket file ownership is set to root:root (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "3.24",
+          "desc": "Ensure that the Containerd socket file permissions are set to 660 or more restrictively (Automated)",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "desc": "Container Images and Build File",
+      "results": [
+        {
+          "id": "4.1",
+          "desc": "Ensure that a user for the container has been created (Automated)",
+          "result": "WARN",
+          "details": "running as root:  mobsf_postgres_1",
+          "items": [
+            "mobsf_postgres_1"
+          ],
+          "remediation": "You should ensure that the Dockerfile for each container image contains the information: USER <username or ID>. If there is no specific user created in the container base image, then make use of the useradd command to add a specific user before the USER instruction in the Dockerfile.",
+          "remediation-impact": "Running as a non-root user can present challenges where you wish to bind mount volumes from the underlying host. In this case, care should be taken to ensure that the user running the contained process can read and write to the bound directory, according to their requirements."
+        },
+        {
+          "id": "4.2",
+          "desc": "Ensure that containers use only trusted base images (Manual)",
+          "result": "NOTE",
+          "remediation": "Configure and use Docker Content trust. View the history of each Docker image to evaluate its risk, dependent on the sensitivity of the application you wish to deploy using it. Scan Docker images for vulnerabilities at regular intervals.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "4.3",
+          "desc": "Ensure that unnecessary packages are not installed in the container (Manual)",
+          "result": "NOTE",
+          "remediation": "You should not install anything within the container that is not required. You should consider using a minimal base image if you can. Some of the options available include BusyBox and Alpine. Not only can this trim your image size considerably, but there would also be fewer pieces of software which could contain vectors for attack.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "4.4",
+          "desc": "Ensure images are scanned and rebuilt to include security patches (Manual)",
+          "result": "NOTE",
+          "remediation": "Images should be re-built ensuring that the latest version of the base images are used, to keep the operating system patch level at an appropriate level. Once the images have been re-built, containers should be re-started making use of the updated images.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "4.5",
+          "desc": "Ensure Content trust for Docker is Enabled (Automated)",
+          "result": "NOTE",
+          "remediation": "Add DOCKER_CONTENT_TRUST variable to the /etc/environment file using command echo DOCKER_CONTENT_TRUST=1 | sudo tee -a /etc/environment.",
+          "remediation-impact": "This prevents users from working with tagged images unless they contain a signature."
+        },
+        {
+          "id": "4.6",
+          "desc": "Ensure that HEALTHCHECK instructions have been added to container images (Automated)",
+          "result": "WARN",
+          "details": "Images w/o HEALTHCHECK:  [wpscanteam/wpscan:latest] [rck:latest] bda1f32ec1e4 2d398157782a 7a8a1063c561 5f19144ab0b6 b10df0cd4a6a a867ff3a3e3c [tomcat:9.0-jre8] [tomcat:10.1.0-M12-jdk11-openjdk-buster] [10.126.120.118:9090/cm-portal/python-openldap:3.8] [10.126.103.151:9090/mitre/mitreattack:latest mitreattack:latest] [10.126.103.151:9090/mitre/mitreattack:latest mitreattack:latest] cdcb9ae2d885 [10.126.120.118:9090/mitre/mitrenav:latest mitrenav:latest] [10.126.120.118:9090/mitre/mitrenav:latest mitrenav:latest] 4e41a85f1af2 9262f2a9471b 2678608471c8 8919183187d6 dcce782aa487 184d8bf2f33f d875ec36b2b8 b5642ba43deb [gaportal:latest] 42a381593e41 ce311566f27c 79b0e16c1bad 68f9992d3cc7 14906f200691 4e393dbb9775 6c93966dc5fc 91322ae02f71 291a1f0d5cc1 74c1b9bc803e 927ab68fdca7 37b8ff914d01 35783d794ac1 f492f9238335 829f23a347cd d9f443233c10 e63a0b88ab31 286c369966a5 7f2f6c63605a 7ebb75d84380 4437516aaa14 e07c53151791 8cab67f5ecf4 1ee0fef66b38 4854b36cdf03 29a0d411a79f 77b8748b4973 e174bcfa574e 791989246c84 af05be4786a9 ea60df4d6bbf d0f4b3253e19 663b2cfdd453 a0626498f5c5 80c792ab0ae1 106befd07998 64f17a60cdd1 4927ce6e44b0 053ded55556e f83f7061e501 3f91fefd81f7 56e7c34300a3 40fa96ef3796 db517bb48152 91ea0a45ed64 61d8cd3970fb 456afead8bb9 [python:3.8] [python:3.9] [node:16] [maxasut/python-installer:linux] c51ad89c3650 89361d0f3618 c926bc9b2759 16bf40078206 0144cb47122e 05fa3b295790 e3fe14102ca7 4e9761616248 [python:3.9-buster] [10.126.120.118:9092/rbpo/builder/liberica-8-maven-3.8.4:1.0.1] 23a23dad37db [10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:1.0.1 10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:latest] [10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:1.0.1 10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:latest] [node:16-alpine] [ubuntu:20.04] [postgres:latest] [bellsoft/liberica-openjdk-debian:8u312-7] [python:3.8-buster] [alpine:3.15] [cyclonedx/cyclonedx-dotnet:latest] [oscarakaelvis/evil-winrm:latest] [fedora:30]",
+          "items": [
+            "[wpscanteam/wpscan:latest]","[rck:latest]","bda1f32ec1e4","2d398157782a","7a8a1063c561","5f19144ab0b6","b10df0cd4a6a","a867ff3a3e3c","[tomcat:9.0-jre8]","[tomcat:10.1.0-M12-jdk11-openjdk-buster]","[10.126.120.118:9090/cm-portal/python-openldap:3.8]","[10.126.103.151:9090/mitre/mitreattack:latest","mitreattack:latest]","[10.126.103.151:9090/mitre/mitreattack:latest","mitreattack:latest]","cdcb9ae2d885","[10.126.120.118:9090/mitre/mitrenav:latest","mitrenav:latest]","[10.126.120.118:9090/mitre/mitrenav:latest","mitrenav:latest]","4e41a85f1af2","9262f2a9471b","2678608471c8","8919183187d6","dcce782aa487","184d8bf2f33f","d875ec36b2b8","b5642ba43deb","[gaportal:latest]","42a381593e41","ce311566f27c","79b0e16c1bad","68f9992d3cc7","14906f200691","4e393dbb9775","6c93966dc5fc","91322ae02f71","291a1f0d5cc1","74c1b9bc803e","927ab68fdca7","37b8ff914d01","35783d794ac1","f492f9238335","829f23a347cd","d9f443233c10","e63a0b88ab31","286c369966a5","7f2f6c63605a","7ebb75d84380","4437516aaa14","e07c53151791","8cab67f5ecf4","1ee0fef66b38","4854b36cdf03","29a0d411a79f","77b8748b4973","e174bcfa574e","791989246c84","af05be4786a9","ea60df4d6bbf","d0f4b3253e19","663b2cfdd453","a0626498f5c5","80c792ab0ae1","106befd07998","64f17a60cdd1","4927ce6e44b0","053ded55556e","f83f7061e501","3f91fefd81f7","56e7c34300a3","40fa96ef3796","db517bb48152","91ea0a45ed64","61d8cd3970fb","456afead8bb9","[python:3.8]","[python:3.9]","[node:16]","[maxasut/python-installer:linux]","c51ad89c3650","89361d0f3618","c926bc9b2759","16bf40078206","0144cb47122e","05fa3b295790","e3fe14102ca7","4e9761616248","[python:3.9-buster]","[10.126.120.118:9092/rbpo/builder/liberica-8-maven-3.8.4:1.0.1]","23a23dad37db","[10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:1.0.1","10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:latest]","[10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:1.0.1","10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:latest]","[node:16-alpine]","[ubuntu:20.04]","[postgres:latest]","[bellsoft/liberica-openjdk-debian:8u312-7]","[python:3.8-buster]","[alpine:3.15]","[cyclonedx/cyclonedx-dotnet:latest]","[oscarakaelvis/evil-winrm:latest]","[fedora:30]"
+          ],
+          "remediation": "You should follow the Docker documentation and rebuild your container images to include the HEALTHCHECK instruction.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "4.7",
+          "desc": "Ensure update instructions are not used alone in the Dockerfile (Manual)",
+          "result": "INFO",
+          "details": "Update instructions found:  [rck:latest] [tomcat:9.0-jre8] [tomcat:10.1.0-M12-jdk11-openjdk-buster] [10.126.120.118:9090/cm-portal/python-openldap:3.8] [10.126.103.151:9090/mitre/mitreattack:latest mitreattack:latest] [10.126.103.151:9090/mitre/mitreattack:latest mitreattack:latest] [10.126.120.118:9090/mitre/mitrenav:latest mitrenav:latest] [10.126.120.118:9090/mitre/mitrenav:latest mitrenav:latest] [gaportal:latest] [python:3.8] [python:3.9] [node:16] [maxasut/python-installer:linux] [python:3.9-buster] [10.126.120.118:9092/rbpo/builder/liberica-8-maven-3.8.4:1.0.1] [10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:1.0.1 10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:latest] [10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:1.0.1 10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:latest] [mobsf_mobsf:latest] [postgres:latest] [bellsoft/liberica-openjdk-debian:8u312-7] [python:3.8-buster] [cyclonedx/cyclonedx-dotnet:latest] [oscarakaelvis/evil-winrm:latest] [fedora:30]",
+          "items": [
+            "[rck:latest]","[tomcat:9.0-jre8]","[tomcat:10.1.0-M12-jdk11-openjdk-buster]","[10.126.120.118:9090/cm-portal/python-openldap:3.8]","[10.126.103.151:9090/mitre/mitreattack:latest","mitreattack:latest]","[10.126.103.151:9090/mitre/mitreattack:latest","mitreattack:latest]","[10.126.120.118:9090/mitre/mitrenav:latest","mitrenav:latest]","[10.126.120.118:9090/mitre/mitrenav:latest","mitrenav:latest]","[gaportal:latest]","[python:3.8]","[python:3.9]","[node:16]","[maxasut/python-installer:linux]","[python:3.9-buster]","[10.126.120.118:9092/rbpo/builder/liberica-8-maven-3.8.4:1.0.1]","[10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:1.0.1","10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:latest]","[10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:1.0.1","10.126.103.151:9091/rbpo/builder/liberica-8-maven-3.8.4:latest]","[mobsf_mobsf:latest]","[postgres:latest]","[bellsoft/liberica-openjdk-debian:8u312-7]","[python:3.8-buster]","[cyclonedx/cyclonedx-dotnet:latest]","[oscarakaelvis/evil-winrm:latest]","[fedora:30]"
+          ],
+          "remediation": "You should use update instructions together with install instructions and version pinning for packages while installing them. This prevent caching and force the extraction of the required versions. Alternatively, you could use the --no-cache flag during the docker build process to avoid using cached layers.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "4.8",
+          "desc": "Ensure setuid and setgid permissions are removed (Manual)",
+          "result": "NOTE",
+          "remediation": "You should allow setuid and setgid permissions only on executables which require them. You could remove these permissions at build time by adding the following command in your Dockerfile, preferably towards the end of the Dockerfile: RUN find / -perm /6000 -type f -exec chmod a-s {} ; || true",
+          "remediation-impact": "The above command would break all executables that depend on setuid or setgid permissions including legitimate ones. You should therefore be careful to modify the command to suit your requirements so that it does not reduce the permissions of legitimate programs excessively. Because of this, you should exercise a degree of caution and examine all processes carefully before making this type of modification in order to avoid outages."
+        },
+        {
+          "id": "4.9",
+          "desc": "Ensure that COPY is used instead of ADD in Dockerfiles (Manual)",
+          "result": "INFO",
+          "details": "Images using ADD:  [fedora:30]",
+          "items": [
+            "[fedora:30]"
+          ],
+          "remediation": "You should use COPY rather than ADD instructions in Dockerfiles.",
+          "remediation-impact": "Care needs to be taken in implementing this control if the application requires functionality that is part of the ADD instruction, for example, if you need to retrieve files from remote URLS."
+        },
+        {
+          "id": "4.10",
+          "desc": "Ensure secrets are not stored in Dockerfiles (Manual)",
+          "result": "NOTE",
+          "remediation": "Do not store any kind of secrets within Dockerfiles. Where secrets are required during the build process, make use of a secrets management tool, such as the buildkit builder included with Docker.",
+          "remediation-impact": "A proper secrets management process will be required for Docker image building."
+        },
+        {
+          "id": "4.11",
+          "desc": "Ensure only verified packages are installed (Manual)",
+          "result": "NOTE",
+          "remediation": "You should use a secure package distribution mechanism of your choice to ensure the authenticity of software packages.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "4.12",
+          "desc": "Ensure all signed artifacts are validated (Manual)",
+          "result": "NOTE",
+          "remediation": "Validate artifacts signatures before uploading to the package registry.",
+          "remediation-impact": "None."
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "desc": "Container Runtime",
+      "results": [
+        {
+          "id": "5.1",
+          "desc": "Ensure that, if applicable, an AppArmor Profile is enabled (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.2",
+          "desc": "Ensure that, if applicable, SELinux security options are set (Automated)",
+          "result": "WARN",
+          "details": "Containers with no SecurityOptions:  mobsf_postgres_1",
+          "items": [
+            "mobsf_postgres_1"
+          ],
+          "remediation": "Set the SELinux State. Set the SELinux Policy. Create or import a SELinux policy template for Docker containers. Start Docker in daemon mode with SELinux enabled. Start your Docker container using the security options.",
+          "remediation-impact": "Any restrictions defined in the SELinux policy will be applied to your containers. It should be noted that if your SELinux policy is misconfigured, this may have an impact on the correct operation of the affected containers."
+        },
+        {
+          "id": "5.3",
+          "desc": "Ensure that Linux kernel capabilities are restricted within containers (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.4",
+          "desc": "Ensure that privileged containers are not used (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.5",
+          "desc": "Ensure sensitive host system directories are not mounted on containers (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.6",
+          "desc": "Ensure sshd is not run within containers (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.7",
+          "desc": "Ensure privileged ports are not mapped within containers (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.8",
+          "desc": "Ensure that only needed ports are open on the container (Manual)",
+          "result": "WARN",
+          "details": "Containers with open ports:  mobsf_postgres_1:5432",
+          "items": [
+            "mobsf_postgres_1:5432"
+          ],
+          "remediation": "You should ensure that the Dockerfile for each container image only exposes needed ports.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "5.9",
+          "desc": "Ensure that the host's network namespace is not shared (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.10",
+          "desc": "Ensure that the memory usage for containers is limited (Automated)",
+          "result": "WARN",
+          "details": "Container running without memory restrictions:  mobsf_postgres_1",
+          "items": [
+            "mobsf_postgres_1"
+          ],
+          "remediation": "You should run the container with only as much memory as it requires by using the --memory argument.",
+          "remediation-impact": "If correct memory limits are not set on each container, one process can expand its usage and cause other containers to run out of resources."
+        },
+        {
+          "id": "5.11",
+          "desc": "Ensure that CPU priority is set appropriately on containers (Automated)",
+          "result": "WARN",
+          "details": "Containers running without CPU restrictions:  mobsf_postgres_1",
+          "items": [
+            "mobsf_postgres_1"
+          ],
+          "remediation": "You should manage the CPU runtime between your containers dependent on their priority within your organization. To do so start the container using the --cpu-shares argument.",
+          "remediation-impact": "If you do not correctly assign CPU thresholds, the container process may run out of resources and become unresponsive. If CPU resources on the host are not constrainted, CPU shares do not place any restrictions on individual resources."
+        },
+        {
+          "id": "5.12",
+          "desc": "Ensure that the container's root filesystem is mounted as read only (Automated)",
+          "result": "WARN",
+          "details": "Containers running with root FS mounted R/W:  mobsf_postgres_1",
+          "items": [
+            "mobsf_postgres_1"
+          ],
+          "remediation": "You should add a --read-only flag at a container's runtime to enforce the container's root filesystem being mounted as read only.",
+          "remediation-impact": "Enabling --read-only at container runtime may break some container OS packages if a data writing strategy is not defined. You should define what the container's data should and should not persist at runtime in order to decide which strategy to use."
+        },
+        {
+          "id": "5.13",
+          "desc": "Ensure that incoming container traffic is bound to a specific host interface (Automated)",
+          "result": "WARN",
+          "details": "Containers with port bound to wildcard IP:  mobsf_postgres_1:0.0.0.0",
+          "items": [
+            "mobsf_postgres_1:0.0.0.0"
+          ],
+          "remediation": "You should bind the container port to a specific host interface on the desired host port. Example: docker run --detach --publish 10.2.3.4:49153:80 nginx In this example, the container port 80 is bound to the host port on 49153 and would accept incoming connection only from the 10.2.3.4 external interface.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "5.14",
+          "desc": "Ensure that the 'on-failure' container restart policy is set to '5' (Automated)",
+          "result": "WARN",
+          "details": "Containers with MaximumRetryCount not set to 5:  mobsf_postgres_1",
+          "items": [
+            "mobsf_postgres_1"
+          ],
+          "remediation": "If you wish a container to be automatically restarted, a sample command is docker run --detach --restart=on-failure:5 nginx",
+          "remediation-impact": "If this option is set, a container will only attempt to restart itself 5 times."
+        },
+        {
+          "id": "5.15",
+          "desc": "Ensure that the host's process namespace is not shared (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.16",
+          "desc": "Ensure that the host's IPC namespace is not shared (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.17",
+          "desc": "Ensure that host devices are not directly exposed to containers (Manual)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.18",
+          "desc": "Ensure that the default ulimit is overwritten at runtime if needed (Manual)",
+          "result": "INFO",
+          "details": "Containers with no default ulimit override:  mobsf_postgres_1",
+          "items": [
+            "mobsf_postgres_1"
+          ],
+          "remediation": "You should only override the default ulimit settings if needed in a specific case.",
+          "remediation-impact": "If ulimits are not set correctly, overutilization by individual containers could make the host system unusable."
+        },
+        {
+          "id": "5.19",
+          "desc": "Ensure mount propagation mode is not set to shared (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.20",
+          "desc": "Ensure that the host's UTS namespace is not shared (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.21",
+          "desc": "Ensure the default seccomp profile is not Disabled (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.22",
+          "desc": "Ensure that docker exec commands are not used with the privileged option (Automated)",
+          "result": "NOTE",
+          "remediation": "You should not use the --privileged option in docker exec commands.",
+          "remediation-impact": "If you need enhanced capabilities within a container, then run it with all the permissions it requires. These should be specified individually."
+        },
+        {
+          "id": "5.23",
+          "desc": "Ensure that docker exec commands are not used with the user=root option (Manual)",
+          "result": "NOTE",
+          "remediation": "You should not use the --user=root option in docker exec commands.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "5.24",
+          "desc": "Ensure that cgroup usage is confirmed (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.25",
+          "desc": "Ensure that the container is restricted from acquiring additional privileges (Automated)",
+          "result": "WARN",
+          "details": "Containers without restricted privileges:  mobsf_postgres_1",
+          "items": [
+            "mobsf_postgres_1"
+          ],
+          "remediation": "You should start your container with the options: docker run --rm -it --security-opt=no-new-privileges ubuntu bash",
+          "remediation-impact": "The no_new_priv option prevents LSMs like SELinux from allowing processes to acquire new privileges."
+        },
+        {
+          "id": "5.26",
+          "desc": "Ensure that container health is checked at runtime (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.27",
+          "desc": "Ensure that Docker commands always make use of the latest version of their image (Manual)",
+          "result": "INFO",
+          "remediation": "You should use proper version pinning mechanisms (the <latest> tag which is assigned by default is still vulnerable to caching attacks) to avoid extracting cached older versions. Version pinning mechanisms should be used for base images, packages, and entire images. You can customize version pinning rules according to your requirements.",
+          "remediation-impact": "None."
+        },
+        {
+          "id": "5.28",
+          "desc": "Ensure that the PIDs cgroup limit is used (Automated)",
+          "result": "WARN",
+          "details": "Containers without PIDs cgroup limit:  mobsf_postgres_1",
+          "items": [
+            "mobsf_postgres_1"
+          ],
+          "remediation": "Use --pids-limit flag with an appropriate value when launching the container.",
+          "remediation-impact": "Set the PIDs limit value as appropriate. Incorrect values might leave containers unusable."
+        },
+        {
+          "id": "5.29",
+          "desc": "Ensure that Docker's default bridge 'docker0' is not used (Manual)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.30",
+          "desc": "Ensure that the host's user namespaces are not shared (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "5.31",
+          "desc": "Ensure that the Docker socket is not mounted inside any containers (Automated)",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "desc": "Docker Security Operations",
+      "results": [
+        {
+          "id": "6.1",
+          "desc": "Ensure that image sprawl is avoided (Manual)",
+          "result": "INFO",
+          "details": "0 active/96 in use",
+          "remediation": "You should keep only the images that you actually need and establish a workflow to remove old or stale images from the host. Additionally, you should use features such as pull-by-digest to get specific images from the registry.",
+          "remediation-impact": "docker system prune -a removes all exited containers as well as all images and volumes that are not referenced by running containers, including for UCP and DTR."
+        },
+        {
+          "id": "6.2",
+          "desc": "Ensure that container sprawl is avoided (Manual)",
+          "result": "INFO",
+          "details": "93 total/1 running",
+          "remediation": "You should periodically check your container inventory on each host and clean up containers which are not in active use with the command: docker container prune",
+          "remediation-impact": "You should retain containers that are actively in use, and delete ones which are no longer needed."
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "desc": "Docker Swarm Configuration",
+      "results": [
+        {
+          "id": "7.1",
+          "desc": "Ensure swarm mode is not Enabled, if not needed (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "7.2",
+          "desc": "Ensure that the minimum number of manager nodes have been created in a swarm (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "7.3",
+          "desc": "Ensure that swarm services are bound to a specific host interface (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "7.4",
+          "desc": "Ensure that all Docker swarm overlay networks are encrypted (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "7.5",
+          "desc": "Ensure that Docker's secret management commands are used for managing secrets in a swarm cluster (Manual)",
+          "result": "PASS"
+        },
+        {
+          "id": "7.6",
+          "desc": "Ensure that swarm manager is run in auto-lock mode (Automated)",
+          "result": "PASS"
+        },
+        {
+          "id": "7.7",
+          "desc": "Ensure that the swarm manager auto-lock key is rotated periodically (Manual)",
+          "result": "PASS"
+        },
+        {
+          "id": "7.8",
+          "desc": "Ensure that node certificates are rotated as appropriate (Manual)",
+          "result": "PASS"
+        },
+        {
+          "id": "7.9",
+          "desc": "Ensure that CA certificates are rotated as appropriate (Manual)",
+          "result": "PASS"
+        },
+        {
+          "id": "7.10",
+          "desc": "Ensure that management plane traffic is separated from data plane traffic (Manual)",
+          "result": "PASS"
+        }
+      ]
+    }
+  ],
+  "checks": 117,
+  "score": 6,
+  "end": 1659371409
+}

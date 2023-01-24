@@ -5,7 +5,6 @@ from dojo.models import Test
 
 
 class TestGitlabContainerScanParser(DojoTestCase):
-
     def test_gitlab_container_scan_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/gitlab_container_scan/gl-container-scanning-report-0-vuln.json")
         parser = GitlabContainerScanParser()
@@ -21,9 +20,9 @@ class TestGitlabContainerScanParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        first_finding = findings[0]
         self.assertEqual(1, len(findings))
-        self.assertEqual(datetime(2021, 4, 14, 19, 46, 18), finding.date)
+        first_finding = findings[0]
+        self.assertEqual(datetime(2021, 4, 14, 19, 46, 18), first_finding.date)
         self.assertEqual("CVE-2019-3462 in apt-1.4.8", first_finding.title)
         self.assertEqual("apt", first_finding.component_name)
         self.assertEqual("1.4.8", first_finding.component_version)
@@ -42,3 +41,39 @@ class TestGitlabContainerScanParser(DojoTestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
         self.assertEqual(5, len(findings))
+
+    def test_gitlab_container_scan_parser_with_fless_data(self):
+        testfile = open("unittests/scans/gitlab_container_scan/issue6639.json")
+        parser = GitlabContainerScanParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(98, len(findings))
+
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertIsNone(finding.date)
+            self.assertEqual("busybox: remote attackers may execute arbitrary code if netstat is used", finding.title)
+            self.assertEqual("busybox", finding.component_name)
+            self.assertEqual("1.34.1-r4", finding.component_version)
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2022-28391", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("Critical", finding.severity)
+            self.assertEqual("Upgrade busybox to 1.34.1-r5", finding.mitigation)
+            self.assertEqual("CVE-2022-28391", finding.unique_id_from_tool)
+
+        with self.subTest(i=50):
+            finding = findings[50]
+            self.assertIsNone(finding.date)
+            self.assertEqual(
+                "openssl: Infinite loop in BN_mod_sqrt() reachable when parsing certificates", finding.title
+            )
+            self.assertEqual("libretls", finding.component_name)
+            self.assertEqual("3.3.4-r2", finding.component_version)
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2022-0778", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("Upgrade libretls to 3.3.4-r3", finding.mitigation)
+            self.assertEqual("CVE-2022-0778", finding.unique_id_from_tool)

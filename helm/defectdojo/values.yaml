@@ -10,6 +10,10 @@ createRedisSecret: false
 createMysqlSecret: false
 # create postgresql secret in defectdojo chart, outside of postgresql chart
 createPostgresqlSecret: false
+# create postgresql-ha secret in defectdojo chart, outside of postgresql-ha chart
+createPostgresqlHaSecret: false
+# create postgresql-ha-pgpool secret in defectdojo chart, outside of postgresql-ha chart
+createPostgresqlHaPgpoolSecret: false
 # Track configuration (trackConfig): will automatically respin application pods in case of config changes detection
 # can be:
 # - disabled, default
@@ -42,6 +46,9 @@ database: postgresql
 # Primary hostname of instance
 host: defectdojo.default.minikube.local
 
+# The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira
+# site_url: 'https://<yourdomain>'
+
 # optional list of alternative hostnames to use that gets appended to
 # DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match
 # the global hostname.
@@ -54,6 +61,11 @@ repositoryPrefix: defectdojo
 # Create secrets as: kubectl create secret docker-registry defectdojoregistrykey --docker-username=registry_username --docker-password=registry_password --docker-server='https://index.docker.io/v1/'
 # imagePullSecrets: defectdojoregistrykey
 tag: latest
+
+# Additional labels to add to the pods:
+# podLabels:
+#   key: value
+podLabels: {}
 
 securityContext:
   enabled: true
@@ -89,7 +101,7 @@ monitoring:
   # Add the nginx prometheus exporter sidecar
   prometheus:
     enabled: false
-    image: nginx/nginx-prometheus-exporter:0.10.0
+    image: nginx/nginx-prometheus-exporter:0.11.0
     imagePullPolicy: IfNotPresent
 
 annotations: {}
@@ -97,6 +109,8 @@ annotations: {}
 # Components
 celery:
   broker: rabbitmq
+  # To use an external celery broker, set the hostname here
+  brokerHost: ""
   logLevel: INFO
   beat:
     annotations: {}
@@ -269,11 +283,20 @@ django:
     # could be emptyDir (not for production) or pvc
     type: emptyDir
     # in case if pvc specified, should point to the already existing pvc
-    persistentVolumeClaim: media
-
+    persistentVolumeClaim:
+      # set to true to create a new pvc and if django.mediaPersistentVolume.type is set to pvc
+      create: false
+      name:
+      size: 5Gi
+      accessModes:
+      - ReadWriteMany  # check KUBERNETES.md doc first for option to choose
+      storageClassName:
 
 initializer:
   run: true
+  jobAnnotations: {
+    helm.sh/hook: "post-install,post-upgrade"
+  }
   annotations: {}
   keepSeconds: 60
   affinity: {}
@@ -295,42 +318,51 @@ mysql:
     database: defectdojo
     existingSecret: defectdojo-mysql-specific
     secretKey: mysql-password
-  master:
+  primary:
     service:
-      port: 3306
+      ports:
+        mysql: 3306
   # To use an external mySQL instance, set enabled to false and uncomment
   # the line below / add external address:
   # mysqlServer: "127.0.0.1"
 
 postgresql:
   enabled: true
-  serviceAccount:
-    enabled: true
-  postgresqlUsername: defectdojo
-  postgresqlPassword: ""
-  postgresqlDatabase: defectdojo
-  existingSecret: defectdojo-postgresql-specific
-  secretKey: postgresql-password
-  persistence:
-    enabled: true
-  replication:
-    enabled: false
-  service:
-    port: 5432
-  securityContext:
-    # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
-    enabled: true
-    # fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
-    fsGroup: 1001
-  containerSecurityContext:
-    # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
-    enabled: true
-    # runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
-    runAsUser: 1001
+  image:
+    tag: 11.16.0-debian-11-r9
+  auth:
+    username: defectdojo
+    password: ""
+    database: defectdojo
+    existingSecret: defectdojo-postgresql-specific
+    secretKeys:
+      adminPasswordKey: postgresql-postgres-password
+      userPasswordKey: postgresql-password
+      replicationPasswordKey: postgresql-replication-password
+  architecture: standalone
+  primary:
+    name: primary
+    persistence:
+      enabled: true
+    service:
+      ports:
+        postgresql: 5432
+    podSecurityContext:
+      # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+      enabled: true
+      # fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+      fsGroup: 1001
+    containerSecurityContext:
+      # Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+      enabled: true
+      # runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+      runAsUser: 1001
+    affinity: {}
+    nodeSelector: {}
   volumePermissions:
-    enabled: true
+    enabled: false
     # if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above
-    securityContext:
+    containerSecurityContext:
       runAsUser: 1001
   shmVolume:
     chmod:
@@ -339,12 +371,42 @@ postgresql:
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
   # postgresServer: "127.0.0.1"
-  master:
-    affinity: {}
-    nodeSelector: {}
-  slave:
-    affinity: {}
-    nodeSelector: {}
+
+postgresqlha:
+  enabled: false
+  global:
+    pgpool:
+      existingSecret: defectdojo-postgresql-ha-pgpool
+  serviceAccount:
+    create: true
+  postgresql:
+    replicaCount: 3
+    username: defectdojo
+    password: ""
+    repmgrPassword: ""
+    database: defectdojo
+    existingSecret: defectdojo-postgresql-ha-specific
+    securityContext:
+      enabled: true
+      fsGroup: 1001
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1001
+  pgpool:
+    replicaCount: 3
+    adminPassword: ""
+    securityContext:
+      enabled: true
+      fsGroup: 1001
+  volumePermissions:
+    enabled: true
+    securityContext:
+      runAsUser: 1001
+  persistence:
+    enabled: true
+  service:
+    ports:
+      postgresql: 5432
 
 # Google CloudSQL support in GKE via gce-proxy
 cloudsql:
@@ -355,7 +417,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.30.1
+    tag: 1.33.1
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
@@ -400,11 +462,15 @@ rabbitmq:
   podSecurityContext:
     enabled: true
     fsGroup: 1001
+  containerSecurityContext:
+    enabled: true
     runAsUser: 1001
+    runAsNonRoot: true
 
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
 redis:
   enabled: false
+  scheme: "redis"
   transportEncryption:
     enabled: false
     params: ''
@@ -416,6 +482,7 @@ redis:
   # To use an external Redis instance, set enabled to false and uncomment
   # the line below:
   # redisServer: myrediscluster
+
 
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it

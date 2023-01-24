@@ -2,7 +2,7 @@
 
 The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment.
 
-Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. [Running in Production](https://defectdojo.github.io/django-DefectDojo/getting_started/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
+Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. [Running in Production](https://documentation.defectdojo.com/getting_started/running-in-production/) gives advice on which adjustments are useful for performance and operational reliability.
 
 
 # Prerequisites
@@ -59,7 +59,7 @@ The environment variables needed for the different profiles are prepared in file
 
 ## Scripts
 
-5 shell scripts make life easier and avoid typing long commands:
+6 shell scripts make life easier and avoid typing long commands:
 
 - `./dc-build.sh` - Build the docker images, it can take one additional parameter to be used in the build process, e.g. `./dc-build.sh --no-cache`.
 - `./dc-up.sh` - Start the docker containers in the foreground, it needs one of the profile names as a parameter, e.g. `./dc-up.sh postgres-redis`.
@@ -309,7 +309,7 @@ ln -s docker-compose.override.https.yml docker-compose.override.yml
 ```
 
 ## Create credentials on the fly
-* you can generate a Certificate on the fly (without valid domainname etc.)
+* You can generate a Certificate on the fly (without valid domainname etc.)
 
 * Run defectDojo with:
 ```

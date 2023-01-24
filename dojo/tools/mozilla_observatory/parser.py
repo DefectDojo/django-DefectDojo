@@ -48,7 +48,7 @@ class MozillaObservatoryParser(object):
                 severity=self.get_severity(int(node['score_modifier'])),
                 static_finding=False,
                 dynamic_finding=True,
-                vuln_id_from_tool=node['name']
+                vuln_id_from_tool=node.get('name', key)
             )
 
             findings.append(finding)

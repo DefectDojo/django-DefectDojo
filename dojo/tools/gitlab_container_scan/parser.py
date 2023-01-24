@@ -1,6 +1,7 @@
 import json
 import textwrap
-from datetime import datetime
+
+from dateutil.parser import parse
 from dojo.models import Finding
 
 
@@ -20,14 +21,12 @@ class GitlabContainerScanParser(object):
         return "GitLab Container Scan report file can be imported in JSON format (option --json)."
 
     def get_findings(self, file, test):
-
         findings = []
-
-        # Load JSON data from uploaded file
         data = json.load(file)
-
-        # This is required by schema - it won't be null / undefined
-        date = datetime.strptime(data["scan"]["end_time"], "%Y-%m-%dT%H:%M:%S")
+        # parse date
+        date = None
+        if "scan" in data and "end_time" in data["scan"]:
+            date = parse(data["scan"]["end_time"])
 
         # Vulnerabilities is stored on vulnerabilities key
         vulnerabilities = data["vulnerabilities"]
@@ -66,9 +65,7 @@ class GitlabContainerScanParser(object):
                     )
 
             if "version" in dependency:
-                finding.component_version = textwrap.shorten(
-                    dependency["version"], width=90, placeholder="..."
-                )
+                finding.component_version = textwrap.shorten(dependency["version"], width=90, placeholder="...")
 
             if "solution" in vulnerability:
                 finding.mitigation = vulnerability["solution"]

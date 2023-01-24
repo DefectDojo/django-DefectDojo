@@ -66,13 +66,12 @@
 
         $(function () {
             $("textarea").each(function (index, elem) {
-
                 if (elem.hasAttribute("required")) {
                     elem.removeAttribute("required");
                     elem.id = "req"
                 }
 
-                if (elem.name != 'vulnerability_ids') {
+                if (elem.name != 'vulnerability_ids' && !$(elem).hasClass('select2-search__field')) {
                     var mde = new EasyMDE({
                         spellChecker: false,
                         element: elem,
@@ -88,6 +87,7 @@
                     mde.render();
                 }
             });
+
             // add req id to input field which enables input length check
             $("input").each(function (index, elem) {
 

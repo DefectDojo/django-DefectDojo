@@ -9,7 +9,7 @@
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <input class="btn btn-primary" name="edit_dev_env" type="submit" value="Submit"/>
-                {% if "dojo.delete_development_environment"|has_configuration_permission:"staff" %}
+                {% if "dojo.delete_development_environment"|has_configuration_permission %}
                 <input class="btn btn-danger" name="delete_dev_env" type="submit" value="Delete"/>
                 {% endif %}
             </div>

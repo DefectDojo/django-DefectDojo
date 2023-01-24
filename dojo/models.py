@@ -14,6 +14,7 @@ from django.contrib.auth.models import Group
 from django.db.models.expressions import Case, When
 from django.urls import reverse
 from django.core.validators import RegexValidator, validate_ipv46_address
+from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.db import models, connection
 from django.db.models import Q, Count
@@ -304,6 +305,10 @@ class System_Settings(models.Model):
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
                                    help_text=_('JIRA issue labels space seperated'))
 
+    add_vulnerability_id_to_jira_label = models.BooleanField(default=False,
+                                        verbose_name=_('Add vulnerability Id as a JIRA label'),
+                                        blank=False)
+
     enable_github = models.BooleanField(default=False,
                                       verbose_name=_('Enable GITHUB integration'),
                                       blank=False)
@@ -390,20 +395,24 @@ class System_Settings(models.Model):
         verbose_name=_("Enable Finding SLA's"),
         help_text=_("Enables Finding SLA's for time to remediate."))
 
-    sla_critical = models.IntegerField(default=7,
-                                          verbose_name=_('Critical Finding SLA Days'),
-                                          help_text=_('# of days to remediate a critical finding.'))
+    enable_notify_sla_active = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Notifiy SLA's Breach for active Findings"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for active Findings."))
 
-    sla_high = models.IntegerField(default=30,
-                                          verbose_name=_('High Finding SLA Days'),
-                                          help_text=_('# of days to remediate a high finding.'))
-    sla_medium = models.IntegerField(default=90,
-                                          verbose_name=_('Medium Finding SLA Days'),
-                                          help_text=_('# of days to remediate a medium finding.'))
+    enable_notify_sla_active_verified = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Notifiy SLA's Breach for active, verified Findings"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for active, verified Findings."))
 
-    sla_low = models.IntegerField(default=120,
-                                          verbose_name=_('Low Finding SLA Days'),
-                                          help_text=_('# of days to remediate a low finding.'))
+    enable_notify_sla_jira_only = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Notifiy SLA's Breach for Findings linked to JIRA"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for Findings that are linked to JIRA issues."))
+
     allow_anonymous_survey_repsonse = models.BooleanField(
         default=False,
         blank=False,
@@ -465,6 +474,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_('Enable Finding Groups'),
         help_text=_("With this setting turned off, the Finding Groups will be disabled."))
+    enable_calendar = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_('Enable Calendar'),
+        help_text=_("With this setting turned off, the Calendar will be disabled in the user interface."))
     default_group = models.ForeignKey(
         Dojo_Group,
         null=True,
@@ -482,12 +496,34 @@ class System_Settings(models.Model):
         default='',
         blank=True,
         help_text=_("New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition."))
-    staff_user_email_pattern = models.CharField(
-        max_length=200,
-        default='',
-        blank=True,
-        verbose_name=_('Email pattern for staff users'),
-        help_text=_("When the email address of a new user created by OAuth2 matches this regex pattern, their is_staff flag will be set to True."))
+    minimum_password_length = models.IntegerField(
+        default=9,
+        verbose_name=_('Minimum password length'),
+        help_text=_("Requires user to set passwords greater than minimum length."))
+    maximum_password_length = models.IntegerField(
+        default=48,
+        verbose_name=_('Maximum password length'),
+        help_text=_("Requires user to set passwords less than maximum length."))
+    number_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one digit"),
+        help_text=_("Requires user passwords to contain at least one digit (0-9)."))
+    special_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one special character"),
+        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)."))  # noqa W605
+    lowercase_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one lowercase letter"),
+        help_text=_("Requires user passwords to contain at least one lowercase letter (a-z)."))
+    uppercase_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one uppercase letter"),
+        help_text=_("Requires user passwords to contain at least one uppercase letter (A-Z)."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -532,7 +568,7 @@ class Contact(models.Model):
     team = models.CharField(max_length=100)
     is_admin = models.BooleanField(default=False)
     is_globally_read_only = models.BooleanField(default=False)
-    updated = models.DateTimeField(editable=False)
+    updated = models.DateTimeField(auto_now=True)
 
 
 class Note_Type(models.Model):
@@ -552,6 +588,13 @@ class NoteHistory(models.Model):
     time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
     current_editor = models.ForeignKey(Dojo_User, editable=False, null=True, on_delete=models.CASCADE)
+
+    def copy(self):
+        copy = self
+        copy.pk = None
+        copy.id = None
+        copy.save()
+        return copy
 
 
 class Notes(models.Model):
@@ -574,15 +617,61 @@ class Notes(models.Model):
     def __str__(self):
         return self.entry
 
+    def copy(self):
+        copy = self
+        # Save the necessary ManyToMany relationships
+        old_history = list(self.history.all())
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        # Save the object before setting any ManyToMany relationships
+        copy.save()
+        # Copy the history
+        for history in old_history:
+            copy.history.add(history.copy())
+
+        return copy
+
 
 class FileUpload(models.Model):
     title = models.CharField(max_length=100, unique=True)
     file = models.FileField(upload_to=UniqueUploadNameProvider('uploaded_files'))
 
+    def copy(self):
+        copy = self
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        # Add unique modifier to file name
+        copy.title = '{} - clone-{}'.format(self.title, str(uuid4())[:8])
+        # Create new unique file name
+        current_url = self.file.url
+        _, current_full_filename = current_url.rsplit('/', 1)
+        _, extension = current_full_filename.split('.', 1)
+        new_file = ContentFile(self.file.read(), name='{}.{}'.format(uuid4(), extension))
+        copy.file = new_file
+        copy.save()
+
+        return copy
+
+    def get_accessible_url(self, obj, obj_id):
+        if isinstance(obj, Engagement):
+            obj_type = 'Engagement'
+        elif isinstance(obj, Test):
+            obj_type = 'Test'
+        elif isinstance(obj, Finding):
+            obj_type = 'Finding'
+
+        return 'access_url/{file_id}/{obj_id}/{obj_type}'.format(
+            file_id=self.id,
+            obj_id=obj_id,
+            obj_type=obj_type
+        )
+
 
 class Product_Type(models.Model):
     """Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
-
+`
        Examples:
          * IAM Team
          * Internal / 3rd Party
@@ -729,6 +818,47 @@ class DojoMeta(models.Model):
                            ('finding', 'name'))
 
 
+class SLA_Configuration(models.Model):
+    name = models.CharField(max_length=128, unique=True, blank=False, verbose_name=_('Custom SLA Name'),
+        help_text=_('A unique name for the set of SLAs.')
+    )
+
+    description = models.CharField(max_length=512, null=True, blank=True)
+    critical = models.IntegerField(default=7, verbose_name=_('Critical Finding SLA Days'),
+                                          help_text=_('number of days to remediate a critical finding.'))
+    high = models.IntegerField(default=30, verbose_name=_('High Finding SLA Days'),
+                                          help_text=_('number of days to remediate a high finding.'))
+    medium = models.IntegerField(default=90, verbose_name=_('Medium Finding SLA Days'),
+                                          help_text=_('number of days to remediate a medium finding.'))
+    low = models.IntegerField(default=120, verbose_name=_('Low Finding SLA Days'),
+                                          help_text=_('number of days to remediate a low finding.'))
+
+    def clean(self):
+
+        sla_days = [self.critical, self.high, self.medium, self.low]
+
+        for sla_day in sla_days:
+            if sla_day < 1:
+                raise ValidationError('SLA Days must be at least 1')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+
+    def delete(self, *args, **kwargs):
+        logger.debug('%d sla configuration delete', self.id)
+
+        if self.id != 1:
+            super().delete(*args, **kwargs)
+        else:
+            raise ValidationError("Unable to delete default SLA Configuration")
+
+    def get_summary(self):
+        return f'{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}'
+
+
 class Product(models.Model):
     WEB_PLATFORM = 'web'
     IOT = 'iot'
@@ -792,10 +922,16 @@ class Product(models.Model):
     team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                      related_name='team_manager', on_delete=models.RESTRICT)
 
-    created = models.DateTimeField(editable=False, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
                                   null=False, blank=False, on_delete=models.CASCADE)
-    updated = models.DateTimeField(editable=False, null=True, blank=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
+    sla_configuration = models.ForeignKey(SLA_Configuration,
+                                          related_name='sla_config',
+                                          null=False,
+                                          blank=False,
+                                          default=1,
+                                          on_delete=models.RESTRICT)
     tid = models.IntegerField(default=0, editable=False)
     members = models.ManyToManyField(Dojo_User, through='Product_Member', related_name='product_members', blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Group', related_name='product_groups', blank=True)
@@ -1173,6 +1309,36 @@ class Engagement(models.Model):
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
 
+    def copy(self):
+        copy = self
+        # Save the necessary ManyToMany relationships
+        old_notes = list(self.notes.all())
+        old_files = list(self.files.all())
+        old_tags = list(self.tags.all())
+        old_risk_acceptances = list(self.risk_acceptance.all())
+        old_tests = list(Test.objects.filter(engagement=self))
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        # Save the object before setting any ManyToMany relationships
+        copy.save()
+        # Copy the notes
+        for notes in old_notes:
+            copy.notes.add(notes.copy())
+        # Copy the files
+        for files in old_files:
+            copy.files.add(files.copy())
+        # Copy the tests
+        for test in old_tests:
+            test.copy(engagement=copy)
+        # Copy the risk_acceptances
+        for risk_acceptance in old_risk_acceptances:
+            copy.risk_acceptance.add(risk_acceptance.copy(engagement=copy))
+        # Assign any tags
+        copy.tags.set(old_tags)
+
+        return copy
+
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
         bc += [{'title': str(self),
@@ -1223,7 +1389,7 @@ class Endpoint_Params(models.Model):
 
 
 class Endpoint_Status(models.Model):
-    date = models.DateTimeField(default=get_current_date)
+    date = models.DateField(default=get_current_date)
     last_modified = models.DateTimeField(null=True, editable=False, default=get_current_datetime)
     mitigated = models.BooleanField(default=False, blank=True)
     mitigated_time = models.DateTimeField(editable=False, null=True, blank=True)
@@ -1238,17 +1404,26 @@ class Endpoint_Status(models.Model):
     def age(self):
 
         if self.mitigated:
-            diff = self.mitigated_time.date() - self.date.date()
+            diff = self.mitigated_time.date() - self.date
         else:
-            diff = get_current_date() - self.date.date()
+            diff = get_current_date() - self.date
         days = diff.days
         return days if days > 0 else 0
 
     def __str__(self):
-        field_values = []
-        for field in self._meta.get_fields():
-            field_values.append(str(getattr(self, field.name, '')))
-        return ' '.join(field_values)
+        return "'{}' on '{}'".format(str(self.finding), str(self.endpoint))
+
+    def copy(self, finding=None):
+        copy = self
+        current_endpoint = self.endpoint
+        copy.pk = None
+        copy.id = None
+        if finding:
+            copy.finding = finding
+        copy.endpoint = current_endpoint
+        copy.save()
+
+        return copy
 
     class Meta:
         indexes = [
@@ -1281,7 +1456,10 @@ class Endpoint(models.Model):
                                           "be omitted. For example 'section-13', 'paragraph-2'."))
     product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE)
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True, editable=False)
-    endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
+    findings = models.ManyToManyField("Finding",
+                                      blank=True,
+                                      verbose_name=_('Findings'),
+                                      through=Endpoint_Status)
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add."))
 
@@ -1440,27 +1618,29 @@ class Endpoint(models.Model):
 
     @property
     def mitigated(self):
-        return not self.vulnerable()
+        return not self.vulnerable
 
+    @property
     def vulnerable(self):
-        return self.active_findings_count() > 0
+        return self.active_findings_count > 0
 
-    def findings(self):
-        return Finding.objects.filter(endpoints=self).distinct()
-
+    @property
     def findings_count(self):
-        return self.findings().count()
+        return self.findings.all().count()
 
     def active_findings(self):
-        findings = self.findings().filter(active=True,
-                                      verified=True,
+        findings = self.findings.filter(active=True,
                                       out_of_scope=False,
                                       mitigated__isnull=True,
                                       false_p=False,
-                                      duplicate=False).order_by('numerical_severity')
-        findings = findings.filter(endpoint_status__mitigated=False)
+                                      duplicate=False,
+                                      status_finding__mitigated=False,
+                                      status_finding__false_positive=False,
+                                      status_finding__out_of_scope=False,
+                                      status_finding__risk_accepted=False).order_by('numerical_severity')
         return findings
 
+    @property
     def active_findings_count(self):
         return self.active_findings().count()
 
@@ -1468,32 +1648,49 @@ class Endpoint(models.Model):
         return Endpoint.objects.filter(host=self.host,
                                        product=self.product).distinct()
 
+    @property
     def host_endpoints_count(self):
         return self.host_endpoints().count()
 
     def host_mitigated_endpoints(self):
-        meps = Endpoint_Status.objects.filter(endpoint__in=self.host_endpoints(), mitigated=True)
-        return Endpoint.objects.filter(endpoint_status__in=meps).distinct()
+        meps = Endpoint_Status.objects \
+                  .filter(endpoint__in=self.host_endpoints()) \
+                  .filter(Q(mitigated=True) |
+                          Q(false_positive=True) |
+                          Q(out_of_scope=True) |
+                          Q(risk_accepted=True) |
+                          Q(finding__out_of_scope=True) |
+                          Q(finding__mitigated__isnull=False) |
+                          Q(finding__false_p=True) |
+                          Q(finding__duplicate=True) |
+                          Q(finding__active=False))
+        return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
+    @property
     def host_mitigated_endpoints_count(self):
         return self.host_mitigated_endpoints().count()
 
     def host_findings(self):
         return Finding.objects.filter(endpoints__in=self.host_endpoints()).distinct()
 
+    @property
     def host_findings_count(self):
-        return self.host_finding().count()
+        return self.host_findings().count()
 
     def host_active_findings(self):
-        findings = self.host_findings().filter(active=True,
-                                           verified=True,
-                                           out_of_scope=False,
-                                           mitigated__isnull=True,
-                                           false_p=False,
-                                           duplicate=False).order_by('numerical_severity')
-        findings = findings.filter(endpoint_status__mitigated=False)
+        findings = Finding.objects.filter(active=True,
+                                        out_of_scope=False,
+                                        mitigated__isnull=True,
+                                        false_p=False,
+                                        duplicate=False,
+                                        status_finding__mitigated=False,
+                                        status_finding__false_positive=False,
+                                        status_finding__out_of_scope=False,
+                                        status_finding__risk_accepted=False,
+                                        endpoints__in=self.host_endpoints()).order_by('numerical_severity')
         return findings
 
+    @property
     def host_active_findings_count(self):
         return self.host_active_findings().count()
 
@@ -1563,7 +1760,7 @@ class Sonarqube_Issue(models.Model):
 
 class Sonarqube_Issue_Transition(models.Model):
     sonarqube_issue = models.ForeignKey(Sonarqube_Issue, on_delete=models.CASCADE, db_index=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
     finding_status = models.CharField(max_length=100)
     sonarqube_status = models.CharField(max_length=50)
     transitions = models.CharField(max_length=100)
@@ -1624,6 +1821,34 @@ class Test(models.Model):
         bc += [{'title': str(self),
                 'url': reverse('view_test', args=(self.id,))}]
         return bc
+
+    def copy(self, engagement=None):
+        copy = self
+        # Save the necessary ManyToMany relationships
+        old_notes = list(self.notes.all())
+        old_files = list(self.files.all())
+        old_tags = list(self.tags.all())
+        old_findings = list(Finding.objects.filter(test=self))
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        if engagement:
+            copy.engagement = engagement
+        # Save the object before setting any ManyToMany relationships
+        copy.save()
+        # Copy the notes
+        for notes in old_notes:
+            copy.notes.add(notes.copy())
+        # Copy the files
+        for files in old_files:
+            copy.files.add(files.copy())
+        # Copy the Findings
+        for finding in old_findings:
+            finding.copy(test=copy)
+        # Assign any tags
+        copy.tags.set(old_tags)
+
+        return copy
 
     # only used by bulk risk acceptance api
     @property
@@ -1823,12 +2048,8 @@ class Finding(models.Model):
     endpoints = models.ManyToManyField(Endpoint,
                                        blank=True,
                                        verbose_name=_('Endpoints'),
-                                       help_text=_("The hosts within the product that are susceptible to this flaw."))
-    endpoint_status = models.ManyToManyField(Endpoint_Status,
-                                             blank=True,
-                                             related_name="finding_endpoint_status",
-                                             verbose_name=_('Endpoint Status'),
-                                             help_text=_('The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...).'))
+                                       help_text=_("The hosts within the product that are susceptible to this flaw. + The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...)."),
+                                       through=Endpoint_Status)
     references = models.TextField(null=True,
                                   blank=True,
                                   db_column="refs",
@@ -2057,6 +2278,11 @@ class Finding(models.Model):
                                verbose_name=_('Service'),
                                help_text=_('A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.'))
 
+    planned_remediation_date = models.DateField(null=True,
+                                                editable=True,
+                                                verbose_name=_('Planned Remediation Date'),
+                                                help_text=_("The date the flaw is expected to be remediated."))
+
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add."))
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
@@ -2106,6 +2332,40 @@ class Finding(models.Model):
         self.unsaved_tags = None
         self.unsaved_files = None
         self.unsaved_vulnerability_ids = None
+
+    def copy(self, test=None):
+        copy = self
+        # Save the necessary ManyToMany relationships
+        old_notes = list(self.notes.all())
+        old_files = list(self.files.all())
+        old_status_findings = list(self.status_finding.all())
+        old_reviewers = list(self.reviewers.all())
+        old_found_by = list(self.found_by.all())
+        old_tags = list(self.tags.all())
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        if test:
+            copy.test = test
+        # Save the object before setting any ManyToMany relationships
+        copy.save()
+        # Copy the notes
+        for notes in old_notes:
+            copy.notes.add(notes.copy())
+        # Copy the files
+        for files in old_files:
+            copy.files.add(files.copy())
+        # Copy the endpoint_status
+        for endpoint_status in old_status_findings:
+            endpoint_status.copy(finding=copy)  # adding or setting is not necessary, link is created by Endpoint_Status.copy()
+        # Assign any reviewers
+        copy.reviewers.set(old_reviewers)
+        # Assign any found_by
+        copy.found_by.set(old_found_by)
+        # Assign any tags
+        copy.tags.set(old_tags)
+
+        return copy
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -2219,7 +2479,7 @@ class Finding(models.Model):
     # (This sometimes reports "None")
     def get_endpoints(self):
         endpoint_str = ''
-        if(self.id is None):
+        if (self.id is None):
             if len(self.unsaved_endpoints) > 0:
                 deduplicationLogger.debug("get_endpoints before the finding was saved")
                 # convert list of unsaved endpoints to the list of their canonical representation
@@ -2370,6 +2630,10 @@ class Finding(models.Model):
     def age(self):
         return self._age(self.date)
 
+    def get_sla_periods(self):
+        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
+        return sla_configuration
+
     def get_sla_start_date(self):
         if self.sla_start_date:
             return self.sla_start_date
@@ -2382,9 +2646,8 @@ class Finding(models.Model):
 
     def sla_days_remaining(self):
         sla_calculation = None
-        severity = self.severity
-        from dojo.utils import get_system_setting
-        sla_age = get_system_setting('sla_' + self.severity.lower())
+        sla_periods = self.get_sla_periods()
+        sla_age = getattr(sla_periods, self.severity.lower(), None)
         if sla_age:
             sla_calculation = sla_age - self.sla_age
         return sla_calculation
@@ -2392,7 +2655,7 @@ class Finding(models.Model):
     def sla_deadline(self):
         days_remaining = self.sla_days_remaining()
         if days_remaining:
-            return self.date + relativedelta(days=days_remaining)
+            return get_current_date() + relativedelta(days=days_remaining)
         return None
 
     def github(self):
@@ -2597,7 +2860,20 @@ class Finding(models.Model):
             return None
         if self.test.engagement.source_code_management_uri is None:
             return escape(self.file_path)
-        link = self.test.engagement.source_code_management_uri + '/' + self.file_path
+        link = self.test.engagement.source_code_management_uri
+        if "https://github.com/" in self.test.engagement.source_code_management_uri:
+            if self.test.commit_hash:
+                link += '/blob/' + self.test.commit_hash + '/' + self.file_path
+            elif self.test.engagement.commit_hash:
+                link += '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
+            elif self.test.branch_tag:
+                link += '/blob/' + self.test.branch_tag + '/' + self.file_path
+            elif self.test.engagement.branch_tag:
+                link += '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
+            else:
+                link += '/' + self.file_path
+        else:
+            link += '/' + self.file_path
         if self.line:
             link = link + '#L' + str(self.line)
         return create_bleached_link(link, self.file_path)
@@ -2648,12 +2924,7 @@ class FindingAdmin(admin.ModelAdmin):
     # IDs rather than multi-select
     raw_id_fields = (
         'endpoints',
-        'endpoint_status',
     )
-
-
-Finding.endpoints.through.__str__ = lambda \
-    x: "Endpoint: " + str(x.endpoint)
 
 
 class Vulnerability_Id(models.Model):
@@ -2662,6 +2933,10 @@ class Vulnerability_Id(models.Model):
 
     def __str__(self):
         return self.vulnerability_id
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_finding', args=[str(self.finding.id)])
 
 
 class Stub_Finding(models.Model):
@@ -2919,7 +3194,7 @@ class Risk_Acceptance(models.Model):
         (TREATMENT_TRANSFER, 'Transfer (The risk is transferred to a 3rd party)'),
     ]
 
-    name = models.CharField(max_length=100, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
+    name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 
     accepted_findings = models.ManyToManyField(Finding)
 
@@ -2945,8 +3220,8 @@ class Risk_Acceptance(models.Model):
     restart_sla_expired = models.BooleanField(default=False, null=False, verbose_name=_('Restart SLA on expiration'), help_text=_("When enabled, the SLA for findings is restarted when the risk acceptance expires."))
 
     notes = models.ManyToManyField(Notes, editable=False)
-    created = models.DateTimeField(null=False, editable=False, auto_now_add=True)
-    updated = models.DateTimeField(editable=False, auto_now=True)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self):
         return str(self.name)
@@ -2980,6 +3255,25 @@ class Risk_Acceptance(models.Model):
             return engs[0]
 
         return None
+
+    def copy(self, engagement=None):
+        copy = self
+        # Save the necessary ManyToMany relationships
+        old_notes = list(self.notes.all())
+        old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
+        # Wipe the IDs of the new object
+        copy.pk = None
+        copy.id = None
+        # Save the object before setting any ManyToMany relationships
+        copy.save()
+        # Copy the notes
+        for notes in old_notes:
+            copy.notes.add(notes.copy())
+        # Assign any accepted findings
+        if engagement:
+            new_accepted_findings = Finding.objects.filter(test__engagement=engagement, hash_code__in=old_accepted_findings_hash_codes, risk_accepted=True).distinct()
+            copy.accepted_findings.set(new_accepted_findings)
+        return copy
 
 
 class FileAccessToken(models.Model):
@@ -3151,6 +3445,15 @@ class JIRA_Project(models.Model):
                                       help_text=_("Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates."))
     engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
+    custom_fields = models.JSONField(max_length=200, blank=True, null=True,
+                                   help_text=_("JIRA custom field JSON mapping of Id to value, e.g. {\"customfield_10122\": [{\"name\": \"8.0.1\"}]}"))
+    default_assignee = models.CharField(max_length=200, blank=True, null=True,
+                                     help_text=_("JIRA default assignee (name). If left blank then it defaults to whatever is configured in JIRA."))
+    jira_labels = models.CharField(max_length=200, blank=True, null=True,
+                                   help_text=_('JIRA issue labels space seperated'))
+    add_vulnerability_id_to_jira_label = models.BooleanField(default=False,
+                                                             verbose_name=_('Add vulnerability Id as a JIRA label'),
+                                                             blank=False)
     push_all_issues = models.BooleanField(default=False, blank=True,
          help_text=_("Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,
@@ -3218,7 +3521,7 @@ class JIRA_Issue(models.Model):
         elif type(obj) == Engagement:
             self.engagement = obj
         else:
-            raise ValueError('unknown objec type whiel creating JIRA_Issue: %s', to_str_typed(obj))
+            raise ValueError('unknown objec type whiel creating JIRA_Issue: %s' % to_str_typed(obj))
 
     def __str__(self):
         text = ""
@@ -3335,7 +3638,7 @@ class Alerts(models.Model):
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
     user_id = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
 
     class Meta:
         ordering = ['-created']
@@ -3406,7 +3709,7 @@ class Languages(models.Model):
     blank = models.IntegerField(blank=True, null=True, verbose_name=_('Number of blank lines'))
     comment = models.IntegerField(blank=True, null=True, verbose_name=_('Number of comment lines'))
     code = models.IntegerField(blank=True, null=True, verbose_name=_('Number of code lines'))
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
 
     def __str__(self):
         return self.language.language
@@ -3424,7 +3727,7 @@ class App_Analysis(models.Model):
     icon = models.CharField(max_length=200, null=True, blank=True)
     website = models.URLField(max_length=400, null=True, blank=True)
     website_found = models.URLField(max_length=400, null=True, blank=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
 
     tags = TagField(blank=True, force_lowercase=True)
 
@@ -3434,7 +3737,7 @@ class App_Analysis(models.Model):
 
 class Objects_Review(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
 
     def __str__(self):
         return self.name
@@ -3450,7 +3753,7 @@ class Objects_Product(models.Model):
     artifact = models.CharField(max_length=400, verbose_name=_('Artifact'),
                                 null=True, blank=True)
     review_status = models.ForeignKey(Objects_Review, on_delete=models.CASCADE)
-    created = models.DateTimeField(null=False, editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this object. Choose from the list or add new tags. Press Enter key to add."))
 
@@ -3468,8 +3771,8 @@ class Objects_Product(models.Model):
 
 class Testing_Guide_Category(models.Model):
     name = models.CharField(max_length=300)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ('name',)
@@ -3486,8 +3789,8 @@ class Testing_Guide(models.Model):
     objective = models.CharField(max_length=800, help_text=_("Objective of the test"))
     how_to_test = models.TextField(default=None, help_text=_("How to test the objective"))
     results_expected = models.CharField(max_length=800, help_text=_("What the results look like for a test"))
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.testing_guide_category.name + ': ' + self.name
@@ -3502,8 +3805,8 @@ class Benchmark_Type(models.Model):
     benchmark_source = models.CharField(max_length=20, blank=False,
                                         null=True, choices=source,
                                         default='OWASP ASVS')
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
     enabled = models.BooleanField(default=True)
 
     def __str__(self):
@@ -3516,8 +3819,8 @@ class Benchmark_Category(models.Model):
     objective = models.TextField()
     references = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ('name',)
@@ -3537,8 +3840,8 @@ class Benchmark_Requirement(models.Model):
     enabled = models.BooleanField(default=True)
     cwe_mapping = models.ManyToManyField(CWE, blank=True)
     testing_guide = models.ManyToManyField(Testing_Guide, blank=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.objective_number) + ': ' + self.category.name
@@ -3552,8 +3855,8 @@ class Benchmark_Product(models.Model):
     enabled = models.BooleanField(default=True,
                                   help_text=_('Applicable for this specific product.'))
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
@@ -3581,8 +3884,8 @@ class Benchmark_Product_Summary(models.Model):
     asvs_level_3_benchmark = models.IntegerField(null=False, default=0, help_text=_("Total number of active benchmarks for this application."))
     asvs_level_3_score = models.IntegerField(null=False, default=0, help_text=_("ASVS Level 3 Score"))
     publish = models.BooleanField(default=False, help_text=_('Publish score to Product.'))
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.product.name + ': ' + self.benchmark_type.name
@@ -3910,6 +4213,7 @@ admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
+admin.site.register(SLA_Configuration)
 admin.site.register(CWE)
 admin.site.register(Regulation)
 admin.site.register(Global_Role)

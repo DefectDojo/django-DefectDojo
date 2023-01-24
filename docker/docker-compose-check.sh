@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 main=`docker-compose  version  --short | cut -d '.' -f 1`
 minor=`docker-compose  version  --short | cut -d '.' -f 2`

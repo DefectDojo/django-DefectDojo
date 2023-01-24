@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load authorization_tags %}
+{% load i18n %}
+
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -8,19 +10,19 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Tool Types
-                        {% if "dojo.add_tool_type"|has_configuration_permission:"superuser" %}
+                        {% trans "Tool Types" %}
+                        {% if "dojo.add_tool_type"|has_configuration_permission %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a href="{% url 'add_tool_type' %}">
-                                            <i class="fa fa-plus"></i> Add Tool Type
+                                            <i class="fa-solid fa-plus"></i> {% trans "Add Tool Type" %}
                                         </a>
                                     </li>
                             </ul>
@@ -48,7 +50,7 @@
                         {% for conf in confs %}
                             <tr>
                                 <td>
-                                    {% if "dojo.change_tool_type"|has_configuration_permission:"superuser" %}
+                                    {% if "dojo.change_tool_type"|has_configuration_permission %}
                                     <a href="{% url 'edit_tool_type' conf.id %}"><b>{{ conf.name }}</b></a>
                                     {% else %}
                                     {{ conf.name }}
@@ -65,7 +67,7 @@
                     {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
                 </div>
             {% else %}
-                <p class="text-center">No tool types found.</p>
+                <p class="text-center">{% trans "No tool types found" %}</p>
             {% endif %}
         </div>
     </div>

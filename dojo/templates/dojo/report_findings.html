@@ -3,7 +3,7 @@
     <div class="panel-heading tight" title="Click and drag to move" data-toggle="tooltip">
         <div class="clearfix">
             <h5 class="pull-left">Findings</h5>
-            <span class="fa fa-arrows pull-right icon"></span>
+            <span class="fa-solid fa-arrows-up-down-left-right pull-right icon"></span>
         </div>
     </div>
     <div class="panel-body">
@@ -42,7 +42,7 @@
                         <tr>
                             <td>
                                 <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
-                                {% include "dojo/snippets/tags.html" with tags=finding.tags.alll %}
+                                {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                             </td>
                             <td class="nowrap">{{ finding.date }}</td>
                             <td>{{ finding.severity }}</td>

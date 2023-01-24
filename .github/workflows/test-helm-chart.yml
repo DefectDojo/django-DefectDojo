@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - dev
+      - bugfix
       - release/**
       - hotfix/**
 
@@ -20,55 +21,55 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
           version: v3.4.0
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.7
 
       - name: Configure Helm repos
         run: |-
-             helm repo add bitnami https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami/
+             helm repo add bitnami https://charts.bitnami.com/bitnami
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.2.1
+        uses: helm/chart-testing-action@v2.3.1
 
       - name: Determine target branch
         id: ct-branch-target
         run: |
           if [ ! -z ${GITHUB_BASE_REF} ]; then
-            echo ::set-output name=ct-branch::${GITHUB_BASE_REF}
+            echo "ct-branch=${GITHUB_BASE_REF}" >> $GITHUB_ENV 
           else
-            echo ::set-output name=ct-branch::${GITHUB_REF#refs/heads/}
+            echo "ct-branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV 
           fi
 
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch}})
+          changed=$(ct list-changed --config ct.yaml --target-branch ${{ env.ct-branch}})
           if [[ -n "$changed" ]]; then
-            echo "::set-output name=changed::true"
+            echo "changed=true" >> $GITHUB_ENV
           fi
-
-      # run all checks but version increment always when something changed
-      - name: Run chart-testing (lint)
-        run: ct lint --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch }} --check-version-increment=false
-        if: steps.list-changed.outputs.changed == 'true'
 
       # run version check only if not dev as in dev we have a `x.y.z-dev` version
       # x.y.z gets bumped automatically when doing a release
       - name: Run chart-testing (lint)
-        run: ct lint --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch }} --check-version-increment=true
-        if: ${{ steps.list-changed.outputs.changed == 'true' && steps.ct-branch-target.outputs.ct-branch != 'dev' }}
+        run: ct lint --config ct.yaml --target-branch ${{ env.ct-branch }} --check-version-increment=true
+        if: ${{ env.changed == 'true' && env.ct-branch != 'dev' && env.ct-branch != 'bugfix' }}  
+
+      # run all checks but version increment always when something changed
+      - name: Run chart-testing (lint)
+        run: ct lint --config ct.yaml --target-branch ${{ env.ct-branch }} --check-version-increment=false
+        if: env.changed == 'true'
 
       # - name: Create kind cluster
       #  uses: helm/kind-action@v1.1.0
-      #  if: steps.list-changed.outputs.changed == 'true'
+      #  if: env.changed == 'true'
 
       # - name: Run chart-testing (install)
-      #   run: ct install --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch }} --helm-extra-args '--set createSecret=true --set createRabbitMqSecret=true --set createPostgresqlSecret=true --set timeout=900'
-      #  if: steps.list-changed.outputs.changed == 'true'
+      #   run: ct install --config ct.yaml --target-branch ${{ env.ct-branch }} --helm-extra-args '--set createSecret=true --set createRabbitMqSecret=true --set createPostgresqlSecret=true --set timeout=900'
+      #  if: env.changed == 'true'

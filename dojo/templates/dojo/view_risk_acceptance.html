@@ -60,7 +60,7 @@
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
-                            <span class="fa fa-bars"></span>
+                            <span class="fa-solid fa-bars"></span>
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
@@ -82,18 +82,18 @@
                         <th>Findings</th>
                         <th>Proof</th>
                         <th>Reactivate
-                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Reactivate findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Reactivate findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
                             </i>
                         </th>
                         <th>Restart SLA
-                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Restart SLA for findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Restart SLA for findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
                             </i>
                         </th>
                         <th>Owner</th>
                     </tr>
                     <tr>
                         <td>{{ risk_acceptance.created|date }}</td>
-                        <td>{{ risk_acceptance.accepted_by.get_full_name }}</td>
+                        <td>{{ risk_acceptance.accepted_by }}</td>
                         <td>{{ risk_acceptance.name }}</td>
                         <td>{{ risk_acceptance.get_decision_display|default_if_none:"" }}</td>
                         <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->

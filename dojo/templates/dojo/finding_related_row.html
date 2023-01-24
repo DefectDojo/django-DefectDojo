@@ -22,7 +22,7 @@
         <a title="{{ similar_finding.title }}" href="{% url 'view_finding' similar_finding.id %}">{{ similar_finding.title|truncatechars_html:80 }}</a>
         {% if similar_finding.tags %}
         <small>
-            {% include "dojo/snippets/tags.html" with tags=similar_finding.tags.alll %}
+            {% include "dojo/snippets/tags.html" with tags=similar_finding.tags.all %}
         </small>
         {% endif %}
         {% with similar_finding.notes.count as note_count %}
@@ -44,7 +44,7 @@
     <td>
         {% if similar_finding.cwe > 0 %}
         <a target="_blank" href="{{ similar_finding.cwe|cwe_url }}">
-            <i class="fa fa-external-link"></i> {{ similar_finding.cwe }}
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ similar_finding.cwe }}
         </a>
         {% endif %}
     </td>
@@ -52,7 +52,7 @@
     {% if similar_finding.file_path %}
         <td title="{{similar_finding.file_path}}{% if similar_finding.line > 0 %} (Line {{ similar_finding.line }}){% endif %}">
             {{ similar_finding.file_path|truncatechars_html:20 }}{% if similar_finding.line > 0 %} (Line {{ similar_finding.line }}){% endif %}
-            <i class="fa fa-copy fa-align-right copytoclipboard" title="copy full path to clipboard"
+            <i class="fa-solid fa-copy fa-align-right copytoclipboard" title="copy full path to clipboard"
             data-clipboard-text="{{similar_finding.file_path}}{% if similar_finding.line > 0 %} (Line {{ similar_finding.line }}){% endif %}"></i></td>
     {% else %}
         <td></td>

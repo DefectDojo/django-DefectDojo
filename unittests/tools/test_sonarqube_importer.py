@@ -54,6 +54,12 @@ def dummy_hotspot_rule(self, *args, **kwargs):
         return data
 
 
+def dummy_hotspot_rule_wo_risk_description(self, *args, **kwargs):
+    with open(get_unit_tests_path() + '/scans/sonarqube_api/hotspots/rule_wo_risk_description.json') as json_file:
+        data = json.load(json_file)
+        return data
+
+
 def empty_list(self, *args, **kwargs):
     return list()
 
@@ -456,6 +462,56 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
             '\n',
             findings[0].references
         )
+        self.assertEqual(str(findings[0].file_path), 'internal.dummy.project:spec/support/user_fixture.rb')
+        self.assertEqual(findings[0].line, 9)
+        self.assertEqual(findings[0].active, True)
+        self.assertEqual(findings[0].verified, False)
+        self.assertEqual(findings[0].false_p, False)
+        self.assertEqual(findings[0].duplicate, False)
+        self.assertEqual(findings[0].out_of_scope, False)
+        self.assertEqual(findings[0].static_finding, True)
+        self.assertEqual(findings[0].scanner_confidence, 1)
+        self.assertEqual(str(findings[0].sonarqube_issue), 'AXgm6Z-ophPPY0C1qhRq')
+
+
+class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
+    # Testing case no 14. https://github.com/DefectDojo/django-DefectDojo/issues/6506
+    fixtures = [
+        'unit_sonarqube_toolType.json',
+        'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_product.json'
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name='product')
+        engagement = Engagement(product=product)
+        self.test = Test(engagement=engagement)
+
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', empty_list)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule_wo_risk_description)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', dummy_one_hotspot)
+    def test_parser(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        self.assertEqual(findings[0].title, '"password" detected here, make sure this is not a hard-coded credential.')
+        self.assertIsNone(findings[0].cwe)
+        self.assertMultiLineEqual(
+            '**Ask Yourself Whether**'
+            '\n\n  '
+            '* Credentials allows access to a sensitive component like a database, a file storage, an API or a service. '
+            '\n  '
+            '* Credentials are used in production environments. '
+            '\n  '
+            '* Application re-distribution is required before updating the credentials. '
+            '\n\n'
+            'There is a risk if you answered yes to any of those questions.'
+            '\n\n',
+            findings[0].description
+        )
+        self.assertEqual(str(findings[0].severity), 'Info')
+        self.assertEqual(findings[0].references, '')
         self.assertEqual(str(findings[0].file_path), 'internal.dummy.project:spec/support/user_fixture.rb')
         self.assertEqual(findings[0].line, 9)
         self.assertEqual(findings[0].active, True)

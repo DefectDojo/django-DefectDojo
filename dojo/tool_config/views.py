@@ -15,7 +15,7 @@ from dojo.authorization.authorization_decorators import user_is_configuration_au
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('dojo.add_tool_configuration', 'superuser')
+@user_is_configuration_authorized('dojo.add_tool_configuration')
 def new_tool_config(request):
     if request.method == 'POST':
         tform = ToolConfigForm(request.POST)
@@ -48,7 +48,7 @@ def new_tool_config(request):
                   {'tform': tform})
 
 
-@user_is_configuration_authorized('dojo.change_tool_configuration', 'superuser')
+@user_is_configuration_authorized('dojo.change_tool_configuration')
 def edit_tool_config(request, ttid):
     tool_config = Tool_Configuration.objects.get(pk=ttid)
     if request.method == 'POST':
@@ -90,7 +90,7 @@ def edit_tool_config(request, ttid):
                   })
 
 
-@user_is_configuration_authorized('dojo.view_tool_configuration', 'superuser')
+@user_is_configuration_authorized('dojo.view_tool_configuration')
 def tool_config(request):
     confs = Tool_Configuration.objects.all().order_by('name')
     add_breadcrumb(title="Tool Configuration List", top_level=not len(request.GET), request=request)

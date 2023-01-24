@@ -1,4 +1,5 @@
 import re
+import uuid
 from datetime import datetime
 
 from defusedxml import ElementTree
@@ -71,14 +72,17 @@ class VeracodeParser(object):
         for component in root.findall('x:software_composition_analysis/x:vulnerable_components'
                                              '/x:component', namespaces=XML_NAMESPACE):
             _library = component.attrib['library']
+            if 'library_id' in component.attrib and component.attrib['library_id'].startswith("maven:"):
+                # Set the library name from the maven component if it's available to align with CycloneDX + Veracode SCA
+                split_library_id = component.attrib['library_id'].split(":")
+                if len(split_library_id) > 2:
+                    _library = split_library_id[2]
             _vendor = component.attrib['vendor']
             _version = component.attrib['version']
 
             for vulnerability in component.findall('x:vulnerabilities/x:vulnerability', namespaces=XML_NAMESPACE):
-                dupe_key = vulnerability.attrib['cve_id']
-                # Only process if we didn't do that before.
-                if dupe_key not in dupes:
-                    dupes[dupe_key] = self.__xml_sca_flaw_to_finding(test, report_date, _vendor, _library, _version, vulnerability)
+                # We don't have a Id for SCA findings so just generate a random one
+                dupes[str(uuid.uuid4())] = self.__xml_sca_flaw_to_finding(test, report_date, _vendor, _library, _version, vulnerability)
 
         return list(dupes.values())
 
@@ -132,11 +136,15 @@ class VeracodeParser(object):
         _mitigated_date = None
         if ('mitigation_status' in xml_node.attrib and
                 xml_node.attrib["mitigation_status"].lower() == "accepted"):
-            # This happens if any mitigation (including 'Potential false positive')
-            # was accepted in VC.
-            for mitigation in xml_node.findall("x:mitigations/x:mitigation", namespaces=XML_NAMESPACE):
+            if ('remediation_status' in xml_node.attrib and
+                    xml_node.attrib["remediation_status"].lower() == "fixed"):
                 _is_mitigated = True
-                _mitigated_date = datetime.strptime(mitigation.attrib['date'], '%Y-%m-%d %H:%M:%S %Z')
+            else:
+                # This happens if any mitigation (including 'Potential false positive')
+                # was accepted in VC.
+                for mitigation in xml_node.findall("x:mitigations/x:mitigation", namespaces=XML_NAMESPACE):
+                    _is_mitigated = True
+                    _mitigated_date = datetime.strptime(mitigation.attrib['date'], '%Y-%m-%d %H:%M:%S %Z')
         finding.is_mitigated = _is_mitigated
         finding.mitigated = _mitigated_date
         finding.active = not _is_mitigated
@@ -175,6 +183,8 @@ class VeracodeParser(object):
         _sast_source_obj = xml_node.attrib.get('functionprototype')
         finding.sast_source_object = _sast_source_obj if _sast_source_obj else None
 
+        finding.unsaved_tags = ["sast"]
+
         return finding
 
     @classmethod
@@ -186,20 +196,9 @@ class VeracodeParser(object):
         url_host = xml_node.attrib.get('url')
         finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
 
-        return finding
+        finding.unsaved_tags = ["dast"]
 
-    @classmethod
-    def __cvss_to_severity(cls, cvss):
-        if cvss >= 9:
-            return cls.vc_severity_mapping.get(5)
-        elif cvss >= 7:
-            return cls.vc_severity_mapping.get(4)
-        elif cvss >= 4:
-            return cls.vc_severity_mapping.get(3)
-        elif cvss > 0:
-            return cls.vc_severity_mapping.get(2)
-        else:
-            return cls.vc_severity_mapping.get(1)
+        return finding
 
     @staticmethod
     def _get_cwe(val):
@@ -217,10 +216,11 @@ class VeracodeParser(object):
         finding.test = test
         finding.static_finding = True
         finding.dynamic_finding = False
-        finding.unique_id_from_tool = xml_node.attrib['cve_id']
 
         # Report values
-        finding.severity = cls.__cvss_to_severity(float(xml_node.attrib['cvss_score']))
+        cvss_score = float(xml_node.attrib['cvss_score'])
+        finding.cvssv3_score = cvss_score
+        finding.severity = cls.__xml_flaw_to_severity(xml_node)
         finding.unsaved_vulnerability_ids = [xml_node.attrib['cve_id']]
         finding.cwe = cls._get_cwe(xml_node.attrib['cwe_id'])
         finding.title = "Vulnerable component: {0}:{1}".format(library, version)
@@ -233,7 +233,7 @@ class VeracodeParser(object):
 
         _description = 'This library has known vulnerabilities.\n'
         _description += \
-                "**CVE: [{0}](https://nvd.nist.gov/vuln/detail/{0})** ({1})\n" \
+                "**CVE:** {0} ({1})\n" \
                 "CVS Score: {2} ({3})\n" \
                 "Summary: \n>{4}" \
                 "\n\n-----\n\n".format(
@@ -243,5 +243,20 @@ class VeracodeParser(object):
                     cls.vc_severity_mapping.get(int(xml_node.attrib['severity']), 'Info'),
                     xml_node.attrib['cve_summary'])
         finding.description = _description
+
+        finding.unsaved_tags = ["sca"]
+
+        _is_mitigated = False
+        _mitigated_date = None
+        if ('mitigation' in xml_node.attrib and
+                xml_node.attrib["mitigation"].lower() == "true"):
+            # This happens if any mitigation (including 'Potential false positive')
+            # was accepted in VC.
+            for mitigation in xml_node.findall("x:mitigations/x:mitigation", namespaces=XML_NAMESPACE):
+                _is_mitigated = True
+                _mitigated_date = datetime.strptime(mitigation.attrib['date'], '%Y-%m-%d %H:%M:%S %Z')
+        finding.is_mitigated = _is_mitigated
+        finding.mitigated = _mitigated_date
+        finding.active = not _is_mitigated
 
         return finding

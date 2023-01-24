@@ -176,3 +176,62 @@ class TestMozillaObservatoryParser(DojoTestCase):
             else:
                 with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                     self.assertFalse(finding.active)
+
+    def test_parse_file_cli_nmap_scanme_no_name_attribute(self):
+        """Test from the CLI"""
+        testfile = open("unittests/scans/mozilla_observatory/nmap_scanme_2022.json")
+        parser = MozillaObservatoryParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(12, len(findings))
+        for finding in findings:
+            if "content-security-policy" == finding.vuln_id_from_tool:
+                with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
+                    self.assertTrue(finding.active)
+                    self.assertEqual("Content Security Policy (CSP) header not implemented", finding.title)
+                    self.assertEqual("Medium", finding.severity)
+                    self.assertIn("Content Security Policy (CSP) header not implemented", finding.description)
+            elif "strict-transport-security" == finding.vuln_id_from_tool:
+                with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
+                    self.assertTrue(finding.active)
+                    self.assertEqual("HTTP Strict Transport Security (HSTS) header cannot be set for sites not available over HTTPS", finding.title)
+                    self.assertEqual("Medium", finding.severity)
+                    self.assertIn("HTTP Strict Transport Security (HSTS) header cannot be set for sites not available over HTTPS", finding.description)
+            elif "x-xss-protection" == finding.vuln_id_from_tool:
+                with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
+                    self.assertTrue(finding.active)
+                    self.assertEqual("X-XSS-Protection header not implemented", finding.title)
+                    self.assertEqual("Low", finding.severity)
+                    self.assertIn("X-XSS-Protection header not implemented", finding.description)
+            elif "x-frame-options" == finding.vuln_id_from_tool:
+                with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
+                    self.assertTrue(finding.active)
+                    self.assertEqual("X-Frame-Options (XFO) header not implemented", finding.title)
+                    self.assertEqual("Medium", finding.severity)
+                    self.assertIn("X-Frame-Options (XFO) header not implemented", finding.description)
+            elif "x-content-type-options" == finding.vuln_id_from_tool:
+                with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
+                    self.assertTrue(finding.active)
+                    self.assertEqual("X-Content-Type-Options header not implemented", finding.title)
+                    self.assertEqual("Low", finding.severity)
+                    self.assertIn("X-Content-Type-Options header not implemented", finding.description)
+            elif "subresource-integrity" == finding.vuln_id_from_tool:
+                with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
+                    self.assertFalse(finding.active)
+                    self.assertEqual("Subresource Integrity (SRI) not implemented, but all scripts are loaded from a similar origin", finding.title)
+                    self.assertEqual("Info", finding.severity)
+                    self.assertIn("Subresource Integrity (SRI) not implemented", finding.description)
+            elif "redirection" == finding.vuln_id_from_tool:
+                with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
+                    self.assertTrue(finding.active)
+                    self.assertEqual("Does not redirect to an HTTPS site", finding.title)
+                    self.assertEqual("Medium", finding.severity)
+                    self.assertIn("Does not redirect to an HTTPS site", finding.description)
+            elif "referrer-policy-private" == finding.vuln_id_from_tool:
+                with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
+                    self.assertTrue(finding.active)
+                    self.assertEqual("Referrer-Policy header not implemented", finding.title)
+                    self.assertEqual("Info", finding.severity)
+                    self.assertIn("Referrer-Policy header not implemented", finding.description)
+            else:
+                with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
+                    self.assertFalse(finding.active)

@@ -12,6 +12,10 @@ weight: 2
 
 See instructions in [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md>)
 
+### SaaS (Includes Support & Supports the Project)
+
+[SaaS link](https://www.defectdojo.com/pricing)
+
 ### AWS AMI (Supports the Project)
 
 [Marketplace link](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk), and complete [walkthrough](https://www.10security.com/defectdojo-aws-launch-guide)

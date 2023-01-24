@@ -1,0 +1,575 @@
+{
+ "reportId": "hidden",
+ "reportHeader": {
+  "projectName": "DIVA",
+  "createdDate": "2022-02-25T21:56:10.318Z",
+  "tenantId": "hidden"
+ },
+ "executiveSummary": {
+  "branchName": "",
+  "projectName": "DIVA",
+  "engines": [
+   "SAST"
+  ],
+  "riskLevel": "No Risk",
+  "totalVulnerabilities": 11,
+  "newVulnerabilities": 10,
+  "recurrentVulnerabilities": 0,
+  "vulnerabilitiesPerEngine": {
+   "SAST": 10
+  },
+  "resultsTriage": {
+   "SAST": {
+    "Confirmed": {
+     "name": "Confirmed",
+     "amount": 0,
+     "percentage": 0
+    },
+    "Not exploitable": {
+     "name": "Not exploitable",
+     "amount": 0,
+     "percentage": 0
+    },
+    "To verify": {
+     "name": "To verify",
+     "amount": 10,
+     "percentage": 100
+    },
+    "Urgent": {
+     "name": "Urgent",
+     "amount": 0,
+     "percentage": 0
+    }
+   }
+  }
+ },
+ "scanSummary": {
+  "scanId": "hidden",
+  "languages": [
+   "Java"
+  ],
+  "enginesCount": 1,
+  "scanCompletedDate": "2022-02-25 21:55:16.281169 +0000 UTC",
+  "engineTypes": [
+   "SAST"
+  ]
+ },
+ "scanResults": {
+  "sast": {
+   "languages": [
+    {
+     "languageName": "Java",
+     "queries": [
+      {
+       "queryName": "SQL_Injection",
+       "queryId": "",
+       "description": "",
+       "vulnerabilitiesTotal": 3,
+       "vulnerabilities": [
+        {
+         "id": "/oiUUpBjigtUpTb1+haL9nypVaQ=",
+         "similarityId": -665784454,
+         "status": "NEW",
+         "state": "To verify",
+         "severity": "HIGH",
+         "groupName": "Java_High_Risk",
+         "cweId": 89,
+         "confidenceLevel": 0,
+         "compliance": [
+          "OWASP Top 10 2013",
+          "OWASP Top 10 API",
+          "OWASP Mobile Top 10 2016",
+          "OWASP Top 10 2021",
+          "FISMA 2014",
+          "PCI DSS v3.2.1",
+          "ASD STIG 4.10",
+          "NIST SP 800-53",
+          "OWASP Top 10 2017"
+         ],
+         "firstScanId": "hidden",
+         "nodes": [
+          {
+           "column": 88,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/SQLInjectionActivity.java",
+           "fullName": "jakhar.aseem.diva.SQLInjectionActivity.search.srchtxt.getText",
+           "length": 1,
+           "line": 70,
+           "methodLine": 66,
+           "name": "getText",
+           "domType": "MethodInvokeExpr",
+           "method": "search"
+          },
+          {
+           "column": 99,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/SQLInjectionActivity.java",
+           "fullName": "jakhar.aseem.diva.SQLInjectionActivity.search.toString",
+           "length": 1,
+           "line": 70,
+           "methodLine": 66,
+           "name": "toString",
+           "domType": "MethodInvokeExpr",
+           "method": "search"
+          },
+          {
+           "column": 30,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/SQLInjectionActivity.java",
+           "fullName": "jakhar.aseem.diva.SQLInjectionActivity.mDB.rawQuery",
+           "length": 1,
+           "line": 70,
+           "methodLine": 66,
+           "name": "rawQuery",
+           "domType": "MethodInvokeExpr",
+           "method": "search"
+          }
+         ],
+         "foundDate": "2022-02-25T21:55:08Z",
+         "firstFoundDate": "2022-02-25T21:55:07Z"
+        },
+        {
+         "id": "RjtOspmU6+BMRIMlftOJo6ATMuA=",
+         "similarityId": 816060275,
+         "status": "NEW",
+         "state": "To verify",
+         "severity": "HIGH",
+         "groupName": "Java_High_Risk",
+         "cweId": 89,
+         "confidenceLevel": 0,
+         "compliance": [
+          "OWASP Top 10 2013",
+          "OWASP Top 10 API",
+          "OWASP Mobile Top 10 2016",
+          "OWASP Top 10 2021",
+          "FISMA 2014",
+          "PCI DSS v3.2.1",
+          "ASD STIG 4.10",
+          "NIST SP 800-53",
+          "OWASP Top 10 2017"
+         ],
+         "firstScanId": "hidden",
+         "nodes": [
+          {
+           "column": 68,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.saveCredentials.usr.getText",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "getText",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          },
+          {
+           "column": 79,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.saveCredentials.toString",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "toString",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          },
+          {
+           "column": 24,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.mDB.execSQL",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "execSQL",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          }
+         ],
+         "foundDate": "2022-02-25T21:55:08Z",
+         "firstFoundDate": "2022-02-25T21:55:07Z"
+        },
+        {
+         "id": "YmC0We6hAbZWhIrrniEWGot4AHQ=",
+         "similarityId": -722600838,
+         "status": "NEW",
+         "state": "To verify",
+         "severity": "HIGH",
+         "groupName": "Java_High_Risk",
+         "cweId": 89,
+         "confidenceLevel": 0,
+         "compliance": [
+          "OWASP Top 10 2013",
+          "OWASP Top 10 API",
+          "OWASP Mobile Top 10 2016",
+          "OWASP Top 10 2021",
+          "FISMA 2014",
+          "PCI DSS v3.2.1",
+          "ASD STIG 4.10",
+          "NIST SP 800-53",
+          "OWASP Top 10 2017"
+         ],
+         "firstScanId": "hidden",
+         "nodes": [
+          {
+           "column": 102,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.saveCredentials.pwd.getText",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "getText",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          },
+          {
+           "column": 113,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.saveCredentials.toString",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "toString",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          },
+          {
+           "column": 24,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.mDB.execSQL",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "execSQL",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          }
+         ],
+         "foundDate": "2022-02-25T21:55:08Z",
+         "firstFoundDate": "2022-02-25T21:55:07Z"
+        }
+       ]
+      },
+      {
+       "queryName": "CSRF",
+       "queryId": "",
+       "description": "",
+       "vulnerabilitiesTotal": 2,
+       "vulnerabilities": [
+        {
+         "id": "mJHdLIgE2fx10ehNLPytxzPTVCo=",
+         "similarityId": 1268494559,
+         "status": "NEW",
+         "state": "To verify",
+         "severity": "MEDIUM",
+         "groupName": "Java_Medium_Threat",
+         "cweId": 352,
+         "confidenceLevel": 0,
+         "compliance": [
+          "OWASP Top 10 2013",
+          "OWASP Top 10 2021",
+          "PCI DSS v3.2.1",
+          "ASD STIG 4.10",
+          "NIST SP 800-53"
+         ],
+         "firstScanId": "hidden",
+         "nodes": [
+          {
+           "column": 68,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.saveCredentials.usr.getText",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "getText",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          },
+          {
+           "column": 79,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.saveCredentials.toString",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "toString",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          },
+          {
+           "column": 24,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.mDB.execSQL",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "execSQL",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          }
+         ],
+         "foundDate": "2022-02-25T21:55:08Z",
+         "firstFoundDate": "2022-02-25T21:55:06Z"
+        },
+        {
+         "id": "IJOkZAzX5emCOIeTESXgsNulW2w=",
+         "similarityId": -443707656,
+         "status": "NEW",
+         "state": "To verify",
+         "severity": "MEDIUM",
+         "groupName": "Java_Medium_Threat",
+         "cweId": 352,
+         "confidenceLevel": 0,
+         "compliance": [
+          "OWASP Top 10 2013",
+          "OWASP Top 10 2021",
+          "PCI DSS v3.2.1",
+          "ASD STIG 4.10",
+          "NIST SP 800-53"
+         ],
+         "firstScanId": "hidden",
+         "nodes": [
+          {
+           "column": 102,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.saveCredentials.pwd.getText",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "getText",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          },
+          {
+           "column": 113,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.saveCredentials.toString",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "toString",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          },
+          {
+           "column": 24,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.mDB.execSQL",
+           "length": 1,
+           "line": 67,
+           "methodLine": 63,
+           "name": "execSQL",
+           "domType": "MethodInvokeExpr",
+           "method": "saveCredentials"
+          }
+         ],
+         "foundDate": "2022-02-25T21:55:08Z",
+         "firstFoundDate": "2022-02-25T21:55:06Z"
+        }
+       ]
+      },
+      {
+       "queryName": "Log_Forging",
+       "queryId": "",
+       "description": "",
+       "vulnerabilitiesTotal": 1,
+       "vulnerabilities": [
+        {
+         "id": "Zxmd7VE19ZSJwJVDs00YugwMhwo=",
+         "similarityId": 2017000979,
+         "status": "NEW",
+         "state": "To verify",
+         "severity": "LOW",
+         "groupName": "Java_Low_Visibility",
+         "cweId": 117,
+         "confidenceLevel": 0,
+         "compliance": [
+          "OWASP Mobile Top 10 2016",
+          "OWASP Top 10 2017",
+          "OWASP Top 10 2021",
+          "PCI DSS v3.2.1",
+          "ASD STIG 4.10",
+          "FISMA 2014",
+          "NIST SP 800-53"
+         ],
+         "firstScanId": "hidden",
+         "nodes": [
+          {
+           "column": 102,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/LogActivity.java",
+           "fullName": "jakhar.aseem.diva.LogActivity.checkout.cctxt.getText",
+           "length": 1,
+           "line": 56,
+           "methodLine": 49,
+           "name": "getText",
+           "domType": "MethodInvokeExpr",
+           "method": "checkout"
+          },
+          {
+           "column": 113,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/LogActivity.java",
+           "fullName": "jakhar.aseem.diva.LogActivity.checkout.toString",
+           "length": 1,
+           "line": 56,
+           "methodLine": 49,
+           "name": "toString",
+           "domType": "MethodInvokeExpr",
+           "method": "checkout"
+          },
+          {
+           "column": 18,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/LogActivity.java",
+           "fullName": "Log.e",
+           "length": 1,
+           "line": 56,
+           "methodLine": 49,
+           "name": "e",
+           "domType": "MethodInvokeExpr",
+           "method": "checkout"
+          }
+         ],
+         "foundDate": "2022-02-25T21:55:08Z",
+         "firstFoundDate": "2022-02-25T21:55:06Z"
+        }
+       ]
+      },
+      {
+       "queryName": "Heap_Inspection",
+       "queryId": "",
+       "description": "",
+       "vulnerabilitiesTotal": 4,
+       "vulnerabilities": [
+        {
+         "id": "nV+sCoSYJnxpcQLod+sD4+I8Z58=",
+         "similarityId": -1853810714,
+         "status": "NEW",
+         "state": "To verify",
+         "severity": "LOW",
+         "groupName": "Java_Low_Visibility",
+         "cweId": 244,
+         "confidenceLevel": 0,
+         "compliance": [
+          "ASD STIG 4.10",
+          "OWASP Top 10 2013",
+          "OWASP Top 10 2021"
+         ],
+         "firstScanId": "hidden",
+         "nodes": [
+          {
+           "column": 18,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage4Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage4Activity.saveCredentials.pwd",
+           "length": 3,
+           "line": 55,
+           "methodLine": 53,
+           "name": "pwd",
+           "domType": "Declarator",
+           "method": "saveCredentials"
+          }
+         ],
+         "foundDate": "2022-02-25T21:55:08Z",
+         "firstFoundDate": "2022-02-25T21:55:06Z"
+        },
+        {
+         "id": "b7tGSONiaSObAFTnmF18NcRIuA4=",
+         "similarityId": 1375153830,
+         "status": "NEW",
+         "state": "To verify",
+         "severity": "LOW",
+         "groupName": "Java_Low_Visibility",
+         "cweId": 244,
+         "confidenceLevel": 0,
+         "compliance": [
+          "ASD STIG 4.10",
+          "OWASP Top 10 2013",
+          "OWASP Top 10 2021"
+         ],
+         "firstScanId": "hidden",
+         "nodes": [
+          {
+           "column": 18,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage3Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage3Activity.saveCredentials.pwd",
+           "length": 3,
+           "line": 56,
+           "methodLine": 54,
+           "name": "pwd",
+           "domType": "Declarator",
+           "method": "saveCredentials"
+          }
+         ],
+         "foundDate": "2022-02-25T21:55:08Z",
+         "firstFoundDate": "2022-02-25T21:55:06Z"
+        },
+        {
+         "id": "1Jfdpc6JtKmb0v3aj8/Jj1QjtYQ=",
+         "similarityId": 309151078,
+         "status": "NEW",
+         "state": "To verify",
+         "severity": "LOW",
+         "groupName": "Java_Low_Visibility",
+         "cweId": 244,
+         "confidenceLevel": 0,
+         "compliance": [
+          "ASD STIG 4.10",
+          "OWASP Top 10 2013",
+          "OWASP Top 10 2021"
+         ],
+         "firstScanId": "hidden",
+         "nodes": [
+          {
+           "column": 18,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage2Activity.saveCredentials.pwd",
+           "length": 3,
+           "line": 65,
+           "methodLine": 63,
+           "name": "pwd",
+           "domType": "Declarator",
+           "method": "saveCredentials"
+          }
+         ],
+         "foundDate": "2022-02-25T21:55:08Z",
+         "firstFoundDate": "2022-02-25T21:55:06Z"
+        },
+        {
+         "id": "udB1urKobWKTYYlRQbAAub1yRAc=",
+         "similarityId": -756851674,
+         "status": "NEW",
+         "state": "To verify",
+         "severity": "LOW",
+         "groupName": "Java_Low_Visibility",
+         "cweId": 244,
+         "confidenceLevel": 0,
+         "compliance": [
+          "ASD STIG 4.10",
+          "OWASP Top 10 2013",
+          "OWASP Top 10 2021"
+         ],
+         "firstScanId": "hidden",
+         "nodes": [
+          {
+           "column": 18,
+           "fileName": "/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage1Activity.java",
+           "fullName": "jakhar.aseem.diva.InsecureDataStorage1Activity.saveCredentials.pwd",
+           "length": 3,
+           "line": 54,
+           "methodLine": 50,
+           "name": "pwd",
+           "domType": "Declarator",
+           "method": "saveCredentials"
+          }
+         ],
+         "foundDate": "2022-02-25T21:55:08Z",
+         "firstFoundDate": "2022-02-25T21:55:06Z"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "vulnerabilities": {
+    "total": 10,
+    "high": 3,
+    "medium": 2,
+    "low": 5,
+    "info": 0
+   }
+  }
+ }
+}

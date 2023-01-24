@@ -44,9 +44,9 @@ class EdgescanAPI(object):
             except (JSONDecodeError, TypeError):
                 raise ValueError('JSON not provided in Extras field.')
 
-    def get_findings(self, asset_id):
-        url = f"{self.url}/api/v1/vulnerabilities/export.json?c[asset_id]={asset_id}&c[status]=open"
-        if 'date' in self.options:
+    def get_findings(self, asset_ids):
+        url = f"{self.url}/api/v1/vulnerabilities/export.json?c[asset_id_in]={asset_ids}&c[status]=open"
+        if self.options and 'date' in self.options:
             url += f"&c[date_opened_after]={self.options['date']}"
 
         response = requests.get(
@@ -67,7 +67,7 @@ class EdgescanAPI(object):
         return headers
 
     def get_proxies(self):
-        if "proxy" not in self.options:
-            return None
+        if self.options and "proxy" in self.options:
+            return {"https": self.options["proxy"]}
 
-        return {"https": self.options["proxy"]}
+        return None

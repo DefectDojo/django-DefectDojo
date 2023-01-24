@@ -14,9 +14,10 @@ data:
   DD_ADMIN_FIRST_NAME: {{ .Values.admin.FirstName | default "Admin" }}
   DD_ADMIN_LAST_NAME: {{ .Values.admin.LastName | default "User" }}
   DD_ALLOWED_HOSTS: {{ include "django.allowed_hosts" . }}
+  DD_SITE_URL: {{ .Values.site_url | default "http://localhost:8080" }}
   DD_CELERY_BROKER_SCHEME: {{ if eq .Values.celery.broker "rabbitmq" }}amqp{{ end }}{{ if eq .Values.celery.broker "redis" }}{{ template "redis.scheme" . }}{{ end }}
   DD_CELERY_BROKER_USER: '{{ if eq .Values.celery.broker "rabbitmq" }}user{{ end }}'
-  DD_CELERY_BROKER_HOST: {{ if eq .Values.celery.broker "rabbitmq" }}{{ .Release.Name }}-rabbitmq{{ else if eq .Values.celery.broker "redis" }}{{ template "redis.hostname" . }}{{ end }}
+  DD_CELERY_BROKER_HOST: {{ if eq .Values.celery.broker "rabbitmq" }}{{ template "rabbitmq.hostname" . }}{{ else if eq .Values.celery.broker "redis" }}{{ template "redis.hostname" . }}{{ end }}
   DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "rabbitmq" }}5672{{ end }}{{ if eq .Values.celery.broker "redis" }}6379{{ end }}'
   DD_CELERY_BROKER_PARAMS: '{{ if eq .Values.celery.broker "redis" }}{{- if .Values.redis.transportEncryption.enabled -}}{{ .Values.redis.transportEncryption.params | default "ssl_cert_reqs=optional" }}{{ end }}{{ end }}'
   DD_CELERY_BROKER_PATH: '{{ .Values.celery.path | default "//" }}'
@@ -26,11 +27,11 @@ data:
   DD_CELERY_WORKER_AUTOSCALE_MAX: '{{ if eq .Values.celery.worker.app_settings.pool_type "prefork" }}{{ .Values.celery.worker.app_settings.autoscale_max | default "8" }}{{ end }}'
   DD_CELERY_WORKER_CONCURRENCY: '{{ if eq .Values.celery.worker.app_settings.pool_type "prefork" }}{{ .Values.celery.worker.app_settings.concurrency | default "8" }}{{ end }}'
   DD_CELERY_WORKER_PREFETCH_MULTIPLIER: '{{ if eq .Values.celery.worker.app_settings.pool_type "prefork" }}{{ .Values.celery.worker.app_settings.prefetch_multiplier | default "128" }}{{ end }}'
-  DD_DATABASE_ENGINE: django.db.backends.{{ if eq .Values.database "postgresql" }}postgresql{{ end }}{{ if eq .Values.database "mysql" }}mysql{{ end }}
-  DD_DATABASE_HOST: {{ if eq .Values.database "postgresql" }}{{ template "postgresql.hostname" . }}{{ end }}{{ if eq .Values.database "mysql" }}{{ template "mysql.hostname" . }}{{ end }}
-  DD_DATABASE_PORT: '{{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.service.port }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.master.service.port }}{{ end }}'
-  DD_DATABASE_USER: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.postgresqlUsername }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.auth.username }}{{ end }}
-  DD_DATABASE_NAME: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.postgresqlDatabase }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.auth.database }}{{ end }}
+  DD_DATABASE_ENGINE: django.db.backends.{{ if eq .Values.database "postgresql" }}postgresql{{ end }}{{ if eq .Values.database "postgresqlha" }}postgresql{{ end }}{{ if eq .Values.database "mysql" }}mysql{{ end }}
+  DD_DATABASE_HOST: {{ if eq .Values.database "postgresql" }}{{ template "postgresql.hostname" . }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ template "postgresqlha.hostname" . }}{{ end }}{{ if eq .Values.database "mysql" }}{{ template "mysql.hostname" . }}{{ end }}
+  DD_DATABASE_PORT: '{{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.primary.service.ports.postgresql }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.service.ports.postgresql }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.primary.service.ports.mysql }}{{ end }}'
+  DD_DATABASE_USER: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.auth.username }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.postgresql.username }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.auth.username }}{{ end }}
+  DD_DATABASE_NAME: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.auth.database }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.postgresql.database }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.auth.database }}{{ end }}
   DD_INITIALIZE: '{{ .Values.initializer.run }}'
   DD_UWSGI_ENDPOINT: /run/defectdojo/uwsgi.sock
   DD_UWSGI_HOST: localhost

@@ -194,3 +194,34 @@ class TestZapParser(DojoTestCase):
             self.assertEqual("https", endpoint.protocol)
             self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
             self.assertEqual("assets", endpoint.path)
+
+    def test_parse_xml_plus_format(self):
+        testfile = open("unittests/scans/zap/zap-xml-plus-format.xml")
+        parser = ZapParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertIsInstance(findings, list)
+        self.assertEqual(1, len(findings))
+        for finding in findings:
+            self.assertIn(finding.severity, Finding.SEVERITIES)
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("Insecure HTTP Method - PUT", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("90028", finding.vuln_id_from_tool)
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual("http", endpoint.protocol)
+            self.assertEqual("localhost", endpoint.host)
+            self.assertEqual(8080, endpoint.port)
+            # Check request and response pair
+            request_pair = finding.unsaved_req_resp[0]
+            request = request_pair["req"]
+            response = request_pair["resp"]
+            self.assertEqual('HTTP/1.1 403 Forbidden\nServer: Apache-Coyote/1.1\nContent-Type: text/html;charset=utf-8\nContent-Language: en\nContent-Length: 1004\nDate: Fri, 30 Sep 2022 06:40:15 GMT\n\n<!DOCTYPE html><html><head><title>Apache Tomcat/8.0.37 - Error report</title><style type="text/css">H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}A {color : black;}A.name {color : black;}.line {height: 1px; background-color: #525D76; border: none;}</style> </head><body><h1>HTTP Status 403 - </h1><div class="line"></div><p><b>type</b> Status report</p><p><b>message</b> <u></u></p><p><b>description</b> <u>Access to the specified resource has been forbidden.</u></p><hr class="line"><h3>Apache Tomcat/8.0.37</h3></body></html>', response)
+            self.assertEqual('PUT http://localhost:8080/bodgeit/js/qndto7n63d HTTP/1.1\nHost: localhost:8080\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:105.0) Gecko/20100101 Firefox/105.0\nAccept: */*\nAccept-Language: de,en-US;q=0.7,en;q=0.3\nConnection: keep-alive\nReferer: https://localhost:8080/bodgeit/\nCookie: JSESSIONID=9E75E26E50F681208096FFAA0B566901\nSec-Fetch-Dest: script\nSec-Fetch-Mode: no-cors\nSec-Fetch-Site: same-origin\nContent-Length: 35\n\n"J0O0glajHdR0Mgp":"UToh9IpCY5zh3CB"', request)
