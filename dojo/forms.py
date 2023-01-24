@@ -24,7 +24,7 @@ from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, SLA_Configuration, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
-    JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
+    JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, Dedupe_Configuration, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, \
@@ -2286,6 +2286,40 @@ class ToolTypeForm(forms.ModelForm):
         model = Tool_Type
         exclude = ['product']
 
+
+class DedupeConfigForm(forms.ModelForm):
+    FINDING_CWE = 'cwe'
+    FINDING_LINE = 'line'
+    FINDING_FILE_PATH = 'file_path'
+    FINDING_VULNERABILITY_IDS = 'vulnerability_ids'
+    FINDING_SEVERITY = 'severity'
+    FINDING_VULN_ID_FROM_TOOL = 'vuln_id_from_tool'
+    FINDING_COMPONENT_NAME = 'component_name'
+    FINDING_UNIQUE_ID_FROM_TOOL = 'unique_id_from_tool'
+    FINDING_COMPONENT_VERSION = 'component_version'
+    FINDING_TITLE = 'title'
+    FINDING_DESCRIPTION = 'description'
+    HASHCODE_FIELDS_CHOICES = (
+        (FINDING_TITLE, FINDING_TITLE),
+        (FINDING_FILE_PATH, FINDING_FILE_PATH),
+        (FINDING_DESCRIPTION, FINDING_DESCRIPTION),
+        (FINDING_LINE, FINDING_LINE),
+        (FINDING_CWE, FINDING_CWE),
+        (FINDING_SEVERITY, FINDING_SEVERITY),
+        (FINDING_UNIQUE_ID_FROM_TOOL, FINDING_UNIQUE_ID_FROM_TOOL),
+        (FINDING_VULN_ID_FROM_TOOL, FINDING_VULN_ID_FROM_TOOL),
+        (FINDING_VULNERABILITY_IDS, FINDING_VULNERABILITY_IDS),
+        (FINDING_COMPONENT_NAME, FINDING_COMPONENT_NAME),
+        (FINDING_COMPONENT_VERSION, FINDING_COMPONENT_VERSION),
+    )
+    hashcode_fields = forms.MultipleChoiceField(
+            widget = forms.CheckboxSelectMultiple,
+            choices = HASHCODE_FIELDS_CHOICES,
+            
+    )
+    class Meta:
+        model = Dedupe_Configuration
+        exclude = ['product']
 
 class RegulationForm(forms.ModelForm):
     class Meta:

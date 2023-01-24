@@ -573,6 +573,13 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
+                                                {% if "dojo.view_dedupe_configuration"|has_configuration_permission %}
+                                                <li>
+                                                    <a href="{% url 'dedupe_config' %}">
+                                                        {% trans "Deduplication Configuration" %}
+                                                    </a>
+                                                </li>
+                                                {% endif %}
                                                 {% if "dojo.view_tool_type"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'tool_type' %}">

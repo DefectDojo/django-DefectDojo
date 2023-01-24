@@ -24,7 +24,7 @@ from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get
 from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, SLA_Configuration, \
     Test, Test_Import, Test_Type, Finding, \
     User, Stub_Finding, Finding_Template, Notes, \
-    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
+    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, Dedupe_Configuration, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, \
@@ -1891,6 +1891,19 @@ class ToolProductSettingsViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         return get_authorized_tool_product_settings(Permissions.Product_View)
 
+# Authorization: configuration
+class DedupeConfigViewSet(mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       mixins.DestroyModelMixin,
+                       mixins.CreateModelMixin,
+                       mixins.UpdateModelMixin,
+                       viewsets.GenericViewSet,
+                       dojo_mixins.DeletePreviewModelMixin):
+    serializer_class = serializers.DedupeConfigSerializer
+    queryset = Dedupe_Configuration.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('id', 'name', 'description')
+    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 # Authorization: configuration
 class ToolTypesViewSet(mixins.ListModelMixin,

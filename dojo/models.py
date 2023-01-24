@@ -1111,6 +1111,23 @@ class Tool_Type(models.Model):
     def __str__(self):
         return self.name
 
+class Dedupe_Configuration(models.Model):
+    scanner = models.OneToOneField(Test_Type,
+                                      verbose_name=_('Scanner'),
+                                      help_text=_("The name of the scanner where you set the hashcode generation"), 
+                                      on_delete=models.CASCADE)
+
+    hashcode_fields = models.CharField(
+            max_length = 255,
+            null = True,
+            blank = True,
+            unique = False)
+
+    class Meta:
+        ordering = ['scanner']
+
+    def __str__(self):
+        return self.scanner.name
 
 class Tool_Configuration(models.Model):
     name = models.CharField(max_length=200, null=False)
@@ -4096,7 +4113,6 @@ class General_Survey(models.Model):
     def __str__(self):
         return self.survey.name
 
-
 class Answer(PolymorphicModel, TimeStampedModel):
     ''' Base Answer model
     '''
@@ -4210,6 +4226,7 @@ admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
+admin.site.register(Dedupe_Configuration)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)

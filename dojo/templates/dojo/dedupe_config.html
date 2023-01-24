@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% load authorization_tags %}
+{% load i18n %}
+
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        {% trans "Deduplication Configurations" %}
+                    </h3>
+                </div>
+
+            </div>
+            {% if confs %}
+
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                </div>
+                <div class="panel panel-default table-responsive">
+                    <table id="products"
+                           class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Scanner</th>
+                            <th>Hashcode Fields</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for conf in confs %}
+                            <tr>
+                                <td>
+                                    {% if "dojo.change_dedupe_config"|has_configuration_permission %}
+                                    <a href="{% url 'edit_dedupe_config' conf.id %}"><b>{{ conf.scanner }}</b></a>
+                                    {% else %}
+                                    {{ conf.scanner }}
+                                    {% endif %}
+                                </td>
+                                <td>{% if conf.hashcode_fields %}{{ conf.hashcode_fields }}{% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                </div>
+            {% else %}
+                <p class="text-center">{% trans "No Deduplication Configurations found" %}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

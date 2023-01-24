@@ -13,7 +13,7 @@ from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIE
     Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
-    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
+    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, Dedupe_Configuration, \
     Product_Type, JIRA_Instance, Endpoint, JIRA_Project, \
     Notes, DojoMeta, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, \
@@ -800,6 +800,10 @@ class ToolTypeSerializer(serializers.ModelSerializer):
         model = Tool_Type
         fields = '__all__'
 
+class DedupeConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dedupe_Configuration
+        fields = '__all__'
 
 class RegulationSerializer(serializers.ModelSerializer):
     class Meta:
