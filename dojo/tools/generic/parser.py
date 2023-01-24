@@ -70,7 +70,7 @@ class GenericParser(object):
                 del item["vulnerability_ids"]
 
             # check for required keys
-            required = ['title', 'date', 'severity', 'description']
+            required = ['title', 'severity', 'description']
             missing = []
             for field in required:
                 if field not in item.keys():
@@ -79,7 +79,7 @@ class GenericParser(object):
                 raise ValidationError(f"Required fields are missing: {missing}")
 
             # check for allowed keys
-            allowed = required + ['cwe', 'cve', 'cvssv3', 'cvssv3_score', 'mitigation', 'impact',
+            allowed = required + ['date', 'cwe', 'cve', 'cvssv3', 'cvssv3_score', 'mitigation', 'impact',
                 'steps_to_reproduce', 'severity_justification', 'references', 'active', 'verified',
                 'false_p', 'out_of_scope', 'risk_accepted', 'under_review', 'is_mitigated',
                 'thread_id', 'mitigated', 'numerical_severity', 'param', 'payload', 'line', 'file_path',
