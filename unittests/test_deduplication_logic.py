@@ -479,7 +479,7 @@ class TestDuplicationLogic(DojoTestCase):
             finding_new.save()
 
         self.assert_finding(finding_new, not_pk=2, duplicate=True, duplicate_finding_id=finding_2.id, hash_code=finding_2.hash_code)
-            # self.assert_finding(finding_new, not_pk=2, duplicate=True, duplicate_finding_id=finding_3.id, hash_code=finding_2.hash_code)
+        # self.assert_finding(finding_new, not_pk=2, duplicate=True, duplicate_finding_id=finding_3.id, hash_code=finding_2.hash_code)
 
         # reset for further tests
         settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
@@ -573,10 +573,10 @@ class TestDuplicationLogic(DojoTestCase):
 
     def test_dedupe_not_inside_engagement_hash_code(self):
         with self.captureOnCommitCallbacks(execute=True) as callbacks:
-        # finding 2 in engagement 1
-        # make a copy and store it in engagement 2, test 4
-        # should result in being marked as duplicate as dedupe inside engagement is set to False
-        # both test 3 and 4 are ZAP scans (cross scanner dedupe is still not working very well)
+            # finding 2 in engagement 1
+            # make a copy and store it in engagement 2, test 4
+            # should result in being marked as duplicate as dedupe inside engagement is set to False
+            # both test 3 and 4 are ZAP scans (cross scanner dedupe is still not working very well)
             self.set_dedupe_inside_engagement(False)
 
             finding_new, finding_2 = self.copy_with_endpoints_without_dedupe_and_reset_finding(id=2)
