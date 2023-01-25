@@ -152,7 +152,11 @@ DEDUPE_ALGO_LEGACY
 
 The hash_code computation can be configured for each parser using the
 parameter `HASHCODE_FIELDS_PER_SCANNER` in
-`settings.dist.py`.
+`settings.dist.py`, or via the env variable (useful for Kubernetes deployments) `DD_HASHCODE_FIELDS_PER_SCANNER` with a JSON string like 
+```json
+{"ScannerName":["field1", "field2"]}
+```
+The environment variable will override the settings in `settings.dist.py`, replacing by matching the keys.
 
 The parameter `HASHCODE_ALLOWED_FIELDS` list the fields
 from finding table that were tested and are known to be working when
