@@ -2,7 +2,6 @@ import base64
 import logging
 
 import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from dojo.decorators import dojo_async_task
 from dojo.celery import app
