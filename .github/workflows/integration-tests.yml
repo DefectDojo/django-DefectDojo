@@ -24,6 +24,11 @@ jobs:
     strategy:
       matrix:
         docker-image: [django, nginx, integration-tests]
+        os: [alpine, debian]
+        exclude:
+          - docker-image: integration-tests
+            os: alpine
+
     steps:
       # - name: Login to DockerHub
       #   uses: docker/login-action@v1
@@ -49,15 +54,13 @@ jobs:
       - name: Build
         id: docker_build
         uses: docker/build-push-action@v4
-        env:
-          docker-image: ${{ matrix.docker-image }}
         with:
           context: .
           push: false
           tags: |
-            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
-          file: Dockerfile.${{ env.docker-image }}
-          outputs: type=docker,dest=${{ env.docker-image }}_img
+            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
+          file: Dockerfile.${{ matix.docker-image }}-${{ matix.os }}
+          outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matix.os }}_img
           cache-from: type=gha,scope=${{ matrix.docker-image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
           
@@ -65,8 +68,8 @@ jobs:
       - name: Upload image ${{ matrix.docker-image }} as artifact
         uses:  actions/upload-artifact@v3
         with:
-          name: ${{ matrix.docker-image }}
-          path: ${{ matrix.docker-image }}_img
+          name: ${{ matrix.docker-image }}-${{ matix.os }}
+          path: ${{ matrix.docker-image }}-${{ matix.os }}_img
           retention-days: 1
 
   integration_tests:
@@ -102,6 +105,7 @@ jobs:
           "tests/tool_config.py",
         ]
         profile: ["mysql-rabbitmq", "postgres-redis"]
+        os: [alpine, debian]
       fail-fast: false
 
     steps:
@@ -115,9 +119,9 @@ jobs:
 
       - name: Load docker images
         run: |-
-             docker load -i nginx/nginx_img
-             docker load -i django/django_img
-             docker load -i integration-tests/integration-tests_img
+             docker load -i nginx/nginx-${{ matix.os }}_img
+             docker load -i django/django-${{ matix.os }}_img
+             docker load -i integration-tests/integration-tests-debian_img
              docker images
 
       - name: Set integration-test mode
@@ -128,18 +132,28 @@ jobs:
       - name: Start Dojo MySQL + RabbitMQ
         if: matrix.profile == 'mysql-rabbitmq'
         run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d mysql nginx celerybeat celeryworker mailhog uwsgi rabbitmq
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: ${{ matrix.os }}
 
       - name: Start Dojo PostgreSQL + Redis
         if: matrix.profile == 'postgres-redis'
         run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: ${{ matrix.os }}
 
       - name: Initialize
         run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from initializer initializer
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: ${{ matrix.os }}
 
       - name: Integration tests
         run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from integration-tests integration-tests
         env:
           DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
+          INTEGRATION_TESTS_VERSION: debian
 
       - name: Logs
         if: always()
