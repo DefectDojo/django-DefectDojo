@@ -1112,17 +1112,36 @@ class Tool_Type(models.Model):
         return self.name
 
 class Dedupe_Configuration(models.Model):
+    FINDING_CWE = 'cwe'
+    FINDING_LINE = 'line'
+    FINDING_FILE_PATH = 'file_path'
+    FINDING_VULNERABILITY_IDS = 'vulnerability_ids'
+    FINDING_SEVERITY = 'severity'
+    FINDING_VULN_ID_FROM_TOOL = 'vuln_id_from_tool'
+    FINDING_COMPONENT_NAME = 'component_name'
+    FINDING_UNIQUE_ID_FROM_TOOL = 'unique_id_from_tool'
+    FINDING_COMPONENT_VERSION = 'component_version'
+    FINDING_TITLE = 'title'
+    FINDING_DESCRIPTION = 'description'
+    HASHCODE_FIELDS_CHOICES = (
+        (FINDING_TITLE, FINDING_TITLE),
+        (FINDING_FILE_PATH, FINDING_FILE_PATH),
+        (FINDING_DESCRIPTION, FINDING_DESCRIPTION),
+        (FINDING_LINE, FINDING_LINE),
+        (FINDING_CWE, FINDING_CWE),
+        (FINDING_SEVERITY, FINDING_SEVERITY),
+        (FINDING_UNIQUE_ID_FROM_TOOL, FINDING_UNIQUE_ID_FROM_TOOL),
+        (FINDING_VULN_ID_FROM_TOOL, FINDING_VULN_ID_FROM_TOOL),
+        (FINDING_VULNERABILITY_IDS, FINDING_VULNERABILITY_IDS),
+        (FINDING_COMPONENT_NAME, FINDING_COMPONENT_NAME),
+        (FINDING_COMPONENT_VERSION, FINDING_COMPONENT_VERSION),
+    )
     scanner = models.OneToOneField(Test_Type,
                                       verbose_name=_('Scanner'),
                                       help_text=_("The name of the scanner where you set the hashcode generation"), 
                                       on_delete=models.CASCADE)
 
-    hashcode_fields = models.CharField(
-            max_length = 255,
-            null = True,
-            blank = True,
-            unique = False)
-
+    hashcode_fields = MultiSelectField(choices=HASHCODE_FIELDS_CHOICES, default=HASHCODE_FIELDS_CHOICES)
     class Meta:
         ordering = ['scanner']
 

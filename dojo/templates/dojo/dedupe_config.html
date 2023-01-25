@@ -36,10 +36,10 @@
                                     {% if "dojo.change_dedupe_config"|has_configuration_permission %}
                                     <a href="{% url 'edit_dedupe_config' conf.id %}"><b>{{ conf.scanner }}</b></a>
                                     {% else %}
-                                    {{ conf.scanner }}
+                                        {{ conf.scanner }}
                                     {% endif %}
                                 </td>
-                                <td>{% if conf.hashcode_fields %}{{ conf.hashcode_fields }}{% endif %}
+                                <td>{{ conf.hashcode_fields }}
                                 </td>
                             </tr>
                         {% endfor %}

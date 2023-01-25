@@ -50,18 +50,18 @@ def edit_dedupe_config(request, ttid):
             return HttpResponseRedirect(reverse('dedupe_config', ))
     else:
         tform = DedupeConfigForm(instance=dedupe_config)
-        print(tform)
 
     add_breadcrumb(title=_("Edit Deduplication Configuration"), top_level=False, request=request)
-
-    return render(request, 'dojo/edit_dedupe_config.html', {'tform': tform})
+    return render(request, 'dojo/edit_dedupe_config.html', {'tform': tform, 'conf': dedupe_config})
 
 
 @user_is_configuration_authorized('dojo.view_dedupe_configuration')
 def dedupe_config(request):
     all_test_types =  Test_Type.objects.all()
     existing_confs = Dedupe_Configuration.objects.all().order_by('scanner')
+
     existing_confs_scanner_names = list(map(lambda c: str(c.scanner), existing_confs))
+    # Add new deduplication configuration objects for each test type, if they don't exist
     for test_type in all_test_types:
         if test_type.name not in existing_confs_scanner_names:
             if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
@@ -70,12 +70,10 @@ def dedupe_config(request):
                     if dedupe_alg == 'hash_code':
                         if (test_type.name in settings.HASHCODE_FIELDS_PER_SCANNER):
                             preset_hash_code_config = settings.HASHCODE_FIELDS_PER_SCANNER[test_type.name]
-                            test = Dedupe_Configuration(scanner=test_type, hashcode_fields=preset_hash_code_config)
-                            test.save()
+                            new_dedupe_config = Dedupe_Configuration(scanner=test_type, hashcode_fields=preset_hash_code_config)
+                            new_dedupe_config.save()
     
     refreshed_confs = Dedupe_Configuration.objects.all().order_by('scanner')
-    for c in refreshed_confs:
-        print(c.hashcode_fields)
-    add_breadcrumb(title=_("Deduplication Config List"), top_level=not len(request.GET), request=request)
 
+    add_breadcrumb(title=_("Deduplication Config List"), top_level=not len(request.GET), request=request)
     return render(request, 'dojo/dedupe_config.html', {'confs': refreshed_confs})
