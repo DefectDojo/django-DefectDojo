@@ -293,15 +293,6 @@ class DojoDefaultReImporter(object):
             if create_finding_groups_for_all_findings or len(findings) > 1:
                 for finding in findings:
                     finding_helper.add_finding_to_auto_group(finding, group_by, **kwargs)
-            if push_to_jira:
-                if findings[0].finding_group is not None:
-                    jira_helper.push_to_jira(findings[0].finding_group)
-                else:
-                    jira_helper.push_to_jira(findings[0])
-
-        if is_finding_groups_enabled() and push_to_jira:
-            for finding_group in set([finding.finding_group for finding in reactivated_items + unchanged_items if finding.finding_group is not None]):
-                jira_helper.push_to_jira(finding_group)
 
         sync = kwargs.get('sync', False)
         if not sync:
@@ -344,10 +335,6 @@ class DojoDefaultReImporter(object):
                 note.save()
                 finding.notes.add(note)
                 mitigated_findings.append(finding)
-
-        if is_finding_groups_enabled() and push_to_jira:
-            for finding_group in set([finding.finding_group for finding in to_mitigate if finding.finding_group is not None]):
-                jira_helper.push_to_jira(finding_group)
 
         return mitigated_findings
 
