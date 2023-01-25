@@ -227,10 +227,6 @@ class DojoDefaultImporter(object):
             else:
                 old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
 
-        if is_finding_groups_enabled() and push_to_jira:
-            for finding_group in set([finding.finding_group for finding in old_findings if finding.finding_group is not None]):
-                jira_helper.push_to_jira(finding_group)
-
         return old_findings
 
     def import_scan(self, scan, scan_type, engagement, lead, environment, active=None, verified=None, tags=None, minimum_severity=None,
