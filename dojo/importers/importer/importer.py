@@ -8,7 +8,6 @@ from dojo.celery import app
 from django.core.exceptions import ValidationError
 from django.core import serializers
 import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from django.conf import settings
 from django.core.files.base import ContentFile
