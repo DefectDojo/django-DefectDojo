@@ -156,6 +156,7 @@ parameter `HASHCODE_FIELDS_PER_SCANNER` in
 ```json
 {"ScannerName":["field1", "field2"]}
 ```
+The environment variable will override the settings in `settings.dist.py`, replacing by matching the keys.
 
 The parameter `HASHCODE_ALLOWED_FIELDS` list the fields
 from finding table that were tested and are known to be working when
