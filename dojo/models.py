@@ -1913,7 +1913,9 @@ class Test(models.Model):
 
     @property
     def hash_code_fields(self):
+        
         hashCodeFields = None
+        matching_dedupe_confs = Dedupe_Configuration.objects.values().filter(scanner=self.test_type.id)
 
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER'):
             if (self.test_type.name in settings.HASHCODE_FIELDS_PER_SCANNER):
@@ -1922,6 +1924,10 @@ class Test(models.Model):
             elif (self.scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
                 deduplicationLogger.debug(f'using HASHCODE_FIELDS_PER_SCANNER for scan_type: {self.scan_type}')
                 hashCodeFields = settings.HASHCODE_FIELDS_PER_SCANNER[self.scan_type]
+        if len(matching_dedupe_confs) == 1:
+            hashCodeFields = matching_dedupe_confs[0]['hashcode_fields']
+            deduplicationLogger.debug(f'using Dedupe_Configuration for scan_type: {self.test_type.name}')
+
         else:
             deduplicationLogger.debug('Section HASHCODE_FIELDS_PER_SCANNER not found in settings.dist.py')
 
