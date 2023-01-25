@@ -173,11 +173,6 @@ class DojoDefaultImporter(object):
             if create_finding_groups_for_all_findings or len(findings) > 1:
                 for finding in findings:
                     finding_helper.add_finding_to_auto_group(finding, group_by, **kwargs)
-            if push_to_jira:
-                if findings[0].finding_group is not None:
-                    jira_helper.push_to_jira(findings[0].finding_group)
-                else:
-                    jira_helper.push_to_jira(findings[0])
 
         sync = kwargs.get('sync', False)
         if not sync:
