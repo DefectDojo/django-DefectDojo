@@ -4,7 +4,7 @@ services:
   integration-tests:
     build:
       context: ./
-      dockerfile: Dockerfile.integration-tests
+      dockerfile: "${INTEGRATION-TESTS_DOCKERFILE:-Dockerfile.integration-tests-debian}"
     image: "defectdojo/defectdojo-integration-tests:${INTEGRATION_TESTS_VERSION:-latest}"
     profiles: 
       - mysql-rabbitmq
