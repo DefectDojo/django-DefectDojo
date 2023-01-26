@@ -59,8 +59,8 @@ jobs:
           push: false
           tags: |
             ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
-          file: Dockerfile.${{ matix.docker-image }}-${{ matix.os }}
-          outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matix.os }}_img
+          file: Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
+          outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}_img
           cache-from: type=gha,scope=${{ matrix.docker-image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
           
@@ -68,8 +68,8 @@ jobs:
       - name: Upload image ${{ matrix.docker-image }} as artifact
         uses:  actions/upload-artifact@v3
         with:
-          name: ${{ matrix.docker-image }}-${{ matix.os }}
-          path: ${{ matrix.docker-image }}-${{ matix.os }}_img
+          name: ${{ matrix.docker-image }}
+          path: ${{ matrix.docker-image }}-${{ matrix.os }}_img
           retention-days: 1
 
   integration_tests:
@@ -119,8 +119,8 @@ jobs:
 
       - name: Load docker images
         run: |-
-             docker load -i nginx/nginx-${{ matix.os }}_img
-             docker load -i django/django-${{ matix.os }}_img
+             docker load -i nginx/nginx-${{ matrix.os }}_img
+             docker load -i django/django-${{ matrix.os }}_img
              docker load -i integration-tests/integration-tests-debian_img
              docker images
 
