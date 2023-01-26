@@ -79,32 +79,32 @@ jobs:
           docker-image: ${{ matrix.docker-image }}
         with:
           path: /tmp/.buildx-cache-${{ env.docker-image }}
-          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matix.os }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
+          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matix.os }}-${{ github.workflow }}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matix.os }}-${{ github.workflow }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matix.os }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ github.workflow }}-${{ github.sha }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ github.workflow }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}
 
       - name: Build
         id: docker_build
         uses: docker/build-push-action@v4
         env:
-          docker-image: ${{ matrix.docker-image }}-${{ matix.os }}
+          docker-image: ${{ matrix.docker-image }}
         with:
           context: .
           push: false
           tags: |
-            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:${{ matix.os }}
-          file: Dockerfile.${{ env.docker-image }}-${{ matix.os }}
-          outputs: type=docker,dest=${{ env.docker-image }}-${{ matix.os }}_img
+            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:${{ matrix.os }}
+          file: Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
+          outputs: type=docker,dest=${{ env.docker-image }}-${{ matrix.os }}_img
           cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
           cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
 
       - name: Upload image ${{ env.docker-image }} as artifact
         uses:  actions/upload-artifact@v3
         with:
-          name: ${{ matrix.docker-image }}-${{ matix.os }}
-          path: ${{ matrix.docker-image }}-${{ matix.os }}_img
+          name: ${{ matrix.docker-image }}
+          path: ${{ matrix.docker-image }}-${{ matrix.os }}_img
           retention-days: 1
 
   setting_minikube_cluster:
@@ -168,8 +168,8 @@ jobs:
       - name: Load docker images
         run: |-
              eval $(minikube docker-env)
-             docker load -i nginx/nginx-${{ matix.os }}_img
-             docker load -i django/django-${{ matix.os }}_img
+             docker load -i nginx/nginx-${{ matrix.os }}_img
+             docker load -i django/django-${{ matrix.os }}_img
              docker images
 
       - name: Configure HELM repos
@@ -192,7 +192,7 @@ jobs:
       #         kubectl create secret docker-registry defectdojoregistrykey --docker-username=${{ secrets.DOCKERHUB_USERNAME }} --docker-password=${{ secrets.DOCKERHUB_TOKEN }}
       #         kubectl get secrets
       - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
-        if: ${{ matix.os }} != 'alpine'
+        if: ${{ matrix.os }} != 'alpine'
         run: |-
              helm install \
                --timeout 800s \
@@ -206,7 +206,7 @@ jobs:
                # --set imagePullSecrets=defectdojoregistrykey
 
       - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
-        if: ${{ matix.os }} == 'alpine'
+        if: ${{ matrix.os }} == 'alpine'
         run: |-
              helm install \
                --timeout 800s \
@@ -218,7 +218,7 @@ jobs:
                ${{ env[matrix.brokers] }} \
                --set createSecret=true \
                # --set imagePullSecrets=defectdojoregistrykey \
-               --set tag=${{ matix.os }}
+               --set tag=${{ matrix.os }}
 
       - name: Check deployment status
         run: |-

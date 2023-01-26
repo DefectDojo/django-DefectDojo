@@ -52,8 +52,8 @@ jobs:
           push: false
           load: true
           tags: |
-            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:${{ matix.os }}
-          file: Dockerfile.${{ env.docker-image }}-${{ matix.os }}
+            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:${{ matrix.os }}
+          file: Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
 
           cache-from: type=gha
           cache-to: type=gha,mode=max
