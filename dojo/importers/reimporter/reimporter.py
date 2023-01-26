@@ -346,9 +346,9 @@ class DojoDefaultReImporter(object):
                 finding.notes.add(note)
                 mitigated_findings.append(finding)
 
-            if is_finding_groups_enabled() and push_to_jira:
-                for finding_group in set([finding.finding_group for finding in to_mitigate if finding.finding_group is not None]):
-                    jira_helper.push_to_jira(finding_group)
+        if is_finding_groups_enabled() and push_to_jira:
+            for finding_group in set([finding.finding_group for finding in to_mitigate if finding.finding_group is not None]):
+                jira_helper.push_to_jira(finding_group)
 
         return mitigated_findings
 

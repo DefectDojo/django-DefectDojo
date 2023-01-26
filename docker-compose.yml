@@ -130,7 +130,6 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   mysql:
-    platform: linux/x86_64
     image: mysql:5.7.41@sha256:f04fc2e2f01e65d6e2828b4cce2c4761d9258aee71d989e273b2ae309f44a945
     profiles: 
       - mysql-rabbitmq
