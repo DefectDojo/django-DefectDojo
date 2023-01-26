@@ -2,6 +2,7 @@ import base64
 import logging
 
 import dojo.finding.helper as finding_helper
+import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from dojo.decorators import dojo_async_task
 from dojo.celery import app
@@ -293,6 +294,16 @@ class DojoDefaultReImporter(object):
                 for finding in findings:
                     finding_helper.add_finding_to_auto_group(finding, group_by, **kwargs)
 
+            if push_to_jira:
+                if findings[0].finding_group is not None:
+                    jira_helper.push_to_jira(findings[0].finding_group)
+                else:
+                    jira_helper.push_to_jira(findings[0])
+
+            if is_finding_groups_enabled() and push_to_jira:
+                for finding_group in set([finding.finding_group for finding in reactivated_items + unchanged_items if finding.finding_group is not None]):
+                    jira_helper.push_to_jira(finding_group)
+
         sync = kwargs.get('sync', False)
         if not sync:
             serialized_new_items = [serializers.serialize('json', [finding, ]) for finding in new_items]
@@ -334,6 +345,10 @@ class DojoDefaultReImporter(object):
                 note.save()
                 finding.notes.add(note)
                 mitigated_findings.append(finding)
+
+            if is_finding_groups_enabled() and push_to_jira:
+                for finding_group in set([finding.finding_group for finding in to_mitigate if finding.finding_group is not None]):
+                    jira_helper.push_to_jira(finding_group)
 
         return mitigated_findings
 

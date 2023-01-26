@@ -8,6 +8,7 @@ from dojo.celery import app
 from django.core.exceptions import ValidationError
 from django.core import serializers
 import dojo.finding.helper as finding_helper
+import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -172,6 +173,11 @@ class DojoDefaultImporter(object):
             if create_finding_groups_for_all_findings or len(findings) > 1:
                 for finding in findings:
                     finding_helper.add_finding_to_auto_group(finding, group_by, **kwargs)
+            if push_to_jira:
+                if findings[0].finding_group is not None:
+                    jira_helper.push_to_jira(findings[0].finding_group)
+                else:
+                    jira_helper.push_to_jira(findings[0])
 
         sync = kwargs.get('sync', False)
         if not sync:
@@ -225,6 +231,10 @@ class DojoDefaultImporter(object):
                 old_finding.save(dedupe_option=False)
             else:
                 old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
+
+            if is_finding_groups_enabled() and push_to_jira:
+                for finding_group in set([finding.finding_group for finding in old_findings if finding.finding_group is not None]):
+                    jira_helper.push_to_jira(finding_group)
 
         return old_findings
 

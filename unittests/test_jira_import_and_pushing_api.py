@@ -107,7 +107,9 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # if yes, it means we have successfully populated the Epic Name custom field which is mandatory in JIRA
         jira_instance.default_issue_type = "Epic"
         jira_instance.save()
-        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
+
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
@@ -136,9 +138,11 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         return test_id
 
     def test_import_with_push_to_jira_is_false_but_push_all(self):
-        self.set_jira_push_all_issues(self.get_engagement(1))
-        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=False)
-        test_id = import0['test']
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.set_jira_push_all_issues(self.get_engagement(1))
+            import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=False)
+            test_id = import0['test']
+
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
         # by asserting full cassette is played we know issues have been updated in JIRA
@@ -323,8 +327,10 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_group_issue_count_in_test(test_id1, 0)
 
     def test_create_edit_update_finding(self):
-        import0 = self.import_scan_with_params(self.zap_sample5_filename)
-        test_id = import0['test']
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            import0 = self.import_scan_with_params(self.zap_sample5_filename)
+            test_id = import0['test']
+
         self.assert_jira_issue_count_in_test(test_id, 0)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
 
@@ -334,56 +340,70 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         # logger.debug('finding_id: %s', finding_id)
 
-        # use existing finding as template, but change some fields to make it not a duplicate
-        finding_details = self.get_finding_api(finding_id)
-        del finding_details['id']
-        del finding_details['push_to_jira']
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            # use existing finding as template, but change some fields to make it not a duplicate
+            finding_details = self.get_finding_api(finding_id)
+            del finding_details['id']
+            del finding_details['push_to_jira']
 
-        finding_details['title'] = 'jira api test 1'
-        self.post_new_finding_api(finding_details)
+            finding_details['title'] = 'jira api test 1'
+            self.post_new_finding_api(finding_details)
         self.assert_jira_issue_count_in_test(test_id, 0)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        finding_details['title'] = 'jira api test 2'
-        self.post_new_finding_api(finding_details, push_to_jira=True)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            finding_details['title'] = 'jira api test 2'
+            self.post_new_finding_api(finding_details, push_to_jira=True)
         self.assert_jira_issue_count_in_test(test_id, 1)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        finding_details['title'] = 'jira api test 3'
-        new_finding_json = self.post_new_finding_api(finding_details)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            finding_details['title'] = 'jira api test 3'
+            new_finding_json = self.post_new_finding_api(finding_details)
         self.assert_jira_issue_count_in_test(test_id, 1)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        self.patch_finding_api(new_finding_json['id'], {"push_to_jira": False})
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.patch_finding_api(new_finding_json['id'], {"push_to_jira": False})
         self.assert_jira_issue_count_in_test(test_id, 1)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
-        self.patch_finding_api(new_finding_json['id'], {"push_to_jira": True})
+
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.patch_finding_api(new_finding_json['id'], {"push_to_jira": True})
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
         pre_jira_status = self.get_jira_issue_status(new_finding_json['id'])
 
-        self.patch_finding_api(new_finding_json['id'], {"push_to_jira": True,
-                                                        "is_mitigated": True,
-                                                        "active": False})
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.patch_finding_api(new_finding_json['id'], {"push_to_jira": True,
+                                                            "is_mitigated": True,
+                                                            "active": False})
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
         post_jira_status = self.get_jira_issue_status(new_finding_json['id'])
         self.assertNotEqual(pre_jira_status, post_jira_status)
 
-        finding_details['title'] = 'jira api test 4'
-        new_finding_json = self.post_new_finding_api(finding_details)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            finding_details['title'] = 'jira api test 4'
+            new_finding_json = self.post_new_finding_api(finding_details)
         new_finding_id = new_finding_json['id']
         del new_finding_json['id']
 
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
-        self.put_finding_api(new_finding_id, new_finding_json, push_to_jira=False)
+
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.put_finding_api(new_finding_id, new_finding_json, push_to_jira=False)
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
-        self.put_finding_api(new_finding_id, new_finding_json, push_to_jira=True)
+
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.put_finding_api(new_finding_id, new_finding_json, push_to_jira=True)
         self.assert_jira_issue_count_in_test(test_id, 3)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
-        self.put_finding_api(new_finding_id, new_finding_json, push_to_jira=True)
+
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.put_finding_api(new_finding_id, new_finding_json, push_to_jira=True)
         self.assert_jira_issue_count_in_test(test_id, 3)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
 
@@ -515,23 +535,26 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         return test_id
 
     def test_import_with_push_to_jira_add_tags(self):
-        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
-        test_id = import0['test']
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
+            test_id = import0['test']
+
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        findings = self.get_test_findings_api(test_id)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            findings = self.get_test_findings_api(test_id)
 
-        finding = Finding.objects.get(id=findings['results'][0]['id'])
+            finding = Finding.objects.get(id=findings['results'][0]['id'])
 
-        tags = ['tag1', 'tag2']
-        response = self.post_finding_tags_api(finding.id, tags)
-        self.patch_finding_api(finding.id, {"push_to_jira": True})
+            tags = ['tag1', 'tag2']
+            response = self.post_finding_tags_api(finding.id, tags)
+            self.patch_finding_api(finding.id, {"push_to_jira": True})
 
-        # Connect to jira to get the new issue
-        jira_instance = jira_helper.get_jira_instance(finding)
-        jira = jira_helper.get_jira_connection(jira_instance)
-        issue = jira.issue(finding.jira_issue.jira_id)
+            # Connect to jira to get the new issue
+            jira_instance = jira_helper.get_jira_instance(finding)
+            jira = jira_helper.get_jira_connection(jira_instance)
+            issue = jira.issue(finding.jira_issue.jira_id)
 
         # Assert that the tags match
         self.assertEqual(issue.fields.labels, tags)
@@ -541,35 +564,38 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         return test_id
 
     def test_import_with_push_to_jira_update_tags(self):
-        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
-        test_id = import0['test']
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            import0 = self.import_scan_with_params(self.zap_sample5_filename, auto_create_context=True, push_to_jira=True)
+            test_id = import0['test']
+
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-        findings = self.get_test_findings_api(test_id)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            findings = self.get_test_findings_api(test_id)
+            finding = Finding.objects.get(id=findings['results'][0]['id'])
 
-        finding = Finding.objects.get(id=findings['results'][0]['id'])
+            tags = ['tag1', 'tag2']
+            response = self.post_finding_tags_api(finding.id, tags)
+            self.patch_finding_api(finding.id, {"push_to_jira": True})
 
-        tags = ['tag1', 'tag2']
-        response = self.post_finding_tags_api(finding.id, tags)
-        self.patch_finding_api(finding.id, {"push_to_jira": True})
-
-        # Connect to jira to get the new issue
-        jira_instance = jira_helper.get_jira_instance(finding)
-        jira = jira_helper.get_jira_connection(jira_instance)
-        issue = jira.issue(finding.jira_issue.jira_id)
+            # Connect to jira to get the new issue
+            jira_instance = jira_helper.get_jira_instance(finding)
+            jira = jira_helper.get_jira_connection(jira_instance)
+            issue = jira.issue(finding.jira_issue.jira_id)
 
         # Assert that the tags match
         self.assertEqual(issue.fields.labels, tags)
 
-        tags_new = tags + ['tag3', 'tag4']
-        response = self.post_finding_tags_api(finding.id, tags_new)
-        self.patch_finding_api(finding.id, {"push_to_jira": True})
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            tags_new = tags + ['tag3', 'tag4']
+            response = self.post_finding_tags_api(finding.id, tags_new)
+            self.patch_finding_api(finding.id, {"push_to_jira": True})
 
-        # Connect to jira to get the new issue
-        jira_instance = jira_helper.get_jira_instance(finding)
-        jira = jira_helper.get_jira_connection(jira_instance)
-        issue = jira.issue(finding.jira_issue.jira_id)
+            # Connect to jira to get the new issue
+            jira_instance = jira_helper.get_jira_instance(finding)
+            jira = jira_helper.get_jira_connection(jira_instance)
+            issue = jira.issue(finding.jira_issue.jira_id)
 
         # Assert that the tags match
         self.assertEqual(issue.fields.labels, tags_new)
