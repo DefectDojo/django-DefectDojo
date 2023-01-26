@@ -123,18 +123,23 @@ jobs:
           - databases: pgsql
             brokers: redis
             k8s: 'v1.22.0'
+            os: debian
           - databases: mysql
             brokers: rabbit
             k8s: 'v1.22.0'
+            os: debian
           - databases: pgsql
             brokers: rabbit
             k8s: 'v1.23.9'
+            os: debian
           - databases: mysql
             brokers: redis
             k8s: 'v1.23.9'
+            os: debian
           - databases: pgsqlha
             brokers: rabbit
             k8s: 'v1.23.9'
+            os: debian
           - databases: pgsql
             brokers: rabbit
             k8s: 'v1.23.9'
@@ -192,7 +197,6 @@ jobs:
       #         kubectl create secret docker-registry defectdojoregistrykey --docker-username=${{ secrets.DOCKERHUB_USERNAME }} --docker-password=${{ secrets.DOCKERHUB_TOKEN }}
       #         kubectl get secrets
       - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
-        if: ${{ matrix.os }} != 'alpine'
         run: |-
              helm install \
                --timeout 800s \
@@ -203,22 +207,8 @@ jobs:
                ${{ env[matrix.databases] }} \
                ${{ env[matrix.brokers] }} \
                --set createSecret=true \
+               --set tag=${{ matrix.os }} \
                # --set imagePullSecrets=defectdojoregistrykey
-
-      - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
-        if: ${{ matrix.os }} == 'alpine'
-        run: |-
-             helm install \
-               --timeout 800s \
-               defectdojo \
-               ./helm/defectdojo \
-               --set django.ingress.enabled=true \
-               --set imagePullPolicy=Never \
-               ${{ env[matrix.databases] }} \
-               ${{ env[matrix.brokers] }} \
-               --set createSecret=true \
-               # --set imagePullSecrets=defectdojoregistrykey \
-               --set tag=${{ matrix.os }}
 
       - name: Check deployment status
         run: |-

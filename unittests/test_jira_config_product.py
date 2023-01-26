@@ -81,7 +81,8 @@ class JIRAConfigProductTest(DojoTestCase):
 
         self.assertEqual(200, response.status_code)
         content = response.content.decode('utf-8')
-        self.assertTrue('Name or service not known' in content)
+        # debian throws 'Name or service not known' error and alpine 'Name does not resolve'
+        self.assertTrue(('Name or service not known' in content) or ('Name does not resolve' in content))
 
         # test raw connection error
         with self.assertRaises(requests.exceptions.RequestException):
