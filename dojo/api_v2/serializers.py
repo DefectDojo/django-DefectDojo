@@ -1277,7 +1277,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             is_risk_accepted = data.get('risk_accepted', self.instance.risk_accepted)
         else:
             is_active = data.get('active', True)
-            is_verified = data.get('verified', True)
+            is_verified = data.get('verified', False)
             is_duplicate = data.get('duplicate', False)
             is_false_p = data.get('false_p', False)
             is_risk_accepted = data.get('risk_accepted', False)
