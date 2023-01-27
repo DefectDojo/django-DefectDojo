@@ -32,7 +32,7 @@ class XanitizerParser(object):
         try:
             tree = ET.parse(filename)
         except SyntaxError as se:
-            raise se
+            raise ValueError(se)
 
         root = tree.getroot()
         if 'XanitizerFindingsList' not in root.tag:

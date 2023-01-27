@@ -203,4 +203,4 @@ class VCGParser(object):
         elif filename.name.lower().endswith('.csv'):
             return list(VCGCsvParser().parse(content, test).values())
         else:
-            raise Exception('Unknown File Format')
+            raise ValueError('Unknown File Format')

@@ -26,7 +26,7 @@ class TruffleHog3Parser(object):
             elif json_data.get('rule'):
                 self.get_finding_current(json_data, test, dupes)
             else:
-                raise Exception('Format is not recognized for Trufflehog3')
+                raise ValueError('Format is not recognized for Trufflehog3')
 
         return list(dupes.values())
 
