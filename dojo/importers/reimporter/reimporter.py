@@ -10,6 +10,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core import serializers
 from django.core.files.base import ContentFile
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from dojo.importers import utils as importer_utils
 from dojo.models import (BurpRawRequestResponse, FileUpload, Finding,
@@ -380,7 +381,10 @@ class DojoDefaultReImporter(object):
         parser = get_parser(scan_type)
         if hasattr(parser, 'get_tests'):
             logger.debug('REIMPORT_SCAN parser v2: Create parse findings')
-            tests = parser.get_tests(scan_type, scan)
+            try:
+                tests = parser.get_tests(scan_type, scan)
+            except ValueError as e:
+                raise ValidationError(e)
             # for now we only consider the first test in the list and artificially aggregate all findings of all tests
             # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
             # when there is more than 1 test
@@ -389,7 +393,10 @@ class DojoDefaultReImporter(object):
                 parsed_findings.extend(test_raw.findings)
         else:
             logger.debug('REIMPORT_SCAN: Parse findings')
-            parsed_findings = parser.get_findings(scan, test)
+            try:
+                parsed_findings = parser.get_findings(scan, test)
+            except ValueError as e:
+                raise ValidationError(e)
 
         logger.debug('REIMPORT_SCAN: Processing findings')
         new_findings = []
