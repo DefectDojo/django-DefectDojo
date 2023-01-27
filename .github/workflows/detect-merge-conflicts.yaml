@@ -1,8 +1,8 @@
 name: "Detect Merge Conflicts"
 on:
   workflow_dispatch:
-  push:
-    branch:
+  pull_request:
+    branches:
       - dev
       - master
       - release/*
