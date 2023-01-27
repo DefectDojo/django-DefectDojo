@@ -440,7 +440,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
+    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=False,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
                                 product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
                                 scan_date=None, service=None, forceActive=True, forceVerified=True):
@@ -492,7 +492,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         return self.import_scan(payload, expected_http_status_code)
 
-    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None,
+    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=False, push_to_jira=None,
                                   tags=None, close_old_findings=True, group_by=None, engagement_name=None, scan_date=None,
                                   product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
         payload = {
