@@ -2,7 +2,6 @@ import datetime
 from ..dojo_test_case import DojoTestCase
 from dojo.models import Test, Engagement, Product, Finding
 from dojo.tools.generic.parser import GenericParser
-from django.core.exceptions import ValidationError
 
 
 class TestFile(object):
@@ -639,13 +638,13 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
     def test_parse_json_empty_finding(self):
         file = open("unittests/scans/generic/generic_empty.json")
         parser = GenericParser()
-        with self.assertRaisesMessage(ValidationError,
+        with self.assertRaisesMessage(ValueError,
                 "Required fields are missing: ['title', 'severity', 'description']"):
             findings = parser.get_findings(file, Test())
 
     def test_parse_json_invalid_finding(self):
         file = open("unittests/scans/generic/generic_invalid.json")
         parser = GenericParser()
-        with self.assertRaisesMessage(ValidationError,
+        with self.assertRaisesMessage(ValueError,
                 "Not allowed fields are present: ['invalid_field', 'last_status_update']"):
             findings = parser.get_findings(file, Test())

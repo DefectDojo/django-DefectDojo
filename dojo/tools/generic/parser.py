@@ -7,7 +7,6 @@ from cvss import parser as cvss_parser
 from dateutil.parser import parse
 from dojo.models import Endpoint, Finding
 from dojo.tools.parser_test import ParserTest
-from django.core.exceptions import ValidationError
 
 
 class GenericParser(object):
@@ -76,7 +75,7 @@ class GenericParser(object):
                 if field not in item.keys():
                     missing.append(field)
             if missing:
-                raise ValidationError(f"Required fields are missing: {missing}")
+                raise ValueError(f"Required fields are missing: {missing}")
 
             # check for allowed keys
             allowed = required + ['date', 'cwe', 'cve', 'cvssv3', 'cvssv3_score', 'mitigation', 'impact',
@@ -92,7 +91,7 @@ class GenericParser(object):
                 if field not in allowed:
                     not_allowed.append(field)
             if not_allowed:
-                raise ValidationError(f"Not allowed fields are present: {not_allowed}")
+                raise ValueError(f"Not allowed fields are present: {not_allowed}")
 
             finding = Finding(**item)
 
