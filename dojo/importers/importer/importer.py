@@ -12,7 +12,6 @@ import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 from dojo.models import (BurpRawRequestResponse, FileUpload,
                          Finding, Test, Test_Import, Test_Type)
@@ -261,7 +260,7 @@ class DojoDefaultImporter(object):
             try:
                 tests = parser.get_tests(scan_type, scan)
             except ValueError as e:
-                logger.info(str(e))
+                logger.warning(e)
                 raise ValidationError(e)
             # for now we only consider the first test in the list and artificially aggregate all findings of all tests
             # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
@@ -310,6 +309,7 @@ class DojoDefaultImporter(object):
             try:
                 parsed_findings = parser.get_findings(scan, test)
             except ValueError as e:
+                logger.warning(e)
                 raise ValidationError(e)
 
         logger.debug('IMPORT_SCAN: Processing findings')

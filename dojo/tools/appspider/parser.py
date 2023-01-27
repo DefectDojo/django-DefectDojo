@@ -1,5 +1,3 @@
-from xml.dom import NamespaceErr
-
 import html2text
 from defusedxml import ElementTree
 

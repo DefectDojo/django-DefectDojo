@@ -10,7 +10,6 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core import serializers
 from django.core.files.base import ContentFile
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 from dojo.importers import utils as importer_utils
 from dojo.models import (BurpRawRequestResponse, FileUpload, Finding,
@@ -384,6 +383,7 @@ class DojoDefaultReImporter(object):
             try:
                 tests = parser.get_tests(scan_type, scan)
             except ValueError as e:
+                logger.warning(e)
                 raise ValidationError(e)
             # for now we only consider the first test in the list and artificially aggregate all findings of all tests
             # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
@@ -396,6 +396,7 @@ class DojoDefaultReImporter(object):
             try:
                 parsed_findings = parser.get_findings(scan, test)
             except ValueError as e:
+                logger.warning(e)
                 raise ValidationError(e)
 
         logger.debug('REIMPORT_SCAN: Processing findings')
