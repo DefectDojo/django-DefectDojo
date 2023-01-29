@@ -269,18 +269,13 @@
     {% endblock metrics %}
     <script>
         $(function () {
-            var critical = "{{critical}}";
-            var high = "{{high}}";
-            var medium = "{{medium}}";
-            var low = "{{low}}";
-            var info = "{{info}}";
-            homepage_pie_chart(critical, high, medium, low, info);
+            homepage_pie_chart("{{critical}}", "{{high}}", "{{medium}}", "{{low}}", "{{info}}");
 
-            critical = [];
-            high = [];
-            medium = [];
-            low = [];
-            info = [];
+            let critical = [];
+            let high = [];
+            let medium = [];
+            let low = [];
+            let info = [];
             {% for month in by_month %}
                 month = {{month|safe}};
                 ttp = new Date(month['y'] + '-01').getTime();
@@ -291,9 +286,9 @@
             {% endfor %}
             homepage_severity_plot(critical, high, medium, low);
 
-            {%  if punchcard %}
+            {% if punchcard %}
                 punchcard("#punchcard", {{ punchcard|safe }}, {{ ticks|safe }});
-            {%  endif %}
+            {% endif %}
         });
 
     </script>

@@ -742,7 +742,6 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
 
         start_of_week = timezone.make_aware(datetime.combine(first_sunday, datetime.min.time()))
         start_of_next_week = start_of_week + relativedelta(weeks=1)
-        day_counts = [0, 0, 0, 0, 0, 0, 0]
 
         for day in severities_by_day:
             if view == 'Finding':
