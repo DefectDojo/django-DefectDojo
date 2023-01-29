@@ -39,7 +39,7 @@ class TestBulkRiskAcceptanceApi(APITestCase):
                                          target_start=datetime.date(2000, 1, 1), target_end=datetime.date(2000, 2, 1))
 
         def create_finding(test: Test, reporter: User, cve: str) -> Finding:
-            return Finding(test=test, title='Finding {}'.format(cve), cve=cve, severity='High',
+            return Finding(test=test, title='Finding {}'.format(cve), cve=cve, severity='High', verified=True,
                            description='Hello world!', mitigation='Delete system32', impact='Everything',
                            reporter=reporter, numerical_severity='S1', static_finding=True, dynamic_finding=False)
 

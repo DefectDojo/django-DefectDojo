@@ -1,7 +1,6 @@
 name: Lint Helm chart
 on:
   pull_request:
-  push:
     branches:
       - master
       - dev

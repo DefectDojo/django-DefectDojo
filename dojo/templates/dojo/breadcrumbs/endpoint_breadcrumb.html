@@ -9,7 +9,7 @@
     {% if host_view %}
       <li><a data-toggle="tooltip" data-placement="top" title="Test" href="{% url 'view_endpoint_host' endpoint.id %}">{{endpoint.host}}</a></li>
     {% else %}
-      <li><a data-toggle="tooltip" data-placement="top" title="Test" href="{% url 'view_endpoint' endpoint.id %}">{{endpoint}}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a></li>
+      <li><a data-toggle="tooltip" data-placement="top" title="Test" href="{% url 'view_endpoint' endpoint.id %}">{{endpoint}}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a></li>
     {% endif %}
   {% endif %}
   {% if product_tab.title %}
