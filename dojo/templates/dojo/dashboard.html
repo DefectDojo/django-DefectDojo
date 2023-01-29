@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load authorization_tags %}
+{% load i18n %}
 {% load static %}
 
 {% block add_styles %}
@@ -23,13 +24,13 @@
                                 </div>
                                 <div class="col-xs-9 text-right">
                                     <div class="huge">{{ engagement_count }}</div>
-                                    <div>Active Engagements</div>
+                                    <div>{% trans "Active Engagements" %}</div>
                                 </div>
                             </div>
                         </div>
                         <a href="{% url 'engagement' %}">
                             <div class="panel-footer">
-                                <span class="pull-left">View Engagement Details</span>
+                                <span class="pull-left">{% trans "View Engagement Details" %}</span>
                                 <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
                                 <div class="clearfix"></div>
                             </div>
@@ -47,13 +48,13 @@
                                 </div>
                                 <div class="col-xs-9 text-right">
                                     <div class="huge">{{ finding_count }}</div>
-                                    <div>Last Seven Days</div>
+                                    <div>{% trans "Last Seven Days" %}</div>
                                 </div>
                             </div>
                         </div>
                         <a href="{% url 'all_findings' %}?duplicate=2&date=2&o=-date">
                             <div class="panel-footer">
-                                <span class="pull-left">View Finding Details</span>
+                                <span class="pull-left">{% trans "View Finding Details" %}</span>
                                 <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
                                 <div class="clearfix"></div>
                             </div>
@@ -71,13 +72,13 @@
                                 </div>
                                 <div class="col-xs-9 text-right">
                                     <div class="huge">{{ mitigated_count }}</div>
-                                    <div>Closed In Last Seven Days</div>
+                                    <div>{% trans "Closed In Last Seven Days" %}</div>
                                 </div>
                             </div>
                         </div>
                         <a href="{% url 'closed_findings' %}?duplicate=2&mitigated=2">
                             <div class="panel-footer">
-                                <span class="pull-left">View Finding Details</span>
+                                <span class="pull-left">{% trans "View Finding Details" %}</span>
                                 <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
                                 <div class="clearfix"></div>
                             </div>
@@ -95,13 +96,13 @@
                                 </div>
                                 <div class="col-xs-9 text-right">
                                     <div class="huge">{{ accepted_count }}</div>
-                                    <div>Risk Accepted In Last Seven Days</div>
+                                    <div>{% trans "Risk Accepted In Last Seven Days" %}</div>
                                 </div>
                             </div>
                         </div>
                         <a href="{% url 'accepted_findings' %}?duplicate=2&risk_acceptance__created__date=2">
                             <div class="panel-footer">
-                                <span class="pull-left">View Finding Details</span>
+                                <span class="pull-left">{% trans "View Finding Details" %}</span>
                                 <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
                                 <div class="clearfix"></div>
                             </div>
@@ -117,7 +118,7 @@
                 <div class="col-lg-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Historical Finding Severity
+                            {% trans "Historical Finding Severity" %}
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -132,7 +133,7 @@
                 <div class="col-lg-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Reported Finding Severity by Month
+                            {% trans "Reported Finding Severity by Month" %}
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -152,20 +153,20 @@
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Unassigned Answered Engagement Questionnaires
+                            {% trans "Unassigned Answered Engagement Questionnaires" %}
                         </div>
                         <div class="panel-body">
                             {% if surveys %}
                                 <table id="surveys" class="tablesorter-bootstrap table table-condensed table-striped">
                                     <thead>
                                         <tr>
-                                            <th>Name</th>
-                                            <th>Product</th>
-                                            <th>Engagement</th>
-                                            <th>Responder</th>
-                                            <th>Status</th>
-                                            <th>Completion Date</th>
-                                            <th>Actions</th>
+                                            <th>{% trans "Name" %}</th>
+                                            <th>{% trans "Product" %}</th>
+                                            <th>{% trans "Engagement" %}</th>
+                                            <th>{% trans "Responder" %}</th>
+                                            <th>{% trans "Status" %}</th>
+                                            <th>{% trans "Completion" %} Date</th>
+                                            <th>{% trans "Actions" %}</th>
                                         </tr>
                                     </thead>
                                     {% for survey in surveys %}
@@ -185,14 +186,14 @@
                                                 {% if survey.responder %}
                                                     {{ survey.responder }}
                                                 {% else %}
-                                                    Anonymous
+                                                    {% trans "Anonymous" %}
                                                 {% endif %}
                                             </td>
                                             <td>
                                                 {% if survey.completed %}
-                                                    <span class="pass_fail Pass">Completed</span>
+                                                    <span class="pass_fail Pass">{% trans "Completed" %}</span>
                                                 {% else %}
-                                                    <span class="pass_fail">Unanswered</span>
+                                                    <span class="pass_fail">{% trans "Unanswered" %}</span>
                                                 {% endif %}
                                             </td>
                                             <td>{{ survey.answered_on }}</td>
@@ -200,15 +201,15 @@
                                                 <div class="btn-group">
                                                     {% if survey.engagement %}
                                                         <a class="btn btn-sm btn-secondary"
-                                                        href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}"> View Responses </a>
+                                                        href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{% trans "View Responses" %}</a>
                                                         <a class="btn btn-sm btn-info"
-                                                        href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign"> Assign User </a>
+                                                        href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign">{% trans "Assign User" %}</a>
                                                     {% else %}
                                                         <a class="btn btn-sm btn-secondary"
-                                                        href="/empty_questionnaire/{{ survey.id }}"> View Responses </a>
-                                                        <a class="btn btn-sm btn-success" href="empty_questionnaire/{{ survey.id }}/new_engagement">Create Engagement</a>
+                                                        href="/empty_questionnaire/{{ survey.id }}">{% trans "View Responses" %}</a>
+                                                        <a class="btn btn-sm btn-success" href="empty_questionnaire/{{ survey.id }}/new_engagement">{% trans "Create Engagement" %}</a>
                                                         <button class="btn btn-sm btn-info" disabled
-                                                        href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign"> Assign User </button>
+                                                        href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign">{% trans "Assign User" %}</button>
                                                     {% endif %}
                                                 </div>
                                             </td>
@@ -217,7 +218,7 @@
                                 </table>
                             {% else %}
                                 <div class="panel-body">
-                                    <p>No questionnaires found.</p>
+                                    <p>{% trans "No questionnaires found." %}</p>
                                 </div>
                             {% endif %}
                         </div>
@@ -232,14 +233,14 @@
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Weekly activity, displayed by day, of findings you reported.*
+                            {% trans "Weekly activity, displayed by day, of findings you reported." %}*
                         </div>
                         <div class="panel-body">
                             <div class="chart" id="punchcard"></div>
-                            <p class="text-center text-muted small">Week begins on date displayed.</p>
+                            <p class="text-center text-muted small">{% trans "Week begins on date displayed." %}</p>
                             <p>
                                 <br/>
-                                <span class="text-muted small">* Weeks are only displayed if findings are available.</span>
+                                <span class="text-muted small">* {% trans "Weeks are only displayed if findings are available." %}</span>
                             </p>
                         </div>
                     </div>
