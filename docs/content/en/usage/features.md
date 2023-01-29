@@ -88,7 +88,12 @@ Note that deduplication can never occur across different products.
 
 The behavior of the deduplication can be configured for each parser in
 settings.dist.py (or settings.py after install) by configuring the
-`DEDUPLICATION_ALGORITHM_PER_PARSER` variable.
+`DEDUPLICATION_ALGORITHM_PER_PARSER` variable, or via the env variable (useful for Kubernetes deployments) `DD_DEDUPLICATION_ALGORITHM_PER_PARSER` with a JSON string like
+```json
+{"ScannerName":"algorithm"}
+```
+The environment variable will override the settings in `settings.dist.py`, replacing by matching the keys.
+
 
 The available algorithms are:
 
