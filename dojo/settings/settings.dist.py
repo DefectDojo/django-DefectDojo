@@ -263,7 +263,9 @@ env = environ.Env(
     # You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
     DD_ADDITIONAL_HEADERS=(dict, {}),
     # Set fields used by the hashcode generator for deduplication, via en env variable that contains a JSON string
-    DD_HASHCODE_FIELDS_PER_SCANNER=(str, '')
+    DD_HASHCODE_FIELDS_PER_SCANNER=(str, ''),
+    # Set deduplication algorithms per parser, via en env variable that contains a JSON string
+    DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, '')
 )
 
 
@@ -1418,6 +1420,14 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
     'Wpscan': DEDUPE_ALGO_HASH_CODE,
 }
+
+# Override the hardcoded settings here via the env var
+if len(env('DD_DEDUPLICATION_ALGORITHM_PER_PARSER')) > 0:
+    env_dedup_algorithm_per_parser = json.loads(env('DD_DEDUPLICATION_ALGORITHM_PER_PARSER'))
+    for key, value in env_dedup_algorithm_per_parser.items():
+        if key in DEDUPLICATION_ALGORITHM_PER_PARSER:
+            print("Replacing {} with value {} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER".format(key, value))
+            DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
 
