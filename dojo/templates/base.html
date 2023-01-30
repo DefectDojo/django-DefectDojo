@@ -1072,7 +1072,7 @@
                             var description = elem.fields.description
                             var display_description = description ? description.length < 100 ? description : description.trim().substring(0,100).trim(this) + '...': ''
                             var dropdown_alert = "alert-list" + i;
-                            $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa fa-' + htmlEscape(elem.fields.icon) +
+                            $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa-solid fa-' + htmlEscape(elem.fields.icon) +
                                                             ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert +
                                                             ' title="' + htmlEscape(display_description) + '"></a><span class="pull-right text-muted small">' +
                                                         htmlEscape(elem.fields.source) + '</span></div></li><li class="divider"></li>');
