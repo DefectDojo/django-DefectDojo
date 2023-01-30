@@ -122,7 +122,7 @@ jobs:
             ${{ runner.os }}-buildx-${{ env.docker-image }}-
 
       - name: Build and push images
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         env:
           REPO_ORG: ${{ env.repoorg }}
           docker-image: ${{ matrix.docker-image }}
