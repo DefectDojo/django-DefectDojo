@@ -143,7 +143,7 @@ def jira_status_reconciliation(*args, **kwargs):
             if action == 'import_status_from_jira':
                 message_action = 'deactivating' if find.active else 'reactivating'
 
-                status_changed = jira_helper.process_resolution_from_jira(find, resolution_id, resolution_name, assignee_name, issue_from_jira.fields.updated) if not dryrun else 'dryrun'
+                status_changed = jira_helper.process_resolution_from_jira(find, resolution_id, resolution_name, assignee_name, issue_from_jira.fields.updated, find.jira_issue) if not dryrun else 'dryrun'
                 if status_changed:
                     message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s finding in defectdojo;%s' % \
                         (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, flag1, flag2, flag3,

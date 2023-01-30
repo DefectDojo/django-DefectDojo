@@ -20,6 +20,7 @@ services:
       - "defectdojo_media_integration_tests:${DD_MEDIA_ROOT:-/app/media}"
     environment:
       DD_BASE_URL: 'http://nginx:8080/'
+      DD_SECURE_CROSS_ORIGIN_OPENER_POLICY: 'None'
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-AdminsLoveIntegrationtests!}"
       DD_INTEGRATION_TEST_FILENAME: "${DD_INTEGRATION_TEST_FILENAME}"
@@ -34,6 +35,7 @@ services:
     environment:
       DD_DEBUG: 'True'
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
+      DD_SECURE_CROSS_ORIGIN_OPENER_POLICY: 'None'
       DD_SECRET_KEY: "${DD_SECRET_KEY:-.}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
   celerybeat:
