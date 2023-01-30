@@ -1063,7 +1063,7 @@
                 $('.has-popover').popover({'trigger':'hover'});
                 {% if request.user.is_authenticated and not 'DISABLE_ALERT_COUNTER'|setting_enabled %}
                     function get_alerts() {
-                        $('.dropdown-alerts').html('<div class="text-center"><i class="fa fa-spin fa-spinner"></i></div>');
+                        $('.dropdown-alerts').html('<div class="text-center"><i class="fa-solid fa-spinner fa-spin"></i></div>');
                         $.get("{% url 'alerts_json' %}?limit=12", function (data) {
                             $('.dropdown-alerts').empty();
                             $.each(data, function(i, elem) {
