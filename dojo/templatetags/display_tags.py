@@ -270,7 +270,6 @@ def finding_sla(finding):
         status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
         if find_sla and find_sla < 0:
             status = "red"
-            find_sla = abs(find_sla)
             status_text = 'Overdue: Remediation for ' + severity.lower() + ' findings in ' + str(
                 sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
 
