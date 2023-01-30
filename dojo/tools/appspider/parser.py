@@ -1,5 +1,3 @@
-from xml.dom import NamespaceErr
-
 import html2text
 from defusedxml import ElementTree
 
@@ -27,8 +25,8 @@ class AppSpiderParser(object):
         root = vscan.getroot()
 
         if "VulnSummary" not in str(root.tag):
-            raise NamespaceErr('Please ensure that you are uploading AppSpider\'s VulnerabilitiesSummary.xml file.'
-                               'At this time it is the only file that is consumable by DefectDojo.')
+            raise ValueError('Please ensure that you are uploading AppSpider\'s VulnerabilitiesSummary.xml file.'
+                             'At this time it is the only file that is consumable by DefectDojo.')
 
         dupes = dict()
 

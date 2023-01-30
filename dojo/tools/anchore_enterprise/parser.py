@@ -66,7 +66,7 @@ class AnchoreEnterpriseParser:
                                         find.unsaved_vulnerability_ids = [vulnerability_id]
                                     items.append(find)
                             except (KeyError, IndexError) as err:
-                                raise Exception("Invalid format: {} key not found".format(err))
+                                raise ValueError("Invalid format: {} key not found".format(err))
         except AttributeError as err:
             # import empty policies without error (e.g. policies or images objects are not a dictionary)
             logger.warning('Exception at %s', 'parsing anchore policy', exc_info=err)
