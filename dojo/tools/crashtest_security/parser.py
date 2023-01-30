@@ -155,7 +155,7 @@ class CrashtestSecurityXmlParser(object):
         try:
             tree = ET.parse(xml_output)
         except SyntaxError as se:
-            raise se
+            raise ValueError(se)
 
         return tree
 
@@ -238,4 +238,4 @@ class CrashtestSecurityParser(object):
         elif filename.name.lower().endswith('.json'):
             return CrashtestSecurityJsonParser().get_findings(filename, test)
         else:
-            raise Exception('Unknown File Format')
+            raise ValueError('Unknown File Format')

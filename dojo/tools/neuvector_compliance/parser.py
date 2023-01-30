@@ -23,7 +23,7 @@ def parse_json(json_output):
         except:
             tree = json.loads(data)
     except:
-        raise Exception("Invalid format")
+        raise ValueError("Invalid format")
 
     return tree
 
@@ -144,4 +144,4 @@ class NeuVectorComplianceParser(object):
         if filename.name.lower().endswith('.json'):
             return parse(filename, test)
         else:
-            raise Exception('Unknown File Format')
+            raise ValueError('Unknown File Format')
