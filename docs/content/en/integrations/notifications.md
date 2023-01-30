@@ -54,6 +54,12 @@ The bot token has to be chosen and put in your System Settings
 
 ![Slack token](../../images/slack_tokens.png)
 
+#### What it generally looks like
+
+![Add Product](../../images/slack_add_product.png)
+
+![Import Scan](../../images/slack_import_scan.png)
+
 ### Microsoft Teams
 
 To activate notifications to Microsoft Teams, you have to:
