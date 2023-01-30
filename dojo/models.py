@@ -2065,7 +2065,7 @@ class Finding(models.Model):
                                  help_text=_("Denotes if this flaw is active or not."))
     # note that false positive findings cannot be verified
     # in defectdojo verified means: "we have verified the finding and it turns out that it's not a false positive"
-    verified = models.BooleanField(default=True,
+    verified = models.BooleanField(default=False,
                                    verbose_name=_('Verified'),
                                    help_text=_("Denotes if this flaw has been manually verified by the tester."))
     false_p = models.BooleanField(default=False,

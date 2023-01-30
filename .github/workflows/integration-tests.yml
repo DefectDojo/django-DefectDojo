@@ -5,7 +5,6 @@ name: Integration tests
 on:
   workflow_dispatch:
   pull_request:
-  push:
     branches:
       - master
       - dev
@@ -100,6 +99,7 @@ jobs:
           "tests/dedupe_test.py",
           "tests/check_various_pages.py",
           "tests/notifications_test.py",
+          "tests/tool_config.py",
         ]
         profile: ["mysql-rabbitmq", "postgres-redis"]
       fail-fast: false

@@ -386,6 +386,12 @@ form.metric_form p label {
     margin: -10px 1px 10px;
 }
 
+.error-page-box {
+    display: inline-block;
+    vertical-align: middle;
+    padding-right: 25px;
+}
+
 .inline-block {
     display: inline-block;
 }

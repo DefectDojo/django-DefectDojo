@@ -58,4 +58,4 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 
 import debug_toolbar
-EXTRA_URL_PATTERNS = [url(r"^__debug__/", include(debug_toolbar.urls))]
+EXTRA_URL_PATTERNS = [re_path(r"^__debug__/", include(debug_toolbar.urls))]

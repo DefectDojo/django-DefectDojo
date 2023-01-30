@@ -42,7 +42,7 @@ class CheckovParser(object):
             except:
                 deserialized = json.loads(data)
         except:
-            raise Exception("Invalid format")
+            raise ValueError("Invalid format")
 
         return [deserialized] if type(deserialized) is not list else deserialized
 

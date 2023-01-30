@@ -48,14 +48,6 @@ class PersistentRemoteUserMiddleware(RemoteUserMiddleware):
 
 
 class RemoteUserBackend(OriginalRemoteUserBackend):
-    # This part can be removed during the upgrade to Django 4.1 or higher. Older
-    # versions (e.g. 3.2) is calling `configure_user` only for new users. In 4.1
-    # this behavior is changed: `configure_user` is call every time.
-    # https://github.com/django/django/pull/15492
-    def authenticate(self, request, remote_user):
-        user = super().authenticate(request, remote_user)
-        return self.configure_user(request, user)
-
     def configure_user(self, request, user, created=True):
         changed = False
 
