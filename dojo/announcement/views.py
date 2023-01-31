@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 from django.http import HttpResponseRedirect
 from dojo.utils import add_breadcrumb
 
@@ -55,7 +56,7 @@ def configure_announcement(request):
             )
             return HttpResponseRedirect(reverse("configure_announcement"))
 
-    add_breadcrumb(title=_("Announcement Configuration"), top_level=True, request=request)
+    add_breadcrumb(title=gettext("Announcement Configuration"), top_level=True, request=request)
     return render(request, 'dojo/announcement.html', {
         'form': form,
         'remove': remove

@@ -3117,11 +3117,6 @@ msgid ""
 msgstr ""
 
 #: dojo/templates/dojo/delete_product_type.html
-#: dojo/templates/dojo/dismiss_announcement.html
-msgid "Danger Zone"
-msgstr ""
-
-#: dojo/templates/dojo/delete_product_type.html
 #: dojo/templates/dojo/delete_user.html
 msgid "No relationships found."
 msgstr ""
