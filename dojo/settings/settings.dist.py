@@ -262,6 +262,10 @@ env = environ.Env(
     DD_API_TOKENS_ENABLED=(bool, True),
     # You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
     DD_ADDITIONAL_HEADERS=(dict, {}),
+    # Set fields used by the hashcode generator for deduplication, via en env variable that contains a JSON string
+    DD_HASHCODE_FIELDS_PER_SCANNER=(str, ''),
+    # Set deduplication algorithms per parser, via en env variable that contains a JSON string
+    DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, '')
 )
 
 
@@ -1239,6 +1243,14 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Wpscan': ['title', 'description', 'severity'],
 }
 
+# Override the hardcoded settings here via the env var
+if len(env('DD_HASHCODE_FIELDS_PER_SCANNER')) > 0:
+    env_hashcode_fields_per_scanner = json.loads(env('DD_HASHCODE_FIELDS_PER_SCANNER'))
+    for key, value in env_hashcode_fields_per_scanner.items():
+        if key in HASHCODE_FIELDS_PER_SCANNER:
+            print("Replacing {} with value {} from env var DD_HASHCODE_FIELDS_PER_SCANNER".format(key, value))
+            HASHCODE_FIELDS_PER_SCANNER[key] = value
+
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
 # If False and cwe = 0, then the hash_code computation will fallback to legacy algorithm for the concerned finding
 # Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
@@ -1409,6 +1421,14 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
     'Wpscan': DEDUPE_ALGO_HASH_CODE,
 }
+
+# Override the hardcoded settings here via the env var
+if len(env('DD_DEDUPLICATION_ALGORITHM_PER_PARSER')) > 0:
+    env_dedup_algorithm_per_parser = json.loads(env('DD_DEDUPLICATION_ALGORITHM_PER_PARSER'))
+    for key, value in env_dedup_algorithm_per_parser.items():
+        if key in DEDUPLICATION_ALGORITHM_PER_PARSER:
+            print("Replacing {} with value {} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER".format(key, value))
+            DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
 

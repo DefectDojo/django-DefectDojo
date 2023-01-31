@@ -75,13 +75,13 @@ Example of JSON format:
 }
 ```
 
-This parser support an attributes that accept files as Base64 strings. These files are attached to the respective findings.
+This parser supports an attributes that accept files as Base64 strings. These files are attached to the respective findings.
 
 Example:
 
 ```JSON
 {
-    "title": "My wonderful report",
+    "name": "My wonderful report",
     "findings": [
         {
             "title": "Vuln with image",
@@ -94,6 +94,19 @@ Example:
                 }
             ]
         }
+    ]
+}
+```
+
+This parser supports an attribute `name` and `type` to be able to define `TestType`. Based on this, you can define custom `HASHCODE_FIELDS` or `DEDUPLICATION_ALGORITHM` in the settings.
+
+Example:
+
+```JSON
+{
+    "name": "My wonderful report",
+    "type": "My custom Test type",
+    "findings": [
     ]
 }
 ```

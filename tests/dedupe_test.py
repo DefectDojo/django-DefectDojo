@@ -272,11 +272,11 @@ class DedupeTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_import_same_eng_tests(self):
-        logger.debug("Importing reports")
-        # First test : Immuniweb Scan (dynamic)
-
+        """Test different scanners - different engagement - dynamic"""
         driver = self.driver
         self.goto_active_engagements_overview(driver)
+
+        # First test : Immuniweb Scan (dynamic)
         driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Same Eng Test").click()
         driver.find_element(By.PARTIAL_LINK_TEXT, "Same Eng Test 1").click()
         driver.find_element(By.ID, "dropdownMenu1").click()

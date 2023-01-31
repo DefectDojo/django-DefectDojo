@@ -257,7 +257,11 @@ class DojoDefaultImporter(object):
         parser = get_parser(scan_type)
         if hasattr(parser, 'get_tests'):
             logger.debug('IMPORT_SCAN parser v2: Create Test and parse findings')
-            tests = parser.get_tests(scan_type, scan)
+            try:
+                tests = parser.get_tests(scan_type, scan)
+            except ValueError as e:
+                logger.warning(e)
+                raise ValidationError(e)
             # for now we only consider the first test in the list and artificially aggregate all findings of all tests
             # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
             # when there is more than 1 test
@@ -302,7 +306,11 @@ class DojoDefaultImporter(object):
 
             logger.debug('IMPORT_SCAN: Parse findings')
             parser = get_parser(scan_type)
-            parsed_findings = parser.get_findings(scan, test)
+            try:
+                parsed_findings = parser.get_findings(scan, test)
+            except ValueError as e:
+                logger.warning(e)
+                raise ValidationError(e)
 
         logger.debug('IMPORT_SCAN: Processing findings')
         new_findings = []

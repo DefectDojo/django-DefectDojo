@@ -75,7 +75,11 @@ class DojoDefaultReImporter(object):
 
             if item.dynamic_finding:
                 for e in item.unsaved_endpoints:
-                    e.clean()
+                    try:
+                        e.clean()
+                    except ValidationError as err:
+                        logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
+                                       "{}".format(err))
 
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
@@ -89,6 +93,11 @@ class DojoDefaultReImporter(object):
                 finding = findings[0]
                 if finding.false_p or finding.out_of_scope or finding.risk_accepted:
                     logger.debug('%i: skipping existing finding (it is marked as false positive:%s and/or out of scope:%s or is a risk accepted:%s): %i:%s:%s:%s', i, finding.false_p, finding.out_of_scope, finding.risk_accepted, finding.id, finding, finding.component_name, finding.component_version)
+                    if (finding.false_p == item.false_p and finding.out_of_scope == item.out_of_scope
+                            and finding.risk_accepted == item.risk_accepted):
+                        unchanged_items.append(finding)
+                        unchanged_count += 1
+                        continue
                 elif finding.is_mitigated:
                     # if the reimported item has a mitigation time, we can compare
                     if item.is_mitigated:
@@ -371,7 +380,11 @@ class DojoDefaultReImporter(object):
         parser = get_parser(scan_type)
         if hasattr(parser, 'get_tests'):
             logger.debug('REIMPORT_SCAN parser v2: Create parse findings')
-            tests = parser.get_tests(scan_type, scan)
+            try:
+                tests = parser.get_tests(scan_type, scan)
+            except ValueError as e:
+                logger.warning(e)
+                raise ValidationError(e)
             # for now we only consider the first test in the list and artificially aggregate all findings of all tests
             # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
             # when there is more than 1 test
@@ -380,7 +393,11 @@ class DojoDefaultReImporter(object):
                 parsed_findings.extend(test_raw.findings)
         else:
             logger.debug('REIMPORT_SCAN: Parse findings')
-            parsed_findings = parser.get_findings(scan, test)
+            try:
+                parsed_findings = parser.get_findings(scan, test)
+            except ValueError as e:
+                logger.warning(e)
+                raise ValidationError(e)
 
         logger.debug('REIMPORT_SCAN: Processing findings')
         new_findings = []

@@ -64,7 +64,7 @@ class SonarQubeParser(object):
                 vuln_mitigation = vuln_properties[5].text
                 vuln_key = vuln_properties[6].text
                 if vuln_title is None or vuln_mitigation is None:
-                    raise Exception("Parser ValueError: can't find a title or a mitigation for vulnerability of name " + vuln_rule_name)
+                    raise ValueError("Parser ValueError: can't find a title or a mitigation for vulnerability of name " + vuln_rule_name)
                 try:
                     vuln_details = rulesDic[vuln_rule_name]
                     vuln_description = self.get_description(vuln_details)

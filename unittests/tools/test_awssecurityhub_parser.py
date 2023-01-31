@@ -16,6 +16,20 @@ class TestAwsSecurityHubParser(DojoTestCase):
             parser = AwsSecurityHubParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual("Informational", finding.severity)
+            self.assertTrue(finding.is_mitigated)
+            self.assertFalse(finding.active)
+
+    def test_one_finding_active(self):
+        with open(get_unit_tests_path() + sample_path("one_finding_active.json")) as test_file:
+            parser = AwsSecurityHubParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual("Medium", finding.severity)
+            self.assertFalse(finding.is_mitigated)
+            self.assertTrue(finding.active)
 
     def test_many_findings(self):
         with open(get_unit_tests_path() + sample_path("many_findings.json")) as test_file:

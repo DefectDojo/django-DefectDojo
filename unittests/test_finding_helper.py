@@ -37,7 +37,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (True, True, False, False, False, None, None, frozen_datetime)
+                (True, False, False, False, False, None, None, frozen_datetime)
             )
 
     @mock.patch('dojo.finding.helper.timezone.now')
@@ -67,7 +67,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
             finding.save()
             self.assertEqual(
                 self.get_status_fields(finding),
-                (False, True, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
+                (False, False, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
             )
 
     @mock.patch('dojo.finding.helper.timezone.now')
@@ -85,7 +85,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (False, True, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
+                (False, False, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
             )
 
     @mock.patch('dojo.finding.helper.timezone.now')
@@ -107,7 +107,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (False, True, False, False, True, custom_mitigated, self.user_2, frozen_datetime)
+                (False, False, False, False, True, custom_mitigated, self.user_2, frozen_datetime)
             )
 
     @mock.patch('dojo.finding.helper.timezone.now')
@@ -129,7 +129,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (False, True, False, False, True, custom_mitigated, self.user_2, frozen_datetime)
+                (False, False, False, False, True, custom_mitigated, self.user_2, frozen_datetime)
             )
 
     @mock.patch('dojo.finding.helper.timezone.now')
@@ -152,7 +152,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (False, True, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
+                (False, False, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
             )
 
     @mock.patch('dojo.finding.helper.timezone.now')
@@ -171,7 +171,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (True, True, False, False, False, None, None, frozen_datetime)
+                (True, False, False, False, False, None, None, frozen_datetime)
             )
 
     @mock.patch('dojo.finding.helper.timezone.now')

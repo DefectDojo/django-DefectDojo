@@ -26,19 +26,19 @@ logger = logging.getLogger(__name__)
 register = template.Library()
 
 # Tags suitable for rendering markdown
-markdown_tags = [
+markdown_tags = {
     "h1", "h2", "h3", "h4", "h5", "h6",
     "b", "i", "strong", "em", "tt",
     "table", "thead", "th", "tbody", "tr", "td",  # enables markdown.extensions.tables
     "p", "br",
     "pre", "div",  # used for code highlighting
-    "span", "div", "blockquote", "code", "hr", "pre",
+    "span", "blockquote", "code", "hr",
     "ul", "ol", "li", "dd", "dt",
     "img",
     "a",
     "sub", "sup",
     "center",
-]
+}
 
 markdown_attrs = {
     "*": ["id"],
@@ -66,9 +66,9 @@ finding_related_action_title_dict = {
 }
 
 supported_file_formats = [
-        'apng', 'avif', 'gif', 'jpg',
-        'jpeg', 'jfif', 'pjpeg', 'pjp',
-        'png', 'svg', 'webp', 'pdf'
+    'apng', 'avif', 'gif', 'jpg',
+    'jpeg', 'jfif', 'pjpeg', 'pjp',
+    'png', 'svg', 'webp', 'pdf'
 ]
 
 
@@ -270,7 +270,6 @@ def finding_sla(finding):
         status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
         if find_sla and find_sla < 0:
             status = "red"
-            find_sla = abs(find_sla)
             status_text = 'Overdue: Remediation for ' + severity.lower() + ' findings in ' + str(
                 sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
 
