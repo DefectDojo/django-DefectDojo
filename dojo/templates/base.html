@@ -583,7 +583,14 @@
                                             </ul>
                                         </li>
                                     {% endblock %}
-
+                                    {% block support-tab %}
+                                        <li>
+                                            <a href="{% url 'support' %}" aria-disabled="true" aria-expanded="false" aria-label="Support">
+                                                <i class="fa-solid fa-life-ring fa-fw"></i>
+                                                <span>{% trans "Get Support" %}</span>
+                                            </a>
+                                        </li>
+                                    {% endblock %}
                                     <li id="min-menu">
                                         <a href="#" id="minimize-menu" title="Expand/Collapse Menu" aria-label="Expand/Collapse Menu">
                                             <i id="nav-minimize-menu-li" class="fa-solid fa-circle-right fa-fw"></i>
