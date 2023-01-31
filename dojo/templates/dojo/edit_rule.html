@@ -15,44 +15,6 @@
 {% block postscript %}
     {{ block.super }}
 <script type="application/javascript">
-    $(document).ready(function() {
-        $('#id_applied_field).empty();
-        $('#id_match_field).empty();
-        $('.dropdown-toggle').click(function() { get_alerts(); });
-
-        setInterval(function() {
-            update_alertcount();
-        }, 10000);
-
-        function update_alertcount() {
-            $.get("/alerts/count", function (data) {
-                if (data.count != $('#alert_count').text()) {
-                    $('#alert_count').text(data.count);
-                    $('#alert_count').removeClass().addClass('badge badge-count badge-count' + data.count);
-                }
-            });
-        }
-
-        function get_alerts() {
-            $('.dropdown-alerts').html('<div class="text-center"><i class="fa-solid fa-spin fa-spinner"></i></div>');
-            $.get("/alerts/json?limit=12", function (data) {
-                $('.dropdown-alerts').empty();
-                $.each(data, function(i, elem) {
-                    var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;
-                    var desc = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';
-                    $('.dropdown-alerts').append('<li><a href="' + elem.fields.url + '"><div><i class="fa-solid fa-' + elem.fields.icon + ' fa-fw"></i> ' +
-                                                  desc + '<span class="pull-right text-muted small">' +
-                                                 elem.fields.source + '</span></div></a></li><li class="divider"></li>');
-                });
-                $('.dropdown-alerts').append('<li><a class="text-center" href="/alerts"><strong>See All Alerts </strong>' +
-                                             '<i class="fa-solid fa-angle-right"></i></a></li>');
-            });
-        }
-    });
-</script>
-
-
-<script type="application/javascript">
   function table_meta(field_name)
   {
     $("[id$=" + field_name + "]").change(function(){
@@ -79,6 +41,9 @@
   }
 
   $( document ).ready(function() {
+      $('#id_applied_field').empty();
+      $('#id_match_field').empty();
+
       table_meta('applies_to');
       table_meta('model_object');
   });
