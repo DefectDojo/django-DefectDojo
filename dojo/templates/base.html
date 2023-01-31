@@ -1050,8 +1050,6 @@
                             </div>
                         </div>
                     </div>
-                    <p id="alert_refresh" class="hidden">{{ 'ALERT_REFRESH'|setting_enabled }}</p>
-                    <p id="disable_count" class="hidden">{{ 'DISABLE_ALERT_COUNTER'|setting_enabled }}</p>
                 </footer>
             {% endblock %}
             </div>
@@ -1069,73 +1067,67 @@
         <script src="{% static "dojo/js/cvss_calculator.js" %}"></script>
         <script type="application/javascript">
             $(document).ready(function() {
-                disable_count = document.getElementById('disable_count').innerHTML
-                refresh = document.getElementById('alert_refresh').innerHTML
-
                 $('.has-popover').popover({'trigger':'hover'});
-                {% if request.user.is_authenticated %}
+                {% if request.user.is_authenticated and not 'DISABLE_ALERT_COUNTER'|setting_enabled %}
+                    function get_alerts() {
+                        $('.dropdown-alerts').html('<div class="text-center"><i class="fa-solid fa-spinner fa-spin"></i></div>');
+                        $.get("{% url 'alerts_json' %}?limit=12", function (data) {
+                            $('.dropdown-alerts').empty();
+                            $.each(data, function(i, elem) {
+                            var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;
+                            var display_title = titleField.length < 50 ? titleField : titleField.trim().substring(0,50).trim(this) + '...';
+                            var description = elem.fields.description
+                            var display_description = description ? description.length < 100 ? description : description.trim().substring(0,100).trim(this) + '...': ''
+                            var dropdown_alert = "alert-list" + i;
+                            $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa-solid fa-' + htmlEscape(elem.fields.icon) +
+                                                            ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert +
+                                                            ' title="' + htmlEscape(display_description) + '"></a><span class="pull-right text-muted small">' +
+                                                        htmlEscape(elem.fields.source) + '</span></div></li><li class="divider"></li>');
+                            $("#" + dropdown_alert).text(display_title);
+                            });
+
+                            if (data.length > 0) {
+                                $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "alerts" %}"><strong>{% trans "See All Alerts" %}</strong>' +
+                                                            '<i class="fa-solid fa-angle-right"></i></a></li>');
+                                $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>{% trans "Clear All Alerts" %}</strong>' +
+                                                        '<i class="fa-solid fa-angle-right"></i></a></li>');
+                            }
+                            else {
+                                $('.dropdown-alerts').append('<li class="text-center"><strong>{% trans "No alerts found" %}</strong></li>');
+                            }
+                        });
+                        update_alertcount()
+                    }
+                    function update_alertcount() {
+                        $.get("{% url 'alertcount' %}", function (data) {
+                            if (data.count != $('#alert_count').text()) {
+                                $('#alert_count').text(data.count);
+                                $('#alert_count').removeClass().addClass('badge badge-count badge-count' + data.count);
+                            }
+                        });
+                    }
+
                     $('.dropdown-toggle-alerts').click(function() {
                         get_alerts();
                     });
 
-                    if (disable_count == "False") {
-                        if(refresh == 'True') {
-                            setInterval(function() {
-                                update_alertcount();
-                            }, 10000);
-                        } else {
-                            update_alertcount();
-                        }
-                    }
+                {% if 'ALERT_REFRESH'|setting_enabled %}
+                    setInterval(function() {
+                        update_alertcount();
+                    }, 10000);
+                {% else %}
+                    update_alertcount();
+                {% endif %}
                 {% endif %}
 
-                function update_alertcount() {
-                    $.get("{% url 'alertcount' %}", function (data) {
-                        if (data.count != $('#alert_count').text()) {
-                            $('#alert_count').text(data.count);
-                            $('#alert_count').removeClass().addClass('badge badge-count badge-count' + data.count);
-                        }
-                    });
-                }
-
                 function htmlEscape(str) {
-                return str
-                    .replace(/\n/g, " ")
-                    .replace(/&/g, '&amp;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#39;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;');
-                }
-
-                function get_alerts() {
-                    $('.dropdown-alerts').html('<div class="text-center"><i class="fa-solid fa-spin fa-spinner"></i></div>');
-                    $.get("{% url 'alerts_json' %}?limit=12", function (data) {
-                        $('.dropdown-alerts').empty();
-                        $.each(data, function(i, elem) {
-                        var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;
-                        var display_title = titleField.length < 50 ? titleField : titleField.trim().substring(0,50).trim(this) + '...';
-                        var description = elem.fields.description
-                        var display_description = description ? description.length < 100 ? description : description.trim().substring(0,100).trim(this) + '...': ''
-                        var dropdown_alert = "alert-list" + i;
-                        $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa-solid fa-' + htmlEscape(elem.fields.icon) +
-                                                        ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert +
-                                                        ' title="' + htmlEscape(display_description) + '"></a><span class="pull-right text-muted small">' +
-                                                    htmlEscape(elem.fields.source) + '</span></div></li><li class="divider"></li>');
-                        $("#" + dropdown_alert).text(display_title);
-                        });
-
-                        if (data.length > 0) {
-                            $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "alerts" %}"><strong>{% trans "See All Alerts" %}</strong>' +
-                                                        '<i class="fa-solid fa-angle-right"></i></a></li>');
-                            $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>{% trans "Clear All Alerts" %}</strong>' +
-                                                    '<i class="fa-solid fa-angle-right"></i></a></li>');
-                        }
-                        else {
-                            $('.dropdown-alerts').append('<li class="text-center"><strong>{% trans "No alerts found" %}</strong></li>');
-                        }
-                    });
-                    update_alertcount()
+                    return str
+                        .replace(/\n/g, " ")
+                        .replace(/&/g, '&amp;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
                 }
 
                 $("#id_jiraform-jira_issue").on('paste', function(e) {
