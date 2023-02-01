@@ -1,27 +1,25 @@
 ---
-# Global settings
-# create defectdojo specific secret
+## @section Global settings
+## @param createSecret create defectdojo specific secret
 createSecret: false
-# create rabbitmq secret in defectdojo chart, outside of rabbitmq chart
+## @param createRabbitMqSecret create rabbitmq secret in defectdojo chart, outside of rabbitmq chart
 createRabbitMqSecret: false
-# create redis secret in defectdojo chart, outside of redis chart
+## @param createRedisSecret create redis secret in defectdojo chart, outside of redis chart
 createRedisSecret: false
-# create mysql secret in defectdojo chart, outside of mysql chart
+## @param createMysqlSecret create mysql secret in defectdojo chart, outside of mysql chart
 createMysqlSecret: false
-# create postgresql secret in defectdojo chart, outside of postgresql chart
+## @param createPostgresqlSecret create postgresql secret in defectdojo chart, outside of postgresql chart
 createPostgresqlSecret: false
-# create postgresql-ha secret in defectdojo chart, outside of postgresql-ha chart
+## @param createPostgresqlHaSecret create postgresql-ha secret in defectdojo chart, outside of postgresql-ha chart
 createPostgresqlHaSecret: false
-# create postgresql-ha-pgpool secret in defectdojo chart, outside of postgresql-ha chart
+## @param createPostgresqlHaPgpoolSecret create postgresql-ha-pgpool secret in defectdojo chart, outside of postgresql-ha chart
 createPostgresqlHaPgpoolSecret: false
-# Track configuration (trackConfig): will automatically respin application pods in case of config changes detection
-# can be:
-# - disabled, default
-# - enabled, enables tracking configuration changes based on SHA256
-# trackConfig: disabled
+## @param trackConfig will automatically respin application pods in case of config changes detection, disabled (default)/enabled
+trackConfig: disabled
 
 # Enables application network policy
 # For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/
+## @skip networkPolicy
 networkPolicy:
   enabled: false
   # if additional labels need to be allowed (e.g. prometheus scraper)
@@ -40,10 +38,10 @@ networkPolicy:
   #     port: 443
 
 # Configuration value to select database type
-# Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
+## @param database Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
 database: postgresql
-# Primary hostname of instance
+## @param host  Primary hostname of instance
 host: defectdojo.default.minikube.local
 
 # The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira
@@ -54,19 +52,26 @@ host: defectdojo.default.minikube.local
 # the global hostname.
 # alternativeHosts:
 #  - defectdojo.example.com
+## @section Image
+## @param imagePullPolicy Kubernetes image pull policy, https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
 imagePullPolicy: Always
-# Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
+## @param repositoryPrefix Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
 repositoryPrefix: defectdojo
 # When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project)
 # Create secrets as: kubectl create secret docker-registry defectdojoregistrykey --docker-username=registry_username --docker-password=registry_password --docker-server='https://index.docker.io/v1/'
-# imagePullSecrets: defectdojoregistrykey
+## @param imagePullSecrets Image pull secret
+imagePullSecrets: []
+## @param tag Image tag
 tag: latest
 
 # Additional labels to add to the pods:
 # podLabels:
 #   key: value
+## @param podLabels Additional labels to add to the pods
 podLabels: {}
 
+## @skip securityContext
+## @param securityContext Pod Security Context
 securityContext:
   enabled: true
   djangoSecurityContext:
@@ -76,6 +81,7 @@ securityContext:
     # nginx dockerfile sets USER=1001
     runAsUser: 1001
 
+## @skip tests
 tests:
   unitTests:
     resources:
@@ -86,16 +92,30 @@ tests:
         cpu: 500m
         memory: 512Mi
 
+## @section Admin setup
+## @param admin.user Admin username
+## @param admin.password Admin password (default generated)
+## @param admin.firstName Admin first name
+## @param admin.lastName Admin last name
+## @param admin.mail Admin email
+## @param admin.secretKey Secret key
+## @param admin.credentialAes256Key credentialAes256Key
+## @param admin.metricsHttpAuthPassword metricsHttpAuthPassword
 admin:
   user: admin
-  password:
+  password: ""
   firstName: Administrator
   lastName: User
   mail: admin@defectdojo.local
-  secretKey:
-  credentialAes256Key:
-  metricsHttpAuthPassword:
+  secretKey: ""
+  credentialAes256Key: ""
+  metricsHttpAuthPassword: ""
 
+## @section Monitoring
+## @param monitoring.enabled Enabled monitoring
+## @param monitoring.prometheus.enabled Adds sidecar
+## @param monitoring.prometheus.image Sidecar image
+## @param monitoring.prometheus.imagePullPolicy Sidecar pull policy
 monitoring:
   enabled: false
   # Add the nginx prometheus exporter sidecar
@@ -103,10 +123,11 @@ monitoring:
     enabled: false
     image: nginx/nginx-prometheus-exporter:0.11.0
     imagePullPolicy: IfNotPresent
-
+## @skip annotations
 annotations: {}
 
 # Components
+## @skip celery
 celery:
   broker: rabbitmq
   # To use an external celery broker, set the hostname here
@@ -182,6 +203,7 @@ celery:
   # @type: array<map>
   extraVolumes: []
 
+## @skip django
 django:
   annotations: {}
   affinity: {}
@@ -286,12 +308,13 @@ django:
     persistentVolumeClaim:
       # set to true to create a new pvc and if django.mediaPersistentVolume.type is set to pvc
       create: false
-      name:
+      name: ""
       size: 5Gi
       accessModes:
       - ReadWriteMany  # check KUBERNETES.md doc first for option to choose
-      storageClassName:
+      storageClassName: ""
 
+## @skip initializer
 initializer:
   run: true
   jobAnnotations: {
@@ -309,6 +332,8 @@ initializer:
       cpu: 2000m
       memory: 512Mi
 
+## @section Database
+## @skip mysql
 mysql:
   enabled: false
   auth:
@@ -326,6 +351,7 @@ mysql:
   # the line below / add external address:
   # mysqlServer: "127.0.0.1"
 
+## @skip postgresql
 postgresql:
   enabled: true
   image:
@@ -372,6 +398,7 @@ postgresql:
   # the line below:
   # postgresServer: "127.0.0.1"
 
+## @skip postgresqlha
 postgresqlha:
   enabled: false
   global:
@@ -409,6 +436,7 @@ postgresqlha:
       postgresql: 5432
 
 # Google CloudSQL support in GKE via gce-proxy
+## @skip cloudsql
 cloudsql:
   # To use CloudSQL in GKE set 'enable: true'
   enabled: false
@@ -427,6 +455,7 @@ cloudsql:
   use_private_ip: false
 
 # Settings to make running the chart on GKE simpler
+## @skip gke
 gke:
   # Set to true to configure the Ingress to use the GKE provided ingress controller
   useGKEIngress: false
@@ -437,6 +466,8 @@ gke:
   # Workload Identity allows the K8s service account to assume the IAM access of a GCP service account to interact with other GCP services
   workloadIdentityEmail: ""
 
+## @section Message Broker
+## @skip rabbitmq
 rabbitmq:
   enabled: true
   replicaCount: 1
@@ -468,6 +499,7 @@ rabbitmq:
     runAsNonRoot: true
 
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
+## @skip redis
 redis:
   enabled: false
   scheme: "redis"
@@ -483,19 +515,23 @@ redis:
   # the line below:
   # redisServer: myrediscluster
 
-
+## @section Extra configs
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it
 # extraConfigs:
 #   DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
 #   DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
 #   DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
+## @param extraConfigs [object] Add extra variables not predefined by helm config it is possible to define in extraConfigs block
+extraConfigs: {}
 
 # Extra secrets can be created inside of extraSecrets block:
-# NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
+# NOTE  This is just an example, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
 # extraSecrets:
 #   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
-extraConfigs: {}
+## @param extraSecrets [object] Extra secrets can be created inside of extraSecrets block. NOTE do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
+extraSecrets: {}
+
 
 # To add (or override) extra variables which need to be pulled from another configMap, you can
 # use extraEnv. For example:
@@ -505,3 +541,5 @@ extraConfigs: {}
 #     configMapKeyRef:
 #       name: my-other-postgres-configmap
 #       key: cluster_endpoint
+## @param extraEnv [array] Add (or override) extra variables which need to be pulled from another configMap
+extraEnv: []
