@@ -634,3 +634,17 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertIn("network", finding.tags)
             self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
             self.assertEqual("TEST1", finding.vuln_id_from_tool)
+
+    def test_parse_json_empty_finding(self):
+        file = open("unittests/scans/generic/generic_empty.json")
+        parser = GenericParser()
+        with self.assertRaisesMessage(ValueError,
+                "Required fields are missing: ['title', 'severity', 'description']"):
+            findings = parser.get_findings(file, Test())
+
+    def test_parse_json_invalid_finding(self):
+        file = open("unittests/scans/generic/generic_invalid.json")
+        parser = GenericParser()
+        with self.assertRaisesMessage(ValueError,
+                "Not allowed fields are present: ['invalid_field', 'last_status_update']"):
+            findings = parser.get_findings(file, Test())
