@@ -229,6 +229,8 @@ def get_group_by_group_name(finding, finding_group_by_option):
     elif finding_group_by_option == 'file_path':
         if finding.file_path:
             group_name = 'Filepath %s' % (finding.file_path)
+    elif finding_group_by_option == 'finding_title':
+        group_name = finding.title
     else:
         raise ValueError("Invalid group_by option %s" % finding_group_by_option)
 
