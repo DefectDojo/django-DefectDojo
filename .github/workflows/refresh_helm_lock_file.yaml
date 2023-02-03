@@ -4,7 +4,7 @@ on:
     branches:
       - dev
     paths:
-      - 'helm/defectdojo/**.yaml'
+      - 'helm/defectdojo/Chart.yaml'
 permissions:
   contents: write
 jobs:
