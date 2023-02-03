@@ -204,7 +204,7 @@ def get_or_create_product(product_name=None, product_type_name=None, auto_create
             member.role = Role.objects.get(is_owner=True)
             member.save()
 
-        product = Product.objects.create(name=product_name, prod_type=product_type)
+        product = Product.objects.create(name=product_name, prod_type=product_type, description=product_name)
         member = Product_Member()
         member.user = get_current_user()
         member.product = product
