@@ -108,14 +108,17 @@ def chunk_list(list):
 
 
 def chunk_endpoints_and_disperse(finding, test, endpoints, **kwargs):
-    chunked_list = chunk_list(endpoints)
-    # If there is only one chunk, then do not bother with async
-    if len(chunked_list) < 2:
+    if settings.ASYNC_FINDING_IMPORT:
+        chunked_list = chunk_list(endpoints)
+        # If there is only one chunk, then do not bother with async
+        if len(chunked_list) < 2:
+            add_endpoints_to_unsaved_finding(finding, test, endpoints, sync=True)
+            return []
+        # First kick off all the workers
+        for endpoints_list in chunked_list:
+            add_endpoints_to_unsaved_finding(finding, test, endpoints_list, sync=False)
+    else:
         add_endpoints_to_unsaved_finding(finding, test, endpoints, sync=True)
-        return []
-    # First kick off all the workers
-    for endpoints_list in chunked_list:
-        add_endpoints_to_unsaved_finding(finding, test, endpoints_list, sync=False)
 
 
 # Since adding a model to a ManyToMany relationship does not require an additional
