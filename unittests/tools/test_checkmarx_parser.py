@@ -774,7 +774,7 @@ class TestCheckmarxParser(DojoTestCase):
         # "KICS": 31,
         # "SAST": 669,
         # "SCA": 117
-        #self.assertEqual(817, len(findings))
+        # self.assertEqual(817, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
             self.assertEqual("Reflected XSS All Clients", finding.title)
@@ -784,6 +784,7 @@ class TestCheckmarxParser(DojoTestCase):
             self.assertEqual(96, finding.line)
             self.assertIsNone(finding.unique_id_from_tool)
         for finding in findings:
+            # test for SAST
             if finding.unique_id_from_tool == "bEGSvBn40cp99etnudzTeskzJRQ=":
                 with self.subTest(i="bEGSvBn40cp99etnudzTeskzJRQ="):
                     self.assertEqual("SQL Injection", finding.title)
@@ -791,7 +792,7 @@ class TestCheckmarxParser(DojoTestCase):
                     self.assertEqual(89, finding.cwe)
                     self.assertEqual("/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/challenges/challenge5/Assignment5.java", finding.file_path)
                     self.assertEqual(61, finding.line)
-                    self.assertEqual("bEGSvBn40cp99etnudzTeskzJRQ=", finding.unique_id_from_tool)
+                    self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
             if finding.unique_id_from_tool == "SYlu22e7ZQydKJFOlC/o1EsyixQ=":
                 with self.subTest(i="SYlu22e7ZQydKJFOlC/o1EsyixQ="):
                     self.assertEqual("SQL Injection", finding.title)
@@ -799,6 +800,7 @@ class TestCheckmarxParser(DojoTestCase):
                     self.assertEqual(89, finding.cwe)
                     self.assertEqual("/webgoat-lessons/sql-injection/src/main/java/org/owasp/webgoat/sql_injection/introduction/SqlInjectionLesson5.java", finding.file_path)
                     self.assertEqual(72, finding.line)
+                    self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
             # test one in SCA part
             if finding.unique_id_from_tool == "GkVx1zoIKcd1EF72zqWrGzeVTmo=":
                 with self.subTest(i="GkVx1zoIKcd1EF72zqWrGzeVTmo="):
@@ -811,6 +813,7 @@ class TestCheckmarxParser(DojoTestCase):
                     self.assertTrue(finding.active)
                     self.assertFalse(finding.verified)
                     self.assertIsNone(finding.line)
+                    self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
             # test one in KICS part
             if finding.unique_id_from_tool == "eZrh18HAPbe2LbDAprSPrwncAC0=":
                 with self.subTest(i="eZrh18HAPbe2LbDAprSPrwncAC0="):
@@ -820,3 +823,4 @@ class TestCheckmarxParser(DojoTestCase):
                     self.assertTrue(finding.active)
                     self.assertFalse(finding.verified)
                     self.assertEqual("/webgoat-server/Dockerfile", finding.file_path)
+                    self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())

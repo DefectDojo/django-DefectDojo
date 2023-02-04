@@ -1,9 +1,11 @@
 
+import datetime
 import json
 import logging
 
 from dateutil import parser
 from defusedxml import ElementTree
+
 from dojo.models import Finding
 from dojo.utils import add_language
 
@@ -289,7 +291,7 @@ class CheckmarxParser(object):
         if isinstance(value, str):
             return parser.parse(value)
         elif isinstance(value, dict):
-            return 3
+            return datetime.datetime.utcfromtimestamp(int(value.get("seconds", 0)))
         else:
             return None
 
