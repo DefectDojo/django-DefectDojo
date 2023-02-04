@@ -761,3 +761,62 @@ class TestCheckmarxParser(DojoTestCase):
             self.assertEqual("/diva-android-master/app/src/main/java/jakhar/aseem/diva/InsecureDataStorage1Activity.java", finding.file_path)
             self.assertEqual(54, finding.line)
             self.assertEqual("udB1urKobWKTYYlRQbAAub1yRAc=", finding.unique_id_from_tool)
+
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_issue6956(self, mock):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/checkmarx/sample_report.json"
+        )
+        parser = CheckmarxParser()
+        findings = parser.get_findings(my_file_handle, Test())
+        self.teardown(my_file_handle)
+        # in this report we have 817
+        # "KICS": 31,
+        # "SAST": 669,
+        # "SCA": 117
+        #self.assertEqual(817, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("Reflected XSS All Clients", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(79, finding.cwe)
+            self.assertEqual("/webgoat-lessons/password-reset/src/main/java/org/owasp/webgoat/password_reset/ResetLinkAssignment.java", finding.file_path)
+            self.assertEqual(96, finding.line)
+            self.assertIsNone(finding.unique_id_from_tool)
+        for finding in findings:
+            if finding.unique_id_from_tool == "bEGSvBn40cp99etnudzTeskzJRQ=":
+                with self.subTest(i="bEGSvBn40cp99etnudzTeskzJRQ="):
+                    self.assertEqual("SQL Injection", finding.title)
+                    self.assertEqual("High", finding.severity)
+                    self.assertEqual(89, finding.cwe)
+                    self.assertEqual("/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/challenges/challenge5/Assignment5.java", finding.file_path)
+                    self.assertEqual(61, finding.line)
+                    self.assertEqual("bEGSvBn40cp99etnudzTeskzJRQ=", finding.unique_id_from_tool)
+            if finding.unique_id_from_tool == "SYlu22e7ZQydKJFOlC/o1EsyixQ=":
+                with self.subTest(i="SYlu22e7ZQydKJFOlC/o1EsyixQ="):
+                    self.assertEqual("SQL Injection", finding.title)
+                    self.assertEqual("High", finding.severity)
+                    self.assertEqual(89, finding.cwe)
+                    self.assertEqual("/webgoat-lessons/sql-injection/src/main/java/org/owasp/webgoat/sql_injection/introduction/SqlInjectionLesson5.java", finding.file_path)
+                    self.assertEqual(72, finding.line)
+            # test one in SCA part
+            if finding.unique_id_from_tool == "GkVx1zoIKcd1EF72zqWrGzeVTmo=":
+                with self.subTest(i="GkVx1zoIKcd1EF72zqWrGzeVTmo="):
+                    self.assertEqual("underscore:1.10.2 | CVE-2021-23358", finding.title)
+                    self.assertIn("The package underscore from 1.13.0-0 and before 1.13.0-2", finding.description)
+                    self.assertEqual("High", finding.severity)
+                    self.assertEqual(94, finding.cwe)
+                    self.assertEqual("underscore", finding.component_name)
+                    self.assertEqual("1.10.2", finding.component_version)
+                    self.assertTrue(finding.active)
+                    self.assertFalse(finding.verified)
+                    self.assertIsNone(finding.line)
+            # test one in KICS part
+            if finding.unique_id_from_tool == "eZrh18HAPbe2LbDAprSPrwncAC0=":
+                with self.subTest(i="eZrh18HAPbe2LbDAprSPrwncAC0="):
+                    self.assertEqual("Dockerfile | IncorrectValue", finding.title)
+                    self.assertIn("After using apt-get install, it is needed to delete apt-get lists", finding.description)
+                    self.assertEqual("Info", finding.severity)
+                    self.assertTrue(finding.active)
+                    self.assertFalse(finding.verified)
+                    self.assertEqual("/webgoat-server/Dockerfile", finding.file_path)
