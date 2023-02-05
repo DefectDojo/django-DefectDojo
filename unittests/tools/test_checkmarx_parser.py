@@ -774,7 +774,7 @@ class TestCheckmarxParser(DojoTestCase):
         # "KICS": 31,
         # "SAST": 669,
         # "SCA": 117
-        # self.assertEqual(817, len(findings))
+        self.assertEqual(817, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
             self.assertEqual("Reflected XSS All Clients", finding.title)
