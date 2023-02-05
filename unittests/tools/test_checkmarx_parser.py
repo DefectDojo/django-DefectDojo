@@ -782,7 +782,7 @@ class TestCheckmarxParser(DojoTestCase):
             self.assertEqual(79, finding.cwe)
             self.assertEqual("/webgoat-lessons/password-reset/src/main/java/org/owasp/webgoat/password_reset/ResetLinkAssignment.java", finding.file_path)
             self.assertEqual(96, finding.line)
-            self.assertIsNone(finding.unique_id_from_tool)
+            self.assertEqual("-1833874157", finding.unique_id_from_tool)
         for finding in findings:
             # test for SAST
             if finding.unique_id_from_tool == "bEGSvBn40cp99etnudzTeskzJRQ=":

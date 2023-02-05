@@ -324,6 +324,8 @@ class CheckmarxParser(object):
                             )
                             if vulnerability.get("id"):
                                 finding.unique_id_from_tool = vulnerability.get("id")
+                            else:
+                                finding.unique_id_from_tool = str(vulnerability.get("similarityId"))
                             # get the last node and set some values
                             if vulnerability.get('nodes'):
                                 last_node = vulnerability['nodes'][-1]
@@ -354,6 +356,8 @@ class CheckmarxParser(object):
                             finding.unsaved_vulnerability_ids = [vulnerability.get("cveId")]
                         if vulnerability.get("id"):
                             finding.unique_id_from_tool = vulnerability.get("id")
+                        else:
+                            finding.unique_id_from_tool = str(vulnerability.get("similarityId"))
                         findings.append(finding)
             if result_type == "kics":
                 for kics_type in results[result_type].get("results", []):
@@ -367,11 +371,13 @@ class CheckmarxParser(object):
                             active=(vulnerability.get("status") != "Not exploitable"),
                             verified=(vulnerability.get("state") != "To verify"),
                             file_path=vulnerability.get("fileName"),
-                            line=vulnerability.get("line"),
+                            line=vulnerability.get("line", 0),
                             test=test,
                             static_finding=True,
                         )
                         if vulnerability.get("id"):
                             finding.unique_id_from_tool = vulnerability.get("id")
+                        else:
+                            finding.unique_id_from_tool = str(vulnerability.get("similarityId"))
                         findings.append(finding)
         return findings
