@@ -358,6 +358,7 @@ class CheckmarxParser(object):
                             finding.unique_id_from_tool = vulnerability.get("id")
                         else:
                             finding.unique_id_from_tool = str(vulnerability.get("similarityId"))
+                        finding.unsaved_tags = [result_type]
                         findings.append(finding)
             if result_type == "kics":
                 for kics_type in results[result_type].get("results", []):
@@ -372,6 +373,7 @@ class CheckmarxParser(object):
                             verified=(vulnerability.get("state") != "To verify"),
                             file_path=vulnerability.get("fileName"),
                             line=vulnerability.get("line", 0),
+                            severity_justification=vulnerability.get("actualValue"),
                             test=test,
                             static_finding=True,
                         )
@@ -379,5 +381,6 @@ class CheckmarxParser(object):
                             finding.unique_id_from_tool = vulnerability.get("id")
                         else:
                             finding.unique_id_from_tool = str(vulnerability.get("similarityId"))
+                        finding.unsaved_tags = [result_type, name]
                         findings.append(finding)
         return findings
