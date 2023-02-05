@@ -269,8 +269,8 @@ class CheckmarxParser(object):
             categories = query.get('categories')
         return name, cwe, categories, queryId
 
-    # Map checkmarx report state to active/inactive status
     def isActive(self, state):
+        """Map checkmarx report state to active/inactive status"""
         # To verify, Confirmed, Urgent, Proposed not exploitable
         activeStates = ["0", "2", "3", "4"]
         return state in activeStates
@@ -290,8 +290,8 @@ class CheckmarxParser(object):
     def _parse_date(self, value):
         if isinstance(value, str):
             return parser.parse(value)
-        elif isinstance(value, dict):
-            return datetime.datetime.utcfromtimestamp(int(value.get("seconds", 0)))
+        elif isinstance(value, dict) and isinstance(value.get("seconds"), int):
+            return datetime.datetime.utcfromtimestamp(value.get("seconds"))
         else:
             return None
 
