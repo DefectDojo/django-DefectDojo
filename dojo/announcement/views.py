@@ -52,7 +52,7 @@ def configure_announcement(request):
                 request,
                 messages.SUCCESS,
                 _('Announcement updated successfully.'),
-                extra_tags="alert-success",
+                extra_tags='alert-success',
             )
             return HttpResponseRedirect(reverse("configure_announcement"))
 
