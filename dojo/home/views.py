@@ -71,6 +71,11 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     })
 
 
+def support(request: HttpRequest) -> HttpResponse:
+    add_breadcrumb(title="Support", top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/support.html', {})
+
+
 def get_severities_all(findings) -> Dict[str, int]:
     severities_all = findings.values('severity').annotate(count=Count('severity')).order_by()
     return defaultdict(lambda: 0, {s['severity']: s['count'] for s in severities_all})

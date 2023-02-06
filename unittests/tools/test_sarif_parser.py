@@ -28,6 +28,19 @@ class TestSarifParser(DojoTestCase):
         for finding in findings:
             self.common_checks(finding)
 
+    def test_suppression_report(self):
+        """test report file having different suppression definitions"""
+        testfile = open(path.join(path.dirname(__file__), "../scans/sarif/suppression_test.sarif"))
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            if finding.title == "Suppressed":
+                self.assertEqual(True, finding.false_p)
+                self.assertEqual(False, finding.active)
+            else:
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(True, finding.active)
+
     def test_example2_report(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sarif/appendix_k.sarif"))
         parser = SarifParser()

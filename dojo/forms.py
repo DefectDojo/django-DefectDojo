@@ -17,11 +17,12 @@ from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 import tagulous
 
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
     validate_endpoints_to_add
-from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
+from dojo.models import Announcement, Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, SLA_Configuration, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
@@ -2901,6 +2902,27 @@ class LoginBanner(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         return cleaned_data
+
+
+class AnnouncementCreateForm(forms.ModelForm):
+    dismissable = forms.BooleanField(
+        label=_('Dismissable?'),
+        initial=False,
+        required=False,
+        help_text=_('Ticking this box allows users to dismiss the current announcement')
+    )
+
+    class Meta:
+        model = Announcement
+        fields = ['message', 'style']
+
+
+class AnnouncementRemoveForm(AnnouncementCreateForm):
+    def __init__(self, *args, **kwargs):
+        super(AnnouncementRemoveForm, self).__init__(*args, **kwargs)
+        self.fields['dismissable'].disabled = True
+        self.fields['message'].disabled = True
+        self.fields['style'].disabled = True
 
 
 # ==============================

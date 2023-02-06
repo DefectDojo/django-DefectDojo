@@ -111,6 +111,7 @@ def get_configuration_permissions_fields():
         jira_permissions + [
         Permission_Helper(name='language type', app='dojo', view=True, add=True, change=True, delete=True),
         Permission_Helper(name='bannerconf', app='dojo', change=True),
+        Permission_Helper(name='announcement', app='dojo', change=True),
         Permission_Helper(name='note type', app='dojo', view=True, add=True, change=True, delete=True),
         Permission_Helper(name='product type', app='dojo', add=True)] + \
         questionnaire_permissions + [

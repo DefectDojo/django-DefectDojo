@@ -1,9 +1,11 @@
 import re
 import logging
 from django.conf import settings
-from dojo.models import Test_Type
+from dojo.models import Test_Type, Tool_Type, Tool_Configuration
 
 PARSERS = {}
+
+logger = logging.getLogger(__name__)
 
 
 def register(parser_type):
@@ -15,7 +17,7 @@ def register(parser_type):
 
 
 def register_parser(scan_type, parser):
-    logging.debug(f"register scan_type:{scan_type} with parser:{parser}")
+    logger.debug(f"register scan_type:{scan_type} with parser:{parser}")
     # check double registration or registration with an existing key
     if scan_type in PARSERS:
         raise ValueError(f"Try to register an existing parser '{scan_type}'")
@@ -60,6 +62,24 @@ def requires_file(scan_type):
     return True
 
 
+def get_api_scan_configuration_hints():
+    res = list()
+    for name, parser in PARSERS.items():
+        if hasattr(parser, "api_scan_configuration_hint"):
+            scan_types = parser.get_scan_types()
+            for scan_type in scan_types:
+                tool_type = parser.requires_tool_type(scan_type)
+                res.append({
+                    'name': name,
+                    'id': name.lower().replace(' ', '_').replace('.', ''),
+                    'tool_type_name': tool_type,
+                    'tool_types': Tool_Type.objects.filter(name=tool_type),
+                    'tool_configurations': Tool_Configuration.objects.filter(tool_type__name=tool_type),
+                    'hint': parser.api_scan_configuration_hint(),
+                })
+    return sorted(res, key=lambda x: x['name'].lower())
+
+
 def requires_tool_type(scan_type):
     if scan_type not in PARSERS:
         return None
@@ -90,4 +110,4 @@ for module_name in os.listdir(package_dir):
                     if isclass(attribute) and attribute_name.lower() == module_name.replace("_", "") + "parser":
                         register(attribute)
         except:
-            logging.exception(f"failed to load {module_name}")
+            logger.exception(f"failed to load {module_name}")

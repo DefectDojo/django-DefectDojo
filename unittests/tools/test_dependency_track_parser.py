@@ -9,7 +9,7 @@ class TestDependencyTrackParser(DojoTestCase):
         self,
     ):
         testfile = open(
-            get_unit_tests_path() + "/scans/dependency_track_samples/no_findings_because_findings_key_is_empty_list.json"
+            get_unit_tests_path() + "/scans/dependency_track/no_findings_because_findings_key_is_empty_list.json"
         )
         parser = DependencyTrackParser()
         findings = parser.get_findings(testfile, Test())
@@ -18,7 +18,7 @@ class TestDependencyTrackParser(DojoTestCase):
 
     def test_dependency_track_parser_with_missing_findings_key_has_no_findings(self):
         testfile = open(
-            get_unit_tests_path() + "/scans/dependency_track_samples/no_findings_because_findings_key_is_missing.json"
+            get_unit_tests_path() + "/scans/dependency_track/no_findings_because_findings_key_is_missing.json"
         )
         parser = DependencyTrackParser()
         findings = parser.get_findings(testfile, Test())
@@ -27,7 +27,7 @@ class TestDependencyTrackParser(DojoTestCase):
 
     def test_dependency_track_parser_with_null_findings_key_has_no_findings(self):
         testfile = open(
-            get_unit_tests_path() + "/scans/dependency_track_samples/no_findings_because_findings_key_is_null.json"
+            get_unit_tests_path() + "/scans/dependency_track/no_findings_because_findings_key_is_null.json"
         )
         parser = DependencyTrackParser()
         findings = parser.get_findings(testfile, Test())
@@ -36,7 +36,7 @@ class TestDependencyTrackParser(DojoTestCase):
 
     def test_dependency_track_parser_has_many_findings(self):
         testfile = open(
-            get_unit_tests_path() + "/scans/dependency_track_samples/many_findings.json"
+            get_unit_tests_path() + "/scans/dependency_track/many_findings.json"
         )
         parser = DependencyTrackParser()
         findings = parser.get_findings(testfile, Test())
@@ -52,7 +52,7 @@ class TestDependencyTrackParser(DojoTestCase):
 
     def test_dependency_track_parser_has_one_finding(self):
         testfile = open(
-            get_unit_tests_path() + "/scans/dependency_track_samples/one_finding.json"
+            get_unit_tests_path() + "/scans/dependency_track/one_finding.json"
         )
         parser = DependencyTrackParser()
         findings = parser.get_findings(testfile, Test())
@@ -61,7 +61,7 @@ class TestDependencyTrackParser(DojoTestCase):
 
     def test_dependency_track_parser_v3_8_0(self):
         testfile = open(
-            get_unit_tests_path() + "/scans/dependency_track_samples/dependency_track_3.8.0_2021-01-18.json"
+            get_unit_tests_path() + "/scans/dependency_track/dependency_track_3.8.0_2021-01-18.json"
         )
         parser = DependencyTrackParser()
         findings = parser.get_findings(testfile, Test())

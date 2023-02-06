@@ -2065,7 +2065,7 @@ class Finding(models.Model):
                                  help_text=_("Denotes if this flaw is active or not."))
     # note that false positive findings cannot be verified
     # in defectdojo verified means: "we have verified the finding and it turns out that it's not a false positive"
-    verified = models.BooleanField(default=True,
+    verified = models.BooleanField(default=False,
                                    verbose_name=_('Verified'),
                                    help_text=_("Denotes if this flaw has been manually verified by the tester."))
     false_p = models.BooleanField(default=False,
@@ -2860,8 +2860,15 @@ class Finding(models.Model):
             return None
         if self.test.engagement.source_code_management_uri is None:
             return escape(self.file_path)
+        link = self.get_file_path_with_raw_link()
+        return create_bleached_link(link, self.file_path)
+
+    def get_file_path_with_raw_link(self):
+        if self.file_path is None:
+            return None
         link = self.test.engagement.source_code_management_uri
-        if "https://github.com/" in self.test.engagement.source_code_management_uri:
+        if (self.test.engagement.source_code_management_uri is not None
+                and "https://github.com/" in self.test.engagement.source_code_management_uri):
             if self.test.commit_hash:
                 link += '/blob/' + self.test.commit_hash + '/' + self.file_path
             elif self.test.engagement.commit_hash:
@@ -2876,7 +2883,7 @@ class Finding(models.Model):
             link += '/' + self.file_path
         if self.line:
             link = link + '#L' + str(self.line)
-        return create_bleached_link(link, self.file_path)
+        return link
 
     def get_references_with_links(self):
         import re
@@ -2962,7 +2969,10 @@ class Stub_Finding(models.Model):
 
 class Finding_Group(TimeStampedModel):
 
-    GROUP_BY_OPTIONS = [('component_name', 'Component Name'), ('component_name+component_version', 'Component Name + Version'), ('file_path', 'File path')]
+    GROUP_BY_OPTIONS = [('component_name', 'Component Name'),
+                        ('component_name+component_version', 'Component Name + Version'),
+                        ('file_path', 'File path'),
+                        ('finding_title', 'Finding Title')]
 
     name = models.CharField(max_length=255, blank=False, null=False)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
@@ -3296,6 +3306,28 @@ class FileAccessToken(models.Model):
         if not self.token:
             self.token = uuid4()
         return super(FileAccessToken, self).save(*args, **kwargs)
+
+
+ANNOUNCEMENT_STYLE_CHOICES = (
+    ('info', 'Info'),
+    ('success', 'Success'),
+    ('warning', 'Warning'),
+    ('danger', 'Danger')
+)
+
+
+class Announcement(models.Model):
+    message = models.CharField(max_length=500,
+                                help_text=_("This dismissable message will be displayed on all pages for authenticated users. It can contain basic html tags, for example <a href='https://www.fred.com' style='color: #337ab7;' target='_blank'>https://example.com</a>"),
+                                default='')
+    dismissable = models.BooleanField(default=False, null=True, blank=True)
+    style = models.CharField(max_length=64, choices=ANNOUNCEMENT_STYLE_CHOICES, default='info',
+                            help_text=_("The style of banner to display. (info, success, warning, danger)"))
+
+
+class UserAnnouncement(models.Model):
+    announcement = models.ForeignKey(Announcement, null=True, editable=False, on_delete=models.CASCADE, related_name='user_announcement')
+    user = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
 
 
 class BannerConf(models.Model):

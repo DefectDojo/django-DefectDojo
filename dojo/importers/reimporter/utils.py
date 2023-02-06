@@ -95,6 +95,21 @@ def mitigate_endpoint_status(endpoint_status_list, user, **kwargs):
         endpoint_status.save()
 
 
+def chunk_endpoints_and_reactivate(endpoint_statuses, **kwargs):
+    # Determine if this can be run async
+    if settings.ASYNC_FINDING_IMPORT:
+        chunk_list = importer_utils.chunk_list(endpoint_statuses)
+        # If there is only one chunk, then do not bother with async
+        if len(chunk_list) < 2:
+            reactivate_endpoint_status(endpoint_statuses, sync=True)
+        logger.debug('IMPORT_SCAN: Split endpoints into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_list[0]))
+        # First kick off all the workers
+        for endpoint_status_list in chunk_list:
+            reactivate_endpoint_status(endpoint_status_list, sync=False)
+    else:
+        reactivate_endpoint_status(endpoint_statuses, sync=True)
+
+
 @dojo_async_task
 @app.task()
 def reactivate_endpoint_status(endpoint_status_list, **kwargs):
@@ -189,7 +204,7 @@ def get_or_create_product(product_name=None, product_type_name=None, auto_create
             member.role = Role.objects.get(is_owner=True)
             member.save()
 
-        product = Product.objects.create(name=product_name, prod_type=product_type)
+        product = Product.objects.create(name=product_name, prod_type=product_type, description=product_name)
         member = Product_Member()
         member.user = get_current_user()
         member.product = product

@@ -1,6 +1,5 @@
 import hashlib
 import logging
-from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
 
@@ -27,7 +26,7 @@ class IbmAppParser(object):
 
         # validate XML file
         if 'xml-report' not in root.tag:
-            raise NamespaceErr("This does not look like a valid expected Ibm AppScan DAST XML file.")
+            raise ValueError("This does not look like a valid expected Ibm AppScan DAST XML file.")
 
         issue_list = []
         # self.hosts = self.fetch_host_details()
