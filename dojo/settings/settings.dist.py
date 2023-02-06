@@ -797,6 +797,7 @@ TEMPLATES = [
                 'dojo.context_processors.globalize_vars',
                 'dojo.context_processors.bind_system_settings',
                 'dojo.context_processors.bind_alert_count',
+                'dojo.context_processors.bind_announcement',
             ],
         },
     },

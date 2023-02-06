@@ -25,7 +25,7 @@ $(function () {
     })
 
     setTimeout(function () {
-        $('.alert-dismissible').slideUp('slow')
+        $('.alert-dismissible').not('.announcement-banner').slideUp('slow')
     }, 20000);
 
     $('#side-menu').metisMenu();
@@ -61,7 +61,6 @@ $.fn.serializeObject = function()
     });
     return o;
 };
-
 
 function sidebar() {  // minimize side nav bar
     var action = 'min';

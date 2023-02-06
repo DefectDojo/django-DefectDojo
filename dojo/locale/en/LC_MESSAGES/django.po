@@ -13,6 +13,26 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: dojo/announcement/views.py
+msgid "Announcement removed for everyone."
+msgstr ""
+
+#: dojo/announcement/views.py
+msgid "Announcement updated successfully."
+msgstr ""
+
+#: dojo/announcement/views.py
+msgid "Announcement Configuration"
+msgstr ""
+
+#: dojo/announcement/views.py
+msgid "Announcement removed."
+msgstr ""
+
+#: dojo/announcement/views.py
+msgid "Failed to remove announcement."
+msgstr ""
+
 #: dojo/api_v2/serializers.py
 #, python-brace-format
 msgid "Expected a list of items but got type \"{input_type}\"."
@@ -145,6 +165,14 @@ msgstr ""
 
 #: dojo/filters.py
 msgid "Choice Question"
+msgstr ""
+
+#: dojo/forms.py
+msgid "Dismissable?"
+msgstr ""
+
+#: dojo/forms.py
+msgid "Ticking this box allows users to dismiss the current announcement"
 msgstr ""
 
 #: dojo/metrics/views.py dojo/templates/base.html
@@ -1719,6 +1747,17 @@ msgstr ""
 
 #: dojo/models.py
 msgid ""
+"This dismissable message will be displayed on all pages for authenticated "
+"users. It can contain basic html tags, for example <a href='https://www.fred."
+"com' style='color: #337ab7;' target='_blank'>https://example.com</a>"
+msgstr ""
+
+#: dojo/models.py
+msgid "The style of banner to display. (info, success, warning, danger)"
+msgstr ""
+
+#: dojo/models.py
+msgid ""
 "This message will be displayed on the login page. It can contain basic html "
 "tags, for example <a href='https://www.fred.com' style='color: #337ab7;' "
 "target='_blank'>https://example.com</a>"
@@ -2665,6 +2704,10 @@ msgid "Configuration"
 msgstr ""
 
 #: dojo/templates/base.html
+msgid "Announcement"
+msgstr ""
+
+#: dojo/templates/base.html
 msgid "Credential Manager"
 msgstr ""
 
@@ -3091,6 +3134,16 @@ msgstr ""
 
 #: dojo/templates/dojo/delete_user.html dojo/user/views.py
 msgid "Delete User"
+msgstr ""
+
+#: dojo/templates/dojo/dismiss_announcement.html
+msgid "Dismiss Announcement"
+msgstr ""
+
+#: dojo/templates/dojo/dismiss_announcement.html
+msgid ""
+"Dismissing the announcement will remove the current announcement from your "
+"view"
 msgstr ""
 
 #: dojo/templates/dojo/edit_note.html

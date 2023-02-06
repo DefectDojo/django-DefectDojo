@@ -493,6 +493,13 @@
                                                 <span>{% trans "Configuration" %}</span>
                                             </a>
                                             <ul class="nav nav-second-level">
+                                                {% if "dojo.change_announcement"|has_configuration_permission %}
+                                                    <li>
+                                                        <a href="{% url 'configure_announcement' %}">
+                                                            {% trans "Announcement" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                                 {% if system_settings.enable_credentials and "dojo.view_cred_user"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'cred' %}">
@@ -524,7 +531,7 @@
                                                 {% if "dojo.change_bannerconf"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'configure_banner' %}">
-                                                            {% trans "Login banner" %}
+                                                            {% trans "Login Banner" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
@@ -607,6 +614,17 @@
             {% endblock %}
             <!-- Page Content -->
             <div id="page-wrapper">
+                {% if request.user.is_authenticated and announcement %}
+                    {% load announcement_banner_tags %}
+                    <div role="alert" class="announcement-banner alert alert-{{ announcement.style }} {% if announcement.dismissable %}alert-dismissible{% endif %} show">
+                    {% if announcement.dismissable %}
+                        <a href="{% url 'dismiss_announcement' %}" class="close" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </a>
+                    {% endif %}
+                    {{ announcement.message|bleach_announcement_message }}
+                    </div>
+                {% endif %}
                 <div class="container-fluid">
                     <!-- start of tabs -->
                     {% block tab_bar %}
