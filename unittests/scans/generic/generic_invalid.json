@@ -1,0 +1,11 @@
+{
+    "findings": [
+        {
+            "title": "title",
+            "severity": "Low",
+            "description": "description",
+            "invalid_field": "this is invalid field",
+            "last_status_update": "this field should not be modified"
+        }
+    ]
+}

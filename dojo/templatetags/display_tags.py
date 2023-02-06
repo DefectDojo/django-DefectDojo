@@ -26,19 +26,19 @@ logger = logging.getLogger(__name__)
 register = template.Library()
 
 # Tags suitable for rendering markdown
-markdown_tags = [
+markdown_tags = {
     "h1", "h2", "h3", "h4", "h5", "h6",
     "b", "i", "strong", "em", "tt",
     "table", "thead", "th", "tbody", "tr", "td",  # enables markdown.extensions.tables
     "p", "br",
     "pre", "div",  # used for code highlighting
-    "span", "div", "blockquote", "code", "hr", "pre",
+    "span", "blockquote", "code", "hr",
     "ul", "ol", "li", "dd", "dt",
     "img",
     "a",
     "sub", "sup",
     "center",
-]
+}
 
 markdown_attrs = {
     "*": ["id"],
@@ -66,9 +66,9 @@ finding_related_action_title_dict = {
 }
 
 supported_file_formats = [
-        'apng', 'avif', 'gif', 'jpg',
-        'jpeg', 'jfif', 'pjpeg', 'pjp',
-        'png', 'svg', 'webp', 'pdf'
+    'apng', 'avif', 'gif', 'jpg',
+    'jpeg', 'jfif', 'pjpeg', 'pjp',
+    'png', 'svg', 'webp', 'pdf'
 ]
 
 

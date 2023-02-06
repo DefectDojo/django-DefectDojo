@@ -1,7 +1,6 @@
 name: k8s deployment
 on:
   pull_request:
-  push:
     branches:
       - master
       - dev
@@ -53,6 +52,7 @@ jobs:
     strategy:
       matrix:
         docker-image: [django, nginx]
+        os: [alpine, debian]
 
     steps:
       # - name: Login to DockerHub
@@ -79,24 +79,24 @@ jobs:
           docker-image: ${{ matrix.docker-image }}
         with:
           path: /tmp/.buildx-cache-${{ env.docker-image }}
-          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
+          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ github.workflow }}-${{ github.sha }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ github.workflow }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}
 
       - name: Build
         id: docker_build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         env:
           docker-image: ${{ matrix.docker-image }}
         with:
           context: .
           push: false
           tags: |
-            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
-          file: Dockerfile.${{ env.docker-image }}
-          outputs: type=docker,dest=${{ env.docker-image }}_img
+            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:${{ matrix.os }}
+          file: Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
+          outputs: type=docker,dest=${{ env.docker-image }}-${{ matrix.os }}_img
           cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
           cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
 
@@ -104,7 +104,7 @@ jobs:
         uses:  actions/upload-artifact@v3
         with:
           name: ${{ matrix.docker-image }}
-          path: ${{ matrix.docker-image }}_img
+          path: ${{ matrix.docker-image }}-${{ matrix.os }}_img
           retention-days: 1
 
   setting_minikube_cluster:
@@ -123,18 +123,27 @@ jobs:
           - databases: pgsql
             brokers: redis
             k8s: 'v1.22.0'
+            os: debian
           - databases: mysql
             brokers: rabbit
             k8s: 'v1.22.0'
+            os: debian
           - databases: pgsql
             brokers: rabbit
             k8s: 'v1.23.9'
+            os: debian
           - databases: mysql
             brokers: redis
             k8s: 'v1.23.9'
+            os: debian
           - databases: pgsqlha
             brokers: rabbit
             k8s: 'v1.23.9'
+            os: debian
+          - databases: pgsql
+            brokers: rabbit
+            k8s: 'v1.23.9'
+            os: alpine
 
     steps:
 #      - name: Login to DockerHub
@@ -164,8 +173,8 @@ jobs:
       - name: Load docker images
         run: |-
              eval $(minikube docker-env)
-             docker load -i nginx/nginx_img
-             docker load -i django/django_img
+             docker load -i nginx/nginx-${{ matrix.os }}_img
+             docker load -i django/django-${{ matrix.os }}_img
              docker images
 
       - name: Configure HELM repos
@@ -198,6 +207,7 @@ jobs:
                ${{ env[matrix.databases] }} \
                ${{ env[matrix.brokers] }} \
                --set createSecret=true \
+               --set tag=${{ matrix.os }} \
                # --set imagePullSecrets=defectdojoregistrykey
 
       - name: Check deployment status

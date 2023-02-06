@@ -75,7 +75,7 @@ worker container.
 
 As you\'ve enabled `prefork`, the following variables have
 to be used. The default are working fairly well, see the
-Dockerfile.django for in-file references.
+Dockerfile.django-* for in-file references.
 
 -   `DD_CELERY_WORKER_AUTOSCALE_MIN` defaults to 2.
 -   `DD_CELERY_WORKER_AUTOSCALE_MAX` defaults to 8.

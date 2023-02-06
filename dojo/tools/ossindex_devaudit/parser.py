@@ -34,7 +34,7 @@ class OssIndexDevauditParser(object):
         try:
             tree = json.load(json_file)
         except JSONDecodeError:
-            raise Exception("Invalid format")
+            raise ValueError("Invalid format")
 
         return tree
 
