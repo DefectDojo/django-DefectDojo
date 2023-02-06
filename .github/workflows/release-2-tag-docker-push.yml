@@ -124,7 +124,7 @@ jobs:
 
       - name: Build and push images with debian
         uses: docker/build-push-action@v4
-        if: ${{ matix.os }} == 'debian'
+        if: ${{ matrix.os }} == 'debian'
         env:
           REPO_ORG: ${{ env.repoorg }}
           docker-image: ${{ matrix.docker-image }}
@@ -139,7 +139,7 @@ jobs:
 
       - name: Build and push images with alpine
         uses: docker/build-push-action@v4
-        if: ${{ matix.os }} == 'alpine'
+        if: ${{ matrix.os }} == 'alpine'
         env:
           REPO_ORG: ${{ env.repoorg }}
           docker-image: ${{ matrix.docker-image }}
