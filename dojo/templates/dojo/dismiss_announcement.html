@@ -12,7 +12,7 @@
         <form class="form-horizontal" method="post">
             {% csrf_token %}
             {{ form }}
-
+<br />
             <div class="form-group">
                 <button class="btn btn-danger" type="submit" name="dismiss_announcement_name" value="dismiss_announcement">{% trans "Dismiss Announcement" %}</button>
             </div>
