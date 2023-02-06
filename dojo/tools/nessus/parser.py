@@ -3,7 +3,6 @@ import io
 import logging
 import re
 import sys
-from xml.dom import NamespaceErr
 
 from cpe import CPE
 from cvss import CVSS3
@@ -127,8 +126,8 @@ class NessusXMLParser(object):
         root = nscan.getroot()
 
         if 'NessusClientData_v2' not in root.tag:
-            raise NamespaceErr('This version of Nessus report is not supported. Please make sure the export is '
-                               'formatted using the NessusClientData_v2 schema.')
+            raise ValueError('This version of Nessus report is not supported. Please make sure the export is '
+                             'formatted using the NessusClientData_v2 schema.')
         dupes = {}
         for report in root.iter("Report"):
             for host in report.iter("ReportHost"):

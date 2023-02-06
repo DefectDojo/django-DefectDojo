@@ -1,0 +1,54 @@
+
+# code: language=Dockerfile
+
+FROM python:3.11.1-slim-bullseye@sha256:3d260508893319ee271989fe16c0ddf13c710ec5ce1d0708cda7bc30da8389e7 as build
+WORKDIR /app
+RUN \
+  apt-get -y update && \
+  apt-get -y install \
+    git \
+    wget \
+    curl \
+    unzip \
+    gpg \
+    && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists && \
+  true
+
+# Installing Google Chrome browser
+RUN \
+  curl -sS -o - https://dl.google.com/linux/linux_signing_key.pub | apt-key add && \
+  echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
+  apt-get -y update && \
+  apt-get -y install \
+    google-chrome-stable \
+  && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists && \
+  true
+
+RUN pip install --no-cache-dir selenium requests chromedriver-autoinstaller
+
+# Installing Chromedriver
+WORKDIR /opt/chrome-driver
+RUN \
+  python -c "import chromedriver_autoinstaller; chromedriver_autoinstaller.install(cwd=True)" && \
+  chmod -R 0755 .
+WORKDIR /app
+
+COPY docker/wait-for-it.sh \
+  docker/entrypoint-integration-tests.sh \
+  /
+
+COPY tests/ ./tests/
+
+RUN chmod -R 0777 /app
+
+ARG uid=1001
+USER ${uid}
+ENV \
+  DD_ADMIN_USER=admin \
+  DD_ADMIN_PASSWORD='' \
+  DD_BASE_URL="http://localhost:8080/"
+CMD ["/entrypoint-integration-tests.sh"]

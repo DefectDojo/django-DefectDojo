@@ -1,9 +1,16 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load navigation_tags %}
 {% load authorization_tags %}
 {% block content %}
     {{ block.super }}
     {% load display_tags %}
+    {% trans "First Name" as first_name %}
+    {% trans "Last Name" as last_name %}
+    {% trans "User Name" as user_name %}
+    {% trans "Email" as email %}
+    {% trans "Active" as active %}
+    {% trans "Superuser" as superuser %}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -22,7 +29,7 @@
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a href="{% url 'add_user' %}">
-                                            <i class="fa-solid fa-plus"></i> New User
+                                            <i class="fa-solid fa-plus"></i> {% trans "New User" %}
                                         </a>
                                     </li>
                             </ul>
@@ -43,16 +50,16 @@
                         class="tablesorter-bootstrap table table-condensed table-striped">
                         <tr>
                             <th></th>
-                            <th class="nowrap">{% dojo_sort request 'First Name' 'first_name' %}</th>
-                            <th class="nowrap">{% dojo_sort request 'Last Name' 'last_name' %}</th>
-                            <th class="nowrap">{% dojo_sort request 'User Name' 'username' 'asc' %}</th>
-                            <th class="nowrap">{% dojo_sort request 'Email' 'email' %}</th>
-                            <th class="nowrap">Title</th>
-                            <th class="nowrap">Phone Number(s)</th>
-                            <th class="nowrap, text-center">{% dojo_sort request 'Active' 'is_active' %}</th>
-                            <th class="nowrap, text-center">{% dojo_sort request 'Superuser' 'is_superuser' %}</th>
-                            <th class="nowrap">Global Role</th>
-                            <th class="nowrap">Last Login</th>
+                            <th class="nowrap">{% dojo_sort request first_name 'first_name' %}</th>
+                            <th class="nowrap">{% dojo_sort request last_name 'last_name' %}</th>
+                            <th class="nowrap">{% dojo_sort request user_name 'username' 'asc' %}</th>
+                            <th class="nowrap">{% dojo_sort request email 'email' %}</th>
+                            <th class="nowrap">{% trans "Title" %}</th>
+                            <th class="nowrap">{% trans "Phone Number(s)" %}</th>
+                            <th class="nowrap, text-center">{% dojo_sort request active 'is_active' %}</th>
+                            <th class="nowrap, text-center">{% dojo_sort request superuser 'is_superuser' %}</th>
+                            <th class="nowrap">{% trans "Global Role" %}</th>
+                            <th class="nowrap">{% trans "Last Login" %}</th>
                         </tr>
                         {% for u in users %}
                             <tr>
@@ -63,25 +70,25 @@
                                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuUsers">
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'view_user' u.id %}" id="viewUser">
-                                                    <i class="fa-solid fa-rectangle-list"></i> View</a>
+                                                    <i class="fa-solid fa-rectangle-list"></i> {% trans "View" %}</a>
                                                 </li>
                                                 {% if "auth.change_user"|has_configuration_permission %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'edit_user' u.id %}"  id="editUser">
-                                                    <i class="fa-solid fa-pen-to-square"></i> Edit</a>
+                                                    <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}</a>
                                                 </li>
                                                 {% endif %}
                                                 <li role="separator" class="divider"></li>
                                                 <li role="presentation">
                                                   <a href="{% url 'action_history' u|content_type u.id %}">
-                                                      <i class="fa-solid fa-clock-rotate-left"></i> View History
+                                                      <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
                                                   </a>
                                                 </li>
                                                 {% if "auth.delete_user"|has_configuration_permission and u.id != request.user.id %}
                                                 <li role="separator" class="divider"></li>
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'delete_user' u.id %}">
-                                                    <i class="fa-solid fa-trash"></i> Delete</a>
+                                                    <i class="fa-solid fa-trash"></i> {% trans "Delete" %}</a>
                                                 </li>
                                                 {% endif %}
                                             </ul>
@@ -94,9 +101,9 @@
                                 <td>{{ u.email }}</td>
                                 <td>{% if u.usercontactinfo.title %} {{ u.usercontactinfo.title }} {% endif %}</td>
                                 <td>
-                                    {% if u.usercontactinfo.phone_number %} Phone: {{ u.usercontactinfo.phone_number }} {% endif %}
+                                    {% if u.usercontactinfo.phone_number %} {% trans "Phone:" %} {{ u.usercontactinfo.phone_number }} {% endif %}
                                     {% if u.usercontactinfo.phone_number and u.usercontactinfo.cell_number %}<br/> {% endif %}
-                                    {% if u.usercontactinfo.cell_number %} Cell: {{ u.usercontactinfo.cell_number }}  {% endif %}
+                                    {% if u.usercontactinfo.cell_number %} {% trans "Cell:" %} {{ u.usercontactinfo.cell_number }}  {% endif %}
                                 </td>
                                 <td class="text-center">{% if u.is_active %}
                                     <i class="text-success fa-solid fa-check"></i>{% else %}
@@ -105,7 +112,7 @@
                                     <i class="text-success fa-solid fa-check"></i>{% else %}
                                     <i class="text-danger fa-solid fa-xmark"></i>{% endif %}</td>
                                 <td>{% if u.global_role.role %} {{ u.global_role.role }} {% endif %}</td>
-                                <td>{% if u.last_login %}{{ u.last_login }}{% else %}Never{% endif %}</td>
+                                <td>{% if u.last_login %}{{ u.last_login }}{% else %}{% trans "Never" %}{% endif %}</td>
                                 </tr>
                         {% endfor %}
                     </table>
@@ -114,7 +121,7 @@
                     {% include "dojo/paging_snippet.html" with page=users page_size=True %}
                 </div>
             {% else %}
-                <h5> No Users </h5>
+                <h5>{% trans "No Users" %}</h5>
             {% endif %}
         </div>
     </div>

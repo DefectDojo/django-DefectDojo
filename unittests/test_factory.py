@@ -13,7 +13,7 @@ class TestFactory(DojoTestCase):
             testfile.close()
         with self.subTest(scan_type="Anchore Engine Scan"):
             scan_type = "Anchore Engine Scan"
-            testfile = open(get_unit_tests_path() + "/scans/anchore/one_vuln.json")
+            testfile = open(get_unit_tests_path() + "/scans/anchore_engine/one_vuln.json")
             parser = get_parser(scan_type)
             findings = parser.get_findings(testfile, Test())
             testfile.close()

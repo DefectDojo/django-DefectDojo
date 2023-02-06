@@ -38,7 +38,7 @@ class SnykParser(object):
             except:
                 tree = json.loads(data)
         except:
-            raise Exception("Invalid format")
+            raise ValueError("Invalid format")
 
         return tree
 

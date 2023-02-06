@@ -20,6 +20,7 @@ from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
@@ -628,7 +629,7 @@ def add_breadcrumb(parent=None,
     if top_level or crumbs is None:
         crumbs = [
             {
-                'title': 'Home',
+                'title': _('Home'),
                 'url': reverse('home')
             },
         ]
@@ -646,18 +647,14 @@ def add_breadcrumb(parent=None,
             obj_crumbs = parent.get_breadcrumbs()
             if title is not None:
                 obj_crumbs += [{
-                    'title':
-                    title,
-                    'url':
-                    request.get_full_path() if url is None else url
+                    'title': title,
+                    'url': request.get_full_path() if url is None else url
                 }]
         else:
             title_done = True
             obj_crumbs = [{
-                'title':
-                title,
-                'url':
-                request.get_full_path() if url is None else url
+                'title': title,
+                'url': request.get_full_path() if url is None else url
             }]
 
         for crumb in crumbs:
@@ -745,7 +742,6 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
 
         start_of_week = timezone.make_aware(datetime.combine(first_sunday, datetime.min.time()))
         start_of_next_week = start_of_week + relativedelta(weeks=1)
-        day_counts = [0, 0, 0, 0, 0, 0, 0]
 
         for day in severities_by_day:
             if view == 'Finding':
@@ -1958,7 +1954,7 @@ def create_bleached_link(url, title):
     link += '\">'
     link += title
     link += '</a>'
-    return bleach.clean(link, tags=['a'], attributes={'a': ['href', 'target', 'title']})
+    return bleach.clean(link, tags={'a'}, attributes={'a': ['href', 'target', 'title']})
 
 
 def get_object_or_none(klass, *args, **kwargs):
@@ -2296,3 +2292,17 @@ def get_password_requirements_string():
         password_requirements_string = s.rsplit(', ', 1)[0] + ', and ' + s.rsplit(', ', 1)[1]
 
     return password_requirements_string + '.'
+
+
+def get_zero_severity_level():
+    return {'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0}
+
+
+def sum_by_severity_level(metrics):
+    values = get_zero_severity_level()
+
+    for m in metrics:
+        if values.get(m.severity) is not None:
+            values[m.severity] += 1
+
+    return values
