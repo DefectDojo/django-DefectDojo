@@ -15,7 +15,6 @@ on:
 
 jobs:
   job-build-and-push:
-    needs: tag-and-release
     runs-on: ubuntu-latest
     strategy:
       matrix:
