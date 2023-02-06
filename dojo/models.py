@@ -2860,8 +2860,15 @@ class Finding(models.Model):
             return None
         if self.test.engagement.source_code_management_uri is None:
             return escape(self.file_path)
+        link = self.get_file_path_with_raw_link()
+        return create_bleached_link(link, self.file_path)
+
+    def get_file_path_with_raw_link(self):
+        if self.file_path is None:
+            return None
         link = self.test.engagement.source_code_management_uri
-        if "https://github.com/" in self.test.engagement.source_code_management_uri:
+        if (self.test.engagement.source_code_management_uri is not None
+                and "https://github.com/" in self.test.engagement.source_code_management_uri):
             if self.test.commit_hash:
                 link += '/blob/' + self.test.commit_hash + '/' + self.file_path
             elif self.test.engagement.commit_hash:
@@ -2876,7 +2883,7 @@ class Finding(models.Model):
             link += '/' + self.file_path
         if self.line:
             link = link + '#L' + str(self.line)
-        return create_bleached_link(link, self.file_path)
+        return link
 
     def get_references_with_links(self):
         import re
@@ -2962,7 +2969,10 @@ class Stub_Finding(models.Model):
 
 class Finding_Group(TimeStampedModel):
 
-    GROUP_BY_OPTIONS = [('component_name', 'Component Name'), ('component_name+component_version', 'Component Name + Version'), ('file_path', 'File path')]
+    GROUP_BY_OPTIONS = [('component_name', 'Component Name'),
+                        ('component_name+component_version', 'Component Name + Version'),
+                        ('file_path', 'File path'),
+                        ('finding_title', 'Finding Title')]
 
     name = models.CharField(max_length=255, blank=False, null=False)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
