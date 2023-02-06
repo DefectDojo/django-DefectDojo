@@ -6,4 +6,5 @@ urlpatterns = [
     #  dojo home pages
     re_path(r'^$', views.home, name='home'),
     re_path(r'^dashboard$', views.dashboard, name='dashboard'),
+    re_path(r'^support$', views.support, name='support'),
 ]

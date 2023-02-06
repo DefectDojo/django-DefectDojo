@@ -302,6 +302,12 @@ def get_item(result, rules, artifacts, run_date):
     if kind != 'fail':
         return None
 
+    # if finding is suppressed, mark it as False Positive
+    # Note: see https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html#_Toc10127852
+    suppressed = False
+    if result.get("suppressions"):
+        suppressed = True
+
     # if there is a location get it
     file_path = None
     line = None
@@ -322,6 +328,8 @@ def get_item(result, rules, artifacts, run_date):
         description=get_description(result, rule),
         static_finding=True,  # by definition
         dynamic_finding=False,  # by definition
+        false_p=suppressed,
+        active=not suppressed,
         file_path=file_path,
         line=line,
         references=get_references(rule),
