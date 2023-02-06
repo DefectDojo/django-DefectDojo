@@ -28,7 +28,7 @@ Django==4.1.5
 djangorestframework==3.14.0
 gunicorn==20.1.0
 html2text==2020.1.16
-humanize==4.5.0
+humanize==4.6.0
 jira==3.4.1
 PyGithub==1.57
 lxml==4.9.2
