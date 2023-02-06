@@ -132,16 +132,9 @@ class DojoDefaultImporter(object):
                 burp_rr.clean()
                 burp_rr.save()
 
-            if settings.ASYNC_FINDING_IMPORT:
-                importer_utils.chunk_endpoints_and_disperse(item, test, item.unsaved_endpoints)
-            else:
-                importer_utils.add_endpoints_to_unsaved_finding(item, test, item.unsaved_endpoints, sync=True)
-
+            importer_utils.chunk_endpoints_and_disperse(item, test, item.unsaved_endpoints)
             if endpoints_to_add:
-                if settings.ASYNC_FINDING_IMPORT:
-                    importer_utils.chunk_endpoints_and_disperse(item, test, endpoints_to_add)
-                else:
-                    importer_utils.add_endpoints_to_unsaved_finding(item, test, endpoints_to_add, sync=True)
+                importer_utils.chunk_endpoints_and_disperse(item, test, endpoints_to_add)
 
             if item.unsaved_tags:
                 item.tags = item.unsaved_tags

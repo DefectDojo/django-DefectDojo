@@ -12,6 +12,7 @@ from django.core import serializers
 from django.core.files.base import ContentFile
 from django.utils import timezone
 from dojo.importers import utils as importer_utils
+from dojo.importers.reimporter import utils as reimporter_utils
 from dojo.models import (BurpRawRequestResponse, FileUpload, Finding,
                          Notes, Test_Import)
 from dojo.tools.factory import get_parser
@@ -42,10 +43,6 @@ class DojoDefaultReImporter(object):
         unchanged_items = []
 
         logger.debug('starting reimport of %i items.', len(items) if items else 0)
-        from dojo.importers.reimporter.utils import (
-            match_new_finding_to_existing_finding,
-            update_endpoint_status,
-            reactivate_endpoint_status)
         deduplication_algorithm = test.deduplication_algorithm
 
         i = 0
@@ -84,7 +81,7 @@ class DojoDefaultReImporter(object):
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
 
-            findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm)
+            findings = reimporter_utils.match_new_finding_to_existing_finding(item, test, deduplication_algorithm)
 
             deduplicationLogger.debug('found %i findings matching with current new finding', len(findings))
 
@@ -146,19 +143,7 @@ class DojoDefaultReImporter(object):
                     endpoint_statuses = finding.status_finding.exclude(Q(false_positive=True) |
                                                                         Q(out_of_scope=True) |
                                                                         Q(risk_accepted=True))
-
-                    # Determine if this can be run async
-                    if settings.ASYNC_FINDING_IMPORT:
-                        chunk_list = importer_utils.chunk_list(endpoint_statuses)
-                        # If there is only one chunk, then do not bother with async
-                        if len(chunk_list) < 2:
-                            reactivate_endpoint_status(endpoint_statuses, sync=True)
-                        logger.debug('IMPORT_SCAN: Split endpoints into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_list[0]))
-                        # First kick off all the workers
-                        for endpoint_status_list in chunk_list:
-                            reactivate_endpoint_status(endpoint_status_list, sync=False)
-                    else:
-                        reactivate_endpoint_status(endpoint_statuses, sync=True)
+                    reimporter_utils.chunk_endpoints_and_reactivate(endpoint_statuses)
 
                     finding.notes.add(note)
                     reactivated_items.append(finding)
@@ -190,7 +175,7 @@ class DojoDefaultReImporter(object):
                     unchanged_count += 1
                 if finding.dynamic_finding:
                     logger.debug("Re-import found an existing dynamic finding for this new finding. Checking the status of endpoints")
-                    update_endpoint_status(finding, item, user)
+                    reimporter_utils.update_endpoint_status(finding, item, user)
             else:
                 # no existing finding found
                 item.reporter = user
@@ -247,16 +232,9 @@ class DojoDefaultReImporter(object):
             # for existing findings: make sure endpoints are present or created
             if finding:
                 finding_count += 1
-                if settings.ASYNC_FINDING_IMPORT:
-                    importer_utils.chunk_endpoints_and_disperse(finding, test, item.unsaved_endpoints)
-                else:
-                    importer_utils.add_endpoints_to_unsaved_finding(finding, test, item.unsaved_endpoints, sync=True)
-
+                importer_utils.chunk_endpoints_and_disperse(finding, test, item.unsaved_endpoints)
                 if endpoints_to_add:
-                    if settings.ASYNC_FINDING_IMPORT:
-                        importer_utils.chunk_endpoints_and_disperse(finding, test, endpoints_to_add)
-                    else:
-                        importer_utils.add_endpoints_to_unsaved_finding(finding, test, endpoints_to_add, sync=True)
+                    importer_utils.chunk_endpoints_and_disperse(finding, test, endpoints_to_add)
 
                 if item.unsaved_tags:
                     finding.tags = item.unsaved_tags
@@ -332,12 +310,7 @@ class DojoDefaultReImporter(object):
                 finding.active = False
 
                 endpoint_status = finding.status_finding.all()
-                for status in endpoint_status:
-                    status.mitigated_by = user
-                    status.mitigated_time = timezone.now()
-                    status.mitigated = True
-                    status.last_modified = timezone.now()
-                    status.save()
+                reimporter_utils.mitigate_endpoint_status(endpoint_status, user, kwuser=user, sync=True)
 
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
                 if is_finding_groups_enabled() and finding.finding_group:
