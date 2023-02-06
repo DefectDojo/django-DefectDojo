@@ -39,3 +39,14 @@ def bind_alert_count(request):
         if request.user.is_authenticated:
             return {'alert_count': Alerts.objects.filter(user_id=request.user).count()}
     return {}
+
+
+def bind_announcement(request):
+    from dojo.models import UserAnnouncement
+    try:
+        if request.user.is_authenticated:
+            user_announcement = UserAnnouncement.objects.select_related('announcement').get(user=request.user)
+            return {'announcement': user_announcement.announcement}
+        return {}
+    except Exception:
+        return {}
