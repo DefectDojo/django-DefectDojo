@@ -11,7 +11,7 @@ services:
   nginx:
     build:
       context: ./
-      dockerfile: Dockerfile.nginx
+      dockerfile: "Dockerfile.nginx-${DEFECT_DOJO_OS:-debian}"
     image: "defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}"
     profiles: 
       - mysql-rabbitmq
@@ -36,7 +36,7 @@ services:
   uwsgi:
     build:
       context: ./
-      dockerfile: Dockerfile.django
+      dockerfile: "Dockerfile.django-${DEFECT_DOJO_OS:-debian}"
       target: django
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     profiles: 

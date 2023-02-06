@@ -14,8 +14,8 @@ So long as you don't mind building your own Docker images...
 
 We will need to modify a grand total of 4-5 files, depending on how you want to pass Dojo your LDAP secrets.
 
- - Dockerfile.django
- - Dockerfile.nginx
+ - Dockerfile.django-*
+ - Dockerfile.nginx-*
  - requirements.txt
  - settings.dist.py
  - docker-compose.yml *(Optional)*
