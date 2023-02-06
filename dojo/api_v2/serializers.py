@@ -1,3 +1,5 @@
+from dojo.group.utils import get_auth_group_name
+from django.contrib.auth.models import Group
 from typing import List
 from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
@@ -466,8 +468,15 @@ class DojoGroupSerializer(serializers.ModelSerializer):
         exclude = ['auth_group']
 
     def to_representation(self, instance):
+        if not instance.auth_group:
+            auth_group = Group(name=get_auth_group_name(instance))
+            auth_group.save()
+            instance.auth_group = auth_group
+            members = instance.users.all()
+            for member in members:
+                auth_group.user_set.add(member)
+            instance.save()
         ret = super().to_representation(instance)
-
         # This will show only "configuration_permissions" even if user has also other permissions
         all_permissions = set(ret['configuration_permissions'])
         allowed_configuration_permissions = set(self.fields['configuration_permissions'].child_relation.queryset.values_list('id', flat=True))
@@ -1268,7 +1277,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             is_risk_accepted = data.get('risk_accepted', self.instance.risk_accepted)
         else:
             is_active = data.get('active', True)
-            is_verified = data.get('verified', True)
+            is_verified = data.get('verified', False)
             is_duplicate = data.get('duplicate', False)
             is_false_p = data.get('false_p', False)
             is_risk_accepted = data.get('risk_accepted', False)
@@ -1693,7 +1702,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         allow_null=True,
         default=None,
         queryset=User.objects.all())
-    tags = TagListSerializerField(required=False, help_text="Modify existing tags that help describe this scan.")
+    tags = TagListSerializerField(required=False, help_text="Modify existing tags that help describe this scan. (Existing test tags will be overwritten)")
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
     create_finding_groups_for_all_findings = serializers.BooleanField(help_text="If set to false, finding groups will only be created when there is more than one grouped finding", required=False, default=True)
@@ -1761,7 +1770,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 reimporter = ReImporter()
                 test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, test_import = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
-                                                tags=None, minimum_severity=minimum_severity,
+                                                tags=tags, minimum_severity=minimum_severity,
                                                 endpoints_to_add=endpoints_to_add, scan_date=scan_date_time,
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,

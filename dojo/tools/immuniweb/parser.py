@@ -1,5 +1,4 @@
 import hashlib
-from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
 
@@ -25,7 +24,7 @@ class ImmuniwebParser(object):
         root = ImmuniScanTree.getroot()
         # validate XML file
         if 'Vulnerabilities' not in root.tag:
-            raise NamespaceErr("This does not look like a valid expected Immuniweb XML file.")
+            raise ValueError("This does not look like a valid expected Immuniweb XML file.")
 
         dupes = dict()
 

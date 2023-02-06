@@ -26,4 +26,4 @@ class SslyzeParser(object):
         elif filename.name.lower().endswith('.json'):
             return SSLyzeJSONParser().get_findings(filename, test)
         else:
-            raise Exception('Unknown File Format')
+            raise ValueError('Unknown File Format')

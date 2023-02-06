@@ -64,7 +64,7 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
         A CVSS3 Vector including both Base and Temporal if available
     """
 
-    vector_pattern = r'^\d.\d \((.*)\)'
+    vector_pattern = r'^\d{1,2}.\d \((.*)\)'
     cvss_vector = 'CVSS:3.0/'
 
     if cvss_base:
@@ -132,9 +132,8 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
         finding.unsaved_vulnerability_ids = cve_data.split(',') if ',' in cve_data else [cve_data]
 
         if report_finding['Date Last Fixed']:
-            finding.mitigated = datetime.strptime(
-                report_finding['Date Last Fixed'],
-                "%m/%d/%Y %H:%M:%S").date()
+            finding.mitigated = datetime.strptime(report_finding['Date Last Fixed'],
+                                                  "%m/%d/%Y %H:%M:%S")
             finding.is_mitigated = True
         else:
             finding.is_mitigated = False

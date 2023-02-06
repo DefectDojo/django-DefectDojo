@@ -113,17 +113,17 @@ class DependencyTrackParser(object):
         """
         # Validation of required fields
         if 'vulnerability' not in dependency_track_finding:
-            raise Exception("Missing 'vulnerability' node from finding!")
+            raise ValueError("Missing 'vulnerability' node from finding!")
         if 'vulnId' not in dependency_track_finding['vulnerability']:
-            raise Exception("Missing 'vulnId' node from vulnerability!")
+            raise ValueError("Missing 'vulnId' node from vulnerability!")
         vuln_id = dependency_track_finding['vulnerability']['vulnId']
         if 'source' not in dependency_track_finding['vulnerability']:
-            raise Exception("Missing 'source' node from vulnerability!")
+            raise ValueError("Missing 'source' node from vulnerability!")
         source = dependency_track_finding['vulnerability']['source']
         if 'component' not in dependency_track_finding:
-            raise Exception("Missing 'component' node from finding!")
+            raise ValueError("Missing 'component' node from finding!")
         if 'name' not in dependency_track_finding['component']:
-            raise Exception("Missing 'name' node from component!")
+            raise ValueError("Missing 'name' node from component!")
         component_name = dependency_track_finding['component']['name']
 
         # Build the title of the Dojo finding

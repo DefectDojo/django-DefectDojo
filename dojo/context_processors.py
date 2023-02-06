@@ -6,6 +6,7 @@ def globalize_vars(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
     return {'SHOW_LOGIN_FORM': settings.SHOW_LOGIN_FORM,
             'FORGOT_PASSWORD': settings.FORGOT_PASSWORD,
+            'FORGOT_USERNAME': settings.FORGOT_USERNAME,
             'CLASSIC_AUTH_ENABLED': settings.CLASSIC_AUTH_ENABLED,
             'AUTH0_ENABLED': settings.AUTH0_OAUTH2_ENABLED,
             'GOOGLE_ENABLED': settings.GOOGLE_OAUTH_ENABLED,
@@ -38,3 +39,14 @@ def bind_alert_count(request):
         if request.user.is_authenticated:
             return {'alert_count': Alerts.objects.filter(user_id=request.user).count()}
     return {}
+
+
+def bind_announcement(request):
+    from dojo.models import UserAnnouncement
+    try:
+        if request.user.is_authenticated:
+            user_announcement = UserAnnouncement.objects.select_related('announcement').get(user=request.user)
+            return {'announcement': user_announcement.announcement}
+        return {}
+    except Exception:
+        return {}
