@@ -10,3 +10,5 @@ To generate the OSA report using Checkmarx CLI:
 
 That will generate three files, two of which are needed for defectdojo. Build the file for defectdojo with the jq utility:
 `jq -s . CxOSAVulnerabilities.json CxOSALibraries.json`
+
+Data for SAST, SCA and KICS are supported.
