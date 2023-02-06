@@ -6,6 +6,8 @@ env:
 on:
   workflow_dispatch:
     inputs:
+      # the actual branch that can be chosen on the UI is made irrelevant by further steps
+      # because someone will forget one day to change it.
       release_number:
         description: 'Release number'
         required: true
@@ -18,6 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: master
           fetch-depth: 0
       
       - name: Get upload URL
@@ -48,7 +51,7 @@ jobs:
         run: |
           mkdir build
           helm package helm/defectdojo/ --destination ./build
-          echo "chart_version=$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')" >> #GITHUB_ENV
+          echo "chart_version=$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')" >> $GITHUB_ENV
       
       - name: Create release ${{ github.event.inputs.release_number }}
         uses: softprops/action-gh-release@v1
