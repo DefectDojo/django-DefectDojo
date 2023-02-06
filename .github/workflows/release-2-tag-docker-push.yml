@@ -145,7 +145,7 @@ jobs:
           docker-image: ${{ matrix.docker-image }}
         with:
           push: true
-          if: ${{ matrix.os }} == 'debian'
+          if: ${{ matrix.os }} == 'alpine'
           tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
           file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
           context: .
