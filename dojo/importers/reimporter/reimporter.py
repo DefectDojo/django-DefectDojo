@@ -122,12 +122,18 @@ class DojoDefaultReImporter(object):
                                 finding.verified = verified
                         if do_not_reactivate:
                             logger.debug('%i: skipping reactivating by user\'s choice do_not_reactivate: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                            note = Notes(
-                                entry="Finding has skipped reactivation from %s re-upload with user decision do_not_reactivate." % scan_type,
-                                author=user)
-                            note.save()
-                            finding.notes.add(note)
-                            finding.save(dedupe_option=False)
+                            existing_note = finding.notes.filter(
+                                entry="Finding has skipped reactivation from %s re-upload with user decision do_not_reactivate."
+                                % scan_type,
+                                author=user,
+                            )
+                            if len(existing_note) == 0:
+                              note = Notes(
+                                  entry="Finding has skipped reactivation from %s re-upload with user decision do_not_reactivate." % scan_type,
+                                  author=user)
+                              note.save()
+                              finding.notes.add(note)
+                              finding.save(dedupe_option=False)
                             continue
                     # existing findings may be from before we had component_name/version fields
                     finding.component_name = finding.component_name if finding.component_name else component_name
