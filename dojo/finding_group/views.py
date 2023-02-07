@@ -33,14 +33,16 @@ def view_finding_group(request, fgid):
     jira_project = None
     github_config = None
 
-    if pid := finding_group.test.engagement.product.id:
+    if finding_group.test.engagement.product.id:
+        pid = finding_group.test.engagement.product.id
         product = get_object_or_404(Product, id=pid)
         user_has_permission_or_403(request.user, product, Permissions.Product_View)
         product_tab = Product_Tab(product, title="Findings", tab="findings")
         jira_project = jira_helper.get_jira_project(product)
         github_config = GITHUB_PKey.objects.filter(product=pid).first()
         findings_filter = FindingFilter(request.GET, findings, user=request.user, pid=pid)
-    elif eid := finding_group.test.engagement.id:
+    elif finding_group.test.engagement.id:
+        eid = finding_group.test.engagement.id
         engagement = get_object_or_404(Engagement, id=eid)
         user_has_permission_or_403(request.user, engagement, Permissions.Engagement_View)
         product_tab = Product_Tab(engagement.product, title=engagement.name, tab="engagements")
