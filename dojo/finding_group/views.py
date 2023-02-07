@@ -2,7 +2,6 @@ from dojo.utils import Product_Tab, add_breadcrumb, get_words_for_field, get_pag
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import prefetch_for_findings
-from dojo.finding.queries import get_authorized_findings
 from dojo.filters import FindingFilter
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
@@ -53,7 +52,7 @@ def view_finding_group(request, fgid):
     title_words = get_words_for_field(Finding, 'title')
     component_words = get_words_for_field(Finding, 'component_name')
 
-    paged_findings = get_page_items(request, findings_filter.qs, 25)    
+    paged_findings = get_page_items(request, findings_filter.qs, 25)
     paged_findings.object_list = prefetch_for_findings(paged_findings.object_list, 'all')
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
@@ -72,18 +71,19 @@ def view_finding_group(request, fgid):
 
     add_breadcrumb(title=finding_group.name, top_level=not len(request.GET), request=request)
     return render(request, 'dojo/view_finding_group.html', {
-            'show_product_column': show_product_column,
-            'product_tab': product_tab,
-            'findings': paged_findings,
-            'filtered': findings_filter,
-            'title_words': title_words,
-            'component_words': component_words,
-            'custom_breadcrumb': custom_breadcrumb,
-            'filter_name': filter_name,
-            'jira_project': jira_project,
-            'bulk_edit_form': bulk_edit_form,
-            'edit_finding_group_form': edit_finding_group_form,
-        })
+        'show_product_column': show_product_column,
+        'product_tab': product_tab,
+        'findings': paged_findings,
+        'filtered': findings_filter,
+        'title_words': title_words,
+        'component_words': component_words,
+        'custom_breadcrumb': custom_breadcrumb,
+        'filter_name': filter_name,
+        'jira_project': jira_project,
+        'bulk_edit_form': bulk_edit_form,
+        'edit_finding_group_form': edit_finding_group_form,
+    })
+
 
 @user_is_authorized(Finding_Group, Permissions.Finding_Group_Delete, 'fgid')
 @require_POST
@@ -116,11 +116,11 @@ def delete_finding_group(request, fgid):
     product_tab = Product_Tab(finding_group.test.engagement.product, title="Product", tab="settings")
 
     return render(request, 'dojo/delete_finding_group.html', {
-            'finding_group': finding_group,
-            'form': form,
-            'product_tab': product_tab,
-            'rels': rels,
-        })
+        'finding_group': finding_group,
+        'form': form,
+        'product_tab': product_tab,
+        'rels': rels,
+    })
 
 
 @user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid')
