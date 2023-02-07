@@ -87,12 +87,14 @@ def update_endpoint_status(existing_finding, new_finding, user):
 @app.task()
 def mitigate_endpoint_status(endpoint_status_list, user, **kwargs):
     for endpoint_status in endpoint_status_list:
-        logger.debug("Re-import: mitigating endpoint %s that is no longer present", str(endpoint_status.endpoint))
-        endpoint_status.mitigated_by = user
-        endpoint_status.mitigated_time = timezone.now()
-        endpoint_status.mitigated = True
-        endpoint_status.last_modified = timezone.now()
-        endpoint_status.save()
+        # Only mitigate endpoints that are actually active
+        if not endpoint_status.mitigated:
+            logger.debug("Re-import: mitigating endpoint %s that is no longer present", str(endpoint_status.endpoint))
+            endpoint_status.mitigated_by = user
+            endpoint_status.mitigated_time = timezone.now()
+            endpoint_status.mitigated = True
+            endpoint_status.last_modified = timezone.now()
+            endpoint_status.save()
 
 
 def chunk_endpoints_and_reactivate(endpoint_statuses, **kwargs):
@@ -114,12 +116,14 @@ def chunk_endpoints_and_reactivate(endpoint_statuses, **kwargs):
 @app.task()
 def reactivate_endpoint_status(endpoint_status_list, **kwargs):
     for endpoint_status in endpoint_status_list:
-        logger.debug("Re-import: reactivating endpoint %s that is present in this scan", str(endpoint_status.endpoint))
-        endpoint_status.mitigated_by = None
-        endpoint_status.mitigated_time = None
-        endpoint_status.mitigated = False
-        endpoint_status.last_modified = timezone.now()
-        endpoint_status.save()
+        # Only reactivate endpoints that are actually mitigated
+        if endpoint_status.mitigated:
+            logger.debug("Re-import: reactivating endpoint %s that is present in this scan", str(endpoint_status.endpoint))
+            endpoint_status.mitigated_by = None
+            endpoint_status.mitigated_time = None
+            endpoint_status.mitigated = False
+            endpoint_status.last_modified = timezone.now()
+            endpoint_status.save()
 
 
 def get_target_product_if_exists(product_name=None, product_type_name=None):
