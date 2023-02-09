@@ -52,7 +52,7 @@ services:
     image: busybox:1.36.1-musl
     entrypoint: ['echo', 'skipping', 'redis']
   go-httpbin:
-    image: mccutchen/go-httpbin:v2.5.3@sha256:866e254ec9fc44cdba12e8e9f1730e666958ceedfa32d09787bc95f9d4d01679
+    image: mccutchen/go-httpbin:v2.5.5@sha256:70682c4803caf113f0e6dbec2d656ba551e7779b5b5a09c6d041dc3917362cc7
 volumes:
   defectdojo_postgres_unit_tests: {}
   defectdojo_media_unit_tests: {}
