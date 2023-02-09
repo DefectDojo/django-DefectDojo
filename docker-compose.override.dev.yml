@@ -53,5 +53,3 @@ services:
         published: 8025
         protocol: tcp
         mode: host
-  go-httpbin:
-    image: mccutchen/go-httpbin:v2.5.3@sha256:866e254ec9fc44cdba12e8e9f1730e666958ceedfa32d09787bc95f9d4d01679
