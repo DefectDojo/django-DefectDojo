@@ -86,6 +86,7 @@ def update_endpoint_status(existing_finding, new_finding, user):
 @dojo_async_task
 @app.task()
 def mitigate_endpoint_status(endpoint_status_list, user, **kwargs):
+    """ Only mitigate endpoints that are actually active """
     for endpoint_status in endpoint_status_list:
         # Only mitigate endpoints that are actually active
         if not endpoint_status.mitigated:
