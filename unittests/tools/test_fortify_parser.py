@@ -55,3 +55,23 @@ class TestFortifyParser(DojoTestCase):
             self.assertEqual("src/main/java/command.java", finding.file_path)
             self.assertEqual(40, finding.line)
             self.assertEqual('7A2F1C728BDDBB17C7CB31CEDF5D8F85', finding.unique_id_from_tool)
+
+    def test_fortify_issue6082(self):
+        testfile = get_unit_tests_path() + "/scans/fortify/issue6082.xml"
+        parser = FortifyParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(2, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("Privacy Violation: Autocomplete - login.html: 19", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("login.html", finding.file_path)
+            self.assertEqual(19, finding.line)
+            self.assertEqual('F46C9EF7203D77D83D3486BCDC78565F', finding.unique_id_from_tool)
+        with self.subTest(i=1):
+            finding = findings[1]
+            self.assertEqual("Unreleased Resource: Database - MyContextListener.java: 28", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("src/adrui/MyContextListener.java", finding.file_path)
+            self.assertEqual(28, finding.line)
+            self.assertEqual('B5B15F27E10F4D7799BD0ED1E6D34C5D', finding.unique_id_from_tool)
