@@ -47,5 +47,12 @@
         },
         "model": "dojo.test_type",
         "pk": 7
+    },
+    {
+        "fields": {
+            "name": "My Scanner"
+        },
+        "model": "dojo.test_type",
+        "pk": 8
     }
 ]
