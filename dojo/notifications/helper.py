@@ -290,7 +290,7 @@ def send_mail_notification(event, user=None, *args, **kwargs):
         )
         email.content_subtype = 'html'
         logger.debug('sending email alert')
-        # logger.info(create_notification_message(event, 'mail'))
+        # logger.info(create_notification_message(event, user, 'mail', *args, **kwargs))
         email.send(fail_silently=False)
 
     except Exception as e:

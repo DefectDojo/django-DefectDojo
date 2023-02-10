@@ -1,8 +1,8 @@
-{% load i18n %}{% blocktranslate trimmed %}
-SLA breach alert for finding {{ finding.id }}. Relative days count to SLA due date: {{sla_age}}.
-Title: {{finding.title}}
-Severity: {{finding.severity}}
-You can find details here: {{ url|full_url }}
+{% load i18n %}{% blocktranslate trimmed with id=finding.id title=finding.title severity=finding.severity sla_url=url|full_url %}
+SLA breach alert for finding {{ id }}. Relative days count to SLA due date: {{sla_age}}.
+Title: {{title}}
+Severity: {{severity}}
+You can find details here: {{ sla_url }}
 {% endblocktranslate %}
 {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
     
