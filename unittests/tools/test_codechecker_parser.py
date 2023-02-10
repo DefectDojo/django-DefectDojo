@@ -32,7 +32,7 @@ class TestCodeCheckerParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertTrue(94 == len(findings), str(len(findings)))
 
-        self.assertTrue(sum(1 for f in findings if f.duplicate ) == 0)
+        self.assertTrue(sum(1 for f in findings if f.duplicate) == 0)
         self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'HIGH') == 20)
         self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'INFORMATIONAL') == 6)
         self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'CRITICAL') == 0)
@@ -78,4 +78,3 @@ class TestCodeCheckerParser(DojoTestCase):
         self.assertFalse(finding.verified)
         self.assertTrue(finding.risk_accepted)
         self.assertFalse(finding.false_p)
-

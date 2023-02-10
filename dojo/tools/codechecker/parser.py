@@ -1,7 +1,6 @@
 import json
 import hashlib
 from dojo.models import Finding
-from dojo.tools.parser_test import ParserTest
 
 
 class CodeCheckerParser(object):
@@ -53,9 +52,8 @@ def get_item(vuln):
     description += 'Category name: {}\n'.format(vuln['category'])
     description += 'Checker name: {}\n'.format(vuln['checker_name'])
 
-    
     if 'type' in vuln:
-        vuln_type = vuln.get('type','None')
+        vuln_type = vuln.get('type', 'None')
         if vuln_type != 'None':
             description += 'Type: {}\n'.format(vuln_type)
 
@@ -64,7 +62,7 @@ def get_item(vuln):
 
     location = vuln['file']
     file_path = location['path'] if 'path' in location else None
-    
+
     if file_path:
         description += 'File path: {}\n'.format(file_path)
 
@@ -79,18 +77,18 @@ def get_item(vuln):
     sast_object = None
 
     severity = get_mapped_severity(vuln.get('severity', 'UNSPECIFIED'))
-    
+
     mitigation = ''
 
     references = ''
 
     review_status = vuln.get('review_status', 'unreviewed')
-    verified = review_status == 'confirmed' # bug confirmed by reviewer    
-    risk_accepted = review_status == 'intentional' # not confirmed, not a bug, there are some reasons to make this code in this manner   
-    false_positive = review_status in ['false_positive', 'suppressed'] # this finding is false positive       
+    verified = review_status == 'confirmed'  # bug confirmed by reviewer
+    risk_accepted = review_status == 'intentional'  # not confirmed, not a bug, there are some reasons to make this code in this manner
+    false_positive = review_status in ['false_positive', 'suppressed']  # this finding is false positive
 
     hash = hashlib.sha256()
-    unique_id = vuln['report_hash']+'.'+vuln['analyzer_result_file_path']+description
+    unique_id = vuln['report_hash'] + '.' + vuln['analyzer_result_file_path']+description
     hash.update(unique_id.encode())
     unique_id_from_tool = hash.hexdigest()
 
@@ -113,7 +111,7 @@ def get_item(vuln):
                       line=line,
                       verified=verified,
                       risk_accepted=risk_accepted,
-                      false_p = false_positive,
+                      false_p=false_positive,
                       sast_source_object=sast_object,
                       sast_sink_object=sast_object,
                       sast_source_file_path=file_path,
@@ -126,11 +124,11 @@ def get_item(vuln):
 
 def get_mapped_severity(severity):
     switcher = {
-        'CRITICAL': 'Critical', 
+        'CRITICAL': 'Critical',
         'HIGH': 'High',
-        'MEDIUM': 'Medium',  
-        'LOW': 'Low', 
+        'MEDIUM': 'Medium',
+        'LOW': 'Low',
         'STYLE': 'Informational',
-        'UNSPECIFIED': 'Informational', 
+        'UNSPECIFIED': 'Informational',
     }
     return switcher.get(severity.upper(), None)
