@@ -27,13 +27,7 @@ class CodeCheckerParser(object):
             return self.get_items(tree)
 
     def parse_json(self, json_output):
-        data = json_output.read()
-        try:
-            tree = json.loads(str(data, 'utf-8'))
-        except:
-            tree = json.loads(data)
-
-        return tree
+        return json.loads(data)
 
     def get_items(self, tree):
         items = {}
