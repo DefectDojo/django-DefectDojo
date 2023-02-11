@@ -23,6 +23,13 @@ class TestCodeCheckerParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("clang-diagnostic-sign-compare", finding.title)
         self.assertEqual("Medium", finding.severity)
+        self.assertEqual("/opt/_ga/openvpn/src/openvpn/push.c", finding.file_path)
+        self.assertEqual("/opt/_ga/openvpn/src/openvpn/push.c", finding.sast_source_file_path)
+        self.assertEqual(576, finding.line)
+        self.assertEqual(576, finding.sast_source_line)
+        self.assertFalse(finding.verified)
+        self.assertFalse(finding.false_p)
+        self.assertFalse(finding.risk_accepted)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
