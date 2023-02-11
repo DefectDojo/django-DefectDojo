@@ -70,18 +70,26 @@ class TestCodeCheckerParser(DojoTestCase):
         self.assertFalse(finding.verified)
         self.assertFalse(finding.risk_accepted)
         self.assertFalse(finding.false_p)
+        self.assertEqual(576, finding.line)
+        self.assertEqual("/opt/_ga/openvpn/src/openvpn/push.c", finding.file_path)
 
         finding = findings[1]
         self.assertTrue(finding.verified)
         self.assertFalse(finding.risk_accepted)
         self.assertFalse(finding.false_p)
+        self.assertEqual(679, finding.line)
+        self.assertEqual("/opt/_ga/openvpn/src/openvpn/push.c", finding.file_path)
 
         finding = findings[2]
         self.assertFalse(finding.verified)
         self.assertFalse(finding.risk_accepted)
         self.assertTrue(finding.false_p)
+        self.assertEqual(402, finding.line)
+        self.assertEqual("/opt/_ga/openvpn/src/openvpn/multi.h", finding.file_path)
 
         finding = findings[3]
         self.assertFalse(finding.verified)
         self.assertTrue(finding.risk_accepted)
         self.assertFalse(finding.false_p)
+        self.assertEqual(91, finding.line)
+        self.assertEqual("/opt/_ga/openvpn/src/openvpn/vlan.c", finding.file_path)
