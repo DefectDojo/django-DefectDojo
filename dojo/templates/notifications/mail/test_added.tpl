@@ -11,8 +11,8 @@
                 {% trans "Hello" %} {{ user.get_full_name }},
             </p>
             <p>
-              {% blocktranslate trimmed %}
-                A new test has been added: <a href="{{product_url|full_url}}">{{product}}</a> / <a href="{{engagement_url|full_url}}">{{ engagement.name }}</a> / <a href="{{ test_url|full_url }}">{{ test }}</a><br/>
+              {% blocktranslate trimmed with prod_url=product_url|full_url eng_url=engagement_url|full_url eng_name=engagement.name t_url=test_url|full_url %}
+                A new test has been added: <a href="{{prod_url}}">{{product}}</a> / <a href="{{eng_url}}">{{ eng_name }}</a> / <a href="{{ t_url }}">{{ test }}</a><br/>
                 Finding details in the 'scan_added' email, which is a separate notification (for now).
               {% endblocktranslate %}
             </p>    

@@ -662,7 +662,7 @@ class FileUpload(models.Model):
         elif isinstance(obj, Finding):
             obj_type = 'Finding'
 
-        return 'access_url/{file_id}/{obj_id}/{obj_type}'.format(
+        return 'access_file/{file_id}/{obj_id}/{obj_type}'.format(
             file_id=self.id,
             obj_id=obj_id,
             obj_type=obj_type
