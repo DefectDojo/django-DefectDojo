@@ -73,7 +73,6 @@ def get_item(vuln):
 
     severity = get_mapped_severity(vuln.get('severity', 'UNSPECIFIED'))
 
-    mitigation = ''
 
     references = ''
 
