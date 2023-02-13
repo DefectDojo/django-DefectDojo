@@ -9,6 +9,15 @@ on:
       # the actual branch that can be chosen on the UI is made irrelevant by further steps
       # because someone will forget one day to change it.
       release_number:
+        type: string
+        description: 'Release number'
+        required: true
+  workflow_call:
+    inputs:
+      # the actual branch that can be chosen on the UI is made irrelevant by further steps
+      # because someone will forget one day to change it.
+      release_number:
+        type: string
         description: 'Release number'
         required: true
 
