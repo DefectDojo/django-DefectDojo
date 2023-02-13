@@ -8,6 +8,7 @@ on:
     branches:
       - master
       - dev
+      - bugfix
 
 env:
   DD_DOCKER_REPO: defectdojo

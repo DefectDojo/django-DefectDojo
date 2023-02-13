@@ -1,5 +1,5 @@
-{% load i18n %}{% blocktranslate trimmed %}
-Your report "{{ report.name }}" is ready. It can be downloaded here: {{ url|full_url }}
+{% load i18n %}{% blocktranslate trimmed with name=report.name report_url=url|full_url %}
+Your report "{{ name }}" is ready. It can be downloaded here: {{ report_url }}
 {% endblocktranslate %}
 {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
     
