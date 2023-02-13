@@ -51,7 +51,7 @@ class BaseTestCase(unittest.TestCase):
     def setUpClass(cls):
 
         # Path for automatic downloads, mapped to the media path
-        cls.export_path = "media"
+        cls.export_path = "/app"
 
         global dd_driver
         if not dd_driver:
