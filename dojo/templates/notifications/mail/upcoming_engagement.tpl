@@ -8,8 +8,8 @@
                 {% trans "Hello" %},
             </p>
             <p>
-              {% blocktranslate trimmed %}
-                this is a reminder that the engagement "{{ engagement.product }}" is about to start shortly.
+              {% blocktranslate trimmed with product=engagement.product%}
+                this is a reminder that the engagement "{{ product }}" is about to start shortly.
               {% endblocktranslate %}
             </p>
             {% trans "Project start" %}: {{ engagement.target_start }}<br/>

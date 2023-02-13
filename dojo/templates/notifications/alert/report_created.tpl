@@ -1,3 +1,3 @@
-{% load i18n %}{% blocktranslate trimmed %}
-Your report "{{ report.name }}" is ready.
+{% load i18n %}{% blocktranslate trimmed with name=report.name %}
+Your report "{{ name }}" is ready.
 {% endblocktranslate %}

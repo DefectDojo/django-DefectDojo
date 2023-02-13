@@ -15,9 +15,9 @@
                 <br/><br/>
             
                 {% if risk_acceptance.is_expired %}
-                    {% blocktranslate %}<a href="{{risk_acceptance_url|full_url}}">Risk acceptance {{ risk_acceptance }}</a> with {{ risk_acceptance.accepted_findings.all| length }} has expired {{ risk_acceptance.expiration_date_handled|date }}{% endblocktranslate %}
+                    {% blocktranslate with risk_url=risk_acceptance_url|full_url risk_findings=risk_acceptance.accepted_findings.all|length risk_date=risk_acceptance.expiration_date_handled|date %}<a href="{{risk_url}}">Risk acceptance {{ risk_acceptance }}</a> with {{ risk_findings }} has expired {{ risk_date }}{% endblocktranslate %}
                 {% else %}
-                    {% blocktranslate %}<a href="{{risk_acceptance_url|full_url}}">Risk acceptance {{ risk_acceptance }}</a> with {{ risk_acceptance.accepted_findings.all| length }} will expire {{ risk_acceptance.expiration_date|date }}{% endblocktranslate %}
+                    {% blocktranslate with risk_url=risk_acceptance_url|full_url risk_findings=risk_acceptance.accepted_findings.all|length risk_date=risk_acceptance.expiration_date|date %}<a href="{{risk_url}}">Risk acceptance {{ risk_acceptance }}</a> with {{ risk_findings }} will expire {{ risk_date }}{% endblocktranslate %}
                 {% endif %}
                 <br/>
                 {% if risk_acceptance.reactivate_expired %}

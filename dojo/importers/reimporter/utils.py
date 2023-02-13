@@ -62,13 +62,23 @@ def update_endpoint_status(existing_finding, new_finding, user):
     existing_finding_endpoint_status_list = existing_finding.status_finding.all()
     new_finding_endpoints_list = new_finding.unsaved_endpoints
     if new_finding.is_mitigated:
+        # New finding is mitigated, so mitigate all old endpoints
         endpoint_status_to_mitigate = existing_finding_endpoint_status_list
     else:
+        # Mitigate any endpoints in the old finding not found in the new finding
         endpoint_status_to_mitigate = list(
             filter(
                 lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint not in new_finding_endpoints_list,
                 existing_finding_endpoint_status_list)
         )
+        # Re-activate any endpoints in the old finding that are in the new finding
+        endpoint_status_to_reactivate = list(
+            filter(
+                lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint in new_finding_endpoints_list,
+                existing_finding_endpoint_status_list)
+        )
+        chunk_endpoints_and_reactivate(endpoint_status_to_reactivate)
+
     # Determine if this can be run async
     if settings.ASYNC_FINDING_IMPORT:
         chunk_list = importer_utils.chunk_list(endpoint_status_to_mitigate)
@@ -86,13 +96,16 @@ def update_endpoint_status(existing_finding, new_finding, user):
 @dojo_async_task
 @app.task()
 def mitigate_endpoint_status(endpoint_status_list, user, **kwargs):
+    """ Only mitigate endpoints that are actually active """
     for endpoint_status in endpoint_status_list:
-        logger.debug("Re-import: mitigating endpoint %s that is no longer present", str(endpoint_status.endpoint))
-        endpoint_status.mitigated_by = user
-        endpoint_status.mitigated_time = timezone.now()
-        endpoint_status.mitigated = True
-        endpoint_status.last_modified = timezone.now()
-        endpoint_status.save()
+        # Only mitigate endpoints that are actually active
+        if not endpoint_status.mitigated:
+            logger.debug("Re-import: mitigating endpoint %s that is no longer present", str(endpoint_status.endpoint))
+            endpoint_status.mitigated_by = user
+            endpoint_status.mitigated_time = timezone.now()
+            endpoint_status.mitigated = True
+            endpoint_status.last_modified = timezone.now()
+            endpoint_status.save()
 
 
 def chunk_endpoints_and_reactivate(endpoint_statuses, **kwargs):
@@ -114,12 +127,14 @@ def chunk_endpoints_and_reactivate(endpoint_statuses, **kwargs):
 @app.task()
 def reactivate_endpoint_status(endpoint_status_list, **kwargs):
     for endpoint_status in endpoint_status_list:
-        logger.debug("Re-import: reactivating endpoint %s that is present in this scan", str(endpoint_status.endpoint))
-        endpoint_status.mitigated_by = None
-        endpoint_status.mitigated_time = None
-        endpoint_status.mitigated = False
-        endpoint_status.last_modified = timezone.now()
-        endpoint_status.save()
+        # Only reactivate endpoints that are actually mitigated
+        if endpoint_status.mitigated:
+            logger.debug("Re-import: reactivating endpoint %s that is present in this scan", str(endpoint_status.endpoint))
+            endpoint_status.mitigated_by = None
+            endpoint_status.mitigated_time = None
+            endpoint_status.mitigated = False
+            endpoint_status.last_modified = timezone.now()
+            endpoint_status.save()
 
 
 def get_target_product_if_exists(product_name=None, product_type_name=None):
