@@ -22,6 +22,11 @@ jobs:
         with:
           ref: master
 
+      - name: Configure git
+        run: |
+          git config --global user.name "${{ env.GIT_USERNAME }}"
+          git config --global user.email "${{ env.GIT_EMAIL }}"
+
       - name: Create new tag ${{ github.event.inputs.release_number }}
         # at this point, the PR from the 1st workflow is merged into master.
         run: |
