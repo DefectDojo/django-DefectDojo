@@ -32,12 +32,13 @@ jobs:
           ref: master
           fetch-depth: 0
       
-      - name: Get upload URL
-        id: get-upload-url
-        uses: pdamianik/release-tag-to-upload-url-action@v1.0.1
-        with:
-          tag: ${{ github.event.inputs.release_number }}
-          token: ${{ github.token }}
+      # This action is deprecated. Not sure if it is even being used anymore...
+      # - name: Get upload URL
+      #   id: get-upload-url
+      #   uses: pdamianik/release-tag-to-upload-url-action@v1.0.1
+      #   with:
+      #     tag: ${{ github.event.inputs.release_number }}
+      #     token: ${{ github.token }}
       
       - name: Configure git
         run: |
