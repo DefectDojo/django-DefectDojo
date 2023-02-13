@@ -71,7 +71,6 @@ def get_item(vuln):
 
     severity = get_mapped_severity(vuln.get('severity', 'UNSPECIFIED'))
 
-
     review_status = vuln.get('review_status', 'unreviewed')
     verified = review_status == 'confirmed'  # bug confirmed by reviewer
     risk_accepted = review_status == 'intentional'  # not confirmed, not a bug, there are some reasons to make this code in this manner
@@ -97,7 +96,7 @@ def get_item(vuln):
                       unique_id_from_tool=unique_id_from_tool,
                       file_path=file_path,
                       line=line,
-                      active = active,
+                      active=active,
                       verified=verified,
                       risk_accepted=risk_accepted,
                       false_p=false_positive,
@@ -105,7 +104,7 @@ def get_item(vuln):
                       sast_source_line=sast_source_line,
                       static_finding=True,
                       dynamic_finding=False,
-                      tags=[vuln['analyzer_name'],])
+                      tags=[vuln['analyzer_name'], ])
 
     return finding
 
