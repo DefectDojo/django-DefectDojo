@@ -1110,6 +1110,8 @@ class ApiFindingFilter(DojoFilter):
     steps_to_reproduce = CharFilter(lookup_expr='icontains')
     unique_id_from_tool = CharFilter(lookup_expr='icontains')
     title = CharFilter(lookup_expr='icontains')
+    product_name = CharFilter(lookup_expr='engagement__product__name__iexact', field_name='test', label='exact product name')
+    product_name_contains = CharFilter(lookup_expr='engagement__product__name__icontains', field_name='test', label='exact product name')
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()
