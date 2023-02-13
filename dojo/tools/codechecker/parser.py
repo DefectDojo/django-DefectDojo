@@ -120,7 +120,7 @@ def get_mapped_severity(severity):
         'HIGH': 'High',
         'MEDIUM': 'Medium',
         'LOW': 'Low',
-        'STYLE': 'Informational',
-        'UNSPECIFIED': 'Informational',
+        'STYLE': 'Info',
+        'UNSPECIFIED': 'Info',
     }
     return switcher.get(severity.upper(), None)
