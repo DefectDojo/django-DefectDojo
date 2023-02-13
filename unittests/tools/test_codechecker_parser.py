@@ -41,7 +41,7 @@ class TestCodeCheckerParser(DojoTestCase):
 
         self.assertTrue(sum(1 for f in findings if f.duplicate) == 0)
         self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'HIGH') == 20)
-        self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'INFORMATIONAL') == 6)
+        self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'INFO') == 6)
         self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'CRITICAL') == 0)
         self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'LOW') == 5)
         self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'MEDIUM') == 63)
@@ -67,6 +67,7 @@ class TestCodeCheckerParser(DojoTestCase):
         self.assertTrue(len(findings) == 4)
 
         finding = findings[0]
+        self.assertTrue(finding.active)
         self.assertFalse(finding.verified)
         self.assertFalse(finding.risk_accepted)
         self.assertFalse(finding.false_p)
@@ -74,6 +75,7 @@ class TestCodeCheckerParser(DojoTestCase):
         self.assertEqual("/opt/_ga/openvpn/src/openvpn/push.c", finding.file_path)
 
         finding = findings[1]
+        self.assertTrue(finding.active)
         self.assertTrue(finding.verified)
         self.assertFalse(finding.risk_accepted)
         self.assertFalse(finding.false_p)
@@ -81,6 +83,7 @@ class TestCodeCheckerParser(DojoTestCase):
         self.assertEqual("/opt/_ga/openvpn/src/openvpn/push.c", finding.file_path)
 
         finding = findings[2]
+        self.assertFalse(finding.active)
         self.assertFalse(finding.verified)
         self.assertFalse(finding.risk_accepted)
         self.assertTrue(finding.false_p)
@@ -88,6 +91,7 @@ class TestCodeCheckerParser(DojoTestCase):
         self.assertEqual("/opt/_ga/openvpn/src/openvpn/multi.h", finding.file_path)
 
         finding = findings[3]
+        self.assertFalse(finding.active)
         self.assertFalse(finding.verified)
         self.assertTrue(finding.risk_accepted)
         self.assertFalse(finding.false_p)

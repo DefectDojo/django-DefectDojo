@@ -69,17 +69,14 @@ def get_item(vuln):
 
     sast_source_line = line
 
-    sast_object = None
-
     severity = get_mapped_severity(vuln.get('severity', 'UNSPECIFIED'))
 
-
-    references = ''
 
     review_status = vuln.get('review_status', 'unreviewed')
     verified = review_status == 'confirmed'  # bug confirmed by reviewer
     risk_accepted = review_status == 'intentional'  # not confirmed, not a bug, there are some reasons to make this code in this manner
     false_positive = review_status in ['false_positive', 'suppressed']  # this finding is false positive
+    active = not false_positive and not risk_accepted
 
     hash = hashlib.sha256()
     unique_id = vuln['report_hash'] + '.' + vuln['analyzer_result_file_path'] + description
@@ -98,18 +95,17 @@ def get_item(vuln):
                       description=description,
                       severity=severity,
                       unique_id_from_tool=unique_id_from_tool,
-                      references=references,
                       file_path=file_path,
                       line=line,
+                      active = active,
                       verified=verified,
                       risk_accepted=risk_accepted,
                       false_p=false_positive,
-                      sast_source_object=sast_object,
-                      sast_sink_object=sast_object,
                       sast_source_file_path=file_path,
                       sast_source_line=sast_source_line,
                       static_finding=True,
-                      dynamic_finding=False)
+                      dynamic_finding=False,
+                      tags=[vuln['analyzer_name'],])
 
     return finding
 
