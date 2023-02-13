@@ -8,8 +8,8 @@
                 {% trans "Hello" %},
             </p>
             <p>
-              {% blocktranslate trimmed %}
-                The new product "{{ title }}" has been added. It can be viewed here: <a href="{{ url|full_url }}">{{ title }}</a>
+              {% blocktranslate trimmed with prod_url=url|full_url %}
+                The new product "{{ title }}" has been added. It can be viewed here: <a href="{{ prod_url }}">{{ title }}</a>
               {% endblocktranslate %}
             </p>
             <br/>

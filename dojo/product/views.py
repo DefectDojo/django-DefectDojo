@@ -896,7 +896,7 @@ def edit_product(request, pid):
         else:
             jform = None
 
-        if github_enabled and (github_inst is not None):
+        if github_enabled:
             if github_inst is not None:
                 gform = GITHUB_Product_Form(instance=github_inst)
             else:
