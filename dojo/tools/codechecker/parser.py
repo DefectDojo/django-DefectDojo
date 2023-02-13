@@ -97,7 +97,6 @@ def get_item(vuln):
     finding = Finding(title=title,
                       description=description,
                       severity=severity,
-                      mitigation=mitigation,
                       unique_id_from_tool=unique_id_from_tool,
                       references=references,
                       file_path=file_path,
