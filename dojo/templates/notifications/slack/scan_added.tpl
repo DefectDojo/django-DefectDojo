@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load display_tags %}
 {{ description }}
 {% if url is not None %}
     
