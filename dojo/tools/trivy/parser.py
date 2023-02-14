@@ -43,6 +43,7 @@ LICENSE_DESCRIPTION_TEMPLATE = """{title}
 **Package:** {package}
 """
 
+
 class TrivyParser:
 
     def get_scan_types(self):
