@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load display_tags %}
 {{ description|safe }}
 {% if url is not None %}
 {% blocktranslate trimmed with event_url=url|full_url %}

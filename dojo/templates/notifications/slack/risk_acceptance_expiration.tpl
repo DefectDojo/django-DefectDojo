@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load display_tags %}
 {{ description }}
 
 {% if risk_acceptance.is_expired %}
