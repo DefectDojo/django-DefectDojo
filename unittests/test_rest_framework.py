@@ -948,41 +948,47 @@ class FindingRequestResponseTest(DojoAPITestCase):
         self.assertEqual(200, response.status_code, response.content[:1000])
 
 
-class FindingFilesTest(DojoAPITestCase):
+class FilesTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
         testuser = User.objects.get(username='admin')
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+        self.path = pathlib.Path(__file__).parent.absolute() 
+        # model: file_id
+        self.url_levels = {
+            'findings/7': 0,
+            'tests/3': 0,
+            'engagements/1': 0
+        }
 
-    def test_request_response_post(self):
-        url_levels = [
-            'findings/7',
-            'tests/3',
-            'engagements/1'
-        ]
-        path = pathlib.Path(__file__).parent.absolute()
-        # print(path)
-        for level in url_levels:
+    def test_request_response_post_and_download(self):
+        # Test the creation
+        for level in self.url_levels.keys():
             length = FileUpload.objects.count()
             payload = {
                 "title": level,
-                "file": open(str(path) + '/scans/acunetix/one_finding.xml')
+                "file": open(f'{str(self.path)}/scans/acunetix/one_finding.xml', 'r')
             }
-            response = self.client.post('/api/v2/' + level + '/files/', payload)
+            response = self.client.post(f'/api/v2/{level}/files/', payload)
             self.assertEqual(201, response.status_code, response.data)
             self.assertEqual(FileUpload.objects.count(), length + 1)
+            # Save the ID of the newly created file object
+            self.url_levels[level] = response.data.get('id')
+        #  Test the download
+        with open(f'{str(self.path)}/scans/acunetix/one_finding.xml', 'r') as file:
+            file_data = file.read()
+        for level, file_id in self.url_levels.items():
+            response = self.client.get(f'/api/v2/{level}/files/download/{file_id}/')
+            self.assertEqual(200, response.status_code)
+            downloaded_file = b''.join(response.streaming_content).decode().replace('\\n', '\n')
+            self.assertEqual(file_data, downloaded_file)
 
     def test_request_response_get(self):
-        url_levels = [
-            'findings/7',
-            'tests/3',
-            'engagements/1'
-        ]
-        for level in url_levels:
-            response = self.client.get('/api/v2/' + level + '/files/')
+        for level in self.url_levels.keys():
+            response = self.client.get(f'/api/v2/{level}/files/')
             self.assertEqual(200, response.status_code)
 
 

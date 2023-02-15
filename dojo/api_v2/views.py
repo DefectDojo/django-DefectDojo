@@ -1,7 +1,7 @@
 from rest_framework.generics import GenericAPIView
 from drf_spectacular.types import OpenApiTypes
 from crum import get_current_user
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, FileResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.models import Permission
@@ -19,6 +19,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
+import mimetypes
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, SLA_Configuration, \
@@ -418,6 +419,38 @@ class EngagementViewSet(mixins.ListModelMixin,
         })
         return Response(serialized_files.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Engagement"),
+        }
+    )
+    @swagger_auto_schema(
+        method='get',
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Engagement"),
+        }
+    )
+    @action(detail=True, methods=["get"], url_path=r'files/download/(?P<file_id>\d+)')
+    def download_file(self, request, file_id, pk=None):
+        engagement = self.get_object()
+        # Get the file object
+        file_object_qs = engagement.files.filter(id=file_id)
+        file_object = file_object_qs.first() if len(file_object_qs) > 0 else None
+        if file_object is None:
+            return Response({"error": "File ID not associated with Engagement"}, status=status.HTTP_404_NOT_FOUND)
+        # Get the path of the file in media root
+        file_path = f'{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}'
+        file_handle = open(file_path, "rb")
+        # send file
+        response = FileResponse(file_handle, content_type=f'{mimetypes.guess_type(file_path)}', status=status.HTTP_200_OK)
+        response['Content-Length'] = file_object.file.size
+        response['Content-Disposition'] = f'attachment; filename="{file_object.file.name}"'
+
+        return response
+
 
 # These are technologies in the UI and the API!
 # Authorization: object-based
@@ -766,6 +799,38 @@ class FindingViewSet(prefetch.PrefetchListMixin,
             "finding_id": finding, "files": files
         })
         return Response(serialized_files.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        methods=['GET'],
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Finding"),
+        }
+    )
+    @swagger_auto_schema(
+        method='get',
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Finding"),
+        }
+    )
+    @action(detail=True, methods=["get"], url_path=r'files/download/(?P<file_id>\d+)')
+    def download_file(self, request, file_id, pk=None):
+        finding = self.get_object()
+        # Get the file object
+        file_object_qs = finding.files.filter(id=file_id)
+        file_object = file_object_qs.first() if len(file_object_qs) > 0 else None
+        if file_object is None:
+            return Response({"error": "File ID not associated with Finding"}, status=status.HTTP_404_NOT_FOUND)
+        # Get the path of the file in media root
+        file_path = f'{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}'
+        file_handle = open(file_path, "rb")
+        # send file
+        response = FileResponse(file_handle, content_type=f'{mimetypes.guess_type(file_path)}', status=status.HTTP_200_OK)
+        response['Content-Length'] = file_object.file.size
+        response['Content-Disposition'] = f'attachment; filename="{file_object.file.name}"'
+
+        return response
 
     @extend_schema(
         request=serializers.FindingNoteSerializer,
@@ -1781,6 +1846,38 @@ class TestsViewSet(mixins.ListModelMixin,
             "test_id": test, "files": files
         })
         return Response(serialized_files.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        methods=['GET'],
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Test"),
+        }
+    )
+    @swagger_auto_schema(
+        method='get',
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Test"),
+        }
+    )
+    @action(detail=True, methods=["get"], url_path=r'files/download/(?P<file_id>\d+)')
+    def download_file(self, request, file_id, pk=None):
+        test = self.get_object()
+        # Get the file object
+        file_object_qs = test.files.filter(id=file_id)
+        file_object = file_object_qs.first() if len(file_object_qs) > 0 else None
+        if file_object is None:
+            return Response({"error": "File ID not associated with Test"}, status=status.HTTP_404_NOT_FOUND)
+        # Get the path of the file in media root
+        file_path = f'{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}'
+        file_handle = open(file_path, "rb")
+        # send file
+        response = FileResponse(file_handle, content_type=f'{mimetypes.guess_type(file_path)}', status=status.HTTP_200_OK)
+        response['Content-Length'] = file_object.file.size
+        response['Content-Disposition'] = f'attachment; filename="{file_object.file.name}"'
+
+        return response
 
 
 # Authorization: authenticated, configuration
