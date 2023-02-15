@@ -956,7 +956,7 @@ class FilesTest(DojoAPITestCase):
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
-        self.path = pathlib.Path(__file__).parent.absolute() 
+        self.path = pathlib.Path(__file__).parent.absolute()
         # model: file_id
         self.url_levels = {
             'findings/7': 0,
