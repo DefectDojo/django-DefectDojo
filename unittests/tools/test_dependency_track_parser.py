@@ -77,6 +77,7 @@ class TestDependencyTrackParser(DojoTestCase):
         parser = DependencyTrackParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
+
         self.assertEqual(12, len(findings))
         self.assertTrue(all(item.file_path is not None for item in findings))
         self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))
