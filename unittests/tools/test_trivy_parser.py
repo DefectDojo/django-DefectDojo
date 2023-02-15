@@ -171,3 +171,20 @@ Container 'follower' of Deployment 'redis-follower' should set 'securityContext.
         self.assertIsNone(finding.component_name)
         self.assertIsNone(finding.component_version)
         self.assertEqual('default / Deployment / redis-follower', finding.service)
+
+    def test_license_scheme(self):
+        test_file = open(sample_path("license_scheme.json"))
+        parser = TrivyParser()
+        findings = parser.get_findings(test_file, Test())
+
+        self.assertEqual(len(findings), 19)
+        finding = findings[0]
+        self.assertEqual("HIGH", finding.severity)
+        self.assertEqual("", finding.file_path)
+        self.assertEqual(1, finding.scanner_confidence)
+        self.assertEqual("", finding.url)
+        description = '''GPL-2.0
+**Category:** restricted
+**Package:** alpine-baselayout
+'''
+        self.assertEqual(description, finding.description)
