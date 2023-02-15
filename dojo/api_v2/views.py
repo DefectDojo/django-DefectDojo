@@ -423,14 +423,14 @@ class EngagementViewSet(mixins.ListModelMixin,
         methods=['GET'],
         responses={
             status.HTTP_200_OK: serializers.RawFileSerializer,
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Engagement"),
+            status.HTTP_404_NOT_FOUND: "Returned if file ID does not exist in the Engagement",
         }
     )
     @swagger_auto_schema(
         method='get',
         responses={
             status.HTTP_200_OK: serializers.RawFileSerializer,
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Engagement"),
+            status.HTTP_404_NOT_FOUND: "Returned if file ID does not exist in the Engagement",
         }
     )
     @action(detail=True, methods=["get"], url_path=r'files/download/(?P<file_id>\d+)')
@@ -804,14 +804,14 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         methods=['GET'],
         responses={
             status.HTTP_200_OK: serializers.RawFileSerializer,
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Finding"),
+            status.HTTP_404_NOT_FOUND: "Returned if file ID does not exist in the Finding",
         }
     )
     @swagger_auto_schema(
         method='get',
         responses={
             status.HTTP_200_OK: serializers.RawFileSerializer,
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Finding"),
+            status.HTTP_404_NOT_FOUND: "Returned if file ID does not exist in the Finding",
         }
     )
     @action(detail=True, methods=["get"], url_path=r'files/download/(?P<file_id>\d+)')
@@ -1851,14 +1851,14 @@ class TestsViewSet(mixins.ListModelMixin,
         methods=['GET'],
         responses={
             status.HTTP_200_OK: serializers.RawFileSerializer,
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Test"),
+            status.HTTP_404_NOT_FOUND: "Returned if file ID does not exist in the Test",
         }
     )
     @swagger_auto_schema(
         method='get',
         responses={
             status.HTTP_200_OK: serializers.RawFileSerializer,
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if file ID does not exist in the Test"),
+            status.HTTP_404_NOT_FOUND: "Returned if file ID does not exist in the Test",
         }
     )
     @action(detail=True, methods=["get"], url_path=r'files/download/(?P<file_id>\d+)')
