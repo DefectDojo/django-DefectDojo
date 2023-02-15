@@ -188,3 +188,4 @@ Container 'follower' of Deployment 'redis-follower' should set 'securityContext.
 **Package:** alpine-baselayout
 '''
         self.assertEqual(description, finding.description)
+
