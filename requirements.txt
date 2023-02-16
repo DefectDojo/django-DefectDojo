@@ -19,7 +19,7 @@ django-slack==5.18.0
 django-tagging==0.5.0
 django-watson==1.6.2
 django-prometheus==2.2.0
-Django==3.2.17
+Django==3.2.18
 djangorestframework==3.14.0
 gunicorn==20.1.0
 html2text==2020.1.16
