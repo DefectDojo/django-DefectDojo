@@ -152,7 +152,7 @@ class DojoDefaultReImporter(object):
                     # if finding associated to new item is none of risk accepted, mitigated, false positive or out of scope
                     # existing findings may be from before we had component_name/version fields
                     logger.debug('%i: updating existing finding: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                    if not (finding.mitigated and finding.is_mitigated):
+                    if finding.active:
                         logger.debug('Reimported item matches a finding that is currently open.')
                         if item.is_mitigated:
                             logger.debug('Reimported mitigated item matches a finding that is currently open, closing.')
@@ -161,6 +161,15 @@ class DojoDefaultReImporter(object):
                             finding.mitigated = item.mitigated
                             finding.is_mitigated = True
                             finding.mitigated_by = item.mitigated_by
+                            finding.active = False
+                            if verified is not None:
+                                finding.verified = verified
+                        elif item.risk_accepted or item.false_p or item.out_of_scope:
+                            logger.debug('Reimported mitigated item matches a finding that is currently open, closing.')
+                            logger.debug('%i: closing: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                            finding.risk_accepted = item.risk_accepted
+                            finding.false_p = item.false_p
+                            finding.out_of_scope = item.out_of_scope
                             finding.active = False
                             if verified is not None:
                                 finding.verified = verified
