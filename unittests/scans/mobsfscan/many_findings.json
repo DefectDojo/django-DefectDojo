@@ -78,7 +78,7 @@
     },
     "android_tapjacking": {
       "metadata": {
-        "cwe": "CWE-200 Information Exposure",
+        "cwe": "cwe-200",
         "description": "This app does not have capabilities to prevent tapjacking attacks.",
         "masvs": "MSTG-PLATFORM-9",
         "owasp-mobile": "M1: Improper Platform Usage",
