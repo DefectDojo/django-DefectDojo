@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "mobsfscan_version": "0.0.6",
+  "mobsfscan_version": "0.2.0",
   "results": {
     "android_certificate_transparency": {
       "metadata": {
