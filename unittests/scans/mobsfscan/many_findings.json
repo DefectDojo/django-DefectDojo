@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "mobsfscan_version": "0.2.0",
+  "mobsfscan_version": "0.0.6",
   "results": {
     "android_certificate_transparency": {
       "metadata": {
@@ -78,7 +78,7 @@
     },
     "android_tapjacking": {
       "metadata": {
-        "cwe": "cwe-200",
+        "cwe": "CWE-200 Information Exposure",
         "description": "This app does not have capabilities to prevent tapjacking attacks.",
         "masvs": "MSTG-PLATFORM-9",
         "owasp-mobile": "M1: Improper Platform Usage",
