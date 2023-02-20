@@ -61,7 +61,7 @@ jobs:
             ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-
 
       - name: Build and push images with debian
-        if: ${{ matrix.os }} == 'debian'
+        if: ${{ matrix.os  == 'debian' }}
         uses: docker/build-push-action@v4
         env:
           REPO_ORG: ${{ env.repoorg }}
@@ -75,7 +75,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
 
       - name: Build and push images with alpine
-        if: ${{ matrix.os }} == 'alpine'
+        if: ${{ matrix.os  == 'alpine' }}
         uses: docker/build-push-action@v4
         env:
           REPO_ORG: ${{ env.repoorg }}
