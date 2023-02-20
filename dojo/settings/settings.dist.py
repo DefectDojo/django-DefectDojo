@@ -7,6 +7,7 @@ import environ
 from netaddr import IPNetwork, IPSet
 import json
 
+from django.utils.translation import ugettext_lazy as _
 # See https://documentation.defectdojo.com/getting_started/configuration/ for options
 # how to tune the configuration to your needs.
 
@@ -839,6 +840,7 @@ INSTALLED_APPS = (
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'dojo.middleware.APITrailingSlashMiddleware',
     'dojo.middleware.DojoSytemSettingsMiddleware',
@@ -1648,3 +1650,12 @@ FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
 AUDITLOG_DISABLE_ON_RAW_SAVE = False
 #  You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
 ADDITIONAL_HEADERS = env('DD_ADDITIONAL_HEADERS')
+
+LANGUAGES = (
+    ('en', _('English')),
+    ('zh-hans', _('Simplified Chinese'))
+)
+
+LOCALE_PATHS = [
+    os.path.join(root, 'locale')
+]
