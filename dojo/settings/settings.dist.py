@@ -1380,6 +1380,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
     'GitLab Dependency Scanning Report': DEDUPE_ALGO_HASH_CODE,
     'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
+    'GitLab Container Scan': DEDUPE_ALGO_HASH_CODE,
+    'GitLab Secret Detection Report': DEDUPE_ALGO_HASH_CODE,
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
     'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
     'JFrog Xray Unified Scan': DEDUPE_ALGO_HASH_CODE,
