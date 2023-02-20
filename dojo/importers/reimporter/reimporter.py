@@ -274,6 +274,15 @@ class DojoDefaultReImporter(object):
                             finding.active = False
                             if verified is not None:
                                 finding.verified = verified
+                        elif item.risk_accepted or item.false_p or item.out_of_scope:
+                            logger.debug('Reimported mitigated item matches a finding that is currently open, closing.')
+                            logger.debug('%i: closing: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
+                            finding.risk_accepted = item.risk_accepted
+                            finding.false_p = item.false_p
+                            finding.out_of_scope = item.out_of_scope
+                            finding.active = False
+                            if verified is not None:
+                                finding.verified = verified
 
                     if (component_name is not None and not finding.component_name) or (
                         component_version is not None and not finding.component_version
