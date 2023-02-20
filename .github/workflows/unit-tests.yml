@@ -15,12 +15,17 @@ jobs:
     uses: ./.github/workflows/build-docker-images-for-testing.yml
     secrets: inherit
   
-  release-helm-chart:
+  test-rest-framework:
     needs: build-docker-containers
     uses: ./.github/workflows/rest-framework-tests.yml
     secrets: inherit
 
-  release-docker-containers:
+  test-user-interface:
     needs: build-docker-containers
     uses: ./.github/workflows/integration-tests.yml
+    secrets: inherit
+  
+  test-k8s:
+    needs: build-docker-containers
+    uses: ./.github/workflows/k8s-tests.yml
     secrets: inherit
