@@ -124,7 +124,9 @@
 
                             {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                             <label><b>Group</b></label>
-                            <span style="font-size: 80%;">(Only available in per test for now)</span><br/>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_finding_group_remove" name="finding_group_remove" class="finding_group_option" type="checkbox"/> <span>Remove from any group</span>
+                            </label>
                             {% endif %}
 
                             <br>
