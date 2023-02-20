@@ -61,14 +61,13 @@ jobs:
             ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-
 
       - name: Build and push images with debian
-        uses: docker/build-push-action@v4
         if: ${{ matrix.os }} == 'debian'
+        uses: docker/build-push-action@v4
         env:
           REPO_ORG: ${{ env.repoorg }}
           docker-image: ${{ matrix.docker-image }}
         with:
           push: true
-          if: ${{ matrix.os }} == 'debian'
           tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
           file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
           context: .
@@ -76,14 +75,13 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
 
       - name: Build and push images with alpine
-        uses: docker/build-push-action@v4
         if: ${{ matrix.os }} == 'alpine'
+        uses: docker/build-push-action@v4
         env:
           REPO_ORG: ${{ env.repoorg }}
           docker-image: ${{ matrix.docker-image }}
         with:
           push: true
-          if: ${{ matrix.os }} == 'alpine'
           tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
           file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
           context: .
