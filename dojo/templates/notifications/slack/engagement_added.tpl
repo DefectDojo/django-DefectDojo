@@ -1,5 +1,7 @@
-{% load i18n %}{% blocktranslate trimmed %}
-The engagement "{{ engagement.name }}" has been created in the product "{{ engagement.product }}". It can be viewed here: {{ url|full_url }}
+{% load i18n %}
+{% load display_tags %}
+{% blocktranslate trimmed with name=engagement.name eng_product=engagement.product eng_url=url|full_url %}
+The engagement "{{ name }}" has been created in the product "{{ eng_product }}". It can be viewed here: {{ eng_url }}
 {% endblocktranslate %}
 {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
     
