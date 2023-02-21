@@ -18,13 +18,6 @@ class BlackduckAPI:
                 )
             )
 
-    def test_product_connection(self, api_scan_configuration):
-        asset = self.get_asset(api_scan_configuration.service_key_1)
-        asset_name = asset["resource"]["title"]
-        api_scan_configuration.service_key_2 = asset_name
-        api_scan_configuration.save()
-        return f'You have access to asset "{asset_name}"'
-
     def get_project_by_name(self, project_name):
         for project in self.client.get_resource("projects"):
             if project["name"] == project_name:
