@@ -34,7 +34,7 @@ from dojo.models import Announcement, Finding, Finding_Group, Product_Type, Prod
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, EFFORT_FOR_FIXING_CHOICES, Product_Type_Member, \
     Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, \
-    Product_API_Scan_Configuration
+    Product_API_Scan_Configuration, Webhook_Endpoints
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from django.urls import reverse
@@ -2654,6 +2654,28 @@ class NotificationsForm(forms.ModelForm):
         model = Notifications
         exclude = ['template']
 
+
+class NotificationsWebhookForm(forms.ModelForm):
+    class Meta:
+        model = Webhook_Endpoints
+        exclude = []
+    def __init__(self, *args, **kwargs):
+        super(NotificationsWebhookForm, self).__init__(*args, **kwargs)
+        self.fields['status'].disabled = True
+        self.fields['first_error'].disabled = True
+        self.fields['last_error'].disabled = True
+
+class DeleteNotificationsWebhookForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+    def __init__(self, *args, **kwargs):
+        super(DeleteNotificationsWebhookForm, self).__init__(*args, **kwargs)
+        self.fields['name'].disabled = True
+        self.fields['url'].disabled = True
+
+    class Meta:
+        model = Webhook_Endpoints
+        fields = ['id', 'name', 'url']
 
 class ProductNotificationsForm(forms.ModelForm):
 
