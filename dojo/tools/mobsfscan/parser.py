@@ -32,7 +32,7 @@ class MobsfscanParser(object):
             dupes = {}
             for key, item in data.get('results').items():
                 metadata = item.get('metadata')
-                cwe = int(re.match(r'CWE-([0-9]+)', metadata.get('cwe')).group(1))
+                cwe = int(re.match(r'cwe-([0-9]+)|CWE-([0-9]+)', metadata.get('cwe')).group(1))
                 masvs = metadata.get('masvs')
                 owasp_mobile = metadata.get('owasp-mobile')
                 description = "\n".join([
