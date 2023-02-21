@@ -48,6 +48,21 @@ python3 manage.py makemigrations dojo
 echo "Migrating"
 python3 manage.py migrate
 
+# Load the announcement banner
+if [ -z "$CREATE_INITIAL_BANNER" ]; then
+cat <<EOD | python3 manage.py shell
+from dojo.models import Announcement, UserAnnouncement, Dojo_User
+announcement, created = Announcement.objects.get_or_create(id=1)
+if created:
+    announcement.message = '<a href="https://www.defectdojo.com/pricing" target="_blank">Cloud and On-Premise Subscriptions Now Available! Click here for more details</a>'
+    announcement.dismissable = True
+    announcement.save()
+    UserAnnouncement.objects.bulk_create([
+        UserAnnouncement(user=user_id, announcement=announcement) for user_id in Dojo_User.objects.all()
+    ])
+EOD
+fi
+
 echo "Admin user: ${DD_ADMIN_USER}"
 ADMIN_EXISTS=$(echo "SELECT * from auth_user;" | python manage.py dbshell | grep "${DD_ADMIN_USER}")
 # Abort if the admin user already exists, instead of giving a new fake password that won't work
