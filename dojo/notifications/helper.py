@@ -354,6 +354,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
 @dojo_async_task
 @app.task
 def send_webhooks_notification(event, user=None, *args, **kwargs):
+    # TODO check sending notifications (in general) to inactive users
     for endpoint in Webhook_Endpoints.objects.filter(owner=user):
         if endpoint.status.startswith(Webhook_Endpoints._STATUS_ACTIVE):
             try:
