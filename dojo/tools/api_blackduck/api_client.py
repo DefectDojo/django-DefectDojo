@@ -30,7 +30,7 @@ class BlackduckAPI:
     #     if not response.ok:
     #         raise Exception(f'Unable to connect and search in BlackDuck due to ...')
     #     return f'You have access to project "..."'
- 
+
     def get_project_by_name(self, project_name):
         for project in self.client.get_resource("projects"):
             if project["name"] == project_name:
