@@ -69,6 +69,10 @@ class DojoAppConfig(AppConfig):
 
         register_check(check_configuration_deduplication, 'dojo')
 
+        # Load any signals here that will be ready for runtime
+        # Importing the signals file is good enough if using the reciever decorator
+        import dojo.announcement.signals  # noqa
+
 
 def get_model_fields_with_extra(model, extra_fields=()):
     return get_model_fields(get_model_default_fields(model), extra_fields)
