@@ -96,6 +96,7 @@ from dojo.models import (
     Tool_Type,
     User,
     UserContactInfo,
+    Webhook_Endpoints,
 )
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
@@ -2777,6 +2778,28 @@ class NotificationsForm(forms.ModelForm):
         model = Notifications
         exclude = ["template"]
 
+
+class NotificationsWebhookForm(forms.ModelForm):
+    class Meta:
+        model = Webhook_Endpoints
+        exclude = []
+    def __init__(self, *args, **kwargs):
+        super(NotificationsWebhookForm, self).__init__(*args, **kwargs)
+        self.fields['status'].disabled = True
+        self.fields['first_error'].disabled = True
+        self.fields['last_error'].disabled = True
+
+class DeleteNotificationsWebhookForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+    def __init__(self, *args, **kwargs):
+        super(DeleteNotificationsWebhookForm, self).__init__(*args, **kwargs)
+        self.fields['name'].disabled = True
+        self.fields['url'].disabled = True
+
+    class Meta:
+        model = Webhook_Endpoints
+        fields = ['id', 'name', 'url']
 
 class ProductNotificationsForm(forms.ModelForm):
 

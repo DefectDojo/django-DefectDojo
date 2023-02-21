@@ -4120,7 +4120,7 @@ class NotificationsAdmin(admin.ModelAdmin):
         return list_fields
 
 
-class Webhook_Endpoints(models.Model):
+class Webhook_Endpoints(models.Model):  # TODO rename to Notification_Webhooks 
     _STATUS_ACTIVE = "active"
     _STATUS_INACTIVE = "inactive"
     STATUS_ACTIVE = f"{_STATUS_ACTIVE}"
@@ -4137,7 +4137,6 @@ class Webhook_Endpoints(models.Model):
         (STATUS_INACTIVE_OTHERS, "Inactive because of status code unsupported"),
         (STATUS_INACTIVE_MANUAL, "Inactive because of manual deactivation"),
     )
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active", blank=False)
     name = models.CharField(max_length=100, default='', blank=False, unique=True,
                                     help_text=_('Name of the incoming webhook'))
     url = models.URLField(max_length=200, default='', blank=False,
@@ -4146,8 +4145,10 @@ class Webhook_Endpoints(models.Model):
                                    help_text=_('Name of the header required for interacting with Webhook endpoint'))
     header_value = models.CharField(max_length=100, default='', blank=True, null=True,
                                    help_text=_('Content of the header required for interacting with Webhook endpoint'))
-    first_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened first time'))
-    last_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened last time'))
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active", blank=False,
+                              help_text=_('Status of the incoming webhook'))
+    first_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened first time'), blank=True, null=True)
+    last_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened last time'), blank=True, null=True)
     owner = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.CASCADE,
                               help_text=_('Owner/receiver of notification, if empty processed as system notification'))
 
