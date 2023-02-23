@@ -3,7 +3,11 @@ from dojo.models import Finding
 
 
 class WazuhParser(object):
-    """Wazuh JSON """
+    """
+    Use Wazuh Vulnerability API to retrieve the findings
+    The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
+    https://github.com/wazuh/wazuh/issues/14560
+    """
 
     def get_scan_types(self):
         return ["Wazuh"]
