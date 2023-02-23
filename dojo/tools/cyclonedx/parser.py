@@ -302,10 +302,8 @@ class CycloneDXParser(object):
 
         # for each component we keep data
         components = {}
-        for component in data.get("components", []):
-            # according to specification 1.4, 'bom-ref' is mandatory but some tools don't provide it
-            if "bom-ref" in component:
-                components[component["bom-ref"]] = component
+        self._flatten_components(data.get("components", []), components)
+
         # for each vulnerabilities create one finding by component affected
         findings = []
         for vulnerability in data.get("vulnerabilities", []):
@@ -410,6 +408,15 @@ class CycloneDXParser(object):
 
                 findings.append(finding)
         return findings
+
+    def _flatten_components(self, components, flatted_components):
+        for component in components:
+            if "components" in component:
+                self._flatten_components(component.get("components", []), flatted_components)
+            # according to specification 1.4, 'bom-ref' is mandatory but some tools don't provide it
+            if "bom-ref" in component:
+                flatted_components[component["bom-ref"]] = component
+        return None
 
     def _get_component(self, components, reference):
         if reference not in components:
