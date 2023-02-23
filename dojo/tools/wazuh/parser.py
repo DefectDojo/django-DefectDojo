@@ -1,7 +1,4 @@
 import json
-from cvss import parser as cvss_parser
-from cvss.cvss3 import CVSS3
-
 from dojo.models import Finding
 
 
@@ -43,7 +40,7 @@ class WazuhParser(object):
                 description = item.get('condition')
                 severity = item.get('severity')
                 links = item.get('external_references')
-                title = item.get('title') + " (version: " + package_version +")"
+                title = item.get('title') + " (version: " + package_version + ")"
                 severity = transpose_severity(severity)
                 if links:
                     references = ''
@@ -78,8 +75,8 @@ class WazuhParser(object):
                     if vulnerability_id:
                         find.unsaved_vulnerability_ids = [vulnerability_id]
                     dupes[dupe_key] = find
-
         return list(dupes.values())
+
 
 def transpose_severity(severity):
     if severity in Finding.SEVERITIES:
