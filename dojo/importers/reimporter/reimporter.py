@@ -283,10 +283,7 @@ class DojoDefaultReImporter(object):
         untouched = set(unchanged_items) - set(to_mitigate) - set(new_items)
 
         for (group_name, findings) in group_names_to_findings_dict.items():
-            # Only create a finding group if we have more than one finding for a given finding group, unless configured otherwise
-            if create_finding_groups_for_all_findings or len(findings) > 1:
-                for finding in findings:
-                    finding_helper.add_finding_to_auto_group(finding, group_by, **kwargs)
+            finding_helper.add_findings_to_auto_group(group_name, findings, create_finding_groups_for_all_findings, **kwargs)
             if push_to_jira:
                 if findings[0].finding_group is not None:
                     jira_helper.push_to_jira(findings[0].finding_group)
