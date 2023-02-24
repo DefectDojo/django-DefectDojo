@@ -1,0 +1,54 @@
+name: "Build Docker Images For Testing"
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build:
+    # build with docker so we can use layer caching
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        docker-image: [django, nginx, integration-tests]
+        os: [alpine, debian]
+        exclude:
+          - docker-image: integration-tests
+            os: alpine
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Read Docker Image Identifiers
+        id: read-docker-image-identifiers
+        run: echo "IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          buildkitd-flags: --debug
+          driver-opts: image=moby/buildkit:master # needed to get the fix for https://github.com/moby/buildkit/issues/2426
+          
+      - name: Build
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: defectdojo/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
+          file: Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
+          outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}_img
+          cache-from: type=gha,scope=${{ matrix.docker-image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
+  
+      # export docker images to be used in next jobs below
+      - name: Upload image ${{ matrix.docker-image }} as artifact
+        uses:  actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.docker-image }}
+          path: ${{ matrix.docker-image }}-${{ matrix.os }}_img
+          retention-days: 1
