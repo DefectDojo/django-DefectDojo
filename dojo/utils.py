@@ -2290,7 +2290,7 @@ def get_password_requirements_string():
         password_requirements_string = s.rsplit(', ', 1)[0] + ' and ' + s.rsplit(', ', 1)[1]
     elif s.count(', ') > 1:
         password_requirements_string = s.rsplit(', ', 1)[0] + ', and ' + s.rsplit(', ', 1)[1]
-    else :
+    else:
         password_requirements_string = s
 
     return password_requirements_string + '.'
