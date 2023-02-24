@@ -272,7 +272,7 @@ def group_findings_by(finds, finding_group_by_option):
     return affected_groups, grouped, skipped, groups_created
 
 
-def add_findings_to_auto_group(name, findings, create_finding_groups_for_all_findings=True, **kwargs):
+def add_findings_to_auto_group(name, findings, group_by, create_finding_groups_for_all_findings=True, **kwargs):
     if name is not None and findings is not None and len(findings) > 0:
         creator = get_current_user()
         if not creator:
@@ -284,6 +284,14 @@ def add_findings_to_auto_group(name, findings, create_finding_groups_for_all_fin
             finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)
             if created:
                 logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)
+                # See if we have old findings in the same test that were created without a finding group
+                # that should be added to this new group
+                old_findings = Finding.objects.filter(test=test)
+                for f in old_findings:
+                    f_group_name = get_group_by_group_name(f, group_by)
+                    if f_group_name == name and f not in findings:
+                        finding_group.findings.add(f)
+
             finding_group.findings.add(*findings)
         else:
             # Otherwise add to an existing finding group if it exists only
@@ -292,8 +300,17 @@ def add_findings_to_auto_group(name, findings, create_finding_groups_for_all_fin
                 if finding_group:
                     finding_group.findings.add(*findings)
             except:
-                # If the finding group doesn't exist we don't have to take any action
-                pass
+                # See if we have old findings in the same test that were created without a finding group
+                # that match this new finding - then we can create a finding group
+                old_findings = Finding.objects.filter(test=test)
+                created = False
+                for f in old_findings:
+                    f_group_name = get_group_by_group_name(f, group_by)
+                    if f_group_name == name and f not in findings:
+                        finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)
+                        finding_group.findings.add(f)
+                if created:
+                    finding_group.findings.add(*findings)
 
 
 @dojo_model_to_id
