@@ -72,6 +72,12 @@ If you have installed DefectDojo on "iron" and wish to upgrade the installation,
 
 There are new docker images based on alpine with fewer third party dependencies. Related to the new images the current docker files had to be renamed and have a "-debian" or the new images a "-alpine" at the end. Furthermore there are new docker tags [DefectdojoVersion]-[OS]. For example 2.19.0-alpine or 2.19.0-debian. The currend tags (latest and [DefectdojoVersion]) are still based on the "old" images. Be aware that the new alpine images are not heavily tested and may contain bugs.
 
+*Breaking Change*
+
+In version 2.19.3, the GitHub OAuth integration has been removed to prevent configurations that may allow more access than intended.
+
+Advisory with details to follow shortly.
+
 ## Upgrading to DefectDojo Version 2.18.x
 
 **Upgrade instructions for helm chart with rabbitMQ enabled**: The rabbitMQ uses a statefulset by default. Before upgrading the helm chart we have to ensure that all queues are empty:

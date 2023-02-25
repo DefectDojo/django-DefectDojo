@@ -311,22 +311,6 @@ DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL: '<your token endpoint>'
 
 Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order to customize the login button's text caption. 
 
-## GitHub
-1. Navigate to GitHub.com and follow instructions to create a new OAuth App [https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app)
-2. Choose a name for your application
-3. For the Redirect URI, enter the DefectDojo URL with the following
-    format
-    -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github/)
-4. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
-    information:
-    {{< highlight python >}}  
-    DD_SOCIAL_AUTH_GITHUB_KEY=(str, 'GitHub OAuth App Client ID'),  
-    DD_SOCIAL_AUTH_GITHUB_SECRET=(str, 'GitHub OAuth App Client Secret'),  
-    DD_SOCIAL_AUTH_GITHUB_OAUTH2_ENABLED = True  
-    {{< /highlight >}}
-5. Restart DefectDojo, and you should now see a **Login with GitHub**
-    button on the login page.
-
 ## GitHub Enterprise
 1.  Navigate to your GitHub Enterprise Server and follow instructions to create a new OAuth App [https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app](https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app)
 2. Choose a name for your application
