@@ -66,7 +66,7 @@ jobs:
       - name: Create release ${{ github.event.inputs.release_number }}
         uses: softprops/action-gh-release@v1
         with:
-          name: Release ${{ github.event.inputs.release_number }}
+          name: '${{ github.event.inputs.release_number }} 🌈'
           tag_name: ${{ github.event.inputs.release_number }}
           body: Run the release drafter to populate the release notes.
           draft: true
