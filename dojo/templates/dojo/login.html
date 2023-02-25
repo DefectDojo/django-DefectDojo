@@ -93,14 +93,6 @@
                     </div>
                 {% endif %}
 
-                {% if GITHUB_ENABLED is True %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <button class="btn btn-success" type="button">
-                            <a href="{% url 'social:begin' 'github' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">{% trans "Login with Github" %}</a>
-                        </button>
-                    </div>
-                {% endif %}
-
                 {% if GITHUB_ENTERPRISE_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
