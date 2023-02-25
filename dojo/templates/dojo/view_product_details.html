@@ -213,22 +213,35 @@
         <h3 class="panel-title"><span class ="fa-solid fa-scale-balanced" aria-hidden="true"></span>{% trans "Benchmark Progress" %}</h3>
       </div>
         <ul class="list-group">
-          {% for Abenchpercent in benchmarks_percents %}
+          {% for benchmark in benchmarks_percents %}
           <li class="list-group-item">
+          <a href="{% url 'view_product_benchmark' prod.id benchmark.id %}">
             <div class="row">
-              <div class="col-md-6">
-                <span class="float-md-left"><strong>{{Abenchpercent.0}}</strong></span>
-              </div>
-              <div class="col-md-6 text-right">
-              <span class="float-md-right">{{Abenchpercent.1|default:"0&#37;"}} {% trans "Complete" %}</span>
-              </div>
+                <div class="col-md-6">
+                    <span class="float-md-left"><strong>{{benchmark.name}}</strong> ({{ benchmark.level }})</span>
+                </div>
+                <div class="col-md-6 text-right">
+                    <span class="float-md-right">{{ benchmark.pass|percentage:benchmark.total }} {% trans "complete" %}</span>
+                </div>
             </div>
             <div class="progress">
-              <div class="progress-bar" role="progressbar" aria-valuenow="{{Abenchpercent.1}}"
-              aria-valuemin="0%" aria-valuemax="100%" style="width:{{Abenchpercent.1}}">
-              <span class="sr-only">{{Abenchpercent.1|default:"0&#37;"}} {% trans "Complete" %}</span>
-              </div>
+                <div class="progress-bar progress-bar-success" data-toggle="tooltip" data-placement="bottom"
+                     title="{% trans "Successful" %} - {{ benchmark.success.percent }}%"
+                     style="width: {{ benchmark.success.percent|floatformat:"2u" }}%">
+                    <span class="sr-only">{{ benchmark.success.percent|floatformat }}%</span>
+                </div>
+                <div class="progress-bar progress-bar-warning" data-toggle="tooltip" data-placement="bottom"
+                     title="{% trans "Pending" %}Ожидают выставления - {{ benchmark.waiting.percent}}%"
+                     style="width: {{ benchmark.waiting.percent|floatformat:"2u" }}%">
+                    <span class="sr-only">{{ benchmark.waiting.percent|floatformat }}%</span>
+                </div>
+                <div class="progress-bar progress-bar-danger" data-toggle="tooltip" data-placement="bottom"
+                     title="{% trans "Identified" %} - {{ benchmark.fail.percent }}%"
+                     style="width: {{ benchmark.fail.percent|floatformat:"2u" }}%">
+                    <span class="sr-only">{{ benchmark.fail.percent|floatformat }}%</span>
+                </div>
             </div>
+          </a>
           </li>
           {% empty %}
             <li class="list-group-item"><small class = "text-muted"><em>{% trans "There are no benchmarks" %}</em></small></li>

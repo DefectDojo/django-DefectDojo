@@ -22,7 +22,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from dojo.templatetags.display_tags import get_level
+from dojo.templatetags.display_tags import asvs_calc_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, \
     MetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, \
@@ -156,14 +156,27 @@ def view_product(request, pid):
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
     languages = Languages.objects.filter(product=prod).order_by('-code').select_related('language')
     app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
-    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
     benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True,
                                                           benchmark_type__enabled=True).order_by('benchmark_type__name')
     sla = SLA_Configuration.objects.filter(id=prod.sla_configuration_id).first()
     benchAndPercent = []
     for i in range(0, len(benchmarks)):
-        benchAndPercent.append([benchmarks[i].benchmark_type, get_level(benchmarks[i])])
+        desired_level, total, total_pass, total_wait, total_fail, total_viewed = asvs_calc_level(benchmarks[i])
 
+        success_percent = round((float(total_pass) / float(total)) * 100, 2)
+        waiting_percent = round((float(total_wait) / float(total)) * 100, 2)
+        fail_percent = round(100 - success_percent - waiting_percent, 2)
+        print(fail_percent)
+        benchAndPercent.append({
+            'id': benchmarks[i].benchmark_type.id,
+            'name': benchmarks[i].benchmark_type,
+            'level': desired_level,
+            'success': {'count': total_pass, 'percent': success_percent},
+            'waiting': {'count': total_wait, 'percent': waiting_percent},
+            'fail': {'count': total_fail, 'percent': fail_percent},
+            'pass': total_pass + total_fail,
+            'total': total
+        })
     system_settings = System_Settings.objects.get()
 
     product_metadata = dict(prod.product_meta.order_by('name').values_list('name', 'value'))

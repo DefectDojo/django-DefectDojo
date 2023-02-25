@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load static %}
 {% load event_tags %}
 {% load display_tags %}
@@ -8,46 +9,49 @@
       <div class="panel panel-default">
           <div class="panel-heading">
               <div class="clearfix">
-                  <span class="pull-left"><h4>{{ benchmark_type.name }} <i>{{ benchmark_type.version }}</i></h4>{% if category_name %}{{ category_name }}&nbsp;&nbsp;<br>{% endif %}{{ benchmark_product_summary|asvs_level }}</span>
+                  <span class="pull-left">
+                      <h4>{{ benchmark_type.name }} {{ benchmark_type.version }} - {{ benchmark_product_summary.desired_level }}</h4>
+                      {{ benchmark_product_summary|asvs_level }}
+                  </span>
                   <div id="test-pulldown" class="dropdown pull-right">
                     <form method="post" id="summary" name="summary">{% csrf_token %}
                       {{ benchmark_summary_form.management_form }}
                       {{ benchmark_summary_form.benchmark_type.as_hidden }}
                       {{ benchmark_summary_form.product.as_hidden }}
-                      <label for="target">Target Level <span class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Target ASVS Level for this application."></label>
+                      <label for="target">Target Level <span class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Target ASVS Level for this application."></span></label>
                       {{ benchmark_summary_form.desired_level }}
                       {{ benchmark_summary_form.score.as_hidden }}
-                      <label for="publish">Publish <span class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Publish will display the ASVS Level on the product and other areas in DefectDojo. Check this once you have completed the assessment."></label>
+                      <label for="publish">Publish <span class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Publish will display the ASVS Level on the product and other areas in DefectDojo. Check this once you have completed the assessment."></label>
                       {{ benchmark_summary_form.publish }}
                       <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                               data-toggle="dropdown" aria-expanded="true">
-                              <i class="fa-solid fa-filter">
+                              <i class="fa fa-filter">
                               </i>
                           <span class="caret"></span>
                       </button>
                       <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a title="{{ bc.name }}" href="{% url 'view_product_benchmark' product.id benchmark_type.id %}">
-                                <span class="fa-solid fa-angle-right"></span> View All
+                                <span class="fa fa-angle-right"></span> View All
                               </a>
                           </li>
                           {% for bc in benchmark_category %}
                           <li role="presentation">
                               <a title="{{ bc.name }}" href="{% url 'view_product_benchmark' product.id benchmark_type.id bc.id %}">
-                                  <span class="fa-solid fa-list-ul"></span> {{ bc.name }}
+                                  <span class="fa fa-list"></span> {{ bc.name }}
                               </a>
                           </li>
                           {% endfor %}
 
                       </ul>
+                    </form>
                   </div>
               </div>
 
           </div>
 
-          {{ benchmark_formset.management_form }}
           {% if benchmarks %}
-              <table id="test_findings" class="table-bordered table table-condensed table-hover">
+              <table id="test_findings" class="table-bordered table table-hover">
                   <thead>
                   <tr>
                       <th>#</th>
@@ -57,29 +61,33 @@
                       <th>L3</th>
                       <th>Applicable</th>
                       <th>Pass</th>
+                      <th>Notes</th>
                   </tr>
                   </thead>
                   <tbody>
-                  {% for benchmark in benchmark_formset %}
-                    {% with value=benchmarks|display_index:forloop.counter0 %}
-                    {{ form.id }}
-                    {{ benchmark.id }}
-                    {{ benchmark.control.as_hidden }}
-                    {{ benchmark.product.as_hidden }}
-                      <tr>
-                          <td class="highlight_{% if value.control.level_1 %}asvs_level_1{% elif value.control.level_2 %}asvs_level_2{% elif value.control.level_3 %}asvs_level_3{%endif%}">{{ value.control.objective_number }}</td>
-                          <td>{{ value.control.objective }}</td>
-                          <td class="level1_select">{% if value.control.level_1 %}✓{% endif %}</td>
-                          <td class="level2_select">{% if value.control.level_2 %}✓{% endif %}</td>
-                          <td class="level3_select">{% if value.control.level_3 %}✓{% endif %}</td>
-                          <td id="td_{{ benchmark.id.auto_id|remove_string:'id-' }}-enabled">
-                            {{ benchmark.enabled }}
-                          </td>
-                          <td id="td_{{ benchmark.id.auto_id|remove_string:'-id' }}-pass_fail">
-                            {{ benchmark.pass_fail }}
-                          </td>
+                  {% for benchmark in benchmarks %}
+                      {% ifchanged %}
+                          <tr>
+                              <td colspan="8"><b>{{ benchmark.control.category.name }}</b></td>
+                          </tr>
+                      {% endifchanged %}
+                        <tr class="level-{% if benchmark.control.level_1 %}1{% elif benchmark.control.level_2 %}2{% elif benchmark.control.level_3 %}3{%endif%}">
+                            <td class="text-center">{{ benchmark.control.objective_number }}</td>
+                            <td>{{ benchmark.control.objective | markdown_render }}</td>
+                            <td class="text-center">{% if benchmark.control.level_1 %}✓{% endif %}</td>
+                            <td class="text-center">{% if benchmark.control.level_2 %}✓{% endif %}</td>
+                            <td class="text-center">{% if benchmark.control.level_3 %}✓{% endif %}</td>
+                            <td id="td_id_form-{{ benchmark.id }}-enabled" class="text-center">
+                                <input type="checkbox" {% if benchmark.enabled %} checked {% endif %} name="form-{{ benchmark.id }}-enabled" id="id_form-{{ benchmark.id }}-enabled" />
+                            </td>
+                            <td id="td_id_form-{{ benchmark.id }}-pass_fail" class="text-center">
+                                <input type="checkbox" {% if benchmark.pass_fail %} checked {% endif %} name="form-{{ benchmark.id }}-pass_fail" id="id_form-{{ benchmark.id }}-pass_fail" />
+                            </td>
+                            <td align="center">
+                                <a href="#" onclick="BenchNote.getBenchNotes(this)" data-toggle="modal" data-target="#notesModal" class="fa-solid {% if benchmark.noted %}fa-file-lines{% else %}fa-plus{% endif %}" id="id_form-{{ benchmark.id }}-notes">
+                                </a>
+                            </td>
                       </tr>
-                    {% endwith %}
                   {% endfor %}
                   </tbody>
               </table>
@@ -90,76 +98,262 @@
           {% endif %}
 </div>
 <div class="form-group">
-    <input class="btn btn-primary" type="submit" name="edit_benchmarks" value="Submit"/>
-    <a class="btn btn btn-danger" href="{% url 'delete_product_benchmark' benchmarks.0.product.id benchmark_type.id %}">Delete</a>
+    <a class="btn btn btn-danger" href="{% url 'delete_product_benchmark' product.id benchmark_type.id %}">Delete</a>
 </div>
-</form>
+
+{#  Modal  #}
+    <div class="modal fade" id="notesModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Benchmark Notes</h4>
+          </div>
+          <div class="modal-body">
+              <div id="benchNotes">
+
+              </div>
+            <label for="id_entry">Notes:<sup>*</sup></label>
+                  <div>
+                    <textarea name="entry" cols="15" rows="4" maxlength="2400" required="" id="id_entry" style="width: 100%"></textarea>
+                  </div>
+                  <div>
+                    <input class="btn btn-primary" onclick="BenchNote.sendBenchNotes()" type="button" value="Add Note" id="id_send_notes">
+                  </div>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
     <script>
         function highlight_level(desired_level) {
-            $( ".level2_select" ).removeClass("level2");
-            $( ".level3_select" ).removeClass("level3");
-            $( ".level1_select" ).addClass("level1");
-            $(".highlight_asvs_level_2").removeClass("highlight_asvs_level_1");
-            $(".highlight_asvs_level_3").removeClass("highlight_asvs_level_1");
-
-            if (desired_level == "Level 2" | desired_level == "Level 3") {
-              $( ".level2_select" ).addClass("level2");
-              $(".highlight_asvs_level_2").addClass("highlight_asvs_level_1");
-              $(".highlight_asvs_level_3").removeClass("highlight_asvs_level_1");
+            switch(desired_level) {
+                case "Level 2":
+                    level_class = "level-2";
+                    break;
+                case "Level 3":
+                    level_class = "level-3";
+                    break;
+                default:
+                    level_class = "level-1";
+                    break
             }
-            if (desired_level == "Level 3") {
-              $( ".level3_select" ).addClass("level3");
-              $(".highlight_asvs_level_3").addClass("highlight_asvs_level_1");
-            }
+            $('table').removeClass('level-1 level-2 level-3').addClass(level_class);
         }
 
         function grid_highlight(name, checked) {
             name = '#td_' + name;
-            if (checked)
-            {
-                $(name).removeClass("benchmark_fail");
-                $(name).addClass("benchmark_pass");
+            if (checked) {
+                $(name).removeClass("benchmark_fail").addClass("benchmark_pass");
             } else {
-                $(name).removeClass("benchmark_pass")
-                $(name).addClass("benchmark_fail");
+                $(name).removeClass("benchmark_pass").addClass("benchmark_fail");
             }
         }
 
         function iterate_checkbox(formname) {
-            var value_checked = false;
+            let value_checked = false;
             $('input[type="checkbox"]').each(function() {
-                disable($(this).attr("id"));
-                if ($(this).is(":checked")) {
-                    value_checked = true;
+                let check_name = $(this).attr("id")
+                if (check_name && (~check_name.indexOf("pass_fail") || ~check_name.indexOf("enabled"))) {
+                    disable(check_name);
+                    $(this).change(onCheck);
+                    if ($(this).is(":checked")) {
+                        value_checked = true;
+                    }
+                    grid_highlight($(this).attr("id"), value_checked)
+                    value_checked = false;
                 }
-                grid_highlight($(this).attr("id"), value_checked)
-                value_checked = false;
             });
         }
 
         function disable(check_name) {
-          var target_check_name;
-          target_check_name = check_name.replace("enabled","pass_fail");
-          if (check_name.indexOf("enable") >= 0) {
-              if ($('#'+check_name).prop( "checked" )) {
-                $('#'+target_check_name).prop('disabled', false);
-                $('#td_'+target_check_name).removeClass("benchmark_disabled");
-                $('#td_'+target_check_name).addClass("benchmark_fail");
-              } else {
-                $('#'+target_check_name).prop('checked', false);
-                $('#'+target_check_name).prop('disabled', true);
-                $('#td_'+target_check_name).addClass("benchmark_disabled");
-              }
-          } else if (check_name.indexOf("pass") >= 0) {
-              if ($('#'+check_name).prop( "checked" )) {
-                grid_highlight(check_name, true);
-              } else {
-                grid_highlight(check_name, false);
-              }
-          }
+            if (!check_name) {
+                return
+            }
+            let pass_fail_name = check_name.replace("enabled","pass_fail");
+            let pass_fail = $('#td_' + pass_fail_name);
+            let pass_fail_checked = $('#' + pass_fail_name).prop( "checked" );
+            let target_checked = $('#' + check_name).prop( "checked" );
+
+            if (check_name.indexOf("enable") >= 0) {
+                if (target_checked) {
+                    $('#' + pass_fail_name).prop('disabled', false);
+                    pass_fail.removeClass("benchmark_disabled");
+                    pass_fail.addClass("benchmark_fail");
+                } else {
+                    pass_fail.prop('checked', false);
+                    pass_fail.prop('disabled', true);
+                    pass_fail.addClass("benchmark_disabled");
+                }
+            }
+
+            grid_highlight(check_name, target_checked);
+            grid_highlight(pass_fail_name, pass_fail_checked);
+        }
+
+        function onCheck() {
+            let check_name = $(this).attr("id")
+
+            disable(check_name);
+            let target_checked = $('#' + check_name).prop( "checked" );
+            let [_, bench_id, field] = check_name.split('-');
+
+            sendAjax("{% url 'update_product_benchmark' product.id benchmark_type.id %}", {
+                'bench_id': bench_id,
+                'field': field,
+                'value': target_checked
+            });
+        }
+
+        function onPublish() {
+            let publish = $(this).prop('checked');
+
+            sendAjax("{% url 'update_product_benchmark_summary' product.id benchmark_type.id benchmark_product_summary.id %}", {
+                'field': 'publish',
+                'value': publish
+            })
+        }
+
+        function onChangeDesiredLevel() {
+            let desired_level = $('#id_desired_level option:selected').text();
+            highlight_level(desired_level);
+
+            sendAjax("{% url 'update_product_benchmark_summary' product.id benchmark_type.id benchmark_product_summary.id %}", {
+                'field': 'desired_level',
+                'value': desired_level
+            })
+        }
+
+        class BenchNote {
+            static bench_id;
+            static benchNotes = $('#benchNotes')
+            static entry = $('#id_entry')[0]
+
+            static addMessage(note) {
+                // Нужно сделать красивое оформление сообщений тут
+                let div = document.createElement('div');
+                div.className = 'bs-callout bs-callout-info';
+                div.style = "padding: 20px; margin: 20px 0; border: 1px solid #eee; border-left-width: 5px; border-radius: 3px; border-left-color: #1b809e; padding-top: 10px"
+
+                let del = document.createElement('p');
+                del.style = 'color: red; font-size: 14px; padding: 0px; cursor: pointer; margin-bottom: -12px; margin-left: 99%';
+                del.innerText = 'x';
+                del.onclick = this.removeNotes;
+                del.id = `id-${note['id']}-note`;
+
+                let date = document.createElement('p');
+                date.style = 'font-size: 10px';
+                date.append(note["date"]);
+
+                let author = document.createElement('h4');
+                author.append(`${note["author"]}`)
+                author.append(date);
+
+                text = document.createElement('span');
+                text.append(note['entry']);
+
+                div.append(del);
+                div.append(author);
+                div.append(text);
+
+                this.benchNotes.append(div);
+            }
+
+            static removeNotes() {
+                if (!confirm("{% trans "Are you sure?" %}")) return;
+
+                BenchNote.spinMeBaby()
+                let _id = $(this).attr('id').split('-')[1];
+
+                sendAjax("{% url 'update_product_benchmark' product.id benchmark_type.id %}", {
+                        'bench_id': BenchNote.bench_id,
+                        'field': 'delete_notes',
+                        'value': _id
+                    });
+            }
+
+            static updateNotes(notes) {
+                this.benchNotes.empty();
+
+                if (!notes.length) {
+                    $('#id_form-' + this.bench_id + '-notes')[0].className = "fa fa-file-text-o";
+                    let div = document.createElement('div');
+                    div.style = "text-align: center";
+                    div.append('There is no notes yet.');
+                    this.benchNotes.append(div);
+                    return
+                }
+
+                $('#id_form-' + this.bench_id + '-notes')[0].className = "fa fa-file-text";
+                notes.forEach(note=>this.addMessage(note))
+            }
+
+            static spinMeBaby() {
+                this.benchNotes.empty();
+
+                let div = document.createElement('div');
+                div.style = "text-align: center; font-size: 60px";
+                let i = document.createElement('i');
+                i.className = "fa fa-spinner fa-pulse";
+
+                div.append(i);
+                this.benchNotes.append(div);
+            }
+
+            static getBenchNotes(self) {
+                this.spinMeBaby();
+                this.entry.value = '';
+
+                let check_name = self.id;
+                let [_, bench_id, field] = check_name.split('-');
+                this.bench_id = bench_id;
+
+                sendAjax("{% url 'update_product_benchmark' product.id benchmark_type.id %}", {
+                    'bench_id': this.bench_id,
+                    'field': 'get_notes',
+                    'value': ''
+                });
+            }
+
+            static sendBenchNotes() {
+                this.spinMeBaby();
+
+                sendAjax("{% url 'update_product_benchmark' product.id benchmark_type.id %}", {
+                    'bench_id': this.bench_id,
+                    'field': 'notes',
+                    'value': this.entry.value
+                });
+
+                this.entry.value = '';
+            }
+        }
+
+        function sendAjax(url, data) {
+            $.ajax({
+                data: data,
+                method: "POST",
+                url: url,
+                beforeSend: function (jqXHR, settings) {
+                    // Pull the token out of the DOM.
+                    jqXHR.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
+                },
+                success: function (response) {
+                    for (let key in response) {
+                        switch (key) {
+                            case "notes":
+                                BenchNote.updateNotes(response["notes"]);
+                                break;
+                        }
+                    }
+                },
+                error: function (response) {
+                  console.log(response.responseJSON.errors)
+                }
+            });
+            return false;
         }
 
         $(document).ready(function() {
@@ -168,13 +362,41 @@
             highlight_level(desired_level);
             //Set the pass/fail colors
             iterate_checkbox('summary');
-          $("#id_desired_level").change(function () {
-            desired_level = $('#id_desired_level option:selected').text();
-            highlight_level(desired_level);
-          });
-          $('input[type="checkbox"]').change(function () {
-            disable($(this).attr("id"));
-          });
+          $("#id_desired_level").change(onChangeDesiredLevel);
+          $("#id_publish").change(onPublish);
         });
     </script>
+{% endblock %}
+{% block add_styles %}
+    td p {
+        margin-bottom: 0px;
+    }
+
+    td p a {
+        color: #337ab7;
+    }
+
+    .table>tbody>tr>td,
+    .table>tbody>tr>th,
+    .table>tfoot>tr>td,
+    .table>tfoot>tr>th,
+    .table>thead>tr>td,
+    .table>thead>tr>th {
+        padding: 12px 10px
+    }
+
+    table.level-1 tr.level-1 td:first-child,
+    table.level-2 tr.level-1 td:first-child,
+    table.level-3 tr.level-1 td:first-child,
+    table.level-2 tr.level-2 td:first-child,
+    table.level-3 tr.level-2 td:first-child,
+    table.level-3 tr.level-3 td:first-child {
+        background-color: #DCEDFB;
+    }
+
+    table.level-1 tr.level-2,
+    table.level-1 tr.level-3,
+    table.level-2 tr.level-3 {
+        opacity: 0.55;
+    }
 {% endblock %}

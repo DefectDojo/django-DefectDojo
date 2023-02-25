@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url, get_file_images
 import dojo.utils
-from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User
+from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User, Benchmark_Product
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
@@ -168,10 +168,10 @@ def remove_string(string, value):
     return string.replace(value, '')
 
 
-@register.filter(name='percentage')
+@register.filter
 def percentage(fraction, value):
     return_value = ''
-    if int(value) > 0 and int(fraction) > 0:
+    if int(value) > 0:
         try:
             return_value = "%.1f%%" % ((float(fraction) / float(value)) * 100)
         except ValueError:
@@ -180,49 +180,42 @@ def percentage(fraction, value):
 
 
 def asvs_calc_level(benchmark_score):
-    level = 0
-    total_pass = 0
     total = 0
+    total_pass = 0
+    total_fail = 0
+    total_wait = 0
+    total_viewed = 0
+
     if benchmark_score:
-        total = benchmark_score.asvs_level_1_benchmark + \
-                benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
-        total_pass = benchmark_score.asvs_level_1_score + \
-                     benchmark_score.asvs_level_2_score + benchmark_score.asvs_level_3_score
-
+        benchmarks = Benchmark_Product.objects.filter(product_id=benchmark_score.product_id, enabled=True,
+                                                      control__category__type=benchmark_score.benchmark_type)
         if benchmark_score.desired_level == "Level 1":
-            total = benchmark_score.asvs_level_1_benchmark
-            total_pass = benchmark_score.asvs_level_1_score
+            benchmarks = benchmarks.filter(control__level_1=True)
         elif benchmark_score.desired_level == "Level 2":
-            total = benchmark_score.asvs_level_1_benchmark + \
-                    benchmark_score.asvs_level_2_benchmark
-            total_pass = benchmark_score.asvs_level_1_score + \
-                         benchmark_score.asvs_level_2_score
+            benchmarks = benchmarks.filter(control__level_2=True)
         elif benchmark_score.desired_level == "Level 3":
-            total = benchmark_score.asvs_level_1_benchmark + \
-                    benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
+            benchmarks = benchmarks.filter(control__level_3=True)
 
-        level = percentage(total_pass, total)
+        noted_benchmarks = benchmarks.filter(notes__isnull=False).order_by('id').distinct('id')
+        noted_benchmarks_ids = [b.id for b in noted_benchmarks]
 
-    return benchmark_score.desired_level, level, str(total_pass), str(total)
+        total = len(benchmarks)
+        total_pass = len([bench for bench in benchmarks if bench.pass_fail])
+        total_fail = len([bench for bench in benchmarks if not bench.pass_fail and bench.id in noted_benchmarks_ids])
+        total_wait = len(
+            [bench for bench in benchmarks if not bench.pass_fail and bench.id not in noted_benchmarks_ids])
+        total_viewed = total_pass + total_fail
+
+    return benchmark_score.desired_level, total, total_pass, total_wait, total_fail, total_viewed
 
 
-def get_level(benchmark_score):
-    benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(benchmark_score)
-    level = percentage(total_pass, total)
-    return level
-
-
-@register.filter(name='asvs_level')
+@register.filter
 def asvs_level(benchmark_score):
-    benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(
-        benchmark_score)
-    if level is None:
-        level = ""
-    else:
-        level = "(" + level + ")"
+    benchmark_score.desired_level, total, total_pass, total_wait, total_fail, total_viewed = asvs_calc_level(benchmark_score)
 
-    return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(
-        total_pass) + " Total:  " + total
+    level = percentage(total_viewed, total)
+
+    return f'Checklist is {level} full (pass: {total_viewed}, total: {total})'
 
 
 @register.filter(name='version_num')
