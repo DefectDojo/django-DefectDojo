@@ -1233,6 +1233,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'NeuVector (REST)': ['title', 'severity', 'component_name', 'component_version'],
     'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
     'Wpscan': ['title', 'description', 'severity'],
+    'Codechecker Report native': ['unique_id_from_tool'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1285,6 +1286,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Twistlock Image Scan': True,
     'Wpscan': True,
     'Rusty Hog Scan': True,
+    'Codechecker Report native': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1338,6 +1340,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Codechecker Report native': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Coverity API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Cobalt.io API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
@@ -1414,6 +1417,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'NeuVector (REST)': DEDUPE_ALGO_HASH_CODE,
     'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
     'Wpscan': DEDUPE_ALGO_HASH_CODE,
+
 }
 
 # Override the hardcoded settings here via the env var
