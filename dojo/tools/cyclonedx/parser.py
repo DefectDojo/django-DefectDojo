@@ -44,11 +44,13 @@ class CycloneDXParser(object):
         for component in root.findall("b:components/b:component", namespaces=ns):
             component_name = component.findtext(f"{namespace}name")
             component_version = component.findtext(f"{namespace}version")
+            component_group = component.findtext(f"{namespace}group")
             # save a ref
             if "bom-ref" in component.attrib:
                 bom_refs[component.attrib["bom-ref"]] = {
                     "name": component_name,
                     "version": component_version,
+                    "group": component_group,
                 }
             # for each vulnerabilities add a finding
             for vulnerability in component.findall("v:vulnerabilities/v:vulnerability", namespaces=ns):
@@ -59,6 +61,7 @@ class CycloneDXParser(object):
                     report_date=report_date,
                     component_name=component_name,
                     component_version=component_version,
+                    component_group=component_group,
                 )
                 findings.append(finding_vuln)
 
@@ -99,7 +102,7 @@ class CycloneDXParser(object):
             return None
 
     def manage_vulnerability_legacy(
-        self, vulnerability, ns, bom_refs, report_date, component_name=None, component_version=None
+        self, vulnerability, ns, bom_refs, report_date, component_name=None, component_version=None, component_group=None
     ):
         ref = vulnerability.attrib["ref"]
         vuln_id = vulnerability.findtext("v:id", namespaces=ns)
@@ -120,6 +123,7 @@ class CycloneDXParser(object):
             bom = bom_refs[ref]
             component_name = bom["name"]
             component_version = bom["version"]
+            component_group = bom["group"]
 
         severity = self.fix_severity(severity)
         references = ""
@@ -132,6 +136,7 @@ class CycloneDXParser(object):
             references=references,
             component_name=component_name,
             component_version=component_version,
+            service=component_group,
             vuln_id_from_tool=vuln_id,
             nb_occurences=1,
         )
@@ -174,7 +179,7 @@ class CycloneDXParser(object):
         return finding
 
     def _manage_vulnerability_xml(
-        self, vulnerability, ns, bom_refs, report_date, component_name=None, component_version=None
+        self, vulnerability, ns, bom_refs, report_date, component_name=None, component_version=None, component_group=None
     ):
         vuln_id = vulnerability.findtext("b:id", namespaces=ns)
 
@@ -213,7 +218,7 @@ class CycloneDXParser(object):
         findings = []
         for target in vulnerability.findall("b:affects/b:target", namespaces=ns):
             ref = target.find("b:ref", namespaces=ns)
-            component_name, component_version = self._get_component(bom_refs, ref.text)
+            component_name, component_version, component_group = self._get_component(bom_refs, ref.text)
 
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
@@ -223,6 +228,7 @@ class CycloneDXParser(object):
                 references=references,
                 component_name=component_name,
                 component_version=component_version,
+                service=component_group,
                 static_finding=True,
                 dynamic_finding=False,
                 vuln_id_from_tool=vuln_id,
@@ -338,7 +344,7 @@ class CycloneDXParser(object):
             # for each component affected we create a finding if the "affects" node is here
             for affect in vulnerability.get("affects", []):
                 reference = affect["ref"]  # required by the specification
-                component_name, component_version = self._get_component(components, reference)
+                component_name, component_version, component_group = self._get_component(components, reference)
                 finding = Finding(
                     title=f"{component_name}:{component_version} | {vulnerability.get('id')}",
                     test=test,
@@ -347,6 +353,7 @@ class CycloneDXParser(object):
                     mitigation=vulnerability.get("recommendation"),
                     component_name=component_name,
                     component_version=component_version,
+                    service=component_group,
                     references=references,
                     static_finding=True,
                     dynamic_finding=False,
@@ -421,10 +428,12 @@ class CycloneDXParser(object):
     def _get_component(self, components, reference):
         if reference not in components:
             LOGGER.warning(f"reference:{reference} not found in the BOM")
-            return (None, None)
+            return (None, None, None)
         if "version" not in components[reference]:
-            return (components[reference]["name"], None)
-        return (components[reference]["name"], components[reference]["version"])
+            return (components[reference]["name"], None, None)
+        if "group" not in components[reference]:
+            return (components[reference]["name"], components[reference]["version"], None)
+        return (components[reference]["name"], components[reference]["version"], components[reference]["group"])
 
     def fix_severity(self, severity):
         severity = severity.capitalize()

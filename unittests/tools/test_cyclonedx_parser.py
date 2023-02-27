@@ -155,6 +155,7 @@ class TestParser(DojoTestCase):
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("jackson-databind", finding.component_name)
                 self.assertEqual("2.9.4", finding.component_version)
+                self.assertEqual('com.fasterxml.jackson.core', finding.service)
                 self.assertIn(finding.cwe, [184, 502])  # there is 2 CWE in the report
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertIn(
@@ -201,6 +202,7 @@ class TestParser(DojoTestCase):
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("jackson-databind", finding.component_name)
                 self.assertEqual("2.9.4", finding.component_version)
+                self.assertEqual('com.fasterxml.jackson.core', finding.service)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
                 self.assertIn(
                     "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution",
