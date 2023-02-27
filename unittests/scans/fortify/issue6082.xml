@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReportDefinition type="standard">
+    <TemplateName>Fortify Security Report</TemplateName>
+    <TemplatePath></TemplatePath>
+    <LogoPath>/MF_logo.png</LogoPath>
+    <Footnote>Copyright 2022 Micro Focus or one of its affiliates.</Footnote>
+    <UserName></UserName>
+    <ReportSection enabled="true" optionalSubsections="false">
+        <Title>Executive Summary</Title>
+        <SubSection enabled="true">
+            <Title>Issues Overview</Title>
+            <Description>This section provides an overview of the issues uncovered during analysis. The report covers a summary of vulnerability categories discovered by the tool. The auditor should augment this section with higher-level conclusions derived from human review of the application (including architecture reviews, black-box testing, compliance issues, etc.)</Description>
+            <Text>On Jan 4, 2023, a source code review was performed over the javaWebApp code base. 15 files, 126 LOC (Executable) were scanned and reviewed for defects that could lead to potential security vulnerabilities. A total of 22 reviewed findings were uncovered during the analysis.</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Issue Summary by Fortify Priority Order</Title>
+            <Description>A table summarizing the number of issues found and the breakdown of issues in each Fortify Priority Level</Description>
+            <IssueListing listing="false" limit="-1">
+                <Refinement></Refinement>
+                <Chart chartType="table">
+                    <Axis>Fortify Priority Order</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                    <GroupingSection count="17">
+                        <groupTitle>Low</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="5">
+                        <groupTitle>High</groupTitle>
+                    </GroupingSection>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Recommendations and Conclusions</Title>
+            <Description>This section gives some high-level recommendations on remediating the issues discussed in the Issues Summary sub section. Recommendations will vary based on deployment scenarios, risk appetite, and existing mitigating strategies. The auditor should supplement the Fortify generic recommendations with specific information that takes into account the application specific variables.</Description>
+            <Text>The Issues Category section provides Fortify recommendations for addressing issues at a generic level.  The recommendations for specific fixes can be extrapolated from those generic recommendations by the development group.</Text>
+        </SubSection>
+    </ReportSection>
+    <ReportSection enabled="true" optionalSubsections="true">
+        <Title>Project Summary</Title>
+        <SubSection enabled="true">
+            <Title>Code Base Summary</Title>
+            <Description>Summary of the Codebase that was analyzed</Description>
+            <Text>Code location: C:/Fortify/Fortify_SCA_and_Apps_22.1.0/Samples/advanced/javaWebApp/LoginProject
+Number of Files: 15
+Lines of Code: 126
+Build Label: &lt;No Build Label&gt;</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Scan Information</Title>
+            <Description>Details of the analysis</Description>
+            <Text>Scan time: 01:14
+SCA Engine version: 22.1.0.0166
+Machine Name: LT094139
+Username running scan: n170294</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Results Certification</Title>
+            <Description>A full summary of the Results Certification for this project</Description>
+            <Text>Results Certification Valid
+
+Details:
+
+Results Signature:
+
+	SCA Analysis Results has Valid signature
+	
+
+Rules Signature:
+
+	There were no custom rules used in this scan</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Attack Surface</Title>
+            <Description>A full summary of the attack surface for this project</Description>
+            <Text>Attack Surface:
+System Information:
+	null.null.null
+
+Web:
+	null.null.null
+</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Filter Set Summary</Title>
+            <Description>A brief summary of the filterset used to create this report</Description>
+            <Text>Current Enabled Filter Set:
+Security Auditor View
+
+Filter Set Details:
+
+Folder Filters:
+If [fortify priority order] contains critical Then set folder to Critical
+If [fortify priority order] contains high Then set folder to High
+If [fortify priority order] contains medium Then set folder to Medium
+If [fortify priority order] contains low Then set folder to Low</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Audit Guide Summary</Title>
+            <Description>Summary of the impact of the audit guide</Description>
+            <Text>Audit guide not enabled</Text>
+        </SubSection>
+    </ReportSection>
+    <ReportSection enabled="true" optionalSubsections="true">
+        <Title>Results Outline</Title>
+        <SubSection enabled="true">
+            <Title>Overall number of results</Title>
+            <Description>Results count</Description>
+            <Text>The scan found 22 issues.</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Vulnerability Examples by Category</Title>
+            <Description>Results summary for critical and high priority issues.  Vulnerability examples are provided by category.</Description>
+            <IssueListing listing="true" limit="1">
+                <Refinement>[fortify priority order]:critical OR [fortify priority order]:high</Refinement>
+                <Chart chartType="list">
+                    <Axis>Category</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                    <GroupingSection count="4">
+                        <groupTitle>Privacy Violation: Autocomplete</groupTitle>
+                        <MajorAttributeSummary>
+                            <MetaInfo>
+<Name>Abstract</Name>
+<Value>The form in login.html uses autocompletion on line 19, which allows some browsers to retain sensitive information in their history.</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Explanation</Name>
+<Value>With autocompletion enabled, some browsers retain user input across sessions, which could allow someone using the computer after the initial user to see information previously submitted.</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Recommendations</Name>
+<Value>Explicitly disable autocompletion on forms or sensitive inputs. By disabling autocompletion, information previously entered will not be presented back to the user as they type. It will also disable the "remember my password" functionality of most major browsers.
+
+Example 1: In an  HTML form, disable autocompletion for all input fields by explicitly setting the value of the autocomplete attribute to off on the form tag.
+
+
+  &lt;form method="post" autocomplete="off"&gt;
+        Address: &lt;input name="address" /&gt;
+        Password: &lt;input name="password" type="password" /&gt;
+  &lt;/form&gt;
+
+
+Example 2: Alternatively, disable autocompletion for specific input fields by explicitly setting the value of the autocomplete attribute to off on the corresponding tags.
+
+
+  &lt;form method="post"&gt;
+        Address: &lt;input name="address" /&gt;
+        Password: &lt;input name="password" type="password" autocomplete="off"/&gt;
+  &lt;/form&gt;
+
+
+Note that the default value of the autocomplete attributed is on. Therefore do not omit the attribute when dealing with sensitive inputs.</Value>
+                            </MetaInfo>
+                            <AttributeValue>
+<Name>&lt;Unaudited&gt;</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Not an Issue</Name>
+<Count>4</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Reliability Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Bad Practice</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Suspicious</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Exploitable</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                        </MajorAttributeSummary>
+                        <Issue iid="F46C9EF7203D77D83D3486BCDC78565F" ruleID="2FC7D1FF-11E4-468E-B7AB-F127828F4016">
+                            <Category>Privacy Violation: Autocomplete</Category>
+                            <Folder>High</Folder>
+                            <Kingdom>Security Features</Kingdom>
+                            <Abstract>The form in login.html uses autocompletion on line 19, which allows some browsers to retain sensitive information in their history.</Abstract>
+                            <Friority>High</Friority>
+                            <Tag>
+<Name>Analysis</Name>
+<Value>Not an Issue</Value>
+                            </Tag>
+                            <Tag>
+<Name>Severity</Name>
+<Value>High</Value>
+                            </Tag>
+                            <Tag>
+<Name>Date</Name>
+<Value>2023-01-04</Value>
+                            </Tag>
+                            <Primary>
+<FileName>login.html</FileName>
+<FilePath>login.html</FilePath>
+<LineStart>19</LineStart>
+<Snippet>        &lt;center&gt;ç”¨æˆ·ç™»å½•&lt;/center&gt;&lt;br/&gt;&lt;br/&gt;
+        USER: &lt;br/&gt; &lt;input type="text" name="user"&gt;&lt;/input&gt;&lt;br/&gt;&lt;br/&gt;
+        PASS: &lt;br/&gt;&lt;input type="password" name="pass"&gt;&lt;/input&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;</Snippet>
+<TargetFunction>null()</TargetFunction>
+                            </Primary>
+                        </Issue>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>Unreleased Resource: Database</groupTitle>
+                        <MajorAttributeSummary>
+                            <MetaInfo>
+<Name>Abstract</Name>
+<Value>The function contextInitialized() in MyContextListener.java sometimes fails to release a database resource allocated by getConnection() on line 28.</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Explanation</Name>
+<Value>Resource leaks have at least two common causes:
+
+- Error conditions and other exceptional circumstances.
+
+- Confusion over which part of the program is responsible for releasing the resource.
+
+Most unreleased resource issues result in general software reliability problems. However, if an attacker can intentionally trigger a resource leak, the attacker may be able to launch a denial of service attack by depleting the resource pool.
+
+Example: Under normal conditions, the following code executes a database query, processes the results returned by the database, and closes the allocated statement object. But if an exception occurs while executing the SQL or processing the results, the statement object will not be closed. If this happens often enough, the database will run out of available cursors and not be able to execute any more SQL queries.
+
+  Statement stmt = conn.createStatement();
+  ResultSet rs = stmt.executeQuery(CXN_SQL);
+  harvestResults(rs);
+  stmt.close();
+&#13;
+</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Recommendations</Name>
+<Value>1. Never rely on finalize() to reclaim resources. In order for an object's finalize() method to be invoked, the garbage collector must determine that the object is eligible for garbage collection. Because the garbage collector is not required to run unless the JVM is low on memory, there is no guarantee that an object's finalize() method will be invoked in an expedient fashion. When the garbage collector finally does run, it may cause a large number of resources to be reclaimed in a short period of time, which can lead to "bursty" performance and lower overall system throughput. This effect becomes more pronounced as the load on the system increases.
+
+Finally, if it is possible for a resource reclamation operation to hang (if it requires communicating over a network to a database, for example), then the thread that is executing the finalize() method will hang.
+
+2. Release resources in a finally block. The code for the Example should be rewritten as follows:
+
+
+  public void execCxnSql(Connection conn) {
+    Statement stmt;
+    try {
+      stmt = conn.createStatement();
+      ResultSet rs = stmt.executeQuery(CXN_SQL);
+      ...
+    }
+    finally {
+      if (stmt != null) {
+        safeClose(stmt);
+      }
+    }
+}
+
+public static void safeClose(Statement stmt) {
+  if (stmt != null) {
+    try {
+      stmt.close();
+    } catch (SQLException e) {
+      log(e);
+    }
+  }
+}
+
+
+This solution uses a helper function to log the exceptions that might occur when trying to close the statement. Presumably this helper function will be reused whenever a statement needs to be closed.
+
+Also, the execCxnSql method does not initialize the stmt object to null. Instead, it checks to ensure that stmt is not null before calling safeClose(). Without the null check, the Java compiler reports that stmt might not be initialized. This choice takes advantage of Java's ability to detect uninitialized variables. If stmt is initialized to null in a more complex method, cases in which stmt is used without being initialized will not be detected by the compiler.</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Tips</Name>
+<Value>1. Be aware that closing a database connection may or may not automatically free other resources associated with the connection object. If the application uses connection pooling, it is best to explicitly close the other resources after the connection is closed. If the application is not using connection pooling, the other resources are automatically closed when the database connection is closed. In such a case, this vulnerability is invalid.</Value>
+                            </MetaInfo>
+                            <AttributeValue>
+<Name>&lt;Unaudited&gt;</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Not an Issue</Name>
+<Count>1</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Reliability Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Bad Practice</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Suspicious</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Exploitable</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                        </MajorAttributeSummary>
+                        <Issue iid="B5B15F27E10F4D7799BD0ED1E6D34C5D" ruleID="B7DFF4A8-9817-4418-A35B-E70D10DC825E">
+                            <Category>Unreleased Resource: Database</Category>
+                            <Folder>High</Folder>
+                            <Kingdom>Code Quality</Kingdom>
+                            <Abstract>The function contextInitialized() in MyContextListener.java sometimes fails to release a database resource allocated by getConnection() on line 28.</Abstract>
+                            <Friority>High</Friority>
+                            <Tag>
+<Name>Analysis</Name>
+<Value>Not an Issue</Value>
+                            </Tag>
+                            <Tag>
+<Name>Severity</Name>
+<Value>High</Value>
+                            </Tag>
+                            <Tag>
+<Name>Date</Name>
+<Value>2023-01-04</Value>
+                            </Tag>
+                            <Primary>
+<FileName>MyContextListener.java</FileName>
+<FilePath>src/adrui/MyContextListener.java</FilePath>
+<LineStart>28</LineStart>
+<Snippet>		try{
+			Class.forName(driver);//åŠ è½½é©±åŠ¨ç¨‹åº�ç±», é«˜ç‰ˆæœ¬jdbcå�¯ä»¥çœ�åŽ», ç›¸å…³å�¯è‡ªè¡Œç™¾åº¦
+			Connection conn = DriverManager.getConnection(url, user, pass);
+			sc.setAttribute("conn", conn);
+			System.out.println("Connect Succeed!");</Snippet>
+<TargetFunction>conn = getConnection(...)</TargetFunction>
+                            </Primary>
+                        </Issue>
+                    </GroupingSection>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+    <ReportSection enabled="true" optionalSubsections="true">
+        <Title>Issue Count by Category</Title>
+        <SubSection enabled="true">
+            <Title>Issues By Category</Title>
+            <IssueListing listing="false" limit="-1">
+                <Refinement></Refinement>
+                <Chart chartType="table">
+                    <Axis>Category</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                    <GroupingSection count="4">
+                        <groupTitle>Privacy Violation: Autocomplete</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="3">
+                        <groupTitle>Cross-Site Request Forgery</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="3">
+                        <groupTitle>Poor Error Handling: Overly Broad Catch</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="3">
+                        <groupTitle>Poor Logging Practice: Use of a System Output Stream</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="3">
+                        <groupTitle>System Information Leak</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="2">
+                        <groupTitle>SQL Injection</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>J2EE Bad Practices: getConnection()</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>J2EE Misconfiguration: Excessive Session Timeout</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>J2EE Misconfiguration: Missing Error Handling</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>Unreleased Resource: Database</groupTitle>
+                    </GroupingSection>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+    <ReportSection enabled="true" optionalSubsections="true">
+        <Title>Issue Breakdown by Analysis</Title>
+        <SubSection enabled="true">
+            <Title>Issue by Analysis</Title>
+            <IssueListing listing="false" limit="-1">
+                <Refinement></Refinement>
+                <Chart chartType="pie">
+                    <Axis>Analysis</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                    <GroupingSection count="22">
+                        <groupTitle>Not an Issue</groupTitle>
+                    </GroupingSection>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+</ReportDefinition>

@@ -277,6 +277,14 @@ class DeleteProductForm(forms.ModelForm):
         fields = ['id']
 
 
+class EditFindingGroupForm(forms.ModelForm):
+    name = forms.CharField(max_length=255, required=True, label='Finding Group Name')
+
+    class Meta:
+        model = Finding_Group
+        fields = ['name']
+
+
 class DeleteFindingGroupForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())

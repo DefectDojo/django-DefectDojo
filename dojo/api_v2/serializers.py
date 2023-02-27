@@ -628,6 +628,14 @@ class FileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class RawFileSerializer(serializers.ModelSerializer):
+    file = serializers.FileField(required=True)
+
+    class Meta:
+        model = FileUpload
+        fields = ['file']
+
+
 class ProductMemberSerializer(serializers.ModelSerializer):
 
     class Meta:
