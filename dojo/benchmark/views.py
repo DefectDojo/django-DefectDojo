@@ -159,7 +159,7 @@ def benchmark_view(request, pid, type, cat=None):
     benchmark_category = sorted(benchmark_category, key=lambda x: int(x.name[:3].strip('V: ')))
 
     product_tab = Product_Tab(product, title="Benchmarks", tab="benchmarks")
-   
+
     return render(request, 'dojo/benchmark.html',
                   {'benchmarks': benchmarks,
                    'active_tab': 'benchmarks',
