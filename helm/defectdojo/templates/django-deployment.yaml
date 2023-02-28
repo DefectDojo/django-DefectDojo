@@ -128,7 +128,7 @@ spec:
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
         {{- end }}
-        {{- range .Values.django.extraVolumes }}
+        {{- range .Values.django.extraVolumeMounts }}
         {{- if (eq .container "uwsgi") }}
         - name: userconfig-{{ .name }}
           readOnly: true
@@ -226,7 +226,7 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
-        {{- range .Values.django.extraVolumes }}
+        {{- range .Values.django.extraVolumeMounts }}
         {{- if (eq .container "nginx") }}
         - name: userconfig-{{ .name }}
           readOnly: true
