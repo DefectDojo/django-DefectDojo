@@ -1146,7 +1146,9 @@ class JiraInstanceViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class JiraIssuesViewSet(mixins.ListModelMixin,
+class JiraIssuesViewSet(prefetch.PrefetchListMixin,
+                        prefetch.PrefetchRetrieveMixin,
+                        mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
@@ -1157,6 +1159,7 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
     queryset = JIRA_Issue.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('id', 'jira_id', 'jira_key', 'finding', 'engagement', 'finding_group')
+    swagger_schema = prefetch.get_prefetch_schema(["jira_finding_mappings_list", "jira_finding_mappings_read"], serializers.JIRAIssueSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasJiraIssuePermission)
 
     def get_queryset(self):
@@ -1164,19 +1167,22 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class JiraProjectViewSet(mixins.ListModelMixin,
-                  mixins.RetrieveModelMixin,
-                  mixins.DestroyModelMixin,
-                  mixins.UpdateModelMixin,
-                  mixins.CreateModelMixin,
-                  viewsets.GenericViewSet,
-                  dojo_mixins.DeletePreviewModelMixin):
+class JiraProjectViewSet(prefetch.PrefetchListMixin,
+                         prefetch.PrefetchRetrieveMixin,
+                         mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.UpdateModelMixin,
+                         mixins.CreateModelMixin,
+                         viewsets.GenericViewSet,
+                         dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.JIRAProjectSerializer
     queryset = JIRA_Project.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'jira_instance', 'product', 'engagement', 'component', 'project_key',
-                     'push_all_issues', 'enable_engagement_epic_mapping',
-                     'push_notes')
+    filterset_fields = (
+        'id', 'jira_instance', 'product', 'engagement', 'component', 'project_key',
+        'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes')
+    swagger_schema = prefetch.get_prefetch_schema(["jira_projects_list", "jira_projects_read"], serializers.JIRAProjectSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasJiraProductPermission)
 
     def get_queryset(self):
