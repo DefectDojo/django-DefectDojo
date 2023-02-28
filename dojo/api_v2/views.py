@@ -1648,7 +1648,9 @@ class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
-class StubFindingsViewSet(mixins.ListModelMixin,
+class StubFindingsViewSet(prefetch.PrefetchListMixin,
+                          prefetch.PrefetchRetrieveMixin,
+                          mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
                           mixins.CreateModelMixin,
                           mixins.UpdateModelMixin,
@@ -1659,6 +1661,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
     queryset = Stub_Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('id', 'title', 'date', 'severity', 'description')
+    swagger_schema = prefetch.get_prefetch_schema(["stub_findings_list", "stub_findings_read"], serializers.StubFindingSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasFindingPermission)
 
     def get_queryset(self):
