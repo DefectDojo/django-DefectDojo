@@ -185,7 +185,7 @@ class EndPointViewSet(prefetch.PrefetchListMixin,
     queryset = Endpoint.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiEndpointFilter
-    swagger_schema = prefetch.get_prefetch_schema(["endpoints_list", "endpoints_read"],serializers.EndpointSerializer).to_schema()
+    swagger_schema = prefetch.get_prefetch_schema(["endpoints_list", "endpoints_read"], serializers.EndpointSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEndpointPermission)
 
     def get_queryset(self):
@@ -234,7 +234,7 @@ class EndpointStatusViewSet(prefetch.PrefetchListMixin,
     queryset = Endpoint_Status.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('mitigated', 'false_positive', 'out_of_scope', 'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
-    swagger_schema = prefetch.get_prefetch_schema(["endpoint_status_list", "endpoint_status_read"],serializers.EndpointStatusSerializer).to_schema()
+    swagger_schema = prefetch.get_prefetch_schema(["endpoint_status_list", "endpoint_status_read"], serializers.EndpointStatusSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEndpointStatusPermission)
 
     def get_queryset(self):
@@ -256,7 +256,7 @@ class EngagementViewSet(prefetch.PrefetchListMixin,
     queryset = Engagement.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiEngagementFilter
-    swagger_schema = prefetch.get_prefetch_schema(["engagements_list", "engagements_read"],serializers.EngagementSerializer).to_schema()
+    swagger_schema = prefetch.get_prefetch_schema(["engagements_list", "engagements_read"], serializers.EngagementSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEngagementPermission)
 
     @property
