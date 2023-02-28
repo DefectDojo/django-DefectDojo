@@ -256,7 +256,7 @@ def group_findings_by(finds, finding_group_by_option):
             skipped += 1
             continue
 
-        finding_group = Finding_Group.objects.filter(name=group_name).first()
+        finding_group = Finding_Group.objects.filter(test=find.test, name=group_name).first()
         if not finding_group:
             finding_group, added, skipped = create_finding_group([find], group_name)
             groups_created += 1
