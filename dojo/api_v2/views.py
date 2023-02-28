@@ -172,7 +172,9 @@ class GlobalRoleViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
-class EndPointViewSet(mixins.ListModelMixin,
+class EndPointViewSet(prefetch.PrefetchListMixin,
+                      prefetch.PrefetchRetrieveMixin,
+                      mixins.ListModelMixin,
                       mixins.RetrieveModelMixin,
                       mixins.UpdateModelMixin,
                       mixins.DestroyModelMixin,
@@ -183,6 +185,7 @@ class EndPointViewSet(mixins.ListModelMixin,
     queryset = Endpoint.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiEndpointFilter
+    swagger_schema = prefetch.get_prefetch_schema(["endpoints_list", "endpoints_read"],serializers.EndpointSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEndpointPermission)
 
     def get_queryset(self):
@@ -218,18 +221,20 @@ class EndPointViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class EndpointStatusViewSet(mixins.ListModelMixin,
-                      mixins.RetrieveModelMixin,
-                      mixins.UpdateModelMixin,
-                      mixins.DestroyModelMixin,
-                      mixins.CreateModelMixin,
-                      viewsets.GenericViewSet,
-                      dojo_mixins.DeletePreviewModelMixin):
+class EndpointStatusViewSet(prefetch.PrefetchListMixin,
+                            prefetch.PrefetchRetrieveMixin,
+                            mixins.ListModelMixin,
+                            mixins.RetrieveModelMixin,
+                            mixins.UpdateModelMixin,
+                            mixins.DestroyModelMixin,
+                            mixins.CreateModelMixin,
+                            viewsets.GenericViewSet,
+                            dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.EndpointStatusSerializer
     queryset = Endpoint_Status.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('mitigated', 'false_positive', 'out_of_scope',
-                     'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
+    filterset_fields = ('mitigated', 'false_positive', 'out_of_scope', 'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
+    swagger_schema = prefetch.get_prefetch_schema(["endpoint_status_list", "endpoint_status_read"],serializers.EndpointStatusSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEndpointStatusPermission)
 
     def get_queryset(self):
@@ -237,7 +242,9 @@ class EndpointStatusViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class EngagementViewSet(mixins.ListModelMixin,
+class EngagementViewSet(prefetch.PrefetchListMixin,
+                        prefetch.PrefetchRetrieveMixin,
+                        mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.UpdateModelMixin,
                         mixins.DestroyModelMixin,
@@ -249,6 +256,7 @@ class EngagementViewSet(mixins.ListModelMixin,
     queryset = Engagement.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiEngagementFilter
+    swagger_schema = prefetch.get_prefetch_schema(["engagements_list", "engagements_read"],serializers.EngagementSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEngagementPermission)
 
     @property
