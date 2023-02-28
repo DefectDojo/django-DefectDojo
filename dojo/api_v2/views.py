@@ -2657,18 +2657,19 @@ class NotificationsViewSet(prefetch.PrefetchListMixin,
         serializers.NotificationsSerializer).to_schema()
 
 
-class EngagementPresetsViewset(mixins.ListModelMixin,
-                         mixins.RetrieveModelMixin,
-                         mixins.UpdateModelMixin,
-                         mixins.DestroyModelMixin,
-                         mixins.CreateModelMixin,
-                         viewsets.GenericViewSet,
-                         dojo_mixins.DeletePreviewModelMixin):
+class EngagementPresetsViewset(prefetch.PrefetchListMixin,
+                               prefetch.PrefetchRetrieveMixin,mixins.ListModelMixin,
+                               mixins.RetrieveModelMixin,
+                               mixins.UpdateModelMixin,
+                               mixins.DestroyModelMixin,
+                               mixins.CreateModelMixin,
+                               viewsets.GenericViewSet,
+                               dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.EngagementPresetsSerializer
     queryset = Engagement_Presets.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('id', 'title', 'product')
-
+    swagger_schema = prefetch.get_prefetch_schema(["engagement_presets_list", "engagement_presets_read"], serializers.EngagementPresetsSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEngagementPresetPermission)
 
     def get_queryset(self):
