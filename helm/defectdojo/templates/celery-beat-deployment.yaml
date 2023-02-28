@@ -89,7 +89,7 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
-        {{- range .Values.celery.extraVolumes }}
+        {{- range .Values.celery.extraVolumeMounts }}
         - name: userconfig-{{ .name }}
           readOnly: true
           mountPath: {{ .path }}
