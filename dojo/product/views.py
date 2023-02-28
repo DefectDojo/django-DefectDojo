@@ -33,7 +33,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
     Delete_Product_GroupForm, SLA_Configuration, \
     DeleteAppAnalysisForm, Product_API_Scan_ConfigurationForm, DeleteProduct_API_Scan_ConfigurationForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, \
-    Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
+    Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Product_Summary, Endpoint_Status, \
     Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
     Product_Group, Product_API_Scan_Configuration
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, \
