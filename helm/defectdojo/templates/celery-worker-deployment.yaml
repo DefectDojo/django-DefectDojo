@@ -84,7 +84,7 @@ spec:
         {{- end }}
         command: ['/entrypoint-celery-worker.sh']
         volumeMounts:
-        {{- range .Values.celery.extraVolumes }}
+        {{- range .Values.celery.extraVolumeMounts }}
         - name: userconfig-{{ .name }}
           readOnly: true
           mountPath: {{ .path }}
