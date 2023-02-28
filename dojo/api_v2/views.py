@@ -2658,7 +2658,8 @@ class NotificationsViewSet(prefetch.PrefetchListMixin,
 
 
 class EngagementPresetsViewset(prefetch.PrefetchListMixin,
-                               prefetch.PrefetchRetrieveMixin,mixins.ListModelMixin,
+                               prefetch.PrefetchRetrieveMixin,
+                               mixins.ListModelMixin,
                                mixins.RetrieveModelMixin,
                                mixins.UpdateModelMixin,
                                mixins.DestroyModelMixin,
