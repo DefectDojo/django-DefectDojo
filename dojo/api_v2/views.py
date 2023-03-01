@@ -31,7 +31,7 @@ from dojo.models import Language_Type, Languages, Notifications, Product, Produc
     Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
     Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations, \
-    UserContactInfo, Product_API_Scan_Configuration
+    UserContactInfo, Product_API_Scan_Configuration, Risk_Acceptance
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -39,7 +39,7 @@ from dojo.finding.views import set_finding_as_original_internal, reset_finding_d
     duplicate_cluster
 from dojo.filters import ReportFindingFilter, \
     ApiFindingFilter, ApiProductFilter, ApiEngagementFilter, ApiEndpointFilter, \
-    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter
+    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter, ApiRiskAcceptanceFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -55,6 +55,7 @@ from dojo.product.queries import get_authorized_products, get_authorized_app_ana
     get_authorized_product_members, get_authorized_product_groups, get_authorized_languages, \
     get_authorized_engagement_presets, get_authorized_product_api_scan_configurations
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
@@ -448,6 +449,29 @@ class EngagementViewSet(mixins.ListModelMixin,
         response['Content-Disposition'] = f'attachment; filename="{file_object.file.name}"'
 
         return response
+
+
+class RiskAcceptanceViewSet(prefetch.PrefetchListMixin,
+                            prefetch.PrefetchRetrieveMixin,
+                            mixins.ListModelMixin,
+                            mixins.RetrieveModelMixin,
+                            mixins.DestroyModelMixin,
+                            viewsets.GenericViewSet,
+                            dojo_mixins.DeletePreviewModelMixin):
+    serializer_class = serializers.RiskAcceptanceSerializer
+    queryset = Risk_Acceptance.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ApiRiskAcceptanceFilter
+    swagger_schema = prefetch.get_prefetch_schema(["risk_acceptance_list", "risk_acceptance_read"], serializers.RiskAcceptanceSerializer).to_schema()
+    permission_classes = (IsAuthenticated, permissions.UserHasRiskAcceptancePermission)
+
+    def get_queryset(self):
+        return get_authorized_risk_acceptances(
+            Permissions.Risk_Acceptance).prefetch_related(
+                'notes',
+                'engagement_set',
+                'owner',
+                'accepted_findings').distinct()
 
 
 # These are technologies in the UI and the API!
