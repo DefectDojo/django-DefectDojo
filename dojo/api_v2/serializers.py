@@ -1124,9 +1124,13 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
     recommendation = serializers.SerializerMethodField()
     decision = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.CharField())
+    @swagger_serializer_method(serializers.CharField())
     def get_recommendation(self, obj):
         return Risk_Acceptance.TREATMENT_TRANSLATIONS.get(obj.recommendation)
 
+    @extend_schema_field(serializers.CharField())
+    @swagger_serializer_method(serializers.CharField())
     def get_decision(self, obj):
         return Risk_Acceptance.TREATMENT_TRANSLATIONS.get(obj.decision)
 
