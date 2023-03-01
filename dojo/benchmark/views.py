@@ -4,11 +4,14 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Count, Q
+from django.utils.translation import gettext as _
+
 from dojo.forms import Benchmark_Product_SummaryForm, DeleteBenchmarkForm
 from dojo.models import Benchmark_Type, Benchmark_Category, Benchmark_Requirement, Benchmark_Product, Product, Benchmark_Product_Summary
 from dojo.utils import add_breadcrumb, Product_Tab, redirect_to_return_url_or_else
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
+
 from crum import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -140,8 +143,6 @@ def benchmark_view(request, pid, type, cat=None):
         benchmark_product_summary = Benchmark_Product_Summary(product=product, benchmark_type=benchmark_type)
         benchmark_product_summary.save()
 
-    add_breadcrumb(title="Benchmarks", top_level=False, request=request)
-
     if cat:
         benchmarks = Benchmark_Product.objects.select_related('control', 'control__category').filter(product=product.id, control__category=cat, control__category__enabled=True, control__category__type=type, control__enabled=True).all().order_by('control__objective_number')
     else:
@@ -158,7 +159,9 @@ def benchmark_view(request, pid, type, cat=None):
     benchmarks = sorted(benchmarks, key=lambda x: [int(_) for _ in x.control.objective_number.split('.')])
     benchmark_category = sorted(benchmark_category, key=lambda x: int(x.name[:3].strip('V: ')))
 
-    product_tab = Product_Tab(product, title="Benchmarks", tab="benchmarks")
+    product_tab = Product_Tab(product, title=_("Benchmarks"), tab="benchmarks")
+
+    add_breadcrumb(title=_("Benchmarks"), top_level=False, request=request)
 
     return render(request, 'dojo/benchmark.html',
                   {'benchmarks': benchmarks,
@@ -187,11 +190,11 @@ def delete(request, pid, type):
                 benchmark_product_summary.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Benchmarks removed.',
+                                     _('Benchmarks removed.'),
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('product'))
 
-    product_tab = Product_Tab(product, title="Delete Benchmarks", tab="benchmarks")
+    product_tab = Product_Tab(product, title=_("Delete Benchmarks"), tab="benchmarks")
     return render(request, 'dojo/delete_benchmark.html', {
         'product': product,
         'form': form,
