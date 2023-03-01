@@ -1,6 +1,6 @@
 from .dojo_test_case import DojoTestCase
-from dojo import models
-
+from django.contrib import admin
+from django.db import models
 
 class AdminSite(DojoTestCase):
     fixtures = ['dojo_testdata.json']
@@ -9,4 +9,4 @@ class AdminSite(DojoTestCase):
         for subclass in models.Model.__subclasses__():
             if subclass.__module__ == 'dojo.models':
                 with self.subTest(subclass=subclass):
-                    self.assertIn(subclass, models.admin.site._registry.keys())
+                    self.assertIn(subclass, admin.site._registry.keys(), "{} is not registered in 'admin.site' in models.py".format(subclass))
