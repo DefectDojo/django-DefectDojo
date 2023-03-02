@@ -10,7 +10,7 @@ from dojo.models import Development_Environment, Product, Engagement, Test, Find
     BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
     Role, Product_Type_Member, Product_Member, Product_Type_Group, \
     Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
-    Notifications, UserContactInfo
+    Notifications, UserContactInfo, Risk_Acceptance
 from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -22,7 +22,7 @@ from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, En
     ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
     NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet, \
-    ConfigurationPermissionViewSet
+    ConfigurationPermissionViewSet, RiskAcceptanceViewSet
 from json import dumps
 from enum import Enum
 from django.urls import reverse
@@ -920,6 +920,21 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         self.permission_update = Permissions.Engagement_Edit
         self.permission_delete = Permissions.Engagement_Delete
         self.deleted_objects = 23
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class RiskAcceptanceTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Risk_Acceptance
+        self.endpoint_path = 'risk_acceptance'
+        self.viewname = 'risk_acceptance'
+        self.viewset = RiskAcceptanceViewSet
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Risk_Acceptance
+        self.permission_delete = Permissions.Risk_Acceptance
+        self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
