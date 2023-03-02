@@ -268,6 +268,45 @@ class UserHasEngagementPermission(permissions.BasePermission):
             )
 
 
+class UserHasRiskAcceptancePermission(permissions.BasePermission):
+    # Permission checks for related objects (like notes or metadata) can be moved
+    # into a seperate class, when the legacy authorization will be removed.
+    path_risk_acceptance_post = re.compile(r"^/api/v2/risk_acceptances/$")
+    path_risk_acceptance = re.compile(r"^/api/v2/risk_acceptances/\d+/$")
+
+    def has_permission(self, request, view):
+        if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
+            request.path
+        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(request.path):
+            return check_post_permission(
+                request, Product, "product", Permissions.Risk_Acceptance
+            )
+        else:
+            # related object only need object permission
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
+            request.path
+        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(request.path):
+            return check_object_permission(
+                request,
+                obj,
+                Permissions.Risk_Acceptance,
+                Permissions.Risk_Acceptance,
+                Permissions.Risk_Acceptance,
+            )
+        else:
+            return check_object_permission(
+                request,
+                obj,
+                Permissions.Risk_Acceptance,
+                Permissions.Risk_Acceptance,
+                Permissions.Risk_Acceptance,
+                Permissions.Risk_Acceptance,
+            )
+
+
 class UserHasFindingPermission(permissions.BasePermission):
     # Permission checks for related objects (like notes or metadata) can be moved
     # into a seperate class, when the legacy authorization will be removed.
