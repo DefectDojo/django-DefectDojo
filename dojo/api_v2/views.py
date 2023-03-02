@@ -1686,7 +1686,9 @@ class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class TestsViewSet(mixins.ListModelMixin,
+class TestsViewSet(prefetch.PrefetchListMixin,
+                   prefetch.PrefetchRetrieveMixin,
+                   mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin,
                    mixins.DestroyModelMixin,
@@ -1698,6 +1700,7 @@ class TestsViewSet(mixins.ListModelMixin,
     queryset = Test.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiTestFilter
+    swagger_schema = prefetch.get_prefetch_schema(["tests_list", "tests_read"], serializers.TestSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasTestPermission)
 
     @property
