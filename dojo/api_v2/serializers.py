@@ -16,7 +16,7 @@ from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIE
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Instance, Endpoint, JIRA_Project, \
     Notes, DojoMeta, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Endpoint_Params, \
     Regulation, System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
@@ -947,6 +947,12 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
         data['product'] = endpoint_ins.product
 
         return data
+
+
+class EndpointParamsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Endpoint_Params
+        fields = '__all__'
 
 
 class JIRAIssueSerializer(serializers.ModelSerializer):
