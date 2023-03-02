@@ -460,17 +460,20 @@ class EngagementViewSet(prefetch.PrefetchListMixin,
 
 # These are technologies in the UI and the API!
 # Authorization: object-based
-class AppAnalysisViewSet(mixins.ListModelMixin,
-                        mixins.RetrieveModelMixin,
-                        mixins.UpdateModelMixin,
-                        mixins.DestroyModelMixin,
-                        mixins.CreateModelMixin,
-                        viewsets.GenericViewSet,
-                        dojo_mixins.DeletePreviewModelMixin):
+class AppAnalysisViewSet(prefetch.PrefetchListMixin,
+                         prefetch.PrefetchRetrieveMixin,
+                         mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.UpdateModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.CreateModelMixin,
+                         viewsets.GenericViewSet,
+                         dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.AppAnalysisSerializer
     queryset = App_Analysis.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiAppAnalysisFilter
+    swagger_schema = prefetch.get_prefetch_schema(["technologies_list", "technologies_read"], serializers.AppAnalysisSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasAppAnalysisPermission)
 
     def get_queryset(self):
