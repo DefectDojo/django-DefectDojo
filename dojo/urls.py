@@ -22,7 +22,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
     NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset, UserContactInfoViewSet, \
     ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView, \
-    ConfigurationPermissionViewSet
+    ConfigurationPermissionViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
+    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -123,6 +124,11 @@ v2_api.register(r'import-languages', ImportLanguagesView, basename='importlangua
 v2_api.register(r'notifications', NotificationsViewSet, basename='notifications')
 v2_api.register(r'engagement_presets', EngagementPresetsViewset)
 v2_api.register(r'network_locations', NetworkLocationsViewset)
+v2_api.register(r'questionnaire_answers', QuestionnaireAnswerViewSet)
+v2_api.register(r'questionnaire_answered_questionnaires', QuestionnaireAnsweredSurveyViewSet)
+v2_api.register(r'questionnaire_engagement_questionnaires', QuestionnaireEngagementSurveyViewSet)
+v2_api.register(r'questionnaire_general_questionnaires', QuestionnaireGeneralSurveyViewSet)
+v2_api.register(r'questionnaire_questions', QuestionnaireQuestionViewSet)
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls

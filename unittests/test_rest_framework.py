@@ -10,7 +10,8 @@ from dojo.models import Development_Environment, Product, Engagement, Test, Find
     BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
     Role, Product_Type_Member, Product_Member, Product_Type_Group, \
     Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
-    Notifications, UserContactInfo
+    Notifications, UserContactInfo, Question, TextQuestion, ChoiceQuestion, Answer, TextAnswer, ChoiceAnswer, \
+    Engagement_Survey, Answered_Survey, General_Survey
 from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -22,7 +23,8 @@ from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, En
     ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
     NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet, \
-    ConfigurationPermissionViewSet
+    ConfigurationPermissionViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
+    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet
 from json import dumps
 from enum import Enum
 from django.urls import reverse
@@ -2654,4 +2656,95 @@ class ConfigurationPermissionTest(BaseClass.RESTEndpointTest):
         self.viewname = 'permission'
         self.viewset = ConfigurationPermissionViewSet
         self.test_type = TestType.STANDARD
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class TextQuestionTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = TextQuestion
+        self.endpoint_path = 'questionnaire_questions'
+        self.viewname = 'question'
+        self.viewset = QuestionnaireQuestionViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ChoiceQuestionTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = ChoiceQuestion
+        self.endpoint_path = 'questionnaire_questions'
+        self.viewname = 'question'
+        self.viewset = QuestionnaireQuestionViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class TextAnswerTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = TextAnswer
+        self.endpoint_path = 'questionnaire_answers'
+        self.viewname = 'answer'
+        self.viewset = QuestionnaireAnswerViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ChoiceAnswerTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = ChoiceAnswer
+        self.endpoint_path = 'questionnaire_answers'
+        self.viewname = 'answer'
+        self.viewset = QuestionnaireAnswerViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class GeneralSurveyTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = General_Survey
+        self.endpoint_path = 'questionnaire_general_questionnaires'
+        self.viewname = 'general_survey'
+        self.viewset = QuestionnaireGeneralSurveyViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class EngagementSurveyTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Engagement_Survey
+        self.endpoint_path = 'questionnaire_engagement_questionnaires'
+        self.viewname = 'engagement_survey'
+        self.viewset = QuestionnaireEngagementSurveyViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class AnsweredSurveyTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Answered_Survey
+        self.endpoint_path = 'questionnaire_answered_questionnaires'
+        self.viewname = 'answered_survey'
+        self.viewset = QuestionnaireAnsweredSurveyViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
