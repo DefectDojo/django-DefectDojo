@@ -1232,18 +1232,20 @@ class SonarqubeIssueTransitionViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class ProductAPIScanConfigurationViewSet(mixins.ListModelMixin,
-                  mixins.RetrieveModelMixin,
-                  mixins.DestroyModelMixin,
-                  mixins.UpdateModelMixin,
-                  mixins.CreateModelMixin,
-                  viewsets.GenericViewSet,
-                  dojo_mixins.DeletePreviewModelMixin):
+class ProductAPIScanConfigurationViewSet(prefetch.PrefetchListMixin,
+                                         prefetch.PrefetchRetrieveMixin,
+                                         mixins.ListModelMixin,
+                                         mixins.RetrieveModelMixin,
+                                         mixins.DestroyModelMixin,
+                                         mixins.UpdateModelMixin,
+                                         mixins.CreateModelMixin,
+                                         viewsets.GenericViewSet,
+                                         dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ProductAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'product', 'tool_configuration',
-                     'service_key_1', 'service_key_2', 'service_key_3')
+    filterset_fields = ('id', 'product', 'tool_configuration', 'service_key_1', 'service_key_2', 'service_key_3')
+    swagger_schema = prefetch.get_prefetch_schema(["product_api_scan_configurations_list", "product_api_scan_configurations_read"], serializers.ProductAPIScanConfigurationSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasProductAPIScanConfigurationPermission)
 
     def get_queryset(self):
@@ -1970,7 +1972,9 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: configurations
-class ToolConfigurationsViewSet(mixins.ListModelMixin,
+class ToolConfigurationsViewSet(prefetch.PrefetchListMixin,
+                                prefetch.PrefetchRetrieveMixin,
+                                mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin,
                                 mixins.CreateModelMixin,
                                 mixins.UpdateModelMixin,
@@ -1981,11 +1985,14 @@ class ToolConfigurationsViewSet(mixins.ListModelMixin,
     queryset = Tool_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('id', 'name', 'tool_type', 'url', 'authentication_type')
+    swagger_schema = prefetch.get_prefetch_schema(["tool_configurations_list", "tool_configurations_read"], serializers.ToolConfigurationSerializer).to_schema()
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
 # Authorization: object-based
-class ToolProductSettingsViewSet(mixins.ListModelMixin,
+class ToolProductSettingsViewSet(prefetch.PrefetchListMixin,
+                                 prefetch.PrefetchRetrieveMixin,
+                                 mixins.ListModelMixin,
                                  mixins.RetrieveModelMixin,
                                  mixins.DestroyModelMixin,
                                  mixins.CreateModelMixin,
@@ -1995,8 +2002,8 @@ class ToolProductSettingsViewSet(mixins.ListModelMixin,
     serializer_class = serializers.ToolProductSettingsSerializer
     queryset = Tool_Product_Settings.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'product', 'tool_configuration',
-                     'tool_project_id', 'url')
+    filterset_fields = ('id', 'name', 'product', 'tool_configuration', 'tool_project_id', 'url')
+    swagger_schema = prefetch.get_prefetch_schema(["tool_configurations_list", "tool_configurations_read"], serializers.ToolConfigurationSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasToolProductSettingsPermission)
 
     def get_queryset(self):
