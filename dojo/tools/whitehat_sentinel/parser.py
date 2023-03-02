@@ -31,18 +31,13 @@ class WhiteHatSentinelParser(object):
         if not findings_collection.keys():
             return list()
 
-        # Make sure the findings key exists in the dictionary and that it is not null or an empty list
-        if 'collection' not in findings_collection.keys() or not findings_collection['collection']:
-            raise ValueError('collection key not present or there were not findings present.')
+        # Make sure the findings key exists in the dictionary
+        if 'collection' not in findings_collection.keys():
+            raise ValueError('collection key not present')
 
         # Convert a WhiteHat Vuln with Attack Vectors to a list of DefectDojo findings
         dojo_findings = self._convert_whitehat_sentinel_vulns_to_dojo_finding(findings_collection['collection'], test)
 
-        # # Loop through each vuln from WhiteHat
-        # for whitehat_vuln in findings_collection['collection']:
-        #
-        #     # Append DefectDojo findings to list
-        #     dojo_findings.append(dojo_finding)
         return dojo_findings
 
     def _convert_whitehat_severity_id_to_dojo_severity(self, whitehat_severity_id: int) -> Union[str, None]:
