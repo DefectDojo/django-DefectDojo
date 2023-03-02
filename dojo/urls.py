@@ -17,7 +17,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
-    RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
+    RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, RiskAcceptanceViewSet, \
     DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
     NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset, UserContactInfoViewSet, \
@@ -118,6 +118,7 @@ v2_api.register(r'notes', NotesViewSet)
 v2_api.register(r'note_type', NoteTypeViewSet)
 v2_api.register(r'system_settings', SystemSettingsViewSet)
 v2_api.register(r'regulations', RegulationsViewSet)
+v2_api.register(r'risk_acceptance', RiskAcceptanceViewSet)
 v2_api.register(r'language_types', LanguageTypeViewSet)
 v2_api.register(r'languages', LanguageViewSet)
 v2_api.register(r'import-languages', ImportLanguagesView, basename='importlanguages')

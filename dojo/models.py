@@ -3204,6 +3204,14 @@ class Risk_Acceptance(models.Model):
         (TREATMENT_TRANSFER, 'Transfer (The risk is transferred to a 3rd party)'),
     ]
 
+    TREATMENT_TRANSLATIONS = {
+        'A': 'Accept (The risk is acknowledged, yet remains)',
+        'V': 'Avoid (Do not engage with whatever creates the risk)',
+        'M': 'Mitigate (The risk still exists, yet compensating controls make it less of a threat)',
+        'F': 'Fix (The risk is eradicated)',
+        'T': 'Transfer (The risk is transferred to a 3rd party)',
+    }
+
     name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 
     accepted_findings = models.ManyToManyField(Finding)
