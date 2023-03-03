@@ -585,21 +585,11 @@
             "severity": "HIGH",
             "severityRank": 1,
             "cweName": "Uncontrolled Resource Consumption",
-            "vulnId": "GHSA-95rf-557x-44g5",
-            "aliases": [
-               {
-                  "allBySource": {
-                     "NVD": "CVE-2022-2053",
-                     "GITHUB": "GHSA-95rf-557x-44g5"
-                  },
-                  "cveId": "CVE-2022-2053",
-                  "ghsaId": "GHSA-95rf-557x-44g5",
-                  "id": 6883
-               }
-            ],
+            "vulnId": "CVE-2022-2053",
+            "aliases": [],
             "cweId": 400,
             "description": "When a POST request comes through AJP and the request exceeds the max-post-size limit (maxEntitySize), Undertow's AjpServerRequestConduit implementation closes a connection without sending any response to the client/proxy. This behavior results in that a front-end proxy marking the backend worker (application server) as an error state and not forward requests to the worker for a while. In mod_cluster, this continues until the next STATUS request (10 seconds intervals) from the application server updates the server state. So, in the worst case, it can result in \"All workers are in error state\" and mod_cluster responds \"503 Service Unavailable\" for a while (up to 10 seconds). In mod_proxy_balancer, it does not forward requests to the worker until the \"retry\" timeout passes. However, luckily, mod_proxy_balancer has \"forcerecovery\" setting (On by default; this parameter can force the immediate recovery of all workers without considering the retry parameter of the workers if all workers of a balancer are in error state.). So, unlike mod_cluster, mod_proxy_balancer does not result in responding \"503 Service Unavailable\". An attacker could use this behavior to send a malicious request and trigger server errors, resulting in DoS (denial of service). This flaw was fixed in Undertow 2.2.19.Final, Undertow 2.3.0.Alpha2.",
-            "source": "GITHUB",
+            "source": "NVD",
             "title": "Undertow vulnerable to Dos via Large AJP request",
             "cwes": [
                {
