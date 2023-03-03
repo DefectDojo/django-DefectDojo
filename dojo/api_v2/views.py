@@ -31,7 +31,7 @@ from dojo.models import Language_Type, Languages, Notifications, Product, Produc
     Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, Risk_Acceptance, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
     Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations, \
-    UserContactInfo, Product_API_Scan_Configuration, Risk_Acceptance, Cred_Mapping, Cred_User, , Question, Answer, \
+    UserContactInfo, Product_API_Scan_Configuration, Cred_Mapping, Cred_User, Question, Answer, \
     Engagement_Survey, Answered_Survey, General_Survey
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
