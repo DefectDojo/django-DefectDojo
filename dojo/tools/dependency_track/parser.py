@@ -204,9 +204,12 @@ class DependencyTrackParser(object):
             logger.warn("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
             vulnerability_severity = "Critical"
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> ca088a9d15cab3f261f840b82524a9aa7a7f998d
         # Build and return Finding model
         finding = Finding(
             title=title,
@@ -225,7 +228,10 @@ class DependencyTrackParser(object):
             finding.unsaved_vulnerability_ids = [vuln_id]
 
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
+<<<<<<< HEAD
 
+=======
+>>>>>>> ca088a9d15cab3f261f840b82524a9aa7a7f998d
         if 'state' in dependency_track_finding['analysis']:
             if dependency_track_finding['analysis']['state'] == 'FALSE_POSITIVE':
                 finding.false_p = True 
@@ -243,7 +249,7 @@ class DependencyTrackParser(object):
                 finding.is_mitigated = False
                 finding.active=False
                 finding.false_p = False
-
+                
         return finding
 
     def get_scan_types(self):
