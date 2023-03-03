@@ -22,7 +22,9 @@ from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIE
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
     Network_Locations, UserContactInfo, Product_API_Scan_Configuration, DEFAULT_NOTIFICATION, \
-    Vulnerability_Id, Vulnerability_Id_Template, get_current_date
+    Vulnerability_Id, Vulnerability_Id_Template, get_current_date, \
+    Question, TextQuestion, ChoiceQuestion, Answer, TextAnswer, ChoiceAnswer, \
+    Engagement_Survey, Answered_Survey, General_Survey
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from dojo.utils import is_scan_file_too_large
@@ -2208,3 +2210,112 @@ class ConfigurationPermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
         exclude = ['content_type']
+
+
+class QuestionnaireQuestionSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        if isinstance(instance, TextQuestion):
+            return TextQuestionSerializer(instance=instance).data
+        elif isinstance(instance, ChoiceQuestion):
+            return ChoiceQuestionSerializer(instance=instance).data
+        else:
+            return QuestionSerializer(instance=instance).data
+
+    class Meta:
+        model = Question
+        exclude = ['polymorphic_ctype']
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        exclude = ['polymorphic_ctype']
+
+
+class TextQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TextQuestion
+        exclude = ['polymorphic_ctype']
+
+
+class ChoiceQuestionSerializer(serializers.ModelSerializer):
+    choices = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        model = ChoiceQuestion
+        exclude = ['polymorphic_ctype']
+
+
+class QuestionnaireAnsweredSurveySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Answered_Survey
+        fields = '__all__'
+
+
+class QuestionnaireAnswerSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        if isinstance(instance, TextAnswer):
+            return TextAnswerSerializer(instance=instance).data
+        elif isinstance(instance, ChoiceAnswer):
+            return ChoiceAnswerSerializer(instance=instance).data
+        else:
+            return AnswerSerializer(instance=instance).data
+
+    class Meta:
+        model = Answer
+        exclude = ['polymorphic_ctype']
+
+
+class AnswerSerializer(serializers.ModelSerializer):
+    question = serializers.StringRelatedField()
+    answered_survey = QuestionnaireAnsweredSurveySerializer()
+
+    class Meta:
+        model = Answer
+        exclude = ['polymorphic_ctype']
+
+
+class TextAnswerSerializer(serializers.ModelSerializer):
+    question = serializers.StringRelatedField()
+    answered_survey = QuestionnaireAnsweredSurveySerializer()
+
+    class Meta:
+        model = TextAnswer
+        exclude = ['polymorphic_ctype']
+
+
+class ChoiceAnswerSerializer(serializers.ModelSerializer):
+    answer = serializers.StringRelatedField(many=True)
+    question = serializers.StringRelatedField()
+    answered_survey = QuestionnaireAnsweredSurveySerializer()
+
+    class Meta:
+        model = ChoiceAnswer
+        exclude = ['polymorphic_ctype']
+
+
+class QuestionnaireEngagementSurveySerializer(serializers.ModelSerializer):
+    questions = serializers.SerializerMethodField()
+
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
+    @swagger_serializer_method(serializers.ListField(child=serializers.CharField()))
+    def get_questions(self, obj):
+        questions = obj.questions.all()
+        formated_questions = []
+        for question in questions:
+            formated_question = f"Order #{question.order} - {question.text}{' (Optional)' if question.optional else ''}"
+            formated_questions.append(formated_question)
+        return formated_questions
+
+    class Meta:
+        model = Engagement_Survey
+        fields = '__all__'
+
+
+class QuestionnaireGeneralSurveySerializer(serializers.ModelSerializer):
+    survey = QuestionnaireEngagementSurveySerializer()
+
+    class Meta:
+        model = General_Survey
+        fields = '__all__'

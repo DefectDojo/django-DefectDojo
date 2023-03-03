@@ -8,9 +8,11 @@ from dojo.models import Development_Environment, Product, Engagement, Test, Find
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Product_API_Scan_Configuration, Notes, \
     BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
-    Role, Product_Type_Member, Product_Member, Product_Type_Group, \
+    Role, Product_Type_Member, Product_Member, Product_Type_Group, Risk_Acceptance, \
     Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
-    Notifications, UserContactInfo, Risk_Acceptance, Cred_Mapping, Cred_User
+    Notifications, UserContactInfo, Risk_Acceptance, Cred_Mapping, Cred_User, \
+    TextQuestion, ChoiceQuestion, TextAnswer, ChoiceAnswer, Engagement_Survey, \
+    Answered_Survey, General_Survey
 from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -19,11 +21,12 @@ from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, En
     UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
     EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet, ProductTypeViewSet, \
     DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
-    ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
+    ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, RiskAcceptanceViewSet, \
     DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
     NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet, \
     ConfigurationPermissionViewSet, RiskAcceptanceViewSet, CredentialsMappingViewSet, \
-    CredentialsViewSet
+    CredentialsViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
+    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet
 from json import dumps
 from enum import Enum
 from django.urls import reverse
@@ -2708,4 +2711,94 @@ class CredentialTest(BaseClass.RESTEndpointTest):
         self.permission_update = Permissions.Credential_Edit
         self.permission_delete = Permissions.Credential_Delete
         self.deleted_objects = 2
+
+
+class TextQuestionTest(BaseClass.RESTEndpointTest):
+    fixtures = ['questionnaire_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = TextQuestion
+        self.endpoint_path = 'questionnaire_questions'
+        self.viewname = 'question'
+        self.viewset = QuestionnaireQuestionViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ChoiceQuestionTest(BaseClass.RESTEndpointTest):
+    fixtures = ['questionnaire_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = ChoiceQuestion
+        self.endpoint_path = 'questionnaire_questions'
+        self.viewname = 'question'
+        self.viewset = QuestionnaireQuestionViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class TextAnswerTest(BaseClass.RESTEndpointTest):
+    fixtures = ['questionnaire_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = TextAnswer
+        self.endpoint_path = 'questionnaire_answers'
+        self.viewname = 'answer'
+        self.viewset = QuestionnaireAnswerViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ChoiceAnswerTest(BaseClass.RESTEndpointTest):
+    fixtures = ['questionnaire_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = ChoiceAnswer
+        self.endpoint_path = 'questionnaire_answers'
+        self.viewname = 'answer'
+        self.viewset = QuestionnaireAnswerViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class GeneralSurveyTest(BaseClass.RESTEndpointTest):
+    fixtures = ['questionnaire_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = General_Survey
+        self.endpoint_path = 'questionnaire_general_questionnaires'
+        self.viewname = 'general_survey'
+        self.viewset = QuestionnaireGeneralSurveyViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class EngagementSurveyTest(BaseClass.RESTEndpointTest):
+    fixtures = ['questionnaire_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Engagement_Survey
+        self.endpoint_path = 'questionnaire_engagement_questionnaires'
+        self.viewname = 'engagement_survey'
+        self.viewset = QuestionnaireEngagementSurveyViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class AnsweredSurveyTest(BaseClass.RESTEndpointTest):
+    fixtures = ['questionnaire_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Answered_Survey
+        self.endpoint_path = 'questionnaire_answered_questionnaires'
+        self.viewname = 'answered_survey'
+        self.viewset = QuestionnaireAnsweredSurveyViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
