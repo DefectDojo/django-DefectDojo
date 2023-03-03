@@ -3,7 +3,7 @@ from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_global_roles_with_permissions, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group, Dojo_Group, Dojo_Group_Member, \
-    Languages, App_Analysis, Stub_Finding, Product_API_Scan_Configuration
+    Languages, App_Analysis, Stub_Finding, Product_API_Scan_Configuration, Cred_User, Cred_Mapping
 
 
 def user_has_configuration_permission(user, permission):
@@ -96,9 +96,11 @@ def user_has_permission(user, obj, permission):
             return obj.user == user or user_has_permission(user, obj.group, permission)
         else:
             return user_has_permission(user, obj.group, permission)
+    elif isinstance(obj, Cred_User) and permission in Permissions.get_credential_permissions():
+        cred_mapping = Cred_Mapping.objects.get(cred_id=obj)
+        return user_has_permission(user, cred_mapping.product, permission)
     else:
-        raise NoAuthorizationImplementedError('No authorization implemented for class {} and permission {}'.
-            format(type(obj).__name__, permission))
+        raise NoAuthorizationImplementedError(f'No authorization implemented for class {type(obj).__name__} and permission {permission}')
 
 
 def user_has_global_permission(user, permission):

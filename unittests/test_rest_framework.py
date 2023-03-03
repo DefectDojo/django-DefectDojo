@@ -10,7 +10,7 @@ from dojo.models import Development_Environment, Product, Engagement, Test, Find
     BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
     Role, Product_Type_Member, Product_Member, Product_Type_Group, \
     Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
-    Notifications, UserContactInfo, Risk_Acceptance
+    Notifications, UserContactInfo, Risk_Acceptance, Cred_Mapping, Cred_User
 from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -22,7 +22,8 @@ from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, En
     ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
     NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet, \
-    ConfigurationPermissionViewSet, RiskAcceptanceViewSet
+    ConfigurationPermissionViewSet, RiskAcceptanceViewSet, CredentialsMappingViewSet, \
+    CredentialsViewSet
 from json import dumps
 from enum import Enum
 from django.urls import reverse
@@ -2669,4 +2670,42 @@ class ConfigurationPermissionTest(BaseClass.RESTEndpointTest):
         self.viewname = 'permission'
         self.viewset = ConfigurationPermissionViewSet
         self.test_type = TestType.STANDARD
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class CredentialMappingTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Cred_Mapping
+        self.endpoint_path = 'credential_mappings'
+        self.viewname = 'credential_mappings'
+        self.viewset = CredentialsMappingViewSet
+        self.test_type = TestType.STANDARD
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class CredentialTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Cred_User
+        self.endpoint_path = 'credentials'
+        self.viewname = 'credentials'
+        self.viewset = CredentialsViewSet
+        self.payload = {
+            'name': 'name',
+            'username': 'usernmae',
+            'password': 'password',
+            'role': 'role',
+            'url': 'https://some-url.com',
+            'environment': 1,
+        }
+        self.update_fields = {'name': 'newname'}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Cred_User
+        self.permission_create = Permissions.Credential_Add
+        self.permission_update = Permissions.Credential_Edit
+        self.permission_delete = Permissions.Credential_Delete
+        self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

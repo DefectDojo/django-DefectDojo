@@ -14,8 +14,8 @@ from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIE
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Product_Type, JIRA_Instance, Endpoint, JIRA_Project, \
-    Notes, DojoMeta, Note_Type, App_Analysis, Endpoint_Status, \
+    Product_Type, JIRA_Instance, Endpoint, JIRA_Project, Cred_Mapping, \
+    Notes, DojoMeta, Note_Type, App_Analysis, Endpoint_Status, Cred_User, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Endpoint_Params, \
     Regulation, System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
@@ -1475,6 +1475,18 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             save_vulnerability_ids_template(instance, vulnerability_ids)
 
         return super(TaggitSerializer, self).update(instance, validated_data)
+
+
+class CredentialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cred_User
+        exclude = ['password']
+
+
+class CredentialMappingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cred_Mapping
+        fields = '__all__'
 
 
 class StubFindingSerializer(serializers.ModelSerializer):

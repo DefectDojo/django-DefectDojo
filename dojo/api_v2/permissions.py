@@ -20,6 +20,7 @@ from dojo.models import (
     Product,
     Test,
     Dojo_Group,
+    Cred_User,
 )
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
@@ -78,6 +79,22 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
             Permissions.Technology_View,
             Permissions.Technology_Edit,
             Permissions.Technology_Delete,
+        )
+
+
+class UserHasCredentialPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(
+            request, Cred_User, "credentials", Permissions.Credential_Add
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(
+            request,
+            obj.product,
+            Permissions.Credential_View,
+            Permissions.Credential_Edit,
+            Permissions.Credential_Delete,
         )
 
 

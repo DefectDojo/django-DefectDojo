@@ -31,7 +31,7 @@ from dojo.models import Language_Type, Languages, Notifications, Product, Produc
     Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
     Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations, \
-    UserContactInfo, Product_API_Scan_Configuration, Risk_Acceptance
+    UserContactInfo, Product_API_Scan_Configuration, Risk_Acceptance, Cred_Mapping, Cred_User
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -62,6 +62,7 @@ from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpo
 from dojo.group.queries import get_authorized_groups, get_authorized_group_members
 from dojo.jira_link.queries import get_authorized_jira_projects, get_authorized_jira_issues
 from dojo.tool_product.queries import get_authorized_tool_product_settings
+from dojo.cred.queries import get_authorized_cred_mappings
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from dojo.authorization.roles_permissions import Permissions
 from dojo.user.utils import get_configuration_permissions_codenames
@@ -502,6 +503,43 @@ class AppAnalysisViewSet(prefetch.PrefetchListMixin,
 
     def get_queryset(self):
         return get_authorized_app_analysis(Permissions.Product_View)
+
+
+# Authorization: object-based
+class CredentialsViewSet(prefetch.PrefetchListMixin,
+                         prefetch.PrefetchRetrieveMixin,
+                         mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.UpdateModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.CreateModelMixin,
+                         viewsets.GenericViewSet,
+                         dojo_mixins.DeletePreviewModelMixin):
+    serializer_class = serializers.CredentialSerializer
+    queryset = Cred_User.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    swagger_schema = prefetch.get_prefetch_schema(["credentials_list", "credentials_read"], serializers.CredentialSerializer).to_schema()
+    permission_classes = (IsAuthenticated, permissions.UserHasCredentialPermission)
+
+    def get_queryset(self):
+        return get_authorized_cred_mappings(Permissions.Credential_View)
+
+
+# Authorization: configuration
+class CredentialsMappingViewSet(prefetch.PrefetchListMixin,
+                                prefetch.PrefetchRetrieveMixin,
+                                mixins.ListModelMixin,
+                                mixins.RetrieveModelMixin,
+                                mixins.UpdateModelMixin,
+                                mixins.DestroyModelMixin,
+                                mixins.CreateModelMixin,
+                                viewsets.GenericViewSet,
+                                dojo_mixins.DeletePreviewModelMixin):
+    serializer_class = serializers.CredentialMappingSerializer
+    queryset = Cred_Mapping.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    swagger_schema = prefetch.get_prefetch_schema(["credential_mappings_list", "credential_mappings_read"], serializers.CredentialMappingSerializer).to_schema()
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
 # Authorization: configuration
