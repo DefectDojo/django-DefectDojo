@@ -28,10 +28,10 @@ from dojo.models import Language_Type, Languages, Notifications, Product, Produc
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, Risk_Acceptance, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
     Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations, \
-    UserContactInfo, Product_API_Scan_Configuration, Risk_Acceptance
+    UserContactInfo, Product_API_Scan_Configuration, Question, Answer, Engagement_Survey, Answered_Survey, General_Survey
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -2766,3 +2766,53 @@ class SLAConfigurationViewset(mixins.ListModelMixin,
     queryset = SLA_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+
+class QuestionnaireQuestionViewSet(mixins.ListModelMixin,
+                                   mixins.RetrieveModelMixin,
+                                   viewsets.GenericViewSet,
+                                   dojo_mixins.QuestionSubClassFieldsMixin):
+    serializer_class = serializers.QuestionSerializer
+    queryset = Question.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
+
+
+class QuestionnaireAnswerViewSet(mixins.ListModelMixin,
+                                 mixins.RetrieveModelMixin,
+                                 viewsets.GenericViewSet,
+                                 dojo_mixins.AnswerSubClassFieldsMixin):
+    serializer_class = serializers.QuestionnaireAnswerSerializer
+    queryset = Answer.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
+
+
+class QuestionnaireGeneralSurveyViewSet(mixins.ListModelMixin,
+                                        mixins.RetrieveModelMixin,
+                                        viewsets.GenericViewSet):
+    serializer_class = serializers.QuestionnaireGeneralSurveySerializer
+    queryset = General_Survey.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
+
+
+class QuestionnaireEngagementSurveyViewSet(mixins.ListModelMixin,
+                                           mixins.RetrieveModelMixin,
+                                           viewsets.GenericViewSet):
+    serializer_class = serializers.QuestionnaireEngagementSurveySerializer
+    queryset = Engagement_Survey.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
+
+
+class QuestionnaireAnsweredSurveyViewSet(prefetch.PrefetchListMixin,
+                                         prefetch.PrefetchRetrieveMixin,
+                                         mixins.ListModelMixin,
+                                         mixins.RetrieveModelMixin,
+                                         viewsets.GenericViewSet):
+    serializer_class = serializers.QuestionnaireAnsweredSurveySerializer
+    queryset = Answered_Survey.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
+    swagger_schema = prefetch.get_prefetch_schema(["questionnaire_answered_questionnaires_list", "questionnaire_answered_questionnaires_read"], serializers.QuestionnaireAnsweredSurveySerializer).to_schema()
