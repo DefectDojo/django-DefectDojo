@@ -10,7 +10,7 @@ from dojo.models import Development_Environment, Product, Engagement, Test, Find
     BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
     Role, Product_Type_Member, Product_Member, Product_Type_Group, Risk_Acceptance, \
     Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
-    Notifications, UserContactInfo, Question, TextQuestion, ChoiceQuestion, Answer, TextAnswer, ChoiceAnswer, \
+    Notifications, UserContactInfo, TextQuestion, ChoiceQuestion, TextAnswer, ChoiceAnswer, \
     Engagement_Survey, Answered_Survey, General_Survey
 from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \

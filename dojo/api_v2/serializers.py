@@ -2234,7 +2234,6 @@ class ChoiceQuestionSerializer(serializers.ModelSerializer):
         exclude = ['polymorphic_ctype']
 
 
-
 class QuestionnaireAnsweredSurveySerializer(serializers.ModelSerializer):
 
     class Meta:
