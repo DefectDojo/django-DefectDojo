@@ -204,9 +204,6 @@ class DependencyTrackParser(object):
             logger.warn("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
             vulnerability_severity = "Critical"
 
-       
-    
-
         # Build and return Finding model
         finding = Finding(
             title=title,
