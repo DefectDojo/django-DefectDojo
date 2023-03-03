@@ -2660,7 +2660,7 @@ class ConfigurationPermissionTest(BaseClass.RESTEndpointTest):
 
 
 class TextQuestionTest(BaseClass.RESTEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = TextQuestion
@@ -2673,7 +2673,7 @@ class TextQuestionTest(BaseClass.RESTEndpointTest):
 
 
 class ChoiceQuestionTest(BaseClass.RESTEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = ChoiceQuestion
@@ -2686,7 +2686,7 @@ class ChoiceQuestionTest(BaseClass.RESTEndpointTest):
 
 
 class TextAnswerTest(BaseClass.RESTEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = TextAnswer
@@ -2699,7 +2699,7 @@ class TextAnswerTest(BaseClass.RESTEndpointTest):
 
 
 class ChoiceAnswerTest(BaseClass.RESTEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = ChoiceAnswer
@@ -2712,7 +2712,7 @@ class ChoiceAnswerTest(BaseClass.RESTEndpointTest):
 
 
 class GeneralSurveyTest(BaseClass.RESTEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = General_Survey
@@ -2725,7 +2725,7 @@ class GeneralSurveyTest(BaseClass.RESTEndpointTest):
 
 
 class EngagementSurveyTest(BaseClass.RESTEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Engagement_Survey
@@ -2738,7 +2738,7 @@ class EngagementSurveyTest(BaseClass.RESTEndpointTest):
 
 
 class AnsweredSurveyTest(BaseClass.RESTEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Answered_Survey
