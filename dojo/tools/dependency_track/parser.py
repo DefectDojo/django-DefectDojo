@@ -202,7 +202,7 @@ class DependencyTrackParser(object):
         vulnerability_severity = self._convert_dependency_track_severity_to_dojo_severity(dependency_track_severity)
         if vulnerability_severity is None:
             logger.warn("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
-            vulnerability_severity = "Critical
+            vulnerability_severity = "Critical"
 
         # Build and return Finding model
         finding = Finding(
