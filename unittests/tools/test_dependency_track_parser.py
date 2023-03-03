@@ -82,3 +82,4 @@ class TestDependencyTrackParser(DojoTestCase):
         self.assertTrue(all(item.file_path is not None for item in findings))
         self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))
         self.assertTrue('CVE-2022-42004' in findings[0].unsaved_vulnerability_ids)
+        self.assertTrue('CVE-2022-2053' in findings[11].unsaved_vulnerability_ids)
