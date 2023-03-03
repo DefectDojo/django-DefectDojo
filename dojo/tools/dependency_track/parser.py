@@ -204,9 +204,8 @@ class DependencyTrackParser(object):
             logger.warn("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
             vulnerability_severity = "Critical"
 
-        # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
-        analysis = dependency_track_finding.get('analysis')
-        is_false_positive = True if analysis is not None and analysis.get('state') == 'FALSE_POSITIVE' else False
+       
+    
 
         # Build and return Finding model
         finding = Finding(
@@ -215,16 +214,35 @@ class DependencyTrackParser(object):
             cwe=cwe,
             description=vulnerability_description,
             severity=vulnerability_severity,
-            false_p=is_false_positive,
             component_name=component_name,
             component_version=component_version,
             file_path=file_path,
             vuln_id_from_tool=vuln_id_from_tool,
             static_finding=True,
             dynamic_finding=False)
-
+        
         if vulnerability_id:
-            finding.unsaved_vulnerability_ids = vulnerability_id
+            finding.unsaved_vulnerability_ids = [vuln_id]
+        
+        # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
+        
+        if 'state' in dependency_track_finding['analysis']:
+            if dependency_track_finding['analysis']['state'] == 'FALSE_POSITIVE':
+                finding.false_p = True 
+                finding.active = False
+                finding.is_mitigated = True
+                finding.out_of_scope = False
+                finding.verified = False
+            if dependency_track_finding['analysis']['state'] == 'RESOLVED':
+                finding.is_mitigated = True 
+                finding.active = False
+                finding.false_p = False
+                finding.out_of_scope = False
+            if dependency_track_finding['analysis']['state'] == 'NOT_AFFECTED':
+                finding.out_of_scope = True 
+                finding.is_mitigated = False
+                finding.active=False
+                finding.false_p = False
 
         return finding
 
@@ -271,3 +289,4 @@ class DependencyTrackParser(object):
             # Append DefectDojo finding to list
             items.append(dojo_finding)
         return items
+
