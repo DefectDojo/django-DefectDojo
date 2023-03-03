@@ -28,7 +28,7 @@ from dojo.models import Language_Type, Languages, Notifications, Product, Produc
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, Risk_Acceptance, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
     Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations, \
     UserContactInfo, Product_API_Scan_Configuration, Question, Answer, Engagement_Survey, Answered_Survey, General_Survey
@@ -39,7 +39,7 @@ from dojo.finding.views import set_finding_as_original_internal, reset_finding_d
     duplicate_cluster
 from dojo.filters import ReportFindingFilter, \
     ApiFindingFilter, ApiProductFilter, ApiEngagementFilter, ApiEndpointFilter, \
-    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter
+    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter, ApiRiskAcceptanceFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -55,6 +55,7 @@ from dojo.product.queries import get_authorized_products, get_authorized_app_ana
     get_authorized_product_members, get_authorized_product_groups, get_authorized_languages, \
     get_authorized_engagement_presets, get_authorized_product_api_scan_configurations
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
@@ -458,19 +459,45 @@ class EngagementViewSet(prefetch.PrefetchListMixin,
         return response
 
 
+class RiskAcceptanceViewSet(prefetch.PrefetchListMixin,
+                            prefetch.PrefetchRetrieveMixin,
+                            mixins.ListModelMixin,
+                            mixins.RetrieveModelMixin,
+                            mixins.DestroyModelMixin,
+                            viewsets.GenericViewSet,
+                            dojo_mixins.DeletePreviewModelMixin):
+    serializer_class = serializers.RiskAcceptanceSerializer
+    queryset = Risk_Acceptance.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ApiRiskAcceptanceFilter
+    swagger_schema = prefetch.get_prefetch_schema(["risk_acceptance_list", "risk_acceptance_read"], serializers.RiskAcceptanceSerializer).to_schema()
+    permission_classes = (IsAuthenticated, permissions.UserHasRiskAcceptancePermission)
+
+    def get_queryset(self):
+        return get_authorized_risk_acceptances(
+            Permissions.Risk_Acceptance).prefetch_related(
+                'notes',
+                'engagement_set',
+                'owner',
+                'accepted_findings').distinct()
+
+
 # These are technologies in the UI and the API!
 # Authorization: object-based
-class AppAnalysisViewSet(mixins.ListModelMixin,
-                        mixins.RetrieveModelMixin,
-                        mixins.UpdateModelMixin,
-                        mixins.DestroyModelMixin,
-                        mixins.CreateModelMixin,
-                        viewsets.GenericViewSet,
-                        dojo_mixins.DeletePreviewModelMixin):
+class AppAnalysisViewSet(prefetch.PrefetchListMixin,
+                         prefetch.PrefetchRetrieveMixin,
+                         mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.UpdateModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.CreateModelMixin,
+                         viewsets.GenericViewSet,
+                         dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.AppAnalysisSerializer
     queryset = App_Analysis.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiAppAnalysisFilter
+    swagger_schema = prefetch.get_prefetch_schema(["technologies_list", "technologies_read"], serializers.AppAnalysisSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasAppAnalysisPermission)
 
     def get_queryset(self):
@@ -1229,18 +1256,20 @@ class SonarqubeIssueTransitionViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class ProductAPIScanConfigurationViewSet(mixins.ListModelMixin,
-                  mixins.RetrieveModelMixin,
-                  mixins.DestroyModelMixin,
-                  mixins.UpdateModelMixin,
-                  mixins.CreateModelMixin,
-                  viewsets.GenericViewSet,
-                  dojo_mixins.DeletePreviewModelMixin):
+class ProductAPIScanConfigurationViewSet(prefetch.PrefetchListMixin,
+                                         prefetch.PrefetchRetrieveMixin,
+                                         mixins.ListModelMixin,
+                                         mixins.RetrieveModelMixin,
+                                         mixins.DestroyModelMixin,
+                                         mixins.UpdateModelMixin,
+                                         mixins.CreateModelMixin,
+                                         viewsets.GenericViewSet,
+                                         dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ProductAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'product', 'tool_configuration',
-                     'service_key_1', 'service_key_2', 'service_key_3')
+    filterset_fields = ('id', 'product', 'tool_configuration', 'service_key_1', 'service_key_2', 'service_key_3')
+    swagger_schema = prefetch.get_prefetch_schema(["product_api_scan_configurations_list", "product_api_scan_configurations_read"], serializers.ProductAPIScanConfigurationSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasProductAPIScanConfigurationPermission)
 
     def get_queryset(self):
@@ -1656,7 +1685,9 @@ class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
-class StubFindingsViewSet(mixins.ListModelMixin,
+class StubFindingsViewSet(prefetch.PrefetchListMixin,
+                          prefetch.PrefetchRetrieveMixin,
+                          mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
                           mixins.CreateModelMixin,
                           mixins.UpdateModelMixin,
@@ -1667,6 +1698,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
     queryset = Stub_Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('id', 'title', 'date', 'severity', 'description')
+    swagger_schema = prefetch.get_prefetch_schema(["stub_findings_list", "stub_findings_read"], serializers.StubFindingSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasFindingPermission)
 
     def get_queryset(self):
@@ -1967,7 +1999,9 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: configurations
-class ToolConfigurationsViewSet(mixins.ListModelMixin,
+class ToolConfigurationsViewSet(prefetch.PrefetchListMixin,
+                                prefetch.PrefetchRetrieveMixin,
+                                mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin,
                                 mixins.CreateModelMixin,
                                 mixins.UpdateModelMixin,
@@ -1978,11 +2012,14 @@ class ToolConfigurationsViewSet(mixins.ListModelMixin,
     queryset = Tool_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('id', 'name', 'tool_type', 'url', 'authentication_type')
+    swagger_schema = prefetch.get_prefetch_schema(["tool_configurations_list", "tool_configurations_read"], serializers.ToolConfigurationSerializer).to_schema()
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
 # Authorization: object-based
-class ToolProductSettingsViewSet(mixins.ListModelMixin,
+class ToolProductSettingsViewSet(prefetch.PrefetchListMixin,
+                                 prefetch.PrefetchRetrieveMixin,
+                                 mixins.ListModelMixin,
                                  mixins.RetrieveModelMixin,
                                  mixins.DestroyModelMixin,
                                  mixins.CreateModelMixin,
@@ -1992,8 +2029,8 @@ class ToolProductSettingsViewSet(mixins.ListModelMixin,
     serializer_class = serializers.ToolProductSettingsSerializer
     queryset = Tool_Product_Settings.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'product', 'tool_configuration',
-                     'tool_project_id', 'url')
+    filterset_fields = ('id', 'name', 'product', 'tool_configuration', 'tool_project_id', 'url')
+    swagger_schema = prefetch.get_prefetch_schema(["tool_configurations_list", "tool_configurations_read"], serializers.ToolConfigurationSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasToolProductSettingsPermission)
 
     def get_queryset(self):
@@ -2674,18 +2711,20 @@ class NotificationsViewSet(prefetch.PrefetchListMixin,
         serializers.NotificationsSerializer).to_schema()
 
 
-class EngagementPresetsViewset(mixins.ListModelMixin,
-                         mixins.RetrieveModelMixin,
-                         mixins.UpdateModelMixin,
-                         mixins.DestroyModelMixin,
-                         mixins.CreateModelMixin,
-                         viewsets.GenericViewSet,
-                         dojo_mixins.DeletePreviewModelMixin):
+class EngagementPresetsViewset(prefetch.PrefetchListMixin,
+                               prefetch.PrefetchRetrieveMixin,
+                               mixins.ListModelMixin,
+                               mixins.RetrieveModelMixin,
+                               mixins.UpdateModelMixin,
+                               mixins.DestroyModelMixin,
+                               mixins.CreateModelMixin,
+                               viewsets.GenericViewSet,
+                               dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.EngagementPresetsSerializer
     queryset = Engagement_Presets.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('id', 'title', 'product')
-
+    swagger_schema = prefetch.get_prefetch_schema(["engagement_presets_list", "engagement_presets_read"], serializers.EngagementPresetsSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEngagementPresetPermission)
 
     def get_queryset(self):
