@@ -224,20 +224,20 @@ class DependencyTrackParser(object):
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
         if 'state' in dependency_track_finding['analysis']:
             if dependency_track_finding['analysis']['state'] == 'FALSE_POSITIVE':
-                finding.false_p = True 
+                finding.false_p = True
                 finding.active = False
                 finding.is_mitigated = True
                 finding.out_of_scope = False
                 finding.verified = False
             if dependency_track_finding['analysis']['state'] == 'RESOLVED':
-                finding.is_mitigated = True 
+                finding.is_mitigated = True
                 finding.active = False
                 finding.false_p = False
                 finding.out_of_scope = False
             if dependency_track_finding['analysis']['state'] == 'NOT_AFFECTED':
-                finding.out_of_scope = True 
+                finding.out_of_scope = True
                 finding.is_mitigated = False
-                finding.active=False
+                finding.active = False
                 finding.false_p = False
 
         return finding
@@ -285,4 +285,3 @@ class DependencyTrackParser(object):
             # Append DefectDojo finding to list
             items.append(dojo_finding)
         return items
-
