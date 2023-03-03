@@ -69,7 +69,7 @@ class WazuhParser(object):
                         test=test,
                         description=description,
                         severity=severity,
-                        active = active,
+                        active=active,
                         mitigation="mitigation",
                         references=references,
                         static_finding=True,
