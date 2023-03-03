@@ -202,14 +202,8 @@ class DependencyTrackParser(object):
         vulnerability_severity = self._convert_dependency_track_severity_to_dojo_severity(dependency_track_severity)
         if vulnerability_severity is None:
             logger.warn("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
-            vulnerability_severity = "Critical"
+            vulnerability_severity = "Critical
 
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> ca088a9d15cab3f261f840b82524a9aa7a7f998d
         # Build and return Finding model
         finding = Finding(
             title=title,
@@ -249,7 +243,7 @@ class DependencyTrackParser(object):
                 finding.is_mitigated = False
                 finding.active=False
                 finding.false_p = False
-                
+
         return finding
 
     def get_scan_types(self):
