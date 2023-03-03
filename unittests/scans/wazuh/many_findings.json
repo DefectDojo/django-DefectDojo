@@ -248,7 +248,7 @@
               "name": "asfasdfsafd",
               "published": "1980-09-01",
               "severity": "Medium",
-              "status": "VALID",
+              "status": "UNTRIAGED",
               "title": "CVE-YYYY-XXXXX affects asfasdfsafd",
               "type": "PACKAGE",
               "updated": "2022-09-07",

@@ -4,7 +4,7 @@
           {
             "architecture": "amd64",
             "condition": "Package less than 4.3.2",
-            "cve": "CVE-YYYY-XXXXX",
+            "cve": "CVE-1234-123123",
             "cvss2_score": 0,
             "cvss3_score": 5.5,
             "detection_time": "2023-02-08T13:55:10Z",

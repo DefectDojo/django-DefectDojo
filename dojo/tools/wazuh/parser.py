@@ -19,12 +19,7 @@ class WazuhParser(object):
         return "Wazuh"
 
     def get_findings(self, filename, test):
-        tree = filename.read()
-        try:
-            data = json.loads(str(tree, "utf-8"))
-        except:
-            data = json.loads(tree)
-
+        data = json.load(filename)
         # Detect duplications
         dupes = dict()
 
@@ -43,6 +38,10 @@ class WazuhParser(object):
                 package_version = item.get('version')
                 description = item.get('condition')
                 severity = item.get('severity')
+                if item.get('status') == "VALID":
+                    active = True
+                else:
+                    active = False
                 links = item.get('external_references')
                 title = item.get('title') + " (version: " + package_version + ")"
                 severity = transpose_severity(severity)
@@ -70,6 +69,7 @@ class WazuhParser(object):
                         test=test,
                         description=description,
                         severity=severity,
+                        active = active,
                         mitigation="mitigation",
                         references=references,
                         static_finding=True,
