@@ -222,7 +222,6 @@ class DependencyTrackParser(object):
             finding.unsaved_vulnerability_ids = [vuln_id]
         
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
-        
         if 'state' in dependency_track_finding['analysis']:
             if dependency_track_finding['analysis']['state'] == 'FALSE_POSITIVE':
                 finding.false_p = True 
@@ -240,7 +239,7 @@ class DependencyTrackParser(object):
                 finding.is_mitigated = False
                 finding.active=False
                 finding.false_p = False
-
+                
         return finding
 
     def get_scan_types(self):
