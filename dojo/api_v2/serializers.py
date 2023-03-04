@@ -588,13 +588,17 @@ class NoteHistorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class NoteSerializer(serializers.ModelSerializer):
-    author = UserStubSerializer(
-        many=False, read_only=True)
-    editor = UserStubSerializer(
-        read_only=True, many=False, allow_null=True)
+class NoteTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note_Type
+        fields = '__all__'
 
+
+class NoteSerializer(serializers.ModelSerializer):
+    author = UserStubSerializer(many=False, read_only=True)
+    editor = UserStubSerializer(read_only=True, many=False, allow_null=True)
     history = NoteHistorySerializer(read_only=True, many=True)
+    note_type = NoteTypeSerializer(read_only=True, many=False)
 
     def update(self, instance, validated_data):
         instance.entry = validated_data.get('entry')
@@ -613,12 +617,6 @@ class NoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notes
-        fields = '__all__'
-
-
-class NoteTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Note_Type
         fields = '__all__'
 
 
