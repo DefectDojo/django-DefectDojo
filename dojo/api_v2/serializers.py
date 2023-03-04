@@ -580,17 +580,18 @@ class AddUserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username')
 
 
-class NoteHistorySerializer(serializers.ModelSerializer):
-    current_editor = UserStubSerializer(read_only=True)
-
-    class Meta:
-        model = NoteHistory
-        fields = '__all__'
-
-
 class NoteTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note_Type
+        fields = '__all__'
+
+
+class NoteHistorySerializer(serializers.ModelSerializer):
+    current_editor = UserStubSerializer(read_only=True)
+    note_type = NoteTypeSerializer(read_only=True, many=False)
+
+    class Meta:
+        model = NoteHistory
         fields = '__all__'
 
 
