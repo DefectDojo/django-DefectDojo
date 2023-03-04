@@ -20,7 +20,7 @@ from dojo.models import (
     Product,
     Test,
     Dojo_Group,
-    Cred_User,
+    Cred_Mapping,
 )
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
@@ -84,9 +84,15 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
 
 class UserHasCredentialPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(
-            request, Cred_User, "credentials", Permissions.Credential_Add
-        )
+        if request.data.get('product') is not None:
+            return check_post_permission(request, Cred_Mapping, "product", Permissions.Credential_Add)
+        if request.data.get('engagement') is not None:
+            return check_post_permission(request, Cred_Mapping, "engagement", Permissions.Credential_Add)
+        if request.data.get('test') is not None:
+            return check_post_permission(request, Cred_Mapping, "test", Permissions.Credential_Add)
+        if request.data.get('finding') is not None:
+            return check_post_permission(request, Cred_Mapping, "finding", Permissions.Credential_Add)
+        return check_post_permission(request, Cred_Mapping, "product", Permissions.Credential_Add)
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(

@@ -37,7 +37,7 @@ from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
 from dojo.finding.views import set_finding_as_original_internal, reset_finding_duplicate_status_internal, \
     duplicate_cluster
-from dojo.filters import ReportFindingFilter, \
+from dojo.filters import ReportFindingFilter, ApiCredentialsFilter, \
     ApiFindingFilter, ApiProductFilter, ApiEngagementFilter, ApiEndpointFilter, \
     ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter, ApiRiskAcceptanceFilter
 from dojo.risk_acceptance import api as ra_api
@@ -516,13 +516,10 @@ class CredentialsViewSet(prefetch.PrefetchListMixin,
                          viewsets.GenericViewSet,
                          dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.CredentialSerializer
-    queryset = Cred_User.objects.none()
+    queryset = Cred_User.objects.all()
     filter_backends = (DjangoFilterBackend,)
     swagger_schema = prefetch.get_prefetch_schema(["credentials_list", "credentials_read"], serializers.CredentialSerializer).to_schema()
-    permission_classes = (IsAuthenticated, permissions.UserHasCredentialPermission)
-
-    def get_queryset(self):
-        return get_authorized_cred_mappings(Permissions.Credential_View)
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
 # Authorization: configuration
@@ -536,10 +533,14 @@ class CredentialsMappingViewSet(prefetch.PrefetchListMixin,
                                 viewsets.GenericViewSet,
                                 dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.CredentialMappingSerializer
-    queryset = Cred_Mapping.objects.all()
+    queryset = Cred_Mapping.objects.none()
     filter_backends = (DjangoFilterBackend,)
+    filterset_class = ApiCredentialsFilter
     swagger_schema = prefetch.get_prefetch_schema(["credential_mappings_list", "credential_mappings_read"], serializers.CredentialMappingSerializer).to_schema()
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, permissions.UserHasCredentialPermission)
+
+    def get_queryset(self):
+        return get_authorized_cred_mappings(Permissions.Credential_View)
 
 
 # Authorization: configuration

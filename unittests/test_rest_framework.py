@@ -2682,9 +2682,20 @@ class CredentialMappingTest(BaseClass.RESTEndpointTest):
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Cred_Mapping
         self.endpoint_path = 'credential_mappings'
-        self.viewname = 'credential_mappings'
+        self.viewname = 'cred_mapping'
         self.viewset = CredentialsMappingViewSet
-        self.test_type = TestType.STANDARD
+        self.payload = {
+            'cred_id': 1,
+            'product': 1,
+            'url': 'https://google.com'
+        }
+        self.update_fields = {'url': 'https://bing.com'}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Product
+        self.permission_create = Permissions.Credential_Add
+        self.permission_update = Permissions.Credential_Edit
+        self.permission_delete = Permissions.Credential_Delete
+        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2694,7 +2705,7 @@ class CredentialTest(BaseClass.RESTEndpointTest):
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Cred_User
         self.endpoint_path = 'credentials'
-        self.viewname = 'credentials'
+        self.viewname = 'cred_user'
         self.viewset = CredentialsViewSet
         self.payload = {
             'name': 'name',
@@ -2705,12 +2716,9 @@ class CredentialTest(BaseClass.RESTEndpointTest):
             'environment': 1,
         }
         self.update_fields = {'name': 'newname'}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Cred_User
-        self.permission_create = Permissions.Credential_Add
-        self.permission_update = Permissions.Credential_Edit
-        self.permission_delete = Permissions.Credential_Delete
+        self.test_type = TestType.STANDARD
         self.deleted_objects = 2
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class TextQuestionTest(BaseClass.RESTEndpointTest):
