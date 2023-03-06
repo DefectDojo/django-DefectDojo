@@ -14,8 +14,8 @@ from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIE
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Product_Type, JIRA_Instance, Endpoint, JIRA_Project, \
-    Notes, DojoMeta, Note_Type, App_Analysis, Endpoint_Status, \
+    Product_Type, JIRA_Instance, Endpoint, JIRA_Project, Cred_Mapping, \
+    Notes, DojoMeta, Note_Type, App_Analysis, Endpoint_Status, Cred_User, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Endpoint_Params, \
     Regulation, System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
@@ -580,8 +580,15 @@ class AddUserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username')
 
 
+class NoteTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note_Type
+        fields = '__all__'
+
+
 class NoteHistorySerializer(serializers.ModelSerializer):
     current_editor = UserStubSerializer(read_only=True)
+    note_type = NoteTypeSerializer(read_only=True, many=False)
 
     class Meta:
         model = NoteHistory
@@ -589,12 +596,10 @@ class NoteHistorySerializer(serializers.ModelSerializer):
 
 
 class NoteSerializer(serializers.ModelSerializer):
-    author = UserStubSerializer(
-        many=False, read_only=True)
-    editor = UserStubSerializer(
-        read_only=True, many=False, allow_null=True)
-
+    author = UserStubSerializer(many=False, read_only=True)
+    editor = UserStubSerializer(read_only=True, many=False, allow_null=True)
     history = NoteHistorySerializer(read_only=True, many=True)
+    note_type = NoteTypeSerializer(read_only=True, many=False)
 
     def update(self, instance, validated_data):
         instance.entry = validated_data.get('entry')
@@ -613,12 +618,6 @@ class NoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notes
-        fields = '__all__'
-
-
-class NoteTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Note_Type
         fields = '__all__'
 
 
@@ -1477,6 +1476,18 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             save_vulnerability_ids_template(instance, vulnerability_ids)
 
         return super(TaggitSerializer, self).update(instance, validated_data)
+
+
+class CredentialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cred_User
+        exclude = ['password']
+
+
+class CredentialMappingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cred_Mapping
+        fields = '__all__'
 
 
 class StubFindingSerializer(serializers.ModelSerializer):

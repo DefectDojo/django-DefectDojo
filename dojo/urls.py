@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from dojo import views
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
-    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, CredentialsViewSet, CredentialsMappingViewSet, \
     SLAConfigurationViewset, StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
@@ -76,6 +76,8 @@ handler400 = 'dojo.views.custom_bad_request_view'
 v2_api = DefaultRouter()
 v2_api.register(r'technologies', AppAnalysisViewSet)
 v2_api.register(r'configuration_permissions', ConfigurationPermissionViewSet)
+v2_api.register(r'credentials', CredentialsViewSet)
+v2_api.register(r'credential_mappings', CredentialsMappingViewSet)
 v2_api.register(r'endpoints', EndPointViewSet)
 v2_api.register(r'endpoint_meta_import', EndpointMetaImporterView, basename='endpointmetaimport')
 v2_api.register(r'endpoint_status', EndpointStatusViewSet)

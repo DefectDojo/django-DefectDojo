@@ -20,7 +20,7 @@ from django.db.models import JSONField
 import pytz
 from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Note_Type, Risk_Acceptance, \
+    Endpoint, Development_Environment, Finding_Template, Note_Type, Risk_Acceptance, Cred_Mapping, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
     ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group, Vulnerability_Id
 from dojo.utils import get_system_setting
@@ -1956,6 +1956,12 @@ class ApiAppAnalysisFilter(DojoFilter):
     class Meta:
         model = App_Analysis
         fields = ['product', 'name', 'user', 'version']
+
+
+class ApiCredentialsFilter(DojoFilter):
+    class Meta:
+        model = Cred_Mapping
+        fields = '__all__'
 
 
 class EndpointReportFilter(DojoFilter):
