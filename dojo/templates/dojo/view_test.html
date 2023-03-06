@@ -304,7 +304,6 @@
     </div>
 
     <div id="finding_groups_panel" class="panel panel-default table-responsive collapse">
-        <span>Experimental feature, use bulk edit to create/edit them</span>
         {% if finding_groups %}
             <table id="finding_groups" class="table-striped tablesorter-bootstrap table table-condensed table-hover">
                 <thead>
@@ -339,15 +338,10 @@
                             <div class="dropdown">
                                 <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
                                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                                    <li>
-                                        <a class="" href="{% url 'view_finding_group' group.id %}">
-                                        <i class="fa-solid fa-circle-right"></i> View
-                                        </a>
-                                    </li>
                                     {% if group|has_object_permission:"Finding_Group_Edit" %}
                                         <li>
-                                            <a class="" href="{% url 'edit_finding_group' group.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                            <a class="" href="{% url 'view_finding_group' group.id %}">
+                                            <i class="fa-solid fa-pen-to-square"></i> View/Edit
                                             </a>
                                         </li>
                                     {% endif %}
