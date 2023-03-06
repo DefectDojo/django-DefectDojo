@@ -119,6 +119,11 @@ class Permissions(IntEnum):
     Product_Tracking_Files_Edit = 2606
     Product_Tracking_Files_Delete = 2607
 
+    Credential_View = 2702
+    Credential_Add = 2703
+    Credential_Edit = 2706
+    Credential_Delete = 2707
+
     @classmethod
     def has_value(cls, value):
         try:
@@ -199,6 +204,10 @@ class Permissions(IntEnum):
     def get_product_api_scan_configuration_permissions(cls):
         return {Permissions.Product_API_Scan_Configuration_View, Permissions.Product_API_Scan_Configuration_Edit, Permissions.Product_API_Scan_Configuration_Delete}
 
+    @classmethod
+    def get_credential_permissions(cls):
+        return {Permissions.Credential_View, Permissions.Credential_Add, Permissions.Credential_Edit, Permissions.Credential_Delete}
+
 
 def get_roles_with_permissions():
     return {
@@ -219,6 +228,7 @@ def get_roles_with_permissions():
             Permissions.Technology_View,
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
         },
         Roles.API_Importer: {
             Permissions.Product_Type_View,
@@ -234,7 +244,8 @@ def get_roles_with_permissions():
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
             Permissions.Technology_View,
-            Permissions.Import_Scan_Result
+            Permissions.Import_Scan_Result,
+            Permissions.Credential_View,
         },
         Roles.Writer: {
             Permissions.Product_Type_View,
@@ -288,6 +299,10 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
 
             Permissions.Product_Tracking_Files_View,
+
+            Permissions.Credential_View,
+            Permissions.Credential_Add,
+            Permissions.Credential_Edit,
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -373,6 +388,11 @@ def get_roles_with_permissions():
             Permissions.Product_Tracking_Files_Add,
             Permissions.Product_Tracking_Files_Edit,
             Permissions.Product_Tracking_Files_Delete,
+
+            Permissions.Credential_View,
+            Permissions.Credential_Add,
+            Permissions.Credential_Edit,
+            Permissions.Credential_Delete,
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -466,6 +486,11 @@ def get_roles_with_permissions():
             Permissions.Product_Tracking_Files_Add,
             Permissions.Product_Tracking_Files_Edit,
             Permissions.Product_Tracking_Files_Delete,
+
+            Permissions.Credential_View,
+            Permissions.Credential_Add,
+            Permissions.Credential_Edit,
+            Permissions.Credential_Delete,
         }
     }
 
