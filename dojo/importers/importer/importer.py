@@ -134,16 +134,9 @@ class DojoDefaultImporter(object):
                 burp_rr.clean()
                 burp_rr.save()
 
-            if settings.ASYNC_FINDING_IMPORT:
-                importer_utils.chunk_endpoints_and_disperse(item, test, item.unsaved_endpoints)
-            else:
-                importer_utils.add_endpoints_to_unsaved_finding(item, test, item.unsaved_endpoints, sync=True)
-
+            importer_utils.chunk_endpoints_and_disperse(item, test, item.unsaved_endpoints)
             if endpoints_to_add:
-                if settings.ASYNC_FINDING_IMPORT:
-                    importer_utils.chunk_endpoints_and_disperse(item, test, endpoints_to_add)
-                else:
-                    importer_utils.add_endpoints_to_unsaved_finding(item, test, endpoints_to_add, sync=True)
+                importer_utils.chunk_endpoints_and_disperse(item, test, endpoints_to_add)
 
             if item.unsaved_tags:
                 item.tags = item.unsaved_tags
@@ -169,10 +162,7 @@ class DojoDefaultImporter(object):
                 item.save(push_to_jira=push_to_jira)
 
         for (group_name, findings) in group_names_to_findings_dict.items():
-            # Only create a finding group if we have more than one finding for a given finding group, unless configured otherwise
-            if create_finding_groups_for_all_findings or len(findings) > 1:
-                for finding in findings:
-                    finding_helper.add_finding_to_auto_group(finding, group_by, **kwargs)
+            finding_helper.add_findings_to_auto_group(group_name, findings, group_by, create_finding_groups_for_all_findings, **kwargs)
             if push_to_jira:
                 if findings[0].finding_group is not None:
                     jira_helper.push_to_jira(findings[0].finding_group)
@@ -259,7 +249,11 @@ class DojoDefaultImporter(object):
         parser = get_parser(scan_type)
         if hasattr(parser, 'get_tests'):
             logger.debug('IMPORT_SCAN parser v2: Create Test and parse findings')
-            tests = parser.get_tests(scan_type, scan)
+            try:
+                tests = parser.get_tests(scan_type, scan)
+            except ValueError as e:
+                logger.warning(e)
+                raise ValidationError(e)
             # for now we only consider the first test in the list and artificially aggregate all findings of all tests
             # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
             # when there is more than 1 test
@@ -304,7 +298,11 @@ class DojoDefaultImporter(object):
 
             logger.debug('IMPORT_SCAN: Parse findings')
             parser = get_parser(scan_type)
-            parsed_findings = parser.get_findings(scan, test)
+            try:
+                parsed_findings = parser.get_findings(scan, test)
+            except ValueError as e:
+                logger.warning(e)
+                raise ValidationError(e)
 
         logger.debug('IMPORT_SCAN: Processing findings')
         new_findings = []

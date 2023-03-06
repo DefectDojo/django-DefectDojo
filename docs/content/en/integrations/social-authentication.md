@@ -311,22 +311,6 @@ DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL: '<your token endpoint>'
 
 Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order to customize the login button's text caption. 
 
-## GitHub
-1. Navigate to GitHub.com and follow instructions to create a new OAuth App [https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app)
-2. Choose a name for your application
-3. For the Redirect URI, enter the DefectDojo URL with the following
-    format
-    -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github/)
-4. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
-    information:
-    {{< highlight python >}}  
-    DD_SOCIAL_AUTH_GITHUB_KEY=(str, 'GitHub OAuth App Client ID'),  
-    DD_SOCIAL_AUTH_GITHUB_SECRET=(str, 'GitHub OAuth App Client Secret'),  
-    DD_SOCIAL_AUTH_GITHUB_OAUTH2_ENABLED = True  
-    {{< /highlight >}}
-5. Restart DefectDojo, and you should now see a **Login with GitHub**
-    button on the login page.
-
 ## GitHub Enterprise
 1.  Navigate to your GitHub Enterprise Server and follow instructions to create a new OAuth App [https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app](https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app)
 2. Choose a name for your application
@@ -442,6 +426,13 @@ When a new user is created via the social-auth, only the default permissions are
 ### Default group
 
 When both the parameters `Default group` and `Default group role` are set, the new user will be a member of the given group with the given role, which will give him the respective permissions.
+
+### Groups from Identity Providers
+
+Some Identity Providers are able to send list of groups to which should user belongs. This functionality is implemented only for Identity Providers mentioned below. For all others, we will be more than happy for contribution (hint: functions `assign_user_to_groups` and `cleanup_old_groups_for_user` from [`dojo/pipeline.py`](https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/pipeline.py) might be useful).
+
+- [Azure](#automatic-import-of-user-groups): Check `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS` and `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS`
+- [RemoteUser](#remoteuser): Check `DD_AUTH_REMOTEUSER_GROUPS_HEADER` and `DD_AUTH_REMOTEUSER_GROUPS_CLEANUP`
 
 ## Login speed-up
 

@@ -63,3 +63,17 @@ class TestIntSightsParser(DojoTestCase):
                 "unittests/scans/intsights/intsights_invalid_file.txt")
             parser = IntSightsParser()
             findings = parser.get_findings(testfile, Test())
+
+    def test_intsights_parser_with_no_alerts_json(self):
+        testfile = open("unittests/scans/intsights/intsights_zero_vuln.json")
+        parser = IntSightsParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(0, len(findings))
+
+    def test_intsights_parser_with_no_alerts_csv(self):
+        testfile = open("unittests/scans/intsights/intsights_zero_vuln.csv")
+        parser = IntSightsParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(0, len(findings))

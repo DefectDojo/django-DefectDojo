@@ -1,0 +1,94 @@
+name: "release-X: Release docker containers"
+
+env:
+  GIT_USERNAME: "DefectDojo release bot"
+  GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
+  workflow_name: 'release docker containers' # needed in cache key, which doesn't support comma's
+on:
+  workflow_dispatch:
+    inputs:
+      # the actual branch that can be chosen on the UI is made irrelevant by further steps
+      # because someone will forget one day to change it.
+      release_number:
+        type: string
+        description: 'Release version (x.y.z format)'
+        required: true
+  workflow_call:
+    inputs:
+      # the actual branch that can be chosen on the UI is made irrelevant by further steps
+      # because someone will forget one day to change it.
+      release_number:
+        type: string
+        description: 'Release version (x.y.z format)'
+        required: true
+
+jobs:
+  job-build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+          docker-image: [django, nginx]
+          os: [alpine, debian]
+          platform: [amd64, arm64]
+    steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Checkout tag
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.release_number }}
+
+      - id: set-repo-org
+        run: echo "repoorg=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        env:
+          docker-image: ${{ matrix.docker-image }}
+        with:
+          path: /tmp/.buildx-cache-${{ env.docker-image }}
+          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ env.workflow_name }}-${{ github.sha }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ env.workflow_name}}-${{ github.sha }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ env.workflow_name }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-
+
+      - name: Build and push images with debian
+        if: ${{ matrix.os  == 'debian' }}
+        uses: docker/build-push-action@v4
+        env:
+          REPO_ORG: ${{ env.repoorg }}
+          docker-image: ${{ matrix.docker-image }}
+        with:
+          push: true
+          tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
+          file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
+          context: .
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
+
+      - name: Build and push images with alpine
+        if: ${{ matrix.os  == 'alpine' }}
+        uses: docker/build-push-action@v4
+        env:
+          REPO_ORG: ${{ env.repoorg }}
+          docker-image: ${{ matrix.docker-image }}
+        with:
+          push: true
+          tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
+          file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
+          context: .
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
+          platforms: ${{ matrix.platform }}
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}

@@ -1,0 +1,40 @@
+name: 'Referesh Chart.lock'
+on:
+  pull_request_target:
+    branches:
+      - dev
+    paths:
+      - 'helm/defectdojo/Chart.yaml'
+permissions:
+  contents: write
+jobs:
+  update-chart-lock:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout bitnami/charts
+        uses: actions/checkout@v3
+        with:
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          path: charts
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.4.0
+
+      - name: Execute generate new Chart.lock file
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm dependency list ./charts/helm/defectdojo
+          helm dependency update ./charts/helm/defectdojo
+      - name: Push changes
+        run: |
+          # Push all the changes
+          cd charts
+          if git status -s | grep helm; then
+            git config user.name "DefectDojo"
+            git config user.email "defectdojo-project@owasp.org"
+            git add . && git commit -am "Update helm lock file" --signoff && git push
+          fi

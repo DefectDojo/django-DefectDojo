@@ -68,6 +68,31 @@ class GenericParser(object):
                 unsaved_vulnerability_ids = item["vulnerability_ids"]
                 del item["vulnerability_ids"]
 
+            # check for required keys
+            required = ['title', 'severity', 'description']
+            missing = []
+            for field in required:
+                if field not in item.keys():
+                    missing.append(field)
+            if missing:
+                raise ValueError(f"Required fields are missing: {missing}")
+
+            # check for allowed keys
+            allowed = required + ['date', 'cwe', 'cve', 'cvssv3', 'cvssv3_score', 'mitigation', 'impact',
+                'steps_to_reproduce', 'severity_justification', 'references', 'active', 'verified',
+                'false_p', 'out_of_scope', 'risk_accepted', 'under_review', 'is_mitigated',
+                'thread_id', 'mitigated', 'numerical_severity', 'param', 'payload', 'line', 'file_path',
+                'component_name', 'component_version', 'static_finding', 'dynamic_finding',
+                'scanner_confidence', 'unique_id_from_tool', 'vuln_id_from_tool', 'sast_source_object',
+                'sast_sink_object', 'sast_source_line', 'sast_source_file_path', 'nb_occurences',
+                'publish_date', 'service', 'planned_remediation_date', 'tags']
+            not_allowed = []
+            for field in item.keys():
+                if field not in allowed:
+                    not_allowed.append(field)
+            if not_allowed:
+                raise ValueError(f"Not allowed fields are present: {not_allowed}")
+
             finding = Finding(**item)
 
             # manage endpoints

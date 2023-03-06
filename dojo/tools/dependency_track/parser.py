@@ -113,17 +113,17 @@ class DependencyTrackParser(object):
         """
         # Validation of required fields
         if 'vulnerability' not in dependency_track_finding:
-            raise Exception("Missing 'vulnerability' node from finding!")
+            raise ValueError("Missing 'vulnerability' node from finding!")
         if 'vulnId' not in dependency_track_finding['vulnerability']:
-            raise Exception("Missing 'vulnId' node from vulnerability!")
+            raise ValueError("Missing 'vulnId' node from vulnerability!")
         vuln_id = dependency_track_finding['vulnerability']['vulnId']
         if 'source' not in dependency_track_finding['vulnerability']:
-            raise Exception("Missing 'source' node from vulnerability!")
+            raise ValueError("Missing 'source' node from vulnerability!")
         source = dependency_track_finding['vulnerability']['source']
         if 'component' not in dependency_track_finding:
-            raise Exception("Missing 'component' node from finding!")
+            raise ValueError("Missing 'component' node from finding!")
         if 'name' not in dependency_track_finding['component']:
-            raise Exception("Missing 'name' node from component!")
+            raise ValueError("Missing 'name' node from component!")
         component_name = dependency_track_finding['component']['name']
 
         # Build the title of the Dojo finding
@@ -141,10 +141,23 @@ class DependencyTrackParser(object):
         title = "{component_name}:{version_description} affected by: {vuln_id} ({source})"\
             .format(vuln_id=vuln_id, source=source, version_description=version_description, component_name=component_name)
 
-        # The vulnId is not always a CVE (e.g. if the vulnerability is not from the NVD source)
-        # So here we set the cve for the DefectDojo finding to null unless the source of the
-        # Dependency Track vulnerability is NVD
-        vulnerability_id = vuln_id if source is not None and source.upper() == 'NVD' else None
+        # We should collect all the vulnerability ids, the FPF format can add additional IDs as aliases
+        # we add these aliases in the vulnerability_id list making sure duplicate findings get correctly deduplicated
+        # older version of Dependency-track might not include these field therefore lets check first
+        if dependency_track_finding['vulnerability'].get('aliases'):
+            # There can be multiple alias entries
+            set_of_ids = set()
+            set_of_sources = {'cveId', 'sonatypeId', 'ghsaId', 'osvId', 'snykId', 'gsdId', 'vulnDbId'}
+            for alias in dependency_track_finding['vulnerability']['aliases']:
+                for source in set_of_sources:
+                    if source in alias:
+                        set_of_ids.add(alias[source])
+            vulnerability_id = list(set_of_ids)
+        else:
+            # The vulnId is not always a CVE (e.g. if the vulnerability is not from the NVD source)
+            # So here we set the cve for the DefectDojo finding to null unless the source of the
+            # Dependency Track vulnerability is NVD
+            vulnerability_id = [vuln_id] if source is not None and source.upper() == 'NVD' else None
 
         # Default CWE to CWE-1035 Using Components with Known Vulnerabilities if there is no CWE
         if 'cweId' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['cweId'] is not None:
@@ -211,7 +224,7 @@ class DependencyTrackParser(object):
             dynamic_finding=False)
 
         if vulnerability_id:
-            finding.unsaved_vulnerability_ids = [vulnerability_id]
+            finding.unsaved_vulnerability_ids = vulnerability_id
 
         return finding
 

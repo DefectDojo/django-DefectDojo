@@ -37,6 +37,13 @@ The generic upgrade method for docker-compose follows these steps:
     docker pull defectdojo/defectdojo-nginx:1.10.2
     ```
 
+-   If you would like to use alpine based images, you specify the version (tag) you want to upgrade to:
+
+    ``` {.sourceCode .bash}
+    docker pull defectdojo/defectdojo-django:1.10.2-alpine
+    docker pull defectdojo/defectdojo-nginx:1.10.2-alpine
+    ```
+
 -   Go to the directory where your docker-compose.yml file lives
 -   Stop DefectDojo: `./dc-stop.sh`
 -   Re-start DefectDojo, allowing for container recreation:
@@ -60,6 +67,20 @@ godojo installations
 --------------------
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
+
+## Upgrading to DefectDojo Version 2.20.x.
+
+There are no special instruction for upgrading to 2.20.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.17.0) for the contents of the release.
+
+## Upgrading to DefectDojo Version 2.19.x
+
+There are new docker images based on alpine with fewer third party dependencies. Related to the new images the current docker files had to be renamed and have a "-debian" or the new images a "-alpine" at the end. Furthermore there are new docker tags [DefectdojoVersion]-[OS]. For example 2.19.0-alpine or 2.19.0-debian. The currend tags (latest and [DefectdojoVersion]) are still based on the "old" images. Be aware that the new alpine images are not heavily tested and may contain bugs.
+
+*Breaking Change*
+
+In version 2.19.3, the GitHub OAuth integration has been removed to prevent configurations that may allow more access than intended.
+
+[DefectDojo Security Advisory: Severity Medium | Potential GitHub Authentication Misconfiguration](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-hfp4-q5pg-2p7r)
 
 ## Upgrading to DefectDojo Version 2.18.x
 

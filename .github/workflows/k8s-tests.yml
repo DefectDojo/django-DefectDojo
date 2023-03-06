@@ -1,16 +1,10 @@
-name: k8s deployment
+name: k8s Deployment
+
 on:
-  pull_request:
-    branches:
-      - master
-      - dev
-      - release/**
-      - hotfix/**
+  workflow_call:
 
 env:
-  DD_DOCKER_REPO: defectdojo
   DD_HOSTNAME: defectdojo.default.minikube.local
-  GITHUB_CACHE_REPO: containers.pkg.github.com
   HELM_RABBIT_BROKER_SETTINGS: " \
     --set redis.enabled=false \
     --set rabbitmq.enabled=true \
@@ -44,74 +38,9 @@ env:
     --set createPostgresqlHaPgpoolSecret=true \
    "
 jobs:
-  build:
-    name: Build Image
-
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        docker-image: [django, nginx]
-
-    steps:
-      # - name: Login to DockerHub
-      #   uses: docker/login-action@v1
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-
-      - name: Read Docker Image Identifiers
-        id: read-docker-image-identifiers
-        run: echo "IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        env:
-          docker-image: ${{ matrix.docker-image }}
-        with:
-          path: /tmp/.buildx-cache-${{ env.docker-image }}
-          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}
-
-      - name: Build
-        id: docker_build
-        uses: docker/build-push-action@v3
-        env:
-          docker-image: ${{ matrix.docker-image }}
-        with:
-          context: .
-          push: false
-          tags: |
-            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
-          file: Dockerfile.${{ env.docker-image }}
-          outputs: type=docker,dest=${{ env.docker-image }}_img
-          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
-          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
-
-      - name: Upload image ${{ env.docker-image }} as artifact
-        uses:  actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.docker-image }}
-          path: ${{ matrix.docker-image }}_img
-          retention-days: 1
-
   setting_minikube_cluster:
     name: Kubernetes Deployment
-
     runs-on: ubuntu-latest
-
-    needs: build
 
     strategy:
       matrix:
@@ -122,25 +51,29 @@ jobs:
           - databases: pgsql
             brokers: redis
             k8s: 'v1.22.0'
+            os: debian
           - databases: mysql
             brokers: rabbit
             k8s: 'v1.22.0'
+            os: debian
           - databases: pgsql
             brokers: rabbit
             k8s: 'v1.23.9'
+            os: debian
           - databases: mysql
             brokers: redis
             k8s: 'v1.23.9'
+            os: debian
           - databases: pgsqlha
             brokers: rabbit
             k8s: 'v1.23.9'
+            os: debian
+          - databases: pgsql
+            brokers: rabbit
+            k8s: 'v1.23.9'
+            os: alpine
 
     steps:
-#      - name: Login to DockerHub
-#        uses: docker/login-action@v1
-#        with:
-#          username: ${{ secrets.DOCKERHUB_USERNAME }}
-#          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -163,8 +96,8 @@ jobs:
       - name: Load docker images
         run: |-
              eval $(minikube docker-env)
-             docker load -i nginx/nginx_img
-             docker load -i django/django_img
+             docker load -i nginx/nginx-${{ matrix.os }}_img
+             docker load -i django/django-${{ matrix.os }}_img
              docker images
 
       - name: Configure HELM repos
@@ -182,10 +115,6 @@ jobs:
               echo "redis=${{ env.HELM_REDIS_BROKER_SETTINGS }}" >> $GITHUB_ENV
               echo "rabbit=${{ env.HELM_RABBIT_BROKER_SETTINGS }}" >> $GITHUB_ENV
 
-      # - name: Create image pull Secrets
-      #   run: |-
-      #         kubectl create secret docker-registry defectdojoregistrykey --docker-username=${{ secrets.DOCKERHUB_USERNAME }} --docker-password=${{ secrets.DOCKERHUB_TOKEN }}
-      #         kubectl get secrets
       - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
         run: |-
              helm install \
@@ -197,6 +126,7 @@ jobs:
                ${{ env[matrix.databases] }} \
                ${{ env[matrix.brokers] }} \
                --set createSecret=true \
+               --set tag=${{ matrix.os }} \
                # --set imagePullSecrets=defectdojoregistrykey
 
       - name: Check deployment status

@@ -8,8 +8,8 @@
                 {% trans "Greetings" %},
             </p>
             <p>
-              {% blocktranslate trimmed %}
-                Your report "{{ report.name }}" is ready. It can be downloaded here: {{ url|full_url }}
+              {% blocktranslate trimmed with report_name=report.name report_url=url|full_url %}
+                Your report "{{ report_name }}" is ready. It can be downloaded here: {{ report_url }}
               {% endblocktranslate %}
             </p>
                 {% trans "Kind regards" %}, <br/>

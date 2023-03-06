@@ -663,7 +663,7 @@ class FileUpload(models.Model):
         elif isinstance(obj, Finding):
             obj_type = 'Finding'
 
-        return 'access_url/{file_id}/{obj_id}/{obj_type}'.format(
+        return 'access_file/{file_id}/{obj_id}/{obj_type}'.format(
             file_id=self.id,
             obj_id=obj_id,
             obj_type=obj_type
@@ -2861,8 +2861,15 @@ class Finding(models.Model):
             return None
         if self.test.engagement.source_code_management_uri is None:
             return escape(self.file_path)
+        link = self.get_file_path_with_raw_link()
+        return create_bleached_link(link, self.file_path)
+
+    def get_file_path_with_raw_link(self):
+        if self.file_path is None:
+            return None
         link = self.test.engagement.source_code_management_uri
-        if "https://github.com/" in self.test.engagement.source_code_management_uri:
+        if (self.test.engagement.source_code_management_uri is not None
+                and "https://github.com/" in self.test.engagement.source_code_management_uri):
             if self.test.commit_hash:
                 link += '/blob/' + self.test.commit_hash + '/' + self.file_path
             elif self.test.engagement.commit_hash:
@@ -2877,7 +2884,7 @@ class Finding(models.Model):
             link += '/' + self.file_path
         if self.line:
             link = link + '#L' + str(self.line)
-        return create_bleached_link(link, self.file_path)
+        return link
 
     def get_references_with_links(self):
         import re
@@ -2963,7 +2970,10 @@ class Stub_Finding(models.Model):
 
 class Finding_Group(TimeStampedModel):
 
-    GROUP_BY_OPTIONS = [('component_name', 'Component Name'), ('component_name+component_version', 'Component Name + Version'), ('file_path', 'File path')]
+    GROUP_BY_OPTIONS = [('component_name', 'Component Name'),
+                        ('component_name+component_version', 'Component Name + Version'),
+                        ('file_path', 'File path'),
+                        ('finding_title', 'Finding Title')]
 
     name = models.CharField(max_length=255, blank=False, null=False)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
@@ -3195,6 +3205,14 @@ class Risk_Acceptance(models.Model):
         (TREATMENT_TRANSFER, 'Transfer (The risk is transferred to a 3rd party)'),
     ]
 
+    TREATMENT_TRANSLATIONS = {
+        'A': 'Accept (The risk is acknowledged, yet remains)',
+        'V': 'Avoid (Do not engage with whatever creates the risk)',
+        'M': 'Mitigate (The risk still exists, yet compensating controls make it less of a threat)',
+        'F': 'Fix (The risk is eradicated)',
+        'T': 'Transfer (The risk is transferred to a 3rd party)',
+    }
+
     name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 
     accepted_findings = models.ManyToManyField(Finding)
@@ -3299,6 +3317,28 @@ class FileAccessToken(models.Model):
         return super(FileAccessToken, self).save(*args, **kwargs)
 
 
+ANNOUNCEMENT_STYLE_CHOICES = (
+    ('info', 'Info'),
+    ('success', 'Success'),
+    ('warning', 'Warning'),
+    ('danger', 'Danger')
+)
+
+
+class Announcement(models.Model):
+    message = models.CharField(max_length=500,
+                                help_text=_("This dismissable message will be displayed on all pages for authenticated users. It can contain basic html tags, for example <a href='https://www.fred.com' style='color: #337ab7;' target='_blank'>https://example.com</a>"),
+                                default='')
+    dismissable = models.BooleanField(default=False, null=True, blank=True)
+    style = models.CharField(max_length=64, choices=ANNOUNCEMENT_STYLE_CHOICES, default='info',
+                            help_text=_("The style of banner to display. (info, success, warning, danger)"))
+
+
+class UserAnnouncement(models.Model):
+    announcement = models.ForeignKey(Announcement, null=True, editable=False, on_delete=models.CASCADE, related_name='user_announcement')
+    user = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
+
+
 class BannerConf(models.Model):
     banner_enable = models.BooleanField(default=False, null=True, blank=True)
     banner_message = models.CharField(max_length=500, help_text=_("This message will be displayed on the login page. It can contain basic html tags, for example <a href='https://www.fred.com' style='color: #337ab7;' target='_blank'>https://example.com</a>"), default='')
@@ -3362,7 +3402,7 @@ class JIRA_Instance(models.Model):
                                         ('Bug', 'Bug'),
                                         ('Security', 'Security')
                                     )
-    default_issue_type = models.CharField(max_length=15,
+    default_issue_type = models.CharField(max_length=255,
                                           choices=default_issue_type_choices,
                                           default='Bug',
                                           help_text=_('You can define extra issue types in settings.py'))
@@ -3382,6 +3422,7 @@ class JIRA_Instance(models.Model):
     accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_('JIRA resolution names (comma-separated values) that maps to an Accepted Finding'))
     false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_('JIRA resolution names (comma-separated values) that maps to a False Positive Finding'))
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
+    finding_jira_sync = models.BooleanField(default=False, blank=False, verbose_name=_("Automatically sync Findings with JIRA?"), help_text=_("If enabled, this will sync changes to a Finding automatically to JIRA"))
 
     @property
     def accepted_resolutions(self):
