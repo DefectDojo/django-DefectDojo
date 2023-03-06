@@ -11,18 +11,19 @@ from django.http import HttpResponse
 from dojo import views
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
-    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, CredentialsViewSet, CredentialsMappingViewSet, \
     SLAConfigurationViewset, StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
-    RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
+    RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, RiskAcceptanceViewSet, \
     DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
     NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset, UserContactInfoViewSet, \
     ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView, \
-    ConfigurationPermissionViewSet
+    ConfigurationPermissionViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
+    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -75,6 +76,8 @@ handler400 = 'dojo.views.custom_bad_request_view'
 v2_api = DefaultRouter()
 v2_api.register(r'technologies', AppAnalysisViewSet)
 v2_api.register(r'configuration_permissions', ConfigurationPermissionViewSet)
+v2_api.register(r'credentials', CredentialsViewSet)
+v2_api.register(r'credential_mappings', CredentialsMappingViewSet)
 v2_api.register(r'endpoints', EndPointViewSet)
 v2_api.register(r'endpoint_meta_import', EndpointMetaImporterView, basename='endpointmetaimport')
 v2_api.register(r'endpoint_status', EndpointStatusViewSet)
@@ -117,12 +120,18 @@ v2_api.register(r'notes', NotesViewSet)
 v2_api.register(r'note_type', NoteTypeViewSet)
 v2_api.register(r'system_settings', SystemSettingsViewSet)
 v2_api.register(r'regulations', RegulationsViewSet)
+v2_api.register(r'risk_acceptance', RiskAcceptanceViewSet)
 v2_api.register(r'language_types', LanguageTypeViewSet)
 v2_api.register(r'languages', LanguageViewSet)
 v2_api.register(r'import-languages', ImportLanguagesView, basename='importlanguages')
 v2_api.register(r'notifications', NotificationsViewSet, basename='notifications')
 v2_api.register(r'engagement_presets', EngagementPresetsViewset)
 v2_api.register(r'network_locations', NetworkLocationsViewset)
+v2_api.register(r'questionnaire_answers', QuestionnaireAnswerViewSet)
+v2_api.register(r'questionnaire_answered_questionnaires', QuestionnaireAnsweredSurveyViewSet)
+v2_api.register(r'questionnaire_engagement_questionnaires', QuestionnaireEngagementSurveyViewSet)
+v2_api.register(r'questionnaire_general_questionnaires', QuestionnaireGeneralSurveyViewSet)
+v2_api.register(r'questionnaire_questions', QuestionnaireQuestionViewSet)
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls

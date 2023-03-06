@@ -3204,6 +3204,14 @@ class Risk_Acceptance(models.Model):
         (TREATMENT_TRANSFER, 'Transfer (The risk is transferred to a 3rd party)'),
     ]
 
+    TREATMENT_TRANSLATIONS = {
+        'A': 'Accept (The risk is acknowledged, yet remains)',
+        'V': 'Avoid (Do not engage with whatever creates the risk)',
+        'M': 'Mitigate (The risk still exists, yet compensating controls make it less of a threat)',
+        'F': 'Fix (The risk is eradicated)',
+        'T': 'Transfer (The risk is transferred to a 3rd party)',
+    }
+
     name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 
     accepted_findings = models.ManyToManyField(Finding)
@@ -3393,7 +3401,7 @@ class JIRA_Instance(models.Model):
                                         ('Bug', 'Bug'),
                                         ('Security', 'Security')
                                     )
-    default_issue_type = models.CharField(max_length=15,
+    default_issue_type = models.CharField(max_length=255,
                                           choices=default_issue_type_choices,
                                           default='Bug',
                                           help_text=_('You can define extra issue types in settings.py'))
@@ -3413,6 +3421,7 @@ class JIRA_Instance(models.Model):
     accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_('JIRA resolution names (comma-separated values) that maps to an Accepted Finding'))
     false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_('JIRA resolution names (comma-separated values) that maps to a False Positive Finding'))
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
+    finding_jira_sync = models.BooleanField(default=False, blank=False, verbose_name=_("Automatically sync Findings with JIRA?"), help_text=_("If enabled, this will sync changes to a Finding automatically to JIRA"))
 
     @property
     def accepted_resolutions(self):

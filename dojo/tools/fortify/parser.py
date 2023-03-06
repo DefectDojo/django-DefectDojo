@@ -1,8 +1,8 @@
 
 import logging
-import re
 
 from defusedxml import ElementTree
+
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
@@ -22,16 +22,6 @@ class FortifyParser(object):
     def get_findings(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
         root = fortify_scan.getroot()
-
-        language_list = []
-        # Get Language
-        lang_string = root[8][4][2].text
-        lang_need_string = re.findall("^.*com.fortify.sca.Phase0HigherOrder.Languages.*$",
-                                      lang_string, re.MULTILINE)
-        lang_my_string = lang_need_string[0]
-        language = lang_my_string.split('=')[1]
-        if language not in language_list:
-            language_list.append(language)
 
         # Get Category Information:
         # Abstract, Explanation, Recommendation, Tips
@@ -65,37 +55,31 @@ class FortifyParser(object):
 
         # All issues obtained, create a map for reference
         issue_map = {}
-        issue_id = "N/A"
-        try:
-            for issue in issues:
-                issue_id = issue.attrib['iid']
-                details = {
-                    "Category": issue.find("Category").text,
-                    "Folder": issue.find("Folder").text, "Kingdom": issue.find("Kingdom").text,
-                    "Abstract": issue.find("Abstract").text,
-                    "Friority": issue.find("Friority").text,
-                    "FileName": issue.find("Primary").find("FileName").text,
-                    "FilePath": issue.find("Primary").find("FilePath").text,
-                    "LineStart": issue.find("Primary").find("LineStart").text}
+        for issue in issues:
+            issue_id = issue.attrib['iid']
+            details = {
+                "Category": issue.find("Category").text,
+                "Folder": issue.find("Folder").text, "Kingdom": issue.find("Kingdom").text,
+                "Abstract": issue.find("Abstract").text,
+                "Friority": issue.find("Friority").text,
+                "FileName": issue.find("Primary").find("FileName").text,
+                "FilePath": issue.find("Primary").find("FilePath").text,
+                "LineStart": issue.find("Primary").find("LineStart").text}
 
-                if issue.find("Primary").find("Snippet"):
-                    details["Snippet"] = issue.find("Primary").find("Snippet").text
-                else:
-                    details["Snippet"] = "n/a"
+            if issue.find("Primary").find("Snippet"):
+                details["Snippet"] = issue.find("Primary").find("Snippet").text
+            else:
+                details["Snippet"] = "n/a"
 
-                if issue.find("Source"):
-                    source = {
-                        "FileName": issue.find("Source").find("FileName").text,
-                        "FilePath": issue.find("Source").find("FilePath").text,
-                        "LineStart": issue.find("Source").find("LineStart").text,
-                        "Snippet": issue.find("Source").find("Snippet").text}
-                    details["Source"] = source
+            if issue.find("Source"):
+                source = {
+                    "FileName": issue.find("Source").find("FileName").text,
+                    "FilePath": issue.find("Source").find("FilePath").text,
+                    "LineStart": issue.find("Source").find("LineStart").text,
+                    "Snippet": issue.find("Source").find("Snippet").text}
+                details["Source"] = source
 
-                issue_map.update({issue.attrib['iid']: details})
-        except AttributeError:
-            logger.warning("XML Parsing error on issue number: %s", issue_id)
-            raise
-        # map created
+            issue_map.update({issue.attrib['iid']: details})
 
         items = []
         dupes = set()
