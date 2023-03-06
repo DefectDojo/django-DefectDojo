@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='jira_instance',
             name='default_issue_type',
-            field=models.CharField(choices=[('Task', 'Task'), ('Story', 'Story'), ('Epic', 'Epic'), ('Spike', 'Spike'), ('Spike123456789abcderfg', 'Spike123456789abcderfg'), ('Bug', 'Bug'), ('Security', 'Security')], default='Bug', help_text='You can define extra issue types in settings.py', max_length=255),
+            field=models.CharField(choices=[('Task', 'Task'), ('Story', 'Story'), ('Epic', 'Epic'), ('Spike', 'Spike'), ('Bug', 'Bug'), ('Security', 'Security')], default='Bug', help_text='You can define extra issue types in settings.py', max_length=255),
         ),
     ]
