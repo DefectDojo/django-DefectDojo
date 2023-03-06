@@ -1158,7 +1158,8 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         risk_acceptance_id = obj.id
         engagement_id = Engagement.objects.filter(risk_acceptance__id__in=[obj.id]).first().id
         path = reverse('download_risk_acceptance', args=(engagement_id, risk_acceptance_id))
-        if request := self.context.get("request"):
+        request = self.context.get("request")
+        if request:
             path = request.build_absolute_uri(path)
         return path
 
