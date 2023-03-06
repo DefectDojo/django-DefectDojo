@@ -20,6 +20,7 @@ from dojo.models import (
     Product,
     Test,
     Dojo_Group,
+    Cred_Mapping,
 )
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
@@ -78,6 +79,28 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
             Permissions.Technology_View,
             Permissions.Technology_Edit,
             Permissions.Technology_Delete,
+        )
+
+
+class UserHasCredentialPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.data.get('product') is not None:
+            return check_post_permission(request, Cred_Mapping, "product", Permissions.Credential_Add)
+        if request.data.get('engagement') is not None:
+            return check_post_permission(request, Cred_Mapping, "engagement", Permissions.Credential_Add)
+        if request.data.get('test') is not None:
+            return check_post_permission(request, Cred_Mapping, "test", Permissions.Credential_Add)
+        if request.data.get('finding') is not None:
+            return check_post_permission(request, Cred_Mapping, "finding", Permissions.Credential_Add)
+        return check_post_permission(request, Cred_Mapping, "product", Permissions.Credential_Add)
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(
+            request,
+            obj.product,
+            Permissions.Credential_View,
+            Permissions.Credential_Edit,
+            Permissions.Credential_Delete,
         )
 
 
@@ -265,6 +288,45 @@ class UserHasEngagementPermission(permissions.BasePermission):
                 Permissions.Engagement_Edit,
                 Permissions.Engagement_Edit,
                 Permissions.Engagement_Edit,
+            )
+
+
+class UserHasRiskAcceptancePermission(permissions.BasePermission):
+    # Permission checks for related objects (like notes or metadata) can be moved
+    # into a seperate class, when the legacy authorization will be removed.
+    path_risk_acceptance_post = re.compile(r"^/api/v2/risk_acceptances/$")
+    path_risk_acceptance = re.compile(r"^/api/v2/risk_acceptances/\d+/$")
+
+    def has_permission(self, request, view):
+        if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
+            request.path
+        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(request.path):
+            return check_post_permission(
+                request, Product, "product", Permissions.Risk_Acceptance
+            )
+        else:
+            # related object only need object permission
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
+            request.path
+        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(request.path):
+            return check_object_permission(
+                request,
+                obj,
+                Permissions.Risk_Acceptance,
+                Permissions.Risk_Acceptance,
+                Permissions.Risk_Acceptance,
+            )
+        else:
+            return check_object_permission(
+                request,
+                obj,
+                Permissions.Risk_Acceptance,
+                Permissions.Risk_Acceptance,
+                Permissions.Risk_Acceptance,
+                Permissions.Risk_Acceptance,
             )
 
 

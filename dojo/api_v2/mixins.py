@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from dojo.api_v2 import serializers
+from dojo.models import Question, Answer
 import itertools
 
 
@@ -45,3 +46,13 @@ class DeletePreviewModelMixin:
 
         serializer = serializers.DeletePreviewSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
+
+class QuestionSubClassFieldsMixin(object):
+    def get_queryset(self):
+        return Question.objects.select_subclasses()
+
+
+class AnswerSubClassFieldsMixin(object):
+    def get_queryset(self):
+        return Answer.objects.select_subclasses()
