@@ -32,7 +32,7 @@ class WazuhParser(object):
             return list()
 
         for item in vulnerability:
-            if item['condition'] != "Package unfixed":
+            if item['condition'] != "Package unfixed" and item['severity'] != "Untriaged":
                 id = item.get('cve')
                 package_name = item.get('name')
                 package_version = item.get('version')
@@ -44,7 +44,7 @@ class WazuhParser(object):
                     active = False
                 links = item.get('external_references')
                 title = item.get('title') + " (version: " + package_version + ")"
-                severity = transpose_severity(severity)
+                severity = item.get('severity', 'info').capitalize()
                 if links:
                     references = ''
                     for link in links:
@@ -80,10 +80,3 @@ class WazuhParser(object):
                         find.unsaved_vulnerability_ids = [vulnerability_id]
                     dupes[dupe_key] = find
         return list(dupes.values())
-
-
-def transpose_severity(severity):
-    if severity in Finding.SEVERITIES:
-        return severity
-    else:
-        return 'Info'
