@@ -260,60 +260,58 @@
                                     {% for test in tests %}
                                         <tr>
                                             <td>
-                                                <ul>
-                                                    <li class="dropdown" style="list-style:none;position:absolute">
-                                                        <a href="#" id='test-menu' class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
-                                                        <ul class="dropdown-menu">
+                                                <div class="dropdown">
+                                                    <a href="#" id="test-menu" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
+                                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                                        <li>
+                                                            <a class="" href="{% url 'view_test' test.id %}">
+                                                            <i class="fa-solid fa-rectangle-list"></i> View</a>
+                                                        </li>
+                                                        {% if test|has_object_permission:"Test_Edit" %}
                                                             <li>
-                                                                <a class="" href="{% url 'view_test' test.id %}">
-                                                                <i class="fa-solid fa-rectangle-list"></i> View</a>
+                                                                <a class="" href="{% url 'edit_test' test.id %}">
+                                                                <i class="fa-solid fa-pen-to-square"></i> Edit</a>
                                                             </li>
-                                                            {% if test|has_object_permission:"Test_Edit" %}
-                                                                <li>
-                                                                    <a class="" href="{% url 'edit_test' test.id %}">
-                                                                    <i class="fa-solid fa-pen-to-square"></i> Edit</a>
-                                                                </li>
-                                                                <li>
-                                                                    <a class="" href="{% url 'copy_test' test.id %}">
-                                                                    <i class="fa-solid fa-copy"></i> Copy</a>
-                                                                </li>
-                                                            {% endif %}
-                                                            {% if test|has_object_permission:"Finding_Add" %}
-                                                                <li class="divider"></li>
-                                                                <li>
-                                                                    <a class="" href="{% url 'add_findings' test.id %}">
-                                                                    <i class="fa-solid fa-plus"></i> Add Finding to Test
-                                                                    </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a title="Add Finding from Template" href="{% url 'search' test.id %}">
-                                                                    <span class="icon-add-template"></span> Finding From Template
-                                                                    </a>
-                                                                </li>
-                                                            {% endif %}
-                                                            {% if test|has_object_permission:"Import_Scan_Result" %}
-                                                                <li class="divider"></li>
-                                                                <li><a class="" href="{% url 're_import_scan_results' test.id %}">
-                                                                    <i class="fa-solid fa-upload"></i> Re-Upload Scan Results
-                                                                    </a>
-                                                                </li>
-                                                            {% endif %}
+                                                            <li>
+                                                                <a class="" href="{% url 'copy_test' test.id %}">
+                                                                <i class="fa-solid fa-copy"></i> Copy</a>
+                                                            </li>
+                                                        {% endif %}
+                                                        {% if test|has_object_permission:"Finding_Add" %}
                                                             <li class="divider"></li>
-                                                            <li role="presentation">
-                                                                <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
-                                                                <i class="fa-solid fa-file-lines"></i> Test Report
+                                                            <li>
+                                                                <a class="" href="{% url 'add_findings' test.id %}">
+                                                                <i class="fa-solid fa-plus"></i> Add Finding to Test
                                                                 </a>
                                                             </li>
-                                                            {% if test|has_object_permission:"Test_Delete" %}
-                                                                <li class="divider"></li>
-                                                                <li>
-                                                                    <a class="text-danger" href="{% url 'delete_test' test.id %}">
-                                                                    <i class="fa-solid fa-trash"></i> Delete</a>
-                                                                </li>
-                                                            {% endif %}
-                                                        </ul>
-                                                    </li>
-                                                </ul>
+                                                            <li>
+                                                                <a title="Add Finding from Template" href="{% url 'search' test.id %}">
+                                                                <span class="icon-add-template"></span> Finding From Template
+                                                                </a>
+                                                            </li>
+                                                        {% endif %}
+                                                        {% if test|has_object_permission:"Import_Scan_Result" %}
+                                                            <li class="divider"></li>
+                                                            <li><a class="" href="{% url 're_import_scan_results' test.id %}">
+                                                                <i class="fa-solid fa-upload"></i> Re-Upload Scan Results
+                                                                </a>
+                                                            </li>
+                                                        {% endif %}
+                                                        <li class="divider"></li>
+                                                        <li role="presentation">
+                                                            <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
+                                                            <i class="fa-solid fa-file-lines"></i> Test Report
+                                                            </a>
+                                                        </li>
+                                                        {% if test|has_object_permission:"Test_Delete" %}
+                                                            <li class="divider"></li>
+                                                            <li>
+                                                                <a class="text-danger" href="{% url 'delete_test' test.id %}">
+                                                                <i class="fa-solid fa-trash"></i> Delete</a>
+                                                            </li>
+                                                        {% endif %}
+                                                    </ul>
+                                                </div>
                                             </td>
                                             <td><a title="{{ test.description }}" href="{% url 'view_test' test.id %}">{{ test }}</a>
                                                 {% if test.version %}

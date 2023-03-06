@@ -1,7 +1,7 @@
 from rest_framework.generics import GenericAPIView
 from drf_spectacular.types import OpenApiTypes
 from crum import get_current_user
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, FileResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.models import Permission
@@ -19,6 +19,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
+import mimetypes
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, SLA_Configuration, \
@@ -27,18 +28,18 @@ from dojo.models import Language_Type, Languages, Notifications, Product, Produc
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, Risk_Acceptance, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
     Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations, \
-    UserContactInfo, Product_API_Scan_Configuration
-
+    UserContactInfo, Product_API_Scan_Configuration, Cred_Mapping, Cred_User, Question, Answer, \
+    Engagement_Survey, Answered_Survey, General_Survey
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
 from dojo.finding.views import set_finding_as_original_internal, reset_finding_duplicate_status_internal, \
     duplicate_cluster
-from dojo.filters import ReportFindingFilter, \
+from dojo.filters import ReportFindingFilter, ApiCredentialsFilter, \
     ApiFindingFilter, ApiProductFilter, ApiEngagementFilter, ApiEndpointFilter, \
-    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter
+    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter, ApiRiskAcceptanceFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -54,12 +55,14 @@ from dojo.product.queries import get_authorized_products, get_authorized_app_ana
     get_authorized_product_members, get_authorized_product_groups, get_authorized_languages, \
     get_authorized_engagement_presets, get_authorized_product_api_scan_configurations
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
 from dojo.group.queries import get_authorized_groups, get_authorized_group_members
 from dojo.jira_link.queries import get_authorized_jira_projects, get_authorized_jira_issues
 from dojo.tool_product.queries import get_authorized_tool_product_settings
+from dojo.cred.queries import get_authorized_cred_mappings
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from dojo.authorization.roles_permissions import Permissions
 from dojo.user.utils import get_configuration_permissions_codenames
@@ -171,7 +174,9 @@ class GlobalRoleViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
-class EndPointViewSet(mixins.ListModelMixin,
+class EndPointViewSet(prefetch.PrefetchListMixin,
+                      prefetch.PrefetchRetrieveMixin,
+                      mixins.ListModelMixin,
                       mixins.RetrieveModelMixin,
                       mixins.UpdateModelMixin,
                       mixins.DestroyModelMixin,
@@ -182,6 +187,7 @@ class EndPointViewSet(mixins.ListModelMixin,
     queryset = Endpoint.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiEndpointFilter
+    swagger_schema = prefetch.get_prefetch_schema(["endpoints_list", "endpoints_read"], serializers.EndpointSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEndpointPermission)
 
     def get_queryset(self):
@@ -217,18 +223,20 @@ class EndPointViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class EndpointStatusViewSet(mixins.ListModelMixin,
-                      mixins.RetrieveModelMixin,
-                      mixins.UpdateModelMixin,
-                      mixins.DestroyModelMixin,
-                      mixins.CreateModelMixin,
-                      viewsets.GenericViewSet,
-                      dojo_mixins.DeletePreviewModelMixin):
+class EndpointStatusViewSet(prefetch.PrefetchListMixin,
+                            prefetch.PrefetchRetrieveMixin,
+                            mixins.ListModelMixin,
+                            mixins.RetrieveModelMixin,
+                            mixins.UpdateModelMixin,
+                            mixins.DestroyModelMixin,
+                            mixins.CreateModelMixin,
+                            viewsets.GenericViewSet,
+                            dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.EndpointStatusSerializer
     queryset = Endpoint_Status.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('mitigated', 'false_positive', 'out_of_scope',
-                     'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
+    filterset_fields = ('mitigated', 'false_positive', 'out_of_scope', 'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
+    swagger_schema = prefetch.get_prefetch_schema(["endpoint_status_list", "endpoint_status_read"], serializers.EndpointStatusSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEndpointStatusPermission)
 
     def get_queryset(self):
@@ -236,7 +244,9 @@ class EndpointStatusViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class EngagementViewSet(mixins.ListModelMixin,
+class EngagementViewSet(prefetch.PrefetchListMixin,
+                        prefetch.PrefetchRetrieveMixin,
+                        mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.UpdateModelMixin,
                         mixins.DestroyModelMixin,
@@ -248,6 +258,7 @@ class EngagementViewSet(mixins.ListModelMixin,
     queryset = Engagement.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiEngagementFilter
+    swagger_schema = prefetch.get_prefetch_schema(["engagements_list", "engagements_read"], serializers.EngagementSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEngagementPermission)
 
     @property
@@ -418,24 +429,118 @@ class EngagementViewSet(mixins.ListModelMixin,
         })
         return Response(serialized_files.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+        }
+    )
+    @swagger_auto_schema(
+        method='get',
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+        }
+    )
+    @action(detail=True, methods=["get"], url_path=r'files/download/(?P<file_id>\d+)')
+    def download_file(self, request, file_id, pk=None):
+        engagement = self.get_object()
+        # Get the file object
+        file_object_qs = engagement.files.filter(id=file_id)
+        file_object = file_object_qs.first() if len(file_object_qs) > 0 else None
+        if file_object is None:
+            return Response({"error": "File ID not associated with Engagement"}, status=status.HTTP_404_NOT_FOUND)
+        # Get the path of the file in media root
+        file_path = f'{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}'
+        file_handle = open(file_path, "rb")
+        # send file
+        response = FileResponse(file_handle, content_type=f'{mimetypes.guess_type(file_path)}', status=status.HTTP_200_OK)
+        response['Content-Length'] = file_object.file.size
+        response['Content-Disposition'] = f'attachment; filename="{file_object.file.name}"'
+
+        return response
+
+
+class RiskAcceptanceViewSet(prefetch.PrefetchListMixin,
+                            prefetch.PrefetchRetrieveMixin,
+                            mixins.ListModelMixin,
+                            mixins.RetrieveModelMixin,
+                            mixins.DestroyModelMixin,
+                            viewsets.GenericViewSet,
+                            dojo_mixins.DeletePreviewModelMixin):
+    serializer_class = serializers.RiskAcceptanceSerializer
+    queryset = Risk_Acceptance.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ApiRiskAcceptanceFilter
+    swagger_schema = prefetch.get_prefetch_schema(["risk_acceptance_list", "risk_acceptance_read"], serializers.RiskAcceptanceSerializer).to_schema()
+    permission_classes = (IsAuthenticated, permissions.UserHasRiskAcceptancePermission)
+
+    def get_queryset(self):
+        return get_authorized_risk_acceptances(
+            Permissions.Risk_Acceptance).prefetch_related(
+                'notes',
+                'engagement_set',
+                'owner',
+                'accepted_findings').distinct()
+
 
 # These are technologies in the UI and the API!
 # Authorization: object-based
-class AppAnalysisViewSet(mixins.ListModelMixin,
-                        mixins.RetrieveModelMixin,
-                        mixins.UpdateModelMixin,
-                        mixins.DestroyModelMixin,
-                        mixins.CreateModelMixin,
-                        viewsets.GenericViewSet,
-                        dojo_mixins.DeletePreviewModelMixin):
+class AppAnalysisViewSet(prefetch.PrefetchListMixin,
+                         prefetch.PrefetchRetrieveMixin,
+                         mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.UpdateModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.CreateModelMixin,
+                         viewsets.GenericViewSet,
+                         dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.AppAnalysisSerializer
     queryset = App_Analysis.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiAppAnalysisFilter
+    swagger_schema = prefetch.get_prefetch_schema(["technologies_list", "technologies_read"], serializers.AppAnalysisSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasAppAnalysisPermission)
 
     def get_queryset(self):
         return get_authorized_app_analysis(Permissions.Product_View)
+
+
+# Authorization: object-based
+class CredentialsViewSet(prefetch.PrefetchListMixin,
+                         prefetch.PrefetchRetrieveMixin,
+                         mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.UpdateModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.CreateModelMixin,
+                         viewsets.GenericViewSet,
+                         dojo_mixins.DeletePreviewModelMixin):
+    serializer_class = serializers.CredentialSerializer
+    queryset = Cred_User.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    swagger_schema = prefetch.get_prefetch_schema(["credentials_list", "credentials_read"], serializers.CredentialSerializer).to_schema()
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+
+# Authorization: configuration
+class CredentialsMappingViewSet(prefetch.PrefetchListMixin,
+                                prefetch.PrefetchRetrieveMixin,
+                                mixins.ListModelMixin,
+                                mixins.RetrieveModelMixin,
+                                mixins.UpdateModelMixin,
+                                mixins.DestroyModelMixin,
+                                mixins.CreateModelMixin,
+                                viewsets.GenericViewSet,
+                                dojo_mixins.DeletePreviewModelMixin):
+    serializer_class = serializers.CredentialMappingSerializer
+    queryset = Cred_Mapping.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ApiCredentialsFilter
+    swagger_schema = prefetch.get_prefetch_schema(["credential_mappings_list", "credential_mappings_read"], serializers.CredentialMappingSerializer).to_schema()
+    permission_classes = (IsAuthenticated, permissions.UserHasCredentialPermission)
+
+    def get_queryset(self):
+        return get_authorized_cred_mappings(Permissions.Credential_View)
 
 
 # Authorization: configuration
@@ -768,6 +873,36 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         return Response(serialized_files.data, status=status.HTTP_200_OK)
 
     @extend_schema(
+        methods=['GET'],
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+        }
+    )
+    @swagger_auto_schema(
+        method='get',
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+        }
+    )
+    @action(detail=True, methods=["get"], url_path=r'files/download/(?P<file_id>\d+)')
+    def download_file(self, request, file_id, pk=None):
+        finding = self.get_object()
+        # Get the file object
+        file_object_qs = finding.files.filter(id=file_id)
+        file_object = file_object_qs.first() if len(file_object_qs) > 0 else None
+        if file_object is None:
+            return Response({"error": "File ID not associated with Finding"}, status=status.HTTP_404_NOT_FOUND)
+        # Get the path of the file in media root
+        file_path = f'{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}'
+        file_handle = open(file_path, "rb")
+        # send file
+        response = FileResponse(file_handle, content_type=f'{mimetypes.guess_type(file_path)}', status=status.HTTP_200_OK)
+        response['Content-Length'] = file_object.file.size
+        response['Content-Disposition'] = f'attachment; filename="{file_object.file.name}"'
+
+        return response
+
+    @extend_schema(
         request=serializers.FindingNoteSerializer,
         responses={status.HTTP_204_NO_CONTENT: ""}
     )
@@ -1085,7 +1220,9 @@ class JiraInstanceViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class JiraIssuesViewSet(mixins.ListModelMixin,
+class JiraIssuesViewSet(prefetch.PrefetchListMixin,
+                        prefetch.PrefetchRetrieveMixin,
+                        mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
@@ -1096,6 +1233,7 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
     queryset = JIRA_Issue.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('id', 'jira_id', 'jira_key', 'finding', 'engagement', 'finding_group')
+    swagger_schema = prefetch.get_prefetch_schema(["jira_finding_mappings_list", "jira_finding_mappings_read"], serializers.JIRAIssueSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasJiraIssuePermission)
 
     def get_queryset(self):
@@ -1103,19 +1241,22 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class JiraProjectViewSet(mixins.ListModelMixin,
-                  mixins.RetrieveModelMixin,
-                  mixins.DestroyModelMixin,
-                  mixins.UpdateModelMixin,
-                  mixins.CreateModelMixin,
-                  viewsets.GenericViewSet,
-                  dojo_mixins.DeletePreviewModelMixin):
+class JiraProjectViewSet(prefetch.PrefetchListMixin,
+                         prefetch.PrefetchRetrieveMixin,
+                         mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.UpdateModelMixin,
+                         mixins.CreateModelMixin,
+                         viewsets.GenericViewSet,
+                         dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.JIRAProjectSerializer
     queryset = JIRA_Project.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'jira_instance', 'product', 'engagement', 'component', 'project_key',
-                     'push_all_issues', 'enable_engagement_epic_mapping',
-                     'push_notes')
+    filterset_fields = (
+        'id', 'jira_instance', 'product', 'engagement', 'component', 'project_key',
+        'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes')
+    swagger_schema = prefetch.get_prefetch_schema(["jira_projects_list", "jira_projects_read"], serializers.JIRAProjectSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasJiraProductPermission)
 
     def get_queryset(self):
@@ -1154,18 +1295,20 @@ class SonarqubeIssueTransitionViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class ProductAPIScanConfigurationViewSet(mixins.ListModelMixin,
-                  mixins.RetrieveModelMixin,
-                  mixins.DestroyModelMixin,
-                  mixins.UpdateModelMixin,
-                  mixins.CreateModelMixin,
-                  viewsets.GenericViewSet,
-                  dojo_mixins.DeletePreviewModelMixin):
+class ProductAPIScanConfigurationViewSet(prefetch.PrefetchListMixin,
+                                         prefetch.PrefetchRetrieveMixin,
+                                         mixins.ListModelMixin,
+                                         mixins.RetrieveModelMixin,
+                                         mixins.DestroyModelMixin,
+                                         mixins.UpdateModelMixin,
+                                         mixins.CreateModelMixin,
+                                         viewsets.GenericViewSet,
+                                         dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.ProductAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'product', 'tool_configuration',
-                     'service_key_1', 'service_key_2', 'service_key_3')
+    filterset_fields = ('id', 'product', 'tool_configuration', 'service_key_1', 'service_key_2', 'service_key_3')
+    swagger_schema = prefetch.get_prefetch_schema(["product_api_scan_configurations_list", "product_api_scan_configurations_read"], serializers.ProductAPIScanConfigurationSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasProductAPIScanConfigurationPermission)
 
     def get_queryset(self):
@@ -1581,7 +1724,9 @@ class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
-class StubFindingsViewSet(mixins.ListModelMixin,
+class StubFindingsViewSet(prefetch.PrefetchListMixin,
+                          prefetch.PrefetchRetrieveMixin,
+                          mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
                           mixins.CreateModelMixin,
                           mixins.UpdateModelMixin,
@@ -1592,6 +1737,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
     queryset = Stub_Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('id', 'title', 'date', 'severity', 'description')
+    swagger_schema = prefetch.get_prefetch_schema(["stub_findings_list", "stub_findings_read"], serializers.StubFindingSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasFindingPermission)
 
     def get_queryset(self):
@@ -1619,7 +1765,9 @@ class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class TestsViewSet(mixins.ListModelMixin,
+class TestsViewSet(prefetch.PrefetchListMixin,
+                   prefetch.PrefetchRetrieveMixin,
+                   mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin,
                    mixins.DestroyModelMixin,
@@ -1631,6 +1779,7 @@ class TestsViewSet(mixins.ListModelMixin,
     queryset = Test.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiTestFilter
+    swagger_schema = prefetch.get_prefetch_schema(["tests_list", "tests_read"], serializers.TestSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasTestPermission)
 
     @property
@@ -1782,6 +1931,36 @@ class TestsViewSet(mixins.ListModelMixin,
         })
         return Response(serialized_files.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+        }
+    )
+    @swagger_auto_schema(
+        method='get',
+        responses={
+            status.HTTP_200_OK: serializers.RawFileSerializer,
+        }
+    )
+    @action(detail=True, methods=["get"], url_path=r'files/download/(?P<file_id>\d+)')
+    def download_file(self, request, file_id, pk=None):
+        test = self.get_object()
+        # Get the file object
+        file_object_qs = test.files.filter(id=file_id)
+        file_object = file_object_qs.first() if len(file_object_qs) > 0 else None
+        if file_object is None:
+            return Response({"error": "File ID not associated with Test"}, status=status.HTTP_404_NOT_FOUND)
+        # Get the path of the file in media root
+        file_path = f'{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}'
+        file_handle = open(file_path, "rb")
+        # send file
+        response = FileResponse(file_handle, content_type=f'{mimetypes.guess_type(file_path)}', status=status.HTTP_200_OK)
+        response['Content-Length'] = file_object.file.size
+        response['Content-Disposition'] = f'attachment; filename="{file_object.file.name}"'
+
+        return response
+
 
 # Authorization: authenticated, configuration
 class TestTypesViewSet(mixins.ListModelMixin,
@@ -1859,7 +2038,9 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: configurations
-class ToolConfigurationsViewSet(mixins.ListModelMixin,
+class ToolConfigurationsViewSet(prefetch.PrefetchListMixin,
+                                prefetch.PrefetchRetrieveMixin,
+                                mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin,
                                 mixins.CreateModelMixin,
                                 mixins.UpdateModelMixin,
@@ -1870,11 +2051,14 @@ class ToolConfigurationsViewSet(mixins.ListModelMixin,
     queryset = Tool_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('id', 'name', 'tool_type', 'url', 'authentication_type')
+    swagger_schema = prefetch.get_prefetch_schema(["tool_configurations_list", "tool_configurations_read"], serializers.ToolConfigurationSerializer).to_schema()
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
 # Authorization: object-based
-class ToolProductSettingsViewSet(mixins.ListModelMixin,
+class ToolProductSettingsViewSet(prefetch.PrefetchListMixin,
+                                 prefetch.PrefetchRetrieveMixin,
+                                 mixins.ListModelMixin,
                                  mixins.RetrieveModelMixin,
                                  mixins.DestroyModelMixin,
                                  mixins.CreateModelMixin,
@@ -1884,8 +2068,8 @@ class ToolProductSettingsViewSet(mixins.ListModelMixin,
     serializer_class = serializers.ToolProductSettingsSerializer
     queryset = Tool_Product_Settings.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'product', 'tool_configuration',
-                     'tool_project_id', 'url')
+    filterset_fields = ('id', 'name', 'product', 'tool_configuration', 'tool_project_id', 'url')
+    swagger_schema = prefetch.get_prefetch_schema(["tool_configurations_list", "tool_configurations_read"], serializers.ToolConfigurationSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasToolProductSettingsPermission)
 
     def get_queryset(self):
@@ -2566,18 +2750,20 @@ class NotificationsViewSet(prefetch.PrefetchListMixin,
         serializers.NotificationsSerializer).to_schema()
 
 
-class EngagementPresetsViewset(mixins.ListModelMixin,
-                         mixins.RetrieveModelMixin,
-                         mixins.UpdateModelMixin,
-                         mixins.DestroyModelMixin,
-                         mixins.CreateModelMixin,
-                         viewsets.GenericViewSet,
-                         dojo_mixins.DeletePreviewModelMixin):
+class EngagementPresetsViewset(prefetch.PrefetchListMixin,
+                               prefetch.PrefetchRetrieveMixin,
+                               mixins.ListModelMixin,
+                               mixins.RetrieveModelMixin,
+                               mixins.UpdateModelMixin,
+                               mixins.DestroyModelMixin,
+                               mixins.CreateModelMixin,
+                               viewsets.GenericViewSet,
+                               dojo_mixins.DeletePreviewModelMixin):
     serializer_class = serializers.EngagementPresetsSerializer
     queryset = Engagement_Presets.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('id', 'title', 'product')
-
+    swagger_schema = prefetch.get_prefetch_schema(["engagement_presets_list", "engagement_presets_read"], serializers.EngagementPresetsSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEngagementPresetPermission)
 
     def get_queryset(self):
@@ -2619,3 +2805,53 @@ class SLAConfigurationViewset(mixins.ListModelMixin,
     queryset = SLA_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+
+class QuestionnaireQuestionViewSet(mixins.ListModelMixin,
+                                   mixins.RetrieveModelMixin,
+                                   viewsets.GenericViewSet,
+                                   dojo_mixins.QuestionSubClassFieldsMixin):
+    serializer_class = serializers.QuestionSerializer
+    queryset = Question.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
+
+
+class QuestionnaireAnswerViewSet(mixins.ListModelMixin,
+                                 mixins.RetrieveModelMixin,
+                                 viewsets.GenericViewSet,
+                                 dojo_mixins.AnswerSubClassFieldsMixin):
+    serializer_class = serializers.QuestionnaireAnswerSerializer
+    queryset = Answer.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
+
+
+class QuestionnaireGeneralSurveyViewSet(mixins.ListModelMixin,
+                                        mixins.RetrieveModelMixin,
+                                        viewsets.GenericViewSet):
+    serializer_class = serializers.QuestionnaireGeneralSurveySerializer
+    queryset = General_Survey.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
+
+
+class QuestionnaireEngagementSurveyViewSet(mixins.ListModelMixin,
+                                           mixins.RetrieveModelMixin,
+                                           viewsets.GenericViewSet):
+    serializer_class = serializers.QuestionnaireEngagementSurveySerializer
+    queryset = Engagement_Survey.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
+
+
+class QuestionnaireAnsweredSurveyViewSet(prefetch.PrefetchListMixin,
+                                         prefetch.PrefetchRetrieveMixin,
+                                         mixins.ListModelMixin,
+                                         mixins.RetrieveModelMixin,
+                                         viewsets.GenericViewSet):
+    serializer_class = serializers.QuestionnaireAnsweredSurveySerializer
+    queryset = Answered_Survey.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
+    swagger_schema = prefetch.get_prefetch_schema(["questionnaire_answered_questionnaires_list", "questionnaire_answered_questionnaires_read"], serializers.QuestionnaireAnsweredSurveySerializer).to_schema()
