@@ -2956,5 +2956,37 @@
       "content_type": 7,
       "codename": "view_logentry"
     }
+  },
+  {
+    "model": "dojo.cred_user",
+    "pk": 1,
+    "fields": {
+      "name": "Cred Product",
+      "username": "admin",
+      "password": "AES.1:2f3cb6d1d412a0552a46b67d972d14f5:6617146b4d29492551dfc62e4a697aca",
+      "role": "admin",
+      "authentication": "Form",
+      "http_authentication": "Basic",
+      "description": "test",
+      "url": "https://google.com",
+      "environment": 1,
+      "login_regex": null,
+      "logout_regex": null,
+      "is_valid": true,
+      "notes": []
+    }
+  },
+  {
+    "model": "dojo.cred_mapping",
+    "pk": 1,
+    "fields": {
+      "cred_id": 1,
+      "product": 1,
+      "finding": null,
+      "engagement": null,
+      "test": null,
+      "is_authn_provider": false,
+      "url": "https://google.com"
+    }
   }
 ]
