@@ -24,7 +24,7 @@ from dojo.models import IMPORT_ACTIONS, SEVERITIES, SLA_Configuration, STATS_FIE
     Network_Locations, UserContactInfo, Product_API_Scan_Configuration, DEFAULT_NOTIFICATION, \
     Vulnerability_Id, Vulnerability_Id_Template, get_current_date, \
     Question, TextQuestion, ChoiceQuestion, Answer, TextAnswer, ChoiceAnswer, \
-    Engagement_Survey, Answered_Survey, General_Survey
+    Engagement_Survey, Answered_Survey, General_Survey, Check_List
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from dojo.utils import is_scan_file_too_large
@@ -794,6 +794,12 @@ class EngagementToFilesSerializer(serializers.Serializer):
             })
         new_data = {'engagement_id': engagement.id, 'files': new_files}
         return new_data
+
+
+class EngagementCheckListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Check_List
+        fields = '__all__'
 
 
 class AppAnalysisSerializer(TaggitSerializer, serializers.ModelSerializer):
