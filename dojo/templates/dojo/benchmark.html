@@ -30,8 +30,7 @@
                                  data-content="{% trans "Publish will display the ASVS Level on the product and other areas in DefectDojo. Check this once you have completed the assessment." %}"></span>
                         </label>
                         {{ benchmark_summary_form.publish }}
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                data-toggle="dropdown" aria-expanded="true">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" aria-expanded="false" data-toggle="dropdown">
                             <i class="fa-solid fa-filter"></i>
                             <span class="caret"></span>
                         </button>
@@ -84,12 +83,12 @@
                         <td class="text-center">{% if benchmark.control.level_2 %}✓{% endif %}</td>
                         <td class="text-center">{% if benchmark.control.level_3 %}✓{% endif %}</td>
                         <td id="td_id_form-{{ benchmark.id }}-enabled" class="text-center">
-                            <input type="checkbox" {% if benchmark.enabled %} checked {% endif %}
-                                   name="form-{{ benchmark.id }}-enabled" aria-label="{% trans "Is applicable?" %}"
+                            <input type="checkbox" {% if benchmark.enabled %} checked {% endif %} aria-label="{% trans "Is applicable?" %}"
+                                   name="form-{{ benchmark.id }}-enabled"
                                    id="id_form-{{ benchmark.id }}-enabled"/>
                         </td>
                         <td id="td_id_form-{{ benchmark.id }}-pass_fail" class="text-center">
-                            <input type="checkbox" {% if benchmark.pass_fail %} checked {% endif %}
+                            <input type="checkbox" {% if benchmark.pass_fail %} checked {% endif %} aria-label="{% trans "Is passed?" %}"
                                    name="form-{{ benchmark.id }}-pass_fail" id="id_form-{{ benchmark.id }}-pass_fail"/>
                         </td>
                         <td align="center">
@@ -115,13 +114,13 @@
     </div>
 
     {#  Modal  #}
-    <div class="modal fade" id="notesModal" tabindex="-1" role="dialog">
+    <div class="modal fade" id="notesModal" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="{% trans "Close" %}"><span
                             aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">{% trans "Benchmark Notes" %}</h4>
+                    <h4 id="modal-title" class="modal-title">{% trans "Benchmark Notes" %}</h4>
                 </div>
                 <div class="modal-body">
                     <div id="benchNotes">
