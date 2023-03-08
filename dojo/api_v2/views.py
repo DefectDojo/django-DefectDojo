@@ -2811,7 +2811,7 @@ class QuestionnaireQuestionViewSet(mixins.ListModelMixin,
                                    mixins.RetrieveModelMixin,
                                    viewsets.GenericViewSet,
                                    dojo_mixins.QuestionSubClassFieldsMixin):
-    serializer_class = serializers.QuestionSerializer
+    serializer_class = serializers.QuestionnaireQuestionSerializer
     queryset = Question.objects.all()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
