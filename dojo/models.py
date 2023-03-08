@@ -4120,7 +4120,7 @@ class NotificationsAdmin(admin.ModelAdmin):
         return list_fields
 
 
-class Webhook_Endpoints(models.Model):  # TODO rename to Notification_Webhooks 
+class Webhook_Endpoints(models.Model):  # TODO rename to Notification_Webhooks
     _STATUS_ACTIVE = "active"
     _STATUS_INACTIVE = "inactive"
     STATUS_ACTIVE = f"{_STATUS_ACTIVE}"
