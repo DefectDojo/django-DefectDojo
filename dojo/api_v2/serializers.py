@@ -95,12 +95,13 @@ from dojo.tools.factory import (
     get_choices_sorted,
     requires_tool_type,
 )
-from dojo.utils import is_scan_file_too_large
+from dojo.utils import is_scan_file_too_large, get_system_setting
 from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import Permission
+from django.http import Http404
 from django.utils import timezone
 from django.urls import reverse
 from django.db.utils import IntegrityError
@@ -3225,3 +3226,8 @@ class WebhookEndpointsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Webhook_Endpoints
         fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        if not get_system_setting('enable_webhooks_notifications'):
+            raise Http404()  # TODO maybe not 404 but other 4xx
+        super().__init__(*args, **kwargs)
