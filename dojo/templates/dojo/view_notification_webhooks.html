@@ -56,7 +56,7 @@
                             <tr>
                               <td><a>{{ nwh.name }}</a></td>
                               <td><a>{{ nwh.url }}</a></td>
-                              <td><a>{{ nwh.status }} TODO, show full text</a></td>
+                              <td><a>{{ nwh.get_status_display }}</a></td>
                               <td><a>{{ nwh.owner }}</a></td>
                               {% if "dojo.edit_notification_webhook"|has_configuration_permission %}
                                 <td>
