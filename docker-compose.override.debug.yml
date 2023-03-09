@@ -10,6 +10,7 @@ services:
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
+      DD_ALERT_REFRESH: "false"
     ports:
       - target: ${DD_DEBUG_PORT:-3000}
         published: ${DD_DEBUG_PORT:-3000}
