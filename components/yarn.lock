@@ -224,11 +224,6 @@ codemirror@^5.63.1:
   resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.65.0.tgz#50344359393579f526ca53797e510ff75477117f"
   integrity sha512-gWEnHKEcz1Hyz7fsQWpK7P0sPI2/kSkRX2tc7DFA6TmZuDN75x/1ejnH/Pn8adYKrLEA1V2ww6L00GudHZbSKw==
 
-components-jqueryui@^1.12.1:
-  version "1.12.1"
-  resolved "https://registry.yarnpkg.com/components-jqueryui/-/components-jqueryui-1.12.1.tgz#617076f128f3be4c265f3e2db50471ef96cd9cee"
-  integrity sha512-efkkM1OzVyxMiyZRB+eu3fhweE3T2fGs2Syia8A6l38sfB0Y8MRvYENhVS3UO21Gel93nt2HZiv+zsV8/4y83w==
-
 concat-stream@~1.6.0:
   version "1.6.2"
   resolved "https://registry.yarnpkg.com/concat-stream/-/concat-stream-1.6.2.tgz#904bdf194cd3122fc675c77fc4ac3d4ff0fd1a34"
@@ -696,6 +691,13 @@ jquery-highlight@3.5.0:
   dependencies:
     jquery ">= 1.0.0"
 
+jquery-ui@1.13.2:
+  version "1.13.2"
+  resolved "https://registry.yarnpkg.com/jquery-ui/-/jquery-ui-1.13.2.tgz#de03580ae6604773602f8d786ad1abfb75232034"
+  integrity sha512-wBZPnqWs5GaYJmo1Jj0k/mrSkzdQzKDwhXNtHKcBdAcKVxMM3KNYFq+iJ2i1rwiG53Z8M4mTn3Qxrm17uH1D4Q==
+  dependencies:
+    jquery ">=1.8.0 <4.0.0"
+
 jquery.cookie@1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/jquery.cookie/-/jquery.cookie-1.4.1.tgz#d63dce209eab691fe63316db08ca9e47e0f9385b"
@@ -710,7 +712,7 @@ jquery.hotkeys@jeresig/jquery.hotkeys#master:
   version "0.2.0"
   resolved "https://codeload.github.com/jeresig/jquery.hotkeys/tar.gz/f24f1da275aab7881ab501055c256add6f690de4"
 
-"jquery@>= 1.0.0", jquery@>=1.7, jquery@>=1.7.0, jquery@^3.6.4:
+"jquery@>= 1.0.0", jquery@>=1.7, jquery@>=1.7.0, "jquery@>=1.8.0 <4.0.0", jquery@^3.6.4:
   version "3.6.4"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.6.4.tgz#ba065c188142100be4833699852bf7c24dc0252f"
   integrity sha512-v28EW9DWDFpzcD9O5iyJXg3R3+q+mET5JhnjJzQUZMHOv67bpSIHq81GEYpPNZHG+XXHsfSme3nxp/hndKEcsQ==
