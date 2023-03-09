@@ -12,6 +12,7 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.utils import IntegrityError
+from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -117,7 +118,7 @@ from dojo.tools.factory import (
     requires_tool_type,
 )
 from dojo.user.utils import get_configuration_permissions_codenames
-from dojo.utils import is_scan_file_too_large
+from dojo.utils import is_scan_file_too_large, get_system_setting
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -3179,3 +3180,8 @@ class WebhookEndpointsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Webhook_Endpoints
         fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        if not get_system_setting('enable_webhooks_notifications'):
+            raise Http404()  # TODO maybe not 404 but other 4xx
+        super().__init__(*args, **kwargs)
