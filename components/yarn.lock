@@ -136,15 +136,15 @@ bootstrap-wysiwyg@^2.0.0:
   resolved "https://registry.yarnpkg.com/bootstrap-wysiwyg/-/bootstrap-wysiwyg-2.0.1.tgz#ed9c7a7e2e33c5931b0f8d974c11268baf39a8ba"
   integrity sha1-7Zx6fi4zxZMbD42XTBEmi685qLo=
 
-bootstrap@^3.4.0, bootstrap@~3:
+bootstrap@^3.4.1, bootstrap@~3:
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-3.4.1.tgz#c3a347d419e289ad11f4033e3c4132b87c081d72"
   integrity sha512-yN5oZVmRCwe5aKwzRj6736nSmKDX7pLYwsXiCj/EYmo16hODaBiT4En5btW/jhBF/seV+XMx3aYwukYC3A49DA==
 
-bootswatch@3.4.1:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/bootswatch/-/bootswatch-3.4.1.tgz#50aed16fb04ec791c3dd8831515c29d4a757fdb9"
-  integrity sha512-0hL4A8OUiqABgPipGrojf/hyhr5RS257xCNARlbK34HaMfhV5fXvwEooN4/ri9+jgX47J4Wg24ZPmfZ2xD2cKw==
+bootswatch@5.2.3:
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/bootswatch/-/bootswatch-5.2.3.tgz#a12bef6ea1a54f1b5b55b472c11a846d1cb77239"
+  integrity sha512-tvnW15WoOY2sEp1uT1ITDQiJy2TekQa+K+Q28WDXibleIxsY0nAoC9IylbnUPD7Q5vkCIclOuBHLVBblJYYPSA==
 
 brfs@^2.0.0, brfs@^2.0.2:
   version "2.0.2"
@@ -224,10 +224,10 @@ codemirror@^5.63.1:
   resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.65.0.tgz#50344359393579f526ca53797e510ff75477117f"
   integrity sha512-gWEnHKEcz1Hyz7fsQWpK7P0sPI2/kSkRX2tc7DFA6TmZuDN75x/1ejnH/Pn8adYKrLEA1V2ww6L00GudHZbSKw==
 
-components-jqueryui@^1.0.0:
+components-jqueryui@^1.12.1:
   version "1.12.1"
   resolved "https://registry.yarnpkg.com/components-jqueryui/-/components-jqueryui-1.12.1.tgz#617076f128f3be4c265f3e2db50471ef96cd9cee"
-  integrity sha1-YXB28SjzvkwmXz4ttQRx75bNnO4=
+  integrity sha512-efkkM1OzVyxMiyZRB+eu3fhweE3T2fGs2Syia8A6l38sfB0Y8MRvYENhVS3UO21Gel93nt2HZiv+zsV8/4y83w==
 
 concat-stream@~1.6.0:
   version "1.6.2"
