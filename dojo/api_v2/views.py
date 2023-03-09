@@ -3336,9 +3336,12 @@ class AnnouncementViewSet(
 
 
 class WebhookEndpointsViewset(
+    prefetch.PrefetchListMixin,
+    prefetch.PrefetchRetrieveMixin,
     DojoModelViewSet
 ):
     serializer_class = serializers.WebhookEndpointsSerializer
     queryset = Webhook_Endpoints.objects.all()
     filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('__all__')
     permission_classes = (IsAuthenticated, DjangoModelPermissions)  # TODO

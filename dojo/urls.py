@@ -70,6 +70,7 @@ from dojo.api_v2.views import (
     UserContactInfoViewSet,
     UserProfileView,
     UsersViewSet,
+    WebhookEndpointsViewset,
 )
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.banner.urls import urlpatterns as banner_urls
@@ -170,6 +171,7 @@ v2_api.register(r"tool_product_settings", ToolProductSettingsViewSet, basename="
 v2_api.register(r"tool_types", ToolTypesViewSet, basename="tool_type")
 v2_api.register(r"users", UsersViewSet, basename="user")
 v2_api.register(r"user_contact_infos", UserContactInfoViewSet, basename="usercontactinfo")
+v2_api.register(r'notification_webhook_endpoints', WebhookEndpointsViewset)
 v2_api.register(r"questionnaire_answers", QuestionnaireAnswerViewSet, basename="answer")
 v2_api.register(r"questionnaire_answered_questionnaires", QuestionnaireAnsweredSurveyViewSet, basename="answered_survey")
 v2_api.register(r"questionnaire_engagement_questionnaires", QuestionnaireEngagementSurveyViewSet, basename="engagement_survey")

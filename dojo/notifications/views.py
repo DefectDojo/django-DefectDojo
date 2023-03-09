@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 
 from dojo.models import Notifications, Notification_Webhooks
-from dojo.utils import get_enabled_notifications_list, add_breadcrumb, get_system_setting
+from dojo.utils import get_enabled_notifications_list, get_page_items, add_breadcrumb, get_system_setting
 from dojo.forms import NotificationsForm, NotificationsWebhookForm, DeleteNotificationsWebhookForm
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.notifications.helper import test_webhooks_notification
@@ -143,6 +143,10 @@ class TemplateNotificationsView(SystemNotificationsView):
 
 @user_is_configuration_authorized('dojo.view_notification_webhooks')
 def notification_webhooks(request):
+    
+    if not get_system_setting('enable_webhooks_notifications'):
+        raise Http404()
+    
     nwhs = Webhook_Endpoints.objects.all().order_by('name')
     # name_words = initial_queryset.values_list('name', flat=True)
     # ntl = NoteTypesFilter(request.GET, queryset=initial_queryset)
@@ -161,6 +165,10 @@ def notification_webhooks(request):
 
 @user_is_configuration_authorized('dojo.add_notification_webhook')
 def add_notification_webhook(request):
+
+    if not get_system_setting('enable_webhooks_notifications'):
+        raise Http404()
+    
     form = NotificationsWebhookForm()
     if request.method == 'POST':
         form = NotificationsWebhookForm(request.POST)
@@ -186,6 +194,10 @@ def add_notification_webhook(request):
 @user_is_configuration_authorized('dojo.change_notification_webhook')
 # TODO this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
 def edit_notification_webhook(request, nwhid):
+
+    if not get_system_setting('enable_webhooks_notifications'):
+        raise Http404()
+
     nwh = get_object_or_404(Webhook_Endpoints, pk=nwhid)
     nwh_form = NotificationsWebhookForm(instance=nwh)
     if request.method == "POST": # TODO do we need this:? and request.POST.get('edit_note_type'):
@@ -213,6 +225,10 @@ def edit_notification_webhook(request, nwhid):
 
 @user_is_configuration_authorized('dojo.delete_notification_webhook')
 def delete_notification_webhook(request, nwhid):
+
+    if not get_system_setting('enable_webhooks_notifications'):
+        raise Http404()
+
     nwh = get_object_or_404(Webhook_Endpoints, id=nwhid)
     form = DeleteNotificationsWebhookForm(instance=nwh)
 

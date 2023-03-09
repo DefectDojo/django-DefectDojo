@@ -541,12 +541,13 @@
                                                         {% trans "Notifications" %}
                                                     </a>
                                                 </li>
-                                                <!-- TODO show only if activated in settings -->
+                                                {% if system_settings.enable_webhooks_notifications %}
                                                 <li>
                                                     <a href="{% url 'notification_webhooks' %}">
                                                         {% trans "Notification Webhooks" %}
                                                     </a>
                                                 </li>
+                                                {% endif %}
                                                 <li>
                                                     <a href="{% url 'regulations' %}">
                                                         {% trans "Regulations" %}
