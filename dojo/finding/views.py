@@ -877,7 +877,8 @@ def edit_finding(request, fid):
             # if there's a finding group, that's what we need to push
             push_group_to_jira = push_to_jira and new_finding.finding_group
             # any existing finding should be updated
-            push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
+            push_to_jira = (push_to_jira and not push_group_to_jira and new_finding.has_jira_issue
+                and jira_helper.get_jira_instance(finding).finding_jira_sync)
 
             finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
 
