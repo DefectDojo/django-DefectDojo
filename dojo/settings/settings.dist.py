@@ -198,6 +198,8 @@ env = environ.Env(
     DD_JIRA_EXTRA_ISSUE_TYPES=(str, ''),
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
     DD_LOGGING_HANDLER=(str, 'console'),
+    # If true, drf-spectacular will load CSS & JS from default CDN, otherwise from static resources
+    DD_DEFAULT_SWAGGER_UI=(bool, True),
     DD_ALERT_REFRESH=(bool, True),
     DD_DISABLE_ALERT_COUNTER=(bool, False),
     # to disable deleting alerts per user set value to -1
@@ -768,6 +770,10 @@ SPECTACULAR_SETTINGS = {
         "docExpansion": "none"
     }
 }
+
+if not env('DD_DEFAULT_SWAGGER_UI'):
+    SPECTACULAR_SETTINGS['SWAGGER_UI_DIST'] = f'{STATIC_URL}drf-yasg/swagger-ui-dist'
+    SPECTACULAR_SETTINGS['SWAGGER_UI_FAVICON_HREF'] = f'{STATIC_URL}drf-yasg/swagger-ui-dist/favicon-32x32.png'
 
 # ------------------------------------------------------------------------------
 # TEMPLATES
