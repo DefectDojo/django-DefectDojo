@@ -1,0 +1,2555 @@
+{
+  "meta": {
+    "application": "Dependency-Track",
+    "version": "4.7.1",
+    "timestamp": "2023-03-10T11:53:36Z"
+  },
+  "findings": [
+    {
+      "component": {
+        "name": "qs",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/qs@6.7.0",
+        "uuid": "cc5e880d-7e04-47d3-ab25-1183515cbe35",
+        "version": "6.7.0",
+        "latestVersion": "6.11.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-24999",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:21.403",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-24999?component-type=npm&component-name=qs&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2022-24999",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "qs before 6.10.3, as used in Express before 4.17.3 and other products, allows attackers to cause a Node process hang for an Express application because an __ proto__ key can be used. In many typical Express use cases, an unauthenticated remote attacker can place the attack payload in the query string of the URL that is used to visit the application, such as a[__proto__]=b&a[__proto__]&a[length]=100000000. The fix was backported to qs 6.9.7, 6.8.3, 6.7.3, 6.6.1, 6.5.3, 6.4.1, 6.3.3, and 6.2.4 (and therefore Express 4.17.3, which has \"deps: qs@6.9.7\" in its release description, is not vulnerable).",
+        "epssScore": 0.00215,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "5eff7176-7339-468e-9d35-052bdf815d6f",
+        "severityRank": 1,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.57744
+      },
+      "analysis": {
+        "isSuppressed": false,
+        "state": "FALSE_POSITIVE"
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:cc5e880d-7e04-47d3-ab25-1183515cbe35:5eff7176-7339-468e-9d35-052bdf815d6f"
+    },
+    {
+      "component": {
+        "name": "mout",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/mout@1.2.2",
+        "uuid": "156de471-1a56-497c-805c-559737cfccd7",
+        "version": "1.2.2",
+        "latestVersion": "1.2.4"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2020-7792",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:21.466",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2020-7792?component-type=npm&component-name=mout&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2020-7792",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "This affects all versions of package mout. The deepFillIn function can be used to 'fill missing properties recursively', while the deepMixIn 'mixes objects into the target object, recursively mixing existing child objects as well'. In both cases, the key used to access the target object recursively is not checked, leading to a Prototype Pollution.",
+        "epssScore": 0.0078,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "e5dd0f34-1cd9-443d-8566-b3735cffa99e",
+        "severityRank": 1,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.78637,
+        "cvssV2BaseScore": 7.5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:156de471-1a56-497c-805c-559737cfccd7:e5dd0f34-1cd9-443d-8566-b3735cffa99e"
+    },
+    {
+      "component": {
+        "name": "mout",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/mout@1.2.2",
+        "uuid": "156de471-1a56-497c-805c-559737cfccd7",
+        "version": "1.2.2",
+        "latestVersion": "1.2.4"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-21213",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:21.489",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-21213?component-type=npm&component-name=mout&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2022-21213",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "This affects all versions of package mout. The deepFillIn function can be used to 'fill missing properties recursively', while the deepMixIn mixes objects into the target object, recursively mixing existing child objects as well. In both cases, the key used to access the target object recursively is not checked, leading to exploiting this vulnerability. **Note:** This vulnerability derives from an incomplete fix of [CVE-2020-7792](https://security.snyk.io/vuln/SNYK-JS-MOUT-1014544).",
+        "epssScore": 0.00106,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "cb57df2c-5efd-4e8a-8133-09f96f2a2286",
+        "severityRank": 1,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.41641,
+        "cvssV2BaseScore": 5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:156de471-1a56-497c-805c-559737cfccd7:cb57df2c-5efd-4e8a-8133-09f96f2a2286"
+    },
+    {
+      "component": {
+        "name": "decode-uri-component",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/decode-uri-component@0.2.0",
+        "uuid": "eb296f14-7eab-44ef-8e34-1c990f871f52",
+        "version": "0.2.0",
+        "latestVersion": "0.4.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-38900",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:21.839",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-38900?component-type=npm&component-name=decode-uri-component&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2022-38900",
+        "aliases": [],
+        "cweId": 20,
+        "description": "decode-uri-component 0.2.0 is vulnerable to Improper Input Validation resulting in DoS.",
+        "epssScore": 0.00046,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 20,
+            "name": "Improper Input Validation",
+            "id": 0
+          }
+        ],
+        "uuid": "422ac2ef-507e-4ef3-b00b-e273c4e0377a",
+        "severityRank": 1,
+        "cweName": "Improper Input Validation",
+        "epssPercentile": 0.13998
+      },
+      "analysis": {
+        "isSuppressed": false,
+        "state": "RESOLVED"
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:eb296f14-7eab-44ef-8e34-1c990f871f52:422ac2ef-507e-4ef3-b00b-e273c4e0377a"
+    },
+    {
+      "component": {
+        "name": "minimist",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/minimist@1.2.5",
+        "uuid": "77d1ae60-1001-435b-b236-7ae675baea2a",
+        "version": "1.2.5",
+        "latestVersion": "1.2.8"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-44906",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:22.78",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-44906?component-type=npm&component-name=minimist&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.8,
+        "vulnId": "CVE-2021-44906",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "Minimist <=1.2.5 is vulnerable to Prototype Pollution via file index.js, function setKey() (lines 69-95).",
+        "epssScore": 0.00168,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "5f4cc821-6e73-4264-a691-33ae3fef4e1f",
+        "severityRank": 0,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.52013,
+        "cvssV2BaseScore": 7.5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:77d1ae60-1001-435b-b236-7ae675baea2a:5f4cc821-6e73-4264-a691-33ae3fef4e1f"
+    },
+    {
+      "component": {
+        "name": "lodash",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/lodash@4.17.19",
+        "uuid": "94a9a668-f4fc-4576-a2ed-6faf95c5c405",
+        "version": "4.17.19",
+        "latestVersion": "4.17.21"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2020-28500",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:22.947",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2020-28500?component-type=npm&component-name=lodash&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 5.3,
+        "severityRank": 2,
+        "vulnId": "CVE-2020-28500",
+        "aliases": [],
+        "epssPercentile": 0.5368,
+        "cvssV2BaseScore": 5,
+        "description": "Lodash versions prior to 4.17.21 are vulnerable to Regular Expression Denial of Service (ReDoS) via the toNumber, trim and trimEnd functions.",
+        "epssScore": 0.00182,
+        "source": "NVD",
+        "uuid": "2ccc7b09-6d5e-4bfd-8b5d-57d81b7cf883"
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:94a9a668-f4fc-4576-a2ed-6faf95c5c405:2ccc7b09-6d5e-4bfd-8b5d-57d81b7cf883"
+    },
+    {
+      "component": {
+        "name": "lodash",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/lodash@4.17.19",
+        "uuid": "94a9a668-f4fc-4576-a2ed-6faf95c5c405",
+        "version": "4.17.19",
+        "latestVersion": "4.17.21"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-23337",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:22.964",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-23337?component-type=npm&component-name=lodash&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.2,
+        "vulnId": "CVE-2021-23337",
+        "aliases": [],
+        "cweId": 94,
+        "description": "Lodash versions prior to 4.17.21 are vulnerable to Command Injection via the template function.",
+        "epssScore": 0.00606,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 94,
+            "name": "Improper Control of Generation of Code ('Code Injection')",
+            "id": 0
+          }
+        ],
+        "uuid": "090685b1-af42-4539-86d8-08e675ba9727",
+        "severityRank": 1,
+        "cweName": "Improper Control of Generation of Code ('Code Injection')",
+        "epssPercentile": 0.75275,
+        "cvssV2BaseScore": 6.5
+      },
+      "analysis": {
+        "isSuppressed": false,
+        "state": "NOT_AFFECTED"
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:94a9a668-f4fc-4576-a2ed-6faf95c5c405:090685b1-af42-4539-86d8-08e675ba9727"
+    },
+    {
+      "component": {
+        "name": "hosted-git-info",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/hosted-git-info@2.8.8",
+        "uuid": "2daaafdf-342c-4c6f-a596-e08824c42927",
+        "version": "2.8.8",
+        "latestVersion": "6.1.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-23362",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:22.987",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-23362?component-type=npm&component-name=hosted-git-info&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 5.3,
+        "severityRank": 2,
+        "vulnId": "CVE-2021-23362",
+        "aliases": [],
+        "epssPercentile": 0.55842,
+        "cvssV2BaseScore": 5,
+        "description": "The package hosted-git-info before 3.0.8 are vulnerable to Regular Expression Denial of Service (ReDoS) via regular expression shortcutMatch in the fromUrl function in index.js. The affected regular expression exhibits polynomial worst-case time complexity.",
+        "epssScore": 0.00197,
+        "source": "NVD",
+        "uuid": "1ee5417e-26b6-419a-b198-abc70d6f15a6"
+      },
+      "analysis": {
+        "isSuppressed": false,
+        "state": "NOT_AFFECTED"
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:2daaafdf-342c-4c6f-a596-e08824c42927:1ee5417e-26b6-419a-b198-abc70d6f15a6"
+    },
+    {
+      "component": {
+        "name": "path-parse",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/path-parse@1.0.6",
+        "uuid": "4897a07a-3e52-40d6-8498-6619e532561d",
+        "version": "1.0.6",
+        "latestVersion": "1.0.7"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2021-0176",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:23.007",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2021-0176?component-type=npm&component-name=path-parse&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "severityRank": 1,
+        "vulnId": "CVE-2021-23343",
+        "aliases": [],
+        "epssPercentile": 0.44666,
+        "cvssV2BaseScore": 5,
+        "description": "All versions of package path-parse are vulnerable to Regular Expression Denial of Service (ReDoS) via splitDeviceRe, splitTailRe, and splitPathRe regular expressions. ReDoS exhibits polynomial worst-case time complexity.",
+        "epssScore": 0.00121,
+        "source": "NVD",
+        "uuid": "2debfa43-93ea-4479-9090-8749c641ccd2"
+      },
+      "analysis": {
+        "isSuppressed": false,
+        "state": "FALSE_POSITIVE"
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:4897a07a-3e52-40d6-8498-6619e532561d:2debfa43-93ea-4479-9090-8749c641ccd2"
+    },
+    {
+      "component": {
+        "name": "ansi-regex",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/ansi-regex@4.1.0",
+        "uuid": "491c04d9-2769-455b-b936-d78e98fcc068",
+        "version": "4.1.0",
+        "latestVersion": "6.0.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2021-1169",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:23.142",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2021-1169?component-type=npm&component-name=ansi-regex&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2021-3807",
+        "aliases": [],
+        "cweId": 697,
+        "description": "ansi-regex is vulnerable to Inefficient Regular Expression Complexity",
+        "epssScore": 0.00157,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 697,
+            "name": "Incorrect Comparison",
+            "id": 0
+          }
+        ],
+        "uuid": "e9a6c08c-3c71-43b9-ac66-23545d3ed068",
+        "severityRank": 1,
+        "cweName": "Incorrect Comparison",
+        "epssPercentile": 0.50429,
+        "cvssV2BaseScore": 7.8
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:491c04d9-2769-455b-b936-d78e98fcc068:e9a6c08c-3c71-43b9-ac66-23545d3ed068"
+    },
+    {
+      "component": {
+        "name": "y18n",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/y18n@4.0.0",
+        "uuid": "bdd8dc0f-7832-4fc8-b170-5bac6f0a2ebe",
+        "version": "4.0.0",
+        "latestVersion": "5.0.8"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2020-1040",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:23.221",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2020-1040?component-type=npm&component-name=y18n&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.8,
+        "vulnId": "CVE-2020-7774",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "The package y18n before 3.2.2, 4.0.1 and 5.0.5, is vulnerable to Prototype Pollution.",
+        "epssScore": 0.45473,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "a2600505-a8d4-4465-b116-5d931f357651",
+        "severityRank": 0,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.96801,
+        "cvssV2BaseScore": 7.5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:bdd8dc0f-7832-4fc8-b170-5bac6f0a2ebe:a2600505-a8d4-4465-b116-5d931f357651"
+    },
+    {
+      "component": {
+        "name": "json5",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/json5@2.1.3",
+        "uuid": "6d9fbb5c-a081-44e9-99a6-b4532c2f6efb",
+        "version": "2.1.3",
+        "latestVersion": "2.2.3"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-46175",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:23.268",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-46175?component-type=npm&component-name=json5&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 8.8,
+        "vulnId": "CVE-2022-46175",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "JSON5 is an extension to the popular JSON file format that aims to be easier to write and maintain by hand (e.g. for config files). The `parse` method of the JSON5 library before and including versions 1.0.1 and 2.2.1 does not restrict parsing of keys named `__proto__`, allowing specially crafted strings to pollute the prototype of the resulting object. This vulnerability pollutes the prototype of the object returned by `JSON5.parse` and not the global Object prototype, which is the commonly understood definition of Prototype Pollution. However, polluting the prototype of a single object can have significant security impact for an application if the object is later used in trusted operations. This vulnerability could allow an attacker to set arbitrary and unexpected keys on the object returned from `JSON5.parse`. The actual impact will depend on how applications utilize the returned object and how they filter unwanted keys, but could include denial of service, cross-site scripting, elevation of privilege, and in extreme cases, remote code execution. `JSON5.parse` should restrict parsing of `__proto__` keys when parsing JSON strings to objects. As a point of reference, the `JSON.parse` method included in JavaScript ignores `__proto__` keys. Simply changing `JSON5.parse` to `JSON.parse` in the examples above mitigates this vulnerability. This vulnerability is patched in json5 versions 1.0.2, 2.2.2, and later.",
+        "epssScore": 0.00262,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "c2659bca-4da4-4a4b-8972-1e110ede8c89",
+        "severityRank": 1,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.62096
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:6d9fbb5c-a081-44e9-99a6-b4532c2f6efb:c2659bca-4da4-4a4b-8972-1e110ede8c89"
+    },
+    {
+      "component": {
+        "name": "bl",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/bl@1.2.2",
+        "uuid": "53a9dc41-aabc-48dc-81b1-bce8ec75ec04",
+        "version": "1.2.2",
+        "latestVersion": "6.0.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2020-8244",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:23.474",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2020-8244?component-type=npm&component-name=bl&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 6.5,
+        "vulnId": "CVE-2020-8244",
+        "aliases": [],
+        "cweId": 125,
+        "description": "A buffer over-read vulnerability exists in bl <4.0.3, <3.0.1, <2.2.1, and <1.2.3 which could allow an attacker to supply user input (even typed) that if it ends up in consume() argument and can become negative, the BufferList state can be corrupted, tricking it into exposing uninitialized memory via regular .slice() calls.",
+        "epssScore": 0.00111,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 125,
+            "name": "Out-of-bounds Read",
+            "id": 0
+          }
+        ],
+        "uuid": "08201a89-f14f-4b70-8545-2838ded02ee3",
+        "severityRank": 2,
+        "cweName": "Out-of-bounds Read",
+        "epssPercentile": 0.42585,
+        "cvssV2BaseScore": 6.4
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:53a9dc41-aabc-48dc-81b1-bce8ec75ec04:08201a89-f14f-4b70-8545-2838ded02ee3"
+    },
+    {
+      "component": {
+        "name": "got",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/got@8.3.2",
+        "uuid": "850947c1-abc3-4440-8195-eeb5ccc56c64",
+        "version": "8.3.2",
+        "latestVersion": "12.6.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-33987",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:25.901",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-33987?component-type=npm&component-name=got&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 5.3,
+        "severityRank": 2,
+        "vulnId": "CVE-2022-33987",
+        "aliases": [],
+        "epssPercentile": 0.18452,
+        "cvssV2BaseScore": 5,
+        "description": "The got package before 12.1.0 (also fixed in 11.8.5) for Node.js allows a redirect to a UNIX socket.",
+        "epssScore": 0.00052,
+        "source": "NVD",
+        "uuid": "64383cb4-ecc1-43bd-831d-8f97aea054d3"
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:850947c1-abc3-4440-8195-eeb5ccc56c64:64383cb4-ecc1-43bd-831d-8f97aea054d3"
+    },
+    {
+      "component": {
+        "name": "http-cache-semantics",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/http-cache-semantics@3.8.1",
+        "uuid": "db40dc65-a4ba-405f-bd78-aa5d80e4f494",
+        "version": "3.8.1",
+        "latestVersion": "4.1.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-25881",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:25.949",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-25881?component-type=npm&component-name=http-cache-semantics&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2022-25881",
+        "aliases": [],
+        "cweId": 1333,
+        "description": "This affects versions of the package http-cache-semantics before 4.1.1. The issue can be exploited via malicious request header values sent to a server, when that server reads the cache policy from the request using this library.",
+        "epssScore": 0.00049,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1333,
+            "name": "Inefficient Regular Expression Complexity",
+            "id": 0
+          }
+        ],
+        "uuid": "35236ab5-d581-4688-aec6-ba8c8041ea10",
+        "severityRank": 1,
+        "cweName": "Inefficient Regular Expression Complexity",
+        "epssPercentile": 0.16294
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:db40dc65-a4ba-405f-bd78-aa5d80e4f494:35236ab5-d581-4688-aec6-ba8c8041ea10"
+    },
+    {
+      "component": {
+        "name": "express",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/express@4.17.1",
+        "uuid": "862aadf1-08b3-472c-91dd-7e3b37a6309b",
+        "version": "4.17.1",
+        "latestVersion": "4.18.2"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-24999",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:26.114",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-24999?component-type=npm&component-name=express&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2022-24999",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "qs before 6.10.3, as used in Express before 4.17.3 and other products, allows attackers to cause a Node process hang for an Express application because an __ proto__ key can be used. In many typical Express use cases, an unauthenticated remote attacker can place the attack payload in the query string of the URL that is used to visit the application, such as a[__proto__]=b&a[__proto__]&a[length]=100000000. The fix was backported to qs 6.9.7, 6.8.3, 6.7.3, 6.6.1, 6.5.3, 6.4.1, 6.3.3, and 6.2.4 (and therefore Express 4.17.3, which has \"deps: qs@6.9.7\" in its release description, is not vulnerable).",
+        "epssScore": 0.00215,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "5eff7176-7339-468e-9d35-052bdf815d6f",
+        "severityRank": 1,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.57744
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:862aadf1-08b3-472c-91dd-7e3b37a6309b:5eff7176-7339-468e-9d35-052bdf815d6f"
+    },
+    {
+      "component": {
+        "name": "express-jwt",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/express-jwt@0.1.3",
+        "uuid": "f06f93c0-dab0-4417-84fb-c956243e97a8",
+        "version": "0.1.3",
+        "latestVersion": "8.4.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2020-15084",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:26.25",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2020-15084?component-type=npm&component-name=express-jwt&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.1,
+        "vulnId": "CVE-2020-15084",
+        "aliases": [],
+        "cweId": 863,
+        "description": "In express-jwt (NPM package) up and including version 5.3.3, the algorithms entry to be specified in the configuration is not being enforced. When algorithms is not specified in the configuration, with the combination of jwks-rsa, it may lead to authorization bypass. You are affected by this vulnerability if all of the following conditions apply: - You are using express-jwt - You do not have **algorithms** configured in your express-jwt configuration. - You are using libraries such as jwks-rsa as the **secret**. You can fix this by specifying **algorithms** in the express-jwt configuration. See linked GHSA for example. This is also fixed in version 6.0.0.",
+        "epssScore": 0.00178,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 863,
+            "name": "Incorrect Authorization",
+            "id": 0
+          }
+        ],
+        "uuid": "635ffe03-9828-4a07-8cf4-f530832aba3c",
+        "severityRank": 0,
+        "cweName": "Incorrect Authorization",
+        "epssPercentile": 0.53238,
+        "cvssV2BaseScore": 4.3
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:f06f93c0-dab0-4417-84fb-c956243e97a8:635ffe03-9828-4a07-8cf4-f530832aba3c"
+    },
+    {
+      "component": {
+        "name": "jsonwebtoken",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/jsonwebtoken@0.1.0",
+        "uuid": "3f763088-839c-4a6a-a095-eed6219d71db",
+        "version": "0.1.0",
+        "latestVersion": "9.0.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-23539",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:26.28",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-23539?component-type=npm&component-name=jsonwebtoken&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 8.1,
+        "vulnId": "CVE-2022-23539",
+        "aliases": [],
+        "cweId": 327,
+        "description": "Versions `<=8.5.1` of `jsonwebtoken` library could be misconfigured so that legacy, insecure key types are used for signature verification. For example, DSA keys could be used with the RS256 algorithm. You are affected if you are using an algorithm and a key type other than a combination listed in the GitHub Security Advisory as unaffected. This issue has been fixed, please update to version 9.0.0. This version validates for asymmetric key type and algorithm combinations. Please refer to the above mentioned algorithm / key type combinations for the valid secure configuration. After updating to version 9.0.0, if you still intend to continue with signing or verifying tokens using invalid key type/algorithm value combinations, you’ll need to set the `allowInvalidAsymmetricKeyTypes` option to `true` in the `sign()` and/or `verify()` functions.",
+        "epssScore": 0.00049,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 327,
+            "name": "Use of a Broken or Risky Cryptographic Algorithm",
+            "id": 0
+          }
+        ],
+        "uuid": "1e2d86ec-f27f-4523-a899-b44025883eb0",
+        "severityRank": 1,
+        "cweName": "Use of a Broken or Risky Cryptographic Algorithm",
+        "epssPercentile": 0.16318
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:3f763088-839c-4a6a-a095-eed6219d71db:1e2d86ec-f27f-4523-a899-b44025883eb0"
+    },
+    {
+      "component": {
+        "name": "jsonwebtoken",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/jsonwebtoken@0.1.0",
+        "uuid": "3f763088-839c-4a6a-a095-eed6219d71db",
+        "version": "0.1.0",
+        "latestVersion": "9.0.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-23540",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:26.301",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-23540?component-type=npm&component-name=jsonwebtoken&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.6,
+        "vulnId": "CVE-2022-23540",
+        "aliases": [],
+        "cweId": 327,
+        "description": "In versions `<=8.5.1` of `jsonwebtoken` library, lack of algorithm definition in the `jwt.verify()` function can lead to signature validation bypass due to defaulting to the `none` algorithm for signature verification. Users are affected if you do not specify algorithms in the `jwt.verify()` function. This issue has been fixed, please update to version 9.0.0 which removes the default support for the none algorithm in the `jwt.verify()` method. There will be no impact, if you update to version 9.0.0 and you don’t need to allow for the `none` algorithm. If you need 'none' algorithm, you have to explicitly specify that in `jwt.verify()` options.",
+        "epssScore": 0.00046,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 327,
+            "name": "Use of a Broken or Risky Cryptographic Algorithm",
+            "id": 0
+          }
+        ],
+        "uuid": "8b5557a6-689e-4c91-87a3-eca27ab30b0a",
+        "severityRank": 1,
+        "cweName": "Use of a Broken or Risky Cryptographic Algorithm",
+        "epssPercentile": 0.12766
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:3f763088-839c-4a6a-a095-eed6219d71db:8b5557a6-689e-4c91-87a3-eca27ab30b0a"
+    },
+    {
+      "component": {
+        "name": "jsonwebtoken",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/jsonwebtoken@0.1.0",
+        "uuid": "3f763088-839c-4a6a-a095-eed6219d71db",
+        "version": "0.1.0",
+        "latestVersion": "9.0.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2015-0022",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:26.339",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2015-0022?component-type=npm&component-name=jsonwebtoken&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.8,
+        "vulnId": "CVE-2015-9235",
+        "aliases": [],
+        "cweId": 327,
+        "description": "In jsonwebtoken node module before 4.2.2 it is possible for an attacker to bypass verification when a token digitally signed with an asymmetric key (RS/ES family) of algorithms but instead the attacker send a token digitally signed with a symmetric algorithm (HS* family).",
+        "epssScore": 0.00709,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 327,
+            "name": "Use of a Broken or Risky Cryptographic Algorithm",
+            "id": 0
+          }
+        ],
+        "uuid": "bff9e89d-4f8b-4a71-b5e1-d2ad03cc389d",
+        "severityRank": 0,
+        "cweName": "Use of a Broken or Risky Cryptographic Algorithm",
+        "epssPercentile": 0.77373,
+        "cvssV2BaseScore": 7.5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:3f763088-839c-4a6a-a095-eed6219d71db:bff9e89d-4f8b-4a71-b5e1-d2ad03cc389d"
+    },
+    {
+      "component": {
+        "name": "moment",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/moment@2.0.0",
+        "uuid": "0e12c695-8f06-44e9-a33d-a3818d5200d8",
+        "version": "2.0.0",
+        "latestVersion": "2.29.4"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2017-0422",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:26.394",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2017-0422?component-type=npm&component-name=moment&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2017-18214",
+        "aliases": [],
+        "cweId": 400,
+        "description": "The moment module before 2.19.3 for Node.js is prone to a regular expression denial of service via a crafted date string, a different vulnerability than CVE-2016-4055.",
+        "epssScore": 0.00234,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 400,
+            "name": "Uncontrolled Resource Consumption",
+            "id": 0
+          }
+        ],
+        "uuid": "d7533386-d047-4c14-b9d9-7b8d2112d74d",
+        "severityRank": 1,
+        "cweName": "Uncontrolled Resource Consumption",
+        "epssPercentile": 0.59645,
+        "cvssV2BaseScore": 5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:0e12c695-8f06-44e9-a33d-a3818d5200d8:d7533386-d047-4c14-b9d9-7b8d2112d74d"
+    },
+    {
+      "component": {
+        "name": "moment",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/moment@2.27.0",
+        "uuid": "6e77b7ac-2e60-497e-8c57-a4a45e646485",
+        "version": "2.27.0",
+        "latestVersion": "2.29.4"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-24785",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:26.456",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-24785?component-type=npm&component-name=moment&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2022-24785",
+        "aliases": [],
+        "cweId": 22,
+        "description": "Moment.js is a JavaScript date library for parsing, validating, manipulating, and formatting dates. A path traversal vulnerability impacts npm (server) users of Moment.js between versions 1.0.1 and 2.29.1, especially if a user-provided locale string is directly used to switch moment locale. This problem is patched in 2.29.2, and the patch can be applied to all affected versions. As a workaround, sanitize the user-provided locale name before passing it to Moment.js.",
+        "epssScore": 0.00165,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 22,
+            "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+            "id": 0
+          },
+          {
+            "cweId": 27,
+            "name": "Path Traversal: 'dir/../../filename'",
+            "id": 0
+          }
+        ],
+        "uuid": "db781f24-7aa3-44c9-a877-cec33fba0bc5",
+        "severityRank": 1,
+        "cweName": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "epssPercentile": 0.51416,
+        "cvssV2BaseScore": 5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:6e77b7ac-2e60-497e-8c57-a4a45e646485:db781f24-7aa3-44c9-a877-cec33fba0bc5"
+    },
+    {
+      "component": {
+        "name": "moment",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/moment@2.27.0",
+        "uuid": "6e77b7ac-2e60-497e-8c57-a4a45e646485",
+        "version": "2.27.0",
+        "latestVersion": "2.29.4"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-31129",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:26.48",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-31129?component-type=npm&component-name=moment&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2022-31129",
+        "aliases": [],
+        "cweId": 400,
+        "description": "moment is a JavaScript date library for parsing, validating, manipulating, and formatting dates. Affected versions of moment were found to use an inefficient parsing algorithm. Specifically using string-to-date parsing in moment (more specifically rfc2822 parsing, which is tried by default) has quadratic (N^2) complexity on specific inputs. Users may notice a noticeable slowdown is observed with inputs above 10k characters. Users who pass user-provided strings without sanity length checks to moment constructor are vulnerable to (Re)DoS attacks. The problem is patched in 2.29.4, the patch can be applied to all affected versions with minimal tweaking. Users are advised to upgrade. Users unable to upgrade should consider limiting date lengths accepted from user input.",
+        "epssScore": 0.0008,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 400,
+            "name": "Uncontrolled Resource Consumption",
+            "id": 0
+          }
+        ],
+        "uuid": "1c351ed9-dd22-4cb1-acaf-b8ee91bd15bf",
+        "severityRank": 1,
+        "cweName": "Uncontrolled Resource Consumption",
+        "epssPercentile": 0.32686,
+        "cvssV2BaseScore": 5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:6e77b7ac-2e60-497e-8c57-a4a45e646485:1c351ed9-dd22-4cb1-acaf-b8ee91bd15bf"
+    },
+    {
+      "component": {
+        "name": "grunt",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/grunt@1.2.1",
+        "uuid": "c15ddc0a-6863-480e-9fe8-ab9552fbc8c1",
+        "version": "1.2.1",
+        "latestVersion": "1.6.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-0436",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:26.594",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-0436?component-type=npm&component-name=grunt&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 5.5,
+        "vulnId": "CVE-2022-0436",
+        "aliases": [],
+        "cweId": 22,
+        "description": "Path Traversal in GitHub repository gruntjs/grunt prior to 1.5.2.",
+        "epssScore": 0.00044,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 22,
+            "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+            "id": 0
+          }
+        ],
+        "uuid": "a6075aee-4031-4bf8-a701-0d07b03e7fcf",
+        "severityRank": 2,
+        "cweName": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "epssPercentile": 0.08486,
+        "cvssV2BaseScore": 2.1
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:c15ddc0a-6863-480e-9fe8-ab9552fbc8c1:a6075aee-4031-4bf8-a701-0d07b03e7fcf"
+    },
+    {
+      "component": {
+        "name": "grunt",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/grunt@1.2.1",
+        "uuid": "c15ddc0a-6863-480e-9fe8-ab9552fbc8c1",
+        "version": "1.2.1",
+        "latestVersion": "1.6.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-1537",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:26.615",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-1537?component-type=npm&component-name=grunt&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7,
+        "vulnId": "CVE-2022-1537",
+        "aliases": [],
+        "cweId": 367,
+        "description": "file.copy operations in GruntJS are vulnerable to a TOCTOU race condition leading to arbitrary file write in GitHub repository gruntjs/grunt prior to 1.5.3. This vulnerability is capable of arbitrary file writes which can lead to local privilege escalation to the GruntJS user if a lower-privileged user has write access to both source and destination directories as the lower-privileged user can create a symlink to the GruntJS user's .bashrc file or replace /etc/shadow file if the GruntJS user is root.",
+        "epssScore": 0.00042,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 367,
+            "name": "Time-of-check Time-of-use (TOCTOU) Race Condition",
+            "id": 0
+          }
+        ],
+        "uuid": "65ff4428-fe50-431a-a4f3-8ba84d0d7eca",
+        "severityRank": 1,
+        "cweName": "Time-of-check Time-of-use (TOCTOU) Race Condition",
+        "epssPercentile": 0.05641,
+        "cvssV2BaseScore": 6.9
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:c15ddc0a-6863-480e-9fe8-ab9552fbc8c1:65ff4428-fe50-431a-a4f3-8ba84d0d7eca"
+    },
+    {
+      "component": {
+        "name": "grunt",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/grunt@1.2.1",
+        "uuid": "c15ddc0a-6863-480e-9fe8-ab9552fbc8c1",
+        "version": "1.2.1",
+        "latestVersion": "1.6.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2020-0768",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:26.636",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2020-0768?component-type=npm&component-name=grunt&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.1,
+        "vulnId": "CVE-2020-7729",
+        "aliases": [],
+        "cweId": 1188,
+        "description": "The package grunt before 1.3.0 are vulnerable to Arbitrary Code Execution due to the default usage of the function load() instead of its secure replacement safeLoad() of the package js-yaml inside grunt.file.readYAML.",
+        "epssScore": 0.00599,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1188,
+            "name": "Insecure Default Initialization of Resource",
+            "id": 0
+          }
+        ],
+        "uuid": "42903572-2ee8-4a35-9c4a-43b93980fb86",
+        "severityRank": 1,
+        "cweName": "Insecure Default Initialization of Resource",
+        "epssPercentile": 0.75108,
+        "cvssV2BaseScore": 4.6
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:c15ddc0a-6863-480e-9fe8-ab9552fbc8c1:42903572-2ee8-4a35-9c4a-43b93980fb86"
+    },
+    {
+      "component": {
+        "name": "getobject",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/getobject@0.1.0",
+        "uuid": "5676fb7d-58e8-47bb-b6f7-696bd60f1b7d",
+        "version": "0.1.0",
+        "latestVersion": "1.1.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2020-28282",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:27.601",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2020-28282?component-type=npm&component-name=getobject&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.8,
+        "severityRank": 0,
+        "vulnId": "CVE-2020-28282",
+        "aliases": [],
+        "epssPercentile": 0.73224,
+        "cvssV2BaseScore": 7.5,
+        "description": "Prototype pollution vulnerability in 'getobject' version 0.1.0 allows an attacker to cause a denial of service and may lead to remote code execution.",
+        "epssScore": 0.0052,
+        "source": "NVD",
+        "uuid": "84c830ed-ac62-4a92-9d71-707b46a236c7"
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:5676fb7d-58e8-47bb-b6f7-696bd60f1b7d:84c830ed-ac62-4a92-9d71-707b46a236c7"
+    },
+    {
+      "component": {
+        "name": "async",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/async@2.6.3",
+        "uuid": "b1249588-9b77-4422-b3e6-133fcd85d034",
+        "version": "2.6.3",
+        "latestVersion": "3.2.4"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-43138",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:28.399",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-43138?component-type=npm&component-name=async&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.8,
+        "vulnId": "CVE-2021-43138",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "In Async before 2.6.4 and 3.x before 3.2.2, a malicious user can obtain privileges via the mapValues() method, aka lib/internal/iterator.js createObjectIterator prototype pollution.",
+        "epssScore": 0.00057,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "289c4243-6009-43cc-9765-86e3815d14b0",
+        "severityRank": 1,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.2165,
+        "cvssV2BaseScore": 6.8
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:b1249588-9b77-4422-b3e6-133fcd85d034:289c4243-6009-43cc-9765-86e3815d14b0"
+    },
+    {
+      "component": {
+        "name": "jsonwebtoken",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/jsonwebtoken@0.4.0",
+        "uuid": "1c3b5cd3-7b8e-4926-8c39-72aee3e79a2d",
+        "version": "0.4.0",
+        "latestVersion": "9.0.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-23539",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:28.613",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-23539?component-type=npm&component-name=jsonwebtoken&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 8.1,
+        "vulnId": "CVE-2022-23539",
+        "aliases": [],
+        "cweId": 327,
+        "description": "Versions `<=8.5.1` of `jsonwebtoken` library could be misconfigured so that legacy, insecure key types are used for signature verification. For example, DSA keys could be used with the RS256 algorithm. You are affected if you are using an algorithm and a key type other than a combination listed in the GitHub Security Advisory as unaffected. This issue has been fixed, please update to version 9.0.0. This version validates for asymmetric key type and algorithm combinations. Please refer to the above mentioned algorithm / key type combinations for the valid secure configuration. After updating to version 9.0.0, if you still intend to continue with signing or verifying tokens using invalid key type/algorithm value combinations, you’ll need to set the `allowInvalidAsymmetricKeyTypes` option to `true` in the `sign()` and/or `verify()` functions.",
+        "epssScore": 0.00049,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 327,
+            "name": "Use of a Broken or Risky Cryptographic Algorithm",
+            "id": 0
+          }
+        ],
+        "uuid": "1e2d86ec-f27f-4523-a899-b44025883eb0",
+        "severityRank": 1,
+        "cweName": "Use of a Broken or Risky Cryptographic Algorithm",
+        "epssPercentile": 0.16318
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:1c3b5cd3-7b8e-4926-8c39-72aee3e79a2d:1e2d86ec-f27f-4523-a899-b44025883eb0"
+    },
+    {
+      "component": {
+        "name": "jsonwebtoken",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/jsonwebtoken@0.4.0",
+        "uuid": "1c3b5cd3-7b8e-4926-8c39-72aee3e79a2d",
+        "version": "0.4.0",
+        "latestVersion": "9.0.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-23540",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:28.631",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-23540?component-type=npm&component-name=jsonwebtoken&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.6,
+        "vulnId": "CVE-2022-23540",
+        "aliases": [],
+        "cweId": 327,
+        "description": "In versions `<=8.5.1` of `jsonwebtoken` library, lack of algorithm definition in the `jwt.verify()` function can lead to signature validation bypass due to defaulting to the `none` algorithm for signature verification. Users are affected if you do not specify algorithms in the `jwt.verify()` function. This issue has been fixed, please update to version 9.0.0 which removes the default support for the none algorithm in the `jwt.verify()` method. There will be no impact, if you update to version 9.0.0 and you don’t need to allow for the `none` algorithm. If you need 'none' algorithm, you have to explicitly specify that in `jwt.verify()` options.",
+        "epssScore": 0.00046,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 327,
+            "name": "Use of a Broken or Risky Cryptographic Algorithm",
+            "id": 0
+          }
+        ],
+        "uuid": "8b5557a6-689e-4c91-87a3-eca27ab30b0a",
+        "severityRank": 1,
+        "cweName": "Use of a Broken or Risky Cryptographic Algorithm",
+        "epssPercentile": 0.12766
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:1c3b5cd3-7b8e-4926-8c39-72aee3e79a2d:8b5557a6-689e-4c91-87a3-eca27ab30b0a"
+    },
+    {
+      "component": {
+        "name": "jsonwebtoken",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/jsonwebtoken@0.4.0",
+        "uuid": "1c3b5cd3-7b8e-4926-8c39-72aee3e79a2d",
+        "version": "0.4.0",
+        "latestVersion": "9.0.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2015-0022",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:28.648",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2015-0022?component-type=npm&component-name=jsonwebtoken&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.8,
+        "vulnId": "CVE-2015-9235",
+        "aliases": [],
+        "cweId": 327,
+        "description": "In jsonwebtoken node module before 4.2.2 it is possible for an attacker to bypass verification when a token digitally signed with an asymmetric key (RS/ES family) of algorithms but instead the attacker send a token digitally signed with a symmetric algorithm (HS* family).",
+        "epssScore": 0.00709,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 327,
+            "name": "Use of a Broken or Risky Cryptographic Algorithm",
+            "id": 0
+          }
+        ],
+        "uuid": "bff9e89d-4f8b-4a71-b5e1-d2ad03cc389d",
+        "severityRank": 0,
+        "cweName": "Use of a Broken or Risky Cryptographic Algorithm",
+        "epssPercentile": 0.77373,
+        "cvssV2BaseScore": 7.5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:1c3b5cd3-7b8e-4926-8c39-72aee3e79a2d:bff9e89d-4f8b-4a71-b5e1-d2ad03cc389d"
+    },
+    {
+      "component": {
+        "name": "ansi-regex",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/ansi-regex@3.0.0",
+        "uuid": "15a8274d-5f73-4f7f-809e-72bb2d4113e0",
+        "version": "3.0.0",
+        "latestVersion": "6.0.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2021-1169",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:28.832",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2021-1169?component-type=npm&component-name=ansi-regex&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2021-3807",
+        "aliases": [],
+        "cweId": 697,
+        "description": "ansi-regex is vulnerable to Inefficient Regular Expression Complexity",
+        "epssScore": 0.00157,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 697,
+            "name": "Incorrect Comparison",
+            "id": 0
+          }
+        ],
+        "uuid": "e9a6c08c-3c71-43b9-ac66-23545d3ed068",
+        "severityRank": 1,
+        "cweName": "Incorrect Comparison",
+        "epssPercentile": 0.50429,
+        "cvssV2BaseScore": 7.8
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:15a8274d-5f73-4f7f-809e-72bb2d4113e0:e9a6c08c-3c71-43b9-ac66-23545d3ed068"
+    },
+    {
+      "component": {
+        "name": "tar",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/tar@4.4.13",
+        "uuid": "4ec40825-8dc9-450a-a309-f96bcbea1f7d",
+        "version": "4.4.13",
+        "latestVersion": "6.1.13"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-32803",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:28.896",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-32803?component-type=npm&component-name=tar&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 8.1,
+        "vulnId": "CVE-2021-32803",
+        "aliases": [],
+        "cweId": 59,
+        "description": "The npm package \"tar\" (aka node-tar) before versions 6.1.2, 5.0.7, 4.4.15, and 3.2.3 has an arbitrary File Creation/Overwrite vulnerability via insufficient symlink protection. `node-tar` aims to guarantee that any file whose location would be modified by a symbolic link is not extracted. This is, in part, achieved by ensuring that extracted directories are not symlinks. Additionally, in order to prevent unnecessary `stat` calls to determine whether a given path is a directory, paths are cached when directories are created. This logic was insufficient when extracting tar files that contained both a directory and a symlink with the same name as the directory. This order of operations resulted in the directory being created and added to the `node-tar` directory cache. When a directory is present in the directory cache, subsequent calls to mkdir for that directory are skipped. However, this is also where `node-tar` checks for symlinks occur. By first creating a directory, and then replacing that directory with a symlink, it was thus possible to bypass `node-tar` symlink checks on directories, essentially allowing an untrusted tar file to symlink into an arbitrary location and subsequently extracting arbitrary files into that location, thus allowing arbitrary file creation and overwrite. This issue was addressed in releases 3.2.3, 4.4.15, 5.0.7 and 6.1.2.",
+        "epssScore": 0.00921,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 59,
+            "name": "Improper Link Resolution Before File Access ('Link Following')",
+            "id": 0
+          }
+        ],
+        "uuid": "d351e004-e6c5-4343-9058-a71695495b78",
+        "severityRank": 1,
+        "cweName": "Improper Link Resolution Before File Access ('Link Following')",
+        "epssPercentile": 0.805,
+        "cvssV2BaseScore": 5.8
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:4ec40825-8dc9-450a-a309-f96bcbea1f7d:d351e004-e6c5-4343-9058-a71695495b78"
+    },
+    {
+      "component": {
+        "name": "tar",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/tar@4.4.13",
+        "uuid": "4ec40825-8dc9-450a-a309-f96bcbea1f7d",
+        "version": "4.4.13",
+        "latestVersion": "6.1.13"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-32804",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:28.907",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-32804?component-type=npm&component-name=tar&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 8.1,
+        "vulnId": "CVE-2021-32804",
+        "aliases": [],
+        "cweId": 22,
+        "description": "The npm package \"tar\" (aka node-tar) before versions 6.1.1, 5.0.6, 4.4.14, and 3.3.2 has a arbitrary File Creation/Overwrite vulnerability due to insufficient absolute path sanitization. node-tar aims to prevent extraction of absolute file paths by turning absolute paths into relative paths when the `preservePaths` flag is not set to `true`. This is achieved by stripping the absolute path root from any absolute file paths contained in a tar file. For example `/home/user/.bashrc` would turn into `home/user/.bashrc`. This logic was insufficient when file paths contained repeated path roots such as `////home/user/.bashrc`. `node-tar` would only strip a single path root from such paths. When given an absolute file path with repeating path roots, the resulting path (e.g. `///home/user/.bashrc`) would still resolve to an absolute path, thus allowing arbitrary file creation and overwrite. This issue was addressed in releases 3.2.2, 4.4.14, 5.0.6 and 6.1.1. Users may work around this vulnerability without upgrading by creating a custom `onentry` method which sanitizes the `entry.path` or a `filter` method which removes entries with absolute paths. See referenced GitHub Advisory for details. Be aware of CVE-2021-32803 which fixes a similar bug in later versions of tar.",
+        "epssScore": 0.01715,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 22,
+            "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+            "id": 0
+          }
+        ],
+        "uuid": "d4dceab7-9af9-4ef1-88d9-b39ba9511fa3",
+        "severityRank": 1,
+        "cweName": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "epssPercentile": 0.85868,
+        "cvssV2BaseScore": 5.8
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:4ec40825-8dc9-450a-a309-f96bcbea1f7d:d4dceab7-9af9-4ef1-88d9-b39ba9511fa3"
+    },
+    {
+      "component": {
+        "name": "tar",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/tar@4.4.13",
+        "uuid": "4ec40825-8dc9-450a-a309-f96bcbea1f7d",
+        "version": "4.4.13",
+        "latestVersion": "6.1.13"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-37701",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:28.943",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-37701?component-type=npm&component-name=tar&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 8.6,
+        "vulnId": "CVE-2021-37701",
+        "aliases": [],
+        "cweId": 22,
+        "description": "The npm package \"tar\" (aka node-tar) before versions 4.4.16, 5.0.8, and 6.1.7 has an arbitrary file creation/overwrite and arbitrary code execution vulnerability. node-tar aims to guarantee that any file whose location would be modified by a symbolic link is not extracted. This is, in part, achieved by ensuring that extracted directories are not symlinks. Additionally, in order to prevent unnecessary stat calls to determine whether a given path is a directory, paths are cached when directories are created. This logic was insufficient when extracting tar files that contained both a directory and a symlink with the same name as the directory, where the symlink and directory names in the archive entry used backslashes as a path separator on posix systems. The cache checking logic used both `\\` and `/` characters as path separators, however `\\` is a valid filename character on posix systems. By first creating a directory, and then replacing that directory with a symlink, it was thus possible to bypass node-tar symlink checks on directories, essentially allowing an untrusted tar file to symlink into an arbitrary location and subsequently extracting arbitrary files into that location, thus allowing arbitrary file creation and overwrite. Additionally, a similar confusion could arise on case-insensitive filesystems. If a tar archive contained a directory at `FOO`, followed by a symbolic link named `foo`, then on case-insensitive file systems, the creation of the symbolic link would remove the directory from the filesystem, but _not_ from the internal directory cache, as it would not be treated as a cache hit. A subsequent file entry within the `FOO` directory would then be placed in the target of the symbolic link, thinking that the directory had already been created. These issues were addressed in releases 4.4.16, 5.0.8 and 6.1.7. The v3 branch of node-tar has been deprecated and did not receive patches for these issues. If you are still using a v3 release we recommend you update to a more recent version of node-tar. If this is not possible, a workaround is available in the referenced GHSA-9r2w-394v-53qc.",
+        "epssScore": 0.00111,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 22,
+            "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+            "id": 0
+          },
+          {
+            "cweId": 59,
+            "name": "Improper Link Resolution Before File Access ('Link Following')",
+            "id": 0
+          }
+        ],
+        "uuid": "77266ad4-2096-4842-9acc-a5f1f2445e7d",
+        "severityRank": 1,
+        "cweName": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "epssPercentile": 0.42566,
+        "cvssV2BaseScore": 4.4
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:4ec40825-8dc9-450a-a309-f96bcbea1f7d:77266ad4-2096-4842-9acc-a5f1f2445e7d"
+    },
+    {
+      "component": {
+        "name": "busboy",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/busboy@0.2.14",
+        "uuid": "c1c2010b-554c-4409-8fd9-5166dd596f6c",
+        "version": "0.2.14",
+        "latestVersion": "1.6.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-24434",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:29.094",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-24434?component-type=npm&component-name=busboy&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "severityRank": 1,
+        "vulnId": "CVE-2022-24434",
+        "aliases": [],
+        "epssPercentile": 0.18229,
+        "cvssV2BaseScore": 5,
+        "description": "This affects all versions of package dicer. A malicious attacker can send a modified form to server, and crash the nodejs service. An attacker could sent the payload again and again so that the service continuously crashes.",
+        "epssScore": 0.00052,
+        "source": "NVD",
+        "uuid": "91f226d2-152c-4290-adde-50304b537dbd"
+      },
+      "analysis": {
+        "isSuppressed": false,
+        "state": "RESOLVED"
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:c1c2010b-554c-4409-8fd9-5166dd596f6c:91f226d2-152c-4290-adde-50304b537dbd"
+    },
+    {
+      "component": {
+        "name": "dicer",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/dicer@0.2.5",
+        "uuid": "1f384ad5-0a6f-442e-8291-e2f63adf461f",
+        "version": "0.2.5",
+        "latestVersion": "0.3.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-24434",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:29.12",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-24434?component-type=npm&component-name=dicer&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "severityRank": 1,
+        "vulnId": "CVE-2022-24434",
+        "aliases": [],
+        "epssPercentile": 0.18229,
+        "cvssV2BaseScore": 5,
+        "description": "This affects all versions of package dicer. A malicious attacker can send a modified form to server, and crash the nodejs service. An attacker could sent the payload again and again so that the service continuously crashes.",
+        "epssScore": 0.00052,
+        "source": "NVD",
+        "uuid": "91f226d2-152c-4290-adde-50304b537dbd"
+      },
+      "analysis": {
+        "isSuppressed": false,
+        "state": "NOT_AFFECTED"
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:1f384ad5-0a6f-442e-8291-e2f63adf461f:91f226d2-152c-4290-adde-50304b537dbd"
+    },
+    {
+      "component": {
+        "name": "notevil",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/notevil@1.3.3",
+        "uuid": "c1bdd107-591e-4b4b-8679-51d26aee0f52",
+        "version": "1.3.3",
+        "latestVersion": "1.3.3"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-23771",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:29.187",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-23771?component-type=npm&component-name=notevil&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 6.5,
+        "vulnId": "CVE-2021-23771",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "This affects all versions of package notevil; all versions of package argencoders-notevil. It is vulnerable to Sandbox Escape leading to Prototype pollution. The package fails to restrict access to the main context, allowing an attacker to add or modify an object's prototype. **Note:** This vulnerability derives from an incomplete fix in [SNYK-JS-NOTEVIL-608878](https://security.snyk.io/vuln/SNYK-JS-NOTEVIL-608878).",
+        "epssScore": 0.00053,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "c725eebe-7f6f-4a38-a7f5-3d81313c6599",
+        "severityRank": 2,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.19051,
+        "cvssV2BaseScore": 6.4
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:c1bdd107-591e-4b4b-8679-51d26aee0f52:c725eebe-7f6f-4a38-a7f5-3d81313c6599"
+    },
+    {
+      "component": {
+        "name": "static-eval",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/static-eval@2.1.0",
+        "uuid": "d97e1156-994b-4d6c-9ada-f4d0a977bc68",
+        "version": "2.1.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-23334",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:30.299",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-23334?component-type=npm&component-name=static-eval&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "UNASSIGNED",
+        "severityRank": 5,
+        "vulnId": "CVE-2021-23334",
+        "aliases": [],
+        "description": "** REJECT ** DO NOT USE THIS CANDIDATE NUMBER. ConsultIDs: none. Reason: This candidate was withdrawn by its CNA. Further investigation showed that it was not a security issue. Notes: none.",
+        "source": "NVD",
+        "uuid": "7553a465-38f2-4aaf-a36b-d9de55d9c77c"
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:d97e1156-994b-4d6c-9ada-f4d0a977bc68:7553a465-38f2-4aaf-a36b-d9de55d9c77c"
+    },
+    {
+      "component": {
+        "name": "pug-code-gen",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/pug-code-gen@2.0.2",
+        "uuid": "541c106e-8b07-4bf2-a545-11612974ae59",
+        "version": "2.0.2"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2021-0203",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:30.701",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2021-0203?component-type=npm&component-name=pug-code-gen&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9,
+        "vulnId": "CVE-2021-21353",
+        "aliases": [],
+        "cweId": 74,
+        "description": "Pug is an npm package which is a high-performance template engine. In pug before version 3.0.1, if a remote attacker was able to control the `pretty` option of the pug compiler, e.g. if you spread a user provided object such as the query parameters of a request into the pug template inputs, it was possible for them to achieve remote code execution on the node.js backend. This is fixed in version 3.0.1. This advisory applies to multiple pug packages including \"pug\", \"pug-code-gen\". pug-code-gen has a backported fix at version 2.0.3. This advisory is not exploitable if there is no way for un-trusted input to be passed to pug as the `pretty` option, e.g. if you compile templates in advance before applying user input to them, you do not need to upgrade.",
+        "epssScore": 0.01261,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 74,
+            "name": "Improper Neutralization of Special Elements in Output Used by a Downstream Component ('Injection')",
+            "id": 0
+          }
+        ],
+        "uuid": "3a294916-fa4d-4369-a322-c391e65b305c",
+        "severityRank": 0,
+        "cweName": "Improper Neutralization of Special Elements in Output Used by a Downstream Component ('Injection')",
+        "epssPercentile": 0.83466,
+        "cvssV2BaseScore": 6.8
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:541c106e-8b07-4bf2-a545-11612974ae59:3a294916-fa4d-4369-a322-c391e65b305c"
+    },
+    {
+      "component": {
+        "name": "ansi-regex",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/ansi-regex@5.0.0",
+        "uuid": "a487dfba-360c-45ac-b748-8b79f040926a",
+        "version": "5.0.0",
+        "latestVersion": "6.0.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2021-1169",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:31.672",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2021-1169?component-type=npm&component-name=ansi-regex&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2021-3807",
+        "aliases": [],
+        "cweId": 697,
+        "description": "ansi-regex is vulnerable to Inefficient Regular Expression Complexity",
+        "epssScore": 0.00157,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 697,
+            "name": "Incorrect Comparison",
+            "id": 0
+          }
+        ],
+        "uuid": "e9a6c08c-3c71-43b9-ac66-23545d3ed068",
+        "severityRank": 1,
+        "cweName": "Incorrect Comparison",
+        "epssPercentile": 0.50429,
+        "cvssV2BaseScore": 7.8
+      },
+      "analysis": {
+        "isSuppressed": false,
+        "state": "FALSE_POSITIVE"
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:a487dfba-360c-45ac-b748-8b79f040926a:e9a6c08c-3c71-43b9-ac66-23545d3ed068"
+    },
+    {
+      "component": {
+        "name": "json-schema",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/json-schema@0.2.3",
+        "uuid": "823915c3-d2d8-4c9a-b17a-f3323193064e",
+        "version": "0.2.3"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-3918",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:31.914",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-3918?component-type=npm&component-name=json-schema&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.8,
+        "vulnId": "CVE-2021-3918",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "json-schema is vulnerable to Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssScore": 0.00122,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "217cf1ed-5284-4871-9e90-c622fde98344",
+        "severityRank": 0,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.44751,
+        "cvssV2BaseScore": 7.5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:823915c3-d2d8-4c9a-b17a-f3323193064e:217cf1ed-5284-4871-9e90-c622fde98344"
+    },
+    {
+      "component": {
+        "name": "qs",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/qs@6.5.2",
+        "uuid": "30eb7690-92da-4538-8cdc-8737b5637f1c",
+        "version": "6.5.2",
+        "latestVersion": "6.11.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-24999",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.126",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-24999?component-type=npm&component-name=qs&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2022-24999",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "qs before 6.10.3, as used in Express before 4.17.3 and other products, allows attackers to cause a Node process hang for an Express application because an __ proto__ key can be used. In many typical Express use cases, an unauthenticated remote attacker can place the attack payload in the query string of the URL that is used to visit the application, such as a[__proto__]=b&a[__proto__]&a[length]=100000000. The fix was backported to qs 6.9.7, 6.8.3, 6.7.3, 6.6.1, 6.5.3, 6.4.1, 6.3.3, and 6.2.4 (and therefore Express 4.17.3, which has \"deps: qs@6.9.7\" in its release description, is not vulnerable).",
+        "epssScore": 0.00215,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "5eff7176-7339-468e-9d35-052bdf815d6f",
+        "severityRank": 1,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.57744
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:30eb7690-92da-4538-8cdc-8737b5637f1c:5eff7176-7339-468e-9d35-052bdf815d6f"
+    },
+    {
+      "component": {
+        "name": "sanitize-html",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/sanitize-html@1.4.2",
+        "uuid": "d0532a6f-f1af-4c57-bb27-f041843cd4ea",
+        "version": "1.4.2"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-26539",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.248",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-26539?component-type=npm&component-name=sanitize-html&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 5.3,
+        "severityRank": 2,
+        "vulnId": "CVE-2021-26539",
+        "aliases": [],
+        "epssPercentile": 0.32508,
+        "cvssV2BaseScore": 5,
+        "description": "Apostrophe Technologies sanitize-html before 2.3.1 does not properly handle internationalized domain name (IDN) which could allow an attacker to bypass hostname whitelist validation set by the \"allowedIframeHostnames\" option.",
+        "epssScore": 0.00079,
+        "source": "NVD",
+        "uuid": "ef9323a0-76c1-4d49-a528-3c65dc6285ad"
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:d0532a6f-f1af-4c57-bb27-f041843cd4ea:ef9323a0-76c1-4d49-a528-3c65dc6285ad"
+    },
+    {
+      "component": {
+        "name": "sanitize-html",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/sanitize-html@1.4.2",
+        "uuid": "d0532a6f-f1af-4c57-bb27-f041843cd4ea",
+        "version": "1.4.2"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-25887",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.311",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-25887?component-type=npm&component-name=sanitize-html&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "severityRank": 1,
+        "vulnId": "CVE-2022-25887",
+        "aliases": [],
+        "epssPercentile": 0.20771,
+        "description": "The package sanitize-html before 2.7.1 are vulnerable to Regular Expression Denial of Service (ReDoS) due to insecure global regular expression replacement logic of HTML comment removal.",
+        "epssScore": 0.00055,
+        "source": "NVD",
+        "uuid": "99f18f1f-321e-4cf0-be04-6790105571ff"
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:d0532a6f-f1af-4c57-bb27-f041843cd4ea:99f18f1f-321e-4cf0-be04-6790105571ff"
+    },
+    {
+      "component": {
+        "name": "sanitize-html",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/sanitize-html@1.4.2",
+        "uuid": "d0532a6f-f1af-4c57-bb27-f041843cd4ea",
+        "version": "1.4.2"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2014-0007",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.333",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2014-0007?component-type=npm&component-name=sanitize-html&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 6.1,
+        "vulnId": "CVE-2016-1000237",
+        "aliases": [],
+        "cweId": 79,
+        "description": "sanitize-html before 1.4.3 has XSS.",
+        "epssScore": 0.00084,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 79,
+            "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "id": 0
+          }
+        ],
+        "uuid": "ffb27e5e-6f7a-4033-b7a4-5aa21a775c28",
+        "severityRank": 2,
+        "cweName": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "epssPercentile": 0.34234,
+        "cvssV2BaseScore": 4.3
+      },
+      "analysis": {
+        "isSuppressed": false,
+        "state": "RESOLVED"
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:d0532a6f-f1af-4c57-bb27-f041843cd4ea:ffb27e5e-6f7a-4033-b7a4-5aa21a775c28"
+    },
+    {
+      "component": {
+        "name": "lodash",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/lodash@2.4.2",
+        "uuid": "76142dd9-d996-4576-aa46-c64fab7baf09",
+        "version": "2.4.2",
+        "latestVersion": "4.17.21"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2018-3721",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.425",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2018-3721?component-type=npm&component-name=lodash&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 6.5,
+        "severityRank": 2,
+        "vulnId": "CVE-2018-3721",
+        "aliases": [],
+        "epssPercentile": 0.29946,
+        "cvssV2BaseScore": 4,
+        "description": "lodash node module before 4.17.5 suffers from a Modification of Assumed-Immutable Data (MAID) vulnerability via defaultsDeep, merge, and mergeWith functions, which allows a malicious user to modify the prototype of \"Object\" via __proto__, causing the addition or modification of an existing property that will exist on all objects.",
+        "epssScore": 0.00074,
+        "source": "NVD",
+        "uuid": "c0724571-8c54-4ac4-adeb-3b5e1e3d7665"
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:76142dd9-d996-4576-aa46-c64fab7baf09:c0724571-8c54-4ac4-adeb-3b5e1e3d7665"
+    },
+    {
+      "component": {
+        "name": "lodash",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/lodash@2.4.2",
+        "uuid": "76142dd9-d996-4576-aa46-c64fab7baf09",
+        "version": "2.4.2",
+        "latestVersion": "4.17.21"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-23337",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.446",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-23337?component-type=npm&component-name=lodash&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.2,
+        "vulnId": "CVE-2021-23337",
+        "aliases": [],
+        "cweId": 94,
+        "description": "Lodash versions prior to 4.17.21 are vulnerable to Command Injection via the template function.",
+        "epssScore": 0.00606,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 94,
+            "name": "Improper Control of Generation of Code ('Code Injection')",
+            "id": 0
+          }
+        ],
+        "uuid": "090685b1-af42-4539-86d8-08e675ba9727",
+        "severityRank": 1,
+        "cweName": "Improper Control of Generation of Code ('Code Injection')",
+        "epssPercentile": 0.75275,
+        "cvssV2BaseScore": 6.5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:76142dd9-d996-4576-aa46-c64fab7baf09:090685b1-af42-4539-86d8-08e675ba9727"
+    },
+    {
+      "component": {
+        "name": "sequelize",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/sequelize@5.22.3",
+        "uuid": "6993919e-d0fe-44c0-b526-070339ec54d1",
+        "version": "5.22.3"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2023-22578",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.493",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2023-22578?component-type=npm&component-name=sequelize&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.8,
+        "severityRank": 0,
+        "vulnId": "CVE-2023-22578",
+        "aliases": [],
+        "epssPercentile": 0.31054,
+        "description": "Due to improper artibute filtering in the sequalize js library, can a attacker peform SQL injections.",
+        "epssScore": 0.00076,
+        "source": "NVD",
+        "uuid": "da21298b-f2e9-421d-aa4b-7653f929775f"
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:6993919e-d0fe-44c0-b526-070339ec54d1:da21298b-f2e9-421d-aa4b-7653f929775f"
+    },
+    {
+      "component": {
+        "name": "sequelize",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/sequelize@5.22.3",
+        "uuid": "6993919e-d0fe-44c0-b526-070339ec54d1",
+        "version": "5.22.3"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2023-22579",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.51",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2023-22579?component-type=npm&component-name=sequelize&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 8.8,
+        "vulnId": "CVE-2023-22579",
+        "aliases": [],
+        "cweId": 843,
+        "description": "Due to improper parameter filtering in the sequalize js library, can a attacker peform injection.",
+        "epssScore": 0.0005,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 843,
+            "name": "Access of Resource Using Incompatible Type ('Type Confusion')",
+            "id": 0
+          }
+        ],
+        "uuid": "490599d5-e9d8-45b0-9e07-ef7a714a3b45",
+        "severityRank": 1,
+        "cweName": "Access of Resource Using Incompatible Type ('Type Confusion')",
+        "epssPercentile": 0.1705
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:6993919e-d0fe-44c0-b526-070339ec54d1:490599d5-e9d8-45b0-9e07-ef7a714a3b45"
+    },
+    {
+      "component": {
+        "name": "sequelize",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/sequelize@5.22.3",
+        "uuid": "6993919e-d0fe-44c0-b526-070339ec54d1",
+        "version": "5.22.3"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2022-4050",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.543",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2022-4050?component-type=npm&component-name=sequelize&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.8,
+        "vulnId": "CVE-2023-25813",
+        "aliases": [],
+        "cweId": 89,
+        "description": "Sequelize is a Node.js ORM tool. In versions prior to 6.19.1 a SQL injection exploit exists related to replacements. Parameters which are passed through replacements are not properly escaped which can lead to arbitrary SQL injection depending on the specific queries in use. The issue has been fixed in Sequelize 6.19.1. Users are advised to upgrade. Users unable to upgrade should not use the `replacements` and the `where` option in the same query.",
+        "epssScore": 0.00069,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 89,
+            "name": "Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+            "id": 0
+          }
+        ],
+        "uuid": "863f44e0-3227-4c43-9170-14223ebbbe01",
+        "severityRank": 0,
+        "cweName": "Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+        "epssPercentile": 0.28184
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:6993919e-d0fe-44c0-b526-070339ec54d1:863f44e0-3227-4c43-9170-14223ebbbe01"
+    },
+    {
+      "component": {
+        "name": "engine.io",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/engine.io@3.4.2",
+        "uuid": "aeae7f83-f8e6-4820-9254-2a37e2d71f1e",
+        "version": "3.4.2"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2020-36048",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.71",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2020-36048?component-type=npm&component-name=engine.io&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2020-36048",
+        "aliases": [],
+        "cweId": 400,
+        "description": "Engine.IO before 4.0.0 allows attackers to cause a denial of service (resource consumption) via a POST request to the long polling transport.",
+        "epssScore": 0.00141,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 400,
+            "name": "Uncontrolled Resource Consumption",
+            "id": 0
+          }
+        ],
+        "uuid": "b4d562a2-09d5-4e51-a054-7b018c8b615c",
+        "severityRank": 1,
+        "cweName": "Uncontrolled Resource Consumption",
+        "epssPercentile": 0.48052,
+        "cvssV2BaseScore": 5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:aeae7f83-f8e6-4820-9254-2a37e2d71f1e:b4d562a2-09d5-4e51-a054-7b018c8b615c"
+    },
+    {
+      "component": {
+        "name": "engine.io",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/engine.io@3.4.2",
+        "uuid": "aeae7f83-f8e6-4820-9254-2a37e2d71f1e",
+        "version": "3.4.2"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-41940",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.739",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-41940?component-type=npm&component-name=engine.io&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 6.5,
+        "vulnId": "CVE-2022-41940",
+        "aliases": [],
+        "cweId": 248,
+        "description": "Engine.IO is the implementation of transport-based cross-browser/cross-device bi-directional communication layer for Socket.IO. A specially crafted HTTP request can trigger an uncaught exception on the Engine.IO server, thus killing the Node.js process. This impacts all the users of the engine.io package, including those who uses depending packages like socket.io. There is no known workaround except upgrading to a safe version. There are patches for this issue released in versions 3.6.1 and 6.2.1.",
+        "epssScore": 0.00066,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 248,
+            "name": "Uncaught Exception",
+            "id": 0
+          }
+        ],
+        "uuid": "6e9d1702-060e-4ea2-8bfd-9d726dfc42c9",
+        "severityRank": 2,
+        "cweName": "Uncaught Exception",
+        "epssPercentile": 0.27096
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:aeae7f83-f8e6-4820-9254-2a37e2d71f1e:6e9d1702-060e-4ea2-8bfd-9d726dfc42c9"
+    },
+    {
+      "component": {
+        "name": "ws",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/ws@7.3.1",
+        "uuid": "96ce1f2d-50d2-4fb0-8db3-f1b5d674bbe6",
+        "version": "7.3.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-32640",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.811",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-32640?component-type=npm&component-name=ws&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 5.3,
+        "vulnId": "CVE-2021-32640",
+        "aliases": [],
+        "cweId": 400,
+        "description": "ws is an open source WebSocket client and server library for Node.js. A specially crafted value of the `Sec-Websocket-Protocol` header can be used to significantly slow down a ws server. The vulnerability has been fixed in ws@7.4.6 (https://github.com/websockets/ws/commit/00c425ec77993773d823f018f64a5c44e17023ff). In vulnerable versions of ws, the issue can be mitigated by reducing the maximum allowed length of the request headers using the [`--max-http-header-size=size`](https://nodejs.org/api/cli.html#cli_max_http_header_size_size) and/or the [`maxHeaderSize`](https://nodejs.org/api/http.html#http_http_createserver_options_requestlistener) options.",
+        "epssScore": 0.00116,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 400,
+            "name": "Uncontrolled Resource Consumption",
+            "id": 0
+          }
+        ],
+        "uuid": "81ccec00-b96a-4035-bfdc-518fde0d818c",
+        "severityRank": 2,
+        "cweName": "Uncontrolled Resource Consumption",
+        "epssPercentile": 0.43694,
+        "cvssV2BaseScore": 5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:96ce1f2d-50d2-4fb0-8db3-f1b5d674bbe6:81ccec00-b96a-4035-bfdc-518fde0d818c"
+    },
+    {
+      "component": {
+        "name": "ws",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/ws@6.1.4",
+        "uuid": "e22ac5b6-e7cb-4e87-bc2d-64c6d828a024",
+        "version": "6.1.4"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-32640",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:32.918",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-32640?component-type=npm&component-name=ws&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 5.3,
+        "vulnId": "CVE-2021-32640",
+        "aliases": [],
+        "cweId": 400,
+        "description": "ws is an open source WebSocket client and server library for Node.js. A specially crafted value of the `Sec-Websocket-Protocol` header can be used to significantly slow down a ws server. The vulnerability has been fixed in ws@7.4.6 (https://github.com/websockets/ws/commit/00c425ec77993773d823f018f64a5c44e17023ff). In vulnerable versions of ws, the issue can be mitigated by reducing the maximum allowed length of the request headers using the [`--max-http-header-size=size`](https://nodejs.org/api/cli.html#cli_max_http_header_size_size) and/or the [`maxHeaderSize`](https://nodejs.org/api/http.html#http_http_createserver_options_requestlistener) options.",
+        "epssScore": 0.00116,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 400,
+            "name": "Uncontrolled Resource Consumption",
+            "id": 0
+          }
+        ],
+        "uuid": "81ccec00-b96a-4035-bfdc-518fde0d818c",
+        "severityRank": 2,
+        "cweName": "Uncontrolled Resource Consumption",
+        "epssPercentile": 0.43694,
+        "cvssV2BaseScore": 5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:e22ac5b6-e7cb-4e87-bc2d-64c6d828a024:81ccec00-b96a-4035-bfdc-518fde0d818c"
+    },
+    {
+      "component": {
+        "name": "xmlhttprequest-ssl",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/xmlhttprequest-ssl@1.5.5",
+        "uuid": "7eb2ea4f-9d94-42e1-8ff4-b0bca8e98736",
+        "version": "1.5.5"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-31597",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:33.547",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-31597?component-type=npm&component-name=xmlhttprequest-ssl&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.4,
+        "vulnId": "CVE-2021-31597",
+        "aliases": [],
+        "cweId": 295,
+        "description": "The xmlhttprequest-ssl package before 1.6.1 for Node.js disables SSL certificate validation by default, because rejectUnauthorized (when the property exists but is undefined) is considered to be false within the https.request function of Node.js. In other words, no certificate is ever rejected.",
+        "epssScore": 0.0012,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 295,
+            "name": "Improper Certificate Validation",
+            "id": 0
+          }
+        ],
+        "uuid": "3248623b-b136-44e1-a20b-d83aef6f94fe",
+        "severityRank": 0,
+        "cweName": "Improper Certificate Validation",
+        "epssPercentile": 0.44479,
+        "cvssV2BaseScore": 7.5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:7eb2ea4f-9d94-42e1-8ff4-b0bca8e98736:3248623b-b136-44e1-a20b-d83aef6f94fe"
+    },
+    {
+      "component": {
+        "name": "socket.io-parser",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/socket.io-parser@3.3.0",
+        "uuid": "efbb6249-23ad-44c1-97e1-87db96597010",
+        "version": "3.3.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2020-36049",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:33.576",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2020-36049?component-type=npm&component-name=socket.io-parser&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2020-36049",
+        "aliases": [],
+        "cweId": 770,
+        "description": "socket.io-parser before 3.4.1 allows attackers to cause a denial of service (memory consumption) via a large packet because a concatenation approach is used.",
+        "epssScore": 0.00141,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 770,
+            "name": "Allocation of Resources Without Limits or Throttling",
+            "id": 0
+          }
+        ],
+        "uuid": "8e9b46e6-a873-428f-9b2a-cf1e03c4d3ed",
+        "severityRank": 1,
+        "cweName": "Allocation of Resources Without Limits or Throttling",
+        "epssPercentile": 0.48052,
+        "cvssV2BaseScore": 5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:efbb6249-23ad-44c1-97e1-87db96597010:8e9b46e6-a873-428f-9b2a-cf1e03c4d3ed"
+    },
+    {
+      "component": {
+        "name": "socket.io-parser",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/socket.io-parser@3.3.0",
+        "uuid": "efbb6249-23ad-44c1-97e1-87db96597010",
+        "version": "3.3.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-2421",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:33.596",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-2421?component-type=npm&component-name=socket.io-parser&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.8,
+        "severityRank": 0,
+        "vulnId": "CVE-2022-2421",
+        "aliases": [],
+        "epssPercentile": 0.38055,
+        "description": "Due to improper type validation in attachment parsing the Socket.io js library, it is possible to overwrite the _placeholder object which allows an attacker to place references to functions at arbitrary places in the resulting query object.",
+        "epssScore": 0.00093,
+        "source": "NVD",
+        "uuid": "5fbca795-0b9f-4b5b-911f-3d99b8768095"
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:efbb6249-23ad-44c1-97e1-87db96597010:5fbca795-0b9f-4b5b-911f-3d99b8768095"
+    },
+    {
+      "component": {
+        "name": "socket.io-parser",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/socket.io-parser@3.4.1",
+        "uuid": "ae04efeb-9307-4608-b99f-a4fa91b253e4",
+        "version": "3.4.1"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-2421",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:33.626",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-2421?component-type=npm&component-name=socket.io-parser&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "CRITICAL",
+        "cvssV3BaseScore": 9.8,
+        "severityRank": 0,
+        "vulnId": "CVE-2022-2421",
+        "aliases": [],
+        "epssPercentile": 0.38055,
+        "description": "Due to improper type validation in attachment parsing the Socket.io js library, it is possible to overwrite the _placeholder object which allows an attacker to place references to functions at arbitrary places in the resulting query object.",
+        "epssScore": 0.00093,
+        "source": "NVD",
+        "uuid": "5fbca795-0b9f-4b5b-911f-3d99b8768095"
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:ae04efeb-9307-4608-b99f-a4fa91b253e4:5fbca795-0b9f-4b5b-911f-3d99b8768095"
+    },
+    {
+      "component": {
+        "name": "swagger-ui-dist",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/swagger-ui-dist@3.28.0",
+        "uuid": "787c3a39-d932-427c-b780-69070be54db0",
+        "version": "3.28.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2018-25031",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:33.676",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2018-25031?component-type=npm&component-name=swagger-ui-dist&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 4.3,
+        "vulnId": "CVE-2018-25031",
+        "aliases": [],
+        "cweId": 20,
+        "description": "Swagger UI before 4.1.3 could allow a remote attacker to conduct spoofing attacks. By persuading a victim to open a crafted URL, an attacker could exploit this vulnerability to display remote OpenAPI definitions.",
+        "epssScore": 0.00096,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 20,
+            "name": "Improper Input Validation",
+            "id": 0
+          }
+        ],
+        "uuid": "e16df903-5723-40f2-a047-6c72cecee230",
+        "severityRank": 2,
+        "cweName": "Improper Input Validation",
+        "epssPercentile": 0.38738,
+        "cvssV2BaseScore": 4.3
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:787c3a39-d932-427c-b780-69070be54db0:e16df903-5723-40f2-a047-6c72cecee230"
+    },
+    {
+      "component": {
+        "name": "color-string",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/color-string@1.5.3",
+        "uuid": "a366cb4c-dc7c-4d1c-b6d1-12629e812c0b",
+        "version": "1.5.3"
+      },
+      "attribution": {
+        "alternateIdentifier": "sonatype-2021-0318",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:33.776",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/sonatype-2021-0318?component-type=npm&component-name=color-string&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 5.3,
+        "vulnId": "CVE-2021-29060",
+        "aliases": [],
+        "cweId": 770,
+        "description": "A Regular Expression Denial of Service (ReDOS) vulnerability was discovered in Color-String version 1.5.5 and below which occurs when the application is provided and checks a crafted invalid HWB string.",
+        "epssScore": 0.00128,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 770,
+            "name": "Allocation of Resources Without Limits or Throttling",
+            "id": 0
+          }
+        ],
+        "uuid": "c14c59da-9756-4d97-abd3-322a20f17fa9",
+        "severityRank": 2,
+        "cweName": "Allocation of Resources Without Limits or Throttling",
+        "epssPercentile": 0.45834,
+        "cvssV2BaseScore": 5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:a366cb4c-dc7c-4d1c-b6d1-12629e812c0b:c14c59da-9756-4d97-abd3-322a20f17fa9"
+    },
+    {
+      "component": {
+        "name": "async",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/async@3.2.0",
+        "uuid": "3bb6a46d-15cc-4280-82c9-6b39da6f535f",
+        "version": "3.2.0",
+        "latestVersion": "3.2.4"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2021-43138",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:33.832",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2021-43138?component-type=npm&component-name=async&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.8,
+        "vulnId": "CVE-2021-43138",
+        "aliases": [],
+        "cweId": 1321,
+        "description": "In Async before 2.6.4 and 3.x before 3.2.2, a malicious user can obtain privileges via the mapValues() method, aka lib/internal/iterator.js createObjectIterator prototype pollution.",
+        "epssScore": 0.00057,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 1321,
+            "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+            "id": 0
+          }
+        ],
+        "uuid": "289c4243-6009-43cc-9765-86e3815d14b0",
+        "severityRank": 1,
+        "cweName": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+        "epssPercentile": 0.2165,
+        "cvssV2BaseScore": 6.8
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:3bb6a46d-15cc-4280-82c9-6b39da6f535f:289c4243-6009-43cc-9765-86e3815d14b0"
+    },
+    {
+      "component": {
+        "name": "simple-get",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/simple-get@3.1.0",
+        "uuid": "d97095cd-da42-4e47-93cc-05950660d05e",
+        "version": "3.1.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2022-0355",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:34.012",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2022-0355?component-type=npm&component-name=simple-get&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "HIGH",
+        "cvssV3BaseScore": 7.5,
+        "vulnId": "CVE-2022-0355",
+        "aliases": [],
+        "cweId": 200,
+        "description": "Exposure of Sensitive Information to an Unauthorized Actor in NPM simple-get prior to 4.0.1.",
+        "epssScore": 0.00148,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 200,
+            "name": "Exposure of Sensitive Information to an Unauthorized Actor",
+            "id": 0
+          }
+        ],
+        "uuid": "00815c64-bbe1-4185-a6e7-03157b8f19b1",
+        "severityRank": 1,
+        "cweName": "Exposure of Sensitive Information to an Unauthorized Actor",
+        "epssPercentile": 0.4908,
+        "cvssV2BaseScore": 5
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:d97095cd-da42-4e47-93cc-05950660d05e:00815c64-bbe1-4185-a6e7-03157b8f19b1"
+    },
+    {
+      "component": {
+        "name": "bl",
+        "project": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+        "purl": "pkg:npm/bl@4.0.2",
+        "uuid": "9cd88cd5-2f28-46d0-9476-a292fe5fc282",
+        "version": "4.0.2",
+        "latestVersion": "6.0.0"
+      },
+      "attribution": {
+        "alternateIdentifier": "CVE-2020-8244",
+        "analyzerIdentity": "OSSINDEX_ANALYZER",
+        "attributedOn": "2023-03-10 11:50:34.069",
+        "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2020-8244?component-type=npm&component-name=bl&utm_source=dependency-track&utm_medium=integration&utm_content=v4.7.1"
+      },
+      "vulnerability": {
+        "severity": "MEDIUM",
+        "cvssV3BaseScore": 6.5,
+        "vulnId": "CVE-2020-8244",
+        "aliases": [],
+        "cweId": 125,
+        "description": "A buffer over-read vulnerability exists in bl <4.0.3, <3.0.1, <2.2.1, and <1.2.3 which could allow an attacker to supply user input (even typed) that if it ends up in consume() argument and can become negative, the BufferList state can be corrupted, tricking it into exposing uninitialized memory via regular .slice() calls.",
+        "epssScore": 0.00111,
+        "source": "NVD",
+        "cwes": [
+          {
+            "cweId": 125,
+            "name": "Out-of-bounds Read",
+            "id": 0
+          }
+        ],
+        "uuid": "08201a89-f14f-4b70-8545-2838ded02ee3",
+        "severityRank": 2,
+        "cweName": "Out-of-bounds Read",
+        "epssPercentile": 0.42585,
+        "cvssV2BaseScore": 6.4
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c:9cd88cd5-2f28-46d0-9476-a292fe5fc282:08201a89-f14f-4b70-8545-2838ded02ee3"
+    }
+  ],
+  "project": {
+    "name": "test",
+    "uuid": "0285b2d4-ae73-4f1b-80f6-f8480570dd6c",
+    "version": "1.0"
+  },
+  "version": "1.1"
+}

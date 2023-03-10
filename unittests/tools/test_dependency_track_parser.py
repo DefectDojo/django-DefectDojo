@@ -93,3 +93,20 @@ class TestDependencyTrackParser(DojoTestCase):
 
         self.assertEqual(12, len(findings))
         self.assertTrue('CVE-2022-2053' in findings[11].unsaved_vulnerability_ids)
+    def test_dependency_track_parser_findings_with_state(self):
+        testfile = open(
+            get_unit_tests_path() + "/scans/dependency_track/with_state_fp_na_resolved"
+        )
+        parser = DependencyTrackParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+
+        self.assertTrue(findings[0].false_p and findings[0].is_mitigated)
+        self.assertTrue(findings[8].false_p and findings[8].is_mitigated)
+        self.assertTrue(findings[40].false_p and findings[40].is_mitigated)
+        self.assertTrue(findings[6].out_of_scope)
+        self.assertTrue(findings[7].out_of_scope)
+        self.assertTrue(findings[36].out_of_scope)
+        self.assertTrue(findings[3].is_mitigated)
+        self.assertTrue(findings[35].is_mitigated)
+        self.assertTrue(findings[45].is_mitigated)
