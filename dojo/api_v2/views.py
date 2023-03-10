@@ -519,6 +519,35 @@ class RiskAcceptanceViewSet(prefetch.PrefetchListMixin,
                 'owner',
                 'accepted_findings').distinct()
 
+    @extend_schema(
+        methods=['GET'],
+        responses={
+            status.HTTP_200_OK: serializers.RiskAcceptanceProofSerializer,
+        }
+    )
+    @swagger_auto_schema(
+        method='get',
+        responses={
+            status.HTTP_200_OK: serializers.RiskAcceptanceProofSerializer,
+        }
+    )
+    @action(detail=True, methods=["get"])
+    def download_proof(self, request, pk=None):
+        risk_acceptance = self.get_object()
+        # Get the file object
+        file_object = risk_acceptance.path
+        if file_object is None:
+            return Response({"error": "Proof has not provided to this risk acceptance..."}, status=status.HTTP_404_NOT_FOUND)
+        # Get the path of the file in media root
+        file_path = f'{settings.MEDIA_ROOT}/{file_object.name}'
+        file_handle = open(file_path, "rb")
+        # send file
+        response = FileResponse(file_handle, content_type=f'{mimetypes.guess_type(file_path)}', status=status.HTTP_200_OK)
+        response['Content-Length'] = file_object.size
+        response['Content-Disposition'] = f'attachment; filename="{risk_acceptance.filename()}"'
+
+        return response
+
 
 # These are technologies in the UI and the API!
 # Authorization: object-based

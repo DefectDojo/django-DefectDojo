@@ -34,6 +34,7 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import Permission
 from django.utils import timezone
+from django.urls import reverse
 from django.db.utils import IntegrityError
 import six
 from django.utils.translation import gettext_lazy as _
@@ -637,6 +638,14 @@ class RawFileSerializer(serializers.ModelSerializer):
         fields = ['file']
 
 
+class RiskAcceptanceProofSerializer(serializers.ModelSerializer):
+    path = serializers.FileField(required=True)
+
+    class Meta:
+        model = Risk_Acceptance
+        fields = ['path']
+
+
 class ProductMemberSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -1136,6 +1145,7 @@ class TestImportSerializer(serializers.ModelSerializer):
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
     recommendation = serializers.SerializerMethodField()
     decision = serializers.SerializerMethodField()
+    path = serializers.SerializerMethodField()
 
     @extend_schema_field(serializers.CharField())
     @swagger_serializer_method(serializers.CharField())
@@ -1146,6 +1156,23 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
     @swagger_serializer_method(serializers.CharField())
     def get_decision(self, obj):
         return Risk_Acceptance.TREATMENT_TRANSLATIONS.get(obj.decision)
+
+    @extend_schema_field(serializers.CharField())
+    @swagger_serializer_method(serializers.CharField())
+    def get_path(self, obj):
+        risk_acceptance_id = obj.id
+        engagement_id = Engagement.objects.filter(risk_acceptance__id__in=[obj.id]).first().id
+        path = reverse('download_risk_acceptance', args=(engagement_id, risk_acceptance_id))
+        request = self.context.get("request")
+        if request:
+            path = request.build_absolute_uri(path)
+        return path
+
+    @extend_schema_field(serializers.IntegerField())
+    @swagger_serializer_method(serializers.IntegerField())
+    def get_engagement(self, obj):
+        engagement = Engagement.objects.filter(risk_acceptance__id__in=[obj.id]).first()
+        return EngagementSerializer(read_only=True).to_representation(engagement)
 
     class Meta:
         model = Risk_Acceptance
