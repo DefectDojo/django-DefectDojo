@@ -461,7 +461,7 @@ class EngagementViewSet(prefetch.PrefetchListMixin,
         prefetcher = _Prefetcher()
         entry = check_lists.first()
         # Get the queried object representation
-        result = serializers.EngagementCheckListSerializer(centry).data
+        result = serializers.EngagementCheckListSerializer(entry).data
         prefetcher._prefetch(entry, prefetch_params)
         result["prefetch"] = prefetcher.prefetched_data
         return Response(result, status=status.HTTP_200_OK)
