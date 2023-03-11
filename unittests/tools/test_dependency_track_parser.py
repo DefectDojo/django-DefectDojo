@@ -96,7 +96,7 @@ class TestDependencyTrackParser(DojoTestCase):
 
     def test_dependency_track_parser_findings_with_state(self):
         testfile = open(
-            get_unit_tests_path() + "/scans/dependency_track/with_state_fp_na_resolved"
+            get_unit_tests_path() + "/scans/dependency_track/with_state_fp_na_resolved.json"
         )
         parser = DependencyTrackParser()
         findings = parser.get_findings(testfile, Test())
