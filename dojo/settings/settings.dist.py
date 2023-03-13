@@ -129,9 +129,6 @@ env = environ.Env(
     DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL=(str, ''),
     DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL=(str, ''),
     DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT=(str, 'Login with Keycloak'),
-    DD_SOCIAL_AUTH_GITHUB_OAUTH2_ENABLED=(bool, False),
-    DD_SOCIAL_AUTH_GITHUB_KEY=(str, ''),
-    DD_SOCIAL_AUTH_GITHUB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_URL=(str, ''),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL=(str, ''),
@@ -254,7 +251,7 @@ env = environ.Env(
     DD_DELETE_PREVIEW=(bool, True),
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
-                                 '.html', '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
+                                 '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
@@ -459,7 +456,6 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
     'social_core.backends.gitlab.GitLabOAuth2',
     'social_core.backends.keycloak.KeycloakOAuth2',
-    'social_core.backends.github.GithubOAuth2',
     'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
     'dojo.remote_user.RemoteUserBackend',
     'django.contrib.auth.backends.RemoteUserBackend',
@@ -559,10 +555,6 @@ SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY = env('DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY')
 SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = env('DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL')
 SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = env('DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL')
 SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT = env('DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT')
-
-GITHUB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITHUB_OAUTH2_ENABLED')
-SOCIAL_AUTH_GITHUB_KEY = env('DD_SOCIAL_AUTH_GITHUB_KEY')
-SOCIAL_AUTH_GITHUB_SECRET = env('DD_SOCIAL_AUTH_GITHUB_SECRET')
 
 GITHUB_ENTERPRISE_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED')
 SOCIAL_AUTH_GITHUB_ENTERPRISE_URL = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_URL')
@@ -1215,7 +1207,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
-    'Github Vulnerability Scan': ['title', 'severity', 'component_name', 'vulnerability_ids'],
+    'Github Vulnerability Scan': ['title', 'severity', 'component_name', 'vulnerability_ids', 'file_path'],
     'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
     'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
     'pip-audit Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
@@ -1458,9 +1450,9 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
 if env('DD_JIRA_EXTRA_ISSUE_TYPES') != '':
     if env('DD_JIRA_EXTRA_ISSUE_TYPES').count(',') > 0:
         for extra_type in env('DD_JIRA_EXTRA_ISSUE_TYPES').split(','):
-            JIRA_ISSUE_TYPE_CHOICES_CONFIG += (extra_type, extra_type)
+            JIRA_ISSUE_TYPE_CHOICES_CONFIG += (extra_type, extra_type),
     else:
-        JIRA_ISSUE_TYPE_CHOICES_CONFIG += (env('DD_JIRA_EXTRA_ISSUE_TYPES'), env('DD_JIRA_EXTRA_ISSUE_TYPES'))
+        JIRA_ISSUE_TYPE_CHOICES_CONFIG += (env('DD_JIRA_EXTRA_ISSUE_TYPES'), env('DD_JIRA_EXTRA_ISSUE_TYPES')),
 
 JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 

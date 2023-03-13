@@ -109,7 +109,7 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
 
 def add_findings_to_risk_acceptance(risk_acceptance, findings):
     for finding in findings:
-        if not finding.duplicate:
+        if not finding.duplicate or finding.risk_accepted:
             finding.active = False
             finding.risk_accepted = True
             finding.save(dedupe_option=False)

@@ -617,7 +617,7 @@
                 {% endif %}
                 {% if 'is_finding_groups_enabled'|system_setting_enabled and finding.finding_group %}
                     <td>
-                        {{ finding.finding_group.name }}
+                        <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
                         <i id="push_group_to_jira_{{ finding.finding_group.group.id }}" data-group-id="{{ finding.finding_group.id }}" class="fa-solid fa-share-from-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
                     </td>
                 {% endif %}
