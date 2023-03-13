@@ -1,15 +1,9 @@
 # #  product
 import logging
 
-from django.contrib import messages
-from django.urls import reverse
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from dojo.models import Product_API_Scan_Configuration
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view
 from dojo.utils import add_breadcrumb
-from dojo.forms import ToolConfigForm
-from dojo.tool_config.factory import create_API
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
 logger = logging.getLogger(__name__)
