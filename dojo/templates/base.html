@@ -580,6 +580,13 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
+                                                {% if "dojo.view_api_scan_configurations"|has_configuration_permission %}
+                                                    <li>
+                                                        <a href="{% url 'api_scan_configurations' %}">
+                                                            {% trans "API Scan Configurations" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                                 {% if "dojo.view_tool_type"|has_configuration_permission %}
                                                     <li>
                                                         <a href="{% url 'tool_type' %}">

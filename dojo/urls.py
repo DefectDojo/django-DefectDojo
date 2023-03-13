@@ -45,6 +45,7 @@ from dojo.jira_link.urls import urlpatterns as jira_urls
 from dojo.github_issue_link.urls import urlpatterns as github_urls
 from dojo.tool_type.urls import urlpatterns as tool_type_urls
 from dojo.tool_config.urls import urlpatterns as tool_config_urls
+from dojo.api_scan_configurations.urls import urlpatterns as api_scan_configurations_urls
 from dojo.tool_product.urls import urlpatterns as tool_product_urls
 from dojo.cred.urls import urlpatterns as cred_urls
 from dojo.sla_config.urls import urlpatterns as sla_urls
@@ -152,6 +153,7 @@ ur += jira_urls
 ur += github_urls
 ur += tool_type_urls
 ur += tool_config_urls
+ur += api_scan_configurations_urls
 ur += tool_product_urls
 ur += cred_urls
 ur += sla_urls

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% load authorization_tags %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        All API Scan Configurations
+                    </h3>
+                </div>
+
+            </div>
+            {% if confs %}
+
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                </div>
+                <div class="panel panel-default table-responsive">
+                    <table id="products"
+                           class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Product API Scan Configuration</th>
+                            <th>Service key 1</th>
+                            <th>Service key 2</th>
+                            <th>Service key 3</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for conf in confs %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'edit_product' conf.product.id %}">{{ conf.product.name }}</a>
+                                </td>
+                                <td>
+                                    {% if "dojo.change_tool_configuration"|has_configuration_permission %}
+                                        <a href="{% url 'edit_api_scan_configuration' conf.product.id conf.id %}">{{ conf.tool_configuration.name }}</a>
+                                    {% else %}
+                                        {{ conf.name }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if conf.service_key_1 %}{{ conf.service_key_1 }}{% endif %}
+                                </td>
+                                <td>
+                                    {% if conf.service_key_2 %}{{ conf.service_key_2 }}{% endif %}
+                                </td>
+                                <td>
+                                    {% if conf.service_key_3 %}{{ conf.service_key_3 }}{% endif %}
+                                </td>
+
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                </div>
+            {% else %}
+                <p class="text-center">No tool mappings found.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}
