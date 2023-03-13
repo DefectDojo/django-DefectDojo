@@ -32,7 +32,7 @@ from dojo.models import Language_Type, Languages, Notifications, Product, Produc
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
     Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations, \
     UserContactInfo, Product_API_Scan_Configuration, Cred_Mapping, Cred_User, Question, Answer, \
-    Engagement_Survey, Answered_Survey, General_Survey
+    Engagement_Survey, Answered_Survey, General_Survey, Check_List
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
 from dojo.finding.views import set_finding_as_original_internal, reset_finding_duplicate_status_internal, \
@@ -258,7 +258,9 @@ class EngagementViewSet(prefetch.PrefetchListMixin,
     queryset = Engagement.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiEngagementFilter
-    swagger_schema = prefetch.get_prefetch_schema(["engagements_list", "engagements_read"], serializers.EngagementSerializer).to_schema()
+    swagger_schema = prefetch.get_prefetch_schema(["engagements_list", "engagements_read"], serializers.EngagementSerializer).composeWith(
+        prefetch.get_prefetch_schema(["engagements_complete_checklist_read"], serializers.EngagementCheckListSerializer)
+    ).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEngagementPermission)
 
     @property
@@ -430,6 +432,41 @@ class EngagementViewSet(prefetch.PrefetchListMixin,
         return Response(serialized_files.data, status=status.HTTP_200_OK)
 
     @extend_schema(
+        methods=['POST'],
+        request=serializers.EngagementCheckListSerializer,
+        responses={status.HTTP_201_CREATED: serializers.EngagementCheckListSerializer}
+    )
+    @swagger_auto_schema(
+        method='post',
+        request_body=serializers.EngagementCheckListSerializer,
+        responses={status.HTTP_201_CREATED: serializers.EngagementCheckListSerializer}
+    )
+    @action(detail=True, methods=["get", "post"])
+    def complete_checklist(self, request, pk=None):
+        from dojo.api_v2.prefetch.prefetcher import _Prefetcher
+        engagement = self.get_object()
+        check_lists = Check_List.objects.filter(engagement=engagement)
+        if request.method == 'POST':
+            if check_lists.count() > 0:
+                return Response({"message": "A completed checklist for this engagement already exists."}, status=status.HTTP_400_BAD_REQUEST)
+            check_list = serializers.EngagementCheckListSerializer(data=request.data)
+            if not check_list.is_valid():
+                return Response(check_list.errors, status=status.HTTP_400_BAD_REQUEST)
+            check_list = Check_List(**check_list.data)
+            check_list.engagement = engagement
+            check_list.save()
+            serialized_check_list = serializers.EngagementCheckListSerializer(check_list)
+            return Response(serialized_check_list.data, status=status.HTTP_201_CREATED)
+        prefetch_params = request.GET.get("prefetch", "").split(",")
+        prefetcher = _Prefetcher()
+        entry = check_lists.first()
+        # Get the queried object representation
+        result = serializers.EngagementCheckListSerializer(entry).data
+        prefetcher._prefetch(entry, prefetch_params)
+        result["prefetch"] = prefetcher.prefetched_data
+        return Response(result, status=status.HTTP_200_OK)
+
+    @extend_schema(
         methods=['GET'],
         responses={
             status.HTTP_200_OK: serializers.RawFileSerializer,
@@ -481,6 +518,35 @@ class RiskAcceptanceViewSet(prefetch.PrefetchListMixin,
                 'engagement_set',
                 'owner',
                 'accepted_findings').distinct()
+
+    @extend_schema(
+        methods=['GET'],
+        responses={
+            status.HTTP_200_OK: serializers.RiskAcceptanceProofSerializer,
+        }
+    )
+    @swagger_auto_schema(
+        method='get',
+        responses={
+            status.HTTP_200_OK: serializers.RiskAcceptanceProofSerializer,
+        }
+    )
+    @action(detail=True, methods=["get"])
+    def download_proof(self, request, pk=None):
+        risk_acceptance = self.get_object()
+        # Get the file object
+        file_object = risk_acceptance.path
+        if file_object is None:
+            return Response({"error": "Proof has not provided to this risk acceptance..."}, status=status.HTTP_404_NOT_FOUND)
+        # Get the path of the file in media root
+        file_path = f'{settings.MEDIA_ROOT}/{file_object.name}'
+        file_handle = open(file_path, "rb")
+        # send file
+        response = FileResponse(file_handle, content_type=f'{mimetypes.guess_type(file_path)}', status=status.HTTP_200_OK)
+        response['Content-Length'] = file_object.size
+        response['Content-Disposition'] = f'attachment; filename="{risk_acceptance.filename()}"'
+
+        return response
 
 
 # These are technologies in the UI and the API!
@@ -2770,6 +2836,25 @@ class EngagementPresetsViewset(prefetch.PrefetchListMixin,
         return get_authorized_engagement_presets(Permissions.Product_View)
 
 
+class EngagementCheckListViewset(prefetch.PrefetchListMixin,
+                               prefetch.PrefetchRetrieveMixin,
+                               mixins.ListModelMixin,
+                               mixins.RetrieveModelMixin,
+                               mixins.UpdateModelMixin,
+                               mixins.DestroyModelMixin,
+                               mixins.CreateModelMixin,
+                               viewsets.GenericViewSet,
+                               dojo_mixins.DeletePreviewModelMixin):
+    serializer_class = serializers.EngagementCheckListSerializer
+    queryset = Check_List.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    swagger_schema = prefetch.get_prefetch_schema(["engagement_checklists_list", "engagement_checklists_read"], serializers.EngagementCheckListSerializer).to_schema()
+    permission_classes = (IsAuthenticated, permissions.UserHasEngagementPermission)
+
+    def get_queryset(self):
+        return get_authorized_engagement_checklists(Permissions.Product_View)
+
+
 class NetworkLocationsViewset(mixins.ListModelMixin,
                               mixins.RetrieveModelMixin,
                               mixins.UpdateModelMixin,
@@ -2811,7 +2896,7 @@ class QuestionnaireQuestionViewSet(mixins.ListModelMixin,
                                    mixins.RetrieveModelMixin,
                                    viewsets.GenericViewSet,
                                    dojo_mixins.QuestionSubClassFieldsMixin):
-    serializer_class = serializers.QuestionSerializer
+    serializer_class = serializers.QuestionnaireQuestionSerializer
     queryset = Question.objects.all()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (permissions.UserHasEngagementPermission, DjangoModelPermissions)
