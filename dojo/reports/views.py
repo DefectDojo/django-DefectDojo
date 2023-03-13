@@ -564,9 +564,8 @@ def generate_report(request, obj, host_view=False):
                    'title': report_title,
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
-    elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet":
-        findings = ReportFindingFilter(request.GET,
-                                             queryset=prefetch_related_findings_for_report(obj).distinct())
+    elif type(obj).__name__ in ["QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"]:
+        findings = ReportFindingFilter(request.GET, queryset=prefetch_related_findings_for_report(obj).distinct())
         report_name = 'Finding'
         report_type = 'Finding'
         template = 'dojo/finding_pdf_report.html'
