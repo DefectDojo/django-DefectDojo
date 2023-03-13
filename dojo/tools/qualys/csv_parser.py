@@ -131,14 +131,6 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
 
         finding.unsaved_vulnerability_ids = cve_data.split(',') if ',' in cve_data else [cve_data]
 
-        if report_finding['Date Last Fixed']:
-            finding.mitigated = datetime.strptime(
-                report_finding['Date Last Fixed'],
-                "%m/%d/%Y %H:%M:%S")
-            finding.is_mitigated = True
-        else:
-            finding.is_mitigated = False
-
         finding.active = report_finding['Vuln Status'] in (
             'Active', 'Re-Opened', 'New')
         finding.verified = True
