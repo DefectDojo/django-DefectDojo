@@ -11,6 +11,7 @@ from dojo.models import Benchmark_Type, Benchmark_Category, Benchmark_Requiremen
 from dojo.utils import add_breadcrumb, Product_Tab, redirect_to_return_url_or_else
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
+from dojo.templatetags.display_tags import asvs_level
 
 from crum import get_current_user
 
@@ -77,13 +78,18 @@ def update_benchmark_summary(request, pid, _type, summary):
             summary = Benchmark_Product_Summary.objects.get(id=summary)
             if field == 'publish':
                 summary.publish = value
+                data = {
+                    'publish': value
+                }
             elif field == 'desired_level':
                 summary.desired_level = value
+                data = {
+                    'desired_level': value,
+                    'text': asvs_level(summary)
+                }
 
             summary.save()
-            return JsonResponse({
-                field: value
-            })
+            return JsonResponse(data)
 
     return redirect_to_return_url_or_else(request, reverse('view_product_benchmark', args=(pid, _type)))
 

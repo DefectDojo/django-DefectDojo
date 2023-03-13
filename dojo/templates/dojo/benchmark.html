@@ -10,8 +10,8 @@
         <div class="panel-heading">
             <div class="clearfix">
                 <span class="pull-left">
-                  <h4>{{ benchmark_type.name }} {{ benchmark_type.version }} - {{ benchmark_product_summary.desired_level }}</h4>
-                  {{ benchmark_product_summary|asvs_level }}
+                  <h4>{{ benchmark_type.name }} {{ benchmark_type.version }} - <span id="head__desired-level">{{ benchmark_product_summary.desired_level }}</span></h4>
+                  <span id="head__description">{{ benchmark_product_summary|asvs_level }}</span>
                 </span>
                 <div id="test-pulldown" class="dropdown pull-right">
                     <form method="post" id="summary" name="summary">{% csrf_token %}
@@ -126,6 +126,7 @@
                     <div id="benchNotes">
 
                     </div>
+                    <div class="no-notes text-center" style="display: none;">{% trans "There is no notes yet." %}</div>
                     <label for="id_entry">{% trans "Notes:" %}<sup>*</sup></label>
                     <div>
                         <textarea name="entry" cols="15" rows="4" maxlength="2400" required="" id="id_entry"
@@ -240,6 +241,11 @@
                 'field': 'desired_level',
                 'value': desired_level
             })
+            .then(response => response.json())
+            .then((result) => {
+                $('#head__description').text(result.text);
+                $('#head__desired-level').text(result.desired_level);
+            });
         }
 
         class BenchNote {
@@ -251,11 +257,13 @@
                 let div = document.createElement('div');
                 div.className = 'bs-callout bs-callout-info';
                 div.style = "padding: 20px; margin: 20px 0; border: 1px solid #eee; border-left-width: 5px; border-radius: 3px; border-left-color: #1b809e; padding-top: 10px"
-
+                let self = this;
                 let del = document.createElement('p');
                 del.style = 'color: red; font-size: 14px; padding: 0px; cursor: pointer; margin-bottom: -12px; margin-left: 99%';
                 del.innerText = 'x';
-                del.onclick = this.removeNotes;
+                del.onclick = function () {
+                    self.removeNotes(this);
+                };
                 del.id = `id-${note['id']}-note`;
 
                 let date = document.createElement('p');
@@ -276,13 +284,13 @@
                 this.benchNotes.append(div);
             }
 
-            static removeNotes() {
+            static removeNotes(e) {
                 if (!confirm("{% trans "Are you sure?" %}")) return;
 
                 BenchNote.spinMeBaby()
-                let _id = $(this).attr('id').split('-')[1];
+                let _id = $(e).attr('id').split('-')[1];
 
-                sendAjax("{% url 'update_product_benchmark' product.id benchmark_type.id %}", {
+                this.fetchAndUpdate({
                     'bench_id': BenchNote.bench_id,
                     'field': 'delete_notes',
                     'value': _id
@@ -291,17 +299,16 @@
 
             static updateNotes(notes) {
                 this.benchNotes.empty();
+                let $note_icon = $('#id_form-' + this.bench_id + '-notes');
 
                 if (!notes.length) {
-                    $('#id_form-' + this.bench_id + '-notes')[0].className = "fa-solid fa-plus";
-                    let div = document.createElement('div');
-                    div.style = "text-align: center";
-                    div.append('There is no notes yet.');
-                    this.benchNotes.append(div);
+                    $note_icon.removeClass('fa-file-lines').addClass('fa-plus');
+                    $('.no-notes').show();
                     return
                 }
 
-                $('#id_form-' + this.bench_id + '-notes')[0].className = "fa-solid fa-file-lines";
+                $('.no-notes').hide();
+                $note_icon.removeClass('fa-plus').addClass('fa-file-lines')
                 notes.forEach(note => this.addMessage(note))
             }
 
@@ -325,17 +332,18 @@
                 let [_, bench_id, field] = check_name.split('-');
                 this.bench_id = bench_id;
 
-                sendAjax("{% url 'update_product_benchmark' product.id benchmark_type.id %}", {
+                this.fetchAndUpdate({
                     'bench_id': this.bench_id,
                     'field': 'get_notes',
                     'value': ''
                 });
             }
 
+
             static sendBenchNotes() {
                 this.spinMeBaby();
 
-                sendAjax("{% url 'update_product_benchmark' product.id benchmark_type.id %}", {
+                this.fetchAndUpdate({
                     'bench_id': this.bench_id,
                     'field': 'notes',
                     'value': this.entry.value
@@ -343,31 +351,23 @@
 
                 this.entry.value = '';
             }
+
+            static fetchAndUpdate(data) {
+                sendAjax("{% url 'update_product_benchmark' product.id benchmark_type.id %}", data)
+                .then(response => response.json())
+                .then(result => BenchNote.updateNotes(result["notes"]));
+            }
         }
 
         function sendAjax(url, data) {
-            $.ajax({
-                data: data,
+            return fetch(url, {
                 method: "POST",
-                url: url,
-                beforeSend: function (jqXHR, settings) {
-                    // Pull the token out of the DOM.
-                    jqXHR.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
+                headers: {
+                    'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val(),
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
                 },
-                success: function (response) {
-                    for (let key in response) {
-                        switch (key) {
-                            case "notes":
-                                BenchNote.updateNotes(response["notes"]);
-                                break;
-                        }
-                    }
-                },
-                error: function (response) {
-                    console.log(response.responseJSON.errors)
-                }
+                body: new URLSearchParams(data)
             });
-            return false;
         }
 
         $(document).ready(function () {

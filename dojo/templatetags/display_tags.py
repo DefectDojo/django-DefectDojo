@@ -2,17 +2,19 @@ from itertools import chain
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
+from django.utils import timezone
 from django.utils.html import escape, conditional_escape
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
+from django.utils.translation import gettext as _
 from django.urls import reverse
 from django.contrib.auth.models import User
+
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url, get_file_images
 import dojo.utils
 from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User, Benchmark_Product
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
-from django.utils import timezone
 import dateutil.relativedelta
 import datetime
 import bleach
@@ -215,7 +217,11 @@ def asvs_level(benchmark_score):
 
     level = percentage(total_viewed, total)
 
-    return f'Checklist is {level} full (pass: {total_viewed}, total: {total})'
+    return _("Checklist is %(level)s full (pass: %(total_viewed)s, total: %(total)s)") % {
+        'level': level,
+        'total_viewed': total_viewed,
+        'total': total
+    }
 
 
 @register.filter(name='version_num')
