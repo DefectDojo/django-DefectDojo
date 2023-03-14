@@ -76,6 +76,7 @@ def update_benchmark_summary(request, pid, _type, summary):
 
         if field in ['publish', 'desired_level']:
             summary = Benchmark_Product_Summary.objects.get(id=summary)
+            data = {}
             if field == 'publish':
                 summary.publish = value
                 data = {
@@ -145,7 +146,6 @@ def benchmark_view(request, pid, type, cat=None):
     try:
         benchmark_product_summary = Benchmark_Product_Summary.objects.get(product=product, benchmark_type=benchmark_type)
     except:
-        pass
         benchmark_product_summary = Benchmark_Product_Summary(product=product, benchmark_type=benchmark_type)
         benchmark_product_summary.save()
 
@@ -183,7 +183,6 @@ def benchmark_view(request, pid, type, cat=None):
 @user_is_authorized(Product, Permissions.Benchmark_Delete, 'pid')
 def delete(request, pid, type):
     product = get_object_or_404(Product, id=pid)
-    benchmark_type = get_object_or_404(Benchmark_Type, id=type)
     benchmark_product_summary = Benchmark_Product_Summary.objects.filter(product=product, benchmark_type=type).first()
     form = DeleteBenchmarkForm(instance=benchmark_product_summary)
 

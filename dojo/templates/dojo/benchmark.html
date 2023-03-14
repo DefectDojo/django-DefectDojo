@@ -113,7 +113,7 @@
            href="{% url 'delete_product_benchmark' product.id benchmark_type.id %}">{% trans "Delete" %}</a>
     </div>
 
-    {#  Modal  #}
+    {# Modal #}
     <div class="modal fade" id="notesModal" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -123,9 +123,7 @@
                     <h4 id="modal-title" class="modal-title">{% trans "Benchmark Notes" %}</h4>
                 </div>
                 <div class="modal-body">
-                    <div id="benchNotes">
-
-                    </div>
+                    <div id="benchNotes"></div>
                     <div class="no-notes text-center" style="display: none;">{% trans "There is no notes yet." %}</div>
                     <label for="id_entry">{% trans "Notes:" %}<sup>*</sup></label>
                     <div>
@@ -383,11 +381,11 @@
 {% endblock %}
 {% block add_styles %}
     td p {
-    margin-bottom: 0px;
+        margin-bottom: 0px;
     }
 
     td p a {
-    color: #337ab7;
+        color: #337ab7;
     }
 
     .table>tbody>tr>td,
@@ -396,7 +394,7 @@
     .table>tfoot>tr>th,
     .table>thead>tr>td,
     .table>thead>tr>th {
-    padding: 12px 10px
+        padding: 12px 10px
     }
 
     table.level-1 tr.level-1 td:first-child,
@@ -405,12 +403,12 @@
     table.level-2 tr.level-2 td:first-child,
     table.level-3 tr.level-2 td:first-child,
     table.level-3 tr.level-3 td:first-child {
-    background-color: #DCEDFB;
+        background-color: #DCEDFB;
     }
 
     table.level-1 tr.level-2,
     table.level-1 tr.level-3,
     table.level-2 tr.level-3 {
-    opacity: 0.55;
+        opacity: 0.55;
     }
 {% endblock %}
