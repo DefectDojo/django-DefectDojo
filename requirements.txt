@@ -5,7 +5,7 @@ bleach[css]
 celery==5.2.7
 coverage==7.2.1
 defusedxml==0.7.1
-django_celery_results==2.4.0
+django_celery_results==2.5.0
 django-auditlog==2.2.2
 django-dbbackup==4.0.2
 django-environ==0.10.0
@@ -34,7 +34,7 @@ PyGithub==1.58.0
 lxml==4.9.2
 Markdown==3.4.1
 mysqlclient==2.1.1
-openpyxl==3.1.1
+openpyxl==3.1.2
 xlrd==1.2.0
 Pillow==9.4.0  # required by django-imagekit
 psycopg2-binary==2.9.5
@@ -82,7 +82,7 @@ django-ratelimit==4.0.0
 argon2-cffi==21.3.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
-boto3==1.26.84  # Required for Celery Broker AWS (SQS) support
+boto3==1.26.89  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
 vulners==2.0.9
 fontawesomefree==6.3.0
