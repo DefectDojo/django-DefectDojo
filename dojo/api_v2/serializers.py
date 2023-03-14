@@ -1161,12 +1161,14 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
     @swagger_serializer_method(serializers.CharField())
     def get_path(self, obj):
         risk_acceptance_id = obj.id
-        engagement_id = Engagement.objects.filter(risk_acceptance__id__in=[obj.id]).first().id
-        path = reverse('download_risk_acceptance', args=(engagement_id, risk_acceptance_id))
-        request = self.context.get("request")
-        if request:
-            path = request.build_absolute_uri(path)
-        return path
+        engagement = Engagement.objects.filter(risk_acceptance__id__in=[risk_acceptance_id]).first()
+        if engagement:
+            engagement_id = engagement.id
+            path = reverse('download_risk_acceptance', args=(engagement_id, risk_acceptance_id))
+            request = self.context.get("request")
+            if request:
+                path = request.build_absolute_uri(path)
+        return obj.path
 
     @extend_schema_field(serializers.IntegerField())
     @swagger_serializer_method(serializers.IntegerField())
