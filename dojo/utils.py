@@ -1519,6 +1519,7 @@ def get_celery_worker_status():
     except:
         return False
 
+
 def get_work_days(start: date, end: date):
     """
     Math function to get workdays between 2 dates.
