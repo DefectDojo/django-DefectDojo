@@ -241,8 +241,7 @@ class TestUnitTest(BaseTestCase):
         # Accept popup
         driver.switch_to.alert.accept()
         # Check the stub finding is deleted
-        self.assertFalse(self.is_text_present_on_page(text='App Vulnerable to XSS3'))
-        # self.assertFalse(driver.find_elements(By.NAME, "stub_finding_name"))
+        self.assertFalse(driver.find_elements(By.NAME, "stub_finding_name"))
 
     def test_merge_findings(self):
         # View existing test from ProductTest()
