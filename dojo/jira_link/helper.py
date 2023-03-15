@@ -699,8 +699,8 @@ def add_jira_issue(obj, *args, **kwargs):
     obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
         log_jira_alert(error_message, obj)
-        logger.warn("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
-        logger.warn("The JIRA issue will NOT be created.")
+        logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
+        logger.warning("The JIRA issue will NOT be created.")
         return False
     logger.debug('Trying to create a new JIRA issue for %s...', to_str_typed(obj))
     try:
@@ -1039,7 +1039,7 @@ def get_issuetype_fields(
 
     except JIRAError as e:
         e.text = f"Failed retrieving field metadata from Jira version: {jira._version}, project: {project_key}, issue type: {issuetype_name}. {e.text}"
-        logger.warn(e.text)
+        logger.warning(e.text)
         add_error_message_to_response(e.text)
 
         raise e
@@ -1113,7 +1113,7 @@ def close_epic(eng, push_to_jira, **kwargs):
             try:
                 jissue = get_jira_issue(eng)
                 if jissue is None:
-                    logger.warn("JIRA close epic failed: no issue found")
+                    logger.warning("JIRA close epic failed: no issue found")
                     return False
 
                 req_url = jira_instance.url + '/rest/api/latest/issue/' + \
@@ -1124,7 +1124,7 @@ def close_epic(eng, push_to_jira, **kwargs):
                     auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
                     json=json_data)
                 if r.status_code != 204:
-                    logger.warn("JIRA close epic failed with error: {}".format(r.text))
+                    logger.warning("JIRA close epic failed with error: {}".format(r.text))
                     return False
                 return True
             except JIRAError as e:
