@@ -89,47 +89,47 @@
                     "score": 0
                 },
                 "issues": {
-                    "test-namespace/database": [
+                    "test-namespace/random": [
                         {
-                            "group": "database",
+                            "group": "random",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-106] No resources requests/limits defined"
                         }
                     ],
-                    "test-namespace/tool-database": [
+                    "test-namespace/resource-test": [
                         {
-                            "group": "tool-database",
+                            "group": "resource-test",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-106] No resources requests/limits defined"
                         }
                     ],
-                    "test-namespace/test-cve-2021-44228": [
+                    "test-namespace/testing-vuln-2021-44228": [
                         {
-                            "group": "cve-2021-44228",
+                            "group": "vuln-2021-44228",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-101] Image tagged \"latest\" in use"
                         }
                     ],
-                    "test-namespace/test-tool": [
+                    "test-namespace/testing-resource-1": [
                         {
-                            "group": "tool",
+                            "group": "resource",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-101] Image tagged \"latest\" in use"
                         }
                     ],
-                    "test-namespace/test-test": [
+                    "test-namespace/testing-resource-2": [
                         {
-                            "group": "test",
+                            "group": "resource",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-101] Image tagged \"latest\" in use"
                         }
                     ],
-                    "test-namespace/test-juice-shop": [
+                    "test-namespace/testing-place": [
                         {
                             "group": "__root__",
                             "gvr": "apps/v1/deployments",
@@ -137,15 +137,15 @@
                             "message": "[POP-501] Unhealthy 1 desired but have 0 available"
                         },
                         {
-                            "group": "juice-shop",
+                            "group": "place",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-101] Image tagged \"latest\" in use"
                         }
                     ],
-                    "test-namespace/test-tool": [
+                    "test-namespace/testing-resource": [
                         {
-                            "group": "tool",
+                            "group": "resource",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-101] Image tagged \"latest\" in use"
@@ -223,8 +223,8 @@
                     "score": 100
                 },
                 "issues": {
-                    "test-namespace/test": [],
-                    "test-namespace/monitor-ingress": []
+                    "test-namespace/testing": [],
+                    "test-namespace/test-ingress": []
                 }
             },
             {
@@ -249,7 +249,7 @@
                     "score": 100
                 },
                 "issues": {
-                    "test-namespace/tool-node-default": []
+                    "test-namespace/resource-node-default": []
                 }
             },
             {
@@ -303,15 +303,15 @@
                     "score": 0
                 },
                 "issues": {
-                    "test-namespace/database-6cff44dc94-d92km": [
+                    "test-namespace/random-6cff44dc94-d92km": [
                         {
-                            "group": "database",
+                            "group": "random",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-106] No resources requests/limits defined"
                         },
                         {
-                            "group": "database",
+                            "group": "random",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-102] No probes defined"
@@ -335,7 +335,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "database",
+                            "group": "random",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -347,15 +347,15 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/tool-database-6585b7597d-c4xd9": [
+                    "test-namespace/resource-test-6585b7597d-c4xd9": [
                         {
-                            "group": "tool-database",
+                            "group": "resource-test",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-106] No resources requests/limits defined"
                         },
                         {
-                            "group": "tool-database",
+                            "group": "resource-test",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-102] No probes defined"
@@ -379,7 +379,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "tool-database",
+                            "group": "resource-test",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -391,7 +391,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/id-27962887-jpwzh": [
+                    "test-namespace/test-integration-27962887-jpwzh": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -411,7 +411,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "id-container",
+                            "group": "test-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -423,7 +423,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/scanner-tool-integration-27962890-rvb4w": [
+                    "test-namespace/scanner-test-integration-27962890-rvb4w": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -443,7 +443,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "scanner-tool-integration-container",
+                            "group": "scanner-test-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -455,7 +455,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962760-pvdbt": [
+                    "test-namespace/analysis-integration-env-27962760-pvdbt": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -475,7 +475,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -487,7 +487,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962775-hg85k": [
+                    "test-namespace/analysis-integration-env-27962775-hg85k": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -507,7 +507,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -519,7 +519,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962791-74b6l": [
+                    "test-namespace/analysis-integration-env-27962791-74b6l": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -539,7 +539,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -551,7 +551,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962806-rx5s8": [
+                    "test-namespace/analysis-integration-env-27962806-rx5s8": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -571,7 +571,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -583,7 +583,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962822-q82rj": [
+                    "test-namespace/analysis-integration-env-27962822-q82rj": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -603,7 +603,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -615,7 +615,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962838-h8q8q": [
+                    "test-namespace/analysis-integration-env-27962838-h8q8q": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -635,7 +635,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -647,7 +647,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962853-qwnf4": [
+                    "test-namespace/analysis-integration-env-27962853-qwnf4": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -673,7 +673,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -685,7 +685,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962869-67z97": [
+                    "test-namespace/analysis-integration-env-27962869-67z97": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -705,7 +705,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -717,7 +717,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962525-jwbcd": [
+                    "test-namespace/analysis-integration-env-27962525-jwbcd": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -743,7 +743,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -755,7 +755,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962540-dhdsn": [
+                    "test-namespace/analysis-integration-env-27962540-dhdsn": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -775,7 +775,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -787,7 +787,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962556-w57pq": [
+                    "test-namespace/analysis-integration-env-27962556-w57pq": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -807,7 +807,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -819,7 +819,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962572-4bfh4": [
+                    "test-namespace/analysis-integration-env-27962572-4bfh4": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -839,7 +839,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -851,7 +851,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962587-5lbzg": [
+                    "test-namespace/analysis-integration-env-27962587-5lbzg": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -871,7 +871,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -883,7 +883,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962603-jc6ds": [
+                    "test-namespace/analysis-integration-env-27962603-jc6ds": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -903,7 +903,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -915,7 +915,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962619-r9xxd": [
+                    "test-namespace/analysis-integration-env-27962619-r9xxd": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -941,7 +941,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -953,7 +953,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962634-8ffhf": [
+                    "test-namespace/analysis-integration-env-27962634-8ffhf": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -973,7 +973,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -985,7 +985,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962650-8xkdr": [
+                    "test-namespace/analysis-integration-env-27962650-8xkdr": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -1005,7 +1005,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -1017,7 +1017,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962666-bg6fm": [
+                    "test-namespace/analysis-integration-env-27962666-bg6fm": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -1037,7 +1037,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -1049,7 +1049,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962681-k89hk": [
+                    "test-namespace/analysis-integration-env-27962681-k89hk": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -1069,7 +1069,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -1081,7 +1081,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962697-7jmt8": [
+                    "test-namespace/analysis-integration-env-27962697-7jmt8": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -1101,7 +1101,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -1113,7 +1113,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962713-6x5gg": [
+                    "test-namespace/analysis-integration-env-27962713-6x5gg": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -1133,7 +1133,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -1145,7 +1145,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962728-4sv7x": [
+                    "test-namespace/analysis-integration-env-27962728-4sv7x": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -1165,7 +1165,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -1177,7 +1177,7 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/cs-integration-env-27962744-qf262": [
+                    "test-namespace/analysis-integration-env-27962744-qf262": [
                         {
                             "group": "__root__",
                             "gvr": "v1/pods",
@@ -1197,7 +1197,7 @@
                             "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
                         },
                         {
-                            "group": "cs-integration-container",
+                            "group": "analysis-integration-container",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -1209,9 +1209,9 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/test-cve-2021-44228-6888d6b7b-zjtt6": [
+                    "test-namespace/testing-vuln-2021-44228-6888d6b7b-zjtt6": [
                         {
-                            "group": "cve-2021-44228",
+                            "group": "vuln-2021-44228",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-101] Image tagged \"latest\" in use"
@@ -1229,7 +1229,7 @@
                             "message": "[POP-300] Using \"default\" ServiceAccount"
                         },
                         {
-                            "group": "cve-2021-44228",
+                            "group": "vuln-2021-44228",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -1241,15 +1241,15 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/test-tool-65459fc74b-fkgj4": [
+                    "test-namespace/testing-resource-65459fc74b-fkgj4": [
                         {
-                            "group": "tool",
+                            "group": "resource",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-205] Pod was restarted (21) times"
                         },
                         {
-                            "group": "tool",
+                            "group": "resource",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-101] Image tagged \"latest\" in use"
@@ -1267,7 +1267,7 @@
                             "message": "[POP-300] Using \"default\" ServiceAccount"
                         },
                         {
-                            "group": "tool",
+                            "group": "resource",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -1279,9 +1279,9 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/test-test-7c65f94bdb-jprlq": [
+                    "test-namespace/testing-resource-7c65f94bdb-jprlq": [
                         {
-                            "group": "test",
+                            "group": "resource",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-101] Image tagged \"latest\" in use"
@@ -1299,7 +1299,7 @@
                             "message": "[POP-300] Using \"default\" ServiceAccount"
                         },
                         {
-                            "group": "test",
+                            "group": "resource",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -1311,15 +1311,15 @@
                             "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
                         }
                     ],
-                    "test-namespace/test-juice-shop-587cff8d78-q4bdx": [
+                    "test-namespace/testing-place-587cff8d78-q4bdx": [
                         {
-                            "group": "juice-shop",
+                            "group": "place",
                             "gvr": "containers",
                             "level": 3,
                             "message": "[POP-203] Pod is waiting [0/1] CrashLoopBackOff"
                         },
                         {
-                            "group": "juice-shop",
+                            "group": "place",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-101] Image tagged \"latest\" in use"
@@ -1337,9 +1337,9 @@
                             "message": "[POP-300] Using \"default\" ServiceAccount"
                         }
                     ],
-                    "test-namespace/test-tool-684d9d5bb-5tx5r": [
+                    "test-namespace/testing-resource-684d9d5bb-5tx5r": [
                         {
-                            "group": "tool",
+                            "group": "resource",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-101] Image tagged \"latest\" in use"
@@ -1357,15 +1357,15 @@
                             "message": "[POP-300] Using \"default\" ServiceAccount"
                         }
                     ],
-                    "test-namespace/monitor-monitor-0": [
+                    "test-namespace/test-test-0": [
                         {
-                            "group": "monitor",
+                            "group": "test",
                             "gvr": "containers",
                             "level": 3,
                             "message": "[POP-100] Untagged docker image in use"
                         },
                         {
-                            "group": "monitor",
+                            "group": "test",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-106] No resources requests/limits defined"
@@ -1395,7 +1395,7 @@
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
                         },
                         {
-                            "group": "monitor",
+                            "group": "test",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
@@ -1560,13 +1560,13 @@
                     "score": 77
                 },
                 "issues": {
-                    "test-namespace/database-6cff44dc94": [],
-                    "test-namespace/tool-database-6585b7597d": [],
-                    "test-namespace/test-cve-2021-44228-6888d6b7b": [],
-                    "test-namespace/test-tool-65459fc74b": [],
-                    "test-namespace/test-test-5897677ddb": [],
-                    "test-namespace/test-test-7c65f94bdb": [],
-                    "test-namespace/test-juice-shop-587cff8d78": [
+                    "test-namespace/random-6cff44dc94": [],
+                    "test-namespace/resource-test-6585b7597d": [],
+                    "test-namespace/testing-vuln-2021-44228-6888d6b7b": [],
+                    "test-namespace/testing-resource-65459fc74b": [],
+                    "test-namespace/testing-resource-5897677ddb": [],
+                    "test-namespace/testing-resource-7c65f94bdb": [],
+                    "test-namespace/testing-place-587cff8d78": [
                         {
                             "group": "__root__",
                             "gvr": "apps/v1/replicasets",
@@ -1574,7 +1574,7 @@
                             "message": "[POP-1120] Unhealthy ReplicaSet 1 desired but have 0 ready"
                         }
                     ],
-                    "test-namespace/test-tool-684d9d5bb": [],
+                    "test-namespace/testing-resource-684d9d5bb": [],
                     "test-namespace/web-6d947fbdc4": [
                         {
                             "group": "__root__",
@@ -1640,14 +1640,13 @@
                             "message": "[POP-400] Used? Unable to locate resource reference"
                         }
                     ],
-                    "test-namespace/tool-integration-config": [],
-                    "test-namespace/id-config": [],
-                    "test-namespace/scanner-tool-integration-config": [],
-                    "test-namespace/cs-integration-config": [],
-                    "test-namespace/test-tls": [],
-                    "test-namespace/monitor-ingress-tls": [],
-                    "test-namespace/monitor-monitor": [],
-                    "test-namespace/monitor-monitor-tls-assets-0": [
+                    "test-namespace/test-integration-config": [],
+                    "test-namespace/scanner-test-integration-config": [],
+                    "test-namespace/analysis-integration-config": [],
+                    "test-namespace/testing-tls": [],
+                    "test-namespace/test-ingress-tls": [],
+                    "test-namespace/test-test": [],
+                    "test-namespace/test-test-tls-assets-0": [
                         {
                             "group": "__root__",
                             "gvr": "v1/secrets",
@@ -1655,8 +1654,8 @@
                             "message": "[POP-400] Used? Unable to locate resource reference"
                         }
                     ],
-                    "test-namespace/monitor-monitor-web-config": [],
-                    "test-namespace/monitor-token-m5675": [
+                    "test-namespace/test-test-web-config": [],
+                    "test-namespace/test-token-m5675": [
                         {
                             "group": "__root__",
                             "gvr": "v1/secrets",
@@ -1686,7 +1685,7 @@
                     "score": 0
                 },
                 "issues": {
-                    "test-namespace/test-cve-2021-44228": [
+                    "test-namespace/testing-vuln-2021-44228": [
                         {
                             "group": "__root__",
                             "gvr": "v1/services",
@@ -1694,7 +1693,7 @@
                             "message": "[POP-1109] Only one Pod associated with this endpoint"
                         }
                     ],
-                    "test-namespace/test-tool": [
+                    "test-namespace/testing-resource-1": [
                         {
                             "group": "__root__",
                             "gvr": "v1/services",
@@ -1702,7 +1701,7 @@
                             "message": "[POP-1109] Only one Pod associated with this endpoint"
                         }
                     ],
-                    "test-namespace/test-test": [
+                    "test-namespace/testing-resource-3": [
                         {
                             "group": "__root__",
                             "gvr": "v1/services",
@@ -1710,7 +1709,7 @@
                             "message": "[POP-1109] Only one Pod associated with this endpoint"
                         }
                     ],
-                    "test-namespace/test-juice-shop": [
+                    "test-namespace/testing-place": [
                         {
                             "group": "__root__",
                             "gvr": "v1/services",
@@ -1718,7 +1717,7 @@
                             "message": "[POP-1109] Only one Pod associated with this endpoint"
                         }
                     ],
-                    "test-namespace/test-tool": [
+                    "test-namespace/testing-resource": [
                         {
                             "group": "__root__",
                             "gvr": "v1/services",
@@ -1726,7 +1725,7 @@
                             "message": "[POP-1109] Only one Pod associated with this endpoint"
                         }
                     ],
-                    "test-namespace/monitor": [
+                    "test-namespace/test": [
                         {
                             "group": "__root__",
                             "gvr": "v1/services",
@@ -1740,7 +1739,7 @@
                             "message": "[POP-1109] Only one Pod associated with this endpoint"
                         }
                     ],
-                    "test-namespace/monitor-operated": [
+                    "test-namespace/test-operated": [
                         {
                             "group": "__root__",
                             "gvr": "v1/services",
@@ -1788,7 +1787,7 @@
                 },
                 "issues": {
                     "test-namespace/default": [],
-                    "test-namespace/monitor": [],
+                    "test-namespace/test": [],
                     "test-namespace/test-namespace-sa": []
                 }
             },
@@ -1803,15 +1802,15 @@
                     "score": 0
                 },
                 "issues": {
-                    "test-namespace/monitor-monitor": [
+                    "test-namespace/test-test": [
                         {
-                            "group": "monitor",
+                            "group": "test",
                             "gvr": "containers",
                             "level": 3,
                             "message": "[POP-100] Untagged docker image in use"
                         },
                         {
-                            "group": "monitor",
+                            "group": "test",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-106] No resources requests/limits defined"

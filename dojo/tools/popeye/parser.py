@@ -27,13 +27,12 @@ class PopeyeParser(object):
                     for issue in issue_list:
                         if issue['level'] != 0:
                             title = sanitizer['sanitizer'] + " " + issue_group + " " + issue['message']
-                            severity = self.getDefectDojoSeverity(issue['level'])
+                            severity = self.get_defect_dojo_severity(issue['level'])
                             description = "**Sanitizer** : " + sanitizer['sanitizer'] + "\n\n" + \
                                         "**Resource** : " + issue_group + "\n\n" + \
                                         "**Group** : " + issue['group'] + "\n\n" + \
-                                        "**Severity** : " + self.getPopeyeLevelString(issue['level']) + "\n\n" + \
+                                        "**Severity** : " + self.get_popeye_level_string(issue['level']) + "\n\n" + \
                                         "**Message** : " + issue['message']
-                            found_by = "Popeye"
 
                             finding = Finding(
                                 title=title,
@@ -41,16 +40,11 @@ class PopeyeParser(object):
                                 description=description,
                                 severity=severity,
                                 static_finding=False,
-                                dynamic_finding=False, 
+                                dynamic_finding=True
                             )
                             # internal de-duplication
                             dupe_key = hashlib.sha256(str(description + title).encode('utf-8')).hexdigest()
-                            if dupe_key in dupes:
-                                find = dupes[dupe_key]
-                                if finding.description:
-                                    find.description += "\n" + finding.description
-                                dupes[dupe_key] = find
-                            else:
+                            if dupe_key not in dupes:
                                 dupes[dupe_key] = finding
                         else:
                             continue
@@ -58,11 +52,18 @@ class PopeyeParser(object):
                 continue
         return list(dupes.values())
 
-    def getPopeyeLevelString (self, level):
-        if level is 1 : return "Info"
-        elif level is 2 : return "Warning"
-        else: return "Error"
+    def get_popeye_level_string(self, level):
+        if level == 1:
+            return "Info"
+        elif level == 2:
+            return "Warning"
+        else:
+            return "Error"
 
-    def getDefectDojoSeverity (self, level):
-        if level is 1 or 3: return "Info"
-        else: return "Low"
+    def get_defect_dojo_severity(self, level):
+        if level == 1:
+            return "Info"
+        elif level == 2:
+            return "Low"
+        else:
+            return "High"

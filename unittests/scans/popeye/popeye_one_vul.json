@@ -14,9 +14,9 @@
                     "score": 0
                 },
                 "issues": {
-                    "test-namespace/database-6cff44dc94-d92km": [
+                    "test-namespace/6cff44dc94-d92km": [
                         {
-                            "group": "database",
+                            "group": "test-group",
                             "gvr": "containers",
                             "level": 2,
                             "message": "[POP-106] No resources requests/limits defined"
