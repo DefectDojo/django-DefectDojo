@@ -1,2 +1,29 @@
-{"type":"info","data":"No lockfile found."}
-{"type":"auditSummary","data":{"vulnerabilities":{"info":0,"low":0,"moderate":0,"high":0,"critical":0},"dependencies":0,"devDependencies":0,"optionalDependencies":0,"totalDependencies":0}}
+{
+    "popeye": {
+        "score": 100,
+        "grade": "B",
+        "sanitizers": [
+            {
+                "sanitizer": "cluster",
+                "gvr": "cluster",
+                "tally": {
+                    "ok": 1,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                },
+                "issues": {
+                    "Version": [
+                        {
+                            "group": "__root__",
+                            "gvr": "cluster",
+                            "level": 0,
+                            "message": "[POP-406] K8s version OK"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

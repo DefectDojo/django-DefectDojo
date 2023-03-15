@@ -1,4 +1,1824 @@
-{"type":"auditAdvisory","data":{"resolution":{"id":1179,"path":"handlebars>optimist>minimist","dev":false,"optional":false,"bundled":false},"advisory":{"findings":[{"version":"0.0.10","paths":["handlebars>optimist>minimist"]}],"id":1179,"created":"2019-09-23T15:01:43.049Z","updated":"2020-03-18T19:41:45.921Z","deleted":null,"title":"Prototype Pollution","found_by":{"link":"https://www.checkmarx.com/resources/blog/","name":"Checkmarx Research Team","email":""},"reported_by":{"link":"https://www.checkmarx.com/resources/blog/","name":"Checkmarx Research Team","email":""},"module_name":"minimist","cves":[],"vulnerable_versions":"<0.2.1 || >=1.0.0 <1.2.3","patched_versions":">=0.2.1 <1.0.0 || >=1.2.3","overview":"Affected versions of `minimist` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.  \nParsing the argument `--__proto__.y=Polluted` adds a `y` property with value `Polluted` to all objects. The argument `--__proto__=Polluted` raises and uncaught error and crashes the application.  \nThis is exploitable if attackers have control over the arguments being passed to `minimist`.\n","recommendation":"Upgrade to versions 0.2.1, 1.2.3 or later.","references":"- [GitHub commit 1](https://github.com/substack/minimist/commit/4cf1354839cb972e38496d35e12f806eea92c11f#diff-a1e0ee62c91705696ddb71aa30ad4f95)\n- [GitHub commit 2](https://github.com/substack/minimist/commit/63e7ed05aa4b1889ec2f3b196426db4500cbda94)","access":"public","severity":"low","cwe":"CWE-471","metadata":{"module_type":"","exploitability":1,"affected_components":""},"url":"https://npmjs.com/advisories/1179"}}}
-{"type":"auditAdvisory","data":{"resolution":{"id":1324,"path":"handlebars","dev":false,"optional":false,"bundled":false},"advisory":{"findings":[{"version":"4.5.2","paths":["handlebars"]}],"id":1324,"created":"2019-11-18T19:06:46.461Z","updated":"2020-02-26T17:51:49.573Z","deleted":null,"title":"Arbitrary Code Execution","found_by":{"link":"","name":"Unknown","email":""},"reported_by":{"link":"","name":"Unknown","email":""},"module_name":"handlebars","cves":[],"vulnerable_versions":"<3.0.8 || >=4.0.0 <4.5.3","patched_versions":">=3.0.8 <4.0.0 || >=4.5.3","overview":"Versions of `handlebars` prior to 3.0.8 or 4.5.3 are vulnerable to Arbitrary Code Execution. The package's lookup helper fails to properly validate templates, allowing attackers to submit templates that execute arbitrary JavaScript in the system. It is due to an incomplete fix for a [previous issue](https://www.npmjs.com/advisories/1316). This vulnerability can be used to run arbitrary code in a server processing Handlebars templates or on a victim's browser (effectively serving as Cross-Site Scripting).","recommendation":"Upgrade to version 3.0.8, 4.5.3 or later.","references":"","access":"public","severity":"high","cwe":"CWE-79","metadata":{"module_type":"","exploitability":4,"affected_components":""},"url":"https://npmjs.com/advisories/1324"}}}
-{"type":"auditAdvisory","data":{"resolution":{"id":1325,"path":"handlebars","dev":false,"optional":false,"bundled":false},"advisory":{"findings":[{"version":"4.5.2","paths":["handlebars"]}],"id":1325,"created":"2019-11-18T19:42:01.445Z","updated":"2020-02-26T17:55:51.120Z","deleted":null,"title":"Prototype Pollution","found_by":{"link":"","name":"Vladyslav Babkin","email":""},"reported_by":{"link":"","name":"Vladyslav Babkin","email":""},"module_name":"handlebars","cves":[],"vulnerable_versions":"<3.0.8 || >=4.0.0 <4.5.3","patched_versions":">=3.0.8 <4.0.0 || >=4.5.3","overview":"Versions of `handlebars` prior to 3.0.8 or 4.5.3 are vulnerable to prototype pollution. It is possible to add or modify properties to the Object prototype through a malicious template. This may allow attackers to crash the application or execute Arbitrary Code in specific conditions.","recommendation":"Upgrade to version 3.0.8, 4.5.3 or later.","references":"","access":"public","severity":"high","cwe":"CWE-471","metadata":{"module_type":"","exploitability":4,"affected_components":""},"url":"https://npmjs.com/advisories/1325"}}}
-{"type":"auditSummary","data":{"vulnerabilities":{"info":0,"low":1,"moderate":0,"high":2,"critical":0},"dependencies":47,"devDependencies":0,"optionalDependencies":0,"totalDependencies":47}}
+{
+    "popeye": {
+        "score": 67,
+        "grade": "D",
+        "sanitizers": [
+            {
+                "sanitizer": "cluster",
+                "gvr": "cluster",
+                "tally": {
+                    "ok": 1,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                },
+                "issues": {
+                    "Version": [
+                        {
+                            "group": "__root__",
+                            "gvr": "cluster",
+                            "level": 0,
+                            "message": "[POP-406] K8s version OK"
+                        }
+                    ]
+                }
+            },
+            {
+                "sanitizer": "clusterroles",
+                "gvr": "rbac.authorization.k8s.io/v1/clusterroles",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 1,
+                    "score": 0
+                }
+            },
+            {
+                "sanitizer": "clusterrolebindings",
+                "gvr": "rbac.authorization.k8s.io/v1/clusterrolebindings",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                }
+            },
+            {
+                "sanitizer": "configmaps",
+                "gvr": "v1/configmaps",
+                "tally": {
+                    "ok": 1,
+                    "info": 1,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                },
+                "issues": {
+                    "test-namespace/kube-root-ca.crt": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/configmaps",
+                            "level": 1,
+                            "message": "[POP-400] Used? Unable to locate resource reference"
+                        }
+                    ]
+                }
+            },
+            {
+                "sanitizer": "daemonsets",
+                "gvr": "apps/v1/daemonsets",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                }
+            },
+            {
+                "sanitizer": "deployments",
+                "gvr": "apps/v1/deployments",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 6,
+                    "error": 2,
+                    "score": 0
+                },
+                "issues": {
+                    "test-namespace/database": [
+                        {
+                            "group": "database",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-106] No resources requests/limits defined"
+                        }
+                    ],
+                    "test-namespace/tool-database": [
+                        {
+                            "group": "tool-database",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-106] No resources requests/limits defined"
+                        }
+                    ],
+                    "test-namespace/test-cve-2021-44228": [
+                        {
+                            "group": "cve-2021-44228",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        }
+                    ],
+                    "test-namespace/test-tool": [
+                        {
+                            "group": "tool",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        }
+                    ],
+                    "test-namespace/test-test": [
+                        {
+                            "group": "test",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        }
+                    ],
+                    "test-namespace/test-juice-shop": [
+                        {
+                            "group": "__root__",
+                            "gvr": "apps/v1/deployments",
+                            "level": 3,
+                            "message": "[POP-501] Unhealthy 1 desired but have 0 available"
+                        },
+                        {
+                            "group": "juice-shop",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        }
+                    ],
+                    "test-namespace/test-tool": [
+                        {
+                            "group": "tool",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        }
+                    ],
+                    "test-namespace/web": [
+                        {
+                            "group": "__root__",
+                            "gvr": "apps/v1/deployments",
+                            "level": 3,
+                            "message": "[POP-501] Unhealthy 1 desired but have 0 available"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-106] No resources requests/limits defined"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 1,
+                            "message": "[POP-108] Unnamed port 80"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 1,
+                            "message": "[POP-108] Unnamed port 4000"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 1,
+                            "message": "[POP-108] Unnamed port 9090"
+                        }
+                    ]
+                }
+            },
+            {
+                "sanitizer": "horizontalpodautoscalers",
+                "gvr": "autoscaling/v1/horizontalpodautoscalers",
+                "tally": {
+                    "ok": 0,
+                    "info": 1,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                },
+                "issues": {
+                    "": [
+                        {
+                            "group": "__root__",
+                            "gvr": "autoscaling/v1/horizontalpodautoscalers",
+                            "level": 1,
+                            "message": "[POP-402] No metric-server detected nodes is forbidden: User \"system:serviceaccount:test-namespace:test-namespace-sa\" cannot list resource \"nodes\" in API group \"\" at the cluster scope"
+                        }
+                    ]
+                }
+            },
+            {
+                "sanitizer": "ingresses",
+                "gvr": "networking.k8s.io/v1/ingresses",
+                "tally": {
+                    "ok": 2,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                },
+                "issues": {
+                    "test-namespace/test": [],
+                    "test-namespace/monitor-ingress": []
+                }
+            },
+            {
+                "sanitizer": "namespaces",
+                "gvr": "v1/namespaces",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 1,
+                    "score": 0
+                }
+            },
+            {
+                "sanitizer": "networkpolicies",
+                "gvr": "networking.k8s.io/v1/networkpolicies",
+                "tally": {
+                    "ok": 1,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                },
+                "issues": {
+                    "test-namespace/tool-node-default": []
+                }
+            },
+            {
+                "sanitizer": "persistentvolumes",
+                "gvr": "v1/persistentvolumes",
+                "tally": {
+                    "ok": 16,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                },
+                "issues": {
+                    "pvc-0592cf0d-ae17-437e-b90a-53d9180f5a6b": [],
+                    "pvc-07096b36-91a0-49de-9123-fb163e602bf2": [],
+                    "pvc-0e45c81d-474a-4003-8320-8c49b7a562a6": [],
+                    "pvc-26895cdf-df7f-4dbb-bdc8-d9b5bef51544": [],
+                    "pvc-29e4da1a-346a-487d-940c-e8975b2dfe05": [],
+                    "pvc-40cff458-59cc-4d2e-bf10-fde8ccd7c574": [],
+                    "pvc-518afe1f-2b08-4060-9adb-7108c0cf23c3": [],
+                    "pvc-7bcf4a79-0d29-499c-8e7b-136cf0e1b6cb": [],
+                    "pvc-a9dffad2-a184-475d-ba84-b42980a26c9e": [],
+                    "pvc-b286fc0e-1469-49ad-8e28-1a0e331299de": [],
+                    "pvc-b34639b1-103c-4de5-ba95-25963a648ca8": [],
+                    "pvc-b4e727ad-6dea-4ca2-9549-be2150b484d9": [],
+                    "pvc-c9f4d729-2619-4cdd-ade9-aeca4a25904e": [],
+                    "pvc-e1d45e3b-bd52-41d0-b81a-c0c84991625b": [],
+                    "pvc-ea8d4012-4aa8-44c0-bd38-3c0804c4c39f": [],
+                    "pvc-fd478741-c88c-44d0-8a94-887603ed8dfc": []
+                }
+            },
+            {
+                "sanitizer": "persistentvolumeclaims",
+                "gvr": "v1/persistentvolumeclaims",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                }
+            },
+            {
+                "sanitizer": "pods",
+                "gvr": "v1/pods",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 29,
+                    "error": 6,
+                    "score": 0
+                },
+                "issues": {
+                    "test-namespace/database-6cff44dc94-d92km": [
+                        {
+                            "group": "database",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-106] No resources requests/limits defined"
+                        },
+                        {
+                            "group": "database",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-102] No probes defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "database",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/tool-database-6585b7597d-c4xd9": [
+                        {
+                            "group": "tool-database",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-106] No resources requests/limits defined"
+                        },
+                        {
+                            "group": "tool-database",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-102] No probes defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "tool-database",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/id-27962887-jpwzh": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "id-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/scanner-tool-integration-27962890-rvb4w": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "scanner-tool-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962760-pvdbt": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962775-hg85k": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962791-74b6l": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962806-rx5s8": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962822-q82rj": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962838-h8q8q": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962853-qwnf4": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 3,
+                            "message": "[POP-207] Pod is in an unhappy phase (Failed)"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962869-67z97": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962525-jwbcd": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 3,
+                            "message": "[POP-207] Pod is in an unhappy phase (Failed)"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962540-dhdsn": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962556-w57pq": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962572-4bfh4": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962587-5lbzg": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962603-jc6ds": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962619-r9xxd": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 3,
+                            "message": "[POP-207] Pod is in an unhappy phase (Failed)"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962634-8ffhf": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962650-8xkdr": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962666-bg6fm": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962681-k89hk": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962697-7jmt8": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962713-6x5gg": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962728-4sv7x": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/cs-integration-env-27962744-qf262": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "cs-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/test-cve-2021-44228-6888d6b7b-zjtt6": [
+                        {
+                            "group": "cve-2021-44228",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "cve-2021-44228",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/test-tool-65459fc74b-fkgj4": [
+                        {
+                            "group": "tool",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-205] Pod was restarted (21) times"
+                        },
+                        {
+                            "group": "tool",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "tool",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/test-test-7c65f94bdb-jprlq": [
+                        {
+                            "group": "test",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "test",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/test-juice-shop-587cff8d78-q4bdx": [
+                        {
+                            "group": "juice-shop",
+                            "gvr": "containers",
+                            "level": 3,
+                            "message": "[POP-203] Pod is waiting [0/1] CrashLoopBackOff"
+                        },
+                        {
+                            "group": "juice-shop",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        }
+                    ],
+                    "test-namespace/test-tool-684d9d5bb-5tx5r": [
+                        {
+                            "group": "tool",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        }
+                    ],
+                    "test-namespace/monitor-monitor-0": [
+                        {
+                            "group": "monitor",
+                            "gvr": "containers",
+                            "level": 3,
+                            "message": "[POP-100] Untagged docker image in use"
+                        },
+                        {
+                            "group": "monitor",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-106] No resources requests/limits defined"
+                        },
+                        {
+                            "group": "config-reloader",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-102] No probes defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "init-config-reloader",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "monitor",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "config-reloader",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/bees-integration-27962807-vmlwd": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "bees-integration-container",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ],
+                    "test-namespace/web-6d947fbdc4-vwslh": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 3,
+                            "message": "[POP-207] Pod is in an unhappy phase (Pending)"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 3,
+                            "message": "[POP-203] Pod is waiting [0/1] ImagePullBackOff"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-101] Image tagged \"latest\" in use"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-106] No resources requests/limits defined"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-102] No probes defined"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 1,
+                            "message": "[POP-108] Unnamed port 80"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 1,
+                            "message": "[POP-108] Unnamed port 4000"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 1,
+                            "message": "[POP-108] Unnamed port 9090"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 1,
+                            "message": "[POP-206] No PodDisruptionBudget defined"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-300] Using \"default\" ServiceAccount"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-301] Connects to API Server? ServiceAccount token is mounted"
+                        },
+                        {
+                            "group": "web",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-306] Container could be running as root user. Check SecurityContext/Image"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/pods",
+                            "level": 2,
+                            "message": "[POP-302] Pod could be running as root user. Check SecurityContext/Image"
+                        }
+                    ]
+                }
+            },
+            {
+                "sanitizer": "poddisruptionbudgets",
+                "gvr": "policy/v1/poddisruptionbudgets",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                }
+            },
+            {
+                "sanitizer": "podsecuritypolicies",
+                "gvr": "policy/v1beta1/podsecuritypolicies",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 1,
+                    "score": 0
+                }
+            },
+            {
+                "sanitizer": "replicasets",
+                "gvr": "apps/v1/replicasets",
+                "tally": {
+                    "ok": 7,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 2,
+                    "score": 77
+                },
+                "issues": {
+                    "test-namespace/database-6cff44dc94": [],
+                    "test-namespace/tool-database-6585b7597d": [],
+                    "test-namespace/test-cve-2021-44228-6888d6b7b": [],
+                    "test-namespace/test-tool-65459fc74b": [],
+                    "test-namespace/test-test-5897677ddb": [],
+                    "test-namespace/test-test-7c65f94bdb": [],
+                    "test-namespace/test-juice-shop-587cff8d78": [
+                        {
+                            "group": "__root__",
+                            "gvr": "apps/v1/replicasets",
+                            "level": 3,
+                            "message": "[POP-1120] Unhealthy ReplicaSet 1 desired but have 0 ready"
+                        }
+                    ],
+                    "test-namespace/test-tool-684d9d5bb": [],
+                    "test-namespace/web-6d947fbdc4": [
+                        {
+                            "group": "__root__",
+                            "gvr": "apps/v1/replicasets",
+                            "level": 3,
+                            "message": "[POP-1120] Unhealthy ReplicaSet 1 desired but have 0 ready"
+                        }
+                    ]
+                }
+            },
+            {
+                "sanitizer": "roles",
+                "gvr": "rbac.authorization.k8s.io/v1/roles",
+                "tally": {
+                    "ok": 1,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                },
+                "issues": {
+                    "test-namespace/test-namespace-role": []
+                }
+            },
+            {
+                "sanitizer": "rolebindings",
+                "gvr": "rbac.authorization.k8s.io/v1/rolebindings",
+                "tally": {
+                    "ok": 1,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                },
+                "issues": {
+                    "test-namespace/test-namespace-role-binding": []
+                }
+            },
+            {
+                "sanitizer": "secrets",
+                "gvr": "v1/secrets",
+                "tally": {
+                    "ok": 9,
+                    "info": 5,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                },
+                "issues": {
+                    "test-namespace/additional-scrape-configs": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/secrets",
+                            "level": 1,
+                            "message": "[POP-400] Used? Unable to locate resource reference"
+                        }
+                    ],
+                    "test-namespace/default-token-vjfgc": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/secrets",
+                            "level": 1,
+                            "message": "[POP-400] Used? Unable to locate resource reference"
+                        }
+                    ],
+                    "test-namespace/tool-integration-config": [],
+                    "test-namespace/id-config": [],
+                    "test-namespace/scanner-tool-integration-config": [],
+                    "test-namespace/cs-integration-config": [],
+                    "test-namespace/test-tls": [],
+                    "test-namespace/monitor-ingress-tls": [],
+                    "test-namespace/monitor-monitor": [],
+                    "test-namespace/monitor-monitor-tls-assets-0": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/secrets",
+                            "level": 1,
+                            "message": "[POP-400] Used? Unable to locate resource reference"
+                        }
+                    ],
+                    "test-namespace/monitor-monitor-web-config": [],
+                    "test-namespace/monitor-token-m5675": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/secrets",
+                            "level": 1,
+                            "message": "[POP-400] Used? Unable to locate resource reference"
+                        }
+                    ],
+                    "test-namespace/bees-integration-config": [],
+                    "test-namespace/test-namespace-sa-token-6jr6n": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/secrets",
+                            "level": 1,
+                            "message": "[POP-400] Used? Unable to locate resource reference"
+                        }
+                    ]
+                }
+            },
+            {
+                "sanitizer": "services",
+                "gvr": "v1/services",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 8,
+                    "error": 0,
+                    "score": 0
+                },
+                "issues": {
+                    "test-namespace/test-cve-2021-44228": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 2,
+                            "message": "[POP-1109] Only one Pod associated with this endpoint"
+                        }
+                    ],
+                    "test-namespace/test-tool": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 2,
+                            "message": "[POP-1109] Only one Pod associated with this endpoint"
+                        }
+                    ],
+                    "test-namespace/test-test": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 2,
+                            "message": "[POP-1109] Only one Pod associated with this endpoint"
+                        }
+                    ],
+                    "test-namespace/test-juice-shop": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 2,
+                            "message": "[POP-1109] Only one Pod associated with this endpoint"
+                        }
+                    ],
+                    "test-namespace/test-tool": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 2,
+                            "message": "[POP-1109] Only one Pod associated with this endpoint"
+                        }
+                    ],
+                    "test-namespace/monitor": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 1,
+                            "message": "[POP-1102] Use of target port #9090 for service port TCP:web:80. Prefer named port"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 2,
+                            "message": "[POP-1109] Only one Pod associated with this endpoint"
+                        }
+                    ],
+                    "test-namespace/monitor-operated": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 2,
+                            "message": "[POP-1109] Only one Pod associated with this endpoint"
+                        }
+                    ],
+                    "test-namespace/web": [
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 1,
+                            "message": "[POP-1102] Use of target port #80 for service port TCP:80:80. Prefer named port"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 1,
+                            "message": "[POP-1102] Use of target port #4000 for service port TCP:4000:4000. Prefer named port"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 1,
+                            "message": "[POP-1102] Use of target port #9090 for service port TCP:9090:9090. Prefer named port"
+                        },
+                        {
+                            "group": "__root__",
+                            "gvr": "v1/services",
+                            "level": 2,
+                            "message": "[POP-1109] Only one Pod associated with this endpoint"
+                        }
+                    ]
+                }
+            },
+            {
+                "sanitizer": "serviceaccounts",
+                "gvr": "v1/serviceaccounts",
+                "tally": {
+                    "ok": 3,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 0,
+                    "score": 100
+                },
+                "issues": {
+                    "test-namespace/default": [],
+                    "test-namespace/monitor": [],
+                    "test-namespace/test-namespace-sa": []
+                }
+            },
+            {
+                "sanitizer": "statefulsets",
+                "gvr": "apps/v1/statefulsets",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 0,
+                    "error": 1,
+                    "score": 0
+                },
+                "issues": {
+                    "test-namespace/monitor-monitor": [
+                        {
+                            "group": "monitor",
+                            "gvr": "containers",
+                            "level": 3,
+                            "message": "[POP-100] Untagged docker image in use"
+                        },
+                        {
+                            "group": "monitor",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-106] No resources requests/limits defined"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
