@@ -1649,7 +1649,7 @@ def get_full_url(relative_url):
     if settings.SITE_URL:
         return settings.SITE_URL + relative_url
     else:
-        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        logger.warning('SITE URL undefined in settings, full_url cannot be created')
         return "settings.SITE_URL" + relative_url
 
 
@@ -1657,7 +1657,7 @@ def get_site_url():
     if settings.SITE_URL:
         return settings.SITE_URL
     else:
-        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        logger.warning('SITE URL undefined in settings, full_url cannot be created')
         return "settings.SITE_URL"
 
 
