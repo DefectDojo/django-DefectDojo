@@ -1322,6 +1322,38 @@ def finding_link_jira(request, finding, new_jira_issue_key):
     return True
 
 
+def finding_group_link_jira(request, finding_group, new_jira_issue_key):
+    logger.debug('linking existing jira issue %s for finding group %i', new_jira_issue_key, finding_group.id)
+
+    existing_jira_issue = jira_get_issue(get_jira_project(finding_group), new_jira_issue_key)
+
+    jira_project = get_jira_project(finding_group)
+
+    if not existing_jira_issue:
+        raise ValueError('JIRA issue not found or cannot be retrieved: ' + new_jira_issue_key)
+
+    jira_issue = JIRA_Issue(
+        jira_id=existing_jira_issue.id,
+        jira_key=existing_jira_issue.key,
+        finding_group=finding_group,
+        jira_project=jira_project)
+
+    jira_issue.jira_key = new_jira_issue_key
+    # jira timestampe are in iso format: 'updated': '2020-07-17T09:49:51.447+0200'
+    # seems to be a pain to parse these in python < 3.7, so for now just record the curent time as
+    # as the timestamp the jira link was created / updated in DD
+    jira_issue.jira_creation = timezone.now()
+    jira_issue.jira_change = timezone.now()
+
+    jira_issue.save()
+
+    finding_group.save()
+
+    jira_issue_url = get_jira_url(finding_group)
+
+    return True
+
+
 def finding_unlink_jira(request, finding):
     return unlink_jira(request, finding)
 
