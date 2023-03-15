@@ -481,7 +481,7 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 def prepare_duplicates_for_delete(test=None, engagement=None):
     logger.debug('prepare duplicates for delete, test: %s, engagement: %s', test.id if test else None, engagement.id if engagement else None)
     if test is None and engagement is None:
-        logger.warn('nothing to prepare as test and engagement are None')
+        logger.warning('nothing to prepare as test and engagement are None')
 
     fix_loop_duplicates()
 
