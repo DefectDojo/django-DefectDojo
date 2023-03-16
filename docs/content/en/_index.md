@@ -30,8 +30,8 @@ metrics.
 
 ### What does DefectDojo do?
 
-While traceability and metrics are the ultimate end goal, DefectDojo is
-a bug tracker at its core. Taking advantage of DefectDojo\'s
+While automation and efficiency are the ultimate end goals, DefectDojo is
+a bug tracker at its core for vulnerabilities. Taking advantage of DefectDojo\'s
 Product:Engagement model, enables traceability among multiple projects
 and test cycles, and allows for fine-grained reporting.
 
