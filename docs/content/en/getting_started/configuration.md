@@ -7,7 +7,7 @@ weight: 3
 
 ## dojo/settings/settings.dist.py
 
-The main settings are stored in [`dojo/settings/settings.dist.py`](https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py). It is great to use this file as a reference for what can be configured, but it shouldn't be edited directly, because changes will be overwritten when updating DefectDojo. There are several methods to change the default settings:
+The main settings are stored in [`dojo/settings/settings.dist.py`](https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py). It is great to use this file as a reference for what can be configured, but it shouldn\'t be edited directly, because changes will be overwritten when updating DefectDojo. There are several methods to change the default settings:
 
 ### Environment variables
 
