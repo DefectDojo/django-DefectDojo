@@ -46,7 +46,7 @@ services:
       DD_DJANGO_METRICS_ENABLED: "${DD_DJANGO_METRICS_ENABLED:-False}"
       DD_ALLOWED_HOSTS: "${DD_ALLOWED_HOSTS:-*}"
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
-      DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL:-amqp://guest:guest@rabbitmq:5672//}
+      DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL}
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
     volumes:
@@ -68,7 +68,7 @@ services:
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-celery-beat.sh']
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
-      DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL:-amqp://guest:guest@rabbitmq:5672//}
+      DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL}
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
     volumes:
@@ -90,7 +90,7 @@ services:
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-celery-worker.sh']
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
-      DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL:-amqp://guest:guest@rabbitmq:5672//}
+      DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL}
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
     volumes:
