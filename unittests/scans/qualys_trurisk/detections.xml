@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE HOST_LIST_VM_DETECTION_OUTPUT SYSTEM "https://qualysguard.qg1.apps.qualys.com.au/api/2.0/fo/asset/host/vm/detection/dtd/output.dtd">
+<!-- This report was generated with an evaluation version of Qualys //--> 
+<HOST_LIST_VM_DETECTION_OUTPUT>
+  <RESPONSE>
+    <DATETIME>2023-03-15T04:00:24Z</DATETIME>
+    <HOST_LIST>
+      <HOST>
+        <ID>294434</ID>
+        <IP>192.168.44.184</IP>
+        <TRACKING_METHOD>AGENT</TRACKING_METHOD>
+        <NETWORK_ID>0</NETWORK_ID>
+        <OS><![CDATA[Windows Server 2019 Standard Evaluation 64 bit Edition AD Version 1809 Build 17763]]></OS>
+        <DNS><![CDATA[labdc.doobsiss.local]]></DNS>
+        <DNS_DATA>
+          <HOSTNAME><![CDATA[labdc]]></HOSTNAME>
+          <DOMAIN><![CDATA[doobsiss.local]]></DOMAIN>
+          <FQDN><![CDATA[labdc.doobsiss.local]]></FQDN>
+        </DNS_DATA>
+        <NETBIOS><![CDATA[LABDC]]></NETBIOS>
+        <QG_HOSTID><![CDATA[5c9d412c-bf4f-4fdb-8bcd-46ee0f6529de]]></QG_HOSTID>
+        <LAST_SCAN_DATETIME>2023-03-15T00:54:58Z</LAST_SCAN_DATETIME>
+        <LAST_VM_SCANNED_DATE>2023-03-15T00:48:49Z</LAST_VM_SCANNED_DATE>
+        <LAST_VM_AUTH_SCANNED_DATE>2023-03-15T00:48:49Z</LAST_VM_AUTH_SCANNED_DATE>
+        <LAST_PC_SCANNED_DATE>2023-03-15T01:34:08Z</LAST_PC_SCANNED_DATE>
+        <DETECTION_LIST>
+          <DETECTION>
+            <QID>90007</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>2</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon cachedlogonscount = 10]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="MEDIUM">50</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="RTI"><![CDATA[Easy_Exploit,No_Patch]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[5.0]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v2]]></QDS_FACTOR>
+              <QDS_FACTOR name="QID_severity"><![CDATA[2.0]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>90043</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>3</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[HKLM\System\CurrentControlSet\Services\LanManWorkstation\Parameters requiresecuritysignature = 0]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="LOW">35</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="RTI"><![CDATA[High_Data_Loss,No_Patch,High_Lateral_Movement]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[7.3]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v2]]></QDS_FACTOR>
+              <QDS_FACTOR name="QID_severity"><![CDATA[3.0]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>90044</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>3</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[HKLM\SYSTEM\CurrentControlSet\Control\LSA RestrictAnonymous = 0]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="LOW">36</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="exploit_maturity"><![CDATA[poc]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[5.0]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v2]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:N/AC:L/Au:N/C:P/I:N/A:N]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>91462</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>4</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[HKLM\System\CurrentControlSet\Control\Session Manager\Environment PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 165 Stepping 3, GenuineIntel 
+HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management FeatureSettingsOverride is missing. 
+HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management FeatureSettingsOverrideMask is missing.]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="CRITICAL">95</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="RTI"><![CDATA[dos]]></QDS_FACTOR>
+              <QDS_FACTOR name="exploit_maturity"><![CDATA[weaponized,poc]]></QDS_FACTOR>
+              <QDS_FACTOR name="malware_name"><![CDATA[STOP]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[5.5]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="trending"><![CDATA[03062023,03092023,03072023,03022023,03102023]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>91565</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>2</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[HKLM\SYSTEM\CurrentControlSet\Control\ProductOptions ProductType = LanmanNT 
+HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters LDAPServerIntegrity = 1]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="MEDIUM">50</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="RTI"><![CDATA[Privilege_Escalation]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[6.0]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="QID_severity"><![CDATA[2.0]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>91704</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>3</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[%windir%\system32\dns.exe found
+HKLM\SYSTEM\CurrentControlSet\Services\DNS\Parameters MaximumUdpPacketSize is missing.]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="MEDIUM">50</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="RTI"><![CDATA[Easy_Exploit,No_Patch]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[6.3]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="QID_severity"><![CDATA[3.0]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>91962</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>4</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[KB5021237 is not installed 
+%windir%\system32\ntoskrnl.exe  Version is  10.0.17763.3650]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="CRITICAL">95</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="exploit_maturity"><![CDATA[weaponized]]></QDS_FACTOR>
+              <QDS_FACTOR name="malware_name"><![CDATA[Magniber,Qakbot]]></QDS_FACTOR>
+              <QDS_FACTOR name="CISA_vuln"><![CDATA[YES]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[5.4]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="trending"><![CDATA[03012023]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:L]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>91969</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>4</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[KB5022286 is not installed 
+%windir%\system32\ntoskrnl.exe  Version is  10.0.17763.3650]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="CRITICAL">95</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="exploit_maturity"><![CDATA[weaponized]]></QDS_FACTOR>
+              <QDS_FACTOR name="CISA_vuln"><![CDATA[YES]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[8.8]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>91979</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>4</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[KB5022840 is not installed 
+%windir%\system32\ntoskrnl.exe  Version is  10.0.17763.3650]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="CRITICAL">95</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="exploit_maturity"><![CDATA[weaponized]]></QDS_FACTOR>
+              <QDS_FACTOR name="CISA_vuln"><![CDATA[YES]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[7.8]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="trending"><![CDATA[03022023,03102023,03082023]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>91986</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>4</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[d037e070ebe5c83838443f869d5800752b0fcb13
+7.0.2
+
+%programfiles%\dotnet\shared\Microsoft.NETCore.App\7.0.2\.version]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="LOW">35</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="CVSS"><![CDATA[7.8]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="trending"><![CDATA[02152023]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>105170</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>2</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[%windir%\explorer.exe   found 
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer NoDriveTypeAutoRun is missing.]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="MEDIUM">50</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="RTI"><![CDATA[Easy_Exploit,No_Patch]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[5.0]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v2]]></QDS_FACTOR>
+              <QDS_FACTOR name="QID_severity"><![CDATA[2.0]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>105171</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>2</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[%windir%\explorer.exe   found 
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer NoAutorun is missing. 
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer NoDriveTypeAutoRun is missing. 
+HKU\.DEFAULT\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer NoDriveTypeAutoRun is missing.]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="MEDIUM">50</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="RTI"><![CDATA[Easy_Exploit,No_Patch]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[5.0]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v2]]></QDS_FACTOR>
+              <QDS_FACTOR name="QID_severity"><![CDATA[2.0]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>105228</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>3</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[Guest]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="LOW">25</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="RTI"><![CDATA[No_Patch]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[3.7]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="QID_severity"><![CDATA[3.0]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>376442</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>4</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[C:\Program Files\VMware\VMware Tools\\vmtoolsd.exe  Version is  11.3.5.31214]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="LOW">35</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="CVSS"><![CDATA[7.2]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v2]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:L/AC:L/Au:N/C:C/I:C/A:C]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>376633</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>3</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[C:\Program Files\VMware\VMware Tools\\vmtoolsd.exe  Version is  11.3.5.31214]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="LOW">35</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="CVSS"><![CDATA[7.1]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:H]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>376866</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>4</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[C:\Program Files\VMware\VMware Tools\\vmtoolsd.exe  Version is  11.3.5.31214]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="LOW">35</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="CVSS"><![CDATA[7.8]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>377855</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>1</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[C:\Program Files\VMware\VMware Tools\\vmtoolsd.exe  Version is  11.3.5.31214]]></RESULTS>
+            <STATUS>New</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T00:48:49Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T00:48:49Z</LAST_FOUND_DATETIME>
+            <QDS severity="LOW">10</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="CVSS"><![CDATA[4.4]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v2]]></QDS_FACTOR>
+              <QDS_FACTOR name="QID_severity"><![CDATA[1]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>1</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T00:48:49Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T00:54:58Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T00:54:58Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+        </DETECTION_LIST>
+      </HOST>
+      <HOST>
+        <ID>294442</ID>
+        <IP>172.26.6.128</IP>
+        <TRACKING_METHOD>AGENT</TRACKING_METHOD>
+        <NETWORK_ID>0</NETWORK_ID>
+        <OS><![CDATA[Ubuntu Linux 20.04.5]]></OS>
+        <DNS><![CDATA[ip-172-26-6-128.ap-southeast-2.compute.internal]]></DNS>
+        <DNS_DATA>
+          <HOSTNAME><![CDATA[ip-172-26-6-128]]></HOSTNAME>
+          <DOMAIN><![CDATA[ap-southeast-2.compute.internal]]></DOMAIN>
+          <FQDN><![CDATA[ip-172-26-6-128.ap-southeast-2.compute.internal]]></FQDN>
+        </DNS_DATA>
+        <QG_HOSTID><![CDATA[43c8c5a3-25f6-4aa2-9e81-be39532ca4fc]]></QG_HOSTID>
+        <LAST_SCAN_DATETIME>2023-03-15T01:14:47Z</LAST_SCAN_DATETIME>
+        <LAST_VM_SCANNED_DATE>2023-03-15T01:10:15Z</LAST_VM_SCANNED_DATE>
+        <LAST_VM_AUTH_SCANNED_DATE>2023-03-15T01:10:15Z</LAST_VM_AUTH_SCANNED_DATE>
+        <LAST_PC_SCANNED_DATE>2023-03-15T00:44:25Z</LAST_PC_SCANNED_DATE>
+        <DETECTION_LIST>
+          <DETECTION>
+            <QID>105936</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>3</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[Vulnerable version of OpenSSH Detected:
+
+OpenSSH_8.2p1 Ubuntu-4ubuntu0.5, OpenSSL 1.1.1f  31 Mar 2020]]></RESULTS>
+            <STATUS>Active</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T01:03:39Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T01:10:15Z</LAST_FOUND_DATETIME>
+            <QDS severity="MEDIUM">42</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="exploit_maturity"><![CDATA[poc]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS"><![CDATA[7.8]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="trending"><![CDATA[03072023,03052023]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>2</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T01:10:15Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T01:14:47Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T01:14:47Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>115284</QID>
+            <TYPE>Potential</TYPE>
+            <SEVERITY>2</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[sysctl net.ipv4.ip_forward
+net.ipv4.ip_forward = 1]]></RESULTS>
+            <STATUS>Active</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T01:03:39Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T01:10:15Z</LAST_FOUND_DATETIME>
+            <QDS severity="LOW">35</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="CVSS"><![CDATA[7.5]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v2]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:N/AC:L/Au:N/C:P/I:P/A:P]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>2</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T01:10:15Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T01:14:47Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T01:14:47Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+          <DETECTION>
+            <QID>650035</QID>
+            <TYPE>Confirmed</TYPE>
+            <SEVERITY>3</SEVERITY>
+            <SSL>0</SSL>
+            <RESULTS><![CDATA[Vulnerable version of OpenSSH Detected:
+
+OpenSSH_8.2p1 Ubuntu-4ubuntu0.5, OpenSSL 1.1.1f  31 Mar 2020]]></RESULTS>
+            <STATUS>Active</STATUS>
+            <FIRST_FOUND_DATETIME>2023-03-15T01:03:39Z</FIRST_FOUND_DATETIME>
+            <LAST_FOUND_DATETIME>2023-03-15T01:10:15Z</LAST_FOUND_DATETIME>
+            <QDS severity="LOW">30</QDS>
+            <QDS_FACTORS>
+              <QDS_FACTOR name="CVSS"><![CDATA[5.9]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_version"><![CDATA[v3.x]]></QDS_FACTOR>
+              <QDS_FACTOR name="trending"><![CDATA[03092023]]></QDS_FACTOR>
+              <QDS_FACTOR name="CVSS_vector"><![CDATA[AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N]]></QDS_FACTOR>
+            </QDS_FACTORS>
+            <TIMES_FOUND>2</TIMES_FOUND>
+            <LAST_TEST_DATETIME>2023-03-15T01:10:15Z</LAST_TEST_DATETIME>
+            <LAST_UPDATE_DATETIME>2023-03-15T01:14:47Z</LAST_UPDATE_DATETIME>
+            <IS_IGNORED>0</IS_IGNORED>
+            <IS_DISABLED>0</IS_DISABLED>
+            <LAST_PROCESSED_DATETIME>2023-03-15T01:14:47Z</LAST_PROCESSED_DATETIME>
+          </DETECTION>
+        </DETECTION_LIST>
+      </HOST>
+    </HOST_LIST>
+  </RESPONSE>
+</HOST_LIST_VM_DETECTION_OUTPUT>
+<!-- This report was generated with an evaluation version of Qualys //--> 
+<!-- CONFIDENTIAL AND PROPRIETARY INFORMATION. Qualys provides the QualysGuard Service "As Is," without any warranty of any kind. Qualys makes no warranty that the information contained in this report is complete or error-free. Copyright 2023, Qualys, Inc. //--> 
