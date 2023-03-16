@@ -7,11 +7,11 @@ weight: 3
 
 ## dojo/settings/settings.dist.py
 
-The main settings are all stored in [`dojo/settings/settings.dist.py`](https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py). It is great to use this file as a reference what can be configured, but it shouldn't be edited directly, because changes would be overridden when updating DefectDojo. There are several methods to change the default settings:
+The main settings are stored in [`dojo/settings/settings.dist.py`](https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py). It is great to use this file as a reference for what can be configured, but it shouldn't be edited directly, because changes will be overwritten when updating DefectDojo. There are several methods to change the default settings:
 
 ### Environment variables
 
-Most of these parameters can be set by environment variables. 
+Most parameters can be set by environment variables. 
 
 When you deploy DefectDojo via **Docker Compose**, you can set environment variables in [`docker-compose.yml`](https://github.com/DefectDojo/django-DefectDojo/blob/master/docker-compose.yml). Be aware you have to set the variables for three services: `uwsgi`, `celerybeat` and `celeryworker`.
 
@@ -26,8 +26,8 @@ An example can be found in [`template_env`](https://github.com/DefectDojo/django
 ### local_settings.py (not with Kubernetes)
 
 `local_settings.py` can contain more complex customizations such as adding MIDDLEWARE or INSTALLED_APP entries.
-This file is processed *after* settings.dist.py is processed, so you can modify settings delivered by Defect Dojo out of the box.
- The file must be located in the `dojo/settings` directory. Environment variables in this file must have no `DD_` prefix.
+This file is processed *after* settings.dist.py is processed, so you can modify settings delivered by DefectDojo out of the box.
+ The file must be located in the `dojo/settings` directory. Environment variables in this file must not have the `DD_` prefix.
 If the file is missing feel free to create it. Do not edit `settings.dist.py` directly.
 
 An example can be found in [`dojo/settings/template-local_settings`](https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/template-local_settings).
