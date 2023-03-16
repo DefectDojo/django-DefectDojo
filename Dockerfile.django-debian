@@ -109,7 +109,8 @@ RUN \
     chmod -R 775 /app/dojo/settings && \
     mkdir /var/run/${appuser} && \
     chown ${appuser} /var/run/${appuser} && \
-	  chmod g=u /var/run/${appuser} && \
+    chmod g=u /var/run/${appuser} && \
+    chmod 775 /*.sh && \
     mkdir -p media/threat && chown -R ${uid} media
 USER ${uid}
 ENV \
