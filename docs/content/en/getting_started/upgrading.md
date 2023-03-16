@@ -20,7 +20,7 @@ DockerHub to update.
 {{% /alert %}}
 
 
-The generic upgrade method for docker-compose follows these steps:
+The generic upgrade method for docker-compose are as follows:
 
 -   Pull the latest version
 
@@ -29,8 +29,7 @@ The generic upgrade method for docker-compose follows these steps:
     docker pull defectdojo/defectdojo-nginx:latest
     ```
 
--   If you would like to use something older (so not the latest
-    version), specify the version (tag) you want to upgrade to:
+-   If you would like to use a version other than the latest, specify the version (tag) you want to upgrade to:
 
     ``` {.sourceCode .bash}
     docker pull defectdojo/defectdojo-django:1.10.2
@@ -57,11 +56,11 @@ The generic upgrade method for docker-compose follows these steps:
 ### Building your local images
 
 If you build your images locally and do not use the ones from DockerHub,
-the instructions are much the same, except that you'd build your images
+the instructions are the same, with the caveat that you must build your images
 first. (Of course, if you're doing this, then you know you have to
 update the source code first)
 
-Replace the first step above with this one: `docker-compose build`
+Replace the first step above with: `docker-compose build`
 
 godojo installations
 --------------------
