@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load authorization_tags %}
+{% load i18n %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -8,7 +9,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        All API Scan Configurations
+                        {% trans "All API Scans Configurations" %}
                     </h3>
                 </div>
 
@@ -23,11 +24,11 @@
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Product</th>
-                            <th>Product API Scan Configuration</th>
-                            <th>Service key 1</th>
-                            <th>Service key 2</th>
-                            <th>Service key 3</th>
+                            <th>{% trans "Product" %}</th>
+                            <th>{% trans "Product API Scan Configuration" %}</th>
+                            <th>{% trans "Service key 1" %}</th>
+                            <th>{% trans "Service key 2" %}</th>
+                            <th>{% trans "Service key 3" %}</th>
                         </tr>
                         </thead>
                         <tbody>
