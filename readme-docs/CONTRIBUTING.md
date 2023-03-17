@@ -24,9 +24,9 @@ Here are a few things to keep in mind when making changes to DefectDojo.
 
 Please see [the parser guide](https://documentation.defectdojo.com/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
 
-## Submisison Pre-Approval
+## Submisison Pre-Approval -- DefectDojo is Feature Complete
 
-We consider DefectDojo to be feature complete, with the exception of new parsers and parser improvements, it is recomended that you get in touch with us to discuss changes prior to dedicating time and resources. We are working on defining clear guidelines on direction and acceptable PRs, but in the meantime, please get in touch with Matt Tesauro on Slack.  
+We consider the open-source version of DefectDojo to be feature complete with the exception of new parsers and parser improvements, it is recomended that you get in touch with us to discuss changes prior to dedicating time and resources. We're open to your suggestions and feedback, but we do not plan to add or accept new features in the future for supportability concerns. We are working on defining clear guidelines on direction and acceptable PRs, but in the meantime, please get in touch with Matt Tesauro on Slack.  
 
 ## Modifying DefectDojo and Testing
 
