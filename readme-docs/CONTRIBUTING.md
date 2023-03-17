@@ -24,6 +24,10 @@ Here are a few things to keep in mind when making changes to DefectDojo.
 
 Please see [the parser guide](https://documentation.defectdojo.com/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
 
+## Submisison Pre-Approval
+
+We consider DefectDojo to be feature complete, with the exception of new parsers and parser improvements, it is recomended that you get in touch with us to discuss changes prior to dedicating time and resources. We are working on defining clear guidelines on direction and acceptable PRs, but in the meantime, please get in touch with Matt Tesauro on Slack.  
+
 ## Modifying DefectDojo and Testing
 
 Please use [these test scripts](./tests) to test your changes. These are the scripts we run in our [integration tests](DOCKER.md#run-the-tests-with-docker).
@@ -33,8 +37,7 @@ For changes that require additional settings, you can now use local_settings.py 
 ## Python3 version
 For compatibility reasons, the code in dev branch should be python3.11 compliant.
 
-## Submisison Pre-Approval
-With the exception of new parsers and parser improvements, it is recomended that you get in touch with us to discuss changes prior to dedicating time and resources. We are working on defining clear guidelines on direction and acceptable PRs, but in the meantime, please get in touch with a core mod or a maintainer on Slack.  
+
 
 ## Submitting Pull Requests
 
