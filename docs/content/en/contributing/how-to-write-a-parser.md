@@ -13,10 +13,10 @@ All commands assume that you're located at the root of the django-DefectDojo clo
 
 - You have forked https://github.com/DefectDojo/django-DefectDojo and cloned locally.
 - Checkout `dev` and make sure you're up to date with the latest changes.
-- It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name` yet that's up to you.
+- It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name`.
 
-It is probably easier to use the docker-compose stack (and benefit from the hot-reload capbility for uWSGI).
-Set up your environment to use the debug environment, such as:
+It is easiest to use the docker-compose deployment as it has hot-reload capbility for uWSGI.
+Set up your environment to use the debug environment:
 
 `$ docker/setEnv.sh debug`
 
@@ -24,7 +24,7 @@ Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDoj
 
 ### Docker images
 
-You'd want to build your docker images locally, and eventually pass in your local user's `uid` to be able to write to the image (handy for database migration files). Assuming your user's `uid` is `1000`, then:
+You will want to build your docker images locally, and eventually pass in your local user's `uid` to be able to write to the image (handy for database migration files). Assuming your user's `uid` is `1000`, then:
 
 {{< highlight bash >}}
 $ docker-compose build --build-arg uid=1000
@@ -139,7 +139,7 @@ Read [more](https://github.com/DefectDojo/cookiecutter-scanner-parser) on the te
 
 ## Things to pay attention to
 
-Here is a list of advise that will make your parser future proof.
+Here is a list of considerations that will make the parser robust for both common cases and edge cases.
 
 ### Do not parse URLs by hand
 
@@ -187,7 +187,7 @@ Good example:
 
 ### Do not parse CVSS by hand (vector, score or severity)
 
-Data can have `CVSS` vectors or scores. Don't try to write your own CVSS score algorithm.
+Data can have `CVSS` vectors or scores. Don't write your own CVSS score algorithm.
 For parser, we rely on module `cvss`.
 
 It's easy to use and will make the parser aligned with the rest of the code.

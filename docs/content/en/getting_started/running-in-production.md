@@ -1,11 +1,11 @@
 ---
 title: "Running in production"
-description: "Productive use of DefectDojo needs consideration of performance and backups."
+description: "For use in Produciton environments, performance tweaks and backups are recommended."
 draft: false
 weight: 4
 ---
 
-## Production with docker-compose
+## Production use with docker-compose
 
 The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment.
 
@@ -15,9 +15,9 @@ See [Running with Docker Compose](https://github.com/DefectDojo/django-DefectDoj
 
 ### Database performance and backup
 
-It is recommended to use a dedicated database server and not the preconfigured MySQL database. This will improve the performance of DefectDojo
+It is recommended to use a dedicated database server and not the preconfigured MySQL database. This will improve the performance of DefectDojo.
 
-In both case, if you use a dedicated database server or if you should decide to use the preconfigured MySQL database, make sure to make regular backups of the data. For a dedicated database server follow the instructions that come with the database server. For the preconfigured MySQL you can use mysqldump, e.g. as described in [How to backup a Docker MySQL database](https://dev.to/grant_bartlett/how-to-backup-a-docker-mysql-database-3nd8).
+In both cases (dedicated DB or containerized, if you are self-hosting, it is recommended that you implement and create periodic backups of your data.
 
 ### Backup of Media files
 
@@ -30,20 +30,15 @@ Please read the paragraphs below about key processes tweaks.
 {{% /alert %}}
 
 
-Having taken the database to run elsewhere, the minimum recommendation
-is:
+With a seperate database, the minimum recommendations
+are:
 
 -   2 vCPUs
 -   8 GB of RAM
--   2 GB of disk space (remember, your database is not here \-- so
-    basically, what you have for your O/S should do). You could allocate
+-   10 GB of disk space (remember, your database is not here \-- so
+     what you have for your O/S should do). You could allocate
     a different disk than your OS\'s for potential performance
     improvements.
-
-### Key processes
-
-Per <https://github.com/DefectDojo/django-DefectDojo/pull/2813>, it is
-now easy to somewhat improve the uWSGI and celery worker performance.
 
 #### uWSGI
 
@@ -62,19 +57,16 @@ concurrent connections.
 
 #### Celery worker
 
-By default, a single mono-process celery worker is spawned. This is fine
-until you start having many findings, and when async operations like
-deduplication start to kick in. Eventually, it will starve your
-resources and crawl to a halt, while operations continue to queue up.
+By default, a single mono-process celery worker is spawned. When storing a large amount of findings, leveraging async functions (like deduplication), or both. Eventually, it is important to adjust these parameters to prevent resource starvation. 
 
-The following variables will help a lot, while keeping a single celery
-worker container.
+
+The following variables can be changed to increase worker performance, while keeping a single celery container.
 
 -   `DD_CELERY_WORKER_POOL_TYPE` will let you switch to `prefork`.
     (default `solo`)
 
-As you\'ve enabled `prefork`, the following variables have
-to be used. The default are working fairly well, see the
+When you enable `prefork`, the variables below have
+to be used. see the
 Dockerfile.django-* for in-file references.
 
 -   `DD_CELERY_WORKER_AUTOSCALE_MIN` defaults to 2.
@@ -89,13 +81,11 @@ and see what is in effect.
 
 ###### Asynchronous Imports
 
-This is an experimental features that has some [concerns](https://github.com/DefectDojo/django-DefectDojo/pull/5553#issuecomment-989679555) that need to be addressed before it can be used reliably.
-
 Import and Re-Import can also be configured to handle uploads asynchronously to aid in 
-importing especially large files. It works by batching Findings and Endpoints by a 
+processing especially large scans. It works by batching Findings and Endpoints by a 
 configurable amount. Each batch will be be processed in seperate celery tasks.
 
-The following variables have to be used.
+The following variables impact async imports.
 
 -   `DD_ASYNC_FINDING_IMPORT` defaults to False
 -   `DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE` deafults to 100
@@ -106,11 +96,3 @@ to occur after the Findings have already been imported.
 
 To determine if an import has been fully completed, please see the progress bar in the appropriate test.
 
-## Monitoring
-
-To expose Django statistics for [Prometheus](https://prometheus.io/), set
-`DJANGO_METRICS_ENABLED` to `True` in the settings
-(see [Configuration](../configuration)).
-
-The Prometheus endpoint is than available under the path:
-`http://dd_server/django_metrics/metrics`

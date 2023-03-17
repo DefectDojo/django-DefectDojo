@@ -1,13 +1,13 @@
 ---
 title: "Questionnaires"
-description: "Collect test scope and deployment information from outsiders."
+description: "Collect information from people internal or external to DefectDojo."
 weight: 3
 draft: false
 ---
 
 ## Questionnaires
 
-Questionnaires provide a means for collecting test scope and deployment information from developers and respective stakeholders. DefectDojo includes functionality to create new questionnaires with custom questions, open questionnaires to receive responses for certain time periods from insiders or outsiders, and connect questionnaires with new or existing engagements.
+Questionnaires provide a means for collecting information from developers and respective stakeholders. DefectDojo includes functionality to create new questionnaires with custom questions, open questionnaires to receive responses for certain time periods from insiders or outsiders, and connect questionnaires with new or existing engagements.
 
 ## Creating a New Questionnaire
 
