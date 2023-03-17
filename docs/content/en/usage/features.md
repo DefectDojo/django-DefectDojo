@@ -1,6 +1,6 @@
 ---
 title: "Features"
-description: "Various features help manage the findings."
+description: "Various features help manage vulnerabilities."
 draft: false
 weight: 2
 ---
@@ -8,7 +8,7 @@ weight: 2
 ## Risk Acceptance
 
 Findings cannot always be remediated or addressed for various reasons. A
-finding status can change to accepted by doing the following. Findings
+finding \'status\' can be change to \'accepted\' by doing the following: Findings
 are accepted in the engagement view. To locate the engagement from the
 finding click the link to engagement as shown below.
 
@@ -37,7 +37,7 @@ deduplication on engagement and deduplication on product level:
 
 ![Deduplication on product and engagement level](../../images/deduplication.png)
 
-Upon saving a finding, defectDojo will look at the other findings in the
+Upon saving a finding, DefectDojo will look at the other findings in the
 product or the engagement (depending on the configuration) to find
 duplicates
 
@@ -55,7 +55,7 @@ Deduplicate vulnerabilities in the same build/release. The vulnerabilities may b
     detecting duplicates across scanners is not trivial as it
     requires a certain standardization.
 
-Track unique vulnerabilities across builds/releases so that defectDojo knows when it finds a vulnerability whether it has seen it before.
+Track unique vulnerabilities across builds/releases so that DefectDojo knows when it finds a vulnerability that has seen it before.
 
 :   this allows you keep information attached to a given finding
     in a unique place: all further duplicate findings will point
@@ -74,15 +74,15 @@ configured.
 
 #### Engagement configuration
 
-When creating an engagement or later by editing the engagement, the
+When creating or editing an engagement, the
 \"Deduplication within engagement only\" checkbox can be ticked.
 
 -   If activated: Findings are only deduplicated within the same
     engagement. Findings present in different engagements cannot be
     duplicates
--   Else: Findings are deduplicated across the whole product
+-   Otherwise: Findings are deduplicated across the whole product
 
-Note that deduplication can never occur across different products.
+Note that currently deduplication does not occur across different products.
 
 ### Deduplication algorithms
 
@@ -204,7 +204,7 @@ Tips:
 When you change the hashcode configuration, it is needed to regenerated the hashcodes for all findings,
 or at least those findings found by scanners for which the configuration was updated.
 
-This is sometimes also needed after an upgrade to a new Defect Dojo version, for example when we made changes
+This is sometimes also needed after an upgrade to a new DefectDojo version, for example when we made changes
 to the hashcode configuration or calculation logic. We will mention this in the upgrade notes.
 
 To regenerate the hashcodes, use the `dedupe` management command:
@@ -215,7 +215,7 @@ docker-compose exec uwsgi ./manage.py dedupe --hash_code_only
 
 This will only regenerated the hashcodes, but will not run any deduplication logic on existing findings.
 If you want to run deduplication again on existing findings to make sure any duplicates found by the new
-hashcode config are marked as such, run
+hashcode config are marked as such, run:
 
 {{< highlight bash >}}
 docker-compose exec uwsgi ./manage.py dedupe
@@ -273,22 +273,10 @@ Similar Findings
     which will remove the duplicate status on that finding along with
     marking it active again.
 
-## False Positive Removal
-
-DefectDojo allows users to tune out false positives by enabling False
-Positive History. This will track what engineers have labeled as false
-positive for a specific product and for a specific scanner. While
-enabled, when a tool reports the same issue that has been flagged as a
-false positive previously, it will automatically mark the finding as a
-false positive, helping to tune overly verbose security tools.
-
-False Positive Removal is not needed when using deduplication, and it is
-advised to not combine these two.
-
 ## Service Level Agreement (SLA)
 
-DefectDojo allows you to maintain your security SLA and automatically
-remind teams whenever a SLA is about to get breached, or breaches.
+DefectDojo allows you to maintain your security SLAs and automatically
+remind teams whenever a SLA is about to get breached, or is breached.
 
 Simply indicate in the `System Settings` for each severity, how many
 days teams have to remediate a finding.
@@ -329,7 +317,7 @@ through CI in \'active\' state.
 
 ### What notification channels for SLA notifications?
 
-The same as usual. You will notice that an extra `SLA breach` option is now present
+You will notice that an extra `SLA breach` option is now present
 on the `Notification` page and  also in the `Product` view.
 
 ![SLA notification checkbox](../../images/sla_notification_product_checkboxes.png)
@@ -337,8 +325,8 @@ on the `Notification` page and  also in the `Product` view.
 ### SLA notification with JIRA
 
 You can choose to also send SLA notification as JIRA comments, if your
-product is configured with JIRA. You can enable it at the JIRA
-configuration level or at the Product level.
+product is configured with JIRA. You can enable this at the Product level in the Product specific
+JIRA settings.
 
 The Product level JIRA notification configuration takes precendence over
 the global JIRA notification configuration.
