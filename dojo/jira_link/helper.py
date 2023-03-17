@@ -733,7 +733,7 @@ def add_jira_issue(obj, *args, **kwargs):
         logger.debug('sending fields to JIRA: %s', fields)
         new_issue = jira.create_issue(fields)
         if jira_project.default_assignee:
-            new_issue.update(assignee={'name': jira_project.default_assignee})
+            jira.assign_issue(new_issue.key, jira_project.default_assignee)
 
         # Upload dojo finding screenshots to Jira
         findings = [obj]
