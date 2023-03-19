@@ -65,17 +65,10 @@ class VeracodeScaParser(object):
                 cvss_score = vulnerability.get("cvss3_score")
             severity = self.__cvss_to_severity(cvss_score)
 
-            description = 'This library has known vulnerabilities.\n'
-            description += \
-                "**CVE:** {0} ({1})\n" \
-                "CVS Score: {2} ({3})\n" \
-                "Project name: {4}\n" \
-                "Title: \n>{5}" \
+            description = \
+                "Project name: {0}\n" \
+                "Title: \n>{1}" \
                 "\n\n-----\n\n".format(
-                    vuln_id,
-                    date,
-                    cvss_score,
-                    severity,
                     issue.get("project_name"),
                     vulnerability.get('title'))
 
@@ -151,17 +144,10 @@ class VeracodeScaParser(object):
             severity = self.fix_severity(row.get('Severity', None))
             cvss_score = float(row.get('CVSS score', 0))
             date = datetime.strptime(row.get('Issue opened: Scan date'), '%d %b %Y %H:%M%p %Z')
-            description = 'This library has known vulnerabilities.\n'
-            description += \
-                "**CVE:** {0} ({1})\n" \
-                "CVS Score: {2} ({3})\n" \
-                "Project name: {4}\n" \
-                "Title: \n>{5}" \
+            description = \
+                "Project name: {0}\n" \
+                "Title: \n>{1}" \
                 "\n\n-----\n\n".format(
-                    vuln_id,
-                    date,
-                    cvss_score,
-                    severity,
                     row.get('Project'),
                     row.get('Title'))
 
