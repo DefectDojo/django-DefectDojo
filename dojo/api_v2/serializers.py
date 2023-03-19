@@ -1205,7 +1205,7 @@ class FindingEngagementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Engagement
-        fields = ["id", "name", "description", "product", "target_start", "target_end", "branch_tag", "engagement_type", "build_id", "commit_hash", "version",  "created", "updated"]
+        fields = ["id", "name", "description", "product", "target_start", "target_end", "branch_tag", "engagement_type", "build_id", "commit_hash", "version", "created", "updated"]
 
 
 class FindingEnvironmentSerializer(serializers.ModelSerializer):
