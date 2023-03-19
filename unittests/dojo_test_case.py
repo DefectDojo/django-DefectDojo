@@ -1,21 +1,24 @@
-import os
-from django.utils import timezone
-from vcr_unittest import VCRTestCase
-from dojo.models import DojoMeta, Product_Type, Test_Type, User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project, \
-                        Product
-from dojo.models import System_Settings, Engagement
-from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
-from rest_framework.authtoken.models import Token
+import copy
 import json
-from django.test import TestCase
+import logging
+import os
+import pprint
 from itertools import chain
+
+from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.http import urlencode
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient, APITestCase
+from vcr_unittest import VCRTestCase
+
 from dojo.jira_link import helper as jira_helper
 from dojo.jira_link.views import get_custom_field
-import logging
-import pprint
-import copy
-from django.utils.http import urlencode
+from dojo.models import (SEVERITIES, DojoMeta, Endpoint, Endpoint_Status,
+                         Engagement, Finding, JIRA_Issue, JIRA_Project, Notes,
+                         Product, Product_Type, System_Settings, Test,
+                         Test_Type, User)
 
 logger = logging.getLogger(__name__)
 
@@ -400,6 +403,10 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
 
     def __init__(self, *args, **kwargs):
         TestCase.__init__(self, *args, **kwargs)
+
+    def common_check_finding(self, finding):
+        #self.assertIn(finding.severity, SEVERITIES)
+        finding.clean()
 
 
 class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
