@@ -536,7 +536,7 @@ class RiskAcceptanceViewSet(prefetch.PrefetchListMixin,
         risk_acceptance = self.get_object()
         # Get the file object
         file_object = risk_acceptance.path
-        if file_object is None:
+        if file_object is None or risk_acceptance.filename() is None:
             return Response({"error": "Proof has not provided to this risk acceptance..."}, status=status.HTTP_404_NOT_FOUND)
         # Get the path of the file in media root
         file_path = f'{settings.MEDIA_ROOT}/{file_object.name}'

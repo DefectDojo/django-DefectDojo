@@ -30,7 +30,7 @@ We consider the open-source version of DefectDojo to be feature complete with th
 
 ## Modifying DefectDojo and Testing
 
-Please use [these test scripts](./tests) to test your changes. These are the scripts we run in our [integration tests](DOCKER.md#run-the-tests-with-docker).
+Please use [these test scripts](../tests) to test your changes. These are the scripts we run in our [integration tests](DOCKER.md#run-the-tests-with-docker).
 
 For changes that require additional settings, you can now use local_settings.py file. See the logging section below for more information.
 
@@ -48,7 +48,7 @@ DefectDojo.
 
 0. Make sure that the install is working properly.
 
-0. All tests found in [these test scripts](./tests) should be passing.
+0. All tests found in [these test scripts](../tests) should be passing.
 
 0. All submitted code should conform to [__PEP8 standards__][pep8].
 

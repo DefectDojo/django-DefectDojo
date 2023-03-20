@@ -201,7 +201,7 @@ class DependencyTrackParser(object):
         dependency_track_severity = dependency_track_finding['vulnerability']['severity']
         vulnerability_severity = self._convert_dependency_track_severity_to_dojo_severity(dependency_track_severity)
         if vulnerability_severity is None:
-            logger.warn("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
+            logger.warning("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
             vulnerability_severity = "Critical"
 
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
