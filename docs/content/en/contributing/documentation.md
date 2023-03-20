@@ -5,8 +5,7 @@ draft: false
 weight: 2
 ---
 
-The documentation is build with [Hugo](https://gohugo.io/) and uses the theme [Docsy](https://www.docsy.dev). The source code
-of the documentation is located in the [docs](https://github.com/DefectDojo/django-DefectDojo/tree/dev/doc) folder.
+The documentation is built with [Hugo](https://gohugo.io/) and uses the theme [Docsy](https://www.docsy.dev).
 Static files for the webside are build with github actions and are publish in the gh-pages branch.
 
 ## How to run a local preview
@@ -15,7 +14,7 @@ Static files for the webside are build with github actions and are publish in th
 
 2. Install JavaScript packages
 
-    To build or update your site’s CSS resources, you also need PostCSS to create the final assets. If you need to install it, you must have a recent version of NodeJS installed on your machine so you can use npm, the Node package manager. By default npm installs tools under the directory where you run npm install:
+    To build or update your site’s CSS resources, you also need PostCSS to create the final assets. If you need to install it, you must have a recent version of NodeJS installed on your machine so you can use npm, the Node package manager. By default, npm installs tools under the directory where you run npm install:
 
     {{< highlight bash >}}
     cd docs
