@@ -37,7 +37,6 @@ from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
 from dojo.settings.settings import SLA_BUSINESS_DAYS
-from numpy import busday_count
 
 
 logger = logging.getLogger(__name__)
@@ -2613,11 +2612,12 @@ class Finding(models.Model):
         return ", ".join([str(s) for s in status])
 
     def _age(self, start_date):
+        from dojo.utils import get_work_days
         if SLA_BUSINESS_DAYS:
             if self.mitigated:
-                days = busday_count(self.date, self.mitigated.date())
+                days = get_work_days(self.date, self.mitigated.date())
             else:
-                days = busday_count(self.date, get_current_date())
+                days = get_work_days(self.date, get_current_date())
         else:
             if self.mitigated:
                 diff = self.mitigated.date() - start_date
