@@ -1,19 +1,19 @@
 ---
 title: "Branching model"
-description: "How to create releases"
+description: "How we create releases"
 draft: false
 weight: 3
 ---
 
 ## Regular releases
 
-The DefectDojo team aims to meet the following cadence: 
+The DefectDojo team aims to maintain the following cadence: 
 
-- Minor releases at least once a month on the first Monday of the month
-- Patch/Bugfix releases every Monday
-- Security releases can come at any time.
+- Minor releases: at least once a month on the first Monday of the month.
+- Patch/Bugfix: releases every week on Monday.
+- Security releases: will be performed outside of our regular cadence depending on severity.
 
-In doubt, GitHub Actions are the source of truth. The releases are semi-automated right now, with a DefectDojo maintainer proceeding with each major step in the release. The steps for a regular release are:
+GitHub Actions are the source of truth. The releases are semi-automated. The steps for a regular release are:
 1. Create the release branch from `dev` or `bugfix` and prepare a PR against `master` ([details](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-pr.yml))
 --> A maintainer verifies and manually merges the PR
 1. Tag, issue draft release and docker build+push ([details](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/new-release-tag-docker.yml))
