@@ -1160,12 +1160,13 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.CharField())
     @swagger_serializer_method(serializers.CharField())
     def get_path(self, obj):
-        risk_acceptance_id = obj.id
-        engagement_id = Engagement.objects.filter(risk_acceptance__id__in=[obj.id]).first().id
-        path = reverse('download_risk_acceptance', args=(engagement_id, risk_acceptance_id))
-        request = self.context.get("request")
-        if request:
-            path = request.build_absolute_uri(path)
+        engagement = Engagement.objects.filter(risk_acceptance__id__in=[obj.id]).first()
+        path = 'No proof has been supplied'
+        if engagement and obj.filename() is not None:
+            path = reverse('download_risk_acceptance', args=(engagement.id, obj.id))
+            request = self.context.get("request")
+            if request:
+                path = request.build_absolute_uri(path)
         return path
 
     @extend_schema_field(serializers.IntegerField())
@@ -1204,7 +1205,7 @@ class FindingEngagementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Engagement
-        fields = ["id", "name", "product", "branch_tag", "build_id", "commit_hash", "version"]
+        fields = ["id", "name", "description", "product", "target_start", "target_end", "branch_tag", "engagement_type", "build_id", "commit_hash", "version", "created", "updated"]
 
 
 class FindingEnvironmentSerializer(serializers.ModelSerializer):
