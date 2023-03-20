@@ -1,3 +1,5 @@
+## Please Note: We consider the open-source version of DefectDojo to be feature complete. We're open to your suggestions and feedback, but we do not plan to add or accept new features in the future for supportability concerns.
+
 **Description**
 
 Describe the feature / bug fix implemented by this PR.
