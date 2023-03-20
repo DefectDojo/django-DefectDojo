@@ -114,33 +114,31 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
         finding = Finding(
             title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
             mitigation=report_finding['Solution'],
-            description=report_finding['Threat'],
-            severity=severity_lookup.get(
-                report_finding['Severity'],
-                'Info'),
+            description=f"{report_finding['Threat']}\nResult Evidence: \n{report_finding.get('Threat', 'Not available')}",
+            severity=severity_lookup.get(report_finding['Severity'], 'Info'),
             impact=report_finding['Impact'],
-            date=datetime.strptime(
-                report_finding['Last Detected'],
-                "%m/%d/%Y %H:%M:%S").date(),
+            date=datetime.strptime(report_finding['Last Detected'], "%m/%d/%Y %H:%M:%S").date(),
             vuln_id_from_tool=report_finding['QID'],
             cvssv3=_extract_cvss_vectors(
                 report_finding['CVSS3 Base'],
                 report_finding['CVSS3 Temporal']))
 
         cve_data = report_finding.get('CVE ID')
-
         finding.unsaved_vulnerability_ids = cve_data.split(',') if ',' in cve_data else [cve_data]
 
+        # Qualys reports regression findings as active, but with a Date Last Fixed.
         if report_finding['Date Last Fixed']:
-            finding.mitigated = datetime.strptime(
-                report_finding['Date Last Fixed'],
-                "%m/%d/%Y %H:%M:%S")
+            finding.mitigated = datetime.strptime(report_finding['Date Last Fixed'], "%m/%d/%Y %H:%M:%S")
             finding.is_mitigated = True
         else:
             finding.is_mitigated = False
 
-        finding.active = report_finding['Vuln Status'] in (
-            'Active', 'Re-Opened', 'New')
+        finding.active = report_finding['Vuln Status'] in ('Active', 'Re-Opened', 'New')
+
+        if finding.active:
+            finding.mitigated = None
+            finding.is_mitigated = False
+
         finding.verified = True
         finding.unsaved_endpoints = [endpoint]
 
