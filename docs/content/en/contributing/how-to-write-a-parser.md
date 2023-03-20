@@ -94,32 +94,7 @@ class MyToolParser(object):
 
 ## API Parsers
 
-Some reports are not reachable as a file that the user or pipeline can upload but the results of the scans have to be downloaded via API (or we just want to add support for multiple methods).
-In that case, an "API parser" is needed. Core code is the same as a regular parser but there are some additional requirements.
-
-### Which files do you need to modify? (API Parsers only)
-
-| File                                              | Purpose
-|-------                                            |--------
-|`dojo/tools/api_<parser_dir>/api_client.py`        | API client should perform all HTTP API calls and JSON with data from the API
-|`dojo/tools/api_<parser_dir>/importer.py`          | Importer should prepare the API client and process its results
-|`dojo/tools/api_<parser_dir>/parser.py`            | Parser should fetch processed data from the importer
-|`unittests/tools/test_api_<parser_name>_parser.py` | Unit tests of the parser.
-|`unittests/tools/test_api_<parser_name>_importer.py` | Unit tests of the importer.
-|`dojo/tool_config/factory.py`                      | Parser must be listed in `SCAN_APIS`
-|`unittests/test_tool_config.py`                    | Unit tests for content of hints and other metadata
-
-### Factory contract (API Parsers only)
-
-1. Parser directory *MUST* starts with `api_`
-   - ex: `dojo/tools/api_mytool`
-2. class-name of parser *MUST* starts with `Api`
-   - ex: `ApiMytoolParser`
-3. Parser *MUST* implements function `def api_scan_configuration_hint(self)` which returns a string with a hint, on how to configure service keys in Product ...TODO. Using of HTML tag `<b>` is required. Help will be rendered on the website.
-   - ex: `return 'the field <b>Service key 1</b> has to be set to ID of the project. <b>Service key 2</b> has to be set to the version of the project'`
-4. Parser *MUST* implemets function `def requires_tool_type(self, scan_type)` which returns name of the required `Tool_Type`. 
-5. Parser *MUST NOT* create related `Tool_Type`. It will be created automatically based on the function `requires_tool_type`.
-6. API client *SHOULD* implemets `def test_connection(self):` and `def test_product_connection(self, api_scan_configuration):` to be able to test connectivity and test permissions. It should return string with a sucessfull status (like _you have access to 125 projects_) or raise an exception.
+DefectDojo has a limited number of API parsers. While we won’t remove these connectors, adding API connectors has been problematic and thus we cannot accept new API parsers / connectors from the community at this time for supportability reasonsing. To maintain a high quality API connector, it is necessary to have a license to the tool. To get that license requires partnership with the author or vendor. We're close to announcing a new program to help address this and bring API connectors to DefectDojo.
 
 ## Template Generator
 
