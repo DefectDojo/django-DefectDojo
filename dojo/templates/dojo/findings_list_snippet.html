@@ -812,6 +812,7 @@
                 $("form#bulk_change_form").attr("action", "{% url 'merge_finding_product' product_tab.product.id %}");
                 $("form#bulk_change_form").attr("method", "get");
                 $('form#bulk_change_form').append(hidden_input);
+                $("form#bulk_change_form").find('input[name="csrfmiddlewaretoken"]')[0].remove()
                 $( "form#bulk_change_form" ).submit();
               } else {
                 alert("Please select at least two findings before merging.");
