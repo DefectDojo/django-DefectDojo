@@ -168,6 +168,12 @@ ur += component_urls
 ur += regulations
 ur += announcement_urls
 
+api_v2_urls = [
+    #  Django Rest Framework API v2
+    re_path(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
+    re_path(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
+]
+
 schema_view = get_schema_view(
     openapi.Info(
         title="Defect Dojo API",
@@ -178,15 +184,14 @@ schema_view = get_schema_view(
     public=True,
     # The API of a OpenSource project should be public accessible
     permission_classes=[permissions.AllowAny],
+    # url pattersns specific to the API
+    patterns=api_v2_urls,
 )
 
 urlpatterns = [
-    #  Django Rest Framework API v2
-    re_path(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
     # action history
     re_path(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history, name='action_history'),
     re_path(r'^%s' % get_system_setting('url_prefix'), include(ur)),
-    re_path(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
 
     # drf-yasg = OpenAPI2
     re_path(r'^%sapi/v2/doc/' % get_system_setting('url_prefix'), schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),
@@ -201,6 +206,7 @@ urlpatterns = [
     re_path(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), views.protected_serve, {'document_root': settings.MEDIA_ROOT})
 ]
 
+urlpatterns += api_v2_urls
 urlpatterns += survey_urls
 
 if hasattr(settings, 'DJANGO_METRICS_ENABLED'):
