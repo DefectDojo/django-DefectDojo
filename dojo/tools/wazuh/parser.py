@@ -81,6 +81,7 @@ class WazuhParser(object):
                     dupes[dupe_key] = find
         return list(dupes.values())
 
+
 def transpose_severity(severity):
     if severity in Finding.SEVERITIES:
         return severity
