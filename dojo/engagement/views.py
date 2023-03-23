@@ -490,7 +490,7 @@ def prefetch_for_view_tests(tests):
         prefetched = prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
 
     else:
-        logger.warn('unable to prefetch because query was already executed')
+        logger.warning('unable to prefetch because query was already executed')
 
     return prefetched
 

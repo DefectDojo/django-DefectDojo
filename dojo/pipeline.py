@@ -73,7 +73,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
         token = soc.extra_data['access_token']
         group_names = []
         if 'groups' not in kwargs['response'] or kwargs['response']['groups'] == "":
-            logger.warn("No groups in response. Stopping to update groups of user based on azureAD")
+            logger.warning("No groups in response. Stopping to update groups of user based on azureAD")
             return
         group_IDs = kwargs['response']['groups']
         try:

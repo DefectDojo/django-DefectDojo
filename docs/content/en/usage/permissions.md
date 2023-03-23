@@ -7,7 +7,7 @@ draft: false
 
 ## System-wide permissions
 
-* Administrators (aka superusers) have no limitations in the system. They can change all settings, manage users  and have read and write access to all data.
+* Administrators (aka superusers) have no limitations in the system. They can change all settings, manage users  and have read / write access to all data.
 * Staff users can add Product Types, and have access to data according to their role in a Product or Product Type.
 * Regular users have limited functionality available. They cannot add Product Types but have access to data according to their role in a Product or Product Type
 
@@ -73,7 +73,7 @@ Users can be assigned as members to Products and Product Types, giving them one 
 | Delete Note                 | (x) <sup>2)</sub> | (x) <sup>2)</sub> | x          | x     |              |
 
 
-<sup>1)</sup> Every superuser can add Product Types. Regular users are not allowed to add Product Types, unless they are Global Owner or Maintainer.
+<sup>1)</sup> Every superuser can add Product Types. Regular users are not allowed to add Product Types, unless they are a Global Owner or Maintainer.
 
 <sup>2)</sup> Every user is allowed to edit and delete his own notes.
 
