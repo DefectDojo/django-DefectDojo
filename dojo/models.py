@@ -397,20 +397,26 @@ class System_Settings(models.Model):
     enable_notify_sla_active = models.BooleanField(
         default=False,
         blank=False,
-        verbose_name=_("Enable Notifiy SLA's Breach for active Findings"),
+        verbose_name=_("Enable Notify SLA's Breach for active Findings"),
         help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for active Findings."))
 
     enable_notify_sla_active_verified = models.BooleanField(
         default=False,
         blank=False,
-        verbose_name=_("Enable Notifiy SLA's Breach for active, verified Findings"),
+        verbose_name=_("Enable Notify SLA's Breach for active, verified Findings"),
         help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for active, verified Findings."))
 
     enable_notify_sla_jira_only = models.BooleanField(
         default=False,
         blank=False,
-        verbose_name=_("Enable Notifiy SLA's Breach for Findings linked to JIRA"),
+        verbose_name=_("Enable Notify SLA's Breach for Findings linked to JIRA"),
         help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for Findings that are linked to JIRA issues."))
+
+    enable_notify_sla_exponential_backoff = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable an exponential backoff strategy for SLA breach notifications."),
+        help_text=_("Enable an exponential backoff strategy for SLA breach notifications, e.g. 1, 2, 4, 8, etc. Otherwise it alerts every day"))
 
     allow_anonymous_survey_repsonse = models.BooleanField(
         default=False,
