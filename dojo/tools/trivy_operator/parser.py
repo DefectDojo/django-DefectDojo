@@ -54,10 +54,10 @@ class TrivyOperatorParser:
         labels = metadata.get('labels', None)
         if labels is None:
             return list()
-        resource_namespace=labels.get('trivy-operator.resource.namespace', '')
-        resource_kind=labels.get('trivy-operator.resource.kind', '')
-        resource_name=labels.get('trivy-operator.resource.name', '')
-        container_name=labels.get('trivy-operator.container.name', '')
+        resource_namespace = labels.get('trivy-operator.resource.namespace', '')
+        resource_kind = labels.get('trivy-operator.resource.kind', '')
+        resource_name = labels.get('trivy-operator.resource.name', '')
+        container_name = labels.get('trivy-operator.container.name', '')
         service = '/'.join([resource_namespace, resource_kind, resource_name])
         if container_name != '':
             service = '/'.join([service, container_name])
@@ -104,9 +104,6 @@ class TrivyOperatorParser:
                     finding.unsaved_vulnerability_ids = [vuln_id]
                 findings.append(finding)
 
-
-
-
         checks = report.get('checks', None)
         if checks is not None:
             for check in checks:
@@ -130,8 +127,6 @@ class TrivyOperatorParser:
                 if check_id:
                     finding.unsaved_vulnerability_ids = [check_id]
                 findings.append(finding)
-
-
 
         secrets = report.get('secrets', None)
         if secrets is not None:
@@ -164,6 +159,4 @@ class TrivyOperatorParser:
                     finding.unsaved_vulnerability_ids = [secret_rule_id]
                 findings.append(finding)
 
-
         return findings
-
