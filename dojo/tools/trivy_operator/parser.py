@@ -71,7 +71,6 @@ class TrivyOperatorParser:
         if vulnerabilities is not None:
             for vulnerability in vulnerabilities:
                 vuln_id = vulnerability.get('vulnerabilityID', '0')
-                title = vulnerability.get('title')
                 severity = TRIVY_SEVERITIES[vulnerability.get('severity')]
                 references = vulnerability.get('primaryLink')
                 mitigation = vulnerability.get('fixedVersion')
@@ -109,10 +108,10 @@ class TrivyOperatorParser:
             for check in checks:
                 check_title = check.get('title')
                 check_severity = TRIVY_SEVERITIES[check.get('severity')]
-                check_id = check.get('checkID','0')
+                check_id = check.get('checkID', '0')
                 check_references = ''
                 if check_id != 0:
-                    check_references = "https://avd.aquasec.com/misconfig/kubernetes/" + check.get('checkID','0').lower()
+                    check_references = "https://avd.aquasec.com/misconfig/kubernetes/" + check_id.lower()
                 check_description = check.get('description', '')
                 title = f'{check_id} - {check_title}'
                 finding = Finding(
@@ -135,8 +134,8 @@ class TrivyOperatorParser:
                 secret_category = secret.get('category')
                 secret_match = secret.get('match', '')
                 secret_severity = TRIVY_SEVERITIES[secret.get('severity')]
-                secret_rule_id = secret.get('ruleID','0')
-                secret_target = secret.get('target','')
+                secret_rule_id = secret.get('ruleID', '0')
+                secret_target = secret.get('target', '')
                 secret_references = secret.get('ruleID', '')
                 title = f'Secret detected in {secret_target} - {secret_title}'
                 secret_description = SECRET_DESCRIPTION_TEMPLATE.format(
