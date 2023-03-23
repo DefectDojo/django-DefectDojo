@@ -37,7 +37,10 @@ class WazuhParser(object):
                 package_name = item.get('name')
                 package_version = item.get('version')
                 description = item.get('condition')
-                severity = transpose_severity(item.get('severity'))
+                if item.get('severity') == "Untriaged":
+                    severity = "Info"
+                else:
+                    severity = item.get('severity')
                 if item.get('status') == "VALID":
                     active = True
                 else:
@@ -80,10 +83,3 @@ class WazuhParser(object):
                         find.unsaved_vulnerability_ids = [vulnerability_id]
                     dupes[dupe_key] = find
         return list(dupes.values())
-
-
-def transpose_severity(severity):
-    if severity in Finding.SEVERITIES:
-        return severity
-    else:
-        return 'Info'
