@@ -55,8 +55,8 @@ class TestUnitTest(BaseTestCase):
         driver.find_element(By.ID, 'products_wrapper')
         # Select and click on the particular product to create test for
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        # "Click" the dropdown option
-        driver.find_element(By.ID, "dropdownMenu1").click()
+        # # "Click" the dropdown option
+        # driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on the 'Engagement' Dropdown button
         driver.find_element(By.PARTIAL_LINK_TEXT, "Engagement").click()
         # 'click' the Add New Engagement option

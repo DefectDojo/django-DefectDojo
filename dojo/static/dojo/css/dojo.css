@@ -51,10 +51,6 @@ a {
   color: #546474;
 }
 
-.progress-bar {
-  background-color: #546474;
-}
-
 .panel-default .btn-primary {
     background-color: transparent!important;
     border-style: none!important;
@@ -1460,26 +1456,15 @@ span.pull-right.clickable i.glyphicon-chevron-up, span.pull-right.clickable i.gl
     background-color: rgb(255, 255, 123);
 }
 
-.level1 {
-    background-color: #FEFFA2;
-}
-.level2 {
-    background-color: #B7D784;
-}
-.level3 {
-    background-color: #BDE8EF;
-}
+
 .benchmark_pass {
-  background-color: #DAF89F;
+  background-color: #dff0d8;
 }
 .benchmark_fail {
-  background-color: #FFEEEE;
+  background-color: #f2dede;
 }
 .benchmark_disabled {
   background-color: #eaedf2
-}
-.highlight_asvs_level_1 {
-  background-color: #89C4F4
 }
 
 form#quick-add-form {
