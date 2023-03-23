@@ -125,6 +125,142 @@ class MobSFParser(object):
                 }
                 mobsf_findings.append(mobsf_item)
 
+        # Certificate Analysis
+        if "certificate_analysis" in data and any(data["certificate_analysis"]):
+            certificate_analysis = data["certificate_analysis"]
+
+            if type(certificate_analysis) is list:
+                for details in certificate_analysis:
+                    for certificate_analysis_type in details:
+                        if "certificate_findings" == certificate_analysis_type and certificate_analysis_type[0] != "info":
+                            mobsf_item = {
+                                "category": "Binary Analysis",
+                                "title": details[certificate_analysis_type][2],
+                                "severity": details[certificate_analysis_type][0].replace("warning", "low"),
+                                "description": details[certificate_analysis_type][1],
+                            }
+                            mobsf_findings.append(mobsf_item)
+            else:
+                for key in certificate_analysis["certificate_findings"]:
+                    if key[0] != "info":
+                        mobsf_item = {
+                            "category": "Binary certificate_analysis",
+                            "title": key[2],
+                            "severity": key[0].replace("warning", "low"),
+                            "description": key[1],
+                        }
+                        mobsf_findings.append(mobsf_item)
+
+        # Manifest Analysis (currently for Android)
+        if "manifest_analysis" in data and any(data["manifest_analysis"]):
+            manifest_analysis = data["manifest_analysis"]
+
+            if type(manifest_analysis) is list:
+                for details in manifest_analysis:
+                    mobsf_item = {
+                        "category": "Manifest Analysis",
+                        "title": details["rule"],
+                        "severity": details["severity"].replace("warning", "low"),
+                        "description": details["name"] + "\n\n" + details["description"],
+                        "file_path": None
+                    }
+                    mobsf_findings.append(mobsf_item)
+
+        # Network Security Analysis (currently found only in Android)
+        if "network_security" in data and any(data["network_security"]):
+            network_security = data["network_security"]
+            if type(network_security) is list:
+                for details in network_security:
+                    mobsf_item = {
+                        "category": "Network Security Analysis",
+                        "title": details["description"].split(".")[0],
+                        "severity": details["severity"].replace("warning", "low"),
+                        "description": details["description"] + "\n\n" + "**Scope:**" + ", ".join(details["scope"]),
+                        "file_path": None
+                    }
+                    mobsf_findings.append(mobsf_item)
+
+        # ats analysis
+        if "ats_analysis" in data and any(data["ats_analysis"]):
+            ats_analysis = data["ats_analysis"]
+
+        # File Analysis
+        if "file_analysis" in data and any(data["file_analysis"]):
+            file_analysis = data["file_analysis"]
+            if type(file_analysis) is list:
+                for detail in file_analysis:
+                    if detail["issue"] != "Plist Files":
+                        for element in detail['files']:
+                            mobsf_item = {
+                                "category": "File Analysis",
+                                "title": detail['issue'],
+                                "severity": detail["severity"] if "severity" in detail else "medium",
+                                "description": detail["issue"],
+                                "file_path": element["file_path"]
+                            }
+                            mobsf_findings.append(mobsf_item)
+
+        # Mach-o analysis
+        if "macho_analysis" in data and any(data["macho_analysis"]):
+            macho_analysis = data["macho_analysis"]
+            if type(macho_analysis) is list:
+                for detail in macho_analysis:
+                    for macho_analysis_type in detail:
+                        if "name" != macho_analysis_type:
+                            mobsf_item = {
+                                "category": "Binary Analysis",
+                                "title": detail[macho_analysis_type]["description"].split(".")[0],
+                                "severity": detail[macho_analysis_type]["severity"].replace("warning", "low").title(),
+                                "description": detail[macho_analysis_type]["description"],
+                                "file_path": detail["name"]
+                            }
+                            mobsf_findings.append(mobsf_item)
+            else:
+                for detail in macho_analysis:
+                    if detail != "name":
+                        mobsf_item = {
+                            "category": "Mach-o Analysis",
+                            "title": macho_analysis[detail]["description"].split(".")[0],
+                            "severity": macho_analysis[detail]["severity"].replace("warning", "low").title(),
+                            "description": macho_analysis[detail]["description"],
+                            "file_path": macho_analysis["name"]
+                        }
+                        mobsf_findings.append(mobsf_item)
+
+        # Code Analysis
+        if "code_analysis" in data and any(data["code_analysis"]):
+            code_analysis = data["code_analysis"]
+            accepted_severity = ["high", "medium", "warning"]
+            for detail in code_analysis:
+                for element in code_analysis[detail]["files"]:
+                    if code_analysis[detail]["metadata"]["severity"] in accepted_severity:
+                        mobsf_item = {
+                            "category": "Code Analysis",
+                            "title": code_analysis[detail]["metadata"]["owasp-mobile"] if any(
+                                code_analysis[detail]["metadata"]["owasp-mobile"]) else
+                            code_analysis[detail]["metadata"]["description"],
+                            "severity": code_analysis[detail]["metadata"]["severity"].replace("warning", "low"),
+                            "description": code_analysis[detail]["metadata"]["description"],
+                            "file_path": element,
+                            "line": code_analysis[detail]["files"][element].split(",")[0]
+                        }
+                        mobsf_findings.append(mobsf_item)
+
+        # APKiD analysis (PEiD for Android)
+        if "apkid" in data and any(data["apkid"]):
+            apkid = data["apkid"]
+            for details in apkid:
+                for element in apkid[details]:
+                    mobsf_item = {
+                        "category": "APKiD Analysis",
+                        "title": "APKiD finding - " + element + " in " + details,
+                        "severity": "info",
+                        "description": "**Description:**\n\n" + element + "\n\n**Details:**\n\n" + "; ".join(
+                            apkid[details][element]),
+                        "file_path": details
+                    }
+                    mobsf_findings.append(mobsf_item)
+
         # Binary Analysis
         if "binary_analysis" in data:
             if type(data["binary_analysis"]) is list:
@@ -232,7 +368,9 @@ class MobSFParser(object):
             file_path = None
             if mobsf_finding["category"]:
                 description += "**Category:** " + mobsf_finding["category"] + "\n\n"
-            description = description + html2text(mobsf_finding["description"])
+            #description = description + html2text(mobsf_finding["description"])
+            description = description + mobsf_finding["description"]
+            #add line parameter!
             finding = Finding(
                 title=title,
                 cwe=919,  # Weaknesses in Mobile Applications
@@ -252,6 +390,8 @@ class MobSFParser(object):
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if description is not None:
+                    # this repeats description in one finding but doesn't specify file paths
+                    # it is needed to specify differences before uniting description!
                     find.description += description
                 find.nb_occurences += 1
             else:
