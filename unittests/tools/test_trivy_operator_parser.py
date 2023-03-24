@@ -121,4 +121,3 @@ class TestTrivyOperatorParser(DojoTestCase):
         self.assertEqual("github-pat", finding.references)
         self.assertEqual("root/github_secret.txt", finding.file_path)
         self.assertEqual("Secret detected in root/github_secret.txt - GitHub Personal Access Token", finding.title)
-
