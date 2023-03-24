@@ -20,7 +20,7 @@ def has_global_permission(permission):
 
 @register.filter
 def has_configuration_permission(permission, request):
-    if request == None:
+    if request is None:
         user = crum.get_current_user()
     else:
         user = crum.get_current_user() or request.user
