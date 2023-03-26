@@ -148,7 +148,7 @@
         </div>
     {% endblock %}
     {% block surveys %}
-        {% if system_settings.enable_questionnaires and "dojo.view_engagement_survey"|has_configuration_permission  %}
+        {% if system_settings.enable_questionnaires and "dojo.view_engagement_survey"|has_configuration_permission:request  %}
             <div class="row">
                 <div class="col-lg-12">
                     <div class="panel panel-default">

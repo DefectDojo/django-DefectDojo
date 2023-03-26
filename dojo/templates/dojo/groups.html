@@ -11,7 +11,7 @@
                         {{ name }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                            {% if "auth.add_group"|has_configuration_permission %}
+                            {% if "auth.add_group"|has_configuration_permission:request %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>
