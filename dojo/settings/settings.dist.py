@@ -335,7 +335,7 @@ def get_secret(secret_name):
             SecretId=secret_name
         )
     except ClientError as e:
-        print("An error occurred on requested secret " + secret_name,e)
+        print("An error occurred on requested secret " + secret_name, e)
         raise e
 
     # Decrypts secret using the associated KMS key.
