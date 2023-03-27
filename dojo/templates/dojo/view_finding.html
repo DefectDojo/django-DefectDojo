@@ -89,7 +89,7 @@
                                 </li>
                             {% endif %}
                             <li role="separator" class="divider"></li>
-                            {% if "dojo.add_finding_template"|has_configuration_permission %}
+                            {% if "dojo.add_finding_template"|has_configuration_permission:request %}
                                 <li role="presentation">
                                     <a href="{% url 'mktemplate' finding.id %}">
                                         <i class="fa-solid fa-copy"></i> Make Finding a Template
@@ -107,14 +107,14 @@
                                         <input type="hidden" label="apply_template" aria-label="apply_template" name="id" value="{{ finding.id }}"/>
                                     </form>
                             {% endif %}
-                            {% if not cwe_template.cwe and "dojo.add_finding_template"|has_configuration_permission %}
+                            {% if not cwe_template.cwe and "dojo.add_finding_template"|has_configuration_permission:request %}
                                     <li role="presentation">
                                         <a href="{% url 'add_template' %}">
                                             <i class="fa-solid fa-copy"></i> Create a CWE Remediation Template
                                         </a>
                                     </li>
                             {% endif %}
-                            {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission %}
+                            {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission:request %}
                                 <li role="presentation">
                                     <a href="{% url 'find_template_to_apply' finding.id %}">
                                         <i class="fa-solid fa-copy"></i> Apply Template to Finding
