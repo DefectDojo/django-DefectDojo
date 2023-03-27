@@ -52,10 +52,8 @@ from dojo.system_settings.urls import urlpatterns as system_settings_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
-from dojo.rules.urls import urlpatterns as rule_urls
 from dojo.notes.urls import urlpatterns as notes_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
-from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.components.urls import urlpatterns as component_urls
@@ -159,10 +157,8 @@ ur += system_settings_urls
 ur += notifications_urls
 ur += object_urls
 ur += benchmark_urls
-ur += rule_urls
 ur += notes_urls
 ur += note_type_urls
-ur += google_sheets_urls
 ur += banner_urls
 ur += component_urls
 ur += regulations
