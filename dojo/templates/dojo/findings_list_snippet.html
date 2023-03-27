@@ -519,7 +519,9 @@
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
             var columns = [
+                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                 { "data": "checkbox" },
+                {% endif %}
                 { "data": "action" },
                 { "data": "severity" },
                 { "data": "finding" , render: function (data, type, row) {
