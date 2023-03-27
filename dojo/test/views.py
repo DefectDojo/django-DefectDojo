@@ -143,8 +143,6 @@ def view_test(request, tid):
                    'creds': creds,
                    'cred_test': cred_test,
                    'jira_project': jira_project,
-                   'show_export': google_sheets_enabled and system_settings.credentials,
-                   'sheet_url': sheet_url,
                    'bulk_edit_form': bulk_edit_form,
                    'paged_test_imports': paged_test_imports,
                    'test_import_filter': test_import_filter,

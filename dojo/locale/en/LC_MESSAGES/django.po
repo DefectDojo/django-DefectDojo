@@ -2715,10 +2715,6 @@ msgstr ""
 msgid "GitHub"
 msgstr ""
 
-#: dojo/templates/base.html
-msgid "Google Sheets Sync"
-msgstr ""
-
 #: dojo/templates/base.html dojo/templates/dojo/simple_search.html
 #: dojo/templates/dojo/view_product_details.html
 msgid "JIRA"
@@ -4661,13 +4657,6 @@ msgstr ""
 
 #: dojo/test/views.py
 msgid "Note added successfully."
-msgstr ""
-
-#: dojo/test/views.py
-msgid ""
-"There is a problem with the Google Sheets Sync Configuration. Contact your "
-"system admin to solve the issue. Until fixed, the Google Sheets Sync feature "
-"cannot be used."
 msgstr ""
 
 #: dojo/test/views.py
