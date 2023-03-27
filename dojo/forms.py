@@ -2493,7 +2493,7 @@ class SystemSettingsForm(forms.ModelForm):
 
     class Meta:
         model = System_Settings
-        exclude = ['product_grade', 'credentials', 'column_widths', 'drive_folder_ID']
+        exclude = ['product_grade']
 
 
 class BenchmarkForm(forms.ModelForm):
