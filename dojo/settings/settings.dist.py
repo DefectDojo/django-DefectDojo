@@ -302,23 +302,6 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
     result_list.append(params)
     return ''.join(result_list)
 
-
-def assumed_role_session():
-    web_identity_token = None
-    with open(env("AWS_WEB_IDENTITY_TOKEN_FILE"), 'r') as content_file:
-        web_identity_token = content_file.read()
-        role = boto3.client('sts').assume_role_with_web_identity(RoleArn=env(
-            'AWS_ROLE_ARN'), RoleSessionName='assume-role', WebIdentityToken=web_identity_token)
-        credentials = role['Credentials']
-        aws_access_key_id = credentials['AccessKeyId']
-        aws_secret_access_key = credentials['SecretAccessKey']
-        aws_session_token = credentials['SessionToken']
-    return boto3.session.Session(
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        aws_session_token=aws_session_token)
-
-
 def get_secret(secret_name):
 
     region_name = env('AWS_REGION')
