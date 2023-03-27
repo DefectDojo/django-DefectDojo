@@ -405,7 +405,7 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
         TestCase.__init__(self, *args, **kwargs)
 
     def common_check_finding(self, finding):
-        #self.assertIn(finding.severity, SEVERITIES)
+        self.assertIn(finding.severity, SEVERITIES)
         finding.clean()
 
 
