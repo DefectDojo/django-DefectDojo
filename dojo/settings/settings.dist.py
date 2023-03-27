@@ -324,7 +324,7 @@ def get_secret(secret_name):
     region_name = env('AWS_REGION')
 
     # Create a Secrets Manager client
-    session = assumed_role_session()
+    session = boto3.session.Session()
     client = session.client(
         service_name='secretsmanager',
         region_name=region_name
@@ -335,6 +335,7 @@ def get_secret(secret_name):
             SecretId=secret_name
         )
     except ClientError as e:
+        print("An error occurred on requested secret " + secret_name,e)
         raise e
 
     # Decrypts secret using the associated KMS key.
