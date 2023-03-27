@@ -223,6 +223,10 @@ class DependencyTrackParser(object):
             static_finding=True,
             dynamic_finding=False)
 
+        if is_false_positive:
+            finding.is_mitigated = True
+            finding.active = False
+
         if vulnerability_id:
             finding.unsaved_vulnerability_ids = vulnerability_id
 
