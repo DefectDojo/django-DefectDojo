@@ -37,7 +37,6 @@ from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
 from dojo.settings.settings import SLA_BUSINESS_DAYS
-from numpy import busday_count
 
 
 logger = logging.getLogger(__name__)
@@ -398,20 +397,26 @@ class System_Settings(models.Model):
     enable_notify_sla_active = models.BooleanField(
         default=False,
         blank=False,
-        verbose_name=_("Enable Notifiy SLA's Breach for active Findings"),
+        verbose_name=_("Enable Notify SLA's Breach for active Findings"),
         help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for active Findings."))
 
     enable_notify_sla_active_verified = models.BooleanField(
         default=False,
         blank=False,
-        verbose_name=_("Enable Notifiy SLA's Breach for active, verified Findings"),
+        verbose_name=_("Enable Notify SLA's Breach for active, verified Findings"),
         help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for active, verified Findings."))
 
     enable_notify_sla_jira_only = models.BooleanField(
         default=False,
         blank=False,
-        verbose_name=_("Enable Notifiy SLA's Breach for Findings linked to JIRA"),
+        verbose_name=_("Enable Notify SLA's Breach for Findings linked to JIRA"),
         help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for Findings that are linked to JIRA issues."))
+
+    enable_notify_sla_exponential_backoff = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable an exponential backoff strategy for SLA breach notifications."),
+        help_text=_("Enable an exponential backoff strategy for SLA breach notifications, e.g. 1, 2, 4, 8, etc. Otherwise it alerts every day"))
 
     allow_anonymous_survey_repsonse = models.BooleanField(
         default=False,
@@ -2613,11 +2618,12 @@ class Finding(models.Model):
         return ", ".join([str(s) for s in status])
 
     def _age(self, start_date):
+        from dojo.utils import get_work_days
         if SLA_BUSINESS_DAYS:
             if self.mitigated:
-                days = busday_count(self.date, self.mitigated.date())
+                days = get_work_days(self.date, self.mitigated.date())
             else:
-                days = busday_count(self.date, get_current_date())
+                days = get_work_days(self.date, get_current_date())
         else:
             if self.mitigated:
                 diff = self.mitigated.date() - start_date
