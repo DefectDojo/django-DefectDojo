@@ -514,7 +514,7 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if system_settings.enable_jira and "dojo.view_jira_instance"|has_configuration_permission %}
+                                                {% if system_settings.enable_jira and "dojo.view_jira_instance"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'jira' %}">
                                                             {% trans "JIRA" %}
