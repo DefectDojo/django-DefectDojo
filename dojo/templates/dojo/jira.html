@@ -10,7 +10,7 @@
                     <h3 class="has-filters">
                         JIRA Instances
                         <div class="dropdown pull-right">
-                            {% if "dojo.add_jira_instance"|has_configuration_permission %}
+                            {% if "dojo.add_jira_instance"|has_configuration_permission:request %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>
@@ -55,7 +55,7 @@
                         {% for jira_instance in jira_instances %}
                             <tr>
                                 <td>
-                                    {% if "dojo.change_jira_instance"|has_configuration_permission %}
+                                    {% if "dojo.change_jira_instance"|has_configuration_permission:request %}
                                     <a href="{% url 'edit_jira' jira_instance.id %}"><b>{{ jira_instance.configuration_name }}</b></a>
                                     {% else %}
                                     {{ jira_instance.configuration_name }}
@@ -70,13 +70,13 @@
                                         {{ jira_instance.username }}
                                 </td>
                                 <td>
-                                    {% if "dojo.change_jira_instance"|has_configuration_permission %}
+                                    {% if "dojo.change_jira_instance"|has_configuration_permission:request %}
                                     <a href="{% url 'edit_jira' jira_instance.id %}" class="btn btn-sm btn-warning">
                                         <i class="fa-solid fa-file"></i>
                                         Edit
                                     </a>
                                     {% endif %}
-                                    {% if "dojo.delete_jira_instance"|has_configuration_permission %}
+                                    {% if "dojo.delete_jira_instance"|has_configuration_permission:request %}
                                     <a href="{% url 'delete_jira' jira_instance.id %}" class="btn btn-sm btn-danger">
                                         <i class="fa-solid fa-trash" style="color:white"></i>
                                         Delete
