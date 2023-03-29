@@ -535,6 +535,12 @@ def get_tags(obj):
         if obj_tags:
             for tag in obj_tags:
                 tags.append(str(tag.name))
+    if type(obj) == Finding_Group:
+         for finding in obj.findings.all():
+            obj_tags = finding.tags.all()
+            if obj_tags:
+                for tag in obj_tags:
+                    tags.append(str(tag.name))
     return tags
 
 
