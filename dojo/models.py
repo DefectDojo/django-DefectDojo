@@ -428,9 +428,6 @@ class System_Settings(models.Model):
     disclaimer = models.TextField(max_length=3000, default='', blank=True,
                                   verbose_name=_('Custom Disclaimer'),
                                   help_text=_("Include this custom disclaimer on all notifications and generated reports"))
-    column_widths = models.TextField(max_length=1500, blank=True)
-    drive_folder_ID = models.CharField(max_length=100, blank=True)
-    email_address = models.EmailField(max_length=100, blank=True)
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text=_("Default expiry period for risk acceptance form."))
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
                     verbose_name=_('Risk acceptance expiration heads up days'), help_text=_("Notify X days before risk acceptance expires. Leave empty to disable."))
@@ -454,16 +451,6 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_('Enable Endpoint Metadata Import'),
         help_text=_("With this setting turned off, endpoint metadata import will be disabled in the user interface."))
-    enable_google_sheets = models.BooleanField(
-        default=False,
-        blank=False,
-        verbose_name=_('Enable Google Sheets Integration'),
-        help_text=_("With this setting turned off, the Google sheets integration will be disabled in the user interface."))
-    enable_rules_framework = models.BooleanField(
-        default=False,
-        blank=False,
-        verbose_name=_('Enable Rules Framework'),
-        help_text=_("With this setting turned off, the rules framwork will be disabled in the user interface."))
     enable_user_profile_editable = models.BooleanField(
         default=True,
         blank=False,
@@ -2751,10 +2738,6 @@ class Finding(models.Model):
             except Exception as ex:
                 logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
 
-        if rules_option:
-            from dojo.utils import do_apply_rules
-            do_apply_rules(self, *args, **kwargs)
-
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
         # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
         if dedupe_option:
@@ -3939,77 +3922,6 @@ class Benchmark_Product_Summary(models.Model):
 
     class Meta:
         unique_together = [('product', 'benchmark_type')]
-
-
-# product_opts = [f.name for f in Product._meta.fields]
-# test_opts = [f.name for f in Test._meta.fields]
-# test_type_opts = [f.name for f in Test_Type._meta.fields]
-finding_opts = [f.name for f in Finding._meta.fields if f.name not in ['last_status_update']]
-# endpoint_opts = [f.name for f in Endpoint._meta.fields]
-# engagement_opts = [f.name for f in Engagement._meta.fields]
-# product_type_opts = [f.name for f in Product_Type._meta.fields]
-# single_options = product_opts + test_opts + test_type_opts + finding_opts + \
-#                  endpoint_opts + engagement_opts + product_type_opts
-all_options = []
-for x in finding_opts:
-    all_options.append((x, x))
-operator_options = (('Matches', 'Matches'),
-                    ('Contains', 'Contains'))
-application_options = (('Append', 'Append'),
-                      ('Replace', 'Replace'))
-blank_options = (('', ''),)
-
-
-class Rule(models.Model):
-    # add UI notification to let people know what rules were applied
-
-    name = models.CharField(max_length=200)
-    enabled = models.BooleanField(default=True)
-    text = models.TextField()
-    operator = models.CharField(max_length=30, choices=operator_options)
-    """
-    model_object_options = (('Product', 'Product'),
-                            ('Engagement', 'Engagement'), ('Test', 'Test'),
-                            ('Finding', 'Finding'), ('Endpoint', 'Endpoint'),
-                            ('Product Type', 'Product_Type'), ('Test Type', 'Test_Type'))
-    """
-    model_object_options = (('Finding', 'Finding'),)
-    model_object = models.CharField(max_length=30, choices=model_object_options)
-    match_field = models.CharField(max_length=200, choices=all_options)
-    match_text = models.TextField()
-    application = models.CharField(max_length=200, choices=application_options)
-    applies_to = models.CharField(max_length=30, choices=model_object_options)
-    # TODO: Add or ?
-    # and_rules = models.ManyToManyField('self')
-    applied_field = models.CharField(max_length=200, choices=(all_options))
-    child_rules = models.ManyToManyField('self', editable=False)
-    parent_rule = models.ForeignKey('self', editable=False, null=True, on_delete=models.CASCADE)
-
-
-class Child_Rule(models.Model):
-    # add UI notification to let people know what rules were applied
-    operator = models.CharField(max_length=30, choices=operator_options)
-    """
-    model_object_options = (('Product', 'Product'),
-                            ('Engagement', 'Engagement'), ('Test', 'Test'),
-                            ('Finding', 'Finding'), ('Endpoint', 'Endpoint'),
-                            ('Product Type', 'Product_Type'), ('Test Type', 'Test_Type'))
-    """
-    model_object_options = (('Finding', 'Finding'),)
-    model_object = models.CharField(max_length=30, choices=model_object_options)
-    match_field = models.CharField(max_length=200, choices=all_options)
-    match_text = models.TextField()
-    # TODO: Add or ?
-    # and_rules = models.ManyToManyField('self')
-    parent_rule = models.ForeignKey(Rule, editable=False, null=True, on_delete=models.CASCADE)
-
-
-class FieldRule(models.Model):
-    field = models.CharField(max_length=200)
-    update_options = (('Append', 'Append'),
-                        ('Replace', 'Replace'))
-    update_type = models.CharField(max_length=30, choices=update_options)
-    text = models.CharField(max_length=200)
 
 
 # ==========================
