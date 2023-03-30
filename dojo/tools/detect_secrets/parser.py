@@ -51,6 +51,7 @@ class DetectSecretsParser(object):
                         date=find_date,
                         severity="High",
                         verified=is_verified,
+                        active='is_secret' in item and item['is_secret'] is True,
                         file_path=file,
                         line=line,
                         nb_occurences=1,
