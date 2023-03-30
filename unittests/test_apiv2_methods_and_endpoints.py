@@ -1,7 +1,8 @@
 from dojo.urls import v2_api
 from .dojo_test_case import DojoTestCase
 from .test_rest_framework import get_open_api3_json_schema, BASE_API_URL
-
+import django.apps
+from dojo.api_v2 import serializers
 
 class ApiEndpointMethods(DojoTestCase):
     fixtures = ['dojo_testdata.json']
@@ -44,3 +45,26 @@ class ApiEndpointMethods(DojoTestCase):
                 .get('get'),
                 f"Endpoint: {reg}, Method: get - delete_preview",
             )
+
+
+class ApiEndpoints(DojoTestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def setUp(self):
+        super().setUp()
+
+        self.used_models = []
+        for serializer in serializers.__dict__.values():
+            if hasattr(serializer, 'Meta'):
+                if hasattr(serializer.Meta, 'model'):
+                    self.used_models.append(serializer.Meta.model)
+
+    def test_is_defined(self):
+        for subclass in django.apps.apps.get_models():
+            if subclass.__module__ == 'dojo.models':
+                if (subclass.__name__[:9] == "Tagulous_") and (subclass.__name__[-5:] == "_tags"):
+                    continue
+                if subclass.__name__ in ['Alerts']:
+                    continue
+                with self.subTest(subclass=subclass):
+                    self.assertIn(subclass, self.used_models)
