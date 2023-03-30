@@ -698,9 +698,12 @@ def add_jira_issue(obj, *args, **kwargs):
 
     obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
-        log_jira_alert(error_message, obj)
-        logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
-        logger.warning("The JIRA issue will NOT be created.")
+        if type(obj) == Finding and obj.duplicate and not obj.active:
+            logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
+        else:
+            log_jira_alert(error_message, obj)
+            logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
+            logger.warning("The JIRA issue will NOT be created.")
         return False
     logger.debug('Trying to create a new JIRA issue for %s...', to_str_typed(obj))
     try:
