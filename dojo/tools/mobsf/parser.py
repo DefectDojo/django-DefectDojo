@@ -186,17 +186,31 @@ class MobSFParser(object):
 
         # File Analysis
         if "file_analysis" in data and any(data["file_analysis"]):
-            file_analysis = data["file_analysis"]
-            if type(file_analysis) is list:
-                for detail in file_analysis:
-                    if detail["issue"] != "Plist Files":
-                        for element in detail['files']:
+            if data['app_type'] != 'apk':
+                file_analysis = data["file_analysis"]
+                if type(file_analysis) is list:
+                    for detail in file_analysis:
+                        if detail["issue"] != "Plist Files":
+                            for element in detail['files']:
+                                mobsf_item = {
+                                    "category": "File Analysis",
+                                    "title": detail['issue'],
+                                    "severity": detail["severity"] if "severity" in detail else "medium",
+                                    "description": detail["issue"],
+                                    "file_path": element["file_path"]
+                                }
+                                mobsf_findings.append(mobsf_item)
+            else:
+                file_analysis = data["file_analysis"]
+                if type(file_analysis) is list:
+                    for detail in file_analysis:
+                        for element in detail["files"]:
                             mobsf_item = {
                                 "category": "File Analysis",
-                                "title": detail['issue'],
+                                "title": detail["finding"],
                                 "severity": detail["severity"] if "severity" in detail else "medium",
-                                "description": detail["issue"],
-                                "file_path": element["file_path"]
+                                "description": detail["finding"],
+                                "file_path": element
                             }
                             mobsf_findings.append(mobsf_item)
 
