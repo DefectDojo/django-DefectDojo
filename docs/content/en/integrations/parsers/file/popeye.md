@@ -62,5 +62,5 @@ To match it to DefectDojo severity formula, Secerity 0 (Ok) findings from Popeye
 
 - Severity 1 (Info) Popeye findings will be created as Severity "Info" findings in DefectDojo.
 - Severity 2 (Warning) Popeye findings will be created as Severity "Low" findings in DefectDojo.
-- Severity 0 (Errors) Popeye findings will be created as Severity "High" findingsi in DefectDojo.
+- Severity 3 (Errors) Popeye findings will be created as Severity "High" findingsi in DefectDojo.
 
