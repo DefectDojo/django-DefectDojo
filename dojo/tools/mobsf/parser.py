@@ -138,6 +138,7 @@ class MobSFParser(object):
                                 "title": details[certificate_analysis_type][2],
                                 "severity": details[certificate_analysis_type][0].replace("warning", "low"),
                                 "description": details[certificate_analysis_type][1],
+                                "file_path": None
                             }
                             mobsf_findings.append(mobsf_item)
             else:
@@ -148,6 +149,7 @@ class MobSFParser(object):
                             "title": key[2],
                             "severity": key[0].replace("warning", "low"),
                             "description": key[1],
+                            "file_path": None
                         }
                         mobsf_findings.append(mobsf_item)
 
