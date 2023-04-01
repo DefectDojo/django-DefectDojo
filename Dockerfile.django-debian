@@ -7,6 +7,7 @@
 # Ref: https://devguide.python.org/#branchstatus
 FROM python:3.11.1-slim-bullseye@sha256:3d260508893319ee271989fe16c0ddf13c710ec5ce1d0708cda7bc30da8389e7 as base
 FROM base as build
+ARG arch=amd64
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -37,6 +38,7 @@ WORKDIR /app
 ARG uid=1001
 ARG gid=1337
 ARG appuser=defectdojo
+ARG arch=amd64
 ENV appuser ${appuser}
 RUN \
   apt-get -y update && \

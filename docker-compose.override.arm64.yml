@@ -1,0 +1,41 @@
+---
+version: '3.8'
+services:
+  nginx:
+    platform: "linux/arm64/v8"
+    build:
+      context: ./
+      dockerfile: "Dockerfile.nginx-${DEFECT_DOJO_OS:-debian}"
+      args:
+        arch: "arm64/v8"
+    image: "defectdojo-nginx-arm64:${NGINX_VERSION:-latest}"
+  uwsgi:
+    platform: "linux/arm64/v8"
+    build:
+      context: ./
+      dockerfile: "Dockerfile.django-${DEFECT_DOJO_OS:-debian}"
+      target: "django"
+      args:
+        arch: "arm64/v8"
+    image: "defectdojo-django-arm64:${DJANGO_VERSION:-latest}"
+  celerybeat:
+    platform: "linux/arm64/v8"
+    image: "defectdojo-django-arm64:${DJANGO_VERSION:-latest}"
+  celeryworker:
+    platform: "linux/arm64/v8"
+    image: "defectdojo-django-arm64:${DJANGO_VERSION:-latest}"
+  initializer:
+    platform: "linux/arm64/v8"
+    image: "defectdojo-django-arm64:${DJANGO_VERSION:-latest}"
+  mysql:
+    platform: "linux/arm64/v8"
+    image: arm64v8/mysql:8.0.32@sha256:2cb5e59c2166e94a3fb7e4da239e09112097af483f9f2bc8f1f87e3394fdf533
+  postgres:
+    platform: "linux/arm64/v8"
+    image: arm64v8/postgres:15.2-alpine@sha256:12cbba911ab20aff0594c832f0639f71bb2b6a6d5ea72adc91f3eafe7c152afd
+  rabbitmq:
+    platform: "linux/arm64/v8"
+    image: arm64v8/rabbitmq:3.11.10-alpine@sha256:cd96c35c7dba0331bce6d4d753775b3be8c5bbe33082aa550a26a59c2fcb7663
+  redis:
+    platform: "linux/arm64/v8"
+    image: arm64v8/redis:7.0.10-alpine@sha256:ea3c1989f247d2ebc51315878f4f16d050fb5325dec43424aced02ef2135df72

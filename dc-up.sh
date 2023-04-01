@@ -1,29 +1,45 @@
 #!/bin/bash
 
+# for debugging
+# set -o xtrace
+
 unset PROFILE
 
 bash ./docker/docker-compose-check.sh
 if [[ $? -eq 1 ]]; then exit 1; fi
 
 if [ $# -eq 0 ]; then
-    if [ -z $DD_PROFILE ]
-    then
-        echo "No profile supplied, running default: mysql-rabbitmq"
-        PROFILE="mysql-rabbitmq"
-        echo "Other supported profiles:
-          mysql-rabbitmq*
-          mysql-redis
-          postgres-rabbitmq
-          postgres-redis
-
-        Usage example: ./dc-up.sh mysql-redis
-        "
-    else
-        PROFILE=$DD_PROFILE
-    fi
+    PROFILE="${DD_PROFILE:-postgres-redis}"
 else
-    PROFILE=$1
+    PROFILE="$1"
+    shift 1
 fi
 
-echo "Starting docker compose with profile $PROFILE in the foreground ..."
-docker-compose --profile $PROFILE --env-file ./docker/environments/$PROFILE.env up --no-deps
+# check whether this is a valid profile or not
+if [ ! -f "./docker/environments/$PROFILE.env" ]; then
+    echo "Invalid profile \"$PROFILE\". Valid profiles are:"
+    ls -1 ./docker/environments | sed "s/\.env//g"
+    exit 1
+fi
+
+if [ $# -eq 0 ]; then
+    echo "Starting docker-compose with profile $PROFILE"
+else
+    echo "Starting docker-compose with profile $PROFILE and additional parameters \"$@\" ..."
+fi
+
+if [ -z "$DD_ARCH" ]; then
+    arch="$(uname -m)"
+else
+    arch="$DD_ARCH"
+fi
+
+case $arch in
+    arm64)
+        echo "Targeting arm64..."
+        docker-compose --profile "$PROFILE" --env-file ./docker/environments/$PROFILE.env -f docker-compose.yml -f docker-compose.override.arm64.yml up --no-deps $@
+        ;;
+    *)
+        docker-compose --profile "$PROFILE" --env-file ./docker/environments/$PROFILE.env up --no-deps $@
+        ;;
+esac

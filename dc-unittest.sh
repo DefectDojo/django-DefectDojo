@@ -72,5 +72,5 @@ then
   exit 1
 fi
 
-echo "Running docker compose unit tests with profile $PROFILE and test case $TEST_CASE ..."
+echo "Running docker-compose unit tests with profile $PROFILE and test case $TEST_CASE ..."
 docker-compose --profile $PROFILE --env-file ./docker/environments/$PROFILE.env exec uwsgi bash -c "python manage.py test $TEST_CASE -v2 --keepdb"
