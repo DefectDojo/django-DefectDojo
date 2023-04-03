@@ -68,26 +68,6 @@
                                 <i class="fa-solid fa-file-lines"></i> Report
                             </a>
                         </li>
-                      {% if show_export %}
-                        {% if sheet_url is null %}
-                          <li role="presentation">
-                              <a href="{% url 'export_to_sheet' test.id %}">
-                                  <i class="fa-solid fa-file-excel"></i> Create Google Sheet
-                              </a>
-                          </li>
-                        {% else %}
-                          <li role="presentation">
-                              <a href="{{ sheet_url }}">
-                                  <i class="fa-solid fa-file-excel"></i> View Google Sheet
-                              </a>
-                          </li>
-                          <li role="presentation">
-                              <a href="{% url 'export_to_sheet' test.id %}">
-                                  <i class="fa-solid fa-arrows-rotate"></i> Sync Google Sheet
-                              </a>
-                          </li>
-                        {% endif %}
-                      {% endif %}
                         <li role="presentation">
                             <a href="{% url 'test_ics' test.id %}">
                                 <i class="fa-solid fa-calendar-plus"></i> Add To Calendar

@@ -1,5 +1,53 @@
 [
     {
+        "fields": {
+            "model": "question",
+            "app_label": "dojo"
+        },
+        "model": "contenttypes.contenttype",
+        "pk": 65
+    },
+    {
+        "fields": {
+            "model": "answer",
+            "app_label": "dojo"
+        },
+        "model": "contenttypes.contenttype",
+        "pk": 68
+    },
+    {
+        "fields": {
+            "model": "textquestion",
+            "app_label": "dojo"
+        },
+        "model": "contenttypes.contenttype",
+        "pk": 66
+    },
+    {
+        "fields": {
+            "model": "textanswer",
+            "app_label": "dojo"
+        },
+        "model": "contenttypes.contenttype",
+        "pk": 69
+    },
+    {
+        "fields": {
+            "model": "choicequestion",
+            "app_label": "dojo"
+        },
+        "model": "contenttypes.contenttype",
+        "pk": 71
+    },
+    {
+        "fields": {
+            "model": "choiceanswer",
+            "app_label": "dojo"
+        },
+        "model": "contenttypes.contenttype",
+        "pk": 70
+    },
+    {
         "pk": 1,
         "model": "auth.user",
         "fields": {
@@ -163,7 +211,7 @@
         "model": "dojo.question",
         "pk": 14,
         "fields": {
-            "polymorphic_ctype": 69,
+            "polymorphic_ctype": 66,
             "created": "2015-03-30T19:57:22Z",
             "modified": "2015-03-30T19:57:22Z",
             "order": 1,
@@ -175,7 +223,7 @@
         "model": "dojo.question",
         "pk": 15,
         "fields": {
-            "polymorphic_ctype": 69,
+            "polymorphic_ctype": 66,
             "created": "2015-03-30T19:57:34Z",
             "modified": "2015-03-30T19:57:34Z",
             "order": 1,
@@ -187,7 +235,7 @@
         "model": "dojo.question",
         "pk": 16,
         "fields": {
-            "polymorphic_ctype": 69,
+            "polymorphic_ctype": 66,
             "created": "2015-03-30T19:57:55Z",
             "modified": "2015-03-30T19:57:55Z",
             "order": 1,
@@ -199,7 +247,7 @@
         "model": "dojo.question",
         "pk": 17,
         "fields": {
-            "polymorphic_ctype": 69,
+            "polymorphic_ctype": 66,
             "created": "2015-03-30T19:58:36Z",
             "modified": "2015-03-30T19:58:36Z",
             "order": 1,
@@ -211,7 +259,7 @@
         "model": "dojo.question",
         "pk": 18,
         "fields": {
-            "polymorphic_ctype": 69,
+            "polymorphic_ctype": 66,
             "created": "2015-03-30T20:00:35Z",
             "modified": "2015-03-30T20:00:35Z",
             "order": 1,
@@ -223,7 +271,7 @@
         "model": "dojo.question",
         "pk": 19,
         "fields": {
-            "polymorphic_ctype": 69,
+            "polymorphic_ctype": 66,
             "created": "2015-03-30T20:00:46Z",
             "modified": "2015-03-30T20:00:46Z",
             "order": 1,
@@ -235,7 +283,7 @@
         "model": "dojo.question",
         "pk": 20,
         "fields": {
-            "polymorphic_ctype": 69,
+            "polymorphic_ctype": 66,
             "created": "2015-03-30T20:00:58Z",
             "modified": "2015-03-30T20:00:58Z",
             "order": 1,
@@ -247,7 +295,7 @@
         "model": "dojo.question",
         "pk": 44,
         "fields": {
-            "polymorphic_ctype": 74,
+            "polymorphic_ctype": 71,
             "created": "2023-03-02T17:58:59.698Z",
             "modified": "2023-03-02T17:58:59.737Z",
             "order": 1,
@@ -410,7 +458,7 @@
         "model": "dojo.answer",
         "pk": 1,
         "fields": {
-            "polymorphic_ctype": 73,
+            "polymorphic_ctype": 70,
             "created": "2023-03-02T19:07:55.430Z",
             "modified": "2023-03-02T19:07:55.447Z",
             "question": 44,
@@ -421,7 +469,7 @@
         "model": "dojo.answer",
         "pk": 2,
         "fields": {
-            "polymorphic_ctype": 72,
+            "polymorphic_ctype": 69,
             "created": "2023-03-02T19:14:07.816Z",
             "modified": "2023-03-02T19:14:07.822Z",
             "question": 14,
@@ -432,7 +480,7 @@
         "model": "dojo.answer",
         "pk": 3,
         "fields": {
-            "polymorphic_ctype": 72,
+            "polymorphic_ctype": 69,
             "created": "2023-03-02T19:14:07.829Z",
             "modified": "2023-03-02T19:14:07.833Z",
             "question": 15,
@@ -443,7 +491,7 @@
         "model": "dojo.answer",
         "pk": 4,
         "fields": {
-            "polymorphic_ctype": 72,
+            "polymorphic_ctype": 69,
             "created": "2023-03-02T19:14:07.838Z",
             "modified": "2023-03-02T19:14:07.841Z",
             "question": 16,
@@ -454,7 +502,7 @@
         "model": "dojo.answer",
         "pk": 5,
         "fields": {
-            "polymorphic_ctype": 72,
+            "polymorphic_ctype": 69,
             "created": "2023-03-02T19:14:07.845Z",
             "modified": "2023-03-02T19:14:07.848Z",
             "question": 17,
@@ -465,7 +513,7 @@
         "model": "dojo.answer",
         "pk": 6,
         "fields": {
-            "polymorphic_ctype": 72,
+            "polymorphic_ctype": 69,
             "created": "2023-03-02T19:14:07.853Z",
             "modified": "2023-03-02T19:14:07.856Z",
             "question": 19,
@@ -476,7 +524,7 @@
         "model": "dojo.answer",
         "pk": 7,
         "fields": {
-            "polymorphic_ctype": 72,
+            "polymorphic_ctype": 69,
             "created": "2023-03-02T19:14:07.861Z",
             "modified": "2023-03-02T19:14:07.864Z",
             "question": 20,
@@ -487,7 +535,7 @@
         "model": "dojo.answer",
         "pk": 8,
         "fields": {
-            "polymorphic_ctype": 72,
+            "polymorphic_ctype": 69,
             "created": "2023-03-02T19:14:07.868Z",
             "modified": "2023-03-02T19:14:07.871Z",
             "question": 18,
