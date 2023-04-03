@@ -4,8 +4,6 @@ We greatly appreciate all of our
 We would also like to highlight the contributions from Michael Dong and Fatimah
 Zohra who contributed to DefectDojo before it was open source.
 
-
-
 # Submitting an Issue
 
 ## For Bugs
@@ -20,13 +18,40 @@ Bugs that do not have this information will be closed.
 
 Here are a few things to keep in mind when making changes to DefectDojo.
 
-## Writing a new parser
+## Writing a New Parser
 
 Please see [the parser guide](https://documentation.defectdojo.com/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
 
-## Submisison Pre-Approval -- DefectDojo is Feature Complete
+## Submission Pre-Approval -- DefectDojo is Feature Complete
 
-We consider the open-source version of DefectDojo to be feature complete with the exception of new parsers and parser improvements, it is recomended that you get in touch with us to discuss changes prior to dedicating time and resources. We're open to your suggestions and feedback, but we do not plan to add or accept new features in the future for supportability concerns. We are working on defining clear guidelines on direction and acceptable PRs, but in the meantime, please get in touch with Matt Tesauro on Slack.  
+We are narrowing the scope of new additions to DefectDojo v2 in order to stabilize the API and data model for v3.
+Generally speaking, we will no longer accept new API routes, UI routes or views, or new models, but we will still accept
+new parsers and improvements to existing fields/functionality. Simple updates to the data model are acceptable so long
+as they do not introduce additional complexity, until the community has agreed on a "data model freeze date", at which
+point we will stop accepting updates adding new fields or changing existing fields for any reason other than bugfixes or
+stability improvements/etc. Once version 3 is released, no further data model updates to v2 will be approved. We don't
+want to waste your time, so if you're unsure whether your hypothetical enhancement meets the criteria for approval,
+please file an issue to get pre-approval before beginning work on a PR. If approved, we will add the
+`enhancement-approved` label to your issue and you can begin building it out. 
+
+**Acceptable examples:**
+
+* New parser for a currently unsupported tool
+* Bug fix for an existing parser or other core feature
+* Resolving a security vulnerability
+* Adding or improving tests
+
+**Examples where pre-approval is recommended:**
+
+* A new text field to enhance the data that can be collected about a Finding
+* Better filtering/sorting capabilities
+* Minor changes that make the existing UI more intuitive
+
+**Examples that will not be approved:**
+
+* API routes to support a new 3rd party integration
+* A new model to support a new Finding field or other functionality
+* A new page in the UI to collect additional metadata
 
 ## Modifying DefectDojo and Testing
 
@@ -34,9 +59,8 @@ Please use [these test scripts](../tests) to test your changes. These are the sc
 
 For changes that require additional settings, you can now use local_settings.py file. See the logging section below for more information.
 
-## Python3 version
+## Python3 Version
 For compatibility reasons, the code in dev branch should be python3.11 compliant.
-
 
 
 ## Submitting Pull Requests
