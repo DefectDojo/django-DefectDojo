@@ -6,8 +6,6 @@ labels: enhancement
 assignees: ''
 
 ---
-## Please note that we consider the open-source version of DefectDojo to be feature complete. We're open to your suggestions and feedback, but we do not plan to add or accept new features in the future for supportability concerns.
-
 ## :warning: Note on feature completeness :warning:
 
 We are narrowing the scope of acceptable enhancements to DefectDojo in preparation for v3. Learn more here:
