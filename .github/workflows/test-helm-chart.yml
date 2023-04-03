@@ -35,7 +35,7 @@ jobs:
              helm dependency update ./helm/defectdojo
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.3.1
+        uses: helm/chart-testing-action@v2.4.0
 
       - name: Determine target branch
         id: ct-branch-target
