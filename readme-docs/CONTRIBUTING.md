@@ -21,14 +21,17 @@ Here are a few things to keep in mind when making changes to DefectDojo.
 ## Submission Pre-Approval -- DefectDojo is Feature Complete
 
 We are narrowing the scope of new additions to DefectDojo v2 in order to stabilize the API and data model for v3.
-Generally speaking, we will no longer accept new API routes, UI routes or views, or new models, but we will still accept
-new parsers and improvements to existing fields/functionality. Simple updates to the data model are acceptable so long
-as they do not introduce additional complexity, until the community has agreed on a "data model freeze date", at which
-point we will stop accepting updates adding new fields or changing existing fields for any reason other than bugfixes or
-stability improvements/etc. Once version 3 is released, no further data model updates to v2 will be approved. We don't
-want to waste your time, so if you're unsure whether your hypothetical enhancement meets the criteria for approval,
-please file an issue to get pre-approval before beginning work on a PR. If approved, we will add the
-`enhancement-approved` label to your issue and you can begin building it out. 
+Generally speaking, we will no longer accept new API routes, UI routes or views, or new models. One exception is that we
+**will** still accept new parsers and improvements to existing fields/functionality. Simple updates to the data model
+are acceptable as long as they do not introduce additional complexity, until the community has agreed on a "data model
+freeze date", at which point we will stop accepting updates adding new fields or changing existing fields for any reason
+other than bugfixes or stability improvements/etc. Once v3 is released, no further data model updates to v2 will be
+approved. We don't want to waste your time, so if you're unsure whether your hypothetical enhancement meets the criteria
+for approval, please file an issue to get pre-approval before beginning work on a PR. If approved, we will add the
+`enhancement-approved` label to your issue and you can begin building it out.
+
+Below are some representative examples of what we will and won't support going forward. If you have suggestions or other
+feedback, please let us know in the `#defectdojo` channel in [OWASP's Slack](https://owasp-slack.herokuapp.com/).
 
 **Acceptable examples:**
 
