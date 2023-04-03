@@ -18,10 +18,6 @@ Bugs that do not have this information will be closed.
 
 Here are a few things to keep in mind when making changes to DefectDojo.
 
-## Writing a New Parser
-
-Please see [the parser guide](https://documentation.defectdojo.com/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
-
 ## Submission Pre-Approval -- DefectDojo is Feature Complete
 
 We are narrowing the scope of new additions to DefectDojo v2 in order to stabilize the API and data model for v3.
@@ -52,6 +48,10 @@ please file an issue to get pre-approval before beginning work on a PR. If appro
 * API routes to support a new 3rd party integration
 * A new model to support a new Finding field or other functionality
 * A new page in the UI to collect additional metadata
+
+## Writing a New Parser
+
+Please see [the parser guide](https://documentation.defectdojo.com/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
 
 ## Modifying DefectDojo and Testing
 
