@@ -22,8 +22,9 @@ class PopeyeParser(object):
 
         dupes = dict()
         for sanitizer in data['popeye']['sanitizers']:
-            try:
-                for issue_group, issue_list in sanitizer['issues'].items():
+            issues = sanitizer.get('issues')
+            if issues:
+                for issue_group, issue_list in issues.items():
                     for issue in issue_list:
                         if issue['level'] != 0:
                             title = sanitizer['sanitizer'] + " " + issue_group + " " + issue['message']
@@ -48,7 +49,7 @@ class PopeyeParser(object):
                                 dupes[dupe_key] = finding
                         else:
                             continue
-            except KeyError:
+            else:
                 continue
         return list(dupes.values())
 
