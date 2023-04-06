@@ -409,8 +409,8 @@ class System_Settings(models.Model):
     enable_notify_sla_jira_only = models.BooleanField(
         default=False,
         blank=False,
-        verbose_name=_("Enable Notify SLA's Breach for Findings linked to JIRA"),
-        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for Findings that are linked to JIRA issues."))
+        verbose_name=_("Enable Notify SLA's Breach only for Findings linked to JIRA"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for Findings that are linked to JIRA issues. Notification is disabled for Findings not linked to JIRA issues"))
 
     enable_notify_sla_exponential_backoff = models.BooleanField(
         default=False,
@@ -944,6 +944,12 @@ class Product(models.Model):
 
     enable_simple_risk_acceptance = models.BooleanField(default=False, help_text=_('Allows simple risk acceptance by checking/unchecking a checkbox.'))
     enable_full_risk_acceptance = models.BooleanField(default=True, help_text=_('Allows full risk acceptance using a risk acceptance form, expiration date, uploaded proof, etc.'))
+
+    disable_sla_breach_notifications = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Disable SLA breach notifications"),
+        help_text=_("Disable SLA breach notifications if configured in the global settings"))
 
     def __str__(self):
         return self.name
