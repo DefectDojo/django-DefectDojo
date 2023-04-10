@@ -179,10 +179,10 @@ class DojoDefaultImporter(object):
         new_hash_codes = list(new_hash_codes)
         for finding in test.finding_set.values():
             if finding["is_mitigated"]:
-              mitigated_hash_codes.append(finding["hash_code"])
-                for hash_code in new_hash_codes:
-                  if hash_code["hash_code"] == finding["hash_code"]:
-                    new_hash_codes.remove(hash_code)
+                mitigated_hash_codes.append(finding["hash_code"])
+                    for hash_code in new_hash_codes:
+                        if hash_code["hash_code"] == finding["hash_code"]:
+                            new_hash_codes.remove(hash_code)
       
         if close_old_findings_product_scope:
             # Close old findings of the same test type in the same product
