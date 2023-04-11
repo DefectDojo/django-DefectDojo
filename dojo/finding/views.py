@@ -714,8 +714,6 @@ def copy_finding(request, fid):
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def finding_hot_edit(request, fid):
-    """Метод для изменения статуса finding из формы view_finding"""
-
     finding = get_object_or_404(Finding, id=fid)
 
     burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
