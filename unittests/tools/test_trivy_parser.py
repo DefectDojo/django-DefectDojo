@@ -179,7 +179,7 @@ Container 'follower' of Deployment 'redis-follower' should set 'securityContext.
 
         self.assertEqual(len(findings), 19)
         finding = findings[0]
-        self.assertEqual("HIGH", finding.severity)
+        self.assertEqual("High", finding.severity)
         self.assertEqual("", finding.file_path)
         self.assertEqual(1, finding.scanner_confidence)
         self.assertEqual("", finding.url)
