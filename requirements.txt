@@ -55,7 +55,7 @@ social-auth-core==4.4.1
 Python-jose==3.3.0
 gitpython==3.1.31
 debugpy==1.6.7
-python-gitlab==3.13.0
+python-gitlab==3.14.0
 drf_yasg==1.21.5
 cpe==1.2.1
 packageurl-python==0.11.1
