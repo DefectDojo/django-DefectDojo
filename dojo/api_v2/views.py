@@ -2036,7 +2036,7 @@ class TestTypesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.TestTypeSerializer
     queryset = Test_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ['name',]
+    filterset_fields = ['name', ]
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
