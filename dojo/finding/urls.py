@@ -53,6 +53,8 @@ urlpatterns = [
         name='view_finding'),
     re_path(r'^finding/(?P<fid>\d+)/edit$',
         views.edit_finding, name='edit_finding'),
+    re_path(r'^finding/(?P<fid>\d+)/edit_view',
+        views.finding_hot_edit, name='finding_hot_edit'),
     re_path(r'^finding/(?P<fid>\d+)/touch',
         views.touch_finding, name='touch_finding'),
     re_path(r'^finding/(?P<fid>\d+)/simple_risk_accept',

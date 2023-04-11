@@ -713,6 +713,83 @@ def copy_finding(request, fid):
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+def finding_hot_edit(request, fid):
+    """Метод для изменения статуса finding из формы view_finding"""
+
+    finding = get_object_or_404(Finding, id=fid)
+
+    burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
+    if burp_rr:
+        req_resp = (
+            burp_rr.get_request(),
+            burp_rr.get_response()
+        )
+    else:
+        req_resp = None
+    form = FindingForm(instance=finding, req_resp=req_resp,
+                       can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user),
+                       initial={'vulnerability_ids': '\n'.join(finding.vulnerability_ids)})
+
+    if request.method == 'POST' and "action" in request.POST:
+
+        action = request.POST["action"]
+
+        func, state = {
+            "accept_risk": (finding.set_risk_accepted, True),
+            "unaccept_risk": (finding.set_risk_accepted, False),
+            "out_of_scope": (finding.set_out_of_scope, True),
+            "not_out_of_scope": (finding.set_out_of_scope, False),
+            "false_positive": (finding.set_false_positive, True),
+            "not_false_positive": (finding.set_false_positive, False),
+            "under_review": (finding.set_under_review, True),
+            "not_under_review": (finding.set_under_review, False),
+        }[action]
+
+        func(state)
+
+        if finding.active:
+            if (not finding.active or finding.false_p) and not finding.duplicate:
+                note_type_activation = Note_Type.objects.filter(is_active=True).count()
+                closing_disabled = 0
+                if note_type_activation:
+                    closing_disabled = len(get_missing_mandatory_notetypes(finding))
+                if closing_disabled != 0:
+                    error_inactive = ValidationError(
+                        'Can not set a finding as inactive without adding all mandatory notes',
+                        code='inactive_without_mandatory_notes')
+                    error_false_p = ValidationError(
+                        'Can not set a finding as false positive without adding all mandatory notes',
+                        code='false_p_without_mandatory_notes')
+                    if not finding.active:
+                        form.add_error('active', error_inactive)
+                    if finding.false_p:
+                        form.add_error('false_p', error_false_p)
+                    messages.add_message(request,
+                                         messages.ERROR,
+                                         'Can not set a finding as inactive or false positive without adding all mandatory notes',
+                                         extra_tags='alert-danger')
+
+        if not form.errors:
+            if 'risk_accepted' in request.POST:
+                if finding.risk_accepted and finding.test.engagement.product.enable_simple_risk_acceptance:
+                    ra_helper.simple_risk_accept(finding, perform_save=False)
+                elif not finding.risk_accepted:
+                    ra_helper.risk_unaccept(finding, perform_save=False)
+
+            finding.last_reviewed = timezone.now()
+            finding.last_reviewed_by = request.user
+
+            finding.save(push_to_jira=False)
+
+            return JsonResponse(finding.status(), safe=False)
+        else:
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(form)
+
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
+
+
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # finding = finding._detag_to_serializable()

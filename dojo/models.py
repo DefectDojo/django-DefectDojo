@@ -2920,6 +2920,28 @@ class Finding(models.Model):
 
         return vulnerability_ids
 
+    def set_risk_accepted(self, switch=True):
+        self.risk_accepted = switch
+        self.active = not switch
+        self.verified = switch
+        self.under_review = False
+
+    def set_out_of_scope(self, switch=True):
+        self.out_of_scope = switch
+        self.active = not switch
+        self.verified = False
+        self.under_review = False
+
+    def set_false_positive(self, switch=True):
+        self.false_p = switch
+        self.is_mitigated = switch
+        self.verified = False
+        self.under_review = False
+
+    def set_under_review(self, switch=True):
+        self.under_review = switch
+        self.active = not switch
+
 
 class FindingAdmin(admin.ModelAdmin):
     # For efficiency with large databases, display many-to-many fields with raw
