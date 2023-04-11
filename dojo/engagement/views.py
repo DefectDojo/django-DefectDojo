@@ -625,7 +625,7 @@ def import_scan_results(request, eid=None, pid=None):
             # close_old_findings_prodct_scope is a modifier of close_old_findings.
             # If it is selected, close_old_findings should also be selected.
             close_old_findings_product_scope = form.cleaned_data.get('close_old_findings_product_scope', None)
-            if close_old_findings_product_scope == True:
+            if close_old_findings_product_scope:
                 close_old_findings = True
             # Will save in the provided environment or in the `Development` one if absent
             environment_id = request.POST.get('environment', 'Development')

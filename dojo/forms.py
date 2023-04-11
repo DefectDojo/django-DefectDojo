@@ -455,19 +455,19 @@ class ImportScanForm(forms.Form):
         required=False)
 
     # Close Old Findings has changed. The default is engagement only, and it requires a second flag to expand to the product scope.
-    # Exposing the choice as two different check boxes. 
+    # Exposing the choice as two different check boxes.
     # If 'close_old_findings_product_scope' is selected, the backend will ensure that both flags are set.
     close_old_findings = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
                                                         "If service has been set, only the findings for this service will be closed. "
                                                         "This only affects findings within the same engagement.",
-                                            label="Close old findings within this engagement", 
-                                            required=False, 
+                                            label="Close old findings within this engagement",
+                                            required=False,
                                             initial=False)
     close_old_findings_product_scope = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
                                                         "If service has been set, only the findings for this service will be closed. "
                                                         "This only affects findings within the same product.",
                                             label="Close old findings within this product",
-                                            required=False, 
+                                            required=False,
                                             initial=False)
 
     if is_finding_groups_enabled():
