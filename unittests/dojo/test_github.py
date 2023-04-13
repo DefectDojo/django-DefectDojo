@@ -1,5 +1,11 @@
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dojo.settings.settings')
 import django
 django.setup()
+import os
+from django.conf import settings
+from django.core import management
+
 
 import unittest
 from unittest.mock import patch, Mock

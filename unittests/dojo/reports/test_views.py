@@ -1,3 +1,6 @@
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dojo.settings.settings')
+
 import django
 django.setup()
 
@@ -5,8 +8,9 @@ import unittest
 from django.test import RequestFactory
 from dojo.reports.views import down
 from django.contrib.auth.models import User
+from django.test import TestCase
 
-class TestDownView(unittest.TestCase):
+class TestDownView(TestCase):
     
     def setUp(self):
         self.factory = RequestFactory()
@@ -18,5 +22,5 @@ class TestDownView(unittest.TestCase):
         request.user = user
         response = down(request)
         self.assertEqual(response.status_code, 200)
+        #self.assertContains(response, 'disabled.html')
         # Add more assertions as necessary
-
