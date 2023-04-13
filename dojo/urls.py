@@ -52,10 +52,8 @@ from dojo.system_settings.urls import urlpatterns as system_settings_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
-from dojo.rules.urls import urlpatterns as rule_urls
 from dojo.notes.urls import urlpatterns as notes_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
-from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.components.urls import urlpatterns as component_urls
@@ -159,14 +157,18 @@ ur += system_settings_urls
 ur += notifications_urls
 ur += object_urls
 ur += benchmark_urls
-ur += rule_urls
 ur += notes_urls
 ur += note_type_urls
-ur += google_sheets_urls
 ur += banner_urls
 ur += component_urls
 ur += regulations
 ur += announcement_urls
+
+api_v2_urls = [
+    #  Django Rest Framework API v2
+    re_path(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
+    re_path(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
+]
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -178,15 +180,14 @@ schema_view = get_schema_view(
     public=True,
     # The API of a OpenSource project should be public accessible
     permission_classes=[permissions.AllowAny],
+    # url pattersns specific to the API
+    patterns=api_v2_urls,
 )
 
 urlpatterns = [
-    #  Django Rest Framework API v2
-    re_path(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
     # action history
     re_path(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history, name='action_history'),
     re_path(r'^%s' % get_system_setting('url_prefix'), include(ur)),
-    re_path(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
 
     # drf-yasg = OpenAPI2
     re_path(r'^%sapi/v2/doc/' % get_system_setting('url_prefix'), schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),
@@ -201,6 +202,7 @@ urlpatterns = [
     re_path(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), views.protected_serve, {'document_root': settings.MEDIA_ROOT})
 ]
 
+urlpatterns += api_v2_urls
 urlpatterns += survey_urls
 
 if hasattr(settings, 'DJANGO_METRICS_ENABLED'):

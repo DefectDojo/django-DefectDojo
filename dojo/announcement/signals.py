@@ -9,6 +9,10 @@ def add_announcement_to_new_user(sender, instance, **kwargs):
     if announcements.count() > 0:
         dojo_user = Dojo_User.objects.get(id=instance.id)
         announcement = announcements.first()
-        UserAnnouncement.objects.get_or_create(
+        user_announcments = UserAnnouncement.objects.filter(
             user=dojo_user,
             announcement=announcement)
+        if user_announcments.count() == 0:
+            UserAnnouncement.objects.get_or_create(
+                user=dojo_user,
+                announcement=announcement)
