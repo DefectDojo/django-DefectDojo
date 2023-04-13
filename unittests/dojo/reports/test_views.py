@@ -1,24 +1,22 @@
-# Define the setup function to initialize variables
-def setUp(self):
-    self.factory = RequestFactory()
+import django
+django.setup()
 
-# Define the test function to test the "down" view
-def test_down_view(self):
-    # Create a request object with a specified URL
-    request = self.factory.get('/dojo/reports/views/down/')
+import unittest
+from django.test import RequestFactory
+from dojo.reports.views import down
+from django.contrib.auth.models import User
+
+class TestDownView(unittest.TestCase):
     
-    # Define the username to be used for testing
-    username = 'testuser'
+    def setUp(self):
+        self.factory = RequestFactory()
     
-    # Try to get the user with the specified username, or create a new one if it doesn't exist
-    user, created = User.objects.get_or_create(username=username)
-    
-    # Set the request object's user attribute to the user that was found or created
-    request.user = user
-    
-    # Call the "down" view with the request object
-    response = down(request)
-    
-    # Assert that the response status code is 200 (OK)
-    self.assertEqual(response.status_code, 200)
+    def test_down_view(self):
+        request = self.factory.get('/dojo/reports/views/down/')
+        username = 'testuser'
+        user, created = User.objects.get_or_create(username=username)
+        request.user = user
+        response = down(request)
+        self.assertEqual(response.status_code, 200)
+        # Add more assertions as necessary
 
