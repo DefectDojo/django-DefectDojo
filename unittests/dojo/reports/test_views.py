@@ -1,27 +1,24 @@
-import django
-django.setup()
+# Define the setup function to initialize variables
+def setUp(self):
+    self.factory = RequestFactory()
 
-from django.urls import reverse
-from django.test import TestCase, Client
-from django.contrib.auth.models import User
-from unittest.mock import patch, MagicMock
-from dojo.models import System_Settings, Dojo_User
-from django.conf import settings
-
-
-class DownViewTestCase(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser8',
-            email='testuser@example.com',
-            password='testpass'
-        )
-        self.client = Client()
-        self.client.login(username='testuser8', password='testpass')
-        
-
-    def test_down_view(self):
-        url = reverse('down')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+# Define the test function to test the "down" view
+def test_down_view(self):
+    # Create a request object with a specified URL
+    request = self.factory.get('/dojo/reports/views/down/')
+    
+    # Define the username to be used for testing
+    username = 'testuser'
+    
+    # Try to get the user with the specified username, or create a new one if it doesn't exist
+    user, created = User.objects.get_or_create(username=username)
+    
+    # Set the request object's user attribute to the user that was found or created
+    request.user = user
+    
+    # Call the "down" view with the request object
+    response = down(request)
+    
+    # Assert that the response status code is 200 (OK)
+    self.assertEqual(response.status_code, 200)
 
