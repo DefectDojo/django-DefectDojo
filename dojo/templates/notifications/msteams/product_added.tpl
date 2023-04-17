@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load display_tags %}
 {
     "@context": "https://schema.org/extensions",
     "@type": "MessageCard",
