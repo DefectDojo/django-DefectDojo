@@ -77,7 +77,7 @@ class RoleViewSet(mixins.ListModelMixin,
     serializer_class = serializers.RoleSerializer
     queryset = Role.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name')
+    filterset_fields = ['id', 'name']
     permission_classes = (IsAuthenticated, )
 
 
@@ -106,7 +106,7 @@ class DojoGroupViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.DojoGroupSerializer
     queryset = Dojo_Group.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'social_provider')
+    filterset_fields = ['id', 'name', 'social_provider']
     swagger_schema = prefetch.get_prefetch_schema(["dojo_groups_list", "dojo_groups_read"],
         serializers.DojoGroupSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupPermission)
@@ -140,7 +140,7 @@ class DojoGroupMemberViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.DojoGroupMemberSerializer
     queryset = Dojo_Group_Member.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'group_id', 'user_id')
+    filterset_fields = ['id', 'group_id', 'user_id']
     swagger_schema = prefetch.get_prefetch_schema(["dojo_group_members_list", "dojo_group_members_read"],
         serializers.DojoGroupMemberSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupMemberPermission)
@@ -167,7 +167,7 @@ class GlobalRoleViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.GlobalRoleSerializer
     queryset = Global_Role.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'user', 'group', 'role')
+    filterset_fields = ['id', 'user', 'group', 'role']
     swagger_schema = prefetch.get_prefetch_schema(["global_roles_list", "global_roles_read"],
         serializers.GlobalRoleSerializer).to_schema()
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
@@ -235,7 +235,7 @@ class EndpointStatusViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.EndpointStatusSerializer
     queryset = Endpoint_Status.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('mitigated', 'false_positive', 'out_of_scope', 'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
+    filterset_fields = ['mitigated', 'false_positive', 'out_of_scope', 'risk_accepted', 'mitigated_by', 'finding', 'endpoint']
     swagger_schema = prefetch.get_prefetch_schema(["endpoint_status_list", "endpoint_status_read"], serializers.EndpointStatusSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEndpointStatusPermission)
 
@@ -1281,7 +1281,7 @@ class JiraInstanceViewSet(mixins.ListModelMixin,
     serializer_class = serializers.JIRAInstanceSerializer
     queryset = JIRA_Instance.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'url')
+    filterset_fields = ['id', 'url']
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
@@ -1298,7 +1298,7 @@ class JiraIssuesViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.JIRAIssueSerializer
     queryset = JIRA_Issue.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'jira_id', 'jira_key', 'finding', 'engagement', 'finding_group')
+    filterset_fields = ['id', 'jira_id', 'jira_key', 'finding', 'engagement', 'finding_group']
     swagger_schema = prefetch.get_prefetch_schema(["jira_finding_mappings_list", "jira_finding_mappings_read"], serializers.JIRAIssueSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasJiraIssuePermission)
 
@@ -1319,9 +1319,9 @@ class JiraProjectViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.JIRAProjectSerializer
     queryset = JIRA_Project.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = (
+    filterset_fields = [
         'id', 'jira_instance', 'product', 'engagement', 'component', 'project_key',
-        'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes')
+        'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes']
     swagger_schema = prefetch.get_prefetch_schema(["jira_projects_list", "jira_projects_read"], serializers.JIRAProjectSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasJiraProductPermission)
 
@@ -1340,7 +1340,7 @@ class SonarqubeIssueViewSet(mixins.ListModelMixin,
     serializer_class = serializers.SonarqubeIssueSerializer
     queryset = Sonarqube_Issue.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'key', 'status', 'type')
+    filterset_fields = ['id', 'key', 'status', 'type']
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
@@ -1355,8 +1355,7 @@ class SonarqubeIssueTransitionViewSet(mixins.ListModelMixin,
     serializer_class = serializers.SonarqubeIssueTransitionSerializer
     queryset = Sonarqube_Issue_Transition.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'sonarqube_issue', 'finding_status',
-                     'sonarqube_status', 'transitions')
+    filterset_fields = ['id', 'sonarqube_issue', 'finding_status', 'sonarqube_status', 'transitions']
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
@@ -1373,7 +1372,7 @@ class ProductAPIScanConfigurationViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.ProductAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'product', 'tool_configuration', 'service_key_1', 'service_key_2', 'service_key_3')
+    filterset_fields = ['id', 'product', 'tool_configuration', 'service_key_1', 'service_key_2', 'service_key_3']
     swagger_schema = prefetch.get_prefetch_schema(["product_api_scan_configurations_list", "product_api_scan_configurations_read"], serializers.ProductAPIScanConfigurationSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasProductAPIScanConfigurationPermission)
 
@@ -1406,7 +1405,7 @@ class DojoMetaViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'product', 'endpoint', 'finding', 'name', 'value')
+    filterset_fields = ['id', 'product', 'endpoint', 'finding', 'name', 'value']
     permission_classes = (IsAuthenticated, permissions.UserHasDojoMetaPermission)
     swagger_schema = prefetch.get_prefetch_schema(["metadata_list", "metadata_read"],
         serializers.MetaSerializer).to_schema()
@@ -1534,7 +1533,7 @@ class ProductMemberViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.ProductMemberSerializer
     queryset = Product_Member.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'product_id', 'user_id')
+    filterset_fields = ['id', 'product_id', 'user_id']
     swagger_schema = prefetch.get_prefetch_schema(["product_members_list", "product_members_read"],
         serializers.ProductMemberSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasProductMemberPermission)
@@ -1581,7 +1580,7 @@ class ProductGroupViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.ProductGroupSerializer
     queryset = Product_Group.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'product_id', 'group_id')
+    filterset_fields = ['id', 'product_id', 'group_id']
     swagger_schema = prefetch.get_prefetch_schema(["product_groups_list", "product_groups_read"],
         serializers.ProductGroupSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasProductGroupPermission)
@@ -1628,7 +1627,7 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.ProductTypeSerializer
     queryset = Product_Type.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
+    filterset_fields = ['id', 'name', 'critical_product', 'key_product', 'created', 'updated']
     swagger_schema = prefetch.get_prefetch_schema(["product_types_list", "product_types_read"],
         serializers.ProductTypeSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasProductTypePermission)
@@ -1711,7 +1710,7 @@ class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.ProductTypeMemberSerializer
     queryset = Product_Type_Member.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'product_type_id', 'user_id')
+    filterset_fields = ['id', 'product_type_id', 'user_id']
     swagger_schema = prefetch.get_prefetch_schema(["product_type_members_list", "product_type_members_read"],
         serializers.ProductTypeMemberSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasProductTypeMemberPermission)
@@ -1767,7 +1766,7 @@ class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.ProductTypeGroupSerializer
     queryset = Product_Type_Group.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'product_type_id', 'group_id')
+    filterset_fields = ['id', 'product_type_id', 'group_id']
     swagger_schema = prefetch.get_prefetch_schema(["product_type_groups_list", "product_type_groups_read"],
         serializers.ProductTypeGroupSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasProductTypeGroupPermission)
@@ -1802,7 +1801,7 @@ class StubFindingsViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.StubFindingSerializer
     queryset = Stub_Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'title', 'date', 'severity', 'description')
+    filterset_fields = ['id', 'title', 'date', 'severity', 'description']
     swagger_schema = prefetch.get_prefetch_schema(["stub_findings_list", "stub_findings_read"], serializers.StubFindingSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasFindingPermission)
 
@@ -2037,7 +2036,7 @@ class TestTypesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.TestTypeSerializer
     queryset = Test_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name',)
+    filterset_fields = ['name', ]
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
@@ -2065,8 +2064,7 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.TestImportSerializer
     queryset = Test_Import.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('test', 'findings_affected', 'version', 'branch_tag', 'build_id', 'commit_hash', 'test_import_finding_action__action',
-                    'test_import_finding_action__finding', 'test_import_finding_action__created')
+    filterset_fields = ['test', 'findings_affected', 'version', 'branch_tag', 'build_id', 'commit_hash', 'test_import_finding_action__action', 'test_import_finding_action__finding', 'test_import_finding_action__created']
     swagger_schema = prefetch.get_prefetch_schema(["test_imports_list", "test_imports_read"], serializers.TestImportSerializer). \
         to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasTestImportPermission)
@@ -2116,7 +2114,7 @@ class ToolConfigurationsViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.ToolConfigurationSerializer
     queryset = Tool_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'tool_type', 'url', 'authentication_type')
+    filterset_fields = ['id', 'name', 'tool_type', 'url', 'authentication_type']
     swagger_schema = prefetch.get_prefetch_schema(["tool_configurations_list", "tool_configurations_read"], serializers.ToolConfigurationSerializer).to_schema()
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
@@ -2134,7 +2132,7 @@ class ToolProductSettingsViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.ToolProductSettingsSerializer
     queryset = Tool_Product_Settings.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'product', 'tool_configuration', 'tool_project_id', 'url')
+    filterset_fields = ['id', 'name', 'product', 'tool_configuration', 'tool_project_id', 'url']
     swagger_schema = prefetch.get_prefetch_schema(["tool_configurations_list", "tool_configurations_read"], serializers.ToolConfigurationSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasToolProductSettingsPermission)
 
@@ -2153,7 +2151,7 @@ class ToolTypesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.ToolTypeSerializer
     queryset = Tool_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'description')
+    filterset_fields = ['id', 'name', 'description']
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
@@ -2168,7 +2166,7 @@ class RegulationsViewSet(mixins.ListModelMixin,
     serializer_class = serializers.RegulationSerializer
     queryset = Regulation.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'description')
+    filterset_fields = ['id', 'name', 'description']
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
@@ -2183,7 +2181,7 @@ class UsersViewSet(mixins.CreateModelMixin,
     serializer_class = serializers.UserSerializer
     queryset = User.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser')
+    filterset_fields = ['id', 'username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser']
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
     def destroy(self, request, *args, **kwargs):
@@ -2344,7 +2342,7 @@ class LanguageTypeViewSet(mixins.ListModelMixin,
     serializer_class = serializers.LanguageTypeSerializer
     queryset = Language_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'language', 'color')
+    filterset_fields = ['id', 'language', 'color']
     permission_classes = (permissions.UserHasConfigurationPermissionStaff, )
 
 
@@ -2373,7 +2371,7 @@ class LanguageViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.LanguageSerializer
     queryset = Languages.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'language', 'product')
+    filterset_fields = ['id', 'language', 'product']
     swagger_schema = prefetch.get_prefetch_schema(["languages_list", "languages_read"],
         serializers.LanguageSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasLanguagePermission)
@@ -2460,7 +2458,7 @@ class NoteTypeViewSet(mixins.ListModelMixin,
     serializer_class = serializers.NoteTypeSerializer
     queryset = Note_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'description', 'is_single', 'is_active', 'is_mandatory')
+    filterset_fields = ['id', 'name', 'description', 'is_single', 'is_active', 'is_mandatory']
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser, )
 
 
@@ -2472,9 +2470,7 @@ class NotesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.NoteSerializer
     queryset = Notes.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'entry', 'author',
-                    'private', 'date', 'edited',
-                    'edit_time', 'editor')
+    filterset_fields = ['id', 'entry', 'author', 'private', 'date', 'edited', 'edit_time', 'editor']
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
@@ -2810,7 +2806,7 @@ class NotificationsViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.NotificationsSerializer
     queryset = Notifications.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'user', 'product', 'template')
+    filterset_fields = ['id', 'user', 'product', 'template']
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
     swagger_schema = prefetch.get_prefetch_schema(["notifications_list", "notifications_read"],
         serializers.NotificationsSerializer).to_schema()
@@ -2828,7 +2824,7 @@ class EngagementPresetsViewset(prefetch.PrefetchListMixin,
     serializer_class = serializers.EngagementPresetsSerializer
     queryset = Engagement_Presets.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'title', 'product')
+    filterset_fields = ['id', 'title', 'product']
     swagger_schema = prefetch.get_prefetch_schema(["engagement_presets_list", "engagement_presets_read"], serializers.EngagementPresetsSerializer).to_schema()
     permission_classes = (IsAuthenticated, permissions.UserHasEngagementPresetPermission)
 
@@ -2865,7 +2861,7 @@ class NetworkLocationsViewset(mixins.ListModelMixin,
     serializer_class = serializers.NetworkLocationsSerializer
     queryset = Network_Locations.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'location')
+    filterset_fields = ['id', 'location']
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
@@ -2876,7 +2872,7 @@ class ConfigurationPermissionViewSet(mixins.RetrieveModelMixin,
     serializer_class = serializers.ConfigurationPermissionSerializer
     queryset = Permission.objects.filter(codename__in=get_configuration_permissions_codenames())
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'codename')
+    filterset_fields = ['id', 'name', 'codename']
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
