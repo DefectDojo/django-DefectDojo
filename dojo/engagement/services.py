@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def close_engagement(eng):
     eng.active = False
-    eng.status = 'Completed'
+    eng.status = "Completed"
     eng.save()
 
     if jira_helper.get_jira_project(eng):
@@ -20,7 +20,7 @@ def close_engagement(eng):
 
 def reopen_engagement(eng):
     eng.active = True
-    eng.status = 'In Progress'
+    eng.status = "In Progress"
     eng.save()
 
 
