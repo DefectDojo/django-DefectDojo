@@ -19,7 +19,8 @@ class Roles(IntEnum):
 
 def django_enum(cls):
     # decorator needed to enable enums in django templates
-    # see https://stackoverflow.com/questions/35953132/how-to-access-enum-types-in-django-templates
+    # see
+    # https://stackoverflow.com/questions/35953132/how-to-access-enum-types-in-django-templates
     cls.do_not_call_in_templates = True
     return cls
 
@@ -134,79 +135,146 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_engagement_permissions(cls):
-        return {Permissions.Engagement_View, Permissions.Engagement_Edit,
-            Permissions.Engagement_Delete, Permissions.Risk_Acceptance,
-            Permissions.Test_Add, Permissions.Import_Scan_Result, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
-            .union(cls.get_test_permissions())
+        return {
+            Permissions.Engagement_View,
+            Permissions.Engagement_Edit,
+            Permissions.Engagement_Delete,
+            Permissions.Risk_Acceptance,
+            Permissions.Test_Add,
+            Permissions.Import_Scan_Result,
+            Permissions.Note_Add,
+            Permissions.Note_Delete,
+            Permissions.Note_Edit,
+            Permissions.Note_View_History,
+        }.union(cls.get_test_permissions())
 
     @classmethod
     def get_test_permissions(cls):
-        return {Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete,
-            Permissions.Finding_Add, Permissions.Import_Scan_Result, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
-            .union(cls.get_finding_permissions())
+        return {
+            Permissions.Test_View,
+            Permissions.Test_Edit,
+            Permissions.Test_Delete,
+            Permissions.Finding_Add,
+            Permissions.Import_Scan_Result,
+            Permissions.Note_Add,
+            Permissions.Note_Delete,
+            Permissions.Note_Edit,
+            Permissions.Note_View_History,
+        }.union(cls.get_finding_permissions())
 
     @classmethod
     def get_finding_permissions(cls):
-        return {Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Import_Scan_Result,
-            Permissions.Finding_Delete, Permissions.Risk_Acceptance, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
-            .union(cls.get_finding_group_permissions())
+        return {
+            Permissions.Finding_View,
+            Permissions.Finding_Edit,
+            Permissions.Import_Scan_Result,
+            Permissions.Finding_Delete,
+            Permissions.Risk_Acceptance,
+            Permissions.Note_Add,
+            Permissions.Note_Delete,
+            Permissions.Note_Edit,
+            Permissions.Note_View_History,
+        }.union(cls.get_finding_group_permissions())
 
     @classmethod
     def get_finding_group_permissions(cls):
-        return {Permissions.Finding_Group_View, Permissions.Finding_Group_Edit,
-            Permissions.Finding_Group_Delete}
+        return {
+            Permissions.Finding_Group_View,
+            Permissions.Finding_Group_Edit,
+            Permissions.Finding_Group_Delete,
+        }
 
     @classmethod
     def get_endpoint_permissions(cls):
-        return {Permissions.Endpoint_View, Permissions.Endpoint_Edit, Permissions.Endpoint_Delete}
+        return {
+            Permissions.Endpoint_View,
+            Permissions.Endpoint_Edit,
+            Permissions.Endpoint_Delete,
+        }
 
     @classmethod
     def get_product_member_permissions(cls):
-        return {Permissions.Product_View, Permissions.Product_Manage_Members,
-            Permissions.Product_Member_Delete}
+        return {
+            Permissions.Product_View,
+            Permissions.Product_Manage_Members,
+            Permissions.Product_Member_Delete,
+        }
 
     @classmethod
     def get_product_type_member_permissions(cls):
-        return {Permissions.Product_Type_View, Permissions.Product_Type_Manage_Members,
-            Permissions.Product_Type_Member_Delete}
+        return {
+            Permissions.Product_Type_View,
+            Permissions.Product_Type_Manage_Members,
+            Permissions.Product_Type_Member_Delete,
+        }
 
     @classmethod
     def get_product_group_permissions(cls):
-        return {Permissions.Product_Group_View, Permissions.Product_Group_Edit,
-            Permissions.Product_Group_Delete}
+        return {
+            Permissions.Product_Group_View,
+            Permissions.Product_Group_Edit,
+            Permissions.Product_Group_Delete,
+        }
 
     @classmethod
     def get_product_type_group_permissions(cls):
-        return {Permissions.Product_Type_Group_View, Permissions.Product_Type_Group_Edit,
-            Permissions.Product_Type_Group_Delete}
+        return {
+            Permissions.Product_Type_Group_View,
+            Permissions.Product_Type_Group_Edit,
+            Permissions.Product_Type_Group_Delete,
+        }
 
     @classmethod
     def get_group_permissions(cls):
-        return {Permissions.Group_View, Permissions.Group_Member_Delete, Permissions.Group_Manage_Members,
-            Permissions.Group_Add_Owner, Permissions.Group_Edit, Permissions.Group_Delete}
+        return {
+            Permissions.Group_View,
+            Permissions.Group_Member_Delete,
+            Permissions.Group_Manage_Members,
+            Permissions.Group_Add_Owner,
+            Permissions.Group_Edit,
+            Permissions.Group_Delete,
+        }
 
     @classmethod
     def get_group_member_permissions(cls):
-        return {Permissions.Group_View, Permissions.Group_Manage_Members, Permissions.Group_Member_Delete}
+        return {
+            Permissions.Group_View,
+            Permissions.Group_Manage_Members,
+            Permissions.Group_Member_Delete,
+        }
 
     @classmethod
     def get_language_permissions(cls):
-        return {Permissions.Language_View, Permissions.Language_Edit, Permissions.Language_Delete}
+        return {
+            Permissions.Language_View,
+            Permissions.Language_Edit,
+            Permissions.Language_Delete,
+        }
 
     @classmethod
     def get_technology_permissions(cls):
-        return {Permissions.Technology_View, Permissions.Technology_Edit, Permissions.Technology_Delete}
+        return {
+            Permissions.Technology_View,
+            Permissions.Technology_Edit,
+            Permissions.Technology_Delete,
+        }
 
     @classmethod
     def get_product_api_scan_configuration_permissions(cls):
-        return {Permissions.Product_API_Scan_Configuration_View, Permissions.Product_API_Scan_Configuration_Edit, Permissions.Product_API_Scan_Configuration_Delete}
+        return {
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_API_Scan_Configuration_Edit,
+            Permissions.Product_API_Scan_Configuration_Delete,
+        }
 
     @classmethod
     def get_credential_permissions(cls):
-        return {Permissions.Credential_View, Permissions.Credential_Add, Permissions.Credential_Edit, Permissions.Credential_Delete}
+        return {
+            Permissions.Credential_View,
+            Permissions.Credential_Add,
+            Permissions.Credential_Edit,
+            Permissions.Credential_Delete,
+        }
 
 
 def get_roles_with_permissions():
@@ -249,57 +317,42 @@ def get_roles_with_permissions():
         },
         Roles.Writer: {
             Permissions.Product_Type_View,
-
             Permissions.Product_View,
-
             Permissions.Engagement_View,
             Permissions.Engagement_Add,
             Permissions.Engagement_Edit,
             Permissions.Risk_Acceptance,
-
             Permissions.Test_View,
             Permissions.Test_Add,
             Permissions.Test_Edit,
-
             Permissions.Finding_View,
             Permissions.Finding_Add,
             Permissions.Import_Scan_Result,
             Permissions.Finding_Edit,
-
             Permissions.Finding_Group_View,
             Permissions.Finding_Group_Add,
             Permissions.Finding_Group_Edit,
             Permissions.Finding_Group_Delete,
-
             Permissions.Endpoint_View,
             Permissions.Endpoint_Add,
             Permissions.Endpoint_Edit,
-
             Permissions.Benchmark_Edit,
-
             Permissions.Component_View,
-
             Permissions.Note_View_History,
             Permissions.Note_Edit,
             Permissions.Note_Add,
-
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
             Permissions.Group_View,
-
             Permissions.Language_View,
             Permissions.Language_Add,
             Permissions.Language_Edit,
             Permissions.Language_Delete,
-
             Permissions.Technology_View,
             Permissions.Technology_Add,
             Permissions.Technology_Edit,
-
             Permissions.Product_API_Scan_Configuration_View,
-
             Permissions.Product_Tracking_Files_View,
-
             Permissions.Credential_View,
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
@@ -310,85 +363,68 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Member_Delete,
             Permissions.Product_Type_Manage_Members,
             Permissions.Product_Type_Edit,
-
             Permissions.Product_View,
             Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
-
             Permissions.Engagement_View,
             Permissions.Engagement_Add,
             Permissions.Engagement_Edit,
             Permissions.Engagement_Delete,
             Permissions.Risk_Acceptance,
-
             Permissions.Test_View,
             Permissions.Test_Add,
             Permissions.Test_Edit,
             Permissions.Test_Delete,
-
             Permissions.Finding_View,
             Permissions.Finding_Add,
             Permissions.Import_Scan_Result,
             Permissions.Finding_Edit,
             Permissions.Finding_Delete,
-
             Permissions.Finding_Group_View,
             Permissions.Finding_Group_Add,
             Permissions.Finding_Group_Edit,
             Permissions.Finding_Group_Delete,
-
             Permissions.Endpoint_View,
             Permissions.Endpoint_Add,
             Permissions.Endpoint_Edit,
             Permissions.Endpoint_Delete,
-
             Permissions.Benchmark_Edit,
             Permissions.Benchmark_Delete,
-
             Permissions.Component_View,
-
             Permissions.Note_View_History,
             Permissions.Note_Edit,
             Permissions.Note_Add,
             Permissions.Note_Delete,
-
             Permissions.Product_Group_View,
             Permissions.Product_Group_Add,
             Permissions.Product_Group_Edit,
             Permissions.Product_Group_Delete,
-
             Permissions.Product_Type_Group_View,
             Permissions.Product_Type_Group_Add,
             Permissions.Product_Type_Group_Edit,
             Permissions.Product_Type_Group_Delete,
-
             Permissions.Group_View,
             Permissions.Group_Edit,
             Permissions.Group_Manage_Members,
             Permissions.Group_Member_Delete,
-
             Permissions.Language_View,
             Permissions.Language_Add,
             Permissions.Language_Edit,
             Permissions.Language_Delete,
-
             Permissions.Technology_View,
             Permissions.Technology_Add,
             Permissions.Technology_Edit,
             Permissions.Technology_Delete,
-
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_API_Scan_Configuration_Add,
             Permissions.Product_API_Scan_Configuration_Edit,
             Permissions.Product_API_Scan_Configuration_Delete,
-
             Permissions.Product_Tracking_Files_View,
             Permissions.Product_Tracking_Files_Add,
             Permissions.Product_Tracking_Files_Edit,
             Permissions.Product_Tracking_Files_Delete,
-
             Permissions.Credential_View,
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
@@ -402,7 +438,6 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Member_Add_Owner,
             Permissions.Product_Type_Edit,
             Permissions.Product_Type_Delete,
-
             Permissions.Product_View,
             Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
@@ -410,88 +445,72 @@ def get_roles_with_permissions():
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
             Permissions.Product_Delete,
-
             Permissions.Engagement_View,
             Permissions.Engagement_Add,
             Permissions.Engagement_Edit,
             Permissions.Engagement_Delete,
             Permissions.Risk_Acceptance,
-
             Permissions.Test_View,
             Permissions.Test_Add,
             Permissions.Test_Edit,
             Permissions.Test_Delete,
-
             Permissions.Finding_View,
             Permissions.Finding_Add,
             Permissions.Import_Scan_Result,
             Permissions.Finding_Edit,
             Permissions.Finding_Delete,
-
             Permissions.Finding_Group_View,
             Permissions.Finding_Group_Add,
             Permissions.Finding_Group_Edit,
             Permissions.Finding_Group_Delete,
-
             Permissions.Endpoint_View,
             Permissions.Endpoint_Add,
             Permissions.Endpoint_Edit,
             Permissions.Endpoint_Delete,
-
             Permissions.Benchmark_Edit,
             Permissions.Benchmark_Delete,
-
             Permissions.Component_View,
-
             Permissions.Note_View_History,
             Permissions.Note_Edit,
             Permissions.Note_Add,
             Permissions.Note_Delete,
-
             Permissions.Product_Group_View,
             Permissions.Product_Group_Add,
             Permissions.Product_Group_Add_Owner,
             Permissions.Product_Group_Edit,
             Permissions.Product_Group_Delete,
-
             Permissions.Product_Type_Group_View,
             Permissions.Product_Type_Group_Add,
             Permissions.Product_Type_Group_Add_Owner,
             Permissions.Product_Type_Group_Edit,
             Permissions.Product_Type_Group_Delete,
-
             Permissions.Group_View,
             Permissions.Group_Edit,
             Permissions.Group_Manage_Members,
             Permissions.Group_Member_Delete,
             Permissions.Group_Add_Owner,
             Permissions.Group_Delete,
-
             Permissions.Language_View,
             Permissions.Language_Add,
             Permissions.Language_Edit,
             Permissions.Language_Delete,
-
             Permissions.Technology_View,
             Permissions.Technology_Add,
             Permissions.Technology_Edit,
             Permissions.Technology_Delete,
-
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_API_Scan_Configuration_Add,
             Permissions.Product_API_Scan_Configuration_Edit,
             Permissions.Product_API_Scan_Configuration_Delete,
-
             Permissions.Product_Tracking_Files_View,
             Permissions.Product_Tracking_Files_Add,
             Permissions.Product_Tracking_Files_Edit,
             Permissions.Product_Tracking_Files_Delete,
-
             Permissions.Credential_View,
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
-        }
+        },
     }
 
 
@@ -500,10 +519,6 @@ def get_global_roles_with_permissions():
     Extra permissions for global roles, on top of the permissions granted to the "normal" roles above.
     """
     return {
-        Roles.Maintainer: {
-            Permissions.Product_Type_Add
-        },
-        Roles.Owner: {
-            Permissions.Product_Type_Add
-        }
+        Roles.Maintainer: {Permissions.Product_Type_Add},
+        Roles.Owner: {Permissions.Product_Type_Add},
     }
