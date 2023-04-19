@@ -13,7 +13,9 @@ def get_request_cache():
     return getattr(get_current_request(), "cache", None)
 
 
-cache_args_kwargs_marker = object()  # marker for separating args from kwargs (needs to be global)
+cache_args_kwargs_marker = (
+    object()
+)  # marker for separating args from kwargs (needs to be global)
 
 
 def cache_calculate_key(*args, **kwargs):
@@ -39,6 +41,7 @@ def cache_for_request(fn):
     :param fn:
     :return:
     """
+
     def wrapper(*args, **kwargs):
         cache = get_request_cache()
 
@@ -57,4 +60,5 @@ def cache_for_request(fn):
             setattr(cache, key, result)
 
         return result
+
     return wrapper
