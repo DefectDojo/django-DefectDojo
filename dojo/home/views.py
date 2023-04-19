@@ -44,6 +44,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         .count()
 
     severity_count_all = get_severities_all(findings)
+    severity_count_by_week = get_severities_by_week(findings, today)
     severity_count_by_month = get_severities_by_month(findings, today)
     punchcard, ticks = get_punchcard_data(findings, today - relativedelta(weeks=26), 26)
 
@@ -64,6 +65,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         'medium': severity_count_all['Medium'],
         'low': severity_count_all['Low'],
         'info': severity_count_all['Info'],
+        'by_week': severity_count_by_week,
         'by_month': severity_count_by_month,
         'punchcard': punchcard,
         'ticks': ticks,
@@ -102,5 +104,37 @@ def get_severities_by_month(findings, today):
         key = f"{ms['created__year']}-{ms['created__month']:02}"
         month_stats = results.setdefault(key, {'y': key, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, None: 0})
         month_stats[SEVERITY_MAP.get(ms['severity'])] += ms['count']
+
+    return [v for k, v in sorted(results.items())]
+
+
+def get_severities_by_week(findings, today):
+    from_day = today - relativedelta(months=6)
+    severities_by_day = findings\
+        .filter(created__date__gte=from_day)\
+        .values('created', 'severity')\
+        .annotate(count=Count('severity'))\
+        .order_by()
+
+    SEVERITY_MAP = {
+        'Critical': 'Critical',
+        'High': 'High',
+        'Medium': 'Medium',
+        'Low': 'Low',
+        'Info': 'Info',
+    }
+
+    results = {}
+    week = today + timedelta(days=6 - today.weekday())
+    while week > from_day:
+        key = f"{week.year}-{week.month:02}-{week.day:02}"
+        results[key] = {'key': key, 'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, None: 0}
+        week = week - timedelta(days=7)
+
+    for ds in severities_by_day:
+        week = ds['created'] + timedelta(days=6-ds['created'].weekday())
+        key = f"{week.year}-{week.month:02}-{week.day:02}"
+        weekly_stats = results.setdefault(key, {'key': key, 'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, None: 0})
+        weekly_stats[SEVERITY_MAP.get(ds.get('severity'))] += ds.get('count', 0)
 
     return [v for k, v in sorted(results.items())]

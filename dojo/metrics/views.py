@@ -604,6 +604,7 @@ def product_type_counts(request):
     top = None
     pts = []
     products = []
+    overall_in_pt = []
     today = timezone.now()
     start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     end_date = start_date + relativedelta(months=1)
@@ -613,117 +614,119 @@ def product_type_counts(request):
         if form.is_valid():
             pts = form.cleaned_data['product_type']
             products = form.cleaned_data.get('product')
-            form.fields['product'].queryset = get_authorized_products(Permissions.Product_View).filter(
-                prod_type__in=pts)
+            form.fields['product'].queryset = get_authorized_products(Permissions.Product_View).filter(prod_type__in=pts)
 
             user_has_permission_or_403(request.user, pts, Permissions.Product_Type_View)
             month = int(form.cleaned_data['month'])
             year = int(form.cleaned_data['year'])
-            first_of_month = first_of_month.replace(month=month, year=year)
 
-            month_requested = datetime(year, month, 1)
+            start_date = start_date.replace(month=month, year=year)
+            end_date = start_date + relativedelta(months=1)
 
-            end_of_month = month_requested.replace(day=monthrange(month_requested.year, month_requested.month)[1],
-                                                   hour=23, minute=59, second=59, microsecond=999999)
-            start_date = first_of_month
             start_date = datetime(start_date.year,
                                   start_date.month, start_date.day,
                                   tzinfo=timezone.get_current_timezone())
-            end_date = end_of_month
             end_date = datetime(end_date.year,
                                 end_date.month, end_date.day,
                                 tzinfo=timezone.get_current_timezone())
 
-            oip = opened_in_period(start_date, end_date, pt)
-
             # trending data - 12 months
-            for x in range(12, 0, -1):
+            for x in range(12, -1, -1):
                 opened_in_period_list.append(
-                    opened_in_period(start_date + relativedelta(months=-x), end_of_month + relativedelta(months=-x),
-                                     pt))
+                    opened_in_period(start_date - relativedelta(months=x), end_date - relativedelta(months=x),
+                                     pts, products=products))
 
-            opened_in_period_list.append(oip)
+            to_date_total = Finding.objects.filter(
+                created__lte=end_date,
+                duplicate=False,
+                verified=True,
+                test__engagement__product__prod_type__in=pts,
+                severity__in=('Critical', 'High', 'Medium', 'Low'))
+            if products:
+                to_date_total = to_date_total.filter(test__engagement__product__in=products)
 
-            closed_in_period = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
-                                                      test__engagement__product__prod_type=pt,
-                                                      severity__in=('Critical', 'High', 'Medium', 'Low')).values(
-                'numerical_severity').annotate(Count('numerical_severity')).order_by('numerical_severity')
+            created_in_period = [f for f in to_date_total if start_date <= f.created < end_date]
 
-            total_closed_in_period = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
-                                                            test__engagement__product__prod_type=pt,
-                                                            severity__in=(
-                                                                'Critical', 'High', 'Medium', 'Low')).aggregate(
-                total=Sum(
-                    Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
-                              then=Value(1)),
-                         output_field=IntegerField())))['total']
+            closed_in_period = [f for f in to_date_total if f.mitigated and start_date <= f.mitigated < end_date]
 
-            overall_in_pt = Finding.objects.filter(date__lt=end_date,
-                                                   verified=True,
-                                                   false_p=False,
-                                                   duplicate=False,
-                                                   out_of_scope=False,
-                                                   mitigated__isnull=True,
-                                                   test__engagement__product__prod_type=pt,
-                                                   severity__in=('Critical', 'High', 'Medium', 'Low')).values(
-                'numerical_severity').annotate(Count('numerical_severity')).order_by('numerical_severity')
+            overall_in_pt = [f for f in to_date_total
+                             if f.created < end_date
+                             and (not f.mitigated or f.mitigated >= end_date)]
 
-            total_overall_in_pt = Finding.objects.filter(date__lte=end_date,
-                                                         verified=True,
-                                                         false_p=False,
-                                                         duplicate=False,
-                                                         out_of_scope=False,
-                                                         mitigated__isnull=True,
-                                                         test__engagement__product__prod_type=pt,
-                                                         severity__in=('Critical', 'High', 'Medium', 'Low')).aggregate(
-                total=Sum(
-                    Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
-                              then=Value(1)),
-                         output_field=IntegerField())))['total']
+            top = Product.objects.filter(engagement__test__finding__date__lte=end_date,
+                                         engagement__test__finding__verified=True,
+                                         engagement__test__finding__false_p=False,
+                                         engagement__test__finding__duplicate=False,
+                                         engagement__test__finding__out_of_scope=False,
+                                         engagement__test__finding__mitigated__isnull=True,
+                                         engagement__test__finding__severity__in=(
+                                             'Critical', 'High', 'Medium', 'Low'),
+                                         prod_type__in=pts)
+            if products:
+                top = top.filter(id__in=products)
+            top = severity_count(top, 'annotate', 'engagement__test__finding__severity').order_by('-critical', '-high', '-medium', '-low')
 
-            all_current_in_pt = Finding.objects.filter(date__lte=end_date,
-                                                       verified=True,
-                                                       false_p=False,
-                                                       duplicate=False,
-                                                       out_of_scope=False,
-                                                       mitigated__isnull=True,
-                                                       test__engagement__product__prod_type=pt,
-                                                       severity__in=(
-                                                           'Critical', 'High', 'Medium', 'Low')).prefetch_related(
-                'test__engagement__product',
-                'test__engagement__product__prod_type',
-                'test__engagement__risk_acceptance',
-                'reporter').order_by(
-                'numerical_severity')
+            oip = {
+                'S0': len([f for f in created_in_period if f.severity == 'Critical']),
+                'S1': len([f for f in created_in_period if f.severity == 'High']),
+                'S2': len([f for f in created_in_period if f.severity == 'Medium']),
+                'S3': len([f for f in created_in_period if f.severity == 'Low']),
+                'Total': len(created_in_period)
+            }
 
-            top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                             engagement__test__finding__verified=True,
-                                             engagement__test__finding__false_p=False,
-                                             engagement__test__finding__duplicate=False,
-                                             engagement__test__finding__out_of_scope=False,
-                                             engagement__test__finding__mitigated__isnull=True,
-                                             engagement__test__finding__severity__in=(
-                                                 'Critical', 'High', 'Medium', 'Low'),
-                                             prod_type=pt)
-            top_ten = severity_count(top_ten, 'annotate', 'engagement__test__finding__severity').order_by('-critical', '-high', '-medium', '-low')[:10]
+            cip = {
+                'S0': len([f for f in closed_in_period if f.severity == 'Critical']),
+                'S1': len([f for f in closed_in_period if f.severity == 'High']),
+                'S2': len([f for f in closed_in_period if f.severity == 'Medium']),
+                'S3': len([f for f in closed_in_period if f.severity == 'Low']),
+                'Total': len(closed_in_period)
+            }
 
-            cip = {'S0': 0,
-                   'S1': 0,
-                   'S2': 0,
-                   'S3': 0,
-                   'Total': total_closed_in_period}
+            dip = {
+                'S0': oip['S0'] - cip['S0'],
+                'S1': oip['S1'] - cip['S1'],
+                'S2': oip['S2'] - cip['S2'],
+                'S3': oip['S3'] - cip['S3'],
+                'Total': oip['Total'] - cip['Total']
+            }
 
-            aip = {'S0': 0,
-                   'S1': 0,
-                   'S2': 0,
-                   'S3': 0,
-                   'Total': total_overall_in_pt}
+            aip = {
+                'S0': len([f for f in overall_in_pt if f.severity == 'Critical']),
+                'S1': len([f for f in overall_in_pt if f.severity == 'High']),
+                'S2': len([f for f in overall_in_pt if f.severity == 'Medium']),
+                'S3': len([f for f in overall_in_pt if f.severity == 'Low']),
+                'Total': len(overall_in_pt)
+            }
 
-            for o in closed_in_period:
-                cip[o['numerical_severity']] = o['numerical_severity__count']
+            from_day = today - relativedelta(years=1)
+            total_by_week = {}
+            week = today + timedelta(days=6 - today.weekday())
+            while week > from_day:
+                key = f"{week.year}-{week.month:02}-{week.day:02}"
 
-            for o in overall_in_pt:
-                aip[o['numerical_severity']] = o['numerical_severity__count']
+                closed_to_week = [
+                    f for f in to_date_total
+                    if f.mitigated and f.mitigated < week
+                ]
+                active_to_week = [
+                    f for f in to_date_total
+                    if (not f.mitigated or f.mitigated >= end_date)
+                    and f.verified
+                    and f.created < week
+                ]
+
+                total_by_week[key] = {
+                    'key': key,
+                    'closed': len(closed_to_week),
+                    'active': len(active_to_week),
+                    None: 0
+                }
+
+                if not (len(closed_to_week) + len(active_to_week)):
+                    break
+
+                week = week - timedelta(days=7)
+
         else:
             messages.add_message(request, messages.ERROR, _("Please choose month and year and the Product Type."),
                                  extra_tags='alert-danger')
@@ -737,11 +740,14 @@ def product_type_counts(request):
                    'end_date': end_date,
                    'opened_in_period': oip,
                    'trending_opened': opened_in_period_list,
+                   'total_by_week': [v for k, v in sorted(total_by_week.items())],
                    'closed_in_period': cip,
                    'overall_in_pt': aip,
-                   'all_current_in_pt': all_current_in_pt,
-                   'top_ten': top_ten,
-                   'pt': pt}
+                   'all_current_in_pt': overall_in_pt,
+                   'diff_in_pt': dip,
+                   'top': top,
+                   'pts': pts,
+                   'products': products}
                   )
 
 

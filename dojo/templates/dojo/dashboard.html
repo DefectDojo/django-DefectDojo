@@ -129,7 +129,7 @@
                     <!-- /.panel -->
                 </div>
             {% endblock %}
-            {% block reported_finding_severity_by_month %}
+            {% block reported_finding_severity_by_week %}
                 <div class="col-lg-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -276,13 +276,14 @@
             let medium = [];
             let low = [];
             let info = [];
-            {% for month in by_month %}
-                month = {{month|safe}};
-                ttp = new Date(month['y'] + '-01').getTime();
-                critical.push([ttp, month['a']]);
-                high.push([ttp, month['b']]);
-                medium.push([ttp, month['c']]);
-                low.push([ttp, month['d']]);
+            {% for week in by_week %}
+                week = {{week|safe}};
+                ttp = new Date(week['key']).getTime();
+                critical.push([ttp, week['Critical']]);
+                high.push([ttp, week['High']]);
+                medium.push([ttp, week['Medium']]);
+                low.push([ttp, week['Low']]);
+                info.push([ttp, week['Info']])
             {% endfor %}
             homepage_severity_plot(critical, high, medium, low);
 

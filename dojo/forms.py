@@ -2061,14 +2061,18 @@ class ProductTypeCountsForm(forms.Form):
         'required': '*'})
     year = forms.ChoiceField(choices=get_years, required=True, error_messages={
         'required': '*'})
-    product_type = forms.ModelChoiceField(required=True,
-                                          queryset=Product_Type.objects.none(),
-                                          error_messages={
-                                              'required': '*'})
+    product_type = forms.ModelMultipleChoiceField(required=True,
+                                                  queryset=Product_Type.objects.none(),
+                                                  error_messages={
+                                                      'required': '*'})
+    product = forms.ModelMultipleChoiceField(required=False,
+                                             queryset=Product.objects.none())
 
     def __init__(self, *args, **kwargs):
         super(ProductTypeCountsForm, self).__init__(*args, **kwargs)
+        self.fields['month'].initial = datetime.now().month
         self.fields['product_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+        self.fields['product'].queryset = get_authorized_products(Permissions.Product_View)
 
 
 class APIKeyForm(forms.ModelForm):
