@@ -85,6 +85,10 @@ Navigate to <http://localhost:8080>.
 Follow DefectDojo on [Twitter](https://twitter.com/defectdojo), [Linkedin](https://www.linkedin.com/company/defectdojo), and [YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) for project updates!
 
 ## Contributing
+
+:warning: Please note that DefectDojo will soon stop accepting new features to stabilize the API and data model for a
+forthcoming v3 release. See the contributing guidelines below for more details. :warning:
+
 See our [Contributing guidelines](readme-docs/CONTRIBUTING.md)
 
 ## Commercial Support and Training
