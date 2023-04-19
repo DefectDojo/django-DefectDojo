@@ -14,7 +14,7 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.db.models.query import QuerySet
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils.html import escape
 from django.views.decorators.cache import cache_page
@@ -546,30 +546,77 @@ def simple_metrics(request):
     })
 
 
+def ajax_product_refresh(request):
+    import json
+
+    if request.method != 'POST':
+        return
+
+    if 'prod_types' not in request.POST:
+        return
+
+    prod_types = json.loads(request.POST['prod_types'])
+    queryset = get_authorized_products(Permissions.Product_View)
+    if prod_types:
+        queryset = queryset.filter(prod_type__in=prod_types)
+
+    result = [{
+        'id': product.id,
+        'name': product.name
+    } for product in queryset]
+
+    return JsonResponse(result, safe=False)
+
+
+def ajax_product_type_refresh(request):
+    import json
+
+    if request.method != 'POST':
+        return
+
+    if 'products' not in request.POST:
+        return
+
+    product_ids = json.loads(request.POST['products'])
+
+    if not product_ids:
+        return JsonResponse('', safe=False)
+
+    products = Product.objects.filter(id__in=product_ids)
+
+    result = {
+        'ids': list({p.prod_type.id for p in products})
+    }
+
+    return JsonResponse(result, safe=False)
+
+
 # @cache_page(60 * 5)  # cache for 5 minutes
 # @vary_on_cookie
 def product_type_counts(request):
     form = ProductTypeCountsForm()
     opened_in_period_list = []
+    total_by_week = {}
     oip = None
     cip = None
     aip = None
-    all_current_in_pt = None
-    top_ten = None
-    pt = None
+    dip = None
+    top = None
+    pts = []
+    products = []
     today = timezone.now()
-    first_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    mid_month = first_of_month.replace(day=15, hour=23, minute=59, second=59, microsecond=999999)
-    end_of_month = mid_month.replace(day=monthrange(today.year, today.month)[1], hour=23, minute=59, second=59,
-                                     microsecond=999999)
-    start_date = first_of_month
-    end_date = end_of_month
+    start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    end_date = start_date + relativedelta(months=1)
 
     if request.method == 'GET' and 'month' in request.GET and 'year' in request.GET and 'product_type' in request.GET:
         form = ProductTypeCountsForm(request.GET)
         if form.is_valid():
-            pt = form.cleaned_data['product_type']
-            user_has_permission_or_403(request.user, pt, Permissions.Product_Type_View)
+            pts = form.cleaned_data['product_type']
+            products = form.cleaned_data.get('product')
+            form.fields['product'].queryset = get_authorized_products(Permissions.Product_View).filter(
+                prod_type__in=pts)
+
+            user_has_permission_or_403(request.user, pts, Permissions.Product_Type_View)
             month = int(form.cleaned_data['month'])
             year = int(form.cleaned_data['year'])
             first_of_month = first_of_month.replace(month=month, year=year)
