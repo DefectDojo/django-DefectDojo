@@ -14,10 +14,17 @@ repos:
       - id: black
         args:
           - --line-length=79
-  - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
+  # - repo: https://github.com/pre-commit/mirrors-autopep8
+  #   rev: v1.5
+  #   hooks:
+  #     - id: autopep8
+  #       args:
+  #         - --in-place
+  #         - --aggressive
+  #         - --max-line-length=79
+  #         - --verbose
+  #       line_range: 79:120
+
   # - repo: https://github.com/PyCQA/bandit
   #   rev: 1.7.5
   #   hooks:
@@ -26,11 +33,10 @@ repos:
     rev: v2.0.2
     hooks:
       - id: autoflake
-  - repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.5
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
     hooks:
-      - id: autopep8
+      - id: flake8
         args:
-          - --in-place
-          - --aggressive
-          - --max-line-length=79
+          - --ignore=E203,W503,C901
+          - --max-line-length=120
