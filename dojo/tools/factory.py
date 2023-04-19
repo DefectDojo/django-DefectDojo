@@ -1,5 +1,10 @@
 import re
+import os
 import logging
+from inspect import isclass
+from pathlib import Path
+from importlib.util import find_spec
+from importlib import import_module
 from django.conf import settings
 from dojo.models import Test_Type, Tool_Type, Tool_Configuration
 
@@ -69,15 +74,19 @@ def get_api_scan_configuration_hints():
             scan_types = parser.get_scan_types()
             for scan_type in scan_types:
                 tool_type = parser.requires_tool_type(scan_type)
-                res.append({
-                    'name': name,
-                    'id': name.lower().replace(' ', '_').replace('.', ''),
-                    'tool_type_name': tool_type,
-                    'tool_types': Tool_Type.objects.filter(name=tool_type),
-                    'tool_configurations': Tool_Configuration.objects.filter(tool_type__name=tool_type),
-                    'hint': parser.api_scan_configuration_hint(),
-                })
-    return sorted(res, key=lambda x: x['name'].lower())
+                res.append(
+                    {
+                        "name": name,
+                        "id": name.lower().replace(" ", "_").replace(".", ""),
+                        "tool_type_name": tool_type,
+                        "tool_types": Tool_Type.objects.filter(name=tool_type),
+                        "tool_configurations": Tool_Configuration.objects.filter(
+                            tool_type__name=tool_type
+                        ),
+                        "hint": parser.api_scan_configuration_hint(),
+                    }
+                )
+    return sorted(res, key=lambda x: x["name"].lower())
 
 
 def requires_tool_type(scan_type):
@@ -88,12 +97,6 @@ def requires_tool_type(scan_type):
         return parser.requires_tool_type(scan_type)
     return None
 
-
-import os
-from inspect import isclass
-from pathlib import Path
-from importlib import import_module
-from importlib.util import find_spec
 
 # iterate through the modules in the current package
 package_dir = str(Path(__file__).resolve().parent)
@@ -107,7 +110,11 @@ for module_name in os.listdir(package_dir):
                 module = import_module(f"dojo.tools.{module_name}.parser")
                 for attribute_name in dir(module):
                     attribute = getattr(module, attribute_name)
-                    if isclass(attribute) and attribute_name.lower() == module_name.replace("_", "") + "parser":
+                    if (
+                        isclass(attribute)
+                        and attribute_name.lower()
+                        == module_name.replace("_", "") + "parser"
+                    ):
                         register(attribute)
-        except:
+        except Exception:
             logger.exception(f"failed to load {module_name}")
