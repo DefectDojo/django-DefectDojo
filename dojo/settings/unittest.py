@@ -2,13 +2,14 @@
 # first;
 # Do so by copying the file dojo/settings/settings.dist.py to
 # dojo/settings/settings.py; Otherwise, the following import will not work
-from .settings import *
+
+# from .settings import *   # unsed variable
 
 DEBUG = True
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'unittest.sqlite',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "unittest.sqlite",
     }
 }
